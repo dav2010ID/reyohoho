@@ -2,7 +2,6 @@
   <div class="top-100-page" tabindex="0">
     <!-- Меню с фильтрами и настройками -->
     <div class="controls">
-      <!-- Первая строка: фильтры по времени -->
       <div class="filters">
         <button
           v-for="(button, index) in timeFilters"
@@ -14,7 +13,6 @@
         </button>
       </div>
 
-      <!-- Вторая строка: выбор "Фильмы" или "Сериалы" -->
       <div class="type-filter">
         <select v-model="typeFilter" @change="fetchMovies" class="custom-select">
           <option value="all">Все</option>
@@ -24,9 +22,11 @@
       </div>
     </div>
 
-    <!-- Сетка фильмов -->
-    <CardsMovie :moviesList="movies" :isHistory="false" :loading="loading" />
+    <!-- Контейнер для сетки фильмов и спиннера -->
+    <div class="movies-container">
+      <CardsMovie :moviesList="movies" :isHistory="false" :loading="loading" />
     </div>
+  </div>
 </template>
 
 <script setup>
@@ -75,10 +75,17 @@ onMounted(() => {
 </script>
 
 <style scoped>
+.movies-container {
+  position: relative; /* Чтобы спиннер внутри CardsMovie не перекрывался */
+  min-height: 300px;
+}
+
 .top-100-page {
   font-family: Arial, sans-serif;
   color: #ffffff;
   padding: 10px 0 0 0;
+  max-width: calc(258px * 5);
+  margin: 0 auto;
 }
 
 .controls {
