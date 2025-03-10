@@ -13,21 +13,22 @@ export const store = createStore({
     },
     // Мутация для добавления фильма в историю
     addToHistory(state, movie) {
-        const movieWithDate = {
-          kp_id: movie.kp_id,
-          title: movie.title || '',
-          year: movie.year || '',
-          poster: movie.poster || movie.cover || './src/assets/no-poster.gif',
-          addedAt: new Date()
-        };
-      
-        if (!state.history.some(m => m.kp_id === movieWithDate.kp_id)) {
-            state.history.push(movieWithDate);
-          }
-      },
+      if (state.history.some(m => m.kp_id === movie.kp_id)) return; // Если фильм уже есть, выходим
+    
+      const movieWithDate = {
+        kp_id: movie.kp_id,
+        title: movie.title || '',
+        year: movie.year || '',
+        poster: movie.poster || movie.cover || './src/assets/no-poster.gif',
+        addedAt: new Date().toISOString()
+      };
+    
+      state.history.push(movieWithDate);
+    },
+    
     // Мутация для удаления фильма из истории
-    removeFromHistory(state, kpId) {
-      state.history = state.history.filter(movie => movie.kp_id !== kpId);
+    removeFromHistory(state, kp_id) {
+      state.history = state.history.filter(movie => movie.kp_id !== kp_id);
     },
     // Мутация для очистки старых фильмов (старше 30 дней)
     cleanOldHistory(state) {
@@ -53,12 +54,12 @@ export const store = createStore({
       localStorage.setItem('movie-history', JSON.stringify(state.history));
     },
     // Действие для добавления фильма в историю
-    addToHistory({ commit, dispatch }, movie) {
+    addToHistory({ commit, state }, movie) {
       commit('addToHistory', movie);
-      dispatch('saveHistory');  // Сохраняем обновленную историю в localStorage
-    },
-    removeFromHistory({ commit, dispatch }, kpId) {
-      commit('removeFromHistory', kpId);
+      localStorage.setItem('movie-history', JSON.stringify(state.history)); // Сохраняем сразу
+    },    
+    removeFromHistory({ commit, dispatch }, kp_id) {
+      commit('removeFromHistory', kp_id);
       dispatch('saveHistory');  // Сохраняем обновленную историю в localStorage
     },
     // Очистка истории фильмов старше 30 дней

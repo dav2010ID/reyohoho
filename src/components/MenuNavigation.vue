@@ -174,12 +174,13 @@ onBeforeUnmount(() => {
     position: fixed;
     top: 10px;
     left: 10px;
-    background: none;
+    background: rgba(99, 99, 99, 0.589);
     border: none;
     color: #fff;
-    font-size: 1.8rem;
+    font-size: 1.4rem;
     z-index: 1100;
     cursor: pointer;
+    padding: 10px;
   }
 }
 

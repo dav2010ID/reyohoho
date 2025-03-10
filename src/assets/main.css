@@ -10,9 +10,15 @@ body {
     margin: 0 auto;
     padding: 0px 2px 20px 82px;
     outline: none;
-    max-width: 1350px;
+
     z-index: -9999;
     }
+
+html.no-scroll,
+body.no-scroll {
+    overflow: hidden;
+    height: 100%;
+}
 
 /* @font-face {
     font-family: 'OpenSans';

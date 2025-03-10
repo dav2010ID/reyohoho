@@ -73,27 +73,18 @@ const activeMovieIndex = ref(null);
 const store = useStore();
 
 // Удаление года из названия фильма
-const removeYearFromTitle = (title) => title.replace(/\s*\(\d{4}\)\s*$/, '');
+const removeYearFromTitle = (title) => {
+    if (title) {
+      return title.replace(/\(\d{4}\)$/, '').trim();
+    }
+    return title; 
+  };
 
 // Форматирование просмотров
 const formatViews = (views) => {
   if (views >= 1_000_000) return `${(views / 1_000_000).toFixed(1)}M`;
   if (views >= 1_000) return `${(views / 1_000).toFixed(1)}K`;
   return views;
-};
-
-const addToHistory = (movie) => {
-  // Создаем объект с необходимыми полями
-  const movieToSave = {
-    poster: movie.poster || movie.cover || null,  // Если нет постера, сохраняем null
-    title: movie.title || 'No title',  // Если нет названия, сохраняем дефолтное значение
-    year: movie.year || null,  // Если нет года, сохраняем null
-    kp_id: movie.kp_id
-  };
-
-  // Добавляем фильм в историю
-  store.dispatch('addToHistory', movieToSave);
-  store.dispatch('saveHistory');
 };
 
 // Удаление фильма из истории
@@ -106,13 +97,11 @@ const removeFromHistory = (kp_id) => {
 const openMovieInNewTab = (movie) => {
   const url = router.resolve({ name: "movie-info", params: { kp_id: movie.kp_id } }).href;
   window.open(url, '_blank');
-  addToHistory(movie); // Добавляем фильм в историю после открытия
 };
 
 // Переход на страницу фильма
 const goToMoviePage = (movie) => {
   router.push({ name: "movie-info", params: { kp_id: movie.kp_id } });
-  addToHistory(movie); // Добавляем фильм в историю при переходе
 };
 
 // Обработка клика левой кнопкой мыши
@@ -196,11 +185,12 @@ onUnmounted(() => {
 .grid {
   display: grid;
   gap: 15px;
-  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); /* Уменьшаем минимальную ширину */
+  justify-content: center; /* Центрируем сетку */
   margin: 0 auto;
-  max-width: calc(5 * 250px + 4 * 15px);
-  align-items: stretch;
-  justify-items: center;
+  width: 100%;
+  padding: 0 15px;
+  box-sizing: border-box;
 }
 
 /* Стили для контейнера карточек */
@@ -264,7 +254,7 @@ onUnmounted(() => {
 
 /* Ограничение количества строк у заголовка и обрезка текста */
 .movie-header h3 {
-    font-size: 1.2em;
+    font-size: 1.1em;
     margin: 0;
     display: -webkit-box;
     -webkit-line-clamp: 3;

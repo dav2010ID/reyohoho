@@ -26,6 +26,7 @@ const routes = [
     path: '/movie/:kp_id',
     component: MovieInfo,
     name: 'movie-info',
+    props: true,
     meta: {
       title: 'Просмотр фильма',
     },

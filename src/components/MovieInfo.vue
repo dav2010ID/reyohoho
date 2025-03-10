@@ -18,7 +18,7 @@
 
         <div class="ratings-links" v-if="movieInfo.rating_kinopoisk || movieInfo.rating_imdb">
           <a
-            :href="`https://www.kinopoisk.ru/film/${movieId}`"
+            :href="`https://www.kinopoisk.ru/film/${kp_id}`"
             target="_blank"
             rel="noopener noreferrer"
             class="rating-link"
@@ -52,17 +52,13 @@
 
         <!-- Интеграция компонента плеера -->
         <PlayerComponent 
-          :players="players"
-          v-model:selected-player="selectedPlayer"
-          :movie-id="movieId"
+          :kp_id="kp_id"
+          :key="kp_id"
         />
 
         <div class="additional-info">
           <h2 class="additional-info-title">Подробнее</h2>
           <div class="info-content">
-            <div class="poster-container" v-if="movieInfo.poster_url">
-              <img :src="movieInfo.poster_url" alt="Постер фильма" class="movie-poster" />
-            </div>
             <div class="details-container">
               <ul class="info-list">
                 <li v-if="movieInfo.year"><strong>Год выпуска:</strong> {{ movieInfo.year }}</li>
@@ -87,39 +83,78 @@
             {{ movieInfo.short_description }}
           </p>
         </div>
+
+        <!-- Секция с сиквелами и приквелами -->
+        <div v-if="sequelsAndPrequels.length" class="related-movies">
+          <h2>Сиквелы и приквелы</h2>
+          <CardsMovie :moviesList="sequelsAndPrequels" :loading="false" :isHistory="false" />
+        </div>
+
+        <!-- Секция с похожими фильмами -->
+        <div v-if="similars.length" class="related-movies">
+          <h2>Похожие фильмы</h2>
+          <CardsMovie :moviesList="similars" :loading="false" :isHistory="false" />
+        </div>
       </div>
     </div>
     <BackgroundComponent 
-      :external-background-url="movieInfo?.cover_url" 
+      :external-background-url="movieInfo?.cover_url || movieInfo?.poster_url" 
       :is-background-active="isBackgroundActive"
     />
   </div>
 </template>
 
 <script setup>
-import { ref, onMounted, onUnmounted } from 'vue';
+import { ref, onMounted, onUnmounted, computed, watch } from 'vue';
 import { useRoute } from 'vue-router';
 import axios from 'axios';
 import BackgroundComponent from "@/components/BackgroundSpace.vue";
 import PlayerComponent from '@/components/PlayerComponent.vue';
+import CardsMovie from "@/components/CardsMovie.vue";
+import { useStore } from 'vuex';
 
+const store = useStore();
 const route = useRoute();
-const movieId = ref(route.params.kp_id);
-const players = ref([]);
-const selectedPlayer = ref(null);
+const kp_id = ref(route.params.kp_id);
 const errorMessage = ref('');
 const movieInfo = ref(null);
 const apiUrl = import.meta.env.VITE_APP_API_URL;
 const isBackgroundActive = ref(false);
 
+
+const transformMoviesData = (movies) => {
+  return (movies || []).map(movie => ({
+    kp_id: movie.film_id,
+    poster: movie.poster_url_preview || movie.poster_url,
+    title: movie.name_ru,
+  }));
+};
+
+// Функция для загрузки информации о фильме
 const fetchMovieInfo = async () => {
   try {
-    const response = await axios.get(`${apiUrl}/kp_info/${movieId.value}`);
+    const response = await axios.get(`${apiUrl}/kp_info2/${kp_id.value}`);
     movieInfo.value = response.data;
+
+    // Подготовка объекта для истории
+    const movieToSave = {
+      kp_id: kp_id.value,
+      title: movieInfo.value?.name_ru,
+      poster: movieInfo.value?.poster_url || movieInfo.value?.cover_url,
+    };
+
+    if (movieToSave.kp_id && movieToSave.title) {
+      store.dispatch('addToHistory', { ...movieToSave }); // Копируем объект, чтобы Vuex видел изменение
+    }
   } catch (error) {
     console.error('Ошибка при загрузке информации о фильме:', error);
+    errorMessage.value = 'Ошибка загрузки информации о фильме';
   }
 };
+
+// Преобразуем данные для компонентов
+const sequelsAndPrequels = computed(() => transformMoviesData(movieInfo.value?.sequels_and_prequels));
+const similars = computed(() => transformMoviesData(movieInfo.value?.similars));
 
 onMounted(async () => {
   isBackgroundActive.value = true;
@@ -129,15 +164,20 @@ onMounted(async () => {
 onUnmounted(() => {
   isBackgroundActive.value = false;
 });
+
+// Следим за изменением ID фильма
+watch(() => route.params.kp_id, async (newKpId) => {
+  if (newKpId && newKpId !== kp_id.value) {
+    kp_id.value = newKpId;
+    await fetchMovieInfo();
+  }
+}, { immediate: true });
 </script>
 
 <style scoped>
-/* Все стили, связанные с информацией о фильме */
+/* Стили для информации о фильме */
 .content-card {
-  background-color: rgba(30, 30, 30, 0.6);
-  border-radius: 10px;
   overflow: hidden;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.7);
   padding: 20px;
   color: #e0e0e0;
 }
@@ -155,6 +195,7 @@ onUnmounted(() => {
 .content-logo {
   max-height: 80px;
   object-fit: contain;
+  width: 100%;
 }
 
 .content-subtitle {
@@ -208,16 +249,6 @@ onUnmounted(() => {
   gap: 20px;
 }
 
-.poster-container {
-  flex: 0.5;
-}
-
-.movie-poster {
-  width: 100%;
-  border-radius: 4px;
-  object-fit: cover;
-}
-
 .details-container {
   flex: 3;
 }
@@ -253,9 +284,19 @@ onUnmounted(() => {
   border: 1px solid #ff4444;
 }
 
+/* Стили для секций с похожими фильмами */
+.related-movies {
+  margin-top: 30px;
+}
+
+.related-movies h2 {
+  color: #fff;
+  margin-bottom: 15px;
+}
+
 @media (max-width: 600px) {
   .content-card {
-    padding: 10px;
+    padding: 10px 2px;
   }
   .content-title {
     font-size: 28px;
