@@ -1,4 +1,5 @@
 <template>
+  <div class="wrapper">
   <div class="mainpage">
   <!-- Кнопки выбора типа поиска -->
   <div class="search-type-buttons">
@@ -15,18 +16,28 @@
 
   <!-- Поиск -->
   <div class="search-container">
-    <input
-      ref="searchInput"
-      v-model="searchTerm"
-      :placeholder="getPlaceholder()"
-      class="search-input"
-      @keydown.enter="search"
-    />
-    <button @click="search" class="search-button">
-      <i class="fas fa-search"></i>
-    </button>
-    <button @click="resetSearch" class="reset-button">Сброс</button>
-  </div>
+      <div class="input-wrapper">
+        <input
+          ref="searchInput"
+          v-model="searchTerm"
+          :placeholder="getPlaceholder()"
+          class="search-input"
+          @keydown.enter="search"
+        />
+        <div class="icons">
+          <button
+            v-if="searchTerm"
+            @click="resetSearch"
+            class="reset-button"
+          >
+            <i class="fas fa-times"></i>
+          </button>
+          <button @click="search" class="search-button">
+            <i class="fas fa-search"></i>
+          </button>
+        </div>
+      </div>
+    </div>
 
   <!-- Контейнер для истории и результатов -->
   <div class="content-container">
@@ -46,7 +57,7 @@
     <!-- Результаты поиска -->
     <div v-if="searchPerformed">
       <h2>Результаты поиска</h2>
-      <CardsMovie :moviesList="movies" :isHistory="false" />
+      <CardsMovie :moviesList="movies" :isHistory="false" :loading="loading" />
       <div v-if="movies.length === 0 && !loading" class="no-results">
         Ничего не найдено
       </div>
@@ -58,102 +69,95 @@
     </div>
   </div>
 </div>
+<FooterDonaters />
+</div>
 </template>
 
 <script setup>
-import { ref, computed, onMounted } from 'vue';
+import { ref, computed, onMounted, watch } from 'vue';
 import axios from 'axios';
 import { useRouter } from 'vue-router';
-import CardsMovie from "@/components/CardsMovie.vue";
 import { useStore } from 'vuex';
+import CardsMovie from "@/components/CardsMovie.vue";
+import FooterDonaters from '@/components/FooterDonaters.vue';
+import debounce from 'lodash/debounce';
 
 const apiUrl = import.meta.env.VITE_APP_API_URL;
-const store = useStore(); // История из Vuex
-const searchType = ref('title'); // По умолчанию поиск по названию
-const searchTerm = ref(''); // Текущий запрос
-const movies = ref([]); // Результаты поиска
-const loading = ref(false); // Состояние загрузки
-const searchPerformed = ref(false); // Флаг, указывающий, был ли выполнен поиск
-const router = useRouter(); // Роутер
+const store = useStore();
+const router = useRouter();
 
-// Получаем историю из хранилища Vuex
+const searchType = ref('title');
+const searchTerm = ref('');
+const movies = ref([]);
+const loading = ref(false);
+const searchPerformed = ref(false);
+
 const history = computed(() => store.state.history);
 
-// Установка типа поиска
 const setSearchType = (type) => {
   searchType.value = type;
   resetSearch();
 };
 
-// Получение плейсхолдера для поля ввода
 const getPlaceholder = () => {
-  switch (searchType.value) {
-    case 'title':
-      return 'Введите название фильма';
-    case 'kinopoisk':
-      return 'Введите ID Кинопоиск';
-    case 'shikimori':
-      return 'Введите ID Shikimori';
-    default:
-      return 'Введите название фильма';
-  }
+  return {
+    title: 'Введите название фильма',
+    kinopoisk: 'Введите ID Кинопоиск',
+    shikimori: 'Введите ID Shikimori'
+  }[searchType.value] || 'Введите название фильма';
 };
 
-// Загружаем историю при монтировании компонента
 onMounted(() => {
-  store.dispatch('loadHistory'); 
+  store.dispatch('loadHistory');
 });
 
-// Поиск фильма
-const search = async () => {
-  if (!searchTerm.value) return;
+const performSearch = debounce(async () => {
+  if (!searchTerm.value || searchTerm.value.length < 3) return;
 
   loading.value = true;
   searchPerformed.value = true;
   movies.value = [];
 
   try {
-    if (searchType.value === 'kinopoisk') {
+    if (searchType.value === 'kinopoisk' || searchType.value === 'shikimori') {
       if (!/^\d+$/.test(searchTerm.value)) {
-        alert('Введите числовой ID Кинопоиска');
-        return;
-      } else {
-        router.push({ 
-          name: 'movie-info', 
-          params: { kp_id: searchTerm.value } 
-        });
+        alert(`Введите числовой ID ${searchType.value === 'kinopoisk' ? 'Кинопоиска' : 'Shikimori'}`);
         return;
       }
-    } else if (searchType.value === 'shikimori') {
-      if (!/^\d+$/.test(searchTerm.value)) {
-        alert('Введите числовой ID Shikimori');
-        return;
-      } else {
-        router.push({ 
-          name: 'movie-info', 
-          params: { kp_id: `shiki${searchTerm.value}` } 
-        });
-        return;
-      }
-    } else {
-      const response = await axios.get(`${apiUrl}/search/${searchTerm.value}`);
-      movies.value = response.data.map(movie => ({
-        ...movie,
-        kp_id: movie.id.toString()
-      }));
+      const idPrefix = searchType.value === 'shikimori' ? 'shiki' : '';
+      router.push({ name: 'movie-info', params: { kp_id: `${idPrefix}${searchTerm.value}` } });
+      return;
     }
+    
+    const response = await axios.get(`${apiUrl}/search/${searchTerm.value}`);
+    movies.value = response.data.map(movie => ({ ...movie, kp_id: movie.id.toString() }));
   } catch (error) {
     console.error('Ошибка:', error);
-    if (error.response?.status === 404) {
-      movies.value = [];
+    movies.value = [];
+    if (error.response?.status) {
+      router.push(`/${error.response.status}`);
     }
-    router.push(`/${error.response?.status || 500}`);
   } finally {
     loading.value = false;
   }
+}, 300);
+
+watch(searchTerm, (newVal, oldVal) => {
+  if (newVal.length >= 3) {
+    performSearch();
+  } else if (newVal.length < 3 && oldVal.length >= 3) {
+    // Очищаем результаты если текст стал короче 3 символов
+    movies.value = [];
+    searchPerformed.value = false;
+  }
+});
+
+const search = () => {
+  if (searchTerm.value) {
+    performSearch.flush();
+  }
 };
 
-// Сброс поиска
 const resetSearch = () => {
   searchTerm.value = '';
   movies.value = [];
@@ -162,21 +166,30 @@ const resetSearch = () => {
 
 const clearAllHistory = () => {
   if (confirm('Вы уверены, что хотите очистить историю?')) {
-    store.dispatch('clearAllHistory');  // Вызов действия для очистки истории
+    store.dispatch('clearAllHistory');
   }
 };
 </script>
 
+
 <style scoped>
-.mainpage{
-  padding-top: 20px;
+.wrapper {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
 }
+
+.mainpage {
+  flex: 1;
+  padding-top: 20px;
+  padding-bottom: 40px;
+}
+
 /* Общие стили */
 .search-type-buttons {
   display: flex;
   justify-content: center;
   gap: 20px;
-  margin-bottom: 10px;
   padding-top: 10px;
 }
 
@@ -213,12 +226,17 @@ const clearAllHistory = () => {
 .search-container {
   display: flex;
   justify-content: center;
-  align-items: center;
-  gap: 10px;
-  padding: 0px 20px 20px 20px;
+  padding: 20px;
+}
+
+.input-wrapper {
+  position: relative;
+  width: 100%;
+  max-width: 800px;
 }
 
 .search-input {
+  box-sizing: border-box;
   width: 100%;
   padding: 10px;
   font-size: 16px;
@@ -226,42 +244,46 @@ const clearAllHistory = () => {
   border-radius: 10px;
   background: rgba(30, 30, 30, 0.8);
   color: #fff;
-  max-width: 800px;
+  transition: border-color 0.3s ease;
 }
 
 .search-input:focus {
-  border: 1px solid #558839;
+  border-color: #558839;
+  outline: none;
 }
 
+.icons {
+  position: absolute;
+  right: 10px;
+  top: 50%;
+  transform: translateY(-50%);
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.reset-button,
 .search-button {
-  padding: 10px;
-  font-size: 16px;
+  background: none;
   border: none;
-  background: rgba(30, 30, 30, 0.8);
   color: #fff;
-  border-radius: 10px;
   cursor: pointer;
-  transition: background-color 0.3s ease;
-  border: 1px solid #ccc;
+  padding: 2px;
+  opacity: 0.7;
+  transition: opacity 0.2s ease;
 }
 
+.reset-button:hover,
 .search-button:hover {
-  background-color: #464646;
+  opacity: 1;
 }
 
-.reset-button {
-  padding: 10px;
-  font-size: 16px;
-  border: none;
-  background: rgba(30, 30, 30, 0.8);
-  color: #fff;
-  border-radius: 10px;
-  cursor: pointer;
-  border: 1px solid #ccc;
-}
-
-.reset-button:hover {
-  background-color: #464646;
+.reset-button i,
+.search-button i {
+  font-size: 18px;
+  display: block;
+  width: 20px;
+  height: 20px;
 }
 
 h2 {
@@ -308,7 +330,11 @@ h2 {
 
 @media (max-width: 600px) {
   .mainpage{
-    padding-top: 70px;
+    padding-top: 50px;
+    height: calc(100vh - 30px - 63px);
   }
+  .search-container {
+    padding: 5px;
+}
 }
 </style>

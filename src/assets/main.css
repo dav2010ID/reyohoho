@@ -1,17 +1,14 @@
-@import url('https://fonts.googleapis.com/css2?family=Roboto:ital,wght@0,100..900;1,100..900&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Neucha&family=Roboto:ital,wght@0,100..900;1,100..900&display=swap');
 html {
     scroll-behavior: smooth;
   }  
 
 body {
-    font-family: "Roboto", sans-serif; /* Применяем шрифт по умолчанию */
+    font-family: "Roboto", sans-serif;
     color: #fff;
     background-color: #000;
     margin: 0 auto;
-    padding: 0px 2px 20px 82px;
-    outline: none;
-
-    z-index: -9999;
+    padding: 0px 0px 0px 82px;
     }
 
 html.no-scroll,
@@ -20,62 +17,11 @@ body.no-scroll {
     height: 100%;
 }
 
-/* @font-face {
-    font-family: 'OpenSans';
-    src: url('@/assets/fonts/OpenSans.ttf') format('truetype');
-    font-weight: normal;
-    font-style: normal;
-    } */
-  
-@font-face {
-    font-family: 'Neucha', sans-serif;
-    src: url('@/assets/fonts/Neucha.ttf') format('truetype');
-    font-weight: normal;
-    font-style: normal;
-    }
-
-*:focus {
-    outline: none;
-    }
-
-button {
-    padding: 16px 16px;
-    border: 1px solid #444;
-    background-color: #1e1e1e;
-    color: #fff;
-    border-radius: 5px;
-    cursor: pointer;
-    transition: background-color 0.3s, color 0.3s;
-  }
-  
-button:hover {
-    background-color: #444;
-    }
-
-button.active {
-    background-color: #fff;
-    color: #000;
-    }
-
-/* Select */
-.custom-select {
-    padding: 8px 16px;
-    border: 1px solid #444;
-    background-color: #1e1e1e;
-    color: #fff;
-    border-radius: 5px;
-    cursor: pointer;
-    transition: background-color 0.3s, border-color 0.3s;
-    width: 100%;
-    }
-
-.custom-select:hover {
-    border-color: #666;
-    }
-
-.custom-select:focus {
-    border-color: #558839;
-    }
+button,
+select,
+input {
+    font-family: "Roboto", sans-serif;
+}
 
 
 @media (max-width: 600px) {

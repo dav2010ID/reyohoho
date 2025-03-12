@@ -191,6 +191,8 @@ onUnmounted(() => {
   width: 100%;
   padding: 0 15px;
   box-sizing: border-box;
+  position: relative;
+  min-height: 300px;
 }
 
 /* Стили для контейнера карточек */
@@ -257,8 +259,13 @@ onUnmounted(() => {
     font-size: 1.1em;
     margin: 0;
     display: -webkit-box;
-    -webkit-line-clamp: 3;
+    display: box;
+    -webkit-line-clamp: 3; 
+    -moz-line-clamp: 3;
+    line-clamp: 3; 
     -webkit-box-orient: vertical;
+    -moz-box-orient: vertical; 
+    box-orient: vertical; 
     overflow: hidden;
     text-overflow: ellipsis;
     line-height: 1.2;
@@ -401,6 +408,8 @@ onUnmounted(() => {
   .movie-header h3 {
     font-size: 1.2em;
     -webkit-line-clamp: 2;
+    -moz-line-clamp: 2;
+    line-clamp: 2;
     max-height: 2.4em;
     }
 

@@ -14,7 +14,7 @@
     >
       <div class="top-section">
         <div class="logo-section">
-          <router-link to="/" class="home-link" @click="closeNavbar">
+          <router-link to="/" class="home-link" @click="closeSidebar">
             <img src="@/assets/basedge.png" alt="Base Edge" class="logo-image" />
             <h1 v-show="isSidebarOpen" class="logo-title">Reyohoho</h1>
           </router-link>
@@ -30,7 +30,7 @@
               <component
                 :is="link.to ? 'router-link' : 'a'"
                 v-bind="link.to ? { to: link.to, exact: link.exact } : { href: link.href, target: '_blank' }"
-                @click="closeNavbar"
+                @click="closeSidebar"
               >
                 <template v-if="typeof link.icon === 'string' && link.icon.startsWith('fa')">
                   <i :class="link.icon"></i>
@@ -90,7 +90,7 @@ const route = useRoute();
 // Массив навигационных ссылок
 const navLinks = [
   { to: '/', exact: true, icon: 'fas fa-home', text: 'Главная' },
-  { to: '/top', icon: 'fa-solid fa-trophy', text: 'Топ 100' },
+  { to: '/top', icon: 'fa-solid fa-trophy', text: 'Популярное' },
   { href: 'https://t.me/ReYohoho/126', icon: 'fab fa-telegram', text: 'Приложение' },
   { href: 'https://github.com/reyohoho/reyohoho-chrome-ff-ext/blob/master/README.MD', icon: 'fa-solid fa-puzzle-piece', text: 'Расширение' },
   { href: 'https://gist.github.com/reyohoho/93d835ada55bb1175b4249cbf1f1bf20', icon: 'fas fa-heart', text: 'Благодарность' },
@@ -114,14 +114,19 @@ const toggleSidebar = () => {
   isSidebarOpen.value = !isSidebarOpen.value;
 };
 
+const closeSidebar = () => {
+  isSidebarOpen.value = false;
+};
+
+
 // Обновляем состояние мобильного устройства при изменении размера окна
 const updateIsMobile = () => {
   isMobile.value = window.innerWidth < 600;
 };
 
-// Закрываем боковую панель, если кликнули вне её области (только для десктопа)
+// Закрываем боковую панель, если кликнули вне её области 
 const handleClickOutside = (event) => {
-  if (!isMobile.value && sidebar.value && !sidebar.value.contains(event.target)) {
+  if (sidebar.value && !sidebar.value.contains(event.target)) {
     isSidebarOpen.value = false;
   }
 };
@@ -130,9 +135,6 @@ const handleClickOutside = (event) => {
 const handleKeydown = (event) => {
   if (event.key === 'Escape') closeNavbar();
 };
-
-// Закрываем мобильное меню при переходе по маршрутам
-watch(() => route.path, closeNavbar);
 
 // Добавляем и удаляем обработчики событий при монтировании/размонтировании компонента
 onMounted(() => {
@@ -149,13 +151,6 @@ onBeforeUnmount(() => {
 </script>
 
 <style scoped>
-@font-face {
-  font-family: 'Neucha';
-  src: url('@/assets/fonts/Neucha.ttf') format('truetype');
-  font-weight: normal;
-  font-style: normal;
-}
-
 .nav-component {
   font-family: 'Neucha', sans-serif;
   font-weight: 400;

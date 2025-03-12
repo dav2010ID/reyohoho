@@ -19,7 +19,7 @@ export const store = createStore({
         kp_id: movie.kp_id,
         title: movie.title || '',
         year: movie.year || '',
-        poster: movie.poster || movie.cover || './src/assets/no-poster.gif',
+        poster: movie.poster || movie.cover || './src/assets/image-no-poster.gif',
         addedAt: new Date().toISOString()
       };
     

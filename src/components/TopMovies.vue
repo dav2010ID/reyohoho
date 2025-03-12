@@ -1,4 +1,5 @@
 <template>
+  <div class="wrapper">
   <div class="top-100-page" tabindex="0">
     <!-- Меню с фильтрами и настройками -->
     <div class="controls">
@@ -23,10 +24,9 @@
     </div>
 
     <!-- Контейнер для сетки фильмов и спиннера -->
-    <div class="movies-container">
-      <CardsMovie :moviesList="movies" :isHistory="false" :loading="loading" />
-    </div>
+    <CardsMovie :moviesList="movies" :isHistory="false" :loading="loading" />
   </div>
+</div>
 </template>
 
 <script setup>
@@ -75,15 +75,17 @@ onMounted(() => {
 </script>
 
 <style scoped>
-.movies-container {
-  position: relative; /* Чтобы спиннер внутри CardsMovie не перекрывался */
-  min-height: 300px;
+.wrapper {
+  display: flex;
+  min-height: 100vh;
 }
 
 .top-100-page {
   font-family: Arial, sans-serif;
   color: #ffffff;
-  padding: 10px 0 0 0;
+  flex: 1;
+  padding-top: 20px;
+  padding-bottom: 40px;
   max-width: calc(258px * 5);
   margin: 0 auto;
 }
@@ -113,4 +115,43 @@ onMounted(() => {
   max-width: 367.5px;
   width: 100%;
 }
+
+button {
+  padding: 16px 16px;
+  border: 1px solid #444;
+  background-color: #1e1e1e;
+  color: #fff;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: background-color 0.3s, color 0.3s;
+}
+
+button:hover {
+  background-color: #444;
+  }
+
+button.active {
+  background-color: #fff;
+  color: #000;
+  }
+
+  /* Select */
+.custom-select {
+    padding: 8px 16px;
+    border: 1px solid #444;
+    background-color: #1e1e1e;
+    color: #fff;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s, border-color 0.3s;
+    width: 100%;
+    }
+
+.custom-select:hover {
+    border-color: #666;
+    }
+
+.custom-select:focus {
+    border-color: #558839;
+    }
 </style>

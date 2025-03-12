@@ -14,6 +14,8 @@ import MenuNavigation from '@/components/MenuNavigation.vue'
 </script>
 
 <style>
+@import '@/assets/main.css';
+
 #app {
   position: relative;
   z-index: 1;
