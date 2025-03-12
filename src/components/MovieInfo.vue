@@ -13,7 +13,6 @@
           <div v-else>
             <h1 class="content-title">{{ movieInfo.name_ru }}</h1>
           </div>
-          <p v-if="movieInfo.name_en" class="content-subtitle">{{ movieInfo.name_en }}</p>
         </div>
 
         <div class="ratings-links" v-if="movieInfo.rating_kinopoisk || movieInfo.rating_imdb">
@@ -79,9 +78,6 @@
           <p v-if="movieInfo.description" class="content-description-text">
             {{ movieInfo.description }}
           </p>
-          <p v-if="movieInfo.short_description" class="content-short-description">
-            {{ movieInfo.short_description }}
-          </p>
         </div>
 
         <!-- Секция с сиквелами и приквелами -->
@@ -133,8 +129,33 @@ const transformMoviesData = (movies) => {
 // Функция для загрузки информации о фильме
 const fetchMovieInfo = async () => {
   try {
-    const response = await axios.get(`${apiUrl}/kp_info2/${kp_id.value}`);
+    let response;
+
+    // Проверяем, начинается ли kp_id с "shiki"
+    if (kp_id.value.startsWith('shiki')) {
+      // Если начинается с "shiki", делаем запрос по другому адресу
+      response = await axios.get(`${apiUrl}/shiki_info/${kp_id.value}`);
+    } else {
+      // Иначе делаем стандартный запрос
+      response = await axios.get(`${apiUrl}/kp_info2/${kp_id.value}`);
+    }
+
+    // Проверяем, является ли ответ пустым массивом
+    if (Array.isArray(response.data) && response.data.length === 0) {
+      throw new Error('Данные не найдены. Пожалуйста, повторите поиск.');
+    }
+
     movieInfo.value = response.data;
+
+    // Если kp_id начинается с "shiki", переопределяем поля
+    if (kp_id.value.startsWith('shiki')) {
+      movieInfo.value = {
+        ...movieInfo.value,
+        title: movieInfo.value.name_ru,
+        name_original: movieInfo.value.name_en,
+        short_description: movieInfo.value.slogan,
+      };
+    }
 
     // Подготовка объекта для истории
     const movieToSave = {
@@ -148,7 +169,7 @@ const fetchMovieInfo = async () => {
     }
   } catch (error) {
     console.error('Ошибка при загрузке информации о фильме:', error);
-    errorMessage.value = 'Ошибка загрузки информации о фильме';
+    errorMessage.value = error.message || 'Ошибка загрузки информации о фильме';
   }
 };
 

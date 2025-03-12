@@ -382,4 +382,24 @@ html.no-scroll {
 .aspect-ratio-btn.active {
   background-color: #558839;
 }
+
+/* Select */
+.custom-select {
+  padding: 8px 16px;
+  border: 1px solid #444;
+  background-color: #1e1e1e;
+  color: #fff;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: background-color 0.3s, border-color 0.3s;
+  width: 100%;
+  }
+
+.custom-select:hover {
+  border-color: #666;
+  }
+
+.custom-select:focus {
+  border-color: #558839;
+  }
 </style>

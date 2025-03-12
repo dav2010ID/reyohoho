@@ -34,6 +34,7 @@ const props = defineProps({
 
 const topMovie = ref(null);
 const CACHE_KEY = 'topMovieCache';
+const apiUrl = import.meta.env.VITE_APP_API_URL;
 
 // Проверка, активирован ли внешний фон
 const isExternalBackgroundActive = computed(() => {
@@ -71,7 +72,7 @@ const fetchTopMovie = async () => {
   }
 
   try {
-    const response = await fetch('https://rh.aukus.su/top/24h');
+    const response = await fetch(`${apiUrl}/top/24h`);
     const data = await response.json();
     if (data?.[0]) {
       topMovie.value = data[0];
