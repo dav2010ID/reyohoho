@@ -1,26 +1,27 @@
 <template>
   <div>
     <div class="grid" v-show="!loading">
-      <div
+      <a
         v-for="(movie, index) in moviesList"
         :key="movie.kp_id"
         class="movie-card"
         :class="{ active: activeMovieIndex === index }"
-        @click="handleMovieClick(movie, $event)"
-        @contextmenu.prevent="handleMovieContextMenu(movie, $event)"
+        :href="movieUrl(movie)"
+        @click.prevent="handleCardClick(movie, $event)"
+        @auxclick="handleMiddleClick"
         :ref="(el) => (movieRefs[index] = el)"
         tabindex="0"
       >
-      <div class="movie-poster-container">
-        <div v-if="movie.poster || movie.cover">
-          <img :src="movie.poster || movie.cover" :alt="movie.title" class="movie-poster" />
-          <button
-            v-if="isHistory"
-            class="remove-button"
-            @click.stop="removeFromHistory(movie.kp_id)"
-          >
-            <i class="fas fa-times"></i>
-          </button>
+        <div class="movie-poster-container">
+          <div v-if="movie.poster || movie.cover">
+            <img :src="movie.poster || movie.cover" :alt="movie.title" class="movie-poster" />
+            <button
+              v-if="isHistory"
+              class="remove-button"
+              @click.stop="removeFromHistory(movie.kp_id)"
+            >
+              <i class="fas fa-times"></i>
+            </button>
             <div v-if="movie.rating_kp || movie.rating_imdb" class="ratings-overlay">
               <span v-if="movie.rating_kp" class="rating-kp">
                 <img src="/src/assets/icon-kp-logo.svg" alt="КП" class="rating-logo" />
@@ -30,7 +31,7 @@
                 <img src="/src/assets/icon-imdb-logo.svg" alt="IMDb" class="rating-logo" />
                 {{ movie.rating_imdb }}
               </span>
-              </div>
+            </div>
           </div>
         </div>
 
@@ -49,16 +50,16 @@
             <span>{{ formatViews(movie.views_count) }}</span>
           </div>
         </div>
-      </div>
+      </a>
     </div>
+    <Spinner v-if="loading" />
   </div>
-  <Spinner v-if="loading" />
 </template>
 
 <script setup>
 import { ref, watch, onMounted, onUnmounted } from 'vue';
 import { useRouter } from 'vue-router';
-import { useStore } from 'vuex'; // Подключаем store
+import { useStore } from 'vuex';
 import Spinner from "@/components/SpinnerLoading.vue";
 
 const props = defineProps({
@@ -72,53 +73,39 @@ const movieRefs = ref([]);
 const activeMovieIndex = ref(null);
 const store = useStore();
 
-// Удаление года из названия фильма
-const removeYearFromTitle = (title) => {
-    if (title) {
-      return title.replace(/\(\d{4}\)$/, '').trim();
-    }
-    return title; 
-  };
+const movieUrl = (movie) => {
+  return router.resolve({ name: "movie-info", params: { kp_id: movie.kp_id } }).href;
+};
 
-// Форматирование просмотров
+const removeYearFromTitle = (title) => {
+  return title ? title.replace(/\(\d{4}\)$/, '').trim() : title;
+};
+
 const formatViews = (views) => {
   if (views >= 1_000_000) return `${(views / 1_000_000).toFixed(1)}M`;
   if (views >= 1_000) return `${(views / 1_000).toFixed(1)}K`;
   return views;
 };
 
-// Удаление фильма из истории
 const removeFromHistory = (kp_id) => {
   store.dispatch('removeFromHistory', kp_id);
 };
 
-// Открытие фильма в новой вкладке
-const openMovieInNewTab = (movie) => {
-  const url = router.resolve({ name: "movie-info", params: { kp_id: movie.kp_id } }).href;
-  window.open(url, '_blank');
-};
-
-// Переход на страницу фильма
-const goToMoviePage = (movie) => {
-  router.push({ name: "movie-info", params: { kp_id: movie.kp_id } });
-};
-
-// Обработка клика левой кнопкой мыши
-const handleMovieClick = (movie, event) => {
-  if (event.ctrlKey || event.metaKey) {
-    openMovieInNewTab(movie);
+const handleCardClick = (movie, event) => {
+  if (event.ctrlKey || event.metaKey || event.button === 1) {
+    window.open(movieUrl(movie), '_blank');
   } else {
-    goToMoviePage(movie);
+    router.push({ name: "movie-info", params: { kp_id: movie.kp_id } });
   }
 };
 
-// Обработка контекстного меню
-const handleMovieContextMenu = (movie, event) => {
-  event.preventDefault();
-  openMovieInNewTab(movie);
+const handleMiddleClick = (event) => {
+  if (event.button === 1) {
+    event.preventDefault();
+    window.open(event.currentTarget.href, '_blank');
+  }
 };
 
-// Обработка событий клавиатуры
 const handleKeyDown = (event) => {
   if (!props.moviesList?.length) return;
 
@@ -149,15 +136,14 @@ const handleKeyDown = (event) => {
       break;
     case 'Enter':
       if (event.ctrlKey || event.metaKey) {
-        openMovieInNewTab(props.moviesList[activeMovieIndex.value]);
+        window.open(movieUrl(props.moviesList[activeMovieIndex.value]), '_blank');
       } else {
-        goToMoviePage(props.moviesList[activeMovieIndex.value]);
+        router.push({ name: "movie-info", params: { kp_id: props.moviesList[activeMovieIndex.value].kp_id } });
       }
       break;
   }
 };
 
-// Автопрокрутка к активной карточке
 watch(activeMovieIndex, (newIndex) => {
   if (movieRefs.value[newIndex]) {
     movieRefs.value[newIndex].scrollIntoView({ behavior: 'smooth', block: 'center', inline: 'center' });
@@ -165,12 +151,10 @@ watch(activeMovieIndex, (newIndex) => {
   }
 });
 
-// Добавляем обработчик событий клавиатуры
 onMounted(() => {
   document.addEventListener('keydown', handleKeyDown);
 });
 
-// Удаляем обработчик при уничтожении компонента
 onUnmounted(() => {
   document.removeEventListener('keydown', handleKeyDown);
 });
@@ -199,7 +183,8 @@ onUnmounted(() => {
 
 /* Общие стили для карточек фильмов */
 .movie-card {
-    font-family: Arial, sans-serif;
+    text-decoration: none;
+    color: inherit;
     width: 100%;
     max-width: 240px;
     background: rgba(30, 30, 30, 0.6);
