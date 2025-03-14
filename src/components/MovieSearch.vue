@@ -119,15 +119,23 @@ onMounted(() => {
 
 });
 
-const performSearch = debounce(async () => {
-  if (!searchTerm.value || searchTerm.value.length < 3) return;
+const search = () => {
+  if (searchTerm.value) {
+    // Выполняем поиск при любой длине запроса
+    performSearch();
+  } else {
+    alert('Введите запрос для поиска');
+  }
+};
 
+const performSearch = async () => {
   loading.value = true;
   searchPerformed.value = true;
   movies.value = [];
 
   try {
     if (searchType.value === 'kinopoisk' || searchType.value === 'shikimori') {
+      // Для поиска по ID проверяем, что введено число
       if (!/^\d+$/.test(searchTerm.value)) {
         alert(`Введите числовой ID ${searchType.value === 'kinopoisk' ? 'Кинопоиска' : 'Shikimori'}`);
         return;
@@ -137,6 +145,7 @@ const performSearch = debounce(async () => {
       return;
     }
     
+    // Для поиска по названию выполняем запрос при любой длине
     const response = await axios.get(`${apiUrl}/search/${searchTerm.value}`);
     movies.value = response.data.map(movie => ({ ...movie, kp_id: movie.id.toString() }));
   } catch (error) {
@@ -148,23 +157,23 @@ const performSearch = debounce(async () => {
   } finally {
     loading.value = false;
   }
-}, 300);
+};
 
+// Автопоиск при вводе текста (срабатывает только при 3 и более символов)
 watch(searchTerm, (newVal, oldVal) => {
+  if (searchType.value === 'kinopoisk' || searchType.value === 'shikimori') {
+    // Для поиска по ID автопоиск отключен
+    return;
+  }
+
   if (newVal.length >= 3) {
     performSearch();
   } else if (newVal.length < 3 && oldVal.length >= 3) {
-    // Очищаем результаты если текст стал короче 3 символов
+    // Очищаем результаты, если текст стал короче 3 символов
     movies.value = [];
     searchPerformed.value = false;
   }
 });
-
-const search = () => {
-  if (searchTerm.value) {
-    performSearch.flush();
-  }
-};
 
 const resetSearch = () => {
   searchTerm.value = '';
