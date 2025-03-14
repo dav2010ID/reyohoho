@@ -6,8 +6,6 @@
     </header>
 
     <div class="settings-container">
-      <div class="waaarn">Все настройки тестовые, если видите проблему, то сообщите, пожалуйста в телеграмм</div>
-
       <!-- Настройки фона -->
       <div class="setting-group">
         <h2>Тип фона</h2>
@@ -49,7 +47,7 @@
               />
               <span class="slider round"></span>
             </label>
-            <span class="label-text">Автоцентрирование</span>
+            <span class="label-text">Автоцентрирование плеера</span>
           </div>
         </div>
 
@@ -58,39 +56,6 @@
         <button @click="resetBackground" class="reset-button">Сбросить фон</button>
       </div>
 
-      <!-- Раздел для выбранных плееров -->
-      <div class="setting-group players-group" v-if="preferredPlayers.length">
-        <h2>Выбранные плееры (перетащите, чтобы изменять порядок приоритета)</h2>
-        <div class="players-grid">
-          <div
-            v-for="(player, index) in preferredPlayers"
-            :key="player"
-            class="player-tile selected"
-            draggable="true"
-            @dragstart="dragStart(player, index)"
-            @dragover.prevent
-            @drop="dropPlayer(index)"
-          >
-            <span>{{ player }}</span>
-            <button class="remove-btn" @click.stop="removePlayer(player)">✖</button>
-          </div>
-        </div>
-      </div>
-
-      <!-- Раздел для всех плееров -->
-      <div class="setting-group players-group" v-if="allPlayers.length">
-        <h2>Все плееры (выберите для добавления в избранное)</h2>
-        <div class="players-grid">
-          <div
-            v-for="(player, index) in allPlayers"
-            :key="player"
-            :class="['player-tile', { selected: isPlayerPreferred(player) }]"
-            @click="togglePlayer(player)"
-          >
-            <span>{{ player }}</span>
-          </div>
-        </div>
-      </div>
     </div>
   </div>
 </template>
@@ -138,43 +103,6 @@ const fetchAllPlayers = async () => {
 onMounted(() => {
   fetchAllPlayers()
 })
-
-// Предпочтительные плееры (из модуля player)
-// Если хранилище не определено, используем пустой массив.
-const preferredPlayers = computed(() => store.state.player.preferredPlayers || [])
-
-// Проверка, выбран ли плеер
-const isPlayerPreferred = (player) => {
-  return preferredPlayers.value.includes(player)
-}
-
-// Добавление/удаление плеера в/из избранного
-const togglePlayer = (player) => {
-  if (isPlayerPreferred(player)) {
-    store.dispatch('player/removePreferredPlayer', player)
-  } else {
-    store.dispatch('player/addPreferredPlayer', player)
-  }
-}
-
-// Удаление плеера (вызывается кнопкой удаления)
-const removePlayer = (player) => {
-  store.dispatch('player/removePreferredPlayer', player)
-}
-
-// Drag & drop для переупорядочивания выбранных плееров
-let draggedIndex = null
-const dragStart = (player, index) => {
-  draggedIndex = index
-}
-const dropPlayer = (targetIndex) => {
-  if (draggedIndex === null || draggedIndex === targetIndex) return
-  const newPreferred = [...preferredPlayers.value]
-  const movedPlayer = newPreferred.splice(draggedIndex, 1)[0]
-  newPreferred.splice(targetIndex, 0, movedPlayer)
-  store.dispatch('player/updatePreferredPlayers', newPreferred)
-  draggedIndex = null
-}
 
 // Навигация
 const goBack = () => {
