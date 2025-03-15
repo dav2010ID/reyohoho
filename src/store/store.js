@@ -2,6 +2,7 @@ import { createStore } from 'vuex';
 import createPersistedState from 'vuex-persistedstate'; // Плагин для автоматического сохранения
 import background from './modules/background'; // Импортируем модуль фона
 import player from './modules/player'; // Импортируем модуль плеера
+import noPosterImage from '@/assets/image-no-poster.gif';
 
 const store = createStore({
   modules: {
@@ -37,7 +38,7 @@ const store = createStore({
           kp_id: movie.kp_id,
           title: movie.title || '',
           year: movie.year || '',
-          poster: movie.poster || movie.cover || './src/assets/image-no-poster.gif',
+          poster: movie.poster || movie.cover || noPosterImage,
           addedAt: new Date().toISOString()
         };
   
