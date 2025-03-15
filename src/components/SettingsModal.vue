@@ -24,32 +24,10 @@
       </div>
 
       <!-- Включение/выключение размытия -->
-      <div class="setting-item">
-        <div class="toggle">
-            <label class="switch">
-              <input 
-                type="checkbox" 
-                v-model="isBlurEnabled"
-              />
-              <span class="slider round"></span>
-            </label>
-            <span class="label-text">Включить размытие</span>
-          </div>
-        </div>
-
+      <SliderRound v-model="isBlurEnabled" :disabled="isBlurDisabled">Включить размытие</SliderRound>
+        
       <!-- Автоцентрирование плеера -->
-      <div class="setting-item">
-        <div class="toggle">
-            <label class="switch">
-              <input 
-                type="checkbox" 
-                v-model="isCentered"
-              />
-              <span class="slider round"></span>
-            </label>
-            <span class="label-text">Автоцентрирование плеера</span>
-          </div>
-        </div>
+      <SliderRound v-model="isCentered">Автоцентрирование плеера</SliderRound>
 
       <!-- Кнопка сброса фона -->
       <div class="settings-actions">
@@ -61,9 +39,10 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted } from 'vue'
+import { ref, computed, onMounted, watch } from 'vue'
 import { useStore } from 'vuex'
 import { useRouter } from 'vue-router'
+import SliderRound from '@/components/slider/SliderRound.vue'
 
 const store = useStore()
 const router = useRouter()
@@ -73,6 +52,14 @@ const backgroundType = computed({
   get: () => store.state.background.backgroundType,
   set: (value) => store.dispatch('background/setBackgroundType', value)
 })
+
+const isBlurDisabled = computed(() => backgroundType.value === 'stars');
+watch(isBlurDisabled, (newValue) => {
+  if (newValue) {
+    store.dispatch('background/setBlur', false);
+  }
+});
+
 const isBlurEnabled = computed({
   get: () => store.state.background.isBlurEnabled,
   set: (value) => store.dispatch('background/toggleBlur', value)
@@ -111,12 +98,6 @@ const goBack = () => {
 </script>
 
 <style scoped>
-@import '@/assets/slider.css';
-
-.waaarn {
-  color: #df0e0e;
-}
-
 .settings-page {
   display: flex;
   flex-direction: column;
@@ -147,15 +128,14 @@ const goBack = () => {
   max-width: 500px;
   width: 100%;
   box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
-}
-.setting-group, .setting-item {
-  margin-bottom: 20px;
+  display: flex;
+  flex-direction: column; 
+  gap: 15px; 
 }
 .setting-item {
   display: flex;
   align-items: center;
   gap: 10px;
-  padding: 10px 0;
 }
 h2 {
   font-size: 16px;
@@ -188,40 +168,5 @@ h2 {
 }
 .reset-button:hover {
   background: #b71c1c;
-}
-.players-group {
-  margin-top: 30px;
-}
-.players-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
-  gap: 10px;
-}
-.player-tile {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  background: #555;
-  padding: 10px;
-  border-radius: 8px;
-  cursor: pointer;
-  transition: background-color 0.3s;
-  user-select: none;
-  position: relative;
-}
-.player-tile.selected {
-  background-color: #4caf50;
-}
-.player-tile:hover {
-  background-color: #777;
-}
-.remove-btn {
-  position: absolute;
-  top: 2px;
-  right: 2px;
-  background: transparent;
-  border: none;
-  color: #fff;
-  cursor: pointer;
 }
 </style>

@@ -60,7 +60,8 @@ const isTransitioning = ref(false) // Флаг для отслеживания �
 const getBackgroundStyle = (url) => ({
   backgroundImage: `url(${url})`,
   filter: `brightness(20%) ${store.state.background.isBlurEnabled ? 'blur(20px)' : ''}`,
-})
+  transition: 'opacity 1.5s ease-in-out' // Увеличенное время
+});
 
 // Предзагрузка изображения
 const preloadImage = (url) => new Promise((resolve, reject) => {
@@ -91,7 +92,7 @@ watch(currentBackground, async (newUrl) => {
   // Завершаем переход через 1 секунду
   setTimeout(() => {
     isTransitioning.value = false
-  }, 1000)
+  }, 1500)
 })
 
 // Загрузка данных
@@ -140,7 +141,6 @@ watchEffect(() => {
   height: 100%;
   opacity: 0;
   z-index: 1;
-  transition: opacity 2s ease-in-out;
   pointer-events: none;
   background-size: cover;
   background-position: center;

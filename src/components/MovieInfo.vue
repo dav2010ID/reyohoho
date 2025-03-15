@@ -174,7 +174,8 @@ onMounted(async () => {
 });
 
 onUnmounted(() => {
-  store.dispatch('background/updateMovieBackground', null);
+  store.dispatch('background/resetBackground');
+  fetchTopMovie();
 });
 
 watch(() => route.params.kp_id, async (newKpId) => {
@@ -254,7 +255,6 @@ watch(movieInfo, () => {
 
 .additional-info-title {
   margin: 0 0 15px;
-  font-size: 22px;
   text-align: left;
   color: #fff;
 }

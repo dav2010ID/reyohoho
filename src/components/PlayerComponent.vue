@@ -78,16 +78,7 @@
       Центр
     </button>
     <!-- Переключатель автоцентрирования -->
-    <div class="toggle">
-      <label class="switch">
-        <input 
-          type="checkbox" 
-          v-model="isCentered"
-        />
-        <span class="slider round"></span>
-      </label>
-      <span class="label-text">Автоцентрирование</span>
-    </div>
+    <SliderRound v-model="isCentered">Автоцентрирование плеера</SliderRound>
   </div>
 </template>
 
@@ -97,6 +88,7 @@ import axios from 'axios';
 import { useStore } from 'vuex';
 import { useRouter } from 'vue-router';
 import SpinnerLoading from '@/components/SpinnerLoading.vue';
+import SliderRound from '@/components/slider/SliderRound.vue'
 
 const store = useStore();
 const router = useRouter();
@@ -294,8 +286,6 @@ onBeforeUnmount(() => {
 </script>
 
 <style scoped>
-@import '@/assets/slider.css';
-
 .players-list {
   width: 100%;
   max-width: 700px;
@@ -419,6 +409,7 @@ html.no-scroll {
   justify-content: center;
   gap: 10px;
   margin-bottom: 10px;
+  align-items: center;
 }
 
 .theater-mode-btn,
@@ -441,7 +432,7 @@ html.no-scroll {
 }
 
 .aspect-ratio-btn.active {
-  background-color: #558839;
+  background-color: #4caf50;
 }
 
 /* Select */

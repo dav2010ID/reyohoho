@@ -1,8 +1,8 @@
-.toggle {
+<style scoped>
+  .toggle {
     display: flex;
     align-items: center;
     gap: 8px;
-    margin-left: 10px;
   }
   
   .switch {
@@ -51,6 +51,43 @@
   }
   
   .label-text {
-    font-size: 14px;
     color: #fff;
   }
+</style>
+
+<template>
+  <div class="toggle">
+    <label class="switch">
+      <input 
+        type="checkbox" 
+        :checked="modelValue" 
+        :disabled="disabled"
+        @change="onChange"
+      >
+      <span class="slider"></span>
+    </label>
+    <span class="label-text"><slot></slot></span>
+  </div>
+</template>
+
+<script setup>
+const props = defineProps({
+  modelValue: {
+    type: Boolean,
+    default: false
+  },
+  disabled: {
+    type: Boolean,
+    default: false
+  }
+})
+
+const emit = defineEmits(['update:modelValue'])
+
+function onChange(event) {
+  // Эмитируем событие только если компонент не заблокирован
+  if (!props.disabled) {
+    emit('update:modelValue', event.target.checked)
+  }
+}
+</script>

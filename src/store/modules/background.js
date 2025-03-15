@@ -1,8 +1,8 @@
 export default {
   namespaced: true,
   state: () => ({
-    backgroundType: 'dynamic', // 'none', 'stars', 'dynamic'
-    isBlurEnabled: true,
+    backgroundType: 'stars', // 'none', 'stars', 'dynamic'
+    isBlurEnabled: false,
     starsBackground: new URL('/src/assets/image-back-stars.png', import.meta.url).href,
     currentMovieBackground: null,
   }),
@@ -31,11 +31,14 @@ export default {
     },
     resetBackground({ commit }) {
       commit('SET_MOVIE_BACKGROUND', null);
-      commit('SET_BACKGROUND_TYPE', 'dynamic');
-      commit('SET_BLUR', true);
+      commit('SET_BACKGROUND_TYPE', 'stars');
+      commit('SET_BLUR', false);
     },
     toggleBlur({ commit }) {
       commit('TOGGLE_BLUR');
+    },
+    setBlur({ commit }, value) {
+      commit('SET_BLUR', value);
     },
     setBackgroundType({ commit }, type) {
       commit('SET_BACKGROUND_TYPE', type);
