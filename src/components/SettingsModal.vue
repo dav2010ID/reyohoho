@@ -155,7 +155,6 @@ const goBack = () => {
   display: flex;
   align-items: center;
   gap: 10px;
-  padding: 10px 0;
 }
 h2 {
   font-size: 16px;

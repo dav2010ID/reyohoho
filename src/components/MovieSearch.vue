@@ -34,13 +34,16 @@
       <div class="content-container">
         <!-- История просмотра -->
         <div v-if="!searchTerm && history.length > 0">
-          <h2>История просмотра
+          <h2>
+            История просмотра
             <span>
-              <button @click="showModal = true" class="clear-history-button">
-                Очистить
-              </button>
-              <BaseModal :isOpen="showModal" message="Вы уверены, что хотите очистить историю?"
-                @confirm="clearAllHistory" @close="showModal = false" />
+              <DeleteButton @click="showModal = true" />
+              <BaseModal
+                :isOpen="showModal"
+                message="Вы уверены, что хотите очистить историю?"
+                @confirm="clearAllHistory"
+                @close="showModal = false"
+              />
             </span>
           </h2>
           <CardsMovie :moviesList="history" :isHistory="true" :loading="loading" />
@@ -73,6 +76,7 @@ import { useStore } from 'vuex';
 import CardsMovie from "@/components/CardsMovie.vue";
 import FooterDonaters from '@/components/FooterDonaters.vue';
 import BaseModal from '@/components/BaseModal.vue';
+import DeleteButton from "@/components/buttons/DeleteButton.vue";
 import debounce from 'lodash/debounce';
 
 const apiUrl = import.meta.env.VITE_APP_API_URL;
@@ -106,24 +110,15 @@ const handleInput = (event) => {
 const getPlaceholder = () => {
   return {
     title: 'Введите название фильма',
-    kinopoisk: 'Введите ID Кинопоиск',
-    shikimori: 'Введите ID Shikimori'
+    kinopoisk: 'Пример: 301 (Матрица)',
+    shikimori: 'Пример: 28171 (Повар-боец Сома)'
   }[searchType.value] || 'Введите название фильма';
 };
 
-// Обработка нажатия клавиш
-const handleKeyDown = (event) => {
-  if (['kinopoisk', 'shikimori'].includes(searchType.value)) {
-    const allowedKeys = [
-      'Backspace', 'Delete', 'ArrowLeft', 'ArrowRight',
-      'Tab', 'Home', 'End'
-    ];
-
-    if (!allowedKeys.includes(event.key) && !/\d/.test(event.key)) {
-      event.preventDefault();
-    }
-  }
-};
+// Динамический inputmode: для поиска по ID — numeric, иначе — text
+const inputMode = computed(() => {
+  return (searchType.value === 'kinopoisk' || searchType.value === 'shikimori') ? 'numeric' : 'text';
+});
 
 // Очистка поиска
 const resetSearch = () => {
@@ -132,7 +127,6 @@ const resetSearch = () => {
   searchPerformed.value = false;
 };
 
-// Выполнение поиска
 const search = () => {
   if (searchTerm.value) {
     performSearch();
@@ -141,7 +135,6 @@ const search = () => {
   }
 };
 
-// Основная функция поиска
 const performSearch = async () => {
   loading.value = true;
   searchPerformed.value = true;
@@ -149,7 +142,6 @@ const performSearch = async () => {
 
   try {
     if (searchType.value === 'kinopoisk' || searchType.value === 'shikimori') {
-      // Проверка, что введено число
       if (!/^\d+$/.test(searchTerm.value)) {
         alert(`Введите числовой ID ${searchType.value === 'kinopoisk' ? 'Кинопоиска' : 'Shikimori'}`);
         return;
@@ -173,13 +165,11 @@ const performSearch = async () => {
   }
 };
 
-// Очистка истории
 const clearAllHistory = () => {
   store.dispatch('clearAllHistory');
   showModal.value = false;
 };
 
-// Автопоиск с задержкой 700 мс
 const debouncedPerformSearch = debounce(() => {
   if (searchTerm.value.length >= 3) {
     performSearch();
@@ -189,13 +179,11 @@ const debouncedPerformSearch = debounce(() => {
   }
 }, 700);
 
-// Отслеживание изменений searchTerm с debounce
-watch(searchTerm, (newVal, oldVal) => {
+// Автопоиск с задержкой (только для поиска по названию)
+watch(searchTerm, () => {
   if (searchType.value === 'kinopoisk' || searchType.value === 'shikimori') {
-    // Для поиска по ID автопоиск отключен
     return;
   }
-
   debouncedPerformSearch();
 });
 </script>
@@ -338,22 +326,6 @@ h2 {
   color: #fff;
   font-size: 18px;
   margin-top: 20px;
-}
-
-.clear-history-button {
-  padding: 10px;
-  font-size: 20px;
-  border: none;
-  background: rgba(255, 0, 0, 0.2);
-  color: #fff;
-  border-radius: 10px;
-  cursor: pointer;
-  transition: background-color 0.3s ease;
-  border: 1px solid #ccc;
-}
-
-.clear-history-button:hover {
-  background-color: #ff0000;
 }
 
 @media (max-width: 600px) {

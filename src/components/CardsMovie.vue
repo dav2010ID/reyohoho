@@ -7,21 +7,13 @@
         class="movie-card"
         :class="{ active: activeMovieIndex === index }"
         :href="movieUrl(movie)"
-        @click.prevent="handleCardClick(movie, $event)"
-        @auxclick="handleMiddleClick"
         :ref="(el) => (movieRefs[index] = el)"
         tabindex="0"
       >
         <div class="movie-poster-container">
           <div v-if="movie.poster || movie.cover">
             <img :src="movie.poster || movie.cover" :alt="movie.title" class="movie-poster" />
-            <button
-              v-if="isHistory"
-              class="remove-button"
-              @click.stop="removeFromHistory(movie.kp_id)"
-            >
-              <i class="fas fa-times"></i>
-            </button>
+            <DeleteButton v-if="isHistory" @click.stop.prevent="removeFromHistory(movie.kp_id)" />
             <div v-if="movie.rating_kp || movie.rating_imdb" class="ratings-overlay">
               <span v-if="movie.rating_kp" class="rating-kp">
                 <img src="/src/assets/icon-kp-logo.svg" alt="КП" class="rating-logo" />
@@ -61,6 +53,7 @@ import { ref, watch, onMounted, onUnmounted } from 'vue';
 import { useRouter } from 'vue-router';
 import { useStore } from 'vuex';
 import Spinner from "@/components/SpinnerLoading.vue";
+import DeleteButton from "@/components/buttons/DeleteButton.vue";
 
 const props = defineProps({
   moviesList: Array,
@@ -89,21 +82,6 @@ const formatViews = (views) => {
 
 const removeFromHistory = (kp_id) => {
   store.dispatch('removeFromHistory', kp_id);
-};
-
-const handleCardClick = (movie, event) => {
-  if (event.ctrlKey || event.metaKey || event.button === 1) {
-    window.open(movieUrl(movie), '_blank');
-  } else {
-    router.push({ name: "movie-info", params: { kp_id: movie.kp_id } });
-  }
-};
-
-const handleMiddleClick = (event) => {
-  if (event.button === 1) {
-    event.preventDefault();
-    window.open(event.currentTarget.href, '_blank');
-  }
 };
 
 const handleKeyDown = (event) => {
@@ -176,9 +154,9 @@ onUnmounted(() => {
 
 /* Стили для контейнера карточек */
 .cards-container {
-    gap: 10px;
-    justify-content: center;
-    width: 100%;
+  gap: 10px;
+  justify-content: center;
+  width: 100%;
 }
 
 /* Общие стили для карточек фильмов */
@@ -254,46 +232,29 @@ onUnmounted(() => {
 
 /* Стили для постера фильма */
 .movie-poster {
-    width: 100%;
-    aspect-ratio: 2 / 3;
-    object-fit: cover;
+  width: 100%;
+  aspect-ratio: 2 / 3;
+  object-fit: cover;
 }
 
 /* Контейнер для всех карточек */
 .cards-container {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 15px;
-    align-items: stretch; /* Выравнивание по вертикали */
-    justify-content: center;
-    width: 100%;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 15px;
+  align-items: stretch; /* Выравнивание по вертикали */
+  justify-content: center;
+  width: 100%;
 }
-
-/* Кнопка удаления из истории */
-.remove-button {
+.deleteButton {
   position: absolute;
   top: 5px;
   right: 5px;
-  background-color: rgba(0, 0, 0, 0.7);
-  border: none;
-  border-radius: 50%;
-  width: 24px;
-  height: 24px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: #fff;
-  cursor: pointer;
   opacity: 0;
-  transition: opacity 0.3s ease;
-}
+  }
 
-.movie-card:hover .remove-button {
+.movie-card:hover .deleteButton {
   opacity: 1;
-}
-
-.remove-button:hover {
-  background-color: rgba(255, 0, 0, 0.7);
 }
 
 .ratings-overlay {
