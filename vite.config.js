@@ -1,8 +1,7 @@
 import { defineConfig } from 'vite';
 import vue from '@vitejs/plugin-vue';
 import { VitePWA } from 'vite-plugin-pwa'  // Проверь, чтобы импорт был именно таким
-const isGitHubPages = mode === 'github';
-const base = isGitHubPages ? '/reyohoho/' : '/';
+const base = process.env.VITE_BASE_URL || '/';
 export default defineConfig({
   base: base,
   plugins: [
