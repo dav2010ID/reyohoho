@@ -66,7 +66,13 @@ const router = createRouter({
 router.beforeEach((to, from, next) => {
   const title = to.meta.title || 'Reyohoho';
   document.title = title;
-  next();
+
+  if (to.hash) {
+    const hash = to.hash.slice(1);
+    next({ path: `/movie/${hash}` });
+  } else {
+    next();
+  }
 });
 
 export default router;
