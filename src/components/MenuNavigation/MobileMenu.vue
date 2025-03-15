@@ -36,7 +36,7 @@
 import { ref, onMounted, onBeforeUnmount } from 'vue'
 
 const props = defineProps({
-  links: Array,
+  links: Array
 })
 
 // Флаг видимости меню
@@ -70,7 +70,7 @@ onBeforeUnmount(() => {
 <style scoped>
 .mobile-burger {
   position: fixed;
-  top: 10px;
+  top: 6px;
   left: 10px;
   background: rgba(61, 61, 61, 0.96);
   border: none;

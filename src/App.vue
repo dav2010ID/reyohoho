@@ -1,4 +1,5 @@
 <template>
+  <AppHeader />
   <BackgroundSpace />
   <MenuNavigation />
   <div class="router-view-container">
@@ -9,6 +10,7 @@
 </template>
 
 <script setup>
+import AppHeader from '@/components/AppHeader.vue';
 import BackgroundSpace from '@/components/BackgroundSpace.vue'
 import MenuNavigation from '@/components/MenuNavigation.vue'
 </script>

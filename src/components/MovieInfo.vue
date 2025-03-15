@@ -176,7 +176,6 @@ onMounted(async () => {
 
 onUnmounted(() => {
   store.dispatch('background/resetBackground');
-  fetchTopMovie();
 });
 
 watch(() => route.params.kp_id, async (newKpId) => {

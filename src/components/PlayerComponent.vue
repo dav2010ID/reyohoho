@@ -2,9 +2,9 @@
   <div class="players-list">
     <span>Плеер:</span>
     <select v-model="selectedPlayerInternal" class="custom-select">
-      <option 
-        v-for="player in playersInternal" 
-        :key="player.key" 
+      <option
+        v-for="player in playersInternal"
+        :key="player.key"
         :value="player"
       >
         {{ player.key === player.translate ? player.translate.toUpperCase() : player.key + ' - ' + player.translate.toUpperCase() }}
@@ -18,7 +18,7 @@
     :class="['player-container', { 'theater-mode': theaterMode }]"
     :style="!theaterMode ? containerStyle : {}"
   >
-    <div 
+    <div
       class="iframe-wrapper"
       :style="!theaterMode ? iframeWrapperStyle : {}"
     >
@@ -46,33 +46,33 @@
 
   <!-- Кнопки управления -->
   <div v-if="!isMobile" class="controls">
-    <button 
-      @click="toggleTheaterMode" 
+    <button
+      @click="toggleTheaterMode"
       class="theater-mode-btn"
     >
       {{ theaterMode ? 'Выйти из театрального режима' : 'Включить театральный режим' }}
     </button>
-    <button 
-      @click="setAspectRatio('16:9')" 
+    <button
+      @click="setAspectRatio('16:9')"
       :class="['aspect-ratio-btn', { 'active': aspectRatio === '16:9' }]"
     >
       16:9
     </button>
-    <button 
-      @click="setAspectRatio('12:5')" 
+    <button
+      @click="setAspectRatio('12:5')"
       :class="['aspect-ratio-btn', { 'active': aspectRatio === '12:5' }]"
     >
       12:5
     </button>
-    <button 
-      @click="setAspectRatio('4:3')" 
+    <button
+      @click="setAspectRatio('4:3')"
       :class="['aspect-ratio-btn', { 'active': aspectRatio === '4:3' }]"
     >
       4:3
     </button>
     <!-- Новая кнопка "Центр" -->
-    <button 
-      @click="centerPlayer" 
+    <button
+      @click="centerPlayer"
       class="center-btn"
     >
       Центр
@@ -109,7 +109,7 @@ const containerRef = ref(null);
 const apiUrl = import.meta.env.VITE_APP_API_URL;
 const maxPlayerHeightValue = ref(window.innerHeight * 0.9); // 90% от высоты экрана
 const maxPlayerHeight = computed(() => `${maxPlayerHeightValue.value}px`);
-const isMobile = ref(window.innerWidth <= 600);
+const isMobile = ref(window.innerWidth <= 601);
 
 // Используем геттер для получения aspectRatio из хранилища
 const aspectRatio = computed({
@@ -136,7 +136,7 @@ const normalizeKey = (key) => {
 
 const updateScaleFactor = () => {
   if (theaterMode.value || !containerRef.value) return;
-  
+
   const [w, h] = aspectRatio.value.split(':').map(Number);
   maxPlayerHeightValue.value = window.innerHeight * 0.9;
   naturalHeight.value = Math.min(
@@ -147,10 +147,10 @@ const updateScaleFactor = () => {
 
 const containerStyle = computed(() => {
   if (theaterMode.value) return {};
-  
+
   const [w, h] = aspectRatio.value.split(':').map(Number);
   const maxWidth = maxPlayerHeightValue.value * (w / h);
-  
+
   return {
     width: '100%',
     maxWidth: `${maxWidth}px`,
@@ -206,7 +206,7 @@ const fetchPlayers = async () => {
         const normalizedPreferredPlayer = normalizeKey(preferredPlayer.value);
 
         // Ищем плеера, чей ключ совпадает с предпочтительным плеером
-        const preferred = playersInternal.value.find(player => 
+        const preferred = playersInternal.value.find(player =>
           normalizeKey(player.key) === normalizedPreferredPlayer
         );
 

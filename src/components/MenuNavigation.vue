@@ -15,7 +15,7 @@ import MobileMenu from './MenuNavigation/MobileMenu.vue'
 import DesktopMenu from './MenuNavigation/DesktopMenu.vue'
 
 // Определяем, мобильное ли устройство (ширина окна меньше 600px)
-const isMobile = ref(window.innerWidth < 600)
+const isMobile = ref(window.innerWidth < 601)
 
 // Массив навигационных ссылок
 const navLinks = [
@@ -46,7 +46,7 @@ const navLinks = [
 
 // Обновляем состояние мобильного устройства при изменении размера окна
 const updateIsMobile = () => {
-  isMobile.value = window.innerWidth < 600
+  isMobile.value = window.innerWidth < 601
 }
 
 // Добавляем и удаляем обработчики событий при монтировании/размонтировании компонента
