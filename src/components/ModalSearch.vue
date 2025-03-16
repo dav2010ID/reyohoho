@@ -144,8 +144,6 @@ const getRatingColor = (rating) => {
 }
 
 const closeModal = (event) => {
-  console.log(event)
-
   const isLeftClick = event.button === 0
 
   // Проверяем, что не зажаты Ctrl или Cmd
