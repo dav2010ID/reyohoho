@@ -56,7 +56,7 @@ const updateIsMobile = () => {
 }
 
 // Поиск в модальном окне
-const isModalSearchVisible = ref(true)
+const isModalSearchVisible = ref(false)
 const toggleModalSearch = () => {
   console.log('hi')
   isModalSearchVisible.value = !isModalSearchVisible.value
