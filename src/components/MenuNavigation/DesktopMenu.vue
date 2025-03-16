@@ -16,8 +16,8 @@
         <li
           v-for="(link, idx) in links"
           :key="link.text"
-          @mouseenter="showTooltip(idx)"
-          @mouseleave="hideTooltip"
+          @pointerenter="showTooltip(idx)"
+          @pointerleave="hideTooltip"
         >
           <component
             :is="link.to ? 'router-link' : 'a'"
