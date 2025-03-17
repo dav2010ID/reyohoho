@@ -349,6 +349,11 @@ onUnmounted(() => {
     border-radius: 10px 0 0 10px;
   }  
 
+  .deleteButton {
+    left: 5px;
+    opacity: 1;
+  }
+
   .movie-details {
     padding: 10px;
     flex-grow: 1;
