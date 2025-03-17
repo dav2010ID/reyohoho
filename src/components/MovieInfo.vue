@@ -57,6 +57,10 @@
 
         <meta name="title-and-year"
           :content="movieInfo.year ? `${movieInfo.title} (${movieInfo.year})` : movieInfo.title">
+
+        <meta v-if="movieInfo.name_original" name="original-title"
+          :content="movieInfo.name_original">
+
         <div class="additional-info">
           <h2 class="additional-info-title">Подробнее</h2>
           <div class="info-content">
