@@ -89,6 +89,10 @@ const actions = {
 
   toggleCardBorder({ commit }, isBorder) {
     commit('SET_CARD_BORDER', isBorder);
+  },
+  resetBackground({ commit }){
+    commit('SET_BLUR', false);
+    commit('SET_BACKGROUND_TYPE', 'stars');
   }
 };
 

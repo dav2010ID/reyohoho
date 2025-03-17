@@ -29,16 +29,16 @@
       <SliderRound v-model="isCardBorder">Окантовка вокруг карточек</SliderRound>
 
       <!-- Кнопка сброса фона -->
-      <!-- <div class="settings-actions">
+      <div class="settings-actions">
         <button @click="resetBackground" class="reset-button">Сбросить фон</button>
-      </div> -->
+      </div>
 
     </div>
   </div>
 </template>
 
 <script setup>
-import { ref, computed, onMounted, watch } from 'vue'
+import { computed, watch } from 'vue'
 import { useStore } from 'vuex'
 import { useRouter } from 'vue-router'
 import SliderRound from '@/components/slider/SliderRound.vue'
@@ -77,10 +77,9 @@ const goBack = () => {
   router.go(-1)
 }
 
-// При необходимости можно реализовать сброс фона, добавив соответствующее действие в Vuex
-// const resetBackground = () => {
-//   store.dispatch('background/resetBackground')
-// }
+const resetBackground = () => {
+  store.dispatch('background/resetBackground')
+}
 </script>
 
 
