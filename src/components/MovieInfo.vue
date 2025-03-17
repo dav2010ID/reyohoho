@@ -18,21 +18,35 @@
           </div>
         </div>
 
-        <div class="ratings-links" v-if="movieInfo.rating_kinopoisk || movieInfo.rating_imdb">
-          <a :href="`https://www.kinopoisk.ru/film/${kp_id}`" target="_blank" rel="noopener noreferrer"
+        <div class="ratings-links" v-if="kp_id || movieInfo.imdb_id">
+          <!-- Ссылка на Кинопоиск -->
+          <a v-if="kp_id" 
+            :href="`https://www.kinopoisk.ru/film/${kp_id}`"
+            target="_blank"
+            rel="noopener noreferrer"
             class="rating-link">
             <img src="/src/assets/icon-kp-logo.svg" alt="КП" class="rating-logo" />
             <span v-if="movieInfo.rating_kinopoisk">{{ movieInfo.rating_kinopoisk }}/10</span>
             <img src="/src/assets/icon-external-link.png" alt="Внешняя ссылка" class="external-link-icon" />
           </a>
-          <a v-if="movieInfo.imdb_id && movieInfo.rating_imdb" :href="`https://www.imdb.com/title/${movieInfo.imdb_id}`"
-            target="_blank" rel="noopener noreferrer" class="rating-link">
+
+          <!-- Ссылка на IMDb -->
+          <a v-if="movieInfo.imdb_id"
+            :href="`https://www.imdb.com/title/${movieInfo.imdb_id}`"
+            target="_blank"
+            rel="noopener noreferrer"
+            class="rating-link">
             <img src="/src/assets/icon-imdb-logo.svg" alt="IMDb" class="rating-logo" />
-            <span>{{ movieInfo.rating_imdb }}/10</span>
+            <span v-if="movieInfo.rating_imdb">{{ movieInfo.rating_imdb }}/10</span>
             <img src="/src/assets/icon-external-link.png" alt="Внешняя ссылка" class="external-link-icon" />
           </a>
-          <a v-if="movieInfo.imdb_id" :href="`https://www.imdb.com/title/${movieInfo.imdb_id}/parentalguide`"
-            target="_blank" rel="noopener noreferrer" class="rating-link">
+
+          <!-- Parents Guide -->
+          <a v-if="movieInfo.imdb_id"
+            :href="`https://www.imdb.com/title/${movieInfo.imdb_id}/parentalguide`"
+            target="_blank"
+            rel="noopener noreferrer"
+            class="rating-link">
             <span>Parents Guide</span>
             <img src="/src/assets/icon-external-link.png" alt="Внешняя ссылка" class="external-link-icon" />
           </a>
