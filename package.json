@@ -34,6 +34,7 @@
     "jquery": "^3.7.1",
     "jsdom": "^26.0.0",
     "prettier": "^3.0.0",
+    "sass-embedded": "^1.85.1",
     "typescript": "^5.8.2",
     "vite": "^6.2.0",
     "vitest": "^3.0.7",
