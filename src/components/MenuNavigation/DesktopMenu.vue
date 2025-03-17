@@ -12,44 +12,61 @@
       </button>
     </div>
     <nav class="side-nav">
-      <ul class="nav-links">
-        <li
-          v-for="(link, idx) in links"
-          :key="link.text"
-          @pointerenter="showTooltip(idx)"
-          @pointerleave="hideTooltip"
-        >
-          <component
-            :is="link.to ? 'router-link' : 'a'"
-            v-bind="
-              link.to ? { to: link.to, exact: link.exact } : { href: link.href, target: '_blank' }
-            "
-            :class="{ 'support-link': !link.icon }"
-            @click="closeSidebar"
+      <div class="nav-links-wrapper">
+        <ul class="nav-links">
+          <li
+            v-for="(link, idx) in links"
+            :key="link.text"
+            @pointerenter="showTooltip(idx, $event)"
+            @pointerleave="hideTooltip"
           >
-            <template v-if="typeof link.icon === 'string' && link.icon.startsWith('fa')">
-              <i :class="link.icon"></i>
-            </template>
-            <template v-else>
-              <img src="@/assets/icon-donut.png" alt="icon" class="icon-donut" />
-            </template>
-            <span v-show="isSidebarOpen" class="menu-text">{{ link.text }}</span>
-            <span v-if="!isSidebarOpen && activeTooltip === idx" class="tooltip">
-              {{ link.text }}
-            </span>
-          </component>
-        </li>
-      </ul>
+            <component
+              :is="link.to ? 'router-link' : 'a'"
+              v-bind="
+                link.to ? { to: link.to, exact: link.exact } : { href: link.href, target: '_blank' }
+              "
+              :class="{ 'support-link': !link.icon }"
+              @click="closeSidebar"
+            >
+              <template v-if="typeof link.icon === 'string' && link.icon.startsWith('fa')">
+                <i :class="link.icon"></i>
+              </template>
+              <template v-else>
+                <img src="@/assets/icon-donut.png" alt="icon" class="icon-donut" />
+              </template>
+              <span v-show="isSidebarOpen" class="menu-text">{{ link.text }}</span>
+            </component>
+          </li>
+          <li
+            v-if="route.name !== 'home'"
+            @pointerenter="showTooltip(links.length, $event)"
+            @pointerleave="hideTooltip"
+          >
+            <a @click="toggleSearch" class="btn btn--search">
+              <i class="fas fa-search"></i>
+              <span v-show="isSidebarOpen" class="menu-text">Поиск</span>
+            </a>
+          </li>
+        </ul>
+      </div>
     </nav>
+    <div v-if="activeTooltip !== null" class="tooltip" :style="tooltipStyle">
+      {{ activeTooltip === links?.length ? 'Поиск' : links[activeTooltip]?.text }}
+    </div>
   </aside>
 </template>
 
 <script setup>
-import { ref, onMounted, onBeforeUnmount } from 'vue'
+import { ref, onMounted, onBeforeUnmount, computed } from 'vue'
+import { useRoute } from 'vue-router'
 
 const props = defineProps({
   links: Array
 })
+
+const emit = defineEmits(['toggleSearch'])
+
+const route = useRoute()
 
 // Флаг состояния боковой панели
 const isSidebarOpen = ref(false)
@@ -73,14 +90,29 @@ const handleClickOutside = (event) => {
 }
 
 // Всплывающая подсказка при свернутом сайдбаре
+const tooltipPosition = ref({ x: 0, y: 0 })
 const activeTooltip = ref(null)
-const showTooltip = (index) => {
+const showTooltip = (index, event) => {
   activeTooltip.value = index
+  const rect = event.target.getBoundingClientRect()
+  tooltipPosition.value = {
+    x: rect.right + 10,
+    y: rect.top + 5
+  }
 }
 const hideTooltip = () => {
   activeTooltip.value = null
 }
+const tooltipStyle = computed(() => ({
+  left: `${tooltipPosition.value.x}px`,
+  top: `${tooltipPosition.value.y}px`
+}))
 
+// Открыть модалку поиска
+const toggleSearch = () => {
+  closeSidebar()
+  emit('toggleSearch')
+}
 // Добавляем и удаляем обработчики событий при монтировании/размонтировании компонента
 onMounted(() => {
   document.addEventListener('click', handleClickOutside)
@@ -165,7 +197,17 @@ onBeforeUnmount(() => {
 
 .side-nav {
   flex-grow: 1;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
 }
+
+.nav-links-wrapper {
+  flex: 1;
+  padding-bottom: 1rem;
+  overflow-y: auto;
+}
+
 .nav-links {
   list-style: none;
   padding: 0;
@@ -235,5 +277,10 @@ onBeforeUnmount(() => {
   padding: 5px;
   border-radius: 4px;
   white-space: nowrap;
+  transform: translateX(1000);
+}
+
+.btn {
+  cursor: pointer;
 }
 </style>

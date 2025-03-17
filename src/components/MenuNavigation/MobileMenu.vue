@@ -1,31 +1,40 @@
 <template>
   <!-- Мобильный бургер для открытия/закрытия мобильного меню -->
   <button class="mobile-burger" @click.stop="toggleNavbar">
-    <div :style="!isNavbarVisible ? 'margin-top: -3px' : ''">
+    <div>
       {{ isNavbarVisible ? '&#10005;' : '&#9776;' }}
     </div>
   </button>
   <transition name="slide">
     <nav v-if="isNavbarVisible" class="mobile-navbar" @click.stop>
-      <ul class="nav-links">
-        <li v-for="link in links" :key="link.text">
-          <component
-            :is="link.to ? 'router-link' : 'a'"
-            v-bind="
-              link.to ? { to: link.to, exact: link.exact } : { href: link.href, target: '_blank' }
-            "
-            @click="closeNavbar"
-          >
-            <template v-if="typeof link.icon === 'string' && link.icon.startsWith('fa')">
-              <i :class="link.icon"></i>
-            </template>
-            <template v-else>
-              <img src="@/assets/icon-donut.png" alt="icon" class="icon-donut" />
-            </template>
-            <span class="menu-text">{{ link.text }}</span>
-          </component>
-        </li>
-      </ul>
+      <div class="nav-links-wrapper">
+        <ul class="nav-links">
+          <li v-for="link in links" :key="link.text">
+            <component
+              :is="link.to ? 'router-link' : 'a'"
+              v-bind="
+                link.to ? { to: link.to, exact: link.exact } : { href: link.href, target: '_blank' }
+              "
+              @click="closeNavbar"
+            >
+              <template v-if="typeof link.icon === 'string' && link.icon.startsWith('fa')">
+                <i :class="link.icon"></i>
+              </template>
+              <template v-else>
+                <img src="@/assets/icon-donut.png" alt="icon" class="icon-donut" />
+              </template>
+              <span class="menu-text">{{ link.text }}</span>
+            </component>
+          </li>
+
+          <li v-if="route.name !== 'home'">
+            <a @click="toggleSearch" class="btn btn-search">
+              <i class="fas fa-search"></i>
+              <span class="menu-text">Поиск</span>
+            </a>
+          </li>
+        </ul>
+      </div>
     </nav>
   </transition>
   <!-- Оверлей для закрытия мобильного меню при клике вне его -->
@@ -34,10 +43,15 @@
 
 <script setup>
 import { ref, onMounted, onBeforeUnmount } from 'vue'
+import { useRoute } from 'vue-router'
 
 const props = defineProps({
-  links: Array,
+  links: Array
 })
+
+const emit = defineEmits(['toggleSearch'])
+
+const route = useRoute()
 
 // Флаг видимости меню
 const isNavbarVisible = ref(false)
@@ -57,6 +71,12 @@ const handleKeydown = (event) => {
   if (event.key === 'Escape') closeNavbar()
 }
 
+// Открыть модалку поиска
+const toggleSearch = () => {
+  closeNavbar()
+  emit('toggleSearch')
+}
+
 // Добавляем и удаляем обработчики событий при монтировании/размонтировании компонента
 onMounted(() => {
   document.addEventListener('keydown', handleKeydown)
@@ -70,7 +90,7 @@ onBeforeUnmount(() => {
 <style scoped>
 .mobile-burger {
   position: fixed;
-  top: 10px;
+  top: 6px;
   left: 10px;
   background: rgba(61, 61, 61, 0.96);
   border: none;
@@ -83,6 +103,12 @@ onBeforeUnmount(() => {
   height: 40px;
 }
 
+.nav-links-wrapper {
+  flex: 1;
+  overflow-y: auto;
+  padding-bottom: 1rem;
+}
+
 .nav-links {
   list-style: none;
   padding: 0;
@@ -93,11 +119,12 @@ onBeforeUnmount(() => {
 }
 .nav-links li {
   width: 100%;
+  position: relative;
 }
 .nav-links a,
 .nav-links button {
   display: flex;
-  align-items: center;
+  align-items: baseline;
   gap: 1rem;
   color: rgba(255, 255, 255, 0.8);
   text-decoration: none;
@@ -145,5 +172,20 @@ onBeforeUnmount(() => {
 .icon-donut {
   height: 25px;
   object-fit: contain;
+}
+
+.tooltip {
+  position: absolute;
+  top: 5px;
+  left: 70px;
+  background-color: #333;
+  color: #fff;
+  padding: 5px;
+  border-radius: 4px;
+  white-space: nowrap;
+}
+
+.btn {
+  cursor: pointer;
 }
 </style>

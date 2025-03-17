@@ -1,14 +1,14 @@
 @import url('https://fonts.googleapis.com/css2?family=Neucha&family=Roboto:ital,wght@0,100..900;1,100..900&display=swap');
 html {
     scroll-behavior: smooth;
-}  
+}
 
 body {
     font-family: "Roboto", sans-serif;
     color: #fff;
     background-color: #000;
     margin: 0 auto;
-    padding: 0px 0px 0px 82px;
+    padding: 0px 0px 0px 80px;
 }
 
 html.no-scroll,
