@@ -3,7 +3,7 @@
     <div class="content">
       <div v-if="errorMessage" class="error-message">
         {{ errorMessage }}
-        <div class="go-home">
+        <div class="go-home" v-if="errorCode !== 500">
           <router-link to="/" class="home-button">На главную</router-link>
         </div>
       </div>
@@ -133,6 +133,8 @@ const transformMoviesData = (movies) => {
   }));
 };
 
+const errorCode = ref(null); // Добавляем переменную для хранения кода ошибки
+
 const fetchMovieInfo = async () => {
   try {
     let response;
@@ -179,13 +181,16 @@ const fetchMovieInfo = async () => {
     if (movieToSave.kp_id && movieToSave.title) {
       store.dispatch('addToHistory', { ...movieToSave });
     }
-    } catch (error) {
+  } catch (error) {
     if (error.response?.status === 404) {
       errorMessage.value = "Такого не нашлось, повторите поиск";
-    } else if (error.response.status === 500) {
-          errorMessage.value = "Ошибка на сервере. Пожалуйста, попробуйте позже";
+      errorCode.value = 404; // Сохраняем код ошибки
+    } else if (error.response?.status === 500) {
+      errorMessage.value = "Ошибка на сервере. Пожалуйста, попробуйте позже";
+      errorCode.value = 500; // Сохраняем код ошибки
     } else {
       errorMessage.value = "Ошибка загрузки информации о фильме";
+      errorCode.value = null; // Сбрасываем код ошибки
       console.error("Ошибка при загрузке плееров:", error);
     }
   }
