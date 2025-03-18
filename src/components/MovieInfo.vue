@@ -18,48 +18,79 @@
           </div>
         </div>
 
-        <div class="ratings-links" v-if="movieInfo.kinopoisk_id || movieInfo.imdb_id">
-          <!-- Ссылка на Кинопоиск -->
-          <a v-if="movieInfo.kinopoisk_id" 
-            :href="`https://www.kinopoisk.ru/film/${movieInfo.kinopoisk_id}`"
-            target="_blank"
-            rel="noopener noreferrer"
-            class="rating-link">
-            <img src="/src/assets/icon-kp-logo.svg" alt="КП" class="rating-logo" />
-            <span v-if="movieInfo.rating_kinopoisk">{{ movieInfo.rating_kinopoisk }}/10</span>
-            <img src="/src/assets/icon-external-link.png" alt="Внешняя ссылка" class="external-link-icon" />
-          </a>
+        <div class="ratings-links" 
+          v-if="movieInfo.kinopoisk_id || movieInfo.title || movieInfo.imdb_id || movieInfo.rating_imdb || movieInfo.shikimori_id">
+          
+          <!-- Кинопоиск -->
+          <div v-if="movieInfo.kinopoisk_id">
+            <a :href="`https://www.kinopoisk.ru/film/${movieInfo.kinopoisk_id}`"
+              target="_blank"
+              rel="noopener noreferrer"
+              class="rating-link">
+              <img src="/src/assets/icon-kp-logo.svg" alt="КП" class="rating-logo" />
+              <span v-if="movieInfo.rating_kinopoisk">{{ movieInfo.rating_kinopoisk }}/10</span>
+              <img src="/src/assets/icon-external-link.png" alt="Внешняя ссылка" class="external-link-icon" />
+            </a>
+          </div>
 
-          <!-- Ссылка на IMDb -->
-          <a v-if="movieInfo.imdb_id"
-            :href="`https://www.imdb.com/title/${movieInfo.imdb_id}`"
-            target="_blank"
-            rel="noopener noreferrer"
-            class="rating-link">
-            <img src="/src/assets/icon-imdb-logo.svg" alt="IMDb" class="rating-logo" />
-            <span v-if="movieInfo.rating_imdb">{{ movieInfo.rating_imdb }}/10</span>
-            <img src="/src/assets/icon-external-link.png" alt="Внешняя ссылка" class="external-link-icon" />
-          </a>
+          <!-- Поиск на Кинопоиске, если нет ID -->
+          <div v-if="!movieInfo.kinopoisk_id && movieInfo.title">
+            <a :href="`https://www.kinopoisk.ru/index.php?kp_query=${encodeURIComponent(movieInfo.title + (movieInfo.year ? ' ' + movieInfo.year : ''))}`"
+              target="_blank"
+              rel="noopener noreferrer"
+              class="rating-link">
+              <img src="/src/assets/icon-kp-logo.svg" alt="КП" class="rating-logo" />
+              <span v-if="movieInfo.rating_kinopoisk">{{ movieInfo.rating_kinopoisk }}/10</span>
+              <img src="/src/assets/icon-external-link.png" alt="Внешняя ссылка" class="external-link-icon" />
+            </a>
+          </div>
 
-          <!-- Ссылка на Кинопоиск -->
-          <a v-if="movieInfo.shikimori_id" 
-            :href="`https://shikimori.one/animes/${movieInfo.shikimori_id}`"
-            target="_blank"
-            rel="noopener noreferrer"
-            class="rating-link">
-          <img src="/src/assets/icon-shikimori.svg" alt="Shiki" class="rating-logo" />
-            <img src="/src/assets/icon-external-link.png" alt="Внешняя ссылка" class="external-link-icon" />
-          </a>
+          <!-- IMDb -->
+          <div v-if="movieInfo.imdb_id">
+            <a :href="`https://www.imdb.com/title/${movieInfo.imdb_id}`"
+              target="_blank"
+              rel="noopener noreferrer"
+              class="rating-link">
+              <img src="/src/assets/icon-imdb-logo.svg" alt="IMDb" class="rating-logo" />
+              <span v-if="movieInfo.rating_imdb">{{ movieInfo.rating_imdb }}/10</span>
+              <img src="/src/assets/icon-external-link.png" alt="Внешняя ссылка" class="external-link-icon" />
+            </a>
+          </div>
 
-          <!-- Parents Guide -->
-          <a v-if="movieInfo.imdb_id"
-            :href="`https://www.imdb.com/title/${movieInfo.imdb_id}/parentalguide`"
-            target="_blank"
-            rel="noopener noreferrer"
-            class="rating-link">
-            <span>Parents Guide</span>
-            <img src="/src/assets/icon-external-link.png" alt="Внешняя ссылка" class="external-link-icon" />
-          </a>
+          <!-- Поиск на IMDb, если нет ID -->
+          <div v-if="!movieInfo.imdb_id && movieInfo.title">
+            <a :href="`https://www.imdb.com/find/?q=${encodeURIComponent(movieInfo.title + (movieInfo.year ? ' ' + movieInfo.year : ''))}`"
+              target="_blank"
+              rel="noopener noreferrer"
+              class="rating-link">
+              <img src="/src/assets/icon-imdb-logo.svg" alt="IMDb" class="rating-logo" />
+              <span v-if="movieInfo.rating_imdb">{{ movieInfo.rating_imdb }}/10</span>
+              <img src="/src/assets/icon-external-link.png" alt="Внешняя ссылка" class="external-link-icon" />
+            </a>
+          </div>
+
+          <!-- Shikimori -->
+          <div v-if="movieInfo.shikimori_id">
+            <a :href="`https://shikimori.one/animes/${movieInfo.shikimori_id}`"
+              target="_blank"
+              rel="noopener noreferrer"
+              class="rating-link">
+              <img src="/src/assets/icon-shikimori.svg" alt="Shiki" class="rating-logo" />
+              <img src="/src/assets/icon-external-link.png" alt="Внешняя ссылка" class="external-link-icon" />
+            </a>
+          </div>
+
+          <!-- Parents Guide (только если есть IMDb id) -->
+          <div v-if="movieInfo.imdb_id">
+            <a :href="`https://www.imdb.com/title/${movieInfo.imdb_id}/parentalguide`"
+              target="_blank"
+              rel="noopener noreferrer"
+              class="rating-link">
+              <span>Parents Guide</span>
+              <img src="/src/assets/icon-external-link.png" alt="Внешняя ссылка" class="external-link-icon" />
+            </a>
+          </div>
+
         </div>
 
         <!-- Интеграция компонента плеера -->
