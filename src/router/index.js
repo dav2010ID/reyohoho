@@ -70,8 +70,12 @@ router.beforeEach((to, from, next) => {
   document.title = title;
 
   if (to.hash) {
-    const hash = to.hash.slice(1);
-    next({ path: `/movie/${hash}` });
+    if (to.hash.startsWith('#search=')) {
+      next();
+    } else {
+      const hash = to.hash.slice(1);
+      next({ path: `/movie/${hash}` });
+    }
   } else {
     next();
   }

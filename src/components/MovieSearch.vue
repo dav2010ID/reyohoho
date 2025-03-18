@@ -72,7 +72,7 @@
 </template>
 
 <script setup>
-import { ref, computed, watch } from 'vue';
+import { ref, computed, watch, onMounted } from 'vue';
 import axios from 'axios';
 import { useRouter } from 'vue-router';
 import { useStore } from 'vuex';
@@ -184,6 +184,15 @@ const debouncedPerformSearch = debounce(() => {
     searchPerformed.value = false;
   }
 }, 700);
+
+onMounted(() => {
+  const hash = window.location.hash
+  if (hash.startsWith('#search=')) {
+    const searchQuery = decodeURIComponent(hash.slice(8))
+    searchTerm.value = searchQuery
+    performSearch()
+  }
+})
 
 // Автопоиск с задержкой (только для поиска по названию)
 watch(searchTerm, () => {
