@@ -10,7 +10,7 @@ export default defineConfig({
   plugins: [
     vue(),
     legacy({
-      targets: ['defaults', 'not IE 11'],
+      targets: ['defaults', 'not IE 11', 'Chrome >= 47'],
       additionalLegacyPolyfills: ['regenerator-runtime/runtime']
     }),
     VitePWA({
@@ -45,8 +45,5 @@ export default defineConfig({
     alias: {
       '@': '/src',
     },
-  },
-  build: {
-    target: 'es2015'
   }
 });
