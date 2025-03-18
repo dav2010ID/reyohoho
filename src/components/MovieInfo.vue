@@ -205,6 +205,13 @@ onMounted(async () => {
   await fetchMovieInfo();
 });
 
+watch(() => route.params.kp_id, async (newKpId) => {
+  if (newKpId && newKpId !== kp_id.value) {
+    kp_id.value = newKpId;
+    await fetchMovieInfo();
+  }
+}, { immediate: true });
+
 watch(movieInfo, () => {
   setDocumentTitle();
 }, { deep: true });
