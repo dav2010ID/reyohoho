@@ -241,7 +241,7 @@ const showMessageToast = (message) => {
 
   setTimeout(() => {
     document.body.removeChild(messageElement);
-  }, 500);
+  }, 2000);
 }
 
 const toggleBlur = () => {
