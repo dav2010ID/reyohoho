@@ -24,6 +24,8 @@
       :style="!theaterMode ? containerStyle : {}"
     >
       <div class="iframe-wrapper" :style="!theaterMode ? iframeWrapperStyle : {}">
+        <!-- <div class="fullscreen" @mousemove="showCloseButton"></div> -->
+
         <iframe
           ref="playerIframe"
           :src="selectedPlayerInternal?.iframe"
@@ -56,12 +58,15 @@
       <button @click="toggleDimming" class="dimming-btn" :class="{ active: dimmingEnabled }">
         {{ dimmingEnabled ? 'Отключить затемнение' : 'Включить затемнение' }}
       </button>
+
       <button @click="toggleBlur" class="blur-btn">Блюр</button>
       <button @click="toggleCompressor" class="compressor-btn">Компрессор</button>
       <button @click="toggleMirror" class="mirror-btn">Зеркало</button>
+
       <button @click="toggleTheaterMode" class="theater-mode-btn">
         {{ theaterMode ? 'Выйти из театрального режима' : 'Включить театральный режим' }}
       </button>
+
       <button
         @click="setAspectRatio('16:9')"
         :class="['aspect-ratio-btn', { active: aspectRatio === '16:9' }]"
@@ -88,14 +93,12 @@
 
 <script setup>
 import { ref, onMounted, onBeforeUnmount, computed, watch, nextTick } from 'vue'
-import axios from 'axios'
+import api from '@/api/axios'
 import { useStore } from 'vuex'
-import { useRouter } from 'vue-router'
 import SpinnerLoading from '@/components/SpinnerLoading.vue'
 import SliderRound from '@/components/slider/SliderRound.vue'
 
 const store = useStore()
-const router = useRouter()
 
 const props = defineProps({
   kp_id: String
@@ -189,8 +192,8 @@ const centerPlayer = () => {
 
 const fetchPlayers = async () => {
   try {
-    const response = await axios.post(
-      `${apiUrl}/cache`,
+    const response = await api.post(
+      `/cache`,
       new URLSearchParams({
         kinopoisk: props.kp_id,
         type: 'movie'
@@ -229,6 +232,7 @@ const fetchPlayers = async () => {
           errorMessage.value = 'Ошибка на сервере. Пожалуйста, попробуйте позже'
           break
         default:
+          errorMessage.value = `Произошла ошибка: ${error.response.status}`
           errorMessage.value = `Произошла ошибка: ${error.response.status}`
       }
     } else {
@@ -433,12 +437,14 @@ onBeforeUnmount(() => {
   justify-content: center;
   z-index: 7;
 }
+
 .player-container.theater-mode .iframe-wrapper {
   width: 100% !important;
   height: 100% !important;
   padding-top: 0 !important;
   flex-grow: 1;
 }
+
 .close-theater-btn {
   position: fixed;
   top: 20px;
@@ -446,7 +452,7 @@ onBeforeUnmount(() => {
   background: rgba(255, 0, 0, 0.7);
   color: white;
   border: none;
-  width: 50px;
+  width: 50px; /* Увеличиваем размер кнопки */
   height: 50px;
   border-radius: 50%;
   cursor: pointer;
@@ -460,23 +466,18 @@ onBeforeUnmount(() => {
   font-size: 24px;
   z-index: 8;
 }
-.close-theater-btn::before {
-  content: '';
-  position: absolute;
-  width: 80px;
-  height: 80px;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
+
+.close-theater-btn.visible {
+  opacity: 1;
 }
+
+/* Делаем кнопку видимой при наведении на зону */
 .close-theater-btn:hover,
 .close-theater-btn::before:hover {
   background: rgba(255, 0, 0, 1);
   opacity: 1;
 }
-.close-theater-btn.visible {
-  opacity: 1;
-}
+
 html.no-scroll {
   overflow: hidden;
 }
@@ -503,6 +504,7 @@ html.no-scroll {
     transform 0.2s ease,
     box-shadow 0.3s ease;
   outline: none;
+  z-index: 4;
 }
 .controls button:hover {
   background-color: #555;
@@ -527,5 +529,21 @@ html.no-scroll {
   margin: 20px auto;
   max-width: 500px;
   background: rgba(255, 68, 68, 0.1);
+}
+
+.fullscreen {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  z-index: 10;
+}
+
+.theater-mode-lock {
+  pointer-events: none;
+}
+.theater-mode-unlock {
+  pointer-events: all;
 }
 </style>

@@ -1,7 +1,7 @@
 <template>
   <div v-if="backgroundType !== 'disabled'" class="background-container">
-    <div 
-      v-for="(bg, index) in backgrounds" 
+    <div
+      v-for="(bg, index) in backgrounds"
       :key="index"
       class="background-layer"
       :class="{ active: activeIndex === index }"
@@ -14,9 +14,8 @@
 import { ref, computed, watch, onMounted } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { useStore } from 'vuex';
-import axios from 'axios';
+import api from '@/api/axios';
 
-const apiUrl = import.meta.env.VITE_APP_API_URL;
 const store = useStore();
 const route = useRoute();
 const router = useRouter();
@@ -34,7 +33,7 @@ const CACHE_KEY = 'topMoviePoster';
 const getLayerStyle = (index) => {
   const brightnessFilter = backgroundType.value === 'stars' ? 'brightness(100%)' : 'brightness(20%)';
   const blurFilter = isBlurActive.value ? 'blur(20px)' : 'blur(0px)';
-  
+
   return {
     backgroundImage: `url(${backgrounds.value[index]})`,
     filter: `${brightnessFilter} ${blurFilter}`,
@@ -48,8 +47,8 @@ const fetchTopMovie = async () => {
   isFetching.value = true;
 
   try {
-    const { data } = await axios.get(`${apiUrl}/top/24h`);
-    
+    const { data } = await api.get('/top/24h');
+
     if (data?.[0]?.cover) {
       const expiresAt = new Date().setHours(24, 0, 0, 0);
       localStorage.setItem(CACHE_KEY, JSON.stringify({ url: data[0].cover, expiresAt }));
@@ -95,7 +94,7 @@ onMounted(async () => {
 
 watch(route, async (newRoute) => {
   if (newRoute.path.includes('movie')) return;
-  
+
   if (backgroundType.value === 'dynamic') {
     const hasValidCache = checkCachedTopMovie();
     if (!hasValidCache && !isFetching.value) {

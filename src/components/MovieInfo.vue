@@ -18,9 +18,9 @@
           </div>
         </div>
 
-        <div class="ratings-links" 
+        <div class="ratings-links"
           v-if="movieInfo.kinopoisk_id || movieInfo.title || movieInfo.imdb_id || movieInfo.rating_imdb || movieInfo.shikimori_id">
-          
+
           <!-- Кинопоиск -->
           <div v-if="movieInfo.kinopoisk_id">
             <a :href="`https://www.kinopoisk.ru/film/${movieInfo.kinopoisk_id}`"
@@ -150,7 +150,7 @@
 <script setup>
 import { ref, onMounted, computed, watch } from 'vue';
 import { useRoute } from 'vue-router';
-import axios from 'axios';
+import api from '@/api/axios';
 import PlayerComponent from '@/components/PlayerComponent.vue';
 import CardsMovie from "@/components/CardsMovie.vue";
 import { useStore } from 'vuex';
@@ -159,9 +159,8 @@ const store = useStore();
 const route = useRoute();
 const kp_id = ref(route.params.kp_id);
 const errorMessage = ref('');
-const errorCode = ref(null); 
+const errorCode = ref(null);
 const movieInfo = ref(null);
-const apiUrl = import.meta.env.VITE_APP_API_URL;
 
 const setDocumentTitle = () => {
   if (movieInfo.value) {
@@ -185,9 +184,9 @@ const fetchMovieInfo = async () => {
     let response;
 
     if (kp_id.value.startsWith('shiki')) {
-      response = await axios.get(`${apiUrl}/shiki_info/${kp_id.value}`);
+      response = await api.get(`/shiki_info/${kp_id.value}`);
     } else {
-      response = await axios.get(`${apiUrl}/kp_info2/${kp_id.value}`);
+      response = await api.get(`/kp_info2/${kp_id.value}`);
     }
 
     if (Array.isArray(response.data) && response.data.length === 0) {

@@ -67,8 +67,8 @@
 </template>
 
 <script setup>
-import { ref, computed, watch, onMounted, onBeforeUnmount } from 'vue'
-import axios from 'axios'
+import { ref, watch } from 'vue'
+import api from '@/api/axios'
 import { useRouter } from 'vue-router'
 import debounce from 'lodash/debounce'
 import { inRange } from 'lodash'
@@ -108,7 +108,7 @@ const performSearch = async () => {
 
   try {
     // Поиск по названию
-    const response = await axios.get(`${apiUrl}/search/${searchTerm.value}`)
+    const response = await api.get(`/search/${searchTerm.value}`)
     movies.value = response.data.map((movie) => ({ ...movie, kp_id: movie.id.toString() }))
   } catch (error) {
     console.error('Ошибка:', error)
