@@ -1,37 +1,45 @@
-import { createStore } from 'vuex';
-import createPersistedState from 'vuex-persistedstate'; // Плагин для автоматического сохранения
-import background from './modules/background'; // Импортируем модуль фона
-import player from './modules/player'; // Импортируем модуль плеера
-import noPosterImage from '@/assets/image-no-poster.gif';
+import { createStore } from 'vuex'
+import createPersistedState from 'vuex-persistedstate' // Плагин для автоматического сохранения
+import background from './modules/background' // Импортируем модуль фона
+import player from './modules/player' // Импортируем модуль плеера
+import noPosterImage from '@/assets/image-no-poster.gif'
 
 const store = createStore({
   modules: {
     background, // Модуль фона
-    player, // Модуль плеера
+    player // Модуль плеера
   },
   state() {
     return {
       history: [], // История фильмов
-    };
+      isMobile: false,
+      dimmingEnabled: false
+    }
   },
   mutations: {
     setHistory(state, history) {
-      state.history = history;
+      state.history = history
+    },
+    setIsMobile(state, isMobile) {
+      state.isMobile = isMobile
+    },
+    toggleDimming(state) {
+      state.dimmingEnabled = !state.dimmingEnabled
     },
     addToHistory(state, movie) {
       // Проверяем, есть ли у фильма kp_id
-      if (!movie.kp_id) return;
-  
+      if (!movie.kp_id) return
+
       // Находим индекс фильма в истории
-      const existingMovieIndex = state.history.findIndex(m => m.kp_id === movie.kp_id);
-  
+      const existingMovieIndex = state.history.findIndex((m) => m.kp_id === movie.kp_id)
+
       if (existingMovieIndex !== -1) {
         // Если фильм уже есть, обновляем его дату и ставим первым
-        state.history[existingMovieIndex].addedAt = new Date().toISOString();
-  
+        state.history[existingMovieIndex].addedAt = new Date().toISOString()
+
         // Перемещаем фильм в начало списка
-        const updatedMovie = state.history.splice(existingMovieIndex, 1)[0];
-        state.history.unshift(updatedMovie);
+        const updatedMovie = state.history.splice(existingMovieIndex, 1)[0]
+        state.history.unshift(updatedMovie)
       } else {
         // Если фильма нет, добавляем его в историю
         const movieWithDate = {
@@ -40,41 +48,43 @@ const store = createStore({
           year: movie.year || '',
           poster: movie.poster || movie.cover || noPosterImage,
           addedAt: new Date().toISOString()
-        };
-  
-        state.history.unshift(movieWithDate);  // Добавляем новый фильм в начало
+        }
+
+        state.history.unshift(movieWithDate) // Добавляем новый фильм в начало
       }
     },
     removeFromHistory(state, kp_id) {
-      state.history = state.history.filter(movie => movie.kp_id !== kp_id);
+      state.history = state.history.filter((movie) => movie.kp_id !== kp_id)
     },
     cleanOldHistory(state) {
-      const thirtyDaysAgo = new Date();
-      thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
-      state.history = state.history.filter(movie => new Date(movie.addedAt) > thirtyDaysAgo);
+      const thirtyDaysAgo = new Date()
+      thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30)
+      state.history = state.history.filter((movie) => new Date(movie.addedAt) > thirtyDaysAgo)
     },
     clearAllHistory(state) {
-      state.history = [];
-    },
+      state.history = []
+    }
   },
-    
+
   actions: {
     addToHistory({ commit }, movie) {
-      commit('addToHistory', movie);
+      commit('addToHistory', movie)
     },
     removeFromHistory({ commit }, kp_id) {
-      commit('removeFromHistory', kp_id);
+      commit('removeFromHistory', kp_id)
     },
     cleanOldHistory({ commit }) {
-      commit('cleanOldHistory');
+      commit('cleanOldHistory')
     },
     clearAllHistory({ commit }) {
-      commit('clearAllHistory');
-    },
+      commit('clearAllHistory')
+    }
   },
-  plugins: [createPersistedState({
-    paths: ['history', 'background', 'player'], // Указываем, какие данные сохранять в localStorage
-  })],
-});
+  plugins: [
+    createPersistedState({
+      paths: ['history', 'background', 'player'] // Указываем, какие данные сохранять в localStorage
+    })
+  ]
+})
 
-export default store;
+export default store

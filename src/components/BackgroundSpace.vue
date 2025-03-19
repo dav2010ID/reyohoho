@@ -1,7 +1,7 @@
 <template>
   <div v-if="backgroundType !== 'disabled'" class="background-container">
-    <div 
-      v-for="(bg, index) in backgrounds" 
+    <div
+      v-for="(bg, index) in backgrounds"
       :key="index"
       class="background-layer"
       :class="{ active: activeIndex === index }"
@@ -11,120 +11,129 @@
 </template>
 
 <script setup>
-import { ref, computed, watch, onMounted } from 'vue';
-import { useRoute, useRouter } from 'vue-router';
-import { useStore } from 'vuex';
-import axios from 'axios';
+import { ref, computed, watch, onMounted } from 'vue'
+import { useRoute, useRouter } from 'vue-router'
+import { useStore } from 'vuex'
+import { getMovies } from '@/api/movies'
 
-const apiUrl = import.meta.env.VITE_APP_API_URL;
-const store = useStore();
-const route = useRoute();
-const router = useRouter();
+const store = useStore()
+const route = useRoute()
+const router = useRouter()
 
-const backgrounds = ref(['', '']);
-const activeIndex = ref(0);
-const isFetching = ref(false); // Флаг для отслеживания состояния запроса
+const backgrounds = ref(['', ''])
+const activeIndex = ref(0)
+const isFetching = ref(false) // Флаг для отслеживания состояния запроса
 
-const backgroundUrl = computed(() => store.getters['background/getBackgroundUrl']);
-const backgroundType = computed(() => store.getters['background/getBackgroundType']);
-const isBlurActive = computed(() => store.getters['background/isBlurActive']);
+const backgroundUrl = computed(() => store.getters['background/getBackgroundUrl'])
+const backgroundType = computed(() => store.getters['background/getBackgroundType'])
+const isBlurActive = computed(() => store.getters['background/isBlurActive'])
 
-const CACHE_KEY = 'topMoviePoster';
+const CACHE_KEY = 'topMoviePoster'
 
 const getLayerStyle = (index) => {
-  const brightnessFilter = backgroundType.value === 'stars' ? 'brightness(100%)' : 'brightness(20%)';
-  const blurFilter = isBlurActive.value ? 'blur(20px)' : 'blur(0px)';
-  
+  const brightnessFilter = backgroundType.value === 'stars' ? 'brightness(100%)' : 'brightness(20%)'
+  const blurFilter = isBlurActive.value ? 'blur(20px)' : 'blur(0px)'
+
   return {
     backgroundImage: `url(${backgrounds.value[index]})`,
     filter: `${brightnessFilter} ${blurFilter}`,
     backgroundSize: 'cover',
     backgroundPosition: 'center'
   }
-};
+}
 
 const fetchTopMovie = async () => {
-  if (isFetching.value) return;
-  isFetching.value = true;
+  console.log('fetch');
+
+  if (isFetching.value) return
+  isFetching.value = true
 
   try {
-    const { data } = await axios.get(`${apiUrl}/top/24h`);
-    
-    if (data?.[0]?.cover) {
-      const expiresAt = new Date().setHours(24, 0, 0, 0);
-      localStorage.setItem(CACHE_KEY, JSON.stringify({ url: data[0].cover, expiresAt }));
-      store.dispatch('background/updateTopMoviePoster', data[0].cover);
+    const topMovies = await getMovies({ activeTime: '24h' })
+
+    if (topMovies?.[0]?.cover) {
+      const expiresAt = new Date().setHours(24, 0, 0, 0)
+      localStorage.setItem(CACHE_KEY, JSON.stringify({ url: topMovies[0].cover, expiresAt }))
+      store.dispatch('background/updateTopMoviePoster', topMovies[0].cover)
     }
   } catch (err) {
-    console.error('Ошибка:', err);
+    console.error('Ошибка:', err)
   } finally {
-    isFetching.value = false;
+    isFetching.value = false
   }
-};
+}
 
 const checkCachedTopMovie = () => {
-  const cached = localStorage.getItem(CACHE_KEY);
-  if (!cached) return false;
+  const cached = localStorage.getItem(CACHE_KEY)
+  if (!cached) return false
 
   try {
-    const { url, expiresAt } = JSON.parse(cached);
+    const { url, expiresAt } = JSON.parse(cached)
     if (Date.now() < expiresAt) {
-      store.dispatch('background/updateTopMoviePoster', url);
-      return true;
+      store.dispatch('background/updateTopMoviePoster', url)
+      return true
     }
-    localStorage.removeItem(CACHE_KEY);
+    localStorage.removeItem(CACHE_KEY)
   } catch (e) {
-    localStorage.removeItem(CACHE_KEY);
+    localStorage.removeItem(CACHE_KEY)
   }
-  return false;
-};
+  return false
+}
 
 onMounted(async () => {
-  backgrounds.value = [backgroundUrl.value, backgroundUrl.value];
-  await router.isReady();
+  'mounted'
+  backgrounds.value = [backgroundUrl.value, backgroundUrl.value]
+  await router.isReady()
+  'route check'
 
-  if (route.path.includes('movie')) return;
+  if (route.path.includes('movie')) return
+  'route check passed'
 
   if (backgroundType.value !== 'disabled') {
-    const hasValidCache = checkCachedTopMovie();
+    'first if'
+
+    const hasValidCache = checkCachedTopMovie()
+    'valid cache'
+
     if (!hasValidCache && !isFetching.value) {
-      await fetchTopMovie();
+      'second if'
+      await fetchTopMovie()
     }
   }
-});
+})
 
 watch(route, async (newRoute) => {
-  if (newRoute.path.includes('movie')) return;
-  
+  if (newRoute.path.includes('movie')) return
+
   if (backgroundType.value === 'dynamic') {
-    const hasValidCache = checkCachedTopMovie();
+    const hasValidCache = checkCachedTopMovie()
     if (!hasValidCache && !isFetching.value) {
-      await fetchTopMovie();
+      await fetchTopMovie()
     }
   }
-});
+})
 
 watch(backgroundUrl, (newUrl) => {
-  if (!newUrl) return;
+  if (!newUrl) return
 
-  const img = new Image();
-  img.src = newUrl;
+  const img = new Image()
+  img.src = newUrl
   img.onload = () => {
-    const inactiveIndex = activeIndex.value ^ 1;
-    backgrounds.value[inactiveIndex] = newUrl;
-    activeIndex.value = inactiveIndex;
-  };
-});
+    const inactiveIndex = activeIndex.value ^ 1
+    backgrounds.value[inactiveIndex] = newUrl
+    activeIndex.value = inactiveIndex
+  }
+})
 
 watch(backgroundType, (newType) => {
   // Если тип фона изменился на 'dynamic', обновляем фон
   if (newType === 'dynamic') {
-    const hasValidCache = checkCachedTopMovie();
+    const hasValidCache = checkCachedTopMovie()
     if (!hasValidCache && !isFetching.value) {
-      fetchTopMovie();
+      fetchTopMovie()
     }
   }
-});
+})
 </script>
 
 <style scoped>
@@ -143,7 +152,9 @@ watch(backgroundType, (newType) => {
   width: 100%;
   height: 100%;
   opacity: 0;
-  transition: filter 0.6s ease-in-out, opacity 0.6s ease-in-out;
+  transition:
+    filter 0.6s ease-in-out,
+    opacity 0.6s ease-in-out;
   background-size: cover;
   background-position: center;
   will-change: opacity, filter;

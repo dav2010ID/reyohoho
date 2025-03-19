@@ -28,18 +28,18 @@
     isOpen: Boolean,
     message: String
   });
-  
+
   const emit = defineEmits(['confirm', 'close']);
-  
+
   const confirm = () => {
     emit('confirm');
   };
-  
+
   const close = () => {
     emit('close');
   };
   </script>
-  
+
   <style scoped>
     .modal-enter-active,
     .modal-leave-active {
@@ -63,7 +63,6 @@
     display: flex;
     justify-content: center;
     align-items: center;
-    z-index: 1000;
     animation: overlay-in 0.3s;
     }
 
@@ -180,11 +179,10 @@
         width: 80%;
         padding: 1.5rem;
     }
-    
+
     .btn {
         padding: 0.7rem 1.5rem;
         font-size: 0.9rem;
     }
     }
     </style>
-  

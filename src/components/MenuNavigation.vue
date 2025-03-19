@@ -14,14 +14,17 @@
 </template>
 
 <script setup>
-import { ref, onMounted, onBeforeUnmount } from 'vue'
+import { ref, computed } from 'vue'
 
 import MobileMenu from './MenuNavigation/MobileMenu.vue'
 import DesktopMenu from './MenuNavigation/DesktopMenu.vue'
 import ModalSearch from './ModalSearch.vue'
+import { useStore } from 'vuex'
+
+const store = useStore()
 
 // Определяем, мобильное ли устройство (ширина окна меньше 600px)
-const isMobile = ref(window.innerWidth < 601)
+const isMobile = computed(() => store.state.isMobile);
 
 // Массив навигационных ссылок
 const navLinks = [
@@ -50,25 +53,11 @@ const navLinks = [
   { to: '/setting', icon: 'fa-solid fa-gear', text: 'Настройки' }
 ]
 
-// Обновляем состояние мобильного устройства при изменении размера окна
-const updateIsMobile = () => {
-  isMobile.value = window.innerWidth < 601
-}
-
 // Поиск в модальном окне
 const isModalSearchVisible = ref(false)
 const toggleModalSearch = () => {
   isModalSearchVisible.value = !isModalSearchVisible.value
 }
-
-// Добавляем и удаляем обработчики событий при монтировании/размонтировании компонента
-onMounted(() => {
-  window.addEventListener('resize', updateIsMobile)
-})
-
-onBeforeUnmount(() => {
-  window.removeEventListener('resize', updateIsMobile)
-})
 </script>
 
 <style scoped>

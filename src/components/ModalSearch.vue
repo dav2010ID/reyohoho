@@ -15,7 +15,9 @@
       <!-- Результаты поиска -->
       <div class="search__results-wrapper">
         <div class="search__results">
-          <div v-if="searchTerm?.length < 3" class="no-results">Здесь появятся результаты поиска</div>
+          <div v-if="searchTerm?.length < 3" class="no-results">
+            Здесь появятся результаты поиска
+          </div>
 
           <template v-else-if="loading">
             <div class="movie-skeleton" v-for="idx in [0, 1, 2, 3]" :key="idx">
@@ -67,15 +69,14 @@
 </template>
 
 <script setup>
-import { ref, computed, watch, onMounted, onBeforeUnmount } from 'vue'
-import axios from 'axios'
+import { ref, watch } from 'vue'
 import { useRouter } from 'vue-router'
 import debounce from 'lodash/debounce'
 import { inRange } from 'lodash'
+import { apiSearch } from '@/api/movies'
 
 const emit = defineEmits(['closeModal'])
 
-const apiUrl = import.meta.env.VITE_APP_API_URL
 const router = useRouter()
 
 const searchTerm = ref('')
@@ -108,8 +109,8 @@ const performSearch = async () => {
 
   try {
     // Поиск по названию
-    const response = await axios.get(`${apiUrl}/search/${searchTerm.value}`)
-    movies.value = response.data.map((movie) => ({ ...movie, kp_id: movie.id.toString() }))
+    const results = await apiSearch(searchTerm.value)
+    movies.value = (results || []).map((movie) => ({ ...movie, kp_id: movie.id.toString() }))
   } catch (error) {
     console.error('Ошибка:', error)
     movies.value = []
@@ -173,7 +174,7 @@ watch(searchTerm, () => {
   display: flex;
   justify-content: center;
   align-items: center;
-  z-index: 1002;
+  z-index: 5;
 
   &__content {
     position: relative;

@@ -49,10 +49,11 @@
           </li>
         </ul>
       </div>
+
+      <div v-if="activeTooltip !== null" class="tooltip" :style="tooltipStyle">
+        {{ activeTooltip === links?.length ? 'Поиск' : links[activeTooltip]?.text }}
+      </div>
     </nav>
-    <div v-if="activeTooltip !== null" class="tooltip" :style="tooltipStyle">
-      {{ activeTooltip === links?.length ? 'Поиск' : links[activeTooltip]?.text }}
-    </div>
   </aside>
 </template>
 
@@ -123,7 +124,7 @@ onBeforeUnmount(() => {
 })
 </script>
 
-<style scoped>
+<style lang="scss" scoped>
 .home-link {
   text-decoration: none;
   background: transparent;
@@ -141,10 +142,10 @@ onBeforeUnmount(() => {
   position: fixed;
   top: 0;
   left: 0;
-  z-index: 1000;
   transition: width 0.3s ease;
   padding: 1rem 0;
   box-shadow: 2px 0 10px rgba(0, 0, 0, 0.1);
+  z-index: 5;
 }
 .side-panel.collapsed {
   width: 80px;
@@ -206,6 +207,26 @@ onBeforeUnmount(() => {
   flex: 1;
   padding-bottom: 1rem;
   overflow-y: auto;
+
+  &::-webkit-scrollbar {
+    width: 5px; /* Ширина вертикального скроллбара */
+    height: 12px; /* Высота горизонтального скроллбара */
+  }
+
+  &::-webkit-scrollbar-track {
+    background: transparent; /* Цвет фона */
+    border-radius: 10px; /* Закругление углов */
+  }
+
+  &::-webkit-scrollbar-thumb {
+    background: #494949; /* Цвет ползунка */
+    border-radius: 10px; /* Закругление углов */
+    border: 0; /* Отступ вокруг ползунка */
+  }
+
+  &::-webkit-scrollbar-thumb:hover {
+    background: #555; /* Цвет ползунка при наведении */
+  }
 }
 
 .nav-links {
@@ -277,7 +298,6 @@ onBeforeUnmount(() => {
   padding: 5px;
   border-radius: 4px;
   white-space: nowrap;
-  transform: translateX(1000);
 }
 
 .btn {

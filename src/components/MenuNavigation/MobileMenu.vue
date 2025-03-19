@@ -96,11 +96,11 @@ onBeforeUnmount(() => {
   border: none;
   color: #fff;
   font-size: 1.4rem;
-  z-index: 1100;
   cursor: pointer;
   padding: 0;
   width: 40px;
   height: 40px;
+  z-index: 6;
 }
 
 .nav-links-wrapper {
@@ -148,8 +148,8 @@ onBeforeUnmount(() => {
   width: 250px;
   height: 100vh;
   background: rgba(30, 30, 30, 0.97);
-  z-index: 1000;
   padding-top: 60px;
+  z-index: 5;
 }
 .slide-enter-active,
 .slide-leave-active {
@@ -166,23 +166,12 @@ onBeforeUnmount(() => {
   width: 100vw;
   height: 100vh;
   background: rgba(0, 0, 0, 0.5);
-  z-index: 999;
+  z-index: 4;
 }
 
 .icon-donut {
   height: 25px;
   object-fit: contain;
-}
-
-.tooltip {
-  position: absolute;
-  top: 5px;
-  left: 70px;
-  background-color: #333;
-  color: #fff;
-  padding: 5px;
-  border-radius: 4px;
-  white-space: nowrap;
 }
 
 .btn {

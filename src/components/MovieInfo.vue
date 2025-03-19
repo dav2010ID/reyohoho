@@ -18,107 +18,157 @@
           </div>
         </div>
 
-        <div class="ratings-links" 
-          v-if="movieInfo.kinopoisk_id || movieInfo.title || movieInfo.imdb_id || movieInfo.rating_imdb || movieInfo.shikimori_id">
-          
+        <div
+          class="ratings-links"
+          v-if="
+            movieInfo.kinopoisk_id ||
+            movieInfo.title ||
+            movieInfo.imdb_id ||
+            movieInfo.rating_imdb ||
+            movieInfo.shikimori_id
+          "
+        >
           <!-- Кинопоиск -->
           <div v-if="movieInfo.kinopoisk_id">
-            <a :href="`https://www.kinopoisk.ru/film/${movieInfo.kinopoisk_id}`"
+            <a
+              :href="`https://www.kinopoisk.ru/film/${movieInfo.kinopoisk_id}`"
               target="_blank"
               rel="noopener noreferrer"
-              class="rating-link">
+              class="rating-link"
+            >
               <img src="/src/assets/icon-kp-logo.svg" alt="КП" class="rating-logo" />
               <span v-if="movieInfo.rating_kinopoisk">{{ movieInfo.rating_kinopoisk }}/10</span>
-              <img src="/src/assets/icon-external-link.png" alt="Внешняя ссылка" class="external-link-icon" />
+              <img
+                src="/src/assets/icon-external-link.png"
+                alt="Внешняя ссылка"
+                class="external-link-icon"
+              />
             </a>
           </div>
 
           <!-- Поиск на Кинопоиске, если нет ID -->
           <div v-if="!movieInfo.kinopoisk_id && movieInfo.title">
-            <a :href="`https://www.kinopoisk.ru/index.php?kp_query=${encodeURIComponent(movieInfo.title + (movieInfo.year ? ' ' + movieInfo.year : ''))}`"
+            <a
+              :href="`https://www.kinopoisk.ru/index.php?kp_query=${encodeURIComponent(movieInfo.title + (movieInfo.year ? ' ' + movieInfo.year : ''))}`"
               target="_blank"
               rel="noopener noreferrer"
-              class="rating-link">
+              class="rating-link"
+            >
               <img src="/src/assets/icon-kp-logo.svg" alt="КП" class="rating-logo" />
               <span v-if="movieInfo.rating_kinopoisk">{{ movieInfo.rating_kinopoisk }}/10</span>
-              <img src="/src/assets/icon-external-link.png" alt="Внешняя ссылка" class="external-link-icon" />
+              <img
+                src="/src/assets/icon-external-link.png"
+                alt="Внешняя ссылка"
+                class="external-link-icon"
+              />
             </a>
           </div>
 
           <!-- IMDb -->
           <div v-if="movieInfo.imdb_id">
-            <a :href="`https://www.imdb.com/title/${movieInfo.imdb_id}`"
+            <a
+              :href="`https://www.imdb.com/title/${movieInfo.imdb_id}`"
               target="_blank"
               rel="noopener noreferrer"
-              class="rating-link">
+              class="rating-link"
+            >
               <img src="/src/assets/icon-imdb-logo.svg" alt="IMDb" class="rating-logo" />
               <span v-if="movieInfo.rating_imdb">{{ movieInfo.rating_imdb }}/10</span>
-              <img src="/src/assets/icon-external-link.png" alt="Внешняя ссылка" class="external-link-icon" />
+              <img
+                src="/src/assets/icon-external-link.png"
+                alt="Внешняя ссылка"
+                class="external-link-icon"
+              />
             </a>
           </div>
 
           <!-- Поиск на IMDb, если нет ID -->
           <div v-if="!movieInfo.imdb_id && movieInfo.title">
-            <a :href="`https://www.imdb.com/find/?q=${encodeURIComponent(movieInfo.title + (movieInfo.year ? ' ' + movieInfo.year : ''))}`"
+            <a
+              :href="`https://www.imdb.com/find/?q=${encodeURIComponent(movieInfo.title + (movieInfo.year ? ' ' + movieInfo.year : ''))}`"
               target="_blank"
               rel="noopener noreferrer"
-              class="rating-link">
+              class="rating-link"
+            >
               <img src="/src/assets/icon-imdb-logo.svg" alt="IMDb" class="rating-logo" />
               <span v-if="movieInfo.rating_imdb">{{ movieInfo.rating_imdb }}/10</span>
-              <img src="/src/assets/icon-external-link.png" alt="Внешняя ссылка" class="external-link-icon" />
+              <img
+                src="/src/assets/icon-external-link.png"
+                alt="Внешняя ссылка"
+                class="external-link-icon"
+              />
             </a>
           </div>
 
           <!-- Shikimori -->
           <div v-if="movieInfo.shikimori_id">
-            <a :href="`https://shikimori.one/animes/${movieInfo.shikimori_id}`"
+            <a
+              :href="`https://shikimori.one/animes/${movieInfo.shikimori_id}`"
               target="_blank"
               rel="noopener noreferrer"
-              class="rating-link">
+              class="rating-link"
+            >
               <img src="/src/assets/icon-shikimori.svg" alt="Shiki" class="rating-logo" />
-              <img src="/src/assets/icon-external-link.png" alt="Внешняя ссылка" class="external-link-icon" />
+              <img
+                src="/src/assets/icon-external-link.png"
+                alt="Внешняя ссылка"
+                class="external-link-icon"
+              />
             </a>
           </div>
 
           <!-- Parents Guide (только если есть IMDb id) -->
           <div v-if="movieInfo.imdb_id">
-            <a :href="`https://www.imdb.com/title/${movieInfo.imdb_id}/parentalguide`"
+            <a
+              :href="`https://www.imdb.com/title/${movieInfo.imdb_id}/parentalguide`"
               target="_blank"
               rel="noopener noreferrer"
-              class="rating-link">
+              class="rating-link"
+            >
               <span>Parents Guide</span>
-              <img src="/src/assets/icon-external-link.png" alt="Внешняя ссылка" class="external-link-icon" />
+              <img
+                src="/src/assets/icon-external-link.png"
+                alt="Внешняя ссылка"
+                class="external-link-icon"
+              />
             </a>
           </div>
-
         </div>
 
         <!-- Интеграция компонента плеера -->
         <PlayerComponent :kp_id="kp_id" :key="kp_id" />
 
-        <meta name="title-and-year"
-          :content="movieInfo.year ? `${movieInfo.title} (${movieInfo.year})` : movieInfo.title">
+        <meta
+          name="title-and-year"
+          :content="movieInfo.year ? `${movieInfo.title} (${movieInfo.year})` : movieInfo.title"
+        />
 
-        <meta v-if="movieInfo.name_original" name="original-title"
-          :content="movieInfo.name_original">
+        <meta
+          v-if="movieInfo.name_original"
+          name="original-title"
+          :content="movieInfo.name_original"
+        />
         <div class="additional-info">
           <h2 class="additional-info-title">Подробнее</h2>
           <div class="info-content">
             <div class="details-container">
               <ul class="info-list">
                 <li v-if="movieInfo.year"><strong>Год выпуска:</strong> {{ movieInfo.year }}</li>
-                <li v-if="movieInfo.title"><strong>Название:</strong> {{ movieInfo.title }}
-                </li>
-                <li v-if="movieInfo.name_original"><strong>Оригинальное название:</strong> {{ movieInfo.name_original }}
+                <li v-if="movieInfo.title"><strong>Название:</strong> {{ movieInfo.title }}</li>
+                <li v-if="movieInfo.name_original">
+                  <strong>Оригинальное название:</strong> {{ movieInfo.name_original }}
                 </li>
                 <li v-if="movieInfo.slogan"><strong>Слоган:</strong> {{ movieInfo.slogan }}</li>
                 <li v-if="movieInfo.countries?.length">
-                  <strong>Страна производства:</strong> {{movieInfo.countries.map(item => item.country).join(', ')}}
+                  <strong>Страна производства:</strong>
+                  {{ movieInfo.countries.map((item) => item.country).join(', ') }}
                 </li>
                 <li v-if="movieInfo.genres?.length">
-                  <strong>Жанры:</strong> {{movieInfo.genres.map(item => item.genre).join(', ')}}
+                  <strong>Жанры:</strong>
+                  {{ movieInfo.genres.map((item) => item.genre).join(', ') }}
                 </li>
-                <li v-if="movieInfo.film_length"><strong>Продолжительность:</strong> {{ movieInfo.film_length }} мин.
+                <li v-if="movieInfo.film_length">
+                  <strong>Продолжительность:</strong> {{ movieInfo.film_length }} мин.
                 </li>
               </ul>
             </div>
@@ -148,128 +198,139 @@
 </template>
 
 <script setup>
-import { ref, onMounted, computed, watch } from 'vue';
-import { useRoute } from 'vue-router';
-import axios from 'axios';
-import PlayerComponent from '@/components/PlayerComponent.vue';
-import CardsMovie from "@/components/CardsMovie.vue";
-import { useStore } from 'vuex';
+import { ref, onMounted, computed, watch } from 'vue'
+import { useRoute } from 'vue-router'
+import PlayerComponent from '@/components/PlayerComponent.vue'
+import CardsMovie from '@/components/CardsMovie.vue'
+import { useStore } from 'vuex'
+import { getKpInfo, getShikiInfo } from '@/api/movies'
 
-const store = useStore();
-const route = useRoute();
-const kp_id = ref(route.params.kp_id);
-const errorMessage = ref('');
-const errorCode = ref(null); 
-const movieInfo = ref(null);
-const apiUrl = import.meta.env.VITE_APP_API_URL;
+const store = useStore()
+const route = useRoute()
+const kp_id = ref(route.params.kp_id)
+const errorMessage = ref('')
+const errorCode = ref(null)
+const movieInfo = ref(null)
 
 const setDocumentTitle = () => {
   if (movieInfo.value) {
-    const title = movieInfo.value.name_ru
-      || movieInfo.value.name_en || movieInfo.value.name_original
-      || 'Информация о фильме';
-    document.title = title;
+    const title =
+      movieInfo.value.name_ru ||
+      movieInfo.value.name_en ||
+      movieInfo.value.name_original ||
+      'Информация о фильме'
+    document.title = title
   }
-};
+}
 
 const transformMoviesData = (movies) => {
-  return (movies || []).map(movie => ({
+  return (movies || []).map((movie) => ({
     kp_id: movie.film_id,
     poster: movie.poster_url_preview || movie.poster_url,
-    title: movie.name_ru || movie.name_en || movie.name_original,
-  }));
-};
+    title: movie.name_ru || movie.name_en || movie.name_original
+  }))
+}
 
 const fetchMovieInfo = async () => {
   try {
-    let response;
+    let response
 
     if (kp_id.value.startsWith('shiki')) {
-      response = await axios.get(`${apiUrl}/shiki_info/${kp_id.value}`);
+      response = await getShikiInfo(kp_id.value)
     } else {
-      response = await axios.get(`${apiUrl}/kp_info2/${kp_id.value}`);
+      response = await getKpInfo(kp_id.value)
     }
 
-    if (Array.isArray(response.data) && response.data.length === 0) {
-      throw new Error('Данные не найдены. Пожалуйста, повторите поиск.');
+    if (Array.isArray(response) && response.length === 0) {
+      throw new Error('Данные не найдены. Пожалуйста, повторите поиск.')
     }
 
-    movieInfo.value = response.data;
+    movieInfo.value = response
 
     if (kp_id.value.startsWith('shiki')) {
       movieInfo.value = {
         ...movieInfo.value,
         title: movieInfo.value.name_ru || movieInfo.value.name_en,
         name_original: movieInfo.value.name_en,
-        short_description: movieInfo.value.slogan,
-      };
+        short_description: movieInfo.value.slogan
+      }
     } else {
       movieInfo.value = {
         ...movieInfo.value,
         title: movieInfo.value.name_ru || movieInfo.value.name_en || movieInfo.value.name_original,
-        kinopoisk_id: kp_id.value,
-      };
+        kinopoisk_id: kp_id.value
+      }
     }
 
-    setDocumentTitle();
+    setDocumentTitle()
 
     const movieToSave = {
       kp_id: kp_id.value,
       title: movieInfo.value?.name_ru || movieInfo.value?.name_en || movieInfo.value?.name_original,
-      poster: movieInfo.value?.poster_url || movieInfo.value?.cover_url || movieInfo.value?.screenshots[0],
-    };
+      poster:
+        movieInfo.value?.poster_url || movieInfo.value?.cover_url || movieInfo.value?.screenshots[0]
+    }
 
     // Устанавливаем фон фильма через новый метод
     if (kp_id.value.startsWith('shiki')) {
       if (movieInfo.value.screenshots && movieInfo.value.screenshots.length > 0) {
-        const randomIndex = Math.floor(Math.random() * movieInfo.value.screenshots.length);
-        const randomScreenshot = movieInfo.value.screenshots[randomIndex];
-        store.dispatch('background/updateMoviePoster', randomScreenshot);
+        const randomIndex = Math.floor(Math.random() * movieInfo.value.screenshots.length)
+        const randomScreenshot = movieInfo.value.screenshots[randomIndex]
+        store.dispatch('background/updateMoviePoster', randomScreenshot)
       } else if (movieToSave.poster) {
-        store.dispatch('background/updateMoviePoster', movieToSave.poster);
+        store.dispatch('background/updateMoviePoster', movieToSave.poster)
       }
     } else {
       if (movieToSave.poster) {
-        store.dispatch('background/updateMoviePoster', movieToSave.poster);
+        store.dispatch('background/updateMoviePoster', movieToSave.poster)
       }
     }
 
     if (movieToSave.kp_id && movieToSave.title) {
-      store.dispatch('addToHistory', { ...movieToSave });
+      store.dispatch('addToHistory', { ...movieToSave })
     }
   } catch (error) {
     if (error.response?.status === 404) {
-      errorMessage.value = "Такого не нашлось, повторите поиск";
-      errorCode.value = 404;
+      errorMessage.value = 'Такого не нашлось, повторите поиск'
+      errorCode.value = 404
     } else if (error.response?.status === 500) {
-      errorMessage.value = "Ошибка на сервере. Пожалуйста, попробуйте позже";
-      errorCode.value = 500;
+      errorMessage.value = 'Ошибка на сервере. Пожалуйста, попробуйте позже'
+      errorCode.value = 500
     } else {
-      errorMessage.value = "Ошибка загрузки информации о фильме";
-      errorCode.value = null;
-      console.error("Ошибка при загрузке плееров:", error);
+      errorMessage.value = 'Ошибка загрузки информации о фильме'
+      errorCode.value = null
+      console.error('Ошибка при загрузке плееров:', error)
     }
   }
-};
+}
 
-const sequelsAndPrequels = computed(() => transformMoviesData(movieInfo.value?.sequels_and_prequels));
-const similars = computed(() => transformMoviesData(movieInfo.value?.similars));
+const sequelsAndPrequels = computed(() =>
+  transformMoviesData(movieInfo.value?.sequels_and_prequels)
+)
+const similars = computed(() => transformMoviesData(movieInfo.value?.similars))
 
 onMounted(async () => {
-  await fetchMovieInfo();
-});
+  await fetchMovieInfo()
+})
 
-watch(() => route.params.kp_id, async (newKpId) => {
-  if (newKpId && newKpId !== kp_id.value) {
-    kp_id.value = newKpId;
-    await fetchMovieInfo();
-  }
-}, { immediate: true });
+watch(
+  () => route.params.kp_id,
+  async (newKpId) => {
+    if (newKpId && newKpId !== kp_id.value) {
+      kp_id.value = newKpId
+      await fetchMovieInfo()
+    }
+  },
+  { immediate: true }
+)
 
-watch(movieInfo, () => {
-  setDocumentTitle();
-}, { deep: true });
-
+watch(
+  movieInfo,
+  () => {
+    setDocumentTitle()
+  },
+  { deep: true }
+)
 </script>
 
 <style scoped>
