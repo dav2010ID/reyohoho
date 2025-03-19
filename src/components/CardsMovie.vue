@@ -317,7 +317,7 @@ onUnmounted(() => {
 }
 
 /* Мобильная версия */
-@media (max-width: 600px) {
+@media (max-width: 620px) {
   .grid {
     grid-template-columns: 1fr;
     gap: 10px;
