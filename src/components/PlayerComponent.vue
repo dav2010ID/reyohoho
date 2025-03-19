@@ -17,51 +17,73 @@
       </select>
     </div>
 
-    <!-- Единый контейнер плеера -->
-    <div ref="containerRef" :class="['player-container', { 'theater-mode': theaterMode }]"
-      :style="!theaterMode ? containerStyle : {}">
-      <div class="iframe-wrapper" :style="!theaterMode ? iframeWrapperStyle : {}">
-        <!-- <div class="fullscreen" @mousemove="showCloseButton"></div> -->
+    <!-- Затемняющий оверлей для обычного режима, включается тумблером -->
+    <div v-if="dimmingEnabled && !theaterMode" class="dimming-overlay"></div>
 
-        <iframe ref="playerIframe" :src="selectedPlayerInternal?.iframe" frameborder="0" @load="onIframeLoad"
-          allowfullscreen class="responsive-iframe"
-          :class="{ 'theater-mode-unlock': closeButtonVisible, 'theater-mode-lock': theaterMode }"></iframe>
+    <!-- Единый контейнер плеера -->
+    <div
+      ref="containerRef"
+      :class="['player-container', { 'theater-mode': theaterMode }]"
+      :style="!theaterMode ? containerStyle : {}"
+    >
+      <div class="iframe-wrapper" :style="!theaterMode ? iframeWrapperStyle : {}">
+        <iframe
+          ref="playerIframe"
+          :src="selectedPlayerInternal?.iframe"
+          frameborder="0"
+          @load="onIframeLoad"
+          allowfullscreen
+          class="responsive-iframe"
+          :class="{ 'theater-mode-unlock': closeButtonVisible, 'theater-mode-lock': theaterMode }"
+        ></iframe>
         <SpinnerLoading v-if="iframeLoading" />
       </div>
 
       <!-- Кнопка закрытия в театральном режиме -->
-      <button v-if="theaterMode" @click="toggleTheaterMode" class="close-theater-btn"
-        :class="{ visible: closeButtonVisible }">
+      <button
+        v-if="theaterMode"
+        @click="toggleTheaterMode"
+        class="close-theater-btn"
+        :class="{ visible: closeButtonVisible }"
+      >
         ✖
       </button>
     </div>
 
     <!-- Кнопки управления -->
     <div v-if="!isMobile" class="controls">
-      <button @click="toggleBlur" class="blur-btn">
-        Блюр
+      <button
+        @click="toggleDimming"
+        class="dimming-btn"
+        :class="{ active: dimmingEnabled }"
+      >
+        {{ dimmingEnabled ? 'Отключить затемнение' : 'Включить затемнение' }}
       </button>
-      <button @click="toggleCompressor" class="compressor-btn">
-        Компрессор
-      </button>
-      <button @click="toggleMirror" class="mirror-btn">
-        Зеркало
-      </button>
+      <button @click="toggleBlur" class="blur-btn">Блюр</button>
+      <button @click="toggleCompressor" class="compressor-btn">Компрессор</button>
+      <button @click="toggleMirror" class="mirror-btn">Зеркало</button>
       <button @click="toggleTheaterMode" class="theater-mode-btn">
         {{ theaterMode ? 'Выйти из театрального режима' : 'Включить театральный режим' }}
       </button>
-      <button @click="setAspectRatio('16:9')" :class="['aspect-ratio-btn', { active: aspectRatio === '16:9' }]">
+      <button
+        @click="setAspectRatio('16:9')"
+        :class="['aspect-ratio-btn', { active: aspectRatio === '16:9' }]"
+      >
         16:9
       </button>
-      <button @click="setAspectRatio('12:5')" :class="['aspect-ratio-btn', { active: aspectRatio === '12:5' }]">
+      <button
+        @click="setAspectRatio('12:5')"
+        :class="['aspect-ratio-btn', { active: aspectRatio === '12:5' }]"
+      >
         12:5
       </button>
-      <button @click="setAspectRatio('4:3')" :class="['aspect-ratio-btn', { active: aspectRatio === '4:3' }]">
+      <button
+        @click="setAspectRatio('4:3')"
+        :class="['aspect-ratio-btn', { active: aspectRatio === '4:3' }]"
+      >
         4:3
       </button>
-      <!-- Новая кнопка "Центр" -->
       <button @click="centerPlayer" class="center-btn">Центр</button>
-      <!-- Переключатель автоцентрирования -->
       <SliderRound v-model="isCentered">Автоцентрирование плеера</SliderRound>
     </div>
   </template>
@@ -91,6 +113,7 @@ const closeButtonVisible = ref(false);
 const playerIframe = ref(null);
 const containerRef = ref(null);
 const errorMessage = ref('');
+const dimmingEnabled = ref(false);
 
 const apiUrl = import.meta.env.VITE_APP_API_URL;
 const maxPlayerHeightValue = ref(window.innerHeight * 0.9); // 90% от высоты экрана
@@ -190,21 +213,17 @@ const fetchPlayers = async () => {
       if (preferredPlayer.value) {
         // Приводим preferredPlayer к верхнему регистру и удаляем цифры
         const normalizedPreferredPlayer = normalizeKey(preferredPlayer.value)
-
         // Ищем плеера, чей ключ совпадает с предпочтительным плеером
         const preferred = playersInternal.value.find(
           (player) => normalizeKey(player.key) === normalizedPreferredPlayer
         )
-
         selectedPlayerInternal.value = preferred || playersInternal.value[0]
       } else {
         selectedPlayerInternal.value = playersInternal.value[0]
       }
-
       emit('update:selectedPlayer', selectedPlayerInternal.value)
     }
   } catch (error) {
-    // Если сервер ответил с ошибкой
     if (error.response) {
       switch (error.response.status) {
         case 403:
@@ -217,7 +236,6 @@ const fetchPlayers = async () => {
           errorMessage.value = `Произошла ошибка: ${error.response.status}`;
       }
     } else {
-      // Если произошла другая ошибка при настройке запроса
       errorMessage.value = `Ошибка: ${error.message}`;
     }
     console.error('Ошибка при загрузке плееров:', error);
@@ -289,6 +307,10 @@ const toggleTheaterMode = () => {
     document.body.classList.remove('no-scroll')
   }
   closeButtonVisible.value = theaterMode.value
+    // Вызываем центрирование после закрытия театрального режима. Возможно временное решение
+    nextTick(() => {
+    centerPlayer()
+  })
 }
 
 const theaterModeCloseButtonTimeout = ref(null)
@@ -298,6 +320,13 @@ const showCloseButton = (event) => {
     closeButtonVisible.value = false
   }, 4000)
   closeButtonVisible.value = true
+}
+
+const toggleDimming = () => {
+  // Затемнение включается только в обычном режиме
+  if (!theaterMode.value) {
+    dimmingEnabled.value = !dimmingEnabled.value
+  }
 }
 
 const onKeyDown = (event) => {
@@ -349,6 +378,7 @@ onBeforeUnmount(() => {
   margin-bottom: 10px;
 }
 
+/* Select */
 .custom-select {
   font-size: 16px;
   padding: 8px 16px;
@@ -357,16 +387,12 @@ onBeforeUnmount(() => {
   color: #fff;
   border-radius: 5px;
   cursor: pointer;
-  transition:
-    background-color 0.3s,
-    border-color 0.3s;
+  transition: background-color 0.3s, border-color 0.3s;
   width: 100%;
 }
-
 .custom-select:hover {
   border-color: #666;
 }
-
 .custom-select:focus {
   border-color: #558839;
 }
@@ -376,12 +402,9 @@ onBeforeUnmount(() => {
   transition: all 0.3s ease;
   padding-bottom: 10px;
 }
-
 .iframe-wrapper {
   width: 100%;
-  /* Высота определяется за счёт padding-top для сохранения пропорций */
 }
-
 .responsive-iframe {
   position: absolute;
   top: 0;
@@ -389,13 +412,27 @@ onBeforeUnmount(() => {
   width: 100%;
   height: 100%;
   border: none;
+  z-index: 1001;
 }
 
+/* Затемняющий оверлей для обычного режима */
+.dimming-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: rgba(0, 0, 0, 0.8);
+  z-index: 1000;
+  pointer-events: none;
+}
+
+/* Стили для театрального режима */
 .player-container.theater-mode {
   position: fixed;
   top: 0 !important;
   left: 0 !important;
-  z-index: 9999;
+  z-index: 2000;
   width: 100vw !important;
   height: 100vh !important;
   background: #000;
@@ -405,14 +442,12 @@ onBeforeUnmount(() => {
   align-items: center;
   justify-content: center;
 }
-
 .player-container.theater-mode .iframe-wrapper {
   width: 100% !important;
   height: 100% !important;
   padding-top: 0 !important;
   flex-grow: 1;
 }
-
 .close-theater-btn {
   position: fixed;
   top: 20px;
@@ -421,105 +456,69 @@ onBeforeUnmount(() => {
   color: white;
   border: none;
   width: 50px;
-  /* Увеличиваем размер кнопки */
   height: 50px;
   border-radius: 50%;
   cursor: pointer;
-  transition:
-    background 0.3s,
-    opacity 0.3s;
-  z-index: 1001;
+  transition: background 0.3s, opacity 0.3s;
+  z-index: 2001;
   opacity: 0;
   display: flex;
   align-items: center;
   justify-content: center;
   font-size: 24px;
 }
-
-/* Расширяем зону активации */
 .close-theater-btn::before {
   content: '';
   position: absolute;
   width: 80px;
-  /* Увеличиваем невидимую область вокруг кнопки */
   height: 80px;
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
 }
-
-/* Делаем кнопку видимой при наведении на зону */
 .close-theater-btn:hover,
 .close-theater-btn::before:hover {
   background: rgba(255, 0, 0, 1);
   opacity: 1;
 }
-
 .close-theater-btn.visible {
   opacity: 1;
 }
-
 html.no-scroll {
   overflow: hidden;
 }
 
+/* Блока управления */
 .controls {
   display: flex;
+  flex-wrap: wrap;
   justify-content: center;
-  gap: 10px;
-  margin-bottom: 10px;
-  align-items: center;
+  gap: 8px;
+  margin: 0 auto;
+  padding: 5px;
 }
-
-.blur-btn,
-.mirror-btn,
-.compressor-btn,
-.theater-mode-btn,
-.aspect-ratio-btn,
-.center-btn {
+.controls button {
   background-color: #444;
   color: #fff;
   border: none;
-  padding: 8px 12px;
-  cursor: pointer;
-  border-radius: 4px;
-  transition: background-color 0.3s;
-  z-index: 10;
-}
-
-.blur-btn:hover,
-.mirror-btn:hover,
-.compressor-btn:hover,
-.theater-mode-btn:hover,
-.aspect-ratio-btn:hover,
-.center-btn:hover {
-  background-color: #666;
-}
-
-.aspect-ratio-btn.active {
-  background-color: #4caf50;
-}
-
-/* Select */
-.custom-select {
-  padding: 8px 16px;
-  border: 1px solid #444;
-  background-color: #1e1e1e;
-  color: #fff;
+  padding: 10px 10px;
+  font-size: 14px;
   border-radius: 5px;
   cursor: pointer;
-  transition:
-    background-color 0.3s,
-    border-color 0.3s;
-  width: 100%;
+  transition: background-color 0.3s ease, transform 0.2s ease, box-shadow 0.3s ease;
+  outline: none;
 }
-
-.custom-select:hover {
-  border-color: #666;
+.controls button:hover {
+  background-color: #555;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
 }
-
-.custom-select:focus {
-  border-color: #558839;
+.controls button:active {
+  transform: translateY(0);
+  box-shadow: none;
+}
+.controls button.active {
+  background-color: #4caf50;
 }
 
 .error-message {
