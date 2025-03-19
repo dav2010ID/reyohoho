@@ -27,6 +27,9 @@
       :style="!theaterMode ? containerStyle : {}"
     >
       <div class="iframe-wrapper" :style="!theaterMode ? iframeWrapperStyle : {}">
+        <!-- <div class="fullscreen" @mousemove="showCloseButton"></div> -->
+
+
         <iframe
           ref="playerIframe"
           :src="selectedPlayerInternal?.iframe"
@@ -59,12 +62,15 @@
       >
         {{ dimmingEnabled ? 'Отключить затемнение' : 'Включить затемнение' }}
       </button>
+
       <button @click="toggleBlur" class="blur-btn">Блюр</button>
       <button @click="toggleCompressor" class="compressor-btn">Компрессор</button>
       <button @click="toggleMirror" class="mirror-btn">Зеркало</button>
+
       <button @click="toggleTheaterMode" class="theater-mode-btn">
         {{ theaterMode ? 'Выйти из театрального режима' : 'Включить театральный режим' }}
       </button>
+
       <button
         @click="setAspectRatio('16:9')"
         :class="['aspect-ratio-btn', { active: aspectRatio === '16:9' }]"
@@ -93,32 +99,30 @@
 import { ref, onMounted, onBeforeUnmount, computed, watch, nextTick } from 'vue'
 import axios from 'axios'
 import { useStore } from 'vuex'
-import { useRouter } from 'vue-router'
 import SpinnerLoading from '@/components/SpinnerLoading.vue'
 import SliderRound from '@/components/slider/SliderRound.vue'
 
 const store = useStore()
-const router = useRouter()
 
 const props = defineProps({
   kp_id: String
 });
 const emit = defineEmits(['update:selectedPlayer']);
 
-const playersInternal = ref([]);
-const selectedPlayerInternal = ref(null);
-const iframeLoading = ref(true);
-const theaterMode = ref(false);
-const closeButtonVisible = ref(false);
-const playerIframe = ref(null);
-const containerRef = ref(null);
-const errorMessage = ref('');
-const dimmingEnabled = ref(false);
+const playersInternal = ref([])
+const selectedPlayerInternal = ref(null)
+const iframeLoading = ref(true)
+const theaterMode = ref(false)
+const closeButtonVisible = ref(false)
+const playerIframe = ref(null)
+const containerRef = ref(null)
+const errorMessage = ref('')
+const dimmingEnabled = ref(false)
 
-const apiUrl = import.meta.env.VITE_APP_API_URL;
-const maxPlayerHeightValue = ref(window.innerHeight * 0.9); // 90% от высоты экрана
-const maxPlayerHeight = computed(() => `${maxPlayerHeightValue.value}px`);
-const isMobile = ref(window.innerWidth <= 600);
+const apiUrl = import.meta.env.VITE_APP_API_URL
+const maxPlayerHeightValue = ref(window.innerHeight * 0.9) // 90% от высоты экрана
+const maxPlayerHeight = computed(() => `${maxPlayerHeightValue.value}px`)
+const isMobile = ref(window.innerWidth <= 600)
 
 // Используем геттер для получения aspectRatio из хранилища
 const aspectRatio = computed({
@@ -227,13 +231,13 @@ const fetchPlayers = async () => {
     if (error.response) {
       switch (error.response.status) {
         case 403:
-          errorMessage.value = "Упс, недоступно по требованию правообладателя";
-          break;
+          errorMessage.value = "Упс, недоступно по требованию правообладателя"
+          break
         case 500:
-          errorMessage.value = "Ошибка на сервере. Пожалуйста, попробуйте позже";
-          break;
+          errorMessage.value = "Ошибка на сервере. Пожалуйста, попробуйте позже"
+          break
         default:
-          errorMessage.value = `Произошла ошибка: ${error.response.status}`;
+          errorMessage.value = `Произошла ошибка: ${error.response.status}`
       }
     } else {
       errorMessage.value = `Ошибка: ${error.message}`;
@@ -250,48 +254,48 @@ const onIframeLoad = () => {
 }
 
 const showMessageToast = (message) => {
-  const messageElement = document.createElement('div');
-  messageElement.style.position = 'fixed';
-  messageElement.style.top = '0';
-  messageElement.style.left = '0';
-  messageElement.style.width = '100%';
-  messageElement.style.height = '100%';
-  messageElement.style.backgroundColor = 'rgba(0, 0, 0, 0.8)';
-  messageElement.style.color = 'white';
-  messageElement.style.display = 'flex';
-  messageElement.style.justifyContent = 'center';
-  messageElement.style.alignItems = 'center';
-  messageElement.style.fontSize = '2rem';
-  messageElement.style.zIndex = '99000';
-  messageElement.textContent = message;
-  document.body.appendChild(messageElement);
+  const messageElement = document.createElement('div')
+  messageElement.style.position = 'fixed'
+  messageElement.style.top = '0'
+  messageElement.style.left = '0'
+  messageElement.style.width = '100%'
+  messageElement.style.height = '100%'
+  messageElement.style.backgroundColor = 'rgba(0, 0, 0, 0.8)'
+  messageElement.style.color = 'white'
+  messageElement.style.display = 'flex'
+  messageElement.style.justifyContent = 'center'
+  messageElement.style.alignItems = 'center'
+  messageElement.style.fontSize = '2rem'
+  messageElement.style.zIndex = '99000'
+  messageElement.textContent = message
+  document.body.appendChild(messageElement)
 
   setTimeout(() => {
     document.body.removeChild(messageElement);
-  }, 2000);
+  }, 2000)
 }
 
 const toggleBlur = () => {
   if (window.electronAPI) {
-    window.electronAPI.sendHotKey("F2");
+    window.electronAPI.sendHotKey("F2")
   } else {
-    showMessageToast("Доступно только в приложении ReYohoho Desktop");
+    showMessageToast("Доступно только в приложении ReYohoho Desktop")
   }
 }
 
 const toggleCompressor = () => {
   if (window.electronAPI) {
-    window.electronAPI.sendHotKey("F3");
+    window.electronAPI.sendHotKey("F3")
   } else {
-    showMessageToast("Доступно только в приложении ReYohoho Desktop");
+    showMessageToast("Доступно только в приложении ReYohoho Desktop")
   }
 }
 
 const toggleMirror = () => {
   if (window.electronAPI) {
-    window.electronAPI.sendHotKey("F4");
+    window.electronAPI.sendHotKey("F4")
   } else {
-    showMessageToast("Доступно только в приложении ReYohoho Desktop");
+    showMessageToast("Доступно только в приложении ReYohoho Desktop")
   }
 }
 
@@ -432,7 +436,7 @@ onBeforeUnmount(() => {
   position: fixed;
   top: 0 !important;
   left: 0 !important;
-  z-index: 2000;
+  z-index: 9999;
   width: 100vw !important;
   height: 100vh !important;
   background: #000;
@@ -442,12 +446,14 @@ onBeforeUnmount(() => {
   align-items: center;
   justify-content: center;
 }
+
 .player-container.theater-mode .iframe-wrapper {
   width: 100% !important;
   height: 100% !important;
   padding-top: 0 !important;
   flex-grow: 1;
 }
+
 .close-theater-btn {
   position: fixed;
   top: 20px;
@@ -455,35 +461,43 @@ onBeforeUnmount(() => {
   background: rgba(255, 0, 0, 0.7);
   color: white;
   border: none;
-  width: 50px;
+  width: 50px; /* Увеличиваем размер кнопки */
   height: 50px;
   border-radius: 50%;
   cursor: pointer;
-  transition: background 0.3s, opacity 0.3s;
-  z-index: 2001;
+  transition:
+    background 0.3s,
+    opacity 0.3s;
+  z-index: 3001;
   opacity: 0;
   display: flex;
   align-items: center;
   justify-content: center;
   font-size: 24px;
 }
+
+.close-theater-btn.visible {
+  opacity: 1;
+}
+
+/* Расширяем зону активации */
 .close-theater-btn::before {
   content: '';
   position: absolute;
-  width: 80px;
+  width: 80px; /* Увеличиваем невидимую область вокруг кнопки */
   height: 80px;
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
 }
+
+/* Делаем кнопку видимой при наведении на зону */
 .close-theater-btn:hover,
 .close-theater-btn::before:hover {
   background: rgba(255, 0, 0, 1);
   opacity: 1;
 }
-.close-theater-btn.visible {
-  opacity: 1;
-}
+
 html.no-scroll {
   overflow: hidden;
 }
@@ -507,6 +521,7 @@ html.no-scroll {
   cursor: pointer;
   transition: background-color 0.3s ease, transform 0.2s ease, box-shadow 0.3s ease;
   outline: none;
+  z-index: 10;
 }
 .controls button:hover {
   background-color: #555;
@@ -532,4 +547,21 @@ html.no-scroll {
   max-width: 500px;
   background: rgba(255, 68, 68, 0.1);
 }
+
+.fullscreen {
+   position: absolute;
+   top: 0;
+   left: 0;
+   width: 100vw;
+   height: 100vh;
+   z-index: 3001;
+ }
+ 
+ .theater-mode-lock {
+   pointer-events: none;
+ }
+ .theater-mode-unlock {
+   pointer-events: all;
+ }
+
 </style>
