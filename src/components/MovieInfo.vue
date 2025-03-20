@@ -156,6 +156,7 @@
           <div class="info-content">
             <div class="details-container">
               <ul class="info-list">
+                <li v-if="movieInfo.type && TYPES_ENUM[movieInfo.type]"><strong>Тип:</strong> {{ TYPES_ENUM[movieInfo.type] }}</li>
                 <li v-if="movieInfo.year"><strong>Год выпуска:</strong> {{ movieInfo.year }}</li>
                 <li v-if="movieInfo.title"><strong>Название:</strong> {{ movieInfo.title }}</li>
                 <li v-if="movieInfo.name_original">
@@ -207,6 +208,7 @@ import PlayerComponent from '@/components/PlayerComponent.vue'
 import CardsMovie from '@/components/CardsMovie.vue'
 import { useStore } from 'vuex'
 import { getKpInfo, getShikiInfo } from '@/api/movies'
+import { TYPES_ENUM } from '@/constants'
 
 const store = useStore()
 const route = useRoute()

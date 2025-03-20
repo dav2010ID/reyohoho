@@ -1,7 +1,7 @@
 export const TYPES_ENUM = {
-  FILM: 'фильм',
-  TV_SERIES: 'сериал',
-  VIDEO: 'видео',
+  FILM: 'Фильм',
+  TV_SERIES: 'Сериал',
+  VIDEO: 'Видео',
   TV_SHOW: 'ТВ-шоу',
   MINI_SERIES: 'Мини-сериал',
   ANIME: 'Аниме'
