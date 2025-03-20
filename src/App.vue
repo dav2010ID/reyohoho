@@ -25,6 +25,7 @@ const updateIsMobile = () => {
 }
 
 onMounted(() => {
+  store.commit('setIsMobile', window.innerWidth < 600)
   window.addEventListener('resize', updateIsMobile)
 })
 
