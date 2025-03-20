@@ -7,8 +7,7 @@
           <router-link to="/" class="home-button">На главную</router-link>
         </div>
       </div>
-
-      <div v-if="!movieInfo" class="content-card">
+      <div v-if="errorMessage" class="content-card">
         <PlayerComponent :kp_id="kp_id" :key="kp_id" />
       </div>
 
