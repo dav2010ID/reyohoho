@@ -46,11 +46,6 @@
           <div v-if="movie.year" class="meta">
             <span class="year">{{ movie.year }}</span>
           </div>
-
-          <div v-if="!isHistory && movie.views_count" class="views">
-            <span class="eye-icon">👁️</span>
-            <span>{{ formatViews(movie.views_count) }}</span>
-          </div>
         </div>
       </a>
     </div>
@@ -291,8 +286,7 @@ onUnmounted(() => {
 
 .year,
 .type,
-.views,
-.eye-icon {
+.views {
   font-size: 0.9em;
   color: #ccc;
 }
@@ -386,10 +380,6 @@ onUnmounted(() => {
   .type,
   .views {
     font-size: 1em;
-  }
-
-  .eye-icon {
-    font-size: 1.2em;
   }
 }
 </style>
