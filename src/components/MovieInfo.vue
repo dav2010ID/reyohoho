@@ -296,9 +296,6 @@ const fetchMovieInfo = async () => {
       store.dispatch('addToHistory', { ...movieToSave })
     }
   } catch (error) {
-    console.log(error);
-    console.log(error.response?.status);
-    console.log(error.status);
     if (error.response?.status === 404) {
       errorMessage.value = 'Данные о фильме не найдены'
       errorCode.value = 404
