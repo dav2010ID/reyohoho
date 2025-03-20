@@ -1,9 +1,10 @@
-import { defineConfig } from 'vite';
-import vue from '@vitejs/plugin-vue';
-import { VitePWA } from 'vite-plugin-pwa';
-import legacy from '@vitejs/plugin-legacy';
+import { defineConfig } from 'vite'
+import vue from '@vitejs/plugin-vue'
+import { VitePWA } from 'vite-plugin-pwa'
+import legacy from '@vitejs/plugin-legacy'
+import eslintPlugin from 'vite-plugin-eslint'
 
-const base = process.env.VITE_BASE_URL || '/';
+const base = process.env.VITE_BASE_URL || '/'
 
 export default defineConfig({
   base: base,
@@ -30,20 +31,27 @@ export default defineConfig({
             src: `${base}icons/icon-192x192.png`,
             sizes: '192x192',
             type: 'image/png',
-            purpose: 'maskable',
+            purpose: 'maskable'
           },
           {
             src: `${base}icons/icon-512x512.png`,
             sizes: '512x512',
-            type: 'image/png',
-          },
-        ],
-      },
+            type: 'image/png'
+          }
+        ]
+      }
     }),
+    eslintPlugin({
+      include: ['src/**/*.js', 'src/**/*.vue', 'src/**/*.jsx', 'src/**/*.ts', 'src/**/*.tsx'], // Проверяемые файлы
+      failOnError: true, // Останавливать сборку при ошибках ESLint
+      failOnWarning: false, // Останавливать сборку только при ошибках, но не при предупреждениях
+      cache: false, // Отключаем кэширование для корректной работы
+      emitError: true
+    })
   ],
   resolve: {
     alias: {
-      '@': '/src',
-    },
+      '@': '/src'
+    }
   }
-});
+})
