@@ -46,6 +46,7 @@ const store = createStore({
           kp_id: movie.kp_id,
           title: movie.title || '',
           year: movie.year || '',
+          type: movie.type || '',
           poster: movie.poster || movie.cover || noPosterImage,
           addedAt: new Date().toISOString()
         }

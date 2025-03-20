@@ -74,6 +74,7 @@ import { useRouter } from 'vue-router'
 import debounce from 'lodash/debounce'
 import { inRange } from 'lodash'
 import { apiSearch } from '@/api/movies'
+import { TYPES_ENUM } from '@/constants'
 
 const emit = defineEmits(['closeModal'])
 
@@ -82,14 +83,6 @@ const router = useRouter()
 const searchTerm = ref('')
 const movies = ref([])
 const loading = ref(false)
-
-const TYPES_ENUM = {
-  FILM: 'фильм',
-  TV_SERIES: 'сериал',
-  VIDEO: 'видео',
-  TV_SHOW: 'ТВ-шоу',
-  MINI_SERIES: 'Мини-сериал'
-}
 
 // Очистка поиска
 const resetSearch = () => {

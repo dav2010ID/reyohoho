@@ -268,7 +268,9 @@ const fetchMovieInfo = async () => {
       kp_id: kp_id.value,
       title: movieInfo.value?.name_ru || movieInfo.value?.name_en || movieInfo.value?.name_original,
       poster:
-        movieInfo.value?.poster_url || movieInfo.value?.cover_url || movieInfo.value?.screenshots[0]
+        movieInfo.value?.poster_url || movieInfo.value?.cover_url || movieInfo.value?.screenshots[0],
+      year: movieInfo.value?.year,
+      type: movieInfo.value?.type
     }
 
     // Устанавливаем фон фильма через новый метод

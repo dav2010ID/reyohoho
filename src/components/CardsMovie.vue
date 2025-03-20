@@ -28,8 +28,11 @@
               </span>
             </div>
             <!-- Добавлен блок для отображения типа (сериал/фильм) в правом верхнем углу постера -->
-            <div v-if="movie.type" class="poster-type">
+            <div v-if="movie.type && !isHistory" class="poster-type">
               {{ movie.type.replace("🎬", "") }}
+            </div>
+            <div v-if="movie.type && isHistory && TYPES_ENUM[movie.type]" class="poster-type">
+              {{ TYPES_ENUM[movie.type] ?? '' }}
             </div>
           </div>
         </div>
@@ -40,7 +43,7 @@
           </div>
 
           <!-- Вместо старого места для типа выводим год выпуска -->
-          <div v-if="!isHistory && movie.year" class="meta">
+          <div v-if="movie.year" class="meta">
             <span class="year">{{ movie.year }}</span>
           </div>
 
@@ -61,6 +64,7 @@ import { useRouter } from 'vue-router';
 import { useStore } from 'vuex';
 import Spinner from "@/components/SpinnerLoading.vue";
 import DeleteButton from "@/components/buttons/DeleteButton.vue";
+import { TYPES_ENUM } from '@/constants'
 
 const props = defineProps({
   moviesList: Array,
@@ -248,7 +252,7 @@ onUnmounted(() => {
 
 .deleteButton {
   position: absolute;
-  top: 5px;
+  bottom: 5px;
   right: 5px;
   opacity: 0;
 }
