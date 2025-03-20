@@ -28,11 +28,11 @@
               </span>
             </div>
             <!-- Добавлен блок для отображения типа (сериал/фильм) в правом верхнем углу постера -->
-            <div v-if="movie.type && !isHistory" class="poster-type">
-              {{ movie.type.replace("🎬", "") }}
-            </div>
-            <div v-if="movie.type && isHistory && TYPES_ENUM[movie.type]" class="poster-type">
+            <div v-if="movie.type && TYPES_ENUM[movie.type]" class="poster-type">
               {{ TYPES_ENUM[movie.type] ?? '' }}
+            </div>
+            <div v-if="movie.type && !TYPES_ENUM[movie.type]" class="poster-type">
+              {{ movie.type.replace("🎬", "") }}
             </div>
           </div>
         </div>

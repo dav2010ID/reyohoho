@@ -156,7 +156,10 @@ const performSearch = async () => {
 
     // Поиск по названию
     const response = await apiSearch(searchTerm.value);
-    movies.value = response.map(movie => ({ ...movie, kp_id: movie.id.toString() }));
+    movies.value = response.map(movie => ({ ...movie, kp_id: movie.id.toString(), 
+      rating_kp: movie.raw_data?.rating !== 'null' ? movie.raw_data?.rating : null,
+      type: movie.raw_data?.type
+     }));
   } catch (error) {
     console.error('Ошибка:', error);
     if (error.response.status === 500) {
