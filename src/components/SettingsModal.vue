@@ -43,7 +43,8 @@
             <i class="fa-solid fa-trash-can"></i>
             Очистить историю просмотра
           </button>
-          <BaseModal :is-open="showModal" message="Вы уверены, что хотите очистить историю?" @confirm="clearAllHistory"
+          <BaseModal
+            :is-open="showModal" message="Вы уверены, что хотите очистить историю?" @confirm="clearAllHistory"
             @close="showModal = false" />
         </div>
       </div>
