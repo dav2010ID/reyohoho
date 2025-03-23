@@ -12,9 +12,13 @@ const store = createStore({
   state() {
     return {
       history: [], // История фильмов
+      isHistoryAllowed: true,
       isMobile: false,
       dimmingEnabled: false
     }
+  },
+  getters: {
+    isHistoryAllowed: state => state.isHistoryAllowed
   },
   mutations: {
     setHistory(state, history) {
@@ -64,6 +68,9 @@ const store = createStore({
     },
     clearAllHistory(state) {
       state.history = []
+    },
+    setHistoryAllowed(state, value) {
+      state.isHistoryAllowed = value
     }
   },
 
@@ -79,11 +86,14 @@ const store = createStore({
     },
     clearAllHistory({ commit }) {
       commit('clearAllHistory')
+    },
+    setHistoryAllowed({commit}, payload) {
+      commit('setHistoryAllowed', payload)
     }
   },
   plugins: [
     createPersistedState({
-      paths: ['history', 'background', 'player'] // Указываем, какие данные сохранять в localStorage
+      paths: ['history', 'background', 'player', 'isHistoryAllowed'] // Указываем, какие данные сохранять в localStorage
     })
   ]
 })
