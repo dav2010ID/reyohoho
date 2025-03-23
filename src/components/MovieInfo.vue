@@ -301,7 +301,9 @@ const fetchMovieInfo = async () => {
       }
     }
 
-    if (movieToSave.kp_id && movieToSave.title) {
+    const isHistoryAllowed = computed(() => store.state.isHistoryAllowed)
+
+    if (isHistoryAllowed.value && movieToSave.kp_id && movieToSave.title) {
       store.dispatch('addToHistory', { ...movieToSave })
     }
   } catch (error) {
