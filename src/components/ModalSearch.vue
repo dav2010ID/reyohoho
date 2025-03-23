@@ -92,6 +92,7 @@ const resetSearch = () => {
 }
 
 const search = () => {
+  debouncedPerformSearch.cancel()
   if (searchTerm.value) {
     performSearch()
   } else {
