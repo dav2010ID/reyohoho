@@ -20,7 +20,7 @@
           </div>
 
           <template v-else-if="loading">
-            <div class="movie-skeleton" v-for="idx in [0, 1, 2, 3]" :key="idx">
+            <div v-for="idx in [0, 1, 2, 3]" :key="idx" class="movie-skeleton">
               <div class="movie-skeleton__poster"></div>
               <div class="movie-skeleton__content">
                 <div class="movie-skeleton__title"></div>
@@ -37,6 +37,7 @@
           <div v-else>
             <router-link
               v-for="movie in movies"
+              :key="movie.id"
               class="search__movie movie"
               :to="{ name: 'movie-info', params: { kp_id: movie.kp_id } }"
               @click="closeModal"
@@ -61,7 +62,7 @@
         </div>
       </div>
 
-      <button @click="closeModal" class="btn btn--close">
+      <button class="btn btn--close" @click="closeModal">
         <i class="fas fa-close"></i>
       </button>
     </div>

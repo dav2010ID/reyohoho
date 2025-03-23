@@ -43,8 +43,6 @@ const getLayerStyle = (index) => {
 }
 
 const fetchTopMovie = async () => {
-  console.log('fetch');
-
   if (isFetching.value) return
   isFetching.value = true
 
@@ -76,6 +74,7 @@ const checkCachedTopMovie = () => {
     localStorage.removeItem(CACHE_KEY)
   } catch (e) {
     localStorage.removeItem(CACHE_KEY)
+    throw new Error(e)
   }
   return false
 }
@@ -84,19 +83,19 @@ onMounted(async () => {
   'mounted'
   backgrounds.value = [backgroundUrl.value, backgroundUrl.value]
   await router.isReady()
-  'route check'
+  ;('route check')
 
   if (route.path.includes('movie')) return
-  'route check passed'
+  ;('route check passed')
 
   if (backgroundType.value !== 'disabled') {
-    'first if'
+    ;('first if')
 
     const hasValidCache = checkCachedTopMovie()
-    'valid cache'
+    ;('valid cache')
 
     if (!hasValidCache && !isFetching.value) {
-      'second if'
+      ;('second if')
       await fetchTopMovie()
     }
   }

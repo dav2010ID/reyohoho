@@ -3,12 +3,12 @@
     <div class="content">
       <div v-if="errorMessage" class="error-message">
         {{ errorMessage }}
-        <div class="go-home" v-if="errorCode !== 500">
+        <div v-if="errorCode !== 500" class="go-home">
           <router-link to="/" class="home-button">На главную</router-link>
         </div>
       </div>
       <div v-if="errorMessage" class="content-card">
-        <PlayerComponent :kp_id="kp_id" :key="kp_id" />
+        <PlayerComponent :key="kp_id" :kp-id="kp_id" />
       </div>
 
       <div v-if="movieInfo" class="content-card">
@@ -22,7 +22,6 @@
         </div>
 
         <div
-          class="ratings-links"
           v-if="
             movieInfo.kinopoisk_id ||
             movieInfo.title ||
@@ -30,6 +29,7 @@
             movieInfo.rating_imdb ||
             movieInfo.shikimori_id
           "
+          class="ratings-links"
         >
           <!-- Кинопоиск -->
           <div v-if="movieInfo.kinopoisk_id">
@@ -139,11 +139,15 @@
         </div>
 
         <!-- Интеграция компонента плеера -->
-        <PlayerComponent :kp_id="kp_id" :key="kp_id" />
+        <PlayerComponent :key="kp_id" :kp-id="kp_id" />
 
         <meta
           name="title-and-year"
-          :content="movieInfo.type === 'FILM' && movieInfo.year ? `${movieInfo.title} (${movieInfo.year})` : movieInfo.title"
+          :content="
+            movieInfo.type === 'FILM' && movieInfo.year
+              ? `${movieInfo.title} (${movieInfo.year})`
+              : movieInfo.title
+          "
         />
 
         <meta
@@ -156,7 +160,9 @@
           <div class="info-content">
             <div class="details-container">
               <ul class="info-list">
-                <li v-if="movieInfo.type && TYPES_ENUM[movieInfo.type]"><strong>Тип:</strong> {{ TYPES_ENUM[movieInfo.type] }}</li>
+                <li v-if="movieInfo.type && TYPES_ENUM[movieInfo.type]">
+                  <strong>Тип:</strong> {{ TYPES_ENUM[movieInfo.type] }}
+                </li>
                 <li v-if="movieInfo.year"><strong>Год выпуска:</strong> {{ movieInfo.year }}</li>
                 <li v-if="movieInfo.title"><strong>Название:</strong> {{ movieInfo.title }}</li>
                 <li v-if="movieInfo.name_original">
@@ -188,13 +194,13 @@
         <!-- Секция с сиквелами и приквелами -->
         <div v-if="sequelsAndPrequels.length" class="related-movies">
           <h2>Сиквелы и приквелы</h2>
-          <CardsMovie :moviesList="sequelsAndPrequels" :loading="false" :isHistory="false" />
+          <CardsMovie :movies-list="sequelsAndPrequels" :loading="false" :is-history="false" />
         </div>
 
         <!-- Секция с похожими фильмами -->
         <div v-if="similars.length" class="related-movies">
           <h2>Похожие</h2>
-          <CardsMovie :moviesList="similars" :loading="false" :isHistory="false" />
+          <CardsMovie :movies-list="similars" :loading="false" :is-history="false" />
         </div>
       </div>
     </div>
@@ -273,7 +279,9 @@ const fetchMovieInfo = async () => {
       kp_id: kp_id.value,
       title: movieInfo.value?.name_ru || movieInfo.value?.name_en || movieInfo.value?.name_original,
       poster:
-        movieInfo.value?.poster_url || movieInfo.value?.cover_url || movieInfo.value?.screenshots[0],
+        movieInfo.value?.poster_url ||
+        movieInfo.value?.cover_url ||
+        movieInfo.value?.screenshots[0],
       year: movieInfo.value?.year,
       type: movieInfo.value?.type
     }

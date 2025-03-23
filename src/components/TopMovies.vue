@@ -15,7 +15,7 @@
         </div>
 
         <div class="type-filter">
-          <select v-model="typeFilter" @change="fetchMovies" class="custom-select">
+          <select v-model="typeFilter" class="custom-select" @change="fetchMovies">
             <option value="all">Все</option>
             <option value="movie">Фильмы</option>
             <option value="series">Сериалы</option>
@@ -24,7 +24,7 @@
       </div>
 
       <!-- Контейнер для сетки фильмов и спиннера -->
-      <CardsMovie :moviesList="movies" :isHistory="false" :loading="loading" />
+      <CardsMovie :movies-list="movies" :is-history="false" :loading="loading" />
     </div>
   </div>
 </template>

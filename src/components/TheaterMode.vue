@@ -11,9 +11,9 @@
       <!-- Кнопка закрытия в театральном режиме -->
       <button
         v-if="theaterMode"
-        @click="toggleTheaterMode"
         class="close-theater-btn"
         :class="{'visible': closeButtonVisible}"
+        @click="toggleTheaterMode"
       >
         ✖
       </button>
@@ -21,52 +21,52 @@
   </template>
 
   <script setup>
-  import { ref, onMounted, onBeforeUnmount } from 'vue';
+  import { ref, onBeforeUnmount } from 'vue'
 
-  const emit = defineEmits(['update:modelValue']);
+  const emit = defineEmits(['update:modelValue'])
   const props = defineProps({
     modelValue: Boolean,
     containerStyle: Object
-  });
+  })
 
-  const theaterMode = ref(props.modelValue);
-  const closeButtonVisible = ref(false);
-  const containerRef = ref(null);
+  const theaterMode = ref(props.modelValue)
+  const closeButtonVisible = ref(false)
+  const containerRef = ref(null)
 
   const toggleTheaterMode = () => {
-    theaterMode.value = !theaterMode.value;
-    emit('update:modelValue', theaterMode.value);
-    const action = theaterMode.value ? 'add' : 'remove';
+    theaterMode.value = !theaterMode.value
+    emit('update:modelValue', theaterMode.value)
+    const action = theaterMode.value ? 'add' : 'remove'
 
-    document.documentElement.classList[action]('no-scroll');
-    document.body.classList[action]('no-scroll');
+    document.documentElement.classList[action]('no-scroll')
+    document.body.classList[action]('no-scroll')
 
     if (theaterMode.value) {
-      document.addEventListener('mousemove', showCloseButton);
-      document.addEventListener('keydown', onKeyDown);
+      document.addEventListener('mousemove', showCloseButton)
+      document.addEventListener('keydown', onKeyDown)
     } else {
-      document.removeEventListener('mousemove', showCloseButton);
-      document.removeEventListener('keydown', onKeyDown);
+      document.removeEventListener('mousemove', showCloseButton)
+      document.removeEventListener('keydown', onKeyDown)
     }
 
-    closeButtonVisible.value = theaterMode.value;
-  };
+    closeButtonVisible.value = theaterMode.value
+  }
 
   const showCloseButton = (event) => {
-    closeButtonVisible.value = event.clientY < 50;
-  };
+    closeButtonVisible.value = event.clientY < 50
+  }
 
   const onKeyDown = (event) => {
     if (event.key === 'Escape' && theaterMode.value) {
-      toggleTheaterMode();
+      toggleTheaterMode()
     }
-  };
+  }
 
   onBeforeUnmount(() => {
-    document.removeEventListener('mousemove', showCloseButton);
-    document.removeEventListener('keydown', onKeyDown);
-    document.body.classList.remove('no-scroll');
-  });
+    document.removeEventListener('mousemove', showCloseButton)
+    document.removeEventListener('keydown', onKeyDown)
+    document.body.classList.remove('no-scroll')
+  })
   </script>
 
   <style scoped>

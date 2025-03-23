@@ -1,7 +1,7 @@
 <template>
   <div class="settings-page">
     <header class="settings-header">
-      <button @click="goBack" class="back-button">← Назад</button>
+      <button class="back-button" @click="goBack">← Назад</button>
       <h1>Настройки фона и плеера</h1>
     </header>
 
@@ -10,15 +10,15 @@
       <div class="setting-group">
         <h2>Тип фона</h2>
         <label class="radio">
-          <input type="radio" value="dynamic" v-model="backgroundType" />
+          <input v-model="backgroundType" type="radio" value="dynamic" />
           <span class="radio-label">Динамический фон</span>
         </label>
         <label class="radio">
-          <input type="radio" value="stars" v-model="backgroundType" />
+          <input v-model="backgroundType" type="radio" value="stars" />
           <span class="radio-label">Звездный фон</span>
         </label>
         <label class="radio">
-          <input type="radio" value="disabled" v-model="backgroundType" />
+          <input v-model="backgroundType" type="radio" value="disabled" />
           <span class="radio-label">Отключить фон</span>
         </label>
       </div>
@@ -30,7 +30,7 @@
 
       <!-- Кнопка сброса фона -->
       <div class="settings-actions">
-        <button @click="resetBackground" class="reset-button">Сбросить фон</button>
+        <button class="reset-button" @click="resetBackground">Сбросить фон</button>
       </div>
 
     </div>
@@ -65,7 +65,7 @@ watch(isBlurDisabled, (newValue) => {
 const isCentered = computed({
   get: () => store.getters['player/isCentered'],
   set: (value) => store.dispatch('player/updateCentering', value)
-});
+})
 
 const isCardBorder = computed({
   get: () => store.getters['background/getCardBorder'],

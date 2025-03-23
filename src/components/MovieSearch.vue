@@ -17,13 +17,14 @@
       <!-- Поиск -->
       <div class="search-container">
         <div class="input-wrapper">
-          <input ref="searchInput" v-model="searchTerm" :placeholder="getPlaceholder()" class="search-input"
+          <input
+ref="searchInput" v-model="searchTerm" :placeholder="getPlaceholder()" class="search-input"
             :inputmode="searchType === 'title' ? 'text' : 'numeric'" @keydown.enter="search" @input="handleInput" />
           <div class="icons">
-            <button v-if="searchTerm" @click="resetSearch" class="reset-button">
+            <button v-if="searchTerm" class="reset-button" @click="resetSearch">
               <i class="fas fa-times"></i>
             </button>
-            <button @click="search" class="search-button">
+            <button class="search-button" @click="search">
               <i class="fas fa-search"></i>
             </button>
           </div>
@@ -39,20 +40,20 @@
             <span>
               <DeleteButton @click="showModal = true" />
               <BaseModal
-                :isOpen="showModal"
+                :is-open="showModal"
                 message="Вы уверены, что хотите очистить историю?"
                 @confirm="clearAllHistory"
                 @close="showModal = false"
               />
             </span>
           </h2>
-          <CardsMovie :moviesList="history" :isHistory="true" :loading="loading" />
+          <CardsMovie :movies-list="history" :is-history="true" :loading="loading" />
         </div>
 
         <!-- Результаты поиска -->
         <div v-if="searchPerformed">
           <h2>Результаты поиска</h2>
-          <CardsMovie :moviesList="movies" :isHistory="false" :loading="loading" />
+          <CardsMovie :movies-list="movies" :is-history="false" :loading="loading" />
           <div v-if="movies.length === 0 && !loading" class="no-results">
             Ничего не найдено
           </div>
@@ -72,40 +73,40 @@
 </template>
 
 <script setup>
-import { ref, computed, watch, onMounted } from 'vue';
-import { useRouter } from 'vue-router';
-import { useStore } from 'vuex';
-import CardsMovie from "@/components/CardsMovie.vue";
-import FooterDonaters from '@/components/FooterDonaters.vue';
-import BaseModal from '@/components/BaseModal.vue';
-import DeleteButton from "@/components/buttons/DeleteButton.vue";
-import debounce from 'lodash/debounce';
-import { apiSearch } from '@/api/movies';
+import { ref, computed, watch, onMounted } from 'vue'
+import { useRouter } from 'vue-router'
+import { useStore } from 'vuex'
+import CardsMovie from '@/components/CardsMovie.vue'
+import FooterDonaters from '@/components/FooterDonaters.vue'
+import BaseModal from '@/components/BaseModal.vue'
+import DeleteButton from '@/components/buttons/DeleteButton.vue'
+import debounce from 'lodash/debounce'
+import { apiSearch } from '@/api/movies'
 
-const store = useStore();
-const router = useRouter();
+const store = useStore()
+const router = useRouter()
 
-const searchType = ref('title');
-const searchTerm = ref('');
-const movies = ref([]);
-const loading = ref(false);
-const searchPerformed = ref(false);
-const showModal = ref(false);
-const errorMessage = ref('');
+const searchType = ref('title')
+const searchTerm = ref('')
+const movies = ref([])
+const loading = ref(false)
+const searchPerformed = ref(false)
+const showModal = ref(false)
+const errorMessage = ref('')
 
-const history = computed(() => store.state.history);
+const history = computed(() => store.state.history)
 
 // Установка типа поиска
 const setSearchType = (type) => {
-  searchType.value = type;
-  resetSearch();
-};
+  searchType.value = type
+  resetSearch()
+}
 
 const handleInput = (event) => {
   if (searchType.value !== 'title') {
-    searchTerm.value = event.target.value.replace(/\D+/g, '');
+    searchTerm.value = event.target.value.replace(/\D+/g, '')
   } else {
-    searchTerm.value = event.target.value;
+    searchTerm.value = event.target.value
   }
 }
 
@@ -115,77 +116,77 @@ const getPlaceholder = () => {
     title: 'Введите название фильма',
     kinopoisk: 'Пример: 301 (Матрица)',
     shikimori: 'Пример: 28171 (Повар-боец Сома)'
-  }[searchType.value] || 'Введите название фильма';
-};
+  }[searchType.value] || 'Введите название фильма'
+}
 
 // Динамический inputmode: для поиска по ID — numeric, иначе — text
-const inputMode = computed(() => {
-  return (searchType.value === 'kinopoisk' || searchType.value === 'shikimori') ? 'numeric' : 'text';
-});
+// const inputMode = computed(() => {
+//   return (searchType.value === 'kinopoisk' || searchType.value === 'shikimori') ? 'numeric' : 'text'
+// })
 
 // Очистка поиска
 const resetSearch = () => {
-  searchTerm.value = '';
-  movies.value = [];
-  searchPerformed.value = false;
-};
+  searchTerm.value = ''
+  movies.value = []
+  searchPerformed.value = false
+}
 
 const search = () => {
   if (searchTerm.value) {
-    performSearch();
+    performSearch()
   } else {
-    alert('Введите запрос для поиска');
+    alert('Введите запрос для поиска')
   }
-};
+}
 
 const performSearch = async () => {
-  loading.value = true;
-  searchPerformed.value = true;
-  movies.value = [];
+  loading.value = true
+  searchPerformed.value = true
+  movies.value = []
 
   try {
     if (searchType.value === 'kinopoisk' || searchType.value === 'shikimori') {
       if (!/^\d+$/.test(searchTerm.value)) {
-        alert(`Введите числовой ID ${searchType.value === 'kinopoisk' ? 'Кинопоиска' : 'Shikimori'}`);
-        return;
+        alert(`Введите числовой ID ${searchType.value === 'kinopoisk' ? 'Кинопоиска' : 'Shikimori'}`)
+        return
       }
-      const idPrefix = searchType.value === 'shikimori' ? 'shiki' : '';
-      router.push({ name: 'movie-info', params: { kp_id: `${idPrefix}${searchTerm.value}` } });
-      return;
+      const idPrefix = searchType.value === 'shikimori' ? 'shiki' : ''
+      router.push({ name: 'movie-info', params: { kp_id: `${idPrefix}${searchTerm.value}` } })
+      return
     }
 
     // Поиск по названию
-    const response = await apiSearch(searchTerm.value);
-    movies.value = response.map(movie => ({ ...movie, kp_id: movie.id.toString(), 
+    const response = await apiSearch(searchTerm.value)
+    movies.value = response.map(movie => ({ ...movie, kp_id: movie.id.toString(),
       rating_kp: movie.raw_data?.rating !== 'null' ? movie.raw_data?.rating : null,
       type: movie.raw_data?.type
-     }));
+     }))
   } catch (error) {
-    console.error('Ошибка:', error);
+    console.error('Ошибка:', error)
     if (error.response.status === 500) {
-            errorMessage.value = "Ошибка на сервере. Пожалуйста, попробуйте позже";
+            errorMessage.value = 'Ошибка на сервере. Пожалуйста, попробуйте позже'
           }
     else {
-      errorMessage.value = "Произошла ошибка";
+      errorMessage.value = 'Произошла ошибка'
     }
   } finally {
-    loading.value = false;
+    loading.value = false
   }
-};
+}
 
 const clearAllHistory = () => {
-  store.dispatch('clearAllHistory');
-  showModal.value = false;
-};
+  store.dispatch('clearAllHistory')
+  showModal.value = false
+}
 
 const debouncedPerformSearch = debounce(() => {
   if (searchTerm.value.length >= 3) {
-    performSearch();
+    performSearch()
   } else if (searchTerm.value.length < 3) {
-    movies.value = [];
-    searchPerformed.value = false;
+    movies.value = []
+    searchPerformed.value = false
   }
-}, 700);
+}, 700)
 
 onMounted(() => {
   const hash = window.location.hash
@@ -199,10 +200,10 @@ onMounted(() => {
 // Автопоиск с задержкой (только для поиска по названию)
 watch(searchTerm, () => {
   if (searchType.value === 'kinopoisk' || searchType.value === 'shikimori') {
-    return;
+    return
   }
-  debouncedPerformSearch();
-});
+  debouncedPerformSearch()
+})
 </script>
 
 <style scoped>

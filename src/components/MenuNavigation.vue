@@ -1,14 +1,14 @@
 <template>
   <div class="nav-component">
     <!-- Мобильное меню -->
-    <MobileMenu v-if="isMobile" :links="navLinks" @toggleSearch="toggleModalSearch" />
+    <MobileMenu v-if="isMobile" :links="navLinks" @toggle-search="toggleModalSearch" />
 
     <!-- Десктопная боковая панель -->
-    <DesktopMenu v-else :links="navLinks" @toggleSearch="toggleModalSearch" />
+    <DesktopMenu v-else :links="navLinks" @toggle-search="toggleModalSearch" />
 
     <!-- Модальное окно поиска -->
     <transition name="fade">
-      <ModalSearch v-if="isModalSearchVisible" @closeModal="toggleModalSearch" />
+      <ModalSearch v-if="isModalSearchVisible" @close-modal="toggleModalSearch" />
     </transition>
   </div>
 </template>
@@ -24,7 +24,7 @@ import { useStore } from 'vuex'
 const store = useStore()
 
 // Определяем, мобильное ли устройство (ширина окна меньше 600px)
-const isMobile = computed(() => store.state.isMobile);
+const isMobile = computed(() => store.state.isMobile)
 
 // Массив навигационных ссылок
 const navLinks = [

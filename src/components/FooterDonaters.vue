@@ -2,7 +2,7 @@
   <footer>
     <div class="donaters-wrapper">
       <transition name="fade" mode="out-in">
-        <span v-if="currentDonater" class="donater" :key="currentIndex">
+        <span v-if="currentDonater" :key="currentIndex" class="donater">
           {{ currentDonater }}
         </span>
       </transition>
@@ -17,7 +17,6 @@ import { getDons } from '@/api/movies'
 const donaters = ref([])
 const currentIndex = ref(-1)
 const CACHE_KEY_DONATERS = 'donatersCache'
-const apiUrl = import.meta.env.VITE_APP_API_URL
 let intervalId = null
 
 const currentDonater = computed(() => {

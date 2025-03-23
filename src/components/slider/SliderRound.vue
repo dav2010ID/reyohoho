@@ -1,3 +1,40 @@
+<template>
+  <div class="toggle">
+    <label class="switch">
+      <input 
+        type="checkbox" 
+        :checked="modelValue" 
+        :disabled="disabled"
+        @change="onChange"
+      />
+      <span class="slider"></span>
+    </label>
+    <span class="label-text"><slot></slot></span>
+  </div>
+</template>
+
+<script setup>
+const props = defineProps({
+  modelValue: {
+    type: Boolean,
+    default: false
+  },
+  disabled: {
+    type: Boolean,
+    default: false
+  }
+})
+
+const emit = defineEmits(['update:modelValue'])
+
+function onChange(event) {
+  // Эмитируем событие только если компонент не заблокирован
+  if (!props.disabled) {
+    emit('update:modelValue', event.target.checked)
+  }
+}
+</script>
+
 <style scoped>
   .toggle {
     display: flex;
@@ -60,48 +97,3 @@
     outline-offset: 2px;
   }
 </style>
-
-<template>
-  <div class="toggle">
-    <label class="switch">
-      <input 
-        type="checkbox" 
-        :checked="modelValue" 
-        :disabled="disabled"
-        @change="onChange"
-        @keydown.space.prevent="toggle"
-        @keydown.enter.prevent="toggle"
-        tabindex="0"
-      >
-      <span class="slider"></span>
-    </label>
-    <span class="label-text"><slot></slot></span>
-  </div>
-</template>
-
-<script setup>
-const props = defineProps({
-  modelValue: {
-    type: Boolean,
-    default: false
-  },
-  disabled: {
-    type: Boolean,
-    default: false
-  }
-})
-
-const emit = defineEmits(['update:modelValue'])
-
-function onChange(event) {
-  if (!props.disabled) {
-    emit('update:modelValue', event.target.checked)
-  }
-}
-
-function toggle() {
-  if (!props.disabled) {
-    emit('update:modelValue', !props.modelValue)
-  }
-}
-</script>

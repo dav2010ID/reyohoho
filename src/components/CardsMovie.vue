@@ -1,16 +1,16 @@
 <template>
   <div>
-    <div class="grid" v-show="!loading">
+    <div v-show="!loading" class="grid">
       <a
         v-for="(movie, index) in moviesList"
         :key="movie.kp_id"
+        :ref="(el) => (movieRefs[index] = el)"
         class="movie-card"
-        :class="{ 
-          active: activeMovieIndex === index, 
-          'has-border': isCardBorder 
+        :class="{
+          active: activeMovieIndex === index,
+          'has-border': isCardBorder
         }"
         :href="movieUrl(movie)"
-        :ref="(el) => (movieRefs[index] = el)"
         tabindex="0"
       >
         <div class="movie-poster-container">
@@ -54,97 +54,91 @@
 </template>
 
 <script setup>
-import { ref, watch, onMounted, onUnmounted, computed } from 'vue';
-import { useRouter } from 'vue-router';
-import { useStore } from 'vuex';
-import Spinner from "@/components/SpinnerLoading.vue";
-import DeleteButton from "@/components/buttons/DeleteButton.vue";
+import { ref, watch, onMounted, onUnmounted, computed } from 'vue'
+import { useRouter } from 'vue-router'
+import { useStore } from 'vuex'
+import Spinner from '@/components/SpinnerLoading.vue'
+import DeleteButton from '@/components/buttons/DeleteButton.vue'
 import { TYPES_ENUM } from '@/constants'
 
 const props = defineProps({
   moviesList: Array,
   isHistory: Boolean,
   loading: Boolean
-});
+})
 
-const router = useRouter();
-const movieRefs = ref([]);
-const activeMovieIndex = ref(null);
-const store = useStore();
+const router = useRouter()
+const movieRefs = ref([])
+const activeMovieIndex = ref(null)
+const store = useStore()
 
-const isCardBorder = computed(() => store.getters['background/getCardBorder']);
-console.log(isCardBorder.value);
+const isCardBorder = computed(() => store.getters['background/getCardBorder'])
+console.log(isCardBorder.value)
 
 const movieUrl = (movie) => {
-  return router.resolve({ name: "movie-info", params: { kp_id: movie.kp_id } }).href;
-};
+  return router.resolve({ name: 'movie-info', params: { kp_id: movie.kp_id } }).href
+}
 
 const removeYearFromTitle = (title) => {
-  return title ? title.replace(/\(\d{4}\)$/, '').trim() : title;
-};
-
-const formatViews = (views) => {
-  if (views >= 1_000_000) return `${(views / 1_000_000).toFixed(1)}M`;
-  if (views >= 1_000) return `${(views / 1_000).toFixed(1)}K`;
-  return views;
-};
+  return title ? title.replace(/\(\d{4}\)$/, '').trim() : title
+}
 
 const removeFromHistory = (kp_id) => {
-  store.dispatch('removeFromHistory', kp_id);
-};
+  store.dispatch('removeFromHistory', kp_id)
+}
 
 const handleKeyDown = (event) => {
-  if (!props.moviesList?.length) return;
+  if (!props.moviesList?.length) return
 
   if (!event.target.classList.contains('movie-card')) {
-    movieRefs.value[activeMovieIndex.value]?.focus();
+    movieRefs.value[activeMovieIndex.value]?.focus()
   }
 
   switch (event.key) {
     case 'ArrowRight':
-      activeMovieIndex.value = (activeMovieIndex.value + 1) % props.moviesList.length;
-      break;
+      activeMovieIndex.value = (activeMovieIndex.value + 1) % props.moviesList.length
+      break
     case 'ArrowLeft':
-      activeMovieIndex.value = (activeMovieIndex.value - 1 + props.moviesList.length) % props.moviesList.length;
-      break;
+      activeMovieIndex.value = (activeMovieIndex.value - 1 + props.moviesList.length) % props.moviesList.length
+      break
     case 'ArrowUp':
-      event.preventDefault();
-      activeMovieIndex.value = Math.max(activeMovieIndex.value - 5, 0);
-      break;
+      event.preventDefault()
+      activeMovieIndex.value = Math.max(activeMovieIndex.value - 5, 0)
+      break
     case 'ArrowDown':
-      event.preventDefault();
-      activeMovieIndex.value = Math.min(activeMovieIndex.value + 5, props.moviesList.length - 1);
-      break;
+      event.preventDefault()
+      activeMovieIndex.value = Math.min(activeMovieIndex.value + 5, props.moviesList.length - 1)
+      break
     case 'Home':
-      activeMovieIndex.value = 0;
-      break;
+      activeMovieIndex.value = 0
+      break
     case 'End':
-      activeMovieIndex.value = props.moviesList.length - 1;
-      break;
+      activeMovieIndex.value = props.moviesList.length - 1
+      break
     case 'Enter':
       if (event.ctrlKey || event.metaKey) {
-        window.open(movieUrl(props.moviesList[activeMovieIndex.value]), '_blank');
+        window.open(movieUrl(props.moviesList[activeMovieIndex.value]), '_blank')
       } else {
-        router.push({ name: "movie-info", params: { kp_id: props.moviesList[activeMovieIndex.value]?.kp_id } });
+        router.push({ name: 'movie-info', params: { kp_id: props.moviesList[activeMovieIndex.value]?.kp_id } })
       }
-      break;
+      break
   }
-};
+}
 
 watch(activeMovieIndex, (newIndex) => {
   if (movieRefs.value[newIndex]) {
-    movieRefs.value[newIndex].scrollIntoView({ behavior: 'smooth', block: 'center', inline: 'center' });
-    movieRefs.value[newIndex].focus();
+    movieRefs.value[newIndex].scrollIntoView({ behavior: 'smooth', block: 'center', inline: 'center' })
+    movieRefs.value[newIndex].focus()
   }
-});
+})
 
 onMounted(() => {
-  document.addEventListener('keydown', handleKeyDown);
-});
+  document.addEventListener('keydown', handleKeyDown)
+})
 
 onUnmounted(() => {
-  document.removeEventListener('keydown', handleKeyDown);
-});
+  document.removeEventListener('keydown', handleKeyDown)
+})
 </script>
 
 <style scoped>
@@ -337,7 +331,7 @@ onUnmounted(() => {
     width: 100%;
     max-width: none;
     border-radius: 15px;
-  }    
+  }
 
   .movie-poster-container {
     width: 120px;
@@ -347,7 +341,7 @@ onUnmounted(() => {
     width: 120px;
     aspect-ratio: 2 / 3;
     border-radius: 10px 0 0 10px;
-  }  
+  }
 
   .deleteButton {
     left: 5px;

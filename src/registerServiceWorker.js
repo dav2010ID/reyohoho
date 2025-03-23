@@ -15,11 +15,14 @@ function notifyUpdateAvailable(registration) {
 
 function trackError(error) {
   if (navigator.onLine) {
-    navigator.sendBeacon('/api/sw-errors', JSON.stringify({
-      error: error.message,
-      stack: error.stack,
-      timestamp: Date.now()
-    }))
+    navigator.sendBeacon(
+      '/api/sw-errors',
+      JSON.stringify({
+        error: error.message,
+        stack: error.stack,
+        timestamp: Date.now()
+      })
+    )
   }
 }
 
@@ -33,7 +36,7 @@ if ('serviceWorker' in navigator) {
       registered(registration) {
         console.log('Service worker registered')
         setInterval(() => registration.update(), SW_CONFIG.reloadInterval)
-        
+
         navigator.serviceWorker.addEventListener('controllerchange', () => {
           window.location.reload()
         })
@@ -47,9 +50,8 @@ if ('serviceWorker' in navigator) {
       }
     })
   } else {
-    navigator.serviceWorker.getRegistrations()
-      .then(registrations => {
-        registrations.forEach(registration => registration.unregister())
-      })
+    navigator.serviceWorker.getRegistrations().then((registrations) => {
+      registrations.forEach((registration) => registration.unregister())
+    })
   }
 }

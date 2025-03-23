@@ -7,30 +7,30 @@ export default {
   },
   mutations: {
     setAspectRatio(state, ratio) {
-      state.aspectRatio = ratio;
+      state.aspectRatio = ratio
     },
     setCentering(state, isCentered) {
-      state.isCentered = isCentered;
+      state.isCentered = isCentered
     },
     setPreferredPlayer(state, player) {
-      state.preferredPlayer = player;
+      state.preferredPlayer = player
     },
     clearPreferredPlayer(state) {
-      state.preferredPlayer = '';
+      state.preferredPlayer = ''
     }
   },
   actions: {
     updateAspectRatio({ commit }, ratio) {
-      commit('setAspectRatio', ratio);
+      commit('setAspectRatio', ratio)
     },
     updateCentering({ commit }, isCentered) {
-      commit('setCentering', isCentered);
+      commit('setCentering', isCentered)
     },
     updatePreferredPlayer({ commit }, player) {
-      commit('setPreferredPlayer', player);
+      commit('setPreferredPlayer', player)
     },
     clearPreferredPlayer({ commit }) {
-      commit('clearPreferredPlayer');
+      commit('clearPreferredPlayer')
     }
   },
   getters: {
@@ -38,4 +38,4 @@ export default {
     isCentered: (state) => state.isCentered,
     preferredPlayer: (state) => state.preferredPlayer
   }
-};
+}

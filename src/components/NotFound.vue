@@ -4,19 +4,19 @@
     <div class="error-content">
       <h1>400 — Ошибка запроса</h1>
       <p>Что-то пошло не так. Проверьте введенные данные и попробуйте снова.</p>
-      <button @click="goToHome" class="home-button">На главную</button>
+      <button class="home-button" @click="goToHome">На главную</button>
     </div>
   </div>
 </template>
 
 <script setup>
-import { useRouter } from 'vue-router';
+import { useRouter } from 'vue-router'
 
-const router = useRouter();
+const router = useRouter()
 
 const goToHome = () => {
-  router.push('/');
-};
+  router.push('/')
+}
 </script>
 
 <style scoped>

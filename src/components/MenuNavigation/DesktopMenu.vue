@@ -7,7 +7,7 @@
           <h1 v-show="isSidebarOpen" class="logo-title">Reyohoho</h1>
         </router-link>
       </div>
-      <button @click="toggleSidebar" class="toggle-sidebar-btn">
+      <button class="toggle-sidebar-btn" @click="toggleSidebar">
         <i :class="isSidebarOpen ? 'fas fa-chevron-left' : 'fas fa-chevron-right'"></i>
       </button>
     </div>
@@ -15,7 +15,7 @@
       <div class="nav-links-wrapper">
         <ul class="nav-links">
           <li
-            v-for="(link, idx) in links"
+            v-for="(link, idx) in props.links"
             :key="link.text"
             @pointerenter="showTooltip(idx, $event)"
             @pointerleave="hideTooltip"
@@ -42,7 +42,7 @@
             @pointerenter="showTooltip(links.length, $event)"
             @pointerleave="hideTooltip"
           >
-            <a @click="toggleSearch" class="btn btn--search">
+            <a class="btn btn--search" @click="toggleSearch">
               <i class="fas fa-search"></i>
               <span v-show="isSidebarOpen" class="menu-text">Поиск</span>
             </a>
