@@ -15,7 +15,7 @@
       >
         <div class="movie-poster-container">
           <div v-if="movie.poster || movie.cover">
-            <img :src="movie.poster || movie.cover" :alt="movie.title" class="movie-poster" />
+            <img :src="movie.poster || movie.cover" class="movie-poster" />
             <DeleteButton v-if="isHistory" @click.stop.prevent="removeFromHistory(movie.kp_id)" />
             <div v-if="movie.rating_kp || movie.rating_imdb" class="ratings-overlay">
               <span v-if="movie.rating_kp" class="rating-kp">
