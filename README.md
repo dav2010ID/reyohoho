@@ -46,7 +46,7 @@ ReYohoho — это современное веб-приложение, пред
 ---
 ## 🪞 Зеркала
 ### 🔹 Статус работы сервера:
-- [Status]([https://reyohoho.github.io/reyohoho](http://45.136.199.126:3001/status/reyohoho))
+- [Status](https://reyohoho.github.io/reyohoho](http://45.136.199.126:3001/status/reyohoho)
 
 ### 🔹 Новый фронтенд (Vue 3):
 - [reyohoho.github.io/reyohoho](https://reyohoho.github.io/reyohoho)
