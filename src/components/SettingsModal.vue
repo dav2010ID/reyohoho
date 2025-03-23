@@ -28,6 +28,8 @@
 
       <SliderRound v-model="isCardBorder">Окантовка вокруг карточек</SliderRound>
 
+      <SliderRound v-model="isHistoryAllowed">Сохранять историю просмотра</SliderRound>
+
       <!-- Кнопка сброса фона -->
       <div class="settings-actions">
         <button class="reset-button" @click="resetBackground">Сбросить фон</button>
@@ -70,6 +72,11 @@ const isCentered = computed({
 const isCardBorder = computed({
   get: () => store.getters['background/getCardBorder'],
   set: (value) => store.dispatch('background/toggleCardBorder', value)
+})
+
+const isHistoryAllowed = computed({
+  get: () => store.getters['isHistoryAllowed'],
+  set: (value) => store.dispatch('setHistoryAllowed', value)
 })
 
 // Навигация
