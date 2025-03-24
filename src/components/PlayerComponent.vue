@@ -607,7 +607,6 @@ html.no-scroll {
   justify-content: center;
   gap: 10px;
   margin: 0 auto;
-  padding: 10px;
   border-radius: 10px;
   backdrop-filter: blur(10px);
 }
