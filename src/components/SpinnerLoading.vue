@@ -24,6 +24,7 @@ defineProps({
   justify-content: center;
   align-items: center;
   pointer-events: none;
+  min-height: 100%;
 }
 
 .spinner {

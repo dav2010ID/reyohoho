@@ -1,6 +1,8 @@
 <template>
   <div class="movie-info">
     <div class="content">
+      <SpinnerLoading v-if="infoLoading" />
+
       <div v-if="errorMessage" class="error-message">
         {{ errorMessage }}
         <div v-if="errorCode !== 500" class="go-home">
@@ -208,6 +210,7 @@
 </template>
 
 <script setup>
+import SpinnerLoading from '@/components/SpinnerLoading.vue'
 import { ref, onMounted, onUnmounted, computed, watch } from 'vue'
 import { useRoute } from 'vue-router'
 import PlayerComponent from '@/components/PlayerComponent.vue'
@@ -217,6 +220,7 @@ import { getKpInfo, getShikiInfo } from '@/api/movies'
 import { TYPES_ENUM } from '@/constants'
 import { useNavbarStore } from '@/store/navbar'
 
+const infoLoading = ref(true)
 const store = useStore()
 const route = useRoute()
 const kp_id = ref(route.params.kp_id)
@@ -335,6 +339,7 @@ const similars = computed(() => transformMoviesData(movieInfo.value?.similars))
 
 onMounted(async () => {
   await fetchMovieInfo()
+  infoLoading.value = false
 })
 
 onUnmounted(async () => {
@@ -348,6 +353,7 @@ watch(
       navbarStore.clearHeaderContent()
       kp_id.value = newKpId
       await fetchMovieInfo()
+      infoLoading.value = false
     }
   },
   { immediate: true }
@@ -363,6 +369,9 @@ watch(
 </script>
 
 <style scoped>
+.content {
+  min-height: 100vh; 
+}
 /* Стили для информации о фильме */
 .content-card {
   overflow: hidden;
