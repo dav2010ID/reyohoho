@@ -330,6 +330,11 @@ const onKeyDown = (event) => {
 
 const setAspectRatio = (ratio) => {
   aspectRatio.value = ratio
+  setTimeout(() => {
+    if (isCentered.value) {
+      centerPlayer()
+    }
+  }, 310)
 }
 
 // При изменении выбранного плеера сохраняем его ключ в preferredPlayer
@@ -410,10 +415,16 @@ onBeforeUnmount(() => {
 
 .player-container {
   width: 100%;
-  transition: all 0.3s ease;
+  transition: 
+    max-width 0.3s ease-in-out,
+    max-height 0.3s ease-in-out;
+  overflow: hidden;
   padding-bottom: 10px;
 }
 .iframe-wrapper {
+  transition: 
+    padding-top 0.3s ease-in-out,
+    transform 0.3s ease-in-out;
   width: 100%;
 }
 .responsive-iframe {
