@@ -15,7 +15,7 @@ const routes = [
     component: MovieSearch,
     name: 'home',
     meta: {
-      title: 'Reyohoho - Поиск фильмов'
+      title: 'ReYohoho - Поиск фильмов'
     }
   },
   {
@@ -23,7 +23,7 @@ const routes = [
     component: TopMovies,
     name: 'top-movies',
     meta: {
-      title: 'Reyohoho - Популярное'
+      title: 'ReYohoho - Популярное'
     }
   },
   {
@@ -31,7 +31,7 @@ const routes = [
     component: MovieInfo,
     name: 'movie-info',
     meta: {
-      title: 'Reyohoho - Просмотр фильма'
+      title: 'ReYohoho - Просмотр фильма'
     }
   },
   {
@@ -39,7 +39,7 @@ const routes = [
     name: 'ContactsPage',
     component: ContactsPage,
     meta: {
-      title: 'Reyohoho - Контакты'
+      title: 'ReYohoho - Контакты'
     }
   },
   {
@@ -47,7 +47,7 @@ const routes = [
     name: 'SettingsModal',
     component: SettingsModal,
     meta: {
-      title: 'Reyohoho - Настройки'
+      title: 'ReYohoho - Настройки'
     }
   },
   {
@@ -68,7 +68,7 @@ const router = createRouter({
 })
 
 router.beforeEach((to, from, next) => {
-  const title = to.meta.title || 'Reyohoho'
+  const title = to.meta.title || 'ReYohoho'
   document.title = title
 
   if (to.hash) {

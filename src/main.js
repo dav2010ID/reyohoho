@@ -8,6 +8,9 @@ import store from './store/store'
 import { createPinia } from 'pinia'
 import jQuery from 'jquery'
 import { initYandexMetrika } from 'yandex-metrika-vue3'
+import { registerSW } from 'virtual:pwa-register'
+
+registerSW({ immediate: true })
 const $ = jQuery
 window.$ = $
 

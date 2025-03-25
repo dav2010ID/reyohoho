@@ -4,7 +4,7 @@
       <div class="logo-section">
         <router-link to="/" class="home-link" @click="closeSidebar">
           <img src="@/assets/basedge.png" alt="Base Edge" class="logo-image" />
-          <h1 v-show="isSidebarOpen" class="logo-title">Reyohoho</h1>
+          <h1 v-show="isSidebarOpen" class="logo-title">ReYohoho</h1>
         </router-link>
       </div>
       <button class="toggle-sidebar-btn" @click="toggleSidebar">

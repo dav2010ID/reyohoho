@@ -19,10 +19,10 @@
 
     <!-- Единый контейнер плеера -->
     <div
-      ref="containerRef" 
+      ref="containerRef"
       :class="['player-container', { 'theater-mode': theaterMode }]"
       :style="!theaterMode ? containerStyle : {}"
-      >
+    >
       <div class="iframe-wrapper" :style="!theaterMode ? iframeWrapperStyle : {}">
         <!-- <div class="fullscreen" @mousemove="showCloseButton"></div> -->
 
@@ -55,11 +55,14 @@
 
     <!-- Кнопки управления -->
     <div v-if="!isMobile" class="controls">
-
       <div class="tooltip-container">
         <button
-          class="dimming-btn" :class="{ active: dimmingEnabled }" @mouseenter="showTooltip('dimming')"
-          @mouseleave="activeTooltip = null" @click="toggleDimming">
+          class="dimming-btn"
+          :class="{ active: dimmingEnabled }"
+          @mouseenter="showTooltip('dimming')"
+          @mouseleave="activeTooltip = null"
+          @click="toggleDimming"
+        >
           <span class="material-icons">{{ dimmingEnabled ? 'light_mode' : 'dark_mode' }}</span>
         </button>
         <div v-show="activeTooltip === 'dimming'" class="custom-tooltip">
@@ -69,36 +72,56 @@
 
       <div class="tooltip-container">
         <button
-          class="blur-btn" @mouseenter="showTooltip('blur')" @mouseleave="activeTooltip = null"
-          @click="toggleBlur">
+          class="blur-btn"
+          @mouseenter="showTooltip('blur')"
+          @mouseleave="activeTooltip = null"
+          @click="toggleBlur"
+        >
           <span class="material-icons">blur_on</span>
         </button>
-        <div v-show="activeTooltip === 'blur'" class="custom-tooltip">Блюр</div>
+        <div v-show="activeTooltip === 'blur'" class="custom-tooltip">
+          {{ isElectron ? 'Блюр' : 'Блюр, функция доступна в приложении' }}
+        </div>
       </div>
 
       <div class="tooltip-container">
         <button
-          class="material-symbols-outlined" @mouseenter="showTooltip('compressor')"
-          @mouseleave="activeTooltip = null" @click="toggleCompressor">
+          class="material-symbols-outlined"
+          @mouseenter="showTooltip('compressor')"
+          @mouseleave="activeTooltip = null"
+          @click="toggleCompressor"
+        >
           <span class="material-icons">graphic_eq</span>
         </button>
-        <div v-show="activeTooltip === 'compressor'" class="custom-tooltip">Компрессор</div>
+        <div v-show="activeTooltip === 'compressor'" class="custom-tooltip">
+          {{ isElectron ? 'Компрессор' : 'Компрессор, функция доступна в приложении' }}
+        </div>
       </div>
 
       <div class="tooltip-container">
         <button
-          class="mirror-btn" @mouseenter="showTooltip('mirror')" @mouseleave="activeTooltip = null"
-          @click="toggleMirror">
+          class="mirror-btn"
+          @mouseenter="showTooltip('mirror')"
+          @mouseleave="activeTooltip = null"
+          @click="toggleMirror"
+        >
           <span class="material-icons">flip</span>
         </button>
-        <div v-show="activeTooltip === 'mirror'" class="custom-tooltip">Зеркало</div>
+        <div v-show="activeTooltip === 'mirror'" class="custom-tooltip">
+          {{ isElectron ? 'Зеркало' : 'Зеркало, функция доступна в приложении' }}
+        </div>
       </div>
 
       <div class="tooltip-container">
         <button
-          class="theater-mode-btn" @mouseenter="showTooltip('theater')" @mouseleave="activeTooltip = null"
-          @click="toggleTheaterMode">
-          <span class="material-symbols-outlined">{{ theaterMode ? 'fullscreen_exit' : 'capture' }}</span>
+          class="theater-mode-btn"
+          @mouseenter="showTooltip('theater')"
+          @mouseleave="activeTooltip = null"
+          @click="toggleTheaterMode"
+        >
+          <span class="material-symbols-outlined">{{
+            theaterMode ? 'fullscreen_exit' : 'aspect_ratio'
+          }}</span>
         </button>
         <div v-show="activeTooltip === 'theater'" class="custom-tooltip">
           {{ theaterMode ? 'Выйти из театрального режима' : 'Театральный режим' }}
@@ -108,8 +131,11 @@
       <!-- Кнопки соотношения сторон -->
       <div v-for="ratio in ['16:9', '12:5', '4:3']" :key="ratio" class="tooltip-container">
         <button
-          :class="['aspect-ratio-btn', { active: aspectRatio === ratio }]" @mouseenter="showTooltip(ratio)"
-          @mouseleave="activeTooltip = null" @click="setAspectRatio(ratio)">
+          :class="['aspect-ratio-btn', { active: aspectRatio === ratio }]"
+          @mouseenter="showTooltip(ratio)"
+          @mouseleave="activeTooltip = null"
+          @click="setAspectRatio(ratio)"
+        >
           {{ ratio }}
         </button>
         <div v-show="activeTooltip === ratio" class="custom-tooltip">
@@ -118,13 +144,21 @@
       </div>
 
       <!-- Кнопка центрирования с SliderRound в подсказке -->
-      <div class="tooltip-container" @mouseenter="showTooltip('centering')" @mouseleave="tryHideTooltip">
+      <div
+        class="tooltip-container"
+        @mouseenter="showTooltip('centering')"
+        @mouseleave="tryHideTooltip"
+      >
         <button class="center-btn" @click="centerPlayer">
           <span class="material-icons">center_focus_strong</span>
         </button>
         <div
-          v-show="activeTooltip === 'centering'" class="custom-tooltip advanced-tooltip"
-          @mouseenter="keepTooltipVisible" @mouseleave="hideTooltip">Отцентрировать плеер
+          v-show="activeTooltip === 'centering'"
+          class="custom-tooltip advanced-tooltip"
+          @mouseenter="keepTooltipVisible"
+          @mouseleave="hideTooltip"
+        >
+          Отцентрировать плеер
           <SliderRound v-model="isCentered" title="Автоцентрирование плеера" />
           <span class="tooltip-title">Автоцентрирование плеера</span>
         </div>
@@ -133,25 +167,26 @@
       <!-- Новая кнопка для открытия в приложении -->
       <div v-if="!isElectron" class="tooltip-container">
         <button
-          class="app-link-btn" @mouseenter="showTooltip('app_link')" @mouseleave="activeTooltip = null"
-          @click="openAppLink">
+          class="app-link-btn"
+          @mouseenter="showTooltip('app_link')"
+          @mouseleave="activeTooltip = null"
+          @click="openAppLink"
+        >
           <span class="material-icons">open_in_new</span>
         </button>
-        <div v-show="activeTooltip === 'app_link'" class="custom-tooltip">
-          Открыть в приложении
-        </div>
+        <div v-show="activeTooltip === 'app_link'" class="custom-tooltip">Открыть в приложении</div>
       </div>
     </div>
   </template>
 </template>
 
 <script setup>
-import { ref, onMounted, onBeforeUnmount, computed, watch, nextTick } from 'vue'
-import { useStore } from 'vuex'
+import { getPlayers } from '@/api/movies'
 import SpinnerLoading from '@/components/SpinnerLoading.vue'
 import SliderRound from '@/components/slider/SliderRound.vue'
-import { getPlayers } from '@/api/movies'
+import { computed, nextTick, onBeforeUnmount, onMounted, ref, watch } from 'vue'
 import { useRoute } from 'vue-router'
+import { useStore } from 'vuex'
 
 const store = useStore()
 const route = useRoute()
@@ -175,7 +210,9 @@ const maxPlayerHeightValue = ref(window.innerHeight * 0.9) // 90% от высо�
 const maxPlayerHeight = computed(() => `${maxPlayerHeightValue.value}px`)
 const isMobile = computed(() => store.state.isMobile)
 // Надо перенести в хранилище аналогично мобильной версии
-const isElectron = computed(() => {return !!window.electronAPI}) 
+const isElectron = computed(() => {
+  return !!window.electronAPI
+})
 
 // Подсказки
 const activeTooltip = ref(null)
@@ -354,6 +391,7 @@ const toggleBlur = () => {
     window.electronAPI.sendHotKey('F2')
   } else {
     showMessageToast('Доступно только в приложении ReYohoho Desktop')
+    window.open('https://t.me/ReYohoho/126', '_blank')
   }
 }
 
@@ -362,6 +400,7 @@ const toggleCompressor = () => {
     window.electronAPI.sendHotKey('F3')
   } else {
     showMessageToast('Доступно только в приложении ReYohoho Desktop')
+    window.open('https://t.me/ReYohoho/126', '_blank')
   }
 }
 
@@ -370,6 +409,7 @@ const toggleMirror = () => {
     window.electronAPI.sendHotKey('F4')
   } else {
     showMessageToast('Доступно только в приложении ReYohoho Desktop')
+    window.open('https://t.me/ReYohoho/126', '_blank')
   }
 }
 

@@ -16,9 +16,27 @@ export default defineConfig({
     }),
     VitePWA({
       registerType: 'autoUpdate',
+      injectRegister: 'inline',
       includeAssets: ['favicon.ico', 'robots.txt', 'icons/*'], // Указываем папку с иконками
+      workbox:{
+        clientsClaim: true,
+        skipWaiting: true,
+        maximumFileSizeToCacheInBytes:3000000
+      },
+      build: {
+        rollupOptions: {
+            output: {
+                assetFileNames: (assetInfo) => {
+                    const extType = assetInfo.name.split(".")[1]
+                    return `assets/${extType}/[name][extname]`
+                },
+                chunkFileNames: "assets/js/[name]-[hash].js"
+
+            }
+        }
+      },
       manifest: {
-        name: 'Reyohoho',
+        name: 'ReYohoho',
         short_name: 'Re',
         description: 'Просмотр фильмов и сериалов онлайн',
         theme_color: '#000000',
@@ -26,6 +44,7 @@ export default defineConfig({
         display: 'standalone',
         scope: base,
         start_url: base,
+        
         icons: [
           {
             src: `${base}icons/icon-192x192.png`,
