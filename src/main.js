@@ -14,6 +14,11 @@ registerSW({ immediate: true })
 const $ = jQuery
 window.$ = $
 
+window.addEventListener('vite:preloadError', (event) => {
+  console.log(`vite:preloadError ${event}`)
+  window.location.reload()
+})
+
 const app = createApp(App)
 
 const pinia = createPinia()
