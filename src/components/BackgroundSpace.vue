@@ -47,7 +47,7 @@ const fetchTopMovie = async () => {
   isFetching.value = true
 
   try {
-    const topMovies = await getMovies({ activeTime: '24h' })
+    const topMovies = await getMovies({ activeTime: '24h', limit: 1 })
 
     if (topMovies?.[0]?.cover) {
       const expiresAt = new Date().setHours(24, 0, 0, 0)

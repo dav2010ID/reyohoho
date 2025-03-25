@@ -27,8 +27,9 @@ const getPlayers = async (kpId) => {
   return data
 }
 
-const getMovies = async ({ activeTime = 'all', typeFilter = 'all' } = {}) => {
-  const { data } = await api.get(`/top/${activeTime}?type=${typeFilter}`)
+const getMovies = async ({ activeTime = 'all', typeFilter = 'all', limit = null } = {}) => {
+  const limitParam = limit ? `&limit=${limit}` : ''
+  const { data } = await api.get(`/top/${activeTime}?type=${typeFilter}${limitParam}`)
   return data
 }
 
