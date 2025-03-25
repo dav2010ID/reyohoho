@@ -19,10 +19,10 @@
 
     <!-- Единый контейнер плеера -->
     <div
-      ref="containerRef"
+      ref="containerRef" 
       :class="['player-container', { 'theater-mode': theaterMode }]"
       :style="!theaterMode ? containerStyle : {}"
-    >
+      >
       <div class="iframe-wrapper" :style="!theaterMode ? iframeWrapperStyle : {}">
         <!-- <div class="fullscreen" @mousemove="showCloseButton"></div> -->
 
@@ -55,38 +55,92 @@
 
     <!-- Кнопки управления -->
     <div v-if="!isMobile" class="controls">
-      <button class="dimming-btn" :class="{ active: dimmingEnabled }" @click="toggleDimming">
-        {{ dimmingEnabled ? 'Отключить' : 'Затемнение' }}
-      </button>
 
-      <button class="blur-btn" tabindex="-1" @click="toggleBlur">Блюр</button>
-      <button class="compressor-btn" tabindex="-1" @click="toggleCompressor">Компрессор</button>
-      <button class="mirror-btn" tabindex="-1" @click="toggleMirror">Зеркало</button>
+      <div class="tooltip-container">
+        <button
+          class="dimming-btn" :class="{ active: dimmingEnabled }" @mouseenter="showTooltip('dimming')"
+          @mouseleave="activeTooltip = null" @click="toggleDimming">
+          <span class="material-icons">{{ dimmingEnabled ? 'light_mode' : 'dark_mode' }}</span>
+        </button>
+        <div v-show="activeTooltip === 'dimming'" class="custom-tooltip">
+          {{ dimmingEnabled ? 'Отключить затемнение' : 'Включить затемнение' }}
+        </div>
+      </div>
 
-      <button class="theater-mode-btn" tabindex="-1" @click="toggleTheaterMode">
-        {{ theaterMode ? 'Выйти из театрального режима' : 'Театральный режим' }}
-      </button>
+      <div class="tooltip-container">
+        <button
+          class="blur-btn" @mouseenter="showTooltip('blur')" @mouseleave="activeTooltip = null"
+          @click="toggleBlur">
+          <span class="material-icons">blur_on</span>
+        </button>
+        <div v-show="activeTooltip === 'blur'" class="custom-tooltip">Блюр</div>
+      </div>
 
-      <button
-        :class="['aspect-ratio-btn', { active: aspectRatio === '16:9' }]"
-        @click="setAspectRatio('16:9')"
-      >
-        16:9
-      </button>
-      <button
-        :class="['aspect-ratio-btn', { active: aspectRatio === '12:5' }]"
-        @click="setAspectRatio('12:5')"
-      >
-        12:5
-      </button>
-      <button
-        :class="['aspect-ratio-btn', { active: aspectRatio === '4:3' }]"
-        @click="setAspectRatio('4:3')"
-      >
-        4:3
-      </button>
-      <button class="center-btn" @click="centerPlayer">Центр</button>
-      <SliderRound v-model="isCentered">Автоцентрирование плеера</SliderRound>
+      <div class="tooltip-container">
+        <button
+          class="material-symbols-outlined" @mouseenter="showTooltip('compressor')"
+          @mouseleave="activeTooltip = null" @click="toggleCompressor">
+          <span class="material-icons">graphic_eq</span>
+        </button>
+        <div v-show="activeTooltip === 'compressor'" class="custom-tooltip">Компрессор</div>
+      </div>
+
+      <div class="tooltip-container">
+        <button
+          class="mirror-btn" @mouseenter="showTooltip('mirror')" @mouseleave="activeTooltip = null"
+          @click="toggleMirror">
+          <span class="material-icons">flip</span>
+        </button>
+        <div v-show="activeTooltip === 'mirror'" class="custom-tooltip">Зеркало</div>
+      </div>
+
+      <div class="tooltip-container">
+        <button
+          class="theater-mode-btn" @mouseenter="showTooltip('theater')" @mouseleave="activeTooltip = null"
+          @click="toggleTheaterMode">
+          <span class="material-symbols-outlined">{{ theaterMode ? 'fullscreen_exit' : 'capture' }}</span>
+        </button>
+        <div v-show="activeTooltip === 'theater'" class="custom-tooltip">
+          {{ theaterMode ? 'Выйти из театрального режима' : 'Театральный режим' }}
+        </div>
+      </div>
+
+      <!-- Кнопки соотношения сторон -->
+      <div v-for="ratio in ['16:9', '12:5', '4:3']" :key="ratio" class="tooltip-container">
+        <button
+          :class="['aspect-ratio-btn', { active: aspectRatio === ratio }]" @mouseenter="showTooltip(ratio)"
+          @mouseleave="activeTooltip = null" @click="setAspectRatio(ratio)">
+          {{ ratio }}
+        </button>
+        <div v-show="activeTooltip === ratio" class="custom-tooltip">
+          Установить соотношение {{ ratio }}
+        </div>
+      </div>
+
+      <!-- Кнопка центрирования с SliderRound в подсказке -->
+      <div class="tooltip-container" @mouseenter="showTooltip('centering')" @mouseleave="tryHideTooltip">
+        <button class="center-btn" @click="centerPlayer">
+          <span class="material-icons">center_focus_strong</span>
+        </button>
+        <div
+          v-show="activeTooltip === 'centering'" class="custom-tooltip advanced-tooltip"
+          @mouseenter="keepTooltipVisible" @mouseleave="hideTooltip">Отцентрировать плеер
+          <SliderRound v-model="isCentered" title="Автоцентрирование плеера" />
+          <span class="tooltip-title">Автоцентрирование плеера</span>
+        </div>
+      </div>
+
+      <!-- Новая кнопка для открытия в приложении -->
+      <div v-if="!isElectron" class="tooltip-container">
+        <button
+          class="app-link-btn" @mouseenter="showTooltip('app_link')" @mouseleave="activeTooltip = null"
+          @click="openAppLink">
+          <span class="material-icons">open_in_new</span>
+        </button>
+        <div v-show="activeTooltip === 'app_link'" class="custom-tooltip">
+          Открыть в приложении
+        </div>
+      </div>
     </div>
   </template>
 </template>
@@ -120,6 +174,38 @@ const errorMessage = ref('')
 const maxPlayerHeightValue = ref(window.innerHeight * 0.9) // 90% от высоты экрана
 const maxPlayerHeight = computed(() => `${maxPlayerHeightValue.value}px`)
 const isMobile = computed(() => store.state.isMobile)
+// Надо перенести в хранилище аналогично мобильной версии
+const isElectron = computed(() => {return !!window.electronAPI}) 
+
+// Подсказки
+const activeTooltip = ref(null)
+const tooltipHovered = ref(false)
+let hideTimeout = null
+
+const showTooltip = (tooltipName) => {
+  activeTooltip.value = tooltipName
+  tooltipHovered.value = false
+  clearTimeout(hideTimeout)
+}
+
+const tryHideTooltip = () => {
+  // Если курсор не над подсказкой - скрываем через 300мс (для плавности)
+  if (!tooltipHovered.value) {
+    hideTimeout = setTimeout(() => {
+      activeTooltip.value = null
+    }, 300)
+  }
+}
+
+const keepTooltipVisible = () => {
+  tooltipHovered.value = true
+  clearTimeout(hideTimeout)
+}
+
+const hideTooltip = () => {
+  tooltipHovered.value = false
+  activeTooltip.value = null
+}
 
 // Используем геттер для получения aspectRatio из хранилища
 const aspectRatio = computed({
@@ -195,7 +281,7 @@ const centerPlayer = () => {
 const fetchPlayers = async () => {
   try {
     console.log(props.kpId)
-    
+
     const players = await getPlayers(props.kpId)
 
     // Преобразуем объект с плеерами в массив объектов
@@ -264,7 +350,7 @@ const showMessageToast = (message) => {
 }
 
 const toggleBlur = () => {
-  if (window.electronAPI) {
+  if (isElectron.value) {
     window.electronAPI.sendHotKey('F2')
   } else {
     showMessageToast('Доступно только в приложении ReYohoho Desktop')
@@ -272,7 +358,7 @@ const toggleBlur = () => {
 }
 
 const toggleCompressor = () => {
-  if (window.electronAPI) {
+  if (isElectron.value) {
     window.electronAPI.sendHotKey('F3')
   } else {
     showMessageToast('Доступно только в приложении ReYohoho Desktop')
@@ -280,7 +366,7 @@ const toggleCompressor = () => {
 }
 
 const toggleMirror = () => {
-  if (window.electronAPI) {
+  if (isElectron.value) {
     window.electronAPI.sendHotKey('F4')
   } else {
     showMessageToast('Доступно только в приложении ReYohoho Desktop')
@@ -330,6 +416,20 @@ const onKeyDown = (event) => {
 
 const setAspectRatio = (ratio) => {
   aspectRatio.value = ratio
+  setTimeout(() => {
+    if (isCentered.value) {
+      centerPlayer()
+    }
+  }, 310)
+}
+
+const openAppLink = () => {
+  const appUrl = `reyohoho://#${kp_id.value}`
+  try {
+    window.location.href = appUrl
+  } catch (e) {
+    console.error('Ошибка при открытии ссылки:', e)
+  }
 }
 
 // При изменении выбранного плеера сохраняем его ключ в preferredPlayer
@@ -364,8 +464,8 @@ onMounted(() => {
   updateScaleFactor()
   window.addEventListener('resize', updateScaleFactor)
   if (isCentered.value) {
-        centerPlayer()
-      }
+    centerPlayer()
+  }
 })
 
 onBeforeUnmount(() => {
@@ -401,21 +501,31 @@ onBeforeUnmount(() => {
     border-color 0.3s;
   width: 100%;
 }
+
 .custom-select:hover {
   border-color: #666;
 }
+
 .custom-select:focus {
   border-color: #558839;
 }
 
 .player-container {
   width: 100%;
-  transition: all 0.3s ease;
+  transition:
+    max-width 0.3s ease-in-out,
+    max-height 0.3s ease-in-out;
+  overflow: hidden;
   padding-bottom: 10px;
 }
+
 .iframe-wrapper {
+  transition:
+    padding-top 0.3s ease-in-out,
+    transform 0.3s ease-in-out;
   width: 100%;
 }
+
 .responsive-iframe {
   position: absolute;
   top: 0;
@@ -460,7 +570,7 @@ onBeforeUnmount(() => {
   background: rgba(255, 0, 0, 0.7);
   color: white;
   border: none;
-  width: 50px; /* Увеличиваем размер кнопки */
+  width: 50px;
   height: 50px;
   border-radius: 50%;
   cursor: pointer;
@@ -495,35 +605,88 @@ html.no-scroll {
   display: flex;
   flex-wrap: wrap;
   justify-content: center;
-  gap: 8px;
+  gap: 10px;
   margin: 0 auto;
-  padding: 5px;
+  border-radius: 10px;
+  backdrop-filter: blur(10px);
 }
+
 .controls button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
   background-color: #444;
   color: #fff;
   border: none;
-  padding: 10px 10px;
-  font-size: 14px;
-  border-radius: 5px;
+  padding: 12px;
+  font-size: 18px;
+  border-radius: 8px;
   cursor: pointer;
   transition:
     background-color 0.3s ease,
     transform 0.2s ease,
     box-shadow 0.3s ease;
   z-index: 4;
+  width: 50px;
+  height: 50px;
 }
+
 .controls button:hover {
   background-color: #555;
-  transform: translateY(-2px);
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+  transform: translateY(-3px);
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
 }
+
 .controls button:active {
   transform: translateY(0);
   box-shadow: none;
 }
+
 .controls button.active {
   background-color: #4caf50;
+  box-shadow: 0 0 10px rgba(76, 175, 80, 0.7);
+}
+
+.material-icons {
+  font-size: 24px;
+}
+
+.tooltip-container {
+  position: relative;
+  display: inline-block;
+}
+
+.custom-tooltip {
+  position: absolute;
+  top: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+  background-color: #333;
+  color: #fff;
+  padding: 5px;
+  border-radius: 4px;
+  font-size: 16px;
+  white-space: nowrap;
+  margin-top: 8px;
+  pointer-events: none;
+  text-align: center;
+}
+
+.advanced-tooltip {
+  white-space: normal;
+  padding: 15px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  top: calc(100% + 5px);
+  pointer-events: all;
+  text-align: center;
+}
+
+.tooltip-title {
+  font-size: 16px;
+  text-align: center;
 }
 
 .error-message {
@@ -550,6 +713,7 @@ html.no-scroll {
 .theater-mode-lock {
   pointer-events: none;
 }
+
 .theater-mode-unlock {
   pointer-events: all;
 }
