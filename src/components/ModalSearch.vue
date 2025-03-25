@@ -9,6 +9,7 @@
           placeholder="Введите название фильма"
           class="search-input"
           @keydown.enter="search"
+          autofocus
         />
       </div>
 
