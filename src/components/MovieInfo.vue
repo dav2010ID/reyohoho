@@ -196,13 +196,13 @@
         <!-- Секция с сиквелами и приквелами -->
         <div v-if="sequelsAndPrequels.length" class="related-movies">
           <h2>Сиквелы и приквелы</h2>
-          <CardsMovie :movies-list="sequelsAndPrequels" :loading="false" :is-history="false" />
+          <MovieList :movies-list="sequelsAndPrequels" :loading="false" :is-history="false" />
         </div>
 
         <!-- Секция с похожими фильмами -->
         <div v-if="similars.length" class="related-movies">
           <h2>Похожие</h2>
-          <CardsMovie :movies-list="similars" :loading="false" :is-history="false" />
+          <MovieList :movies-list="similars" :loading="false" :is-history="false" />
         </div>
       </div>
     </div>
@@ -210,15 +210,15 @@
 </template>
 
 <script setup>
-import SpinnerLoading from '@/components/SpinnerLoading.vue'
-import { ref, onMounted, onUnmounted, computed, watch } from 'vue'
-import { useRoute } from 'vue-router'
-import PlayerComponent from '@/components/PlayerComponent.vue'
-import CardsMovie from '@/components/CardsMovie.vue'
-import { useStore } from 'vuex'
 import { getKpInfo, getShikiInfo } from '@/api/movies'
+import { MovieList } from '@/components/MovieList/'
+import PlayerComponent from '@/components/PlayerComponent.vue'
+import SpinnerLoading from '@/components/SpinnerLoading.vue'
 import { TYPES_ENUM } from '@/constants'
 import { useNavbarStore } from '@/store/navbar'
+import { computed, onMounted, onUnmounted, ref, watch } from 'vue'
+import { useRoute } from 'vue-router'
+import { useStore } from 'vuex'
 
 const infoLoading = ref(true)
 const store = useStore()

@@ -24,15 +24,15 @@
       </div>
 
       <!-- Контейнер для сетки фильмов и спиннера -->
-      <CardsMovie :movies-list="movies" :is-history="false" :loading="loading" />
+      <MovieList :movies-list="movies" :is-history="false" :loading="loading" />
     </div>
   </div>
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue'
-import CardsMovie from '@/components/CardsMovie.vue'
 import { getMovies } from '@/api/movies'
+import { MovieList } from '@/components/MovieList'
+import { onMounted, ref } from 'vue'
 
 // Состояния
 const movies = ref([])

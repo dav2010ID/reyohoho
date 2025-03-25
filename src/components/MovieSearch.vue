@@ -47,13 +47,13 @@ ref="searchInput" v-model="searchTerm" :placeholder="getPlaceholder()" class="se
               />
             </span>
           </h2>
-          <CardsMovie :movies-list="history" :is-history="true" :loading="loading" />
+          <MovieList :movies-list="history" :is-history="true" :loading="loading" />
         </div>
 
         <!-- Результаты поиска -->
         <div v-if="searchPerformed">
           <h2>Результаты поиска</h2>
-          <CardsMovie :movies-list="movies" :is-history="false" :loading="loading" />
+          <MovieList :movies-list="movies" :is-history="false" :loading="loading" />
           <div v-if="movies.length === 0 && !loading" class="no-results">
             Ничего не найдено
           </div>
@@ -73,15 +73,15 @@ ref="searchInput" v-model="searchTerm" :placeholder="getPlaceholder()" class="se
 </template>
 
 <script setup>
-import { ref, computed, watch, onMounted } from 'vue'
-import { useRouter } from 'vue-router'
-import { useStore } from 'vuex'
-import CardsMovie from '@/components/CardsMovie.vue'
-import FooterDonaters from '@/components/FooterDonaters.vue'
+import { apiSearch } from '@/api/movies'
 import BaseModal from '@/components/BaseModal.vue'
 import DeleteButton from '@/components/buttons/DeleteButton.vue'
+import FooterDonaters from '@/components/FooterDonaters.vue'
+import { MovieList } from '@/components/MovieList/'
 import debounce from 'lodash/debounce'
-import { apiSearch } from '@/api/movies'
+import { computed, onMounted, ref, watch } from 'vue'
+import { useRouter } from 'vue-router'
+import { useStore } from 'vuex'
 
 const store = useStore()
 const router = useRouter()
