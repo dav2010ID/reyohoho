@@ -1,7 +1,7 @@
-import api from '@/api/axios'
+import { getApi } from '@/api/axios'
 
 // ===== Симуляция ошибки =====
-let isErrorSimulationEnabled = false  // Переменная для включения/отключения симуляции ошибки
+let isErrorSimulationEnabled = false // Переменная для включения/отключения симуляции ошибки
 const simulatedErrorCode = 500
 
 const simulateErrorIfNeeded = async () => {
@@ -16,27 +16,28 @@ const simulateErrorIfNeeded = async () => {
 // Универсальный вызов запроса с симуляцией ошибки
 const apiCall = async (callFn) => {
   await simulateErrorIfNeeded()
-  return await callFn()
+  const api = await getApi()
+  return await callFn(api)
 }
 
 // ===== API-функции =====
 const apiSearch = async (searchTerm) => {
-  const { data } = await apiCall(() => api.get(`/search/${searchTerm}`))
+  const { data } = await apiCall((api) => api.get(`/search/${searchTerm}`))
   return data
 }
 
 const getShikiInfo = async (shikiId) => {
-  const { data } = await apiCall(() => api.get(`/shiki_info/${shikiId}`))
+  const { data } = await apiCall((api) => api.get(`/shiki_info/${shikiId}`))
   return data
 }
 
 const getKpInfo = async (kpId) => {
-  const { data } = await apiCall(() => api.get(`/kp_info2/${kpId}`))
+  const { data } = await apiCall((api) => api.get(`/kp_info2/${kpId}`))
   return data
 }
 
 const getPlayers = async (kpId) => {
-  const { data } = await apiCall(() =>
+  const { data } = await apiCall((api) =>
     api.post(
       '/cache',
       new URLSearchParams({
@@ -51,14 +52,14 @@ const getPlayers = async (kpId) => {
 
 const getMovies = async ({ activeTime = 'all', typeFilter = 'all', limit = null } = {}) => {
   const limitParam = limit ? `&limit=${limit}` : ''
-  const { data } = await apiCall(() =>
+  const { data } = await apiCall((api) =>
     api.get(`/top/${activeTime}?type=${typeFilter}${limitParam}`)
   )
   return data
 }
 
 const getDons = async () => {
-  const { data } = await apiCall(() => api.get('/get_dons'))
+  const { data } = await apiCall((api) => api.get('/get_dons'))
   return data
 }
 

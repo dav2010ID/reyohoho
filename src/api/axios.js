@@ -1,23 +1,31 @@
 import axios from 'axios'
+import { getConfigValue, initRemoteConfig } from '@/firebase/firebase'
 
-const api = axios.create({
-  baseURL: import.meta.env.VITE_APP_API_URL,
-  headers: { 'Content-Type': 'application/json' }
-})
+let apiInstance = null
 
-api.interceptors.request.use(
-  (config) => {
-    return config
-  },
-  (err) => Promise.reject(err)
-)
+export const getApi = async () => {
+  if (!apiInstance) {
+    await initRemoteConfig()
+    const apiUrl = getConfigValue('api_url') || import.meta.env.VITE_APP_API_URL
 
-api.interceptors.response.use(
-  (res) => res,
-  async (err) => {
-    console.error('Error', err)
-    return Promise.reject(err)
+    apiInstance = axios.create({
+      baseURL: apiUrl,
+      headers: { 'Content-Type': 'application/json' }
+    })
+    apiInstance.interceptors.request.use(
+      (config) => {
+        return config
+      },
+      (err) => Promise.reject(err)
+    )
+
+    apiInstance.interceptors.response.use(
+      (res) => res,
+      async (err) => {
+        console.error('Error', err)
+        return Promise.reject(err)
+      }
+    )
   }
-)
-
-export default api
+  return apiInstance
+}

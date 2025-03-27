@@ -1,8 +1,8 @@
 import 'core-js/stable'
 import 'regenerator-runtime/runtime'
-import { createApp } from 'vue'  // Import createApp from Vue
+import { createApp } from 'vue'
 import App from './App.vue'
-import router from './router' // Import the router
+import router from './router'
 import VueCookies from 'vue3-cookies'
 import store from './store/store'
 import { createPinia } from 'pinia'
@@ -29,7 +29,7 @@ app
   .use(store)
   .use(pinia)
   .use(initYandexMetrika, {
-    id: 94822173,
+    id: import.meta.env.VITE_YANDEX_METRIKA_ID,
     router: router,
     env: process.env.NODE_ENV
   })
