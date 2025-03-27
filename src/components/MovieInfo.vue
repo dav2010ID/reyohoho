@@ -192,6 +192,35 @@
           </p>
         </div>
 
+        <div v-if="videos.length" class="yt-video-container">
+          <h2>Трейлеры</h2>
+
+          <div class="yt-video-thumbnails">
+            <div
+              v-for="(video, index) in videos"
+              :key="index"
+              class="yt-thumbnail"
+              :class="{ active: currentTrailerVideoIndex === index }"
+              @click="selectTrailerVideo(index)"
+            >
+              {{ video.name }}
+            </div>
+          </div>
+
+          <div class="yt-main-player">
+            <iframe
+              v-if="currentTrailerVideo"
+              width="100%"
+              height="400"
+              :src="currentTrailerVideo.iframeUrl"
+              frameborder="0"
+              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+              allowfullscreen
+            ></iframe>
+            <div v-else class="yt-no-video">Видео не найдено</div>
+          </div>
+        </div>
+
         <!-- Секция с сиквелами и приквелами -->
         <div v-if="sequelsAndPrequels.length" class="related-movies">
           <h2>Сиквелы и приквелы</h2>
@@ -228,6 +257,7 @@ const errorMessage = ref('')
 const errorCode = ref(null)
 const movieInfo = ref(null)
 const navbarStore = useNavbarStore()
+const currentTrailerVideoIndex = ref(0)
 
 const setDocumentTitle = () => {
   if (movieInfo.value) {
@@ -328,7 +358,18 @@ const fetchMovieInfo = async () => {
 const sequelsAndPrequels = computed(() =>
   transformMoviesData(movieInfo.value?.sequels_and_prequels)
 )
+
 const similars = computed(() => transformMoviesData(movieInfo.value?.similars))
+
+const videos = computed(() => movieInfo.value?.videos)
+
+const currentTrailerVideo = computed(() => {
+  return movieInfo.value?.videos[currentTrailerVideoIndex.value] || null
+})
+
+const selectTrailerVideo = (index) => {
+  currentTrailerVideoIndex.value = index
+}
 
 onMounted(async () => {
   await fetchMovieInfo()
@@ -523,5 +564,52 @@ watch(
   .info-content {
     flex-direction: column;
   }
+}
+
+/* trailers */
+.yt-video-container {
+  max-width: 800px;
+  margin: 0 0 15px;
+  text-align: left;
+  color: #fff;
+}
+
+.yt-video-thumbnails {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 20px;
+  overflow-x: auto;
+  padding-bottom: 10px;
+}
+
+.yt-thumbnail {
+  padding: 10px 15px;
+  background: #161616;
+  border-radius: 4px;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: all 0.3s ease;
+}
+
+.yt-thumbnail:hover {
+  background: #222222;
+}
+
+.yt-thumbnail.active {
+  background: #333333;
+  color: white;
+}
+
+.yt-main-player {
+  background: #000;
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.yt-no-video {
+  padding: 50px;
+  text-align: center;
+  background: #f5f5f5;
+  color: #666;
 }
 </style>
