@@ -167,6 +167,9 @@
                   <strong>Оригинальное название:</strong> {{ movieInfo.name_original }}
                 </li>
                 <li v-if="movieInfo.slogan"><strong>Слоган:</strong> {{ movieInfo.slogan }}</li>
+                <li v-if="movieInfo.production_companies">
+                  <strong>Продакшн:</strong> {{ movieInfo.production_companies }}
+                </li>
                 <li v-if="movieInfo.countries?.length">
                   <strong>Страна производства:</strong>
                   {{ movieInfo.countries.map((item) => item.country).join(', ') }}
@@ -279,7 +282,7 @@ const fetchMovieInfo = async () => {
     navbarStore.setHeaderContent({
       text: movieInfo.value.title,
       imageUrl: movieInfo.value.logo_url
-      })
+    })
 
     setDocumentTitle()
 
@@ -360,7 +363,7 @@ watch(
 
 <style scoped>
 .content {
-  min-height: 100vh; 
+  min-height: 100vh;
 }
 /* Стили для информации о фильме */
 .content-card {
@@ -373,15 +376,15 @@ watch(
   height: 80px;
   width: 100%;
   display: flex;
-  align-items: center; 
-  justify-content: center; 
-  overflow: hidden; 
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
 }
 
 .content-logo {
   max-height: 80px;
   height: 80px;
-  width: auto; 
+  width: auto;
   object-fit: contain;
   max-width: 100%;
 }
@@ -502,7 +505,7 @@ watch(
   .content-header,
   .content-logo,
   .content-title {
-    display: none; 
+    display: none;
   }
 
   .content-subtitle {
