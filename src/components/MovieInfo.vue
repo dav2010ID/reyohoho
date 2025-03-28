@@ -179,7 +179,7 @@
                   {{ movieInfo.genres.map((item) => item.genre).join(', ') }}
                 </li>
                 <li v-if="movieInfo.film_length">
-                  <strong>Продолжительность:</strong> {{ movieInfo.film_length }} мин.
+                  <strong>Продолжительность:</strong> {{ formatTime(movieInfo.film_length) }}
                 </li>
               </ul>
             </div>
@@ -278,6 +278,12 @@ const transformMoviesData = (movies) => {
     poster: movie.poster_url_preview || movie.poster_url,
     title: movie.name_ru || movie.name_en || movie.name_original
   }))
+}
+
+const formatTime = (minutes) => {
+  const hours = Math.floor(minutes / 60)
+  const mins = minutes % 60
+  return `${hours} ч. ${mins} мин.`
 }
 
 const fetchMovieInfo = async () => {
