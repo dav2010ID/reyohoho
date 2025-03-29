@@ -68,21 +68,7 @@ const getKpIDfromIMDB = async (imdb_id) => {
   return data
 }
 
-const getKpIDfromTMDB = async (tmdb_id) => {
-  const { data } = await apiCall((api) => api.get(`/tmdb_to_kp/${tmdb_id}`))
-  return data
-}
-
-export {
-  apiSearch,
-  getShikiInfo,
-  getKpInfo,
-  getPlayers,
-  getMovies,
-  getDons,
-  getKpIDfromIMDB,
-  getKpIDfromTMDB
-}
+export { apiSearch, getShikiInfo, getKpInfo, getPlayers, getMovies, getDons, getKpIDfromIMDB }
 
 // ===== Универсальный обработчик ошибок =====
 export const handleApiError = (error) => {

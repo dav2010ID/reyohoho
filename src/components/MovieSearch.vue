@@ -15,9 +15,6 @@
         <button :class="{ active: searchType === 'imdb' }" @click="setSearchType('imdb')">
           ID IMDB
         </button>
-        <button :class="{ active: searchType === 'tmdb' }" @click="setSearchType('tmdb')">
-          ID TMDB
-        </button>
       </div>
 
       <!-- Поиск -->
@@ -86,7 +83,7 @@
 </template>
 
 <script setup>
-import { apiSearch, handleApiError, getKpIDfromIMDB, getKpIDfromTMDB } from '@/api/movies'
+import { apiSearch, handleApiError, getKpIDfromIMDB } from '@/api/movies'
 import BaseModal from '@/components/BaseModal.vue'
 import DeleteButton from '@/components/buttons/DeleteButton.vue'
 import ErrorMessage from '@/components/ErrorMessage.vue'
@@ -118,10 +115,10 @@ const setSearchType = (type) => {
 }
 
 const handleInput = (event) => {
-  if (searchType.value !== 'title') {
-    searchTerm.value = event.target.value.replace(/\D+/g, '')
-  } else {
+  if (searchType.value === 'title') {
     searchTerm.value = event.target.value
+  } else {
+    searchTerm.value = event.target.value.replace(/\D+/g, '')
   }
 }
 
@@ -132,8 +129,7 @@ const getPlaceholder = () => {
       title: 'Введите название фильма',
       kinopoisk: 'Пример: 301 (Матрица)',
       shikimori: 'Пример: 28171 (Повар-боец Сома)',
-      imdb: 'Пример: 0198781 (Корпорация монстров)',
-      tmdb: 'Пример: 108978 (Ричер)'
+      imdb: 'Пример: 0198781 (Корпорация монстров)'
     }[searchType.value] || 'Введите название фильма'
   )
 }
@@ -172,22 +168,13 @@ const performSearch = async () => {
       return
     }
 
-    if (searchType.value === 'imdb' || searchType.value === 'tmdb') {
+    if (searchType.value === 'imdb') {
       if (!/^\d+$/.test(searchTerm.value)) {
         searchTerm.value = searchTerm.value.replace(/\D/g, '')
         return
       }
       if (searchType.value === 'imdb') {
         const response = await getKpIDfromIMDB(searchTerm.value)
-        if (response.id_kp) {
-          router.push({ name: 'movie-info', params: { kp_id: `${response.id_kp}` } })
-        } else {
-          throw new Error('Не найдено')
-        }
-        return
-      }
-      if (searchType.value === 'tmdb') {
-        const response = await getKpIDfromTMDB(searchTerm.value)
         if (response.id_kp) {
           router.push({ name: 'movie-info', params: { kp_id: `${response.id_kp}` } })
         } else {
@@ -240,17 +227,12 @@ onMounted(() => {
     setSearchType('imdb')
     searchTerm.value = imdbId
     performSearch()
-  } else if (hash.startsWith('#tmdb=')) {
-    const tmdbId = decodeURIComponent(hash.replace('#tmdb=', ''))
-    setSearchType('tmdb')
-    searchTerm.value = tmdbId
-    performSearch()
   }
 })
 
 // Автопоиск с задержкой (только для поиска по названию)
 watch(searchTerm, () => {
-  if (searchType.value === 'kinopoisk' || searchType.value === 'shikimori') {
+  if (searchType.value !== 'title') {
     return
   }
   debouncedPerformSearch()

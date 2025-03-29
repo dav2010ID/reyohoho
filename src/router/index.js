@@ -25,8 +25,6 @@ router.beforeEach((to, from, next) => {
       next()
     } else if (to.hash.startsWith('#imdb=')) {
       next()
-    } else if (to.hash.startsWith('#tmdb=')) {
-      next()
     } else {
       const hash = to.hash.slice(1)
       next({ path: `/movie/${hash}` })
