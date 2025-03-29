@@ -23,6 +23,10 @@ router.beforeEach((to, from, next) => {
   if (to.hash) {
     if (to.hash.startsWith('#search=')) {
       next()
+    } else if (to.hash.startsWith('#imdb=')) {
+      next()
+    } else if (to.hash.startsWith('#tmdb=')) {
+      next()
     } else {
       const hash = to.hash.slice(1)
       next({ path: `/movie/${hash}` })

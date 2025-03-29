@@ -63,7 +63,26 @@ const getDons = async () => {
   return data
 }
 
-export { apiSearch, getShikiInfo, getKpInfo, getPlayers, getMovies, getDons }
+const getKpIDfromIMDB = async (imdb_id) => {
+  const { data } = await apiCall((api) => api.get(`/imdb_to_kp/${imdb_id}`))
+  return data
+}
+
+const getKpIDfromTMDB = async (tmdb_id) => {
+  const { data } = await apiCall((api) => api.get(`/tmdb_to_kp/${tmdb_id}`))
+  return data
+}
+
+export {
+  apiSearch,
+  getShikiInfo,
+  getKpInfo,
+  getPlayers,
+  getMovies,
+  getDons,
+  getKpIDfromIMDB,
+  getKpIDfromTMDB
+}
 
 // ===== Универсальный обработчик ошибок =====
 export const handleApiError = (error) => {

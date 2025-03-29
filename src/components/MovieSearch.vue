@@ -12,6 +12,12 @@
         <button :class="{ active: searchType === 'shikimori' }" @click="setSearchType('shikimori')">
           ID Shikimori
         </button>
+        <button :class="{ active: searchType === 'imdb' }" @click="setSearchType('imdb')">
+          ID IMDB
+        </button>
+        <button :class="{ active: searchType === 'tmdb' }" @click="setSearchType('tmdb')">
+          ID TMDB
+        </button>
       </div>
 
       <!-- Поиск -->
@@ -80,7 +86,7 @@
 </template>
 
 <script setup>
-import { apiSearch, handleApiError } from '@/api/movies'
+import { apiSearch, handleApiError, getKpIDfromIMDB, getKpIDfromTMDB } from '@/api/movies'
 import BaseModal from '@/components/BaseModal.vue'
 import DeleteButton from '@/components/buttons/DeleteButton.vue'
 import ErrorMessage from '@/components/ErrorMessage.vue'
@@ -125,15 +131,12 @@ const getPlaceholder = () => {
     {
       title: 'Введите название фильма',
       kinopoisk: 'Пример: 301 (Матрица)',
-      shikimori: 'Пример: 28171 (Повар-боец Сома)'
+      shikimori: 'Пример: 28171 (Повар-боец Сома)',
+      imdb: 'Пример: 0198781 (Корпорация монстров)',
+      tmdb: 'Пример: 108978 (Ричер)'
     }[searchType.value] || 'Введите название фильма'
   )
 }
-
-// Динамический inputmode: для поиска по ID — numeric, иначе — text
-// const inputMode = computed(() => {
-//   return (searchType.value === 'kinopoisk' || searchType.value === 'shikimori') ? 'numeric' : 'text'
-// })
 
 // Очистка поиска
 const resetSearch = () => {
@@ -167,6 +170,31 @@ const performSearch = async () => {
       const idPrefix = searchType.value === 'shikimori' ? 'shiki' : ''
       router.push({ name: 'movie-info', params: { kp_id: `${idPrefix}${searchTerm.value}` } })
       return
+    }
+
+    if (searchType.value === 'imdb' || searchType.value === 'tmdb') {
+      if (!/^\d+$/.test(searchTerm.value)) {
+        searchTerm.value = searchTerm.value.replace(/\D/g, '')
+        return
+      }
+      if (searchType.value === 'imdb') {
+        const response = await getKpIDfromIMDB(searchTerm.value)
+        if (response.id_kp) {
+          router.push({ name: 'movie-info', params: { kp_id: `${response.id_kp}` } })
+        } else {
+          throw new Error('Не найдено')
+        }
+        return
+      }
+      if (searchType.value === 'tmdb') {
+        const response = await getKpIDfromTMDB(searchTerm.value)
+        if (response.id_kp) {
+          router.push({ name: 'movie-info', params: { kp_id: `${response.id_kp}` } })
+        } else {
+          throw new Error('Не найдено')
+        }
+        return
+      }
     }
 
     // Поиск по названию
@@ -204,8 +232,18 @@ const debouncedPerformSearch = debounce(() => {
 onMounted(() => {
   const hash = window.location.hash
   if (hash.startsWith('#search=')) {
-    const searchQuery = decodeURIComponent(hash.slice(8))
+    const searchQuery = decodeURIComponent(hash.replace('#search=', ''))
     searchTerm.value = searchQuery
+    performSearch()
+  } else if (hash.startsWith('#imdb=')) {
+    const imdbId = decodeURIComponent(hash.replace('#imdb=', ''))
+    setSearchType('imdb')
+    searchTerm.value = imdbId
+    performSearch()
+  } else if (hash.startsWith('#tmdb=')) {
+    const tmdbId = decodeURIComponent(hash.replace('#tmdb=', ''))
+    setSearchType('tmdb')
+    searchTerm.value = tmdbId
     performSearch()
   }
 })
