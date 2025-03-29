@@ -232,10 +232,10 @@ describe('Тесты компонента MovieList', () => {
     })
 
     await currentSwipe.trigger('touchstart', {
-      touches: [{ clientX: 300 }]
+      touches: [{ clientX: 300, clientY: 0 }]
     })
     await currentSwipe.trigger('touchmove', {
-      touches: [{ clientX: 49 }]
+      touches: [{ clientX: 49, clientY: 10 }] // небольшое вертикальное смещение, чтоб swipe реагировал
     })
     await currentSwipe.trigger('touchend')
     vi.advanceTimersByTime(300)
@@ -276,10 +276,10 @@ describe('Тесты компонента MovieList', () => {
     })
 
     await currentSwipe.trigger('touchstart', {
-      touches: [{ clientX: 100 }]
+      touches: [{ clientX: 100, clientY: 0 }]
     })
     await currentSwipe.trigger('touchmove', {
-      touches: [{ clientX: 30 }]
+      touches: [{ clientX: 30, clientY: 10 }] // небольшое вертикальное смещение, чтоб swipe реагировал
     })
     await currentSwipe.trigger('touchend')
     vi.advanceTimersByTime(300)

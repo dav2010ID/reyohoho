@@ -11,8 +11,6 @@ export const usePlayerStore = defineStore(PLAYER_STORE_NAME, {
 
   actions: {
     updateAspectRatio(ratio) {
-      // eslint-disable-next-line no-debugger
-      debugger
       this.aspectRatio = ratio
     },
     updateCentering(isCentered) {

@@ -6,7 +6,7 @@
     @touchend="onTouchEnd"
   >
     <div
-      v-show="!disabled"
+      v-show="!disabled && !isScrolling"
       class="swipe-background"
       :class="{
         'swipe-left': deltaX > 0,
@@ -40,7 +40,7 @@ import TrashIcon from '@/components/icons/TrashIcon.vue'
 import { computed, nextTick, ref, useTemplateRef } from 'vue'
 
 const {
-  thresholdPercent = 50,
+  thresholdPercent = 55,
   disabled = false,
   backgroundSwipeColor = '#e53935'
 } = defineProps({
@@ -54,10 +54,14 @@ const emit = defineEmits(['slide'])
 const swipeElement = useTemplateRef('swipeElement')
 const startX = ref(0)
 const currentX = ref(0)
+const startY = ref(0)
+const currentY = ref(0)
 const swiping = ref(false)
 const width = ref(0)
+const isScrolling = ref(false)
 
 const deltaX = computed(() => currentX.value - startX.value)
+const deltaY = computed(() => currentY.value - startY.value)
 const translateValue = computed(() => (swiping.value ? deltaX.value : 0))
 const actualThreshold = computed(() => (width.value * thresholdPercent) / 100)
 
@@ -66,18 +70,41 @@ function onTouchStart(e) {
 
   width.value = swipeElement.value?.offsetWidth ?? 0
   startX.value = e.touches[0].clientX
+  startY.value = e.touches[0].clientY
   currentX.value = startX.value
-  swiping.value = true
+  currentY.value = startY.value
+  swiping.value = false
+  isScrolling.value = false
 }
 
 function onTouchMove(e) {
-  if (disabled) return
+  if (disabled || isScrolling.value) return
 
   currentX.value = e.touches[0].clientX
+  currentY.value = e.touches[0].clientY
+
+  const absDeltaX = Math.abs(deltaX.value)
+  const absDeltaY = Math.abs(deltaY.value)
+
+  if (!swiping.value && !isScrolling.value) {
+    if (absDeltaY > absDeltaX) {
+      isScrolling.value = true
+      swiping.value = false
+    } else if (absDeltaX > absDeltaY && absDeltaX > 10) {
+      swiping.value = true
+    }
+  }
+
+  if (swiping.value) {
+    e.preventDefault()
+  }
 }
 
 function onTouchEnd() {
-  if (disabled) return
+  if (disabled || !swiping.value) {
+    resetSwipe()
+    return
+  }
 
   if (deltaX.value < -actualThreshold.value) {
     swiping.value = false
@@ -104,13 +131,17 @@ function onTouchEnd() {
     }, 300)
     return
   }
+
   resetSwipe()
 }
 
 function resetSwipe() {
   startX.value = 0
   currentX.value = 0
+  startY.value = 0
+  currentY.value = 0
   swiping.value = false
+  isScrolling.value = false
   if (swipeElement.value) {
     swipeElement.value.style.transform = ''
     swipeElement.value.style.opacity = ''
