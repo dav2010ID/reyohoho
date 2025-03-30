@@ -30,16 +30,16 @@ const navLinks = [
   { to: '/top', icon: 'fa-solid fa-trophy', text: 'Популярное' },
   { href: 'https://t.me/ReYohoho/126', icon: 'fab fa-telegram', text: 'Приложение' },
   {
-    href: 'https://github.com/reyohoho/reyohoho-chrome-ff-ext/blob/master/README.MD',
+    href: 'https://gitlab.com/reyohoho/reyohoho-chrome-ff-ext',
     icon: 'fa-solid fa-puzzle-piece',
     text: 'Расширение'
   },
   {
-    href: 'https://gist.github.com/reyohoho/93d835ada55bb1175b4249cbf1f1bf20',
+    href: 'https://gitlab.com/-/snippets/4830428',
     icon: 'fas fa-heart',
     text: 'Благодарность'
   },
-  { href: 'https://github.com/reyohoho/reyohoho', icon: 'fab fa-github', text: 'Github' },
+  { href: 'https://gitlab.com/reyohoho/reyohoho', icon: 'fab fa-gitlab', text: 'Gitlab' },
   { href: 'https://t.me/ReYohoho', icon: 'fab fa-telegram', text: 'Telegram' },
   {
     href: 'http://45.136.199.126:3001/status/reyohoho',
