@@ -31,6 +31,7 @@
         <!-- <div class="fullscreen" @mousemove="showCloseButton"></div> -->
 
         <iframe
+          v-show="!iframeLoading && selectedPlayerInternal?.iframe"
           ref="playerIframe"
           :src="selectedPlayerInternal?.iframe"
           frameborder="0"
@@ -383,7 +384,6 @@ const fetchPlayers = async () => {
     errorCode.value = code
     console.error('Ошибка при загрузке плееров:', error)
   }
-  iframeLoading.value = false
 }
 
 const toggleBlur = () => {
@@ -482,10 +482,9 @@ const onIframeLoad = () => {
   iframeLoading.value = false
 }
 
-// Изменение плеера
 watch(selectedPlayerInternal, (newVal) => {
   if (newVal) {
-    iframeLoading.value = true // Включаем спиннер при смене плеера
+    iframeLoading.value = true
     const normalizedKey = normalizeKey(newVal.key)
     playerStore.updatePreferredPlayer(normalizedKey)
     emit('update:selectedPlayer', newVal)
