@@ -171,7 +171,6 @@ const performSearch = async () => {
     if (searchType.value === 'imdb') {
       if (!/^\d+$/.test(searchTerm.value)) {
         searchTerm.value = searchTerm.value.replace(/\D/g, '')
-        return
       }
       if (searchType.value === 'imdb') {
         const response = await getKpIDfromIMDB(searchTerm.value)
