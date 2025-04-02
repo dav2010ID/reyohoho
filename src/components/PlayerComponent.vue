@@ -6,7 +6,11 @@
     <div class="players-list">
       <span>Плеер:</span>
       <button class="player-btn" @click="openPlayerModal">
-        {{ selectedPlayerInternal ? cleanName(selectedPlayerInternal.translate).toUpperCase() : 'Загрузка плееров...' }}
+        {{
+          selectedPlayerInternal
+            ? cleanName(selectedPlayerInternal.translate).toUpperCase()
+            : 'Загрузка плееров...'
+        }}
       </button>
     </div>
 
@@ -342,7 +346,7 @@ const fetchPlayers = async () => {
       if (preferredPlayer.value) {
         const normalizedPreferred = normalizeKey(preferredPlayer.value)
         const preferred = playersInternal.value.find(
-          player => normalizeKey(player.key) === normalizedPreferred
+          (player) => normalizeKey(player.key) === normalizedPreferred
         )
         selectedPlayerInternal.value = preferred || playersInternal.value[0]
       } else {
@@ -478,12 +482,16 @@ watch(selectedPlayerInternal, (newVal) => {
   }
 })
 
-watch(() => route.params.kp_id, async (newKpId) => {
-  if (newKpId && newKpId !== kp_id.value) {
-    kp_id.value = newKpId
-    if (isCentered.value) centerPlayer()
-  }
-}, { immediate: true })
+watch(
+  () => route.params.kp_id,
+  async (newKpId) => {
+    if (newKpId && newKpId !== kp_id.value) {
+      kp_id.value = newKpId
+      if (isCentered.value) centerPlayer()
+    }
+  },
+  { immediate: true }
+)
 
 onMounted(() => {
   iframeLoading.value = true
@@ -540,8 +548,8 @@ onBeforeUnmount(() => {
 }
 
 .player-btn:active {
-  background: #17850b;;
-  border-color: #17850b;;
+  background: #17850b;
+  border-color: #17850b;
 }
 
 .player-btn:focus {

@@ -36,6 +36,11 @@
       </div>
 
       <div class="settings-group">
+        <h2>Трейлеры</h2>
+        <SliderRound v-model="areTrailersActive">Активировать трейлеры</SliderRound>
+      </div>
+
+      <div class="settings-group">
         <h2>История</h2>
         <SliderRound v-model="isHistoryAllowed"> Сохранять историю просмотра</SliderRound>
         <div class="settings-actions">
@@ -60,6 +65,7 @@ import SliderRound from '@/components/slider/SliderRound.vue'
 import { useBackgroundStore } from '@/store/background'
 import { useMainStore } from '@/store/main'
 import { usePlayerStore } from '@/store/player'
+import { useTrailerStore } from '@/store/trailer' // Импортируем store для трейлеров
 import { computed, ref, watch } from 'vue'
 import { useRouter } from 'vue-router'
 import BaseModal from './BaseModal.vue'
@@ -67,6 +73,7 @@ import BaseModal from './BaseModal.vue'
 const mainStore = useMainStore()
 const backgroundStore = useBackgroundStore()
 const playerStore = usePlayerStore()
+const trailerStore = useTrailerStore() // Инициализируем store для трейлеров
 const router = useRouter()
 const showModal = ref(false)
 
@@ -106,6 +113,18 @@ const isCardBorder = computed({
 const isHistoryAllowed = computed({
   get: () => mainStore.isHistoryAllowed,
   set: (value) => mainStore.setHistoryAllowed(value)
+})
+
+// Управление трейлерами (из модуля trailer)
+const areTrailersActive = computed({
+  get: () => trailerStore.areTrailersActive, // Получаем состояние из Pinia
+  set: (value) => {
+    if (value) {
+      trailerStore.activateTrailers() // Включаем трейлеры
+    } else {
+      trailerStore.deactivateTrailers() // Выключаем трейлеры
+    }
+  }
 })
 
 // Навигация

@@ -207,33 +207,8 @@
           </p>
         </div>
 
-        <div v-if="videos.length" class="yt-video-container">
-          <h2>Трейлеры(YouTube)</h2>
-
-          <div class="yt-video-thumbnails">
-            <div
-              v-for="(video, index) in videos"
-              :key="index"
-              class="yt-thumbnail"
-              :class="{ active: currentTrailerVideoIndex === index }"
-              @click="selectTrailerVideo(index)"
-            >
-              {{ video.name }}
-            </div>
-          </div>
-
-          <div class="yt-main-player">
-            <iframe
-              v-if="currentTrailerVideo"
-              width="100%"
-              height="400"
-              :src="currentTrailerVideo.iframeUrl"
-              frameborder="0"
-              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-              allowfullscreen
-            ></iframe>
-            <div v-else class="yt-no-video">Видео не найдено</div>
-          </div>
+        <div v-if="videos.length && areTrailersActive" class="yt-video-container">
+          <TrailerCarousel :videos="videos" @select="playTrailer" />
         </div>
 
         <!-- Секция с сиквелами и приквелами -->
@@ -266,6 +241,8 @@ import { useNavbarStore } from '@/store/navbar'
 import { computed, onMounted, onUnmounted, ref, watch } from 'vue'
 import { useRoute } from 'vue-router'
 import Notification from '@/components/notification/ToastMessage.vue'
+import TrailerCarousel from '@/components/TrailerCarousel.vue'
+import { useTrailerStore } from '@/store/trailer'
 
 const infoLoading = ref(true)
 const mainStore = useMainStore()
@@ -276,7 +253,9 @@ const errorMessage = ref('')
 const errorCode = ref(null)
 const movieInfo = ref(null)
 const navbarStore = useNavbarStore()
-const currentTrailerVideoIndex = ref(0)
+const trailerStore = useTrailerStore()
+
+const areTrailersActive = trailerStore.areTrailersActive
 
 const setDocumentTitle = () => {
   if (movieInfo.value) {
@@ -408,21 +387,16 @@ const fetchMovieInfo = async () => {
   }
 }
 
+const videos = computed(() => {
+  console.log('Трейлеры:', movieInfo.value?.videos)
+  return movieInfo.value?.videos
+})
+
 const sequelsAndPrequels = computed(() =>
   transformMoviesData(movieInfo.value?.sequels_and_prequels)
 )
 
 const similars = computed(() => transformMoviesData(movieInfo.value?.similars))
-
-const videos = computed(() => movieInfo.value?.videos)
-
-const currentTrailerVideo = computed(() => {
-  return movieInfo.value?.videos[currentTrailerVideoIndex.value] || null
-})
-
-const selectTrailerVideo = (index) => {
-  currentTrailerVideoIndex.value = index
-}
 
 onMounted(async () => {
   await fetchMovieInfo()
@@ -592,6 +566,18 @@ watch(
   margin-bottom: 15px;
 }
 
+/* Подсказка */
+.title-copy-tooltip {
+  position: absolute;
+  background-color: #333;
+  color: #fff;
+  padding: 5px 10px;
+  border-radius: 5px;
+  font-size: 14px;
+  white-space: nowrap;
+  pointer-events: none;
+}
+
 @media (max-width: 600px) {
   .content-card {
     padding: 0 2px;
@@ -618,63 +604,5 @@ watch(
   .info-content {
     flex-direction: column;
   }
-}
-
-/* trailers */
-.yt-video-container {
-  max-width: 800px;
-  margin: 0 0 15px;
-  text-align: left;
-  color: #fff;
-}
-
-.yt-video-thumbnails {
-  display: flex;
-  gap: 10px;
-  margin-bottom: 20px;
-  overflow-x: auto;
-  padding-bottom: 10px;
-}
-
-.yt-thumbnail {
-  padding: 10px 15px;
-  background: #161616;
-  border-radius: 4px;
-  cursor: pointer;
-  white-space: nowrap;
-  transition: all 0.3s ease;
-}
-
-.yt-thumbnail:hover {
-  background: #222222;
-}
-
-.yt-thumbnail.active {
-  background: #333333;
-  color: white;
-}
-
-.yt-main-player {
-  background: #000;
-  border-radius: 8px;
-  overflow: hidden;
-}
-
-.yt-no-video {
-  padding: 50px;
-  text-align: center;
-  background: #f5f5f5;
-  color: #666;
-}
-
-.title-copy-tooltip {
-  position: absolute;
-  background-color: #333;
-  color: #fff;
-  padding: 5px 10px;
-  border-radius: 5px;
-  font-size: 14px;
-  white-space: nowrap;
-  pointer-events: none;
 }
 </style>
