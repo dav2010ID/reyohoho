@@ -1,0 +1,12 @@
+pages:
+  script:
+    - npm ci
+    - VITE_BASE_URL=/reyohoho/ npm run build
+    - mkdir .public
+    - cp -r ./dist/ .public
+    - mv .public public
+  artifacts:
+    paths:
+      - public
+  only:
+    - vue
