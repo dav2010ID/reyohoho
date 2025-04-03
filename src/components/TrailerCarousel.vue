@@ -1,5 +1,5 @@
 <template>
-  <div v-if="videos.length" class="carousel-container">
+  <div v-if="availableVideos.length" class="carousel-container">
     <h2>Трейлеры (YouTube)</h2>
     <div class="carousel-wrapper">
       <!-- Кнопка для прокрутки влево -->
@@ -14,7 +14,7 @@
       <!-- Карусель с кастомным скроллом -->
       <div ref="carousel" class="carousel" @scroll="updateScroll">
         <div
-          v-for="(video, index) in videos"
+          v-for="(video, index) in availableVideos"
           :key="index"
           class="carousel-item"
           @click="selectVideo(index)"
@@ -41,7 +41,7 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted, onBeforeUnmount } from 'vue'
+import { ref, computed, onMounted, onBeforeUnmount, watch } from 'vue'
 import { useMainStore } from '@/store/main'
 
 const mainStore = useMainStore()
@@ -89,10 +89,41 @@ const selectVideo = (index) => {
 
 const handleResize = () => updateScroll()
 
-onMounted(() => {
+const availableVideos = ref([])
+
+const checkVideoAvailability = async (videoId) => {
+  try {
+    const response = await fetch(`https://img.youtube.com/vi/${videoId}/0.jpg`)
+    return response.ok
+  } catch {
+    return false
+  }
+}
+
+onMounted(async () => {
+  const availabilityChecks = props.videos.map(async (video) => {
+    const isAvailable = await checkVideoAvailability(video.videoId)
+    return isAvailable ? video : null
+  })
+
+  const results = await Promise.all(availabilityChecks)
+  availableVideos.value = results.filter(Boolean)
   updateScroll()
   window.addEventListener('resize', handleResize)
 })
+
+watch(
+  () => props.videos,
+  async (newVideos) => {
+    const availabilityChecks = newVideos.map(async (video) => {
+      const isAvailable = await checkVideoAvailability(video.videoId)
+      return isAvailable ? video : null
+    })
+
+    const results = await Promise.all(availabilityChecks)
+    availableVideos.value = results.filter(Boolean)
+  }
+)
 
 onBeforeUnmount(() => {
   window.removeEventListener('resize', handleResize)
