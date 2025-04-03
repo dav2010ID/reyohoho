@@ -1,7 +1,7 @@
 pages:
   image: node:20
   script:
-    - npm ci
+    - npm install
     - VITE_BASE_URL=/reyohoho/ npm run build
     - mkdir .public
     - cp -r ./dist/ .public
