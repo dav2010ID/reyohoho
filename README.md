@@ -57,7 +57,7 @@ ReYohoho — это современное веб-приложение, пред
 
 ### 🔹 Новый фронтенд (Vue 3):
 
-- [reyohoho.github.io/reyohoho](https://reyohoho.github.io/reyohoho)
+- [reyohoho.gitlab.io/reyohoho](https://reyohoho.gitlab.io/reyohoho)
 - [reyohoho-vue.vercel.app](https://reyohoho-vue.vercel.app)
 - [reyohoho.onrender.com](https://reyohoho.onrender.com)
 - [reyohoho.serv00.net](https://reyohoho.serv00.net)
