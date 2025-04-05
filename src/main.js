@@ -9,6 +9,9 @@ import VueCookies from 'vue3-cookies'
 import { initYandexMetrika } from 'yandex-metrika-vue3'
 import App from './App.vue'
 import router from './router' // Import the router
+import Bugsnag from '@bugsnag/js'
+import BugsnagPluginVue from '@bugsnag/plugin-vue'
+import BugsnagPerformance from '@bugsnag/browser-performance'
 
 registerSW({ immediate: true })
 const $ = jQuery
@@ -19,12 +22,20 @@ window.addEventListener('vite:preloadError', (event) => {
   window.location.reload()
 })
 
+Bugsnag.start({
+  apiKey: import.meta.env.VITE_BUGSNAG_API_KEY,
+  plugins: [new BugsnagPluginVue()]
+})
+BugsnagPerformance.start({ apiKey: import.meta.env.VITE_BUGSNAG_API_KEY })
+const bugsnagVue = Bugsnag.getPlugin('vue')
+
 const app = createApp(App)
 
 const pinia = createPinia()
 pinia.use(piniaPluginPersistedstate)
 
 app
+  .use(bugsnagVue)
   .use(VueCookies)
   .use(router)
   .use(pinia)
