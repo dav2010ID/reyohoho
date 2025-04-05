@@ -3,7 +3,7 @@ import { nextTick } from 'vue'
 import { routes } from './routes'
 
 const base = import.meta.env.VITE_BASE_URL || '/'
-
+console.log(`base: ${base}`)
 const router = createRouter({
   history: createWebHistory(base),
   routes,

@@ -60,6 +60,7 @@ export default {
     const loading = ref(true)
     const error = ref(null)
     const popup = ref(null)
+    const base = ref(import.meta.env.VITE_BASE_URL || '/')
 
     const initAuth = async () => {
       try {
@@ -77,7 +78,7 @@ export default {
               popup.value.close()
               popup.value = null
             }
-            window.location.href = `${import.meta.env.VITE_BASE_URL}auth-success?token=${response.token}`
+            window.location.href = `${base.value}auth-success?token=${response.token}`
           }
         }, 2000)
       } catch (err) {
