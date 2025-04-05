@@ -46,5 +46,37 @@ export const routes = [
     meta: {
       title: '404 - Страница не найдена'
     }
+  },
+  {
+    path: '/login',
+    name: 'login',
+    component: () => import('@/components/Login.vue'),
+    meta: {
+      title: 'ReYohoho - Логин'
+    }
+  },
+  {
+    path: '/user',
+    name: 'user',
+    component: () => import('@/components/User.vue'),
+    meta: {
+      title: 'ReYohoho - Профиль'
+    }
+  },
+  {
+    path: '/lists/:user_id?',
+    name: 'lists',
+    component: () => import('@/components/UserLists.vue'),
+    meta: {
+      title: 'ReYohoho - Списки'
+    }
+  },
+  {
+    path: '/auth-success',
+    name: 'auth-success',
+    component: () => import('@/components/AuthSuccess.vue'),
+    meta: {
+      title: 'ReYohoho - Логин'
+    }
   }
 ]

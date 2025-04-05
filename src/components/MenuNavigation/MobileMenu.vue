@@ -6,10 +6,18 @@
           <li v-for="link in props.links" :key="link.text">
             <component
               :is="link.to ? 'router-link' : 'a'"
-              v-bind="link.to ? { to: link.to, exact: link.exact } : { href: link.href, target: '_blank' }"
-              @click="closeNavbar">
+              v-bind="
+                link.to ? { to: link.to, exact: link.exact } : { href: link.href, target: '_blank' }
+              "
+              @click="closeNavbar"
+            >
               <template v-if="typeof link.icon === 'string' && link.icon.startsWith('fa')">
                 <i :class="link.icon"></i>
+              </template>
+              <template
+                v-else-if="typeof link.icon === 'string' && link.icon.startsWith('https://')"
+              >
+                <img :src="link.icon" alt="icon" class="icon-user" />
               </template>
               <template v-else>
                 <img src="@/assets/icon-donut.png" alt="icon" class="icon-donut" />
@@ -49,7 +57,6 @@ const toggleSearch = () => {
   toggleSearchModal()
   navbarStore.closeNavbar()
 }
-
 </script>
 
 <style scoped>
@@ -68,6 +75,7 @@ const toggleSearch = () => {
   flex: 1;
   overflow-y: auto;
   padding-bottom: 1rem;
+  height: calc(100vh - 60px);
 }
 
 .nav-links {
@@ -92,7 +100,9 @@ const toggleSearch = () => {
   color: rgba(255, 255, 255, 0.8);
   text-decoration: none;
   padding: 10px 20px;
-  transition: background 0.2s ease, color 0.2s ease;
+  transition:
+    background 0.2s ease,
+    color 0.2s ease;
 }
 
 .nav-links a:hover {
@@ -122,5 +132,12 @@ const toggleSearch = () => {
 .icon-donut {
   height: 25px;
   object-fit: contain;
+}
+
+.icon-user {
+  height: 25px;
+  width: 25px;
+  object-fit: contain;
+  border-radius: 50%;
 }
 </style>

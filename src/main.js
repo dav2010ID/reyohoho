@@ -13,6 +13,8 @@ import Bugsnag from '@bugsnag/js'
 import BugsnagPluginVue from '@bugsnag/plugin-vue'
 import BugsnagPerformance from '@bugsnag/browser-performance'
 
+console.log(`App version: ${import.meta.env.VITE_APP_VERSION_FULL_VERSION}`)
+
 registerSW({ immediate: true })
 const $ = jQuery
 window.$ = $
@@ -23,10 +25,14 @@ window.addEventListener('vite:preloadError', (event) => {
 })
 
 Bugsnag.start({
+  appVersion: import.meta.env.VITE_APP_VERSION_FULL_VERSION,
   apiKey: import.meta.env.VITE_BUGSNAG_API_KEY,
   plugins: [new BugsnagPluginVue()]
 })
-BugsnagPerformance.start({ apiKey: import.meta.env.VITE_BUGSNAG_API_KEY })
+BugsnagPerformance.start({
+  appVersion: import.meta.env.VITE_APP_VERSION_FULL_VERSION,
+  apiKey: import.meta.env.VITE_BUGSNAG_API_KEY
+})
 const bugsnagVue = Bugsnag.getPlugin('vue')
 
 const app = createApp(App)

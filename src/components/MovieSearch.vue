@@ -56,7 +56,12 @@
               />
             </span>
           </h2>
-          <MovieList :movies-list="history" :is-history="true" :loading="loading" />
+          <MovieList
+            :movies-list="history"
+            :is-history="true"
+            :loading="loading"
+            @item-deleted="handleItemDeleted"
+          />
         </div>
 
         <!-- Результаты поиска -->
@@ -83,18 +88,23 @@
 </template>
 
 <script setup>
-import { apiSearch, handleApiError, getKpIDfromIMDB } from '@/api/movies'
+import { apiSearch, getKpIDfromIMDB, getKpIDfromSHIKI } from '@/api/movies'
+import { handleApiError } from '@/constants'
+import { getMyLists, delAllFromList } from '@/api/user'
 import BaseModal from '@/components/BaseModal.vue'
 import DeleteButton from '@/components/buttons/DeleteButton.vue'
 import ErrorMessage from '@/components/ErrorMessage.vue'
 import FooterDonaters from '@/components/FooterDonaters.vue'
 import { MovieList } from '@/components/MovieList/'
 import { useMainStore } from '@/store/main'
+import { useAuthStore } from '@/store/auth'
+import { USER_LIST_TYPES_ENUM } from '@/constants'
 import debounce from 'lodash/debounce'
-import { computed, onMounted, ref, watch } from 'vue'
+import { watchEffect, onMounted, ref, watch } from 'vue'
 import { useRouter } from 'vue-router'
 
 const mainStore = useMainStore()
+const authStore = useAuthStore()
 const router = useRouter()
 
 const searchType = ref('title')
@@ -106,7 +116,35 @@ const showModal = ref(false)
 const errorMessage = ref('')
 const errorCode = ref(null)
 
-const history = computed(() => mainStore.history)
+const history = ref([])
+
+watchEffect(async () => {
+  loading.value = true
+  if (authStore.token) {
+    try {
+      history.value = await getMyLists(USER_LIST_TYPES_ENUM.HISTORY)
+      loading.value = false
+    } catch (error) {
+      const { message, code } = handleApiError(error)
+      errorMessage.value = message
+      errorCode.value = code
+      console.error('Ошибка загрузки истории:', error)
+      if (code === 401) {
+        authStore.logout()
+        await router.push('/login')
+        router.go(0)
+      }
+      loading.value = false
+    }
+  } else {
+    history.value = mainStore.history
+    loading.value = false
+  }
+})
+
+function handleItemDeleted(deletedItemId) {
+  history.value = history.value.filter((item) => item.kp_id !== deletedItemId)
+}
 
 // Установка типа поиска
 const setSearchType = (type) => {
@@ -156,15 +194,11 @@ const performSearch = async () => {
   movies.value = []
 
   try {
-    if (searchType.value === 'kinopoisk' || searchType.value === 'shikimori') {
+    if (searchType.value === 'kinopoisk') {
       if (!/^\d+$/.test(searchTerm.value)) {
-        alert(
-          `Введите числовой ID ${searchType.value === 'kinopoisk' ? 'Кинопоиска' : 'Shikimori'}`
-        )
-        return
+        searchTerm.value = searchTerm.value.replace(/\D/g, '')
       }
-      const idPrefix = searchType.value === 'shikimori' ? 'shiki' : ''
-      router.push({ name: 'movie-info', params: { kp_id: `${idPrefix}${searchTerm.value}` } })
+      router.push({ name: 'movie-info', params: { kp_id: searchTerm.value } })
       return
     }
 
@@ -172,25 +206,36 @@ const performSearch = async () => {
       if (!/^\d+$/.test(searchTerm.value)) {
         searchTerm.value = searchTerm.value.replace(/\D/g, '')
       }
-      if (searchType.value === 'imdb') {
-        const response = await getKpIDfromIMDB(searchTerm.value)
-        if (response.id_kp) {
-          router.push({ name: 'movie-info', params: { kp_id: `${response.id_kp}` } })
-        } else {
-          throw new Error('Не найдено')
-        }
-        return
+      const response = await getKpIDfromIMDB(searchTerm.value)
+      if (response.id_kp) {
+        router.push({ name: 'movie-info', params: { kp_id: `${response.id_kp}` } })
+      } else {
+        throw new Error('Не найдено')
       }
+      return
     }
 
-    // Поиск по названию
-    const response = await apiSearch(searchTerm.value)
-    movies.value = response.map((movie) => ({
-      ...movie,
-      kp_id: movie.id.toString(),
-      rating_kp: movie.raw_data?.rating !== 'null' ? movie.raw_data?.rating : null,
-      type: movie.raw_data?.type
-    }))
+    if (searchType.value === 'shikimori') {
+      if (!/^\d+$/.test(searchTerm.value)) {
+        searchTerm.value = searchTerm.value.replace(/\D/g, '')
+      }
+      const response = await getKpIDfromSHIKI(searchTerm.value)
+      if (response.id_kp) {
+        router.push({ name: 'movie-info', params: { kp_id: `${response.id_kp}` } })
+      } else {
+        throw new Error('Не найдено')
+      }
+      return
+    }
+    if (searchType.value === 'title') {
+      const response = await apiSearch(searchTerm.value)
+      movies.value = response.map((movie) => ({
+        ...movie,
+        kp_id: movie.id.toString(),
+        rating_kp: movie.raw_data?.rating !== 'null' ? movie.raw_data?.rating : null,
+        type: movie.raw_data?.type
+      }))
+    }
   } catch (error) {
     const { message, code } = handleApiError(error)
     errorMessage.value = message
@@ -201,9 +246,32 @@ const performSearch = async () => {
   }
 }
 
-const clearAllHistory = () => {
-  mainStore.clearAllHistory()
-  showModal.value = false
+const clearAllHistory = async () => {
+  loading.value = true
+  if (authStore.token) {
+    try {
+      await delAllFromList(USER_LIST_TYPES_ENUM.HISTORY)
+      history.value = []
+      loading.value = false
+      showModal.value = false
+    } catch (error) {
+      const { message, code } = handleApiError(error)
+      errorMessage.value = message
+      errorCode.value = code
+      console.error('Ошибка загрузки истории:', error)
+      if (code === 401) {
+        authStore.logout()
+        await router.push('/login')
+        router.go(0)
+      }
+      loading.value = false
+      showModal.value = false
+    }
+  } else {
+    mainStore.clearAllHistory()
+    loading.value = false
+    showModal.value = false
+  }
 }
 
 const debouncedPerformSearch = debounce(() => {
@@ -225,6 +293,11 @@ onMounted(() => {
     const imdbId = decodeURIComponent(hash.replace('#imdb=', ''))
     setSearchType('imdb')
     searchTerm.value = imdbId
+    performSearch()
+  } else if (hash.startsWith('#shiki')) {
+    const shikiId = decodeURIComponent(hash.replace('#shiki', ''))
+    setSearchType('shikimori')
+    searchTerm.value = shikiId
     performSearch()
   }
 })

@@ -44,11 +44,16 @@
 import Spinner from '@/components/SpinnerLoading.vue'
 import { useBackgroundStore } from '@/store/background'
 import { useMainStore } from '@/store/main'
+import { useAuthStore } from '@/store/auth'
 import { computed, onMounted, onUnmounted, ref, watch } from 'vue'
 import { useRouter } from 'vue-router'
 import { CardMovie, CardMovieSwipeWrapper } from '../CardMovie'
+import { delFromList } from '@/api/user'
+import { handleApiError } from '@/constants'
+import { USER_LIST_TYPES_ENUM } from '@/constants'
 
 const mainStore = useMainStore()
+const authStore = useAuthStore()
 const backgroundStore = useBackgroundStore()
 const router = useRouter()
 
@@ -72,8 +77,24 @@ const movieUrl = (movie) => {
   return router.resolve({ name: 'movie-info', params: { kp_id: movie.kp_id } }).href
 }
 
-const removeFromHistory = (kp_id) => {
-  mainStore.removeFromHistory(kp_id)
+const emit = defineEmits(['item-deleted'])
+const removeFromHistory = async (kp_id) => {
+  if (authStore.token) {
+    try {
+      await delFromList(kp_id, USER_LIST_TYPES_ENUM.HISTORY)
+      emit('item-deleted', kp_id)
+    } catch (error) {
+      const { code } = handleApiError(error)
+      console.error('Ошибка загрузки истории:', error)
+      if (code === 401) {
+        authStore.logout()
+        await router.push('/login')
+        router.go(0)
+      }
+    }
+  } else {
+    mainStore.removeFromHistory(kp_id)
+  }
 }
 
 const handleKeyDown = (event) => {

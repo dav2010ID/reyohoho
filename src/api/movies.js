@@ -68,47 +68,12 @@ const getKpIDfromIMDB = async (imdb_id) => {
   return data
 }
 
-export { apiSearch, getShikiInfo, getKpInfo, getPlayers, getMovies, getDons, getKpIDfromIMDB }
-
-// ===== Универсальный обработчик ошибок =====
-export const handleApiError = (error) => {
-  if (error.code === 'ECONNABORTED') {
-    return {
-      message: 'Ошибка: сервер не отвечает (таймаут)',
-      code: 408
-    }
-  } else if (error.response) {
-    if (error.response.status >= 500) {
-      return {
-        message: 'Ошибка на сервере. Пожалуйста, попробуйте позже',
-        code: error.response.status
-      }
-    }
-
-    switch (error.response.status) {
-      case 403:
-        return {
-          message: 'Упс, недоступно по требованию правообладателя',
-          code: 403
-        }
-      case 404:
-        return {
-          message: 'Данные не найдены',
-          code: 404
-        }
-      default:
-        return {
-          message: `Произошла неизвестная ошибка. Ошибка: ${error.response.status}`,
-          code: error.response.status
-        }
-    }
-  } else {
-    return {
-      message: `Ошибка: ${error.message}`,
-      code: null
-    }
-  }
+const getKpIDfromSHIKI = async (shiki_id) => {
+  const { data } = await apiCall((api) => api.get(`/shiki_to_kp/${shiki_id}`))
+  return data
 }
+
+export { apiSearch, getShikiInfo, getKpInfo, getPlayers, getMovies, getDons, getKpIDfromIMDB, getKpIDfromSHIKI }
 
 // ===== Функция для включения/выключения симуляции =====
 export const toggleErrorSimulation = (enabled) => {

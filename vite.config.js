@@ -10,11 +10,12 @@ const base = process.env.VITE_BASE_URL || '/'
 export default defineConfig(({ mode }) => {
   process.env = { ...process.env, ...loadEnv(mode, process.cwd()) }
   const isDistEnv = process.env.NODE_ENV === 'production'
-
+  process.env.VITE_APP_VERSION_FULL_VERSION = process.env.VITE_APP_VERSION + '_' + Date.now()
   const bugsnagOptions = {
     apiKey: process.env.VITE_BUGSNAG_API_KEY,
-    appVersion: process.env.VITE_APP_VERSION + Date.now()
+    appVersion: process.env.VITE_APP_VERSION_FULL_VERSION
   }
+
   return {
     base: base,
     plugins: [

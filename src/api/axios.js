@@ -1,10 +1,13 @@
 import axios from 'axios'
 import { getConfigValue, initRemoteConfig } from '@/firebase/firebase'
+import { useAuthStore } from '@/store/auth'
 
 let apiInstance = null
 
 export const getApi = async () => {
   if (!apiInstance) {
+    const authStore = useAuthStore()
+
     await initRemoteConfig()
     const apiUrl = getConfigValue('api_url') || import.meta.env.VITE_APP_API_URL
 
@@ -12,6 +15,9 @@ export const getApi = async () => {
       baseURL: apiUrl,
       headers: { 'Content-Type': 'application/json' }
     })
+    if (authStore.token) {
+      apiInstance.defaults.headers.common['Authorization'] = `Bearer ${authStore.token}`
+    }
     apiInstance.interceptors.request.use(
       (config) => {
         return config
@@ -27,5 +33,16 @@ export const getApi = async () => {
       }
     )
   }
+
   return apiInstance
+}
+
+export const getBaseURL = async () => {
+  if (!apiInstance) {
+    await initRemoteConfig()
+    const apiUrl = getConfigValue('api_url') || import.meta.env.VITE_APP_API_URL
+    return apiUrl
+  } else {
+    return apiInstance.defaults.baseURL
+  }
 }

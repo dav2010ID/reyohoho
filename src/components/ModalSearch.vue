@@ -74,9 +74,10 @@
 </template>
 
 <script setup>
-import { apiSearch, handleApiError } from '@/api/movies'
+import { apiSearch } from '@/api/movies'
 import ErrorMessage from '@/components/ErrorMessage.vue'
 import { TYPES_ENUM } from '@/constants'
+import { handleApiError } from '@/constants'
 import { useNavbarStore } from '@/store/navbar'
 import { inRange } from 'lodash'
 import debounce from 'lodash/debounce'

@@ -48,7 +48,8 @@
 </template>
 
 <script setup>
-import { getMovies, handleApiError } from '@/api/movies'
+import { getMovies } from '@/api/movies'
+import { handleApiError } from '@/constants'
 import { MovieList } from '@/components/MovieList'
 import { onMounted, ref } from 'vue'
 import ErrorMessage from '@/components/ErrorMessage.vue'

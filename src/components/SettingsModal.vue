@@ -56,6 +56,11 @@
           />
         </div>
       </div>
+
+      <div class="settings-group">
+        <h2>Версия</h2>
+        {{ appVersion }}
+      </div>
     </div>
   </div>
 </template>
@@ -76,6 +81,7 @@ const playerStore = usePlayerStore()
 const trailerStore = useTrailerStore() // Инициализируем store для трейлеров
 const router = useRouter()
 const showModal = ref(false)
+const appVersion = ref(import.meta.env.VITE_APP_VERSION_FULL_VERSION)
 
 const clearAllHistory = () => {
   mainStore.clearAllHistory()

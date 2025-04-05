@@ -204,7 +204,8 @@
 </template>
 
 <script setup>
-import { getPlayers, handleApiError } from '@/api/movies'
+import { getPlayers } from '@/api/movies'
+import { handleApiError } from '@/constants'
 import ErrorMessage from '@/components/ErrorMessage.vue'
 import SpinnerLoading from '@/components/SpinnerLoading.vue'
 import Notification from '@/components/notification/ToastMessage.vue'

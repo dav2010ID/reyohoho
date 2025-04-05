@@ -169,6 +169,90 @@
           :content="movieInfo.name_original"
         />
         <div class="additional-info">
+          <div class="controls">
+            <div class="tooltip-container">
+              <button
+                class="favorite-btn"
+                :class="{ active: movieInfo.lists.isFavorite }"
+                @mouseenter="showTooltip('favorite')"
+                @mouseleave="activeTooltip = null"
+                @click="toggleList(USER_LIST_TYPES_ENUM.FAVORITE)"
+              >
+                <span class="material-icons">{{
+                  movieInfo.lists.isFavorite ? 'favorite' : 'favorite_border'
+                }}</span>
+              </button>
+              <div v-show="activeTooltip === 'favorite'" class="custom-tooltip">
+                {{ 'В избранное' }}
+              </div>
+            </div>
+
+            <div class="tooltip-container">
+              <button
+                class="watching-btn"
+                :class="{ active: movieInfo.lists.isWatching }"
+                @mouseenter="showTooltip('watching')"
+                @mouseleave="activeTooltip = null"
+                @click="toggleList(USER_LIST_TYPES_ENUM.WATCHING)"
+              >
+                <span class="material-icons">{{
+                  movieInfo.lists.isWatching ? 'visibility' : 'visibility_off'
+                }}</span>
+              </button>
+              <div v-show="activeTooltip === 'watching'" class="custom-tooltip">
+                {{ 'Смотрю' }}
+              </div>
+            </div>
+
+            <div class="tooltip-container">
+              <button
+                class="later-btn"
+                :class="{ active: movieInfo.lists.isLater }"
+                @mouseenter="showTooltip('later')"
+                @mouseleave="activeTooltip = null"
+                @click="toggleList(USER_LIST_TYPES_ENUM.LATER)"
+              >
+                <span class="material-icons">{{ 'watch_later' }}</span>
+              </button>
+              <div v-show="activeTooltip === 'later'" class="custom-tooltip">
+                {{ 'Смотреть позже' }}
+              </div>
+            </div>
+
+            <div class="tooltip-container">
+              <button
+                class="completed-btn"
+                :class="{ active: movieInfo.lists.isCompleted }"
+                @mouseenter="showTooltip('completed')"
+                @mouseleave="activeTooltip = null"
+                @click="toggleList(USER_LIST_TYPES_ENUM.COMPLETED)"
+              >
+                <span class="material-icons">{{
+                  movieInfo.lists.isCompleted ? 'check_circle' : 'check_circle_outline'
+                }}</span>
+              </button>
+              <div v-show="activeTooltip === 'completed'" class="custom-tooltip">
+                {{ 'Просмотрено' }}
+              </div>
+            </div>
+
+            <div class="tooltip-container">
+              <button
+                class="abandoned-btn"
+                :class="{ active: movieInfo.lists.isAbandoned }"
+                @mouseenter="showTooltip('abandoned')"
+                @mouseleave="activeTooltip = null"
+                @click="toggleList(USER_LIST_TYPES_ENUM.ABANDONED)"
+              >
+                <span class="material-icons">{{
+                  movieInfo.lists.isAbandoned ? 'not_interested' : 'not_interested'
+                }}</span>
+              </button>
+              <div v-show="activeTooltip === 'abandoned'" class="custom-tooltip">
+                {{ 'Брошено' }}
+              </div>
+            </div>
+          </div>
           <h2 class="additional-info-title">Подробнее</h2>
           <div class="info-content">
             <div class="details-container">
@@ -229,14 +313,17 @@
 </template>
 
 <script setup>
-import { getKpInfo, getShikiInfo, handleApiError } from '@/api/movies'
+import { getKpInfo, getShikiInfo } from '@/api/movies'
+import { handleApiError } from '@/constants'
+import { addToList, delFromList } from '@/api/user'
 import { MovieList } from '@/components/MovieList/'
 import PlayerComponent from '@/components/PlayerComponent.vue'
 import SpinnerLoading from '@/components/SpinnerLoading.vue'
 import ErrorMessage from '@/components/ErrorMessage.vue'
-import { TYPES_ENUM } from '@/constants'
+import { TYPES_ENUM, USER_LIST_TYPES_ENUM } from '@/constants'
 import { useBackgroundStore } from '@/store/background'
 import { useMainStore } from '@/store/main'
+import { useAuthStore } from '@/store/auth'
 import { useNavbarStore } from '@/store/navbar'
 import { computed, onMounted, onUnmounted, ref, watch } from 'vue'
 import { useRoute } from 'vue-router'
@@ -246,6 +333,7 @@ import { useTrailerStore } from '@/store/trailer'
 
 const infoLoading = ref(true)
 const mainStore = useMainStore()
+const authStore = useAuthStore()
 const backgroundStore = useBackgroundStore()
 const route = useRoute()
 const kp_id = ref(route.params.kp_id)
@@ -256,6 +344,16 @@ const navbarStore = useNavbarStore()
 const trailerStore = useTrailerStore()
 
 const areTrailersActive = trailerStore.areTrailersActive
+
+const activeTooltip = ref(null)
+const tooltipHovered = ref(false)
+let hideTimeout = null
+
+const showTooltip = (tooltipName) => {
+  activeTooltip.value = tooltipName
+  tooltipHovered.value = false
+  clearTimeout(hideTimeout)
+}
 
 const setDocumentTitle = () => {
   if (movieInfo.value) {
@@ -310,14 +408,49 @@ const copyMovieMeta = async () => {
   }
 }
 
-const fetchMovieInfo = async () => {
+const getListStatus = (movieInfo, listType) => {
+  const statusMap = {
+    [USER_LIST_TYPES_ENUM.FAVORITE]: movieInfo.lists?.isFavorite || false,
+    [USER_LIST_TYPES_ENUM.HISTORY]: movieInfo.lists?.isHistory || false,
+    [USER_LIST_TYPES_ENUM.LATER]: movieInfo.lists?.isLater || false,
+    [USER_LIST_TYPES_ENUM.COMPLETED]: movieInfo.lists?.isCompleted || false,
+    [USER_LIST_TYPES_ENUM.ABANDONED]: movieInfo.lists?.isAbandoned || false,
+    [USER_LIST_TYPES_ENUM.WATCHING]: movieInfo.lists?.isWatching || false
+  }
+
+  return statusMap[listType] ?? false
+}
+
+const toggleList = async (type) => {
+  if (!authStore.token) {
+    notificationRef.value.showNotification('Необходимо авторизоваться', 5000)
+    return
+  }
+  let hasError = false
+  try {
+    if (getListStatus(movieInfo.value, type)) {
+      await delFromList(kp_id.value, type)
+      notificationRef.value.showNotification('Удалено')
+    } else {
+      await addToList(kp_id.value, type)
+      notificationRef.value.showNotification('Добавлено')
+    }
+  } catch (error) {
+    const { message, code } = handleApiError(error)
+    notificationRef.value.showNotification(`${message} ${code}`)
+  }
+  if (!hasError) {
+    await fetchMovieInfo(false)
+  }
+}
+
+const fetchMovieInfo = async (updateHistory = true) => {
   try {
     let response
-
     if (kp_id.value.startsWith('shiki')) {
       response = await getShikiInfo(kp_id.value)
     } else {
-      response = await getKpInfo(kp_id.value)
+      response = await getKpInfo(kp_id.value, authStore.token)
     }
 
     if (Array.isArray(response) && response.length === 0) {
@@ -376,8 +509,16 @@ const fetchMovieInfo = async () => {
 
     const isHistoryAllowed = computed(() => mainStore.isHistoryAllowed)
 
-    if (isHistoryAllowed.value && movieToSave.kp_id && movieToSave.title) {
-      mainStore.addToHistory({ ...movieToSave })
+    if (isHistoryAllowed.value && movieToSave.kp_id && movieToSave.title && updateHistory) {
+      if (authStore.token) {
+        try {
+          await addToList(movieToSave.kp_id, USER_LIST_TYPES_ENUM.HISTORY)
+        } catch (error) {
+          console.error('Ошибка при добавлении в историю:', error)
+        }
+      } else {
+        mainStore.addToHistory({ ...movieToSave })
+      }
     }
   } catch (error) {
     const { message, code } = handleApiError(error)
@@ -604,5 +745,92 @@ watch(
   .info-content {
     flex-direction: column;
   }
+}
+
+.controls {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 10px;
+  margin-top: 40px;
+  border-radius: 10px;
+}
+
+.controls button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: #444;
+  color: #fff;
+  border: none;
+  padding: 12px;
+  font-size: 18px;
+  border-radius: 8px;
+  cursor: pointer;
+  transition:
+    background-color 0.3s ease,
+    transform 0.2s ease,
+    box-shadow 0.3s ease;
+  z-index: 4;
+  width: 50px;
+  height: 50px;
+}
+
+.controls button:hover {
+  background-color: #555;
+  transform: translateY(-3px);
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+}
+
+.controls button:active {
+  transform: translateY(0);
+  box-shadow: none;
+}
+
+.controls button.active {
+  background-color: #4caf50;
+  box-shadow: 0 0 10px rgba(76, 175, 80, 0.7);
+}
+
+.material-icons {
+  font-size: 24px;
+}
+
+.tooltip-container {
+  position: relative;
+  display: inline-block;
+}
+
+.custom-tooltip {
+  position: absolute;
+  top: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+  background-color: #333;
+  color: #fff;
+  padding: 5px;
+  border-radius: 4px;
+  font-size: 16px;
+  white-space: nowrap;
+  margin-top: 8px;
+  pointer-events: none;
+  text-align: center;
+}
+
+.advanced-tooltip {
+  white-space: normal;
+  padding: 15px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  top: calc(100% + 5px);
+  pointer-events: all;
+  text-align: center;
+}
+
+.tooltip-title {
+  font-size: 16px;
+  text-align: center;
 }
 </style>

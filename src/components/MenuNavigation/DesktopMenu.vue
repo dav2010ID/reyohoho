@@ -31,6 +31,11 @@
               <template v-if="typeof link.icon === 'string' && link.icon.startsWith('fa')">
                 <i :class="link.icon"></i>
               </template>
+              <template
+                v-else-if="typeof link.icon === 'string' && link.icon.startsWith('https://')"
+              >
+                <img :src="link.icon" alt="icon" class="icon-user" />
+              </template>
               <template v-else>
                 <img src="@/assets/icon-donut.png" alt="icon" class="icon-donut" />
               </template>
@@ -114,7 +119,7 @@ const tooltipStyle = computed(() => ({
 // Открыть модалку поиска через хранилище
 const toggleSearch = () => {
   closeSidebar()
-  navbarStore.openSearchModal()  // Используем метод из хранилища для управления модалкой поиска
+  navbarStore.openSearchModal() // Используем метод из хранилища для управления модалкой поиска
 }
 
 // Добавляем и удаляем обработчики событий при монтировании/размонтировании компонента
@@ -158,9 +163,7 @@ onBeforeUnmount(() => {
   display: flex;
   flex-direction: column;
   align-items: center;
-  padding: 0 1rem;
   margin-bottom: 1rem;
-  height: 110px;
   font-weight: 700;
   font-size: 27px;
 }
@@ -247,7 +250,7 @@ onBeforeUnmount(() => {
 .nav-links a,
 .nav-links button {
   display: flex;
-  align-items: baseline;
+  align-items: center;
   gap: 1rem;
   color: rgba(255, 255, 255, 0.8);
   text-decoration: none;
@@ -285,6 +288,13 @@ onBeforeUnmount(() => {
 .nav-links a:hover {
   background: rgba(255, 255, 255, 0.05);
   color: #fff;
+}
+
+.icon-user {
+  height: 25px;
+  width: 25px;
+  object-fit: contain;
+  border-radius: 50%;
 }
 
 .icon-donut {
