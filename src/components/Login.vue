@@ -77,7 +77,7 @@ export default {
               popup.value.close()
               popup.value = null
             }
-            window.location.href = `/auth-success?token=${response.token}`
+            window.location.href = `${import.meta.env.VITE_BASE_URL}auth-success?token=${response.token}`
           }
         }, 2000)
       } catch (err) {
