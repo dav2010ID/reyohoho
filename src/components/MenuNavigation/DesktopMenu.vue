@@ -43,7 +43,7 @@
             </component>
           </li>
           <li
-            v-if="route.name !== 'home'"
+            v-if="route.name !== 'home' && props.links.length > 0"
             @pointerenter="showTooltip(links.length, $event)"
             @pointerleave="hideTooltip"
           >
