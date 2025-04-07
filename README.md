@@ -26,7 +26,7 @@
 </p>
 
 <p align="center">
-   🥰 <a href="https://t.me/ReYohoho_Donut_Bot">Поддержать нас</a>
+   🥰 <a href="https://t.me/ReYohoho_Donut_Bot?start=1">Поддержать нас</a>
 </p>
 
 ---

@@ -86,7 +86,7 @@ onMounted(async () => {
       text: 'Статус'
     },
     { to: '/contact', icon: 'fas fa-info-circle', text: 'Copyright' },
-    { href: 'https://t.me/ReYohoho_Donut_Bot', icon: '', text: 'Поддержать' },
+    { href: 'https://t.me/ReYohoho_Donut_Bot?start=1', icon: '', text: 'Поддержать' },
     { to: '/setting', icon: 'fa-solid fa-gear', text: 'Настройки' }
   ]
 })
