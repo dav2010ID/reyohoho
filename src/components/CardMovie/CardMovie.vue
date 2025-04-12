@@ -57,7 +57,6 @@ onMounted(() => {
   text-decoration: none;
   color: inherit;
   width: 100%;
-  max-width: 240px;
   background: rgba(30, 30, 30, 0.6);
   border-radius: 10px;
   overflow: hidden;
@@ -101,7 +100,6 @@ onMounted(() => {
     align-items: flex-start;
     height: 180px;
     width: 100%;
-    max-width: none;
     border-radius: 15px;
   }
 }
