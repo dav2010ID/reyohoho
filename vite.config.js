@@ -11,17 +11,19 @@ export default defineConfig(({ mode }) => {
   process.env = { ...process.env, ...loadEnv(mode, process.cwd()) }
   const isDistEnv = process.env.NODE_ENV === 'production'
   const now = new Date()
-  const formattedDate = now
-    .toLocaleString('ru-RU', {
-      year: 'numeric',
-      month: '2-digit',
-      day: '2-digit',
-      hour: '2-digit',
-      minute: '2-digit',
-      second: '2-digit'
-    })
-    .replace(/[.,]/g, '_')
-    .replace(/\s+/g, '')
+  const formattedDate =
+    now
+      .toLocaleString('ru-RU', {
+        year: 'numeric',
+        month: '2-digit',
+        day: '2-digit',
+        hour: '2-digit',
+        minute: '2-digit',
+        second: '2-digit',
+        timeZone: 'UTC'
+      })
+      .replace(/[.,]/g, '_')
+      .replace(/\s+/g, '') + '_UTC'
   process.env.VITE_APP_VERSION_FULL_VERSION = process.env.VITE_APP_VERSION + '_' + formattedDate
   const bugsnagOptions = {
     apiKey: process.env.VITE_BUGSNAG_API_KEY,
