@@ -30,6 +30,11 @@ const getUserLists = async (type, userId) => {
   return data
 }
 
+const getListCounters = async (userId) => {
+  const { data } = await apiCall((api) => api.get(`/user-list-counters/${userId}`))
+  return data
+}
+
 const getUser = async () => {
   const { data } = await apiCall((api) => api.get('/user'))
   return data
@@ -53,5 +58,6 @@ export {
   delFromList,
   generateToken,
   getTGAuthResult,
-  getUserLists
+  getUserLists,
+  getListCounters
 }

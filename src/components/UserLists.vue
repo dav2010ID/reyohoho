@@ -13,6 +13,7 @@
               @click="changeTypeFilter(btn.value)"
             >
               {{ btn.label }}
+              <span class="counter" v-if="listCounters[btn.value]">({{ listCounters[btn.value] }})</span>
             </button>
             <button class="share-btn" @click="copyShareLink()">
               <span class="material-icons">{{ 'share' }}</span>
@@ -54,7 +55,7 @@
 </template>
 
 <script setup>
-import { getMyLists, getUserLists, delFromList, delAllFromList } from '@/api/user'
+import { getMyLists, getUserLists, delFromList, delAllFromList, getListCounters } from '@/api/user'
 import { useAuthStore } from '@/store/auth'
 import { handleApiError, USER_LIST_TYPES_ENUM } from '@/constants'
 import { MovieList } from '@/components/MovieList'
@@ -74,6 +75,7 @@ const route = useRoute()
 const router = useRouter()
 const user_id = ref(route.params.user_id)
 const showModal = ref(false)
+const listCounters = ref({})
 
 const notificationRef = ref(null)
 const copyShareLink = async () => {
@@ -97,6 +99,17 @@ const typeFilters = [
   { label: 'Брошено', value: USER_LIST_TYPES_ENUM.ABANDONED }
 ]
 
+const fetchCounters = async () => {
+  try {
+    const targetUserId = user_id.value || authStore.user?.id
+    if (targetUserId) {
+      listCounters.value = await getListCounters(targetUserId)
+    }
+  } catch (error) {
+    console.error('Error fetching counters:', error)
+  }
+}
+
 const fetchMovies = async () => {
   loading.value = true
   errorMessage.value = ''
@@ -108,6 +121,7 @@ const fetchMovies = async () => {
     } else {
       movies.value = await getMyLists(typeFilter.value)
     }
+    await fetchCounters()
   } catch (error) {
     const { message, code } = handleApiError(error)
     errorMessage.value = message
@@ -152,6 +166,7 @@ const handleItemDeleted = async (deletedItemId) => {
       await delFromList(deletedItemId, typeFilter.value)
       movies.value = movies.value.filter((item) => item.kp_id !== deletedItemId)
       notificationRef.value.showNotification('Фильм удален из списка')
+      await fetchCounters()
     } catch (error) {
       const { message, code } = handleApiError(error)
       errorMessage.value = message
@@ -353,6 +368,19 @@ onMounted(fetchMovies)
   border-color: #4a90e2;
   color: white;
   box-shadow: 0 0 0 2px rgba(74, 144, 226, 0.3);
+}
+
+.counter {
+  font-size: 0.8em;
+  margin-left: 4px;
+  opacity: 0.8;
+}
+
+.filter-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
 }
 
 @media (max-width: 620px) {
