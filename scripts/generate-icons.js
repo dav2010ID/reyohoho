@@ -24,7 +24,16 @@ const sizes = [72, 96, 128, 144, 152, 192, 384, 512]
 async function generatePNGIcons() {
   for (const size of sizes) {
     const tempFile = path.join(tempDir, `icon-${size}x${size}.png`)
-    await sharp(sourceImage).resize(size, size).toFile(tempFile)
+    const circleMask = await generateCircleMask(size)
+    await sharp(sourceImage)
+      .resize(size, size)
+      .composite([
+        {
+          input: circleMask,
+          blend: 'dest-in'
+        }
+      ])
+      .toFile(tempFile)
     fs.copyFileSync(tempFile, path.join(outputDir, `icon-${size}x${size}.png`))
     console.log(`Generated ${size}x${size} PNG icon`)
   }
@@ -46,10 +55,10 @@ async function generateICO() {
   const icoBuffers = await Promise.all(
     icoSizes.map(async (size) => {
       const image = await sharp(sourceImage)
-        .resize(Math.round(size * 1.5), Math.round(size * 1.5))
+        .resize(Math.round(size * 1.2), Math.round(size * 1.2))
         .extract({
-          left: Math.round(size * 0.25),
-          top: Math.round(size * 0.25),
+          left: Math.round(size * 0.1),
+          top: Math.round(size * 0.1),
           width: size,
           height: size
         })
@@ -71,7 +80,7 @@ async function generateICO() {
       kernel: 'lanczos3'
     })
     .toFile(icoPath)
-  console.log('Generated favicon.ico (32x32, zoomed, circular)')
+  console.log('Generated favicon.ico (32x32, slightly zoomed, circular)')
 }
 
 async function cleanup() {
