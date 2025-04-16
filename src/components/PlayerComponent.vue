@@ -63,7 +63,7 @@
 
     <!-- Кнопки управления -->
     <div class="controls">
-      <div v-if="!isMobile" class="tooltip-container list-buttons-container">
+      <div v-if="!isMobile" class="tooltip-container list-buttons-container" ref="tooltipContainer">
         <button
           class="favorite-btn"
           :class="{ active: movieInfo?.lists?.isFavorite }"
@@ -78,6 +78,7 @@
         <div
           v-show="activeTooltip === 'favorite'"
           class="custom-tooltip advanced-tooltip list-buttons-dropdown"
+          ref="tooltip"
           @mouseenter="keepTooltipVisible"
           @mouseleave="hideTooltip"
         >
@@ -445,10 +446,38 @@ let hideTimeout = null
 
 const notificationRef = ref(null)
 
+const tooltipContainer = ref(null)
+const tooltip = ref(null)
+
+const updateTooltipPosition = () => {
+  if (!tooltipContainer.value || !tooltip.value) return
+
+  const containerRect = tooltipContainer.value.getBoundingClientRect()
+  const tooltipRect = tooltip.value.getBoundingClientRect()
+  const viewportHeight = window.innerHeight
+
+  if (containerRect.bottom + tooltipRect.height > viewportHeight) {
+    tooltip.value.style.top = 'auto'
+    tooltip.value.style.bottom = '100%'
+    tooltip.value.style.marginTop = '0'
+    tooltip.value.style.marginBottom = '12px'
+    tooltip.value.style.transform = 'translateX(-50%)'
+  } else {
+    tooltip.value.style.top = '100%'
+    tooltip.value.style.bottom = 'auto'
+    tooltip.value.style.marginTop = '12px'
+    tooltip.value.style.marginBottom = '0'
+    tooltip.value.style.transform = 'translateX(-50%)'
+  }
+}
+
 const showTooltip = (tooltipName) => {
   activeTooltip.value = tooltipName
   tooltipHovered.value = false
   clearTimeout(hideTimeout)
+  nextTick(() => {
+    updateTooltipPosition()
+  })
 }
 
 const tryHideTooltip = () => {
@@ -756,11 +785,13 @@ onMounted(() => {
   if (isMobile.value) aspectRatio.value = '4:3'
   updateScaleFactor()
   window.addEventListener('resize', updateScaleFactor)
+  window.addEventListener('resize', updateTooltipPosition)
   if (isCentered.value) centerPlayer()
 })
 
 onBeforeUnmount(() => {
   window.removeEventListener('resize', updateScaleFactor)
+  window.removeEventListener('resize', updateTooltipPosition)
   window.removeEventListener('mousemove', showCloseButton)
   document.removeEventListener('keydown', onKeyDown)
   document.body.classList.remove('no-scroll')
@@ -913,6 +944,8 @@ html.no-scroll {
   margin: 0 auto;
   border-radius: 10px;
   backdrop-filter: blur(10px);
+  position: relative;
+  z-index: 10;
 }
 
 .controls button {
@@ -958,20 +991,18 @@ html.no-scroll {
 .tooltip-container {
   position: relative;
   display: inline-block;
+  z-index: 11;
 }
 
 .custom-tooltip {
   position: absolute;
-  top: 100%;
   left: 50%;
-  transform: translateX(-50%);
   background-color: rgba(51, 51, 51, 0.95);
   color: #fff;
   padding: 8px 12px;
   border-radius: 8px;
   font-size: 14px;
   white-space: nowrap;
-  margin-top: 12px;
   pointer-events: none;
   text-align: center;
   box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
@@ -980,13 +1011,12 @@ html.no-scroll {
   opacity: 0;
   visibility: hidden;
   transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
-  z-index: 1000;
+  z-index: 12;
 }
 
 .custom-tooltip::before {
   content: '';
   position: absolute;
-  top: -6px;
   left: 50%;
   transform: translateX(-50%) rotate(45deg);
   width: 12px;
@@ -994,6 +1024,16 @@ html.no-scroll {
   background-color: rgba(51, 51, 51, 0.95);
   border: 1px solid rgba(255, 255, 255, 0.1);
   z-index: -1;
+}
+
+.custom-tooltip[style*='bottom: 100%']::before {
+  bottom: -6px;
+  top: auto;
+}
+
+.custom-tooltip[style*='top: 100%']::before {
+  top: -6px;
+  bottom: auto;
 }
 
 .tooltip-container:hover .custom-tooltip {
