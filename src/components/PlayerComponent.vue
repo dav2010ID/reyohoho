@@ -372,6 +372,11 @@ const closePlayerModal = () => {
 }
 
 const handlePlayerSelect = (player) => {
+  if (selectedPlayerInternal.value?.key === player.key) {
+    closePlayerModal()
+    return
+  }
+  
   selectedPlayerInternal.value = player
   iframeLoading.value = true
   playerStore.updatePreferredPlayer(normalizeKey(player.key))
