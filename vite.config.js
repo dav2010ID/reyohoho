@@ -10,7 +10,19 @@ const base = process.env.VITE_BASE_URL || '/'
 export default defineConfig(({ mode }) => {
   process.env = { ...process.env, ...loadEnv(mode, process.cwd()) }
   const isDistEnv = process.env.NODE_ENV === 'production'
-  process.env.VITE_APP_VERSION_FULL_VERSION = process.env.VITE_APP_VERSION + '_' + Date.now()
+  const now = new Date()
+  const formattedDate = now
+    .toLocaleString('ru-RU', {
+      year: 'numeric',
+      month: '2-digit',
+      day: '2-digit',
+      hour: '2-digit',
+      minute: '2-digit',
+      second: '2-digit'
+    })
+    .replace(/[.,]/g, '_')
+    .replace(/\s+/g, '')
+  process.env.VITE_APP_VERSION_FULL_VERSION = process.env.VITE_APP_VERSION + '_' + formattedDate
   const bugsnagOptions = {
     apiKey: process.env.VITE_BUGSNAG_API_KEY,
     appVersion: process.env.VITE_APP_VERSION_FULL_VERSION
