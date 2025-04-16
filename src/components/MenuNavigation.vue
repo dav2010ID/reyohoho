@@ -45,7 +45,7 @@ onMounted(async () => {
   }
 
   navLinks.value = [
-    ...(isMobile.value ? [{ to: '/', exact: true, icon: 'fas fa-home', text: 'Главная' }] : []),
+    { to: '/', exact: true, icon: 'fas fa-home', text: 'Главная' },
     {
       to: authStore.user ? '/user' : '/login',
       exact: true,
