@@ -54,6 +54,7 @@
     "jsdom": "^26.0.0",
     "prettier": "^3.0.0",
     "sass-embedded": "^1.85.1",
+    "sharp": "^0.34.1",
     "typescript": "^5.8.2",
     "vite": "^6.2.6",
     "vite-plugin-bugsnag": "^2.0.2",
