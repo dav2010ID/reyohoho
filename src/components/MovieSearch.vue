@@ -63,6 +63,7 @@
             @item-deleted="handleItemDeleted"
           />
         </div>
+        <ErrorMessage v-if="!searchTerm && errorMessage" :message="errorMessage" :code="errorCode" />
 
         <!-- Результаты поиска -->
         <div v-if="searchPerformed">
