@@ -25,15 +25,20 @@
         <span>или</span>
       </div>
 
-      <!-- QR-код для входа -->
       <div class="qr-section">
         <h3>Отсканируйте QR-код</h3>
+        <p class="qr-hint">
+          Перебросит в приложение Telegram
+        </p>
         <div class="qr-background">
           <qrcode-vue v-if="!error" :value="qrValue" :size="qrSize" level="H" class="qr-code" />
           <div v-else class="error-placeholder">Ошибка загрузки QR-кода</div>
         </div>
         <p class="qr-hint">
-          Используйте любое приложение для сканирования QR(это не QR код приложения телеграмм)
+          Используйте любое приложение для сканирования QR(это не QR код приложения Telegram)
+        </p>
+        <p class="qr-hint">
+          Передаётся только временный токен сайта через Telegram-бота, авторизация самого Telegram не нужна
         </p>
       </div>
     </div>
