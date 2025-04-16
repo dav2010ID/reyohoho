@@ -135,9 +135,9 @@ const performSearch = async () => {
 }
 
 const debouncedPerformSearch = debounce(() => {
-  if (searchTerm.value.length >= 3) {
+  if (searchTerm.value.length >= 2) {
     performSearch()
-  } else if (searchTerm.value.length < 3) {
+  } else if (searchTerm.value.length < 2) {
     movies.value = []
   }
 }, 700)
