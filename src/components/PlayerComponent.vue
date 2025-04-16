@@ -246,6 +246,7 @@
         <div class="tooltip-container">
           <button
             class="blur-btn"
+            :class="{ 'electron-only': !isElectron }"
             @mouseenter="showTooltip('blur')"
             @mouseleave="activeTooltip = null"
             @click="toggleBlur"
@@ -260,6 +261,7 @@
         <div class="tooltip-container">
           <button
             class="material-symbols-outlined"
+            :class="{ 'electron-only': !isElectron }"
             @mouseenter="showTooltip('compressor')"
             @mouseleave="activeTooltip = null"
             @click="toggleCompressor"
@@ -274,6 +276,7 @@
         <div class="tooltip-container">
           <button
             class="mirror-btn"
+            :class="{ 'electron-only': !isElectron }"
             @mouseenter="showTooltip('mirror')"
             @mouseleave="activeTooltip = null"
             @click="toggleMirror"
@@ -1167,5 +1170,20 @@ html.no-scroll {
   font-size: 12px;
   color: rgba(255, 255, 255, 0.6);
   margin-top: 4px;
+}
+
+.electron-only {
+  background-color: #333 !important;
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.electron-only:hover {
+  transform: none !important;
+  box-shadow: none !important;
+}
+
+.custom-tooltip:has(+ .electron-only) {
+  color: rgba(255, 255, 255, 0.7);
 }
 </style>
