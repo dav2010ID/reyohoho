@@ -49,10 +49,10 @@
       <!-- Контейнер для истории и результатов -->
       <div class="content-container">
         <!-- История просмотра -->
-        <div v-if="!searchTerm && history.length > 0">
+        <div v-if="!searchTerm">
           <h2>
             История просмотра
-            <span>
+            <span v-if="history.length > 0">
               <DeleteButton @click="showModal = true" />
               <BaseModal
                 :is-open="showModal"
@@ -62,10 +62,18 @@
               />
             </span>
           </h2>
+          <div v-if="loading" class="loading-container">
+            <SpinnerLoading />
+          </div>
+          <div v-else-if="history.length === 0" class="empty-history">
+            <span class="material-icons">movie</span>
+            <p>Здесь пока пусто</p>
+          </div>
           <MovieList
+            v-else
             :movies-list="history"
             :is-history="true"
-            :loading="loading"
+            :loading="false"
             @item-deleted="handleItemDeleted"
           />
         </div>
@@ -110,6 +118,7 @@ import { hasConsecutiveConsonants, suggestLayout, convertLayout } from '@/utils/
 import debounce from 'lodash/debounce'
 import { watchEffect, onMounted, ref, watch } from 'vue'
 import { useRouter } from 'vue-router'
+import SpinnerLoading from '@/components/SpinnerLoading.vue'
 
 const mainStore = useMainStore()
 const authStore = useAuthStore()
@@ -130,11 +139,10 @@ const showLayoutWarning = ref(false)
 const suggestedLayout = ref('')
 
 watchEffect(async () => {
-  loading.value = true
   if (authStore.token) {
+    loading.value = true
     try {
       history.value = await getMyLists(USER_LIST_TYPES_ENUM.HISTORY)
-      loading.value = false
     } catch (error) {
       const { message, code } = handleApiError(error)
       errorMessage.value = message
@@ -145,11 +153,11 @@ watchEffect(async () => {
         await router.push('/login')
         router.go(0)
       }
+    } finally {
       loading.value = false
     }
   } else {
     history.value = mainStore.history
-    loading.value = false
   }
 })
 
@@ -512,6 +520,36 @@ h2 {
 
 .layout-warning {
   color: #ff8c00;
+}
+
+.loading-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 200px;
+  width: 100%;
+}
+
+.empty-history {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 200px;
+  color: #888;
+  gap: 15px;
+}
+
+.empty-history .material-icons {
+  font-size: 64px;
+  color: #888;
+  opacity: 0.7;
+}
+
+.empty-history p {
+  font-size: 18px;
+  margin: 0;
+  color: #888;
 }
 
 @media (max-width: 600px) {
