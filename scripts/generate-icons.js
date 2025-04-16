@@ -18,7 +18,8 @@ if (!fs.existsSync(outputDir)) {
   fs.mkdirSync(outputDir, { recursive: true })
 }
 
-const sizes = [16, 32, 48, 72, 96, 144, 192, 256, 384, 512]
+// Обновленные размеры иконок для PWA
+const sizes = [72, 96, 128, 144, 152, 192, 384, 512]
 
 async function generatePNGIcons() {
   for (const size of sizes) {
