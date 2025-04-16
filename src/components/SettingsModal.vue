@@ -33,6 +33,7 @@
         <h2>Плеер</h2>
         <SliderRound v-model="isCentered">Автоцентрирование плеера</SliderRound>
         <SliderRound v-model="isCardBorder">Окантовка вокруг карточек</SliderRound>
+        <SliderRound v-model="isCardHoverDisabled">Отключить подъем карточек при наведении</SliderRound>
       </div>
 
       <div class="settings-group">
@@ -119,6 +120,11 @@ const isCentered = computed({
 const isCardBorder = computed({
   get: () => backgroundStore.isCardBorder,
   set: (value) => backgroundStore.toggleCardBorder(value)
+})
+
+const isCardHoverDisabled = computed({
+  get: () => backgroundStore.isCardHoverDisabled,
+  set: (value) => backgroundStore.toggleCardHover(value)
 })
 
 const isHistoryAllowed = computed({

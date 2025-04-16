@@ -4,7 +4,8 @@
     class="movie-card"
     :class="{
       active: activeMovieIndex === index,
-      'has-border': isCardBorder
+      'has-border': isCardBorder,
+      'hover-disabled': isCardHoverDisabled
     }"
     :to="{ name: 'movie-info', params: { kp_id: movie.kp_id } }"
     :data-test-id="`movie-card-${movie.kp_id}`"
@@ -22,9 +23,13 @@
 </template>
 
 <script setup>
-import { onMounted, useTemplateRef } from 'vue'
+import { onMounted, useTemplateRef, computed } from 'vue'
 import CardMovieDetails from './CardMovieDetails.vue'
 import CardsMovieMainContent from './CardsMovieMainContent.vue'
+import { useBackgroundStore } from '@/store/background'
+
+const backgroundStore = useBackgroundStore()
+const isCardHoverDisabled = computed(() => backgroundStore.isCardHoverDisabled)
 
 const {
   movie,
@@ -79,6 +84,11 @@ onMounted(() => {
 .movie-card:hover {
   transform: translateY(-5px);
   box-shadow: 0 8px 16px rgba(0, 0, 0, 0.3);
+}
+
+.hover-disabled:hover {
+  transform: none;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.4);
 }
 
 .movie-card:focus {

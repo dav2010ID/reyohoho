@@ -11,7 +11,8 @@ export const useBackgroundStore = defineStore(BACKGROUND_STORE_NAME, {
     isBlurActive: false,
     backgroundType: 'stars',
     defaultBackground: starsBackground,
-    isCardBorder: false
+    isCardBorder: false,
+    isCardHoverDisabled: false
   }),
 
   actions: {
@@ -53,6 +54,10 @@ export const useBackgroundStore = defineStore(BACKGROUND_STORE_NAME, {
 
     toggleCardBorder(isBorder) {
       this.isCardBorder = isBorder
+    },
+
+    toggleCardHover(isDisabled) {
+      this.isCardHoverDisabled = isDisabled
     },
 
     resetBackground() {
