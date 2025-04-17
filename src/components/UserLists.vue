@@ -17,7 +17,7 @@
                 >({{ listCounters[btn.value] }})</span
               >
             </button>
-            <button class="share-btn" @click="copyShareLink()">
+            <button class="share-btn" @click="copyShareLink()" title="Поделиться списком">
               <span class="material-icons">{{ 'share' }}</span>
             </button>
             <button
@@ -26,6 +26,7 @@
               "
               class="clear-btn"
               @click="showModal = true"
+              title="Очистить список"
             >
               <span class="material-icons">{{ 'delete_sweep' }}</span>
             </button>
