@@ -33,7 +33,13 @@
         <h2>Плеер</h2>
         <SliderRound v-model="isCentered">Автоцентрирование плеера</SliderRound>
         <SliderRound v-model="isCardBorder">Окантовка вокруг карточек</SliderRound>
-        <SliderRound v-model="isCardHoverDisabled">Отключить подъем карточек при наведении</SliderRound>
+        <SliderRound v-model="isCardHoverDisabled"
+          >Отключить подъем карточек при наведении</SliderRound
+        >
+        <SliderRound v-model="showFavoriteTooltip"
+          >Стиль отображения кнопок избранного:
+          {{ showFavoriteTooltip ? 'Тултип' : 'Все кнопки' }}</SliderRound
+        >
       </div>
 
       <div class="settings-group">
@@ -147,6 +153,11 @@ const areTrailersActive = computed({
 const isCtrlFEnabled = computed({
   get: () => mainStore.isCtrlFEnabled,
   set: () => mainStore.toggleCtrlF()
+})
+
+const showFavoriteTooltip = computed({
+  get: () => mainStore.showFavoriteTooltip,
+  set: () => mainStore.toggleFavoriteTooltip()
 })
 
 // Навигация

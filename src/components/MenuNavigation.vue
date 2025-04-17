@@ -67,7 +67,7 @@ onMounted(async () => {
         ]
       : []),
     { to: '/top', icon: 'fa-solid fa-trophy', text: 'Популярное' },
-    { to: '/setting', icon: 'fa-solid fa-gear', text: 'Настройки' },
+    { to: '/settings', icon: 'fa-solid fa-gear', text: 'Настройки' },
     { to: '/links', icon: 'fa-solid fa-info-circle', text: 'Полезные ссылки' }
   ]
 })

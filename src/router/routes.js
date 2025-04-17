@@ -32,7 +32,7 @@ export const routes = [
     }
   },
   {
-    path: '/setting',
+    path: '/settings',
     name: 'SettingsModal',
     component: () => import('@/components/SettingsModal.vue'),
     meta: {

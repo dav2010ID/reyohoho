@@ -9,7 +9,8 @@ export const useMainStore = defineStore(MAIN_STORE_NAME, {
     isHistoryAllowed: true,
     isMobile: false,
     dimmingEnabled: false,
-    isCtrlFEnabled: true
+    isCtrlFEnabled: true,
+    showFavoriteTooltip: true
   }),
 
   actions: {
@@ -24,6 +25,9 @@ export const useMainStore = defineStore(MAIN_STORE_NAME, {
     },
     toggleCtrlF() {
       this.isCtrlFEnabled = !this.isCtrlFEnabled
+    },
+    toggleFavoriteTooltip() {
+      this.showFavoriteTooltip = !this.showFavoriteTooltip
     },
 
     addToHistory(movie) {
