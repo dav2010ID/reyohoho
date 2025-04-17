@@ -402,7 +402,7 @@
         </div>
       </div>
 
-      <div v-else-if="!showFavoriteTooltip" class="mobile-list-buttons">
+      <div v-else-if="isMobile" class="mobile-list-buttons">
         <div class="tooltip-container">
           <button
             class="favorite-btn"
