@@ -900,7 +900,7 @@ const openLogin = () => {
   router.push('/login')
 }
 
-const showFavoriteTooltip = computed(() => mainStore.showFavoriteTooltip)
+const showFavoriteTooltip = computed(() => playerStore.showFavoriteTooltip)
 
 const openSettings = () => {
   router.push('/settings')

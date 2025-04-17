@@ -4,23 +4,24 @@ import { beforeHydrateLegacyVuex } from '../uitls'
 
 export const usePlayerStore = defineStore(PLAYER_STORE_NAME, {
   state: () => ({
+    preferredPlayer: null,
     aspectRatio: '16:9',
     isCentered: false,
-    preferredPlayer: '' // Например: 'ALLOHA' или 'TORRENTS'
+    showFavoriteTooltip: true
   }),
 
   actions: {
-    updateAspectRatio(ratio) {
-      this.aspectRatio = ratio
-    },
-    updateCentering(isCentered) {
-      this.isCentered = isCentered
-    },
     updatePreferredPlayer(player) {
       this.preferredPlayer = player
     },
-    clearPreferredPlayer() {
-      this.preferredPlayer = ''
+    updateAspectRatio(ratio) {
+      this.aspectRatio = ratio
+    },
+    updateCentering(value) {
+      this.isCentered = value
+    },
+    setFavoriteTooltip(value) {
+      this.showFavoriteTooltip = value
     }
   },
 

@@ -156,8 +156,8 @@ const isCtrlFEnabled = computed({
 })
 
 const showFavoriteTooltip = computed({
-  get: () => mainStore.showFavoriteTooltip,
-  set: () => mainStore.toggleFavoriteTooltip()
+  get: () => playerStore.showFavoriteTooltip,
+  set: (value) => playerStore.setFavoriteTooltip(value)
 })
 
 // Навигация
