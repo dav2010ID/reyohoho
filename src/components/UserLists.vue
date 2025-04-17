@@ -13,14 +13,18 @@
               @click="changeTypeFilter(btn.value)"
             >
               {{ btn.label }}
-              <span class="counter" v-if="listCounters[btn.value]">({{ listCounters[btn.value] }})</span>
+              <span class="counter" v-if="listCounters[btn.value]"
+                >({{ listCounters[btn.value] }})</span
+              >
             </button>
             <button class="share-btn" @click="copyShareLink()">
               <span class="material-icons">{{ 'share' }}</span>
             </button>
-            <button 
-              v-if="movies.length > 0 && (!user_id || String(user_id) === String(authStore.user?.id))" 
-              class="clear-btn" 
+            <button
+              v-if="
+                movies.length > 0 && (!user_id || String(user_id) === String(authStore.user?.id))
+              "
+              class="clear-btn"
               @click="showModal = true"
             >
               <span class="material-icons">{{ 'delete_sweep' }}</span>
@@ -38,6 +42,8 @@
         v-else-if="!errorMessage"
         :movies-list="movies"
         :is-history="false"
+        :is-mobile="mainStore.isMobile"
+        :is-user-list="true"
         :loading="loading"
         @item-deleted="handleItemDeleted"
       />
@@ -64,6 +70,7 @@ import { useRoute, useRouter } from 'vue-router'
 import ErrorMessage from '@/components/ErrorMessage.vue'
 import Notification from '@/components/notification/ToastMessage.vue'
 import BaseModal from '@/components/BaseModal.vue'
+import { useMainStore } from '@/store/main'
 
 const movies = ref([])
 const loading = ref(true)
@@ -76,6 +83,7 @@ const router = useRouter()
 const user_id = ref(route.params.user_id)
 const showModal = ref(false)
 const listCounters = ref({})
+const mainStore = useMainStore()
 
 const notificationRef = ref(null)
 const copyShareLink = async () => {

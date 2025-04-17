@@ -1,7 +1,7 @@
 <template>
   <div>
     <div v-show="!loading" class="grid">
-      <template v-if="isHistory && isMobile">
+      <template v-if="(isHistory || isUserList) && isMobile">
         <CardMovieSwipeWrapper
           v-for="(movie, index) in moviesList"
           :key="movie.kp_id"
@@ -76,7 +76,10 @@ const activeMovieIndex = ref(null)
 const isCardBorder = computed(() => backgroundStore.isCardBorder)
 const isMobile = computed(() => mainStore.isMobile)
 const isUserList = computed(() => {
-  return route.name === 'lists' && (!route.params.user_id || String(route.params.user_id) === String(authStore.user?.id))
+  return (
+    route.name === 'lists' &&
+    (!route.params.user_id || String(route.params.user_id) === String(authStore.user?.id))
+  )
 })
 
 const movieUrl = (movie) => {
