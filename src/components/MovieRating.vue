@@ -62,7 +62,6 @@ const props = defineProps({
 const notificationRef = ref(null)
 const userRating = ref(null)
 const averageRating = ref(null)
-const totalRatings = ref(0)
 const hoverRating = ref(0)
 const isHovered = ref(false)
 const isTooltipVisible = ref(false)
