@@ -67,8 +67,8 @@ const emit = defineEmits(['remove:from-history'])
 
 .delete-button {
   position: absolute;
-  bottom: 5px;
-  right: 5px;
+  top: 5px;
+  left: 5px;
   opacity: 0;
 }
 
@@ -134,6 +134,7 @@ const emit = defineEmits(['remove:from-history'])
   }
 
   .delete-button {
+    top: 5px;
     left: 5px;
     opacity: 1;
   }

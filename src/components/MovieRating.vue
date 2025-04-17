@@ -100,7 +100,6 @@ const loadRating = async () => {
     const data = await getRating(props.kpId)
     userRating.value = data.user_rating
     averageRating.value = data.average_rating
-    totalRatings.value = data.total_ratings
   } catch (error) {
     console.error('Error loading rating:', error)
   }
