@@ -74,6 +74,7 @@
           <span class="material-icons">{{
             movieInfo?.lists?.isFavorite ? 'favorite' : 'favorite_border'
           }}</span>
+          <span class="material-icons dropdown-arrow">expand_more</span>
         </button>
         <div
           v-show="activeTooltip === 'favorite'"
@@ -996,20 +997,28 @@ html.no-scroll {
 .custom-tooltip {
   position: absolute;
   left: 50%;
-  background-color: rgba(51, 51, 51, 0.95);
+  background-color: rgba(30, 30, 30, 0.95);
   color: #fff;
-  padding: 8px 12px;
-  border-radius: 8px;
+  padding: 8px 16px;
+  border-radius: 12px;
   font-size: 14px;
   white-space: nowrap;
   pointer-events: none;
   text-align: center;
-  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
-  backdrop-filter: blur(8px);
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.25);
+  backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.08);
   opacity: 0;
   visibility: hidden;
+  transform: translateX(-50%) translateY(8px);
   transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  z-index: 1000;
+  top: calc(100% + 12px);
+}
+
+.custom-tooltip[style*='bottom: 100%'] {
+  bottom: calc(100% + 12px);
+  top: auto;
 }
 
 .custom-tooltip::before {
@@ -1017,20 +1026,20 @@ html.no-scroll {
   position: absolute;
   left: 50%;
   transform: translateX(-50%) rotate(45deg);
-  width: 12px;
-  height: 12px;
-  background-color: rgba(51, 51, 51, 0.95);
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  width: 10px;
+  height: 10px;
+  background-color: rgba(30, 30, 30, 0.95);
+  border: 1px solid rgba(255, 255, 255, 0.08);
   z-index: -1;
 }
 
 .custom-tooltip[style*='bottom: 100%']::before {
-  bottom: -6px;
+  bottom: -5px;
   top: auto;
 }
 
 .custom-tooltip[style*='top: 100%']::before {
-  top: -6px;
+  top: -5px;
   bottom: auto;
 }
 
@@ -1042,47 +1051,48 @@ html.no-scroll {
 
 .advanced-tooltip {
   white-space: normal;
-  padding: 16px;
+  padding: 20px;
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 12px;
-  top: calc(100% + 8px);
+  gap: 16px;
+  top: calc(100% + 12px);
   pointer-events: all;
   text-align: center;
-  min-width: 200px;
-  background-color: rgba(51, 51, 51, 0.98);
-  border-radius: 12px;
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+  min-width: 240px;
+  background-color: rgba(30, 30, 30, 0.98);
+  border-radius: 16px;
+  box-shadow: 0 8px 40px rgba(0, 0, 0, 0.35);
+  transform: translateX(-50%) translateY(8px);
 }
 
 .advanced-tooltip::before {
-  top: -8px;
-  width: 16px;
-  height: 16px;
+  top: -6px;
+  width: 12px;
+  height: 12px;
 }
 
 .tooltip-title {
-  font-size: 14px;
+  font-size: 15px;
   font-weight: 500;
-  color: rgba(255, 255, 255, 0.9);
+  color: rgba(255, 255, 255, 0.95);
   margin-top: 4px;
 }
 
 .aspect-ratio-dropdown {
   min-width: fit-content;
   width: max-content;
-  padding: 12px;
+  padding: 16px;
   display: flex;
   flex-direction: column;
-  gap: 6px;
-  background-color: rgba(51, 51, 51, 0.98);
-  border-radius: 12px;
+  gap: 8px;
+  background-color: rgba(30, 30, 30, 0.98);
+  border-radius: 16px;
 }
 
 .aspect-ratio-option {
-  padding: 10px 16px;
-  border-radius: 8px;
+  padding: 12px 20px;
+  border-radius: 10px;
   cursor: pointer;
   transition: all 0.2s ease;
   text-align: center;
@@ -1093,7 +1103,7 @@ html.no-scroll {
 }
 
 .aspect-ratio-option:hover {
-  background-color: rgba(255, 255, 255, 0.1);
+  background-color: rgba(255, 255, 255, 0.12);
   transform: translateY(-1px);
 }
 
@@ -1101,7 +1111,7 @@ html.no-scroll {
   background-color: rgba(76, 175, 80, 0.9);
   color: white;
   font-weight: 500;
-  box-shadow: 0 2px 8px rgba(76, 175, 80, 0.3);
+  box-shadow: 0 2px 12px rgba(76, 175, 80, 0.3);
 }
 
 .fullscreen {
@@ -1141,12 +1151,12 @@ html.no-scroll {
 .list-buttons-dropdown {
   display: flex;
   flex-direction: column;
-  gap: 8px;
-  padding: 12px;
-  min-width: 200px;
-  background-color: rgba(51, 51, 51, 0.98);
-  border-radius: 12px;
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+  gap: 10px;
+  padding: 16px;
+  min-width: 240px;
+  background-color: rgba(30, 30, 30, 0.98);
+  border-radius: 16px;
+  box-shadow: 0 8px 40px rgba(0, 0, 0, 0.35);
 }
 
 .list-button-item {
@@ -1158,28 +1168,29 @@ html.no-scroll {
   display: flex;
   align-items: center;
   gap: 12px;
-  padding: 10px 16px;
-  background-color: rgba(255, 255, 255, 0.1);
+  padding: 12px 20px;
+  background-color: rgba(255, 255, 255, 0.08);
   border: none;
-  border-radius: 8px;
+  border-radius: 10px;
   color: rgba(255, 255, 255, 0.9);
   cursor: pointer;
   transition: all 0.2s ease;
-  min-height: 44px;
+  min-height: 48px;
 }
 
 .list-button-item button:hover {
-  background-color: rgba(255, 255, 255, 0.2);
+  background-color: rgba(255, 255, 255, 0.15);
   transform: translateX(4px);
 }
 
 .list-button-item button.active {
   background-color: rgba(76, 175, 80, 0.9);
   color: white;
+  box-shadow: 0 2px 12px rgba(76, 175, 80, 0.3);
 }
 
 .button-label {
-  font-size: 14px;
+  font-size: 15px;
   font-weight: 500;
   flex: 1;
 }
@@ -1211,9 +1222,10 @@ html.no-scroll {
 
 .shortcut-hint {
   display: block;
-  font-size: 12px;
-  color: rgba(255, 255, 255, 0.6);
-  margin-top: 4px;
+  font-size: 13px;
+  color: rgba(255, 255, 255, 0.5);
+  margin-top: 6px;
+  font-weight: 400;
 }
 
 .electron-only {
@@ -1229,5 +1241,35 @@ html.no-scroll {
 
 .custom-tooltip:has(+ .electron-only) {
   color: rgba(255, 255, 255, 0.7);
+}
+
+.favorite-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: #444;
+  color: #fff;
+  border: none;
+  padding: 12px;
+  font-size: 18px;
+  border-radius: 8px;
+  cursor: pointer;
+  transition:
+    background-color 0.3s ease,
+    transform 0.2s ease,
+    box-shadow 0.3s ease;
+  z-index: 4;
+  width: 50px;
+  height: 50px;
+  position: relative;
+}
+
+.dropdown-arrow {
+  position: absolute;
+  right: 2px;
+  bottom: 2px;
+  font-size: 16px;
+  opacity: 0.7;
+  pointer-events: none;
 }
 </style>
