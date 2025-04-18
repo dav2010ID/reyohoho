@@ -306,13 +306,37 @@
         <!-- Секция с сиквелами и приквелами -->
         <div v-if="sequelsAndPrequels.length" class="related-movies">
           <h2>Сиквелы и приквелы</h2>
-          <MovieList :movies-list="sequelsAndPrequels" :loading="false" :is-history="false" />
+          <MovieList
+            :movies-list="showAllSequels ? sequelsAndPrequels : sequelsAndPrequels.slice(0, 6)"
+            :loading="false"
+            :is-history="false"
+          />
+          <a
+            v-if="sequelsAndPrequels.length > 6"
+            class="expand-circle-button"
+            @click="showAllSequels = !showAllSequels"
+            :title="`${showAllSequels ? 'Скрыть' : 'Показать все'} (${sequelsAndPrequels.length})`"
+          >
+            {{ showAllSequels ? '−' : `+${sequelsAndPrequels.length - 6}` }}
+          </a>
         </div>
 
         <!-- Секция с похожими фильмами -->
         <div v-if="similars.length" class="related-movies">
           <h2>Похожие</h2>
-          <MovieList :movies-list="similars" :loading="false" :is-history="false" />
+          <MovieList
+            :movies-list="showAllSimilars ? similars : similars.slice(0, 6)"
+            :loading="false"
+            :is-history="false"
+          />
+          <a
+            v-if="similars.length > 6"
+            class="expand-circle-button"
+            @click="showAllSimilars = !showAllSimilars"
+            :title="`${showAllSimilars ? 'Скрыть' : 'Показать все'} (${similars.length})`"
+          >
+            {{ showAllSimilars ? '−' : `+${similars.length - 6}` }}
+          </a>
         </div>
       </div>
     </div>
@@ -354,6 +378,8 @@ const trailerStore = useTrailerStore()
 
 const areTrailersActive = trailerStore.areTrailersActive
 const activeTrailerIndex = ref(null)
+const showAllSequels = ref(false)
+const showAllSimilars = ref(false)
 
 const setDocumentTitle = () => {
   if (movieInfo.value) {
@@ -683,6 +709,7 @@ const getStaffByProfession = (profession) => {
 /* Стили для секций с похожими фильмами */
 .related-movies {
   margin-top: 30px;
+  position: relative;
 }
 
 .related-movies h2 {
@@ -1176,8 +1203,11 @@ const getStaffByProfession = (profession) => {
 }
 
 .expand-circle-button {
-  width: 80px;
-  height: 80px;
+  position: absolute;
+  top: 0;
+  right: 15px;
+  width: 40px;
+  height: 40px;
   border-radius: 50%;
   background: rgba(255, 255, 255, 0.1);
   border: none;
@@ -1185,10 +1215,9 @@ const getStaffByProfession = (profession) => {
   align-items: center;
   justify-content: center;
   cursor: pointer;
-  margin: 0 auto;
   transition: all 0.2s ease;
   color: #fff;
-  font-size: 24px;
+  font-size: 20px;
   text-decoration: none;
 }
 
@@ -1199,9 +1228,31 @@ const getStaffByProfession = (profession) => {
 
 @media (max-width: 600px) {
   .expand-circle-button {
-    width: 60px;
-    height: 60px;
-    font-size: 18px;
+    width: 35px;
+    height: 35px;
+    font-size: 16px;
   }
+}
+
+.show-more-btn {
+  display: block;
+  margin: 15px auto;
+  padding: 8px 16px;
+  background: #3a3a3a;
+  color: #fff;
+  border: 1px solid #505050;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.show-more-btn:hover {
+  background: #505050;
+  border-color: #17850b;
+}
+
+.show-more-btn:active {
+  background: #17850b;
+  border-color: #17850b;
 }
 </style>
