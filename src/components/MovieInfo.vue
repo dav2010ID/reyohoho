@@ -289,22 +289,15 @@
                     }}</span>
                   </a>
                 </div>
-                <button class="expand-circle-button" @click="showAllStaff" title="Весь состав">
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    width="24"
-                    height="24"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    stroke-width="2"
-                    stroke-linecap="round"
-                    stroke-linejoin="round"
-                  >
-                    <path d="M18 6L6 18" />
-                    <path d="M6 6l12 12" />
-                  </svg>
-                </button>
+                <a
+                  class="expand-circle-button"
+                  :href="`https://www.kinopoisk.ru/film/${kp_id}/cast/`"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  :title="`Показать всех ${getStaffByProfession('ACTOR').length} актеров`"
+                >
+                  +{{ getStaffByProfession('ACTOR').length - 5 }}
+                </a>
               </div>
             </div>
           </div>
@@ -565,10 +558,6 @@ watch(
 
 const getStaffByProfession = (profession) => {
   return movieInfo.value?.staff?.filter((person) => person.profession_key === profession) || []
-}
-
-const showAllStaff = () => {
-  window.open(`https://www.kinopoisk.ru/film/${kp_id.value}/cast/`, '_blank')
 }
 </script>
 
@@ -1122,7 +1111,7 @@ const showAllStaff = () => {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
   gap: 15px;
-  align-items: center;
+  align-items: start;
   margin-bottom: 10px;
 }
 
@@ -1131,6 +1120,7 @@ const showAllStaff = () => {
   flex-direction: column;
   align-items: center;
   text-align: center;
+  height: 100%;
 }
 
 .staff-link {
@@ -1140,6 +1130,7 @@ const showAllStaff = () => {
   text-decoration: none;
   color: inherit;
   transition: transform 0.2s;
+  height: 100%;
 }
 
 .staff-link:hover {
@@ -1153,17 +1144,30 @@ const showAllStaff = () => {
   object-fit: cover;
   margin-bottom: 8px;
   border: 2px solid rgba(255, 255, 255, 0.1);
+  flex-shrink: 0;
 }
 
 .staff-name {
   font-size: 14px;
   color: #fff;
   margin-bottom: 4px;
+  min-height: 2.8em;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 0 4px;
 }
 
 .staff-role {
   font-size: 12px;
   color: #aaa;
+  min-height: 1.8em;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 0 4px;
 }
 
 @media (max-width: 600px) {
@@ -1178,10 +1182,12 @@ const showAllStaff = () => {
 
   .staff-name {
     font-size: 12px;
+    min-height: 2.4em;
   }
 
   .staff-role {
     font-size: 10px;
+    min-height: 1.6em;
   }
 }
 
@@ -1200,8 +1206,8 @@ const showAllStaff = () => {
 }
 
 .expand-circle-button {
-  width: 40px;
-  height: 40px;
+  width: 80px;
+  height: 80px;
   border-radius: 50%;
   background: rgba(255, 255, 255, 0.1);
   border: none;
@@ -1209,18 +1215,23 @@ const showAllStaff = () => {
   align-items: center;
   justify-content: center;
   cursor: pointer;
-  margin: 10px auto 0;
+  margin: 0 auto;
   transition: all 0.2s ease;
   color: #fff;
+  font-size: 24px;
+  text-decoration: none;
 }
 
 .expand-circle-button:hover {
   background: rgba(255, 255, 255, 0.2);
-  transform: rotate(45deg);
+  transform: scale(1.05);
 }
 
-.expand-circle-button svg {
-  width: 20px;
-  height: 20px;
+@media (max-width: 600px) {
+  .expand-circle-button {
+    width: 60px;
+    height: 60px;
+    font-size: 18px;
+  }
 }
 </style>
