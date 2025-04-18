@@ -1156,6 +1156,10 @@ const showAllStaff = () => {
   border: 2px solid rgba(255, 255, 255, 0.1);
 }
 
+.staff-photo[lazy='loading'] {
+  border-radius: 0% !important;
+}
+
 .staff-name {
   font-size: 14px;
   color: #fff;
