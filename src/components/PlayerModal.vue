@@ -12,31 +12,57 @@
       <ul class="players-list">
         <template v-if="!activeGroup">
           <li v-for="player in mainPlayers" :key="player.key">
-            <button :class="['player-item', { active: isSelected(player) }]" @click="selectPlayer(player)">
+            <button
+              :class="['player-item', { active: isSelected(player) }]"
+              @click="selectPlayer(player)"
+            >
               {{ cleanName(player.translate) }}
-              <span v-if="player.warning" class="warning-icon material-icons" title="Внимание!">warning</span>
+              <span v-if="player.warning" class="warning-icon material-icons" title="Внимание!"
+                >warning</span
+              >
             </button>
           </li>
           <li v-if="hasHdrezkaGroup">
-            <button class="group-item" @click="expandGroup('hdrezka')">
+            <button
+              :class="['group-item', { active: isGroupSelected('hdrezka') }]"
+              @click="expandGroup('hdrezka')"
+            >
               <span class="material-icons group-icon">folder</span>
               ReYohoho - HDrezka
-              <span v-if="groupHasWarning('hdrezka')" class="warning-icon material-icons" title="Внимание!">warning</span>
+              <span
+                v-if="groupHasWarning('hdrezka')"
+                class="warning-icon material-icons"
+                title="Внимание!"
+                >warning</span
+              >
             </button>
           </li>
           <li v-if="hasKodikGroup">
-            <button class="group-item" @click="expandGroup('kodik')">
+            <button
+              :class="['group-item', { active: isGroupSelected('kodik') }]"
+              @click="expandGroup('kodik')"
+            >
               <span class="material-icons group-icon">folder</span>
               Kodik
-              <span v-if="groupHasWarning('kodik')" class="warning-icon material-icons" title="Внимание!">warning</span>
+              <span
+                v-if="groupHasWarning('kodik')"
+                class="warning-icon material-icons"
+                title="Внимание!"
+                >warning</span
+              >
             </button>
           </li>
         </template>
         <template v-else>
           <li v-for="player in groupPlayers(activeGroup)" :key="player.key">
-            <button :class="['player-item', { active: isSelected(player) }]" @click="selectPlayer(player)">
+            <button
+              :class="['player-item', { active: isSelected(player) }]"
+              @click="selectPlayer(player)"
+            >
               {{ cleanName(player.translate) }}
-              <span v-if="player.warning" class="warning-icon material-icons" title="Внимание!">warning</span>
+              <span v-if="player.warning" class="warning-icon material-icons" title="Внимание!"
+                >warning</span
+              >
             </button>
           </li>
         </template>
@@ -63,55 +89,53 @@ const emit = defineEmits(['close', 'select'])
 const activeGroup = ref(null)
 
 const mainPlayers = computed(() =>
-  props.players.filter(player => !isHdrezka(player) && !isKodik(player))
+  props.players.filter((player) => !isHdrezka(player) && !isKodik(player))
 )
-const hasHdrezkaGroup = computed(() =>
-  props.players.some(player => isHdrezka(player))
-)
-const hasKodikGroup = computed(() =>
-  props.players.some(player => isKodik(player))
-)
+const hasHdrezkaGroup = computed(() => props.players.some((player) => isHdrezka(player)))
+const hasKodikGroup = computed(() => props.players.some((player) => isKodik(player)))
 
-const isHdrezka = player => player.key.toUpperCase().includes('HDREZKA')
-const isKodik = player => player.key.toUpperCase().includes('KODIK')
+const isHdrezka = (player) => player.key.toUpperCase().includes('HDREZKA')
+const isKodik = (player) => player.key.toUpperCase().includes('KODIK')
 
-const cleanName = name =>
+const cleanName = (name) =>
   name
     .replace(/^REYOHOHO_PLAYER>HDREZKA>/, '')
     .replace(/KODIK>/, '')
     .trim()
 
-const selectPlayer = player => {
+const selectPlayer = (player) => {
   emit('select', player)
   emit('close')
 }
 
-const isSelected = player =>
-  props.selectedPlayer && props.selectedPlayer.key === player.key
+const isSelected = (player) => props.selectedPlayer && props.selectedPlayer.key === player.key
 
-const expandGroup = group => {
+const isGroupSelected = (group) => {
+  if (!props.selectedPlayer) return false
+  return (
+    (group === 'hdrezka' && isHdrezka(props.selectedPlayer)) ||
+    (group === 'kodik' && isKodik(props.selectedPlayer))
+  )
+}
+
+const expandGroup = (group) => {
   activeGroup.value = group
 }
 const collapseGroup = () => {
   activeGroup.value = null
 }
-const groupPlayers = group => {
+const groupPlayers = (group) => {
   let players = props.players.filter(
-    player =>
-      (group === 'hdrezka' && isHdrezka(player)) ||
-      (group === 'kodik' && isKodik(player))
+    (player) => (group === 'hdrezka' && isHdrezka(player)) || (group === 'kodik' && isKodik(player))
   )
 
   if (group === 'kodik') {
-    return players.sort((a, b) =>
-      cleanName(a.translate).localeCompare(cleanName(b.translate))
-    )
+    return players.sort((a, b) => cleanName(a.translate).localeCompare(cleanName(b.translate)))
   }
 
   return players
 }
-const groupHasWarning = group =>
-  groupPlayers(group).some(player => player.warning)
+const groupHasWarning = (group) => groupPlayers(group).some((player) => player.warning)
 </script>
 
 <style scoped>

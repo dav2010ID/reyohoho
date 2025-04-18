@@ -814,10 +814,11 @@ const onIframeLoad = () => {
 }
 
 function cleanName(name) {
-  return name
-    .replace(/^REYOHOHO_PLAYER>HDREZKA>/, '')
-    .replace(/KODIK>/, 'KODIK - ')
+  const cleanedName = name
+    .replace(/^REYOHOHO_PLAYER>HDREZKA>/, 'HDRezka - ')
+    .replace(/KODIK>/, 'Kodik - ')
     .trim()
+  return cleanedName
 }
 
 watch(selectedPlayerInternal, (newVal) => {
