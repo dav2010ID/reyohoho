@@ -5,7 +5,8 @@
     :class="{
       active: activeMovieIndex === index,
       'has-border': isCardBorder,
-      'hover-disabled': isCardHoverDisabled
+      'hover-disabled': isCardHoverDisabled,
+      'card-border': isCardBorder
     }"
     :to="{ name: 'movie-info', params: { kp_id: movie.kp_id } }"
     :data-test-id="`movie-card-${movie.kp_id}`"

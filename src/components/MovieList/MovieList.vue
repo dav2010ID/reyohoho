@@ -110,8 +110,12 @@ const handleKeyDown = (event) => {
   if (!moviesList?.length) return
 
   if (!event.target?.classList?.contains('movie-card')) {
-    movieRefs.value[activeMovieIndex.value]?.focus()
+    return
   }
+
+  const grid = document.querySelector('.grid')
+  const gridStyle = window.getComputedStyle(grid)
+  const columns = gridStyle.gridTemplateColumns.split(' ').length
 
   switch (event.key) {
     case 'ArrowRight':
@@ -122,11 +126,18 @@ const handleKeyDown = (event) => {
       break
     case 'ArrowUp':
       event.preventDefault()
-      activeMovieIndex.value = Math.max(activeMovieIndex.value - 5, 0)
+      if (activeMovieIndex.value <= 0) {
+        const searchInput = document.querySelector('.search-input')
+        if (searchInput) {
+          searchInput.focus()
+        }
+      } else {
+        activeMovieIndex.value = Math.max(activeMovieIndex.value - columns, 0)
+      }
       break
     case 'ArrowDown':
       event.preventDefault()
-      activeMovieIndex.value = Math.min(activeMovieIndex.value + 5, moviesList.length - 1)
+      activeMovieIndex.value = Math.min(activeMovieIndex.value + columns, moviesList.length - 1)
       break
     case 'Home':
       activeMovieIndex.value = 0

@@ -11,11 +11,13 @@
           :class="{ 'wrong-layout': showLayoutWarning }"
           @keydown.enter="search"
           @keydown.tab.prevent="handleTabKey"
+          @keydown.down.prevent="focusFirstMovieCard"
           @input="handleInput"
         />
-        <div v-if="showLayoutWarning" class="layout-warning" :class="{ 'show': showLayoutWarning }">
+        <div v-if="showLayoutWarning" class="layout-warning" :class="{ show: showLayoutWarning }">
           <i class="fas fa-keyboard"></i>
-          Возможно, вы используете неправильную раскладку. Нажмите Tab для переключения на {{ suggestedLayout }} раскладку
+          Возможно, вы используете неправильную раскладку. Нажмите Tab для переключения на
+          {{ suggestedLayout }} раскладку
         </div>
       </div>
 
@@ -88,7 +90,7 @@ import { useNavbarStore } from '@/store/navbar'
 import { hasConsecutiveConsonants, suggestLayout, convertLayout } from '@/utils/keyboardLayout'
 import { inRange } from 'lodash'
 import debounce from 'lodash/debounce'
-import { ref, watch, nextTick, onMounted } from 'vue'
+import { ref, watch, nextTick, onMounted, onUnmounted } from 'vue'
 
 const navbarStore = useNavbarStore()
 
@@ -101,13 +103,19 @@ const errorMessage = ref('')
 const errorCode = ref(null)
 
 const searchInput = ref(null)
+const activeMovieIndex = ref(null)
 
 const showLayoutWarning = ref(false)
 const suggestedLayout = ref('')
 
 onMounted(async () => {
   await nextTick()
+  document.addEventListener('keydown', handleKeyDown)
   searchInput.value?.focus()
+})
+
+onUnmounted(() => {
+  document.removeEventListener('keydown', handleKeyDown)
 })
 
 // Очистка поиска
@@ -200,6 +208,64 @@ const handleTabKey = () => {
   }
 }
 
+const focusFirstMovieCard = () => {
+  if (movies.value.length > 0) {
+    const firstMovieCard = document.querySelector('.search__movie')
+    if (firstMovieCard) {
+      firstMovieCard.focus()
+      activeMovieIndex.value = 0
+    }
+  }
+}
+
+const handleKeyDown = (event) => {
+  if (!movies.value?.length) return
+
+  if (!event.target?.classList?.contains('search__movie')) {
+    return
+  }
+
+  switch (event.key) {
+    case 'ArrowRight':
+      activeMovieIndex.value = (activeMovieIndex.value + 1) % movies.value.length
+      break
+    case 'ArrowLeft':
+      activeMovieIndex.value =
+        (activeMovieIndex.value - 1 + movies.value.length) % movies.value.length
+      break
+    case 'ArrowUp':
+      event.preventDefault()
+      if (activeMovieIndex.value <= 0) {
+        const searchInput = document.querySelector('.search-input')
+        if (searchInput) {
+          searchInput.focus()
+        }
+      } else {
+        activeMovieIndex.value = Math.max(activeMovieIndex.value - 1, 0)
+      }
+      break
+    case 'ArrowDown':
+      event.preventDefault()
+      activeMovieIndex.value = Math.min(activeMovieIndex.value + 1, movies.value.length - 1)
+      break
+    case 'Home':
+      activeMovieIndex.value = 0
+      break
+    case 'End':
+      activeMovieIndex.value = movies.value.length - 1
+      break
+  }
+}
+
+watch(activeMovieIndex, (newIndex) => {
+  if (newIndex !== null) {
+    const movieCards = document.querySelectorAll('.search__movie')
+    if (movieCards[newIndex]) {
+      movieCards[newIndex].focus()
+    }
+  }
+})
+
 // Автопоиск с задержкой
 watch(searchTerm, () => {
   debouncedPerformSearch()
@@ -275,9 +341,16 @@ watch(searchTerm, () => {
     text-decoration: none;
     color: #fff;
     border-radius: 10px;
+    outline: none;
+    margin: 2px;
 
     &:hover {
       background: rgba(34, 34, 34, 0.98);
+    }
+
+    &:focus {
+      background: rgba(34, 34, 34, 0.98);
+      box-shadow: 0 0 0 2px #558839;
     }
 
     &__poster {
@@ -331,7 +404,7 @@ watch(searchTerm, () => {
     border-color: #558839;
     outline: none;
   }
-  
+
   &.wrong-layout {
     border-color: #ff8c00;
     box-shadow: 0 0 5px rgba(255, 140, 0, 0.2);

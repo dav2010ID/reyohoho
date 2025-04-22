@@ -29,6 +29,7 @@
             :inputmode="searchType === 'title' ? 'text' : 'numeric'"
             @keydown.enter="search"
             @keydown.tab.prevent="handleTabKey"
+            @keydown.down.prevent="focusFirstMovieCard"
             @input="handleInput"
           />
           <div class="icons">
@@ -39,9 +40,10 @@
               <i class="fas fa-search"></i>
             </button>
           </div>
-          <div v-if="showLayoutWarning" class="layout-warning" :class="{ 'show': showLayoutWarning }">
+          <div v-if="showLayoutWarning" class="layout-warning" :class="{ show: showLayoutWarning }">
             <i class="fas fa-keyboard"></i>
-            Возможно, вы используете неправильную раскладку. Нажмите Tab для переключения на {{ suggestedLayout }} раскладку
+            Возможно, вы используете неправильную раскладку. Нажмите Tab для переключения на
+            {{ suggestedLayout }} раскладку
           </div>
         </div>
       </div>
@@ -77,7 +79,11 @@
             @item-deleted="handleItemDeleted"
           />
         </div>
-        <ErrorMessage v-if="!searchTerm && errorMessage" :message="errorMessage" :code="errorCode" />
+        <ErrorMessage
+          v-if="!searchTerm && errorMessage"
+          :message="errorMessage"
+          :code="errorCode"
+        />
 
         <!-- Результаты поиска -->
         <div v-if="searchPerformed">
@@ -137,6 +143,8 @@ const history = ref([])
 
 const showLayoutWarning = ref(false)
 const suggestedLayout = ref('')
+
+const searchInput = ref(null)
 
 watchEffect(async () => {
   if (authStore.token) {
@@ -331,6 +339,7 @@ onMounted(() => {
     searchTerm.value = shikiId
     performSearch()
   }
+  searchInput.value?.focus()
 })
 
 // Автопоиск с задержкой (только для поиска по названию)
@@ -340,6 +349,15 @@ watch(searchTerm, () => {
   }
   debouncedPerformSearch()
 })
+
+const focusFirstMovieCard = () => {
+  if (movies.value.length > 0) {
+    const firstMovieCard = document.querySelector('.movie-card')
+    if (firstMovieCard) {
+      firstMovieCard.focus()
+    }
+  }
+}
 </script>
 
 <style scoped>
