@@ -194,10 +194,11 @@
               />
             </a>
             <button
-              v-if="authStore.token"
               class="rating-link nudity-info-btn"
               @click="showNudityInfo"
-              :title="nudityInfo ? 'Скрыть информацию' : 'Показать информацию о сценах'"
+              :title="
+                nudityInfo ? 'Скрыть информацию' : 'Показать информацию о сценах(Sex & Nudity)'
+              "
             >
               <i v-if="!nudityInfoLoading" class="fa-regular fa-face-grin-wink"></i>
               <i v-else class="fas fa-spinner fa-spin"></i>
@@ -574,6 +575,15 @@ const onKeyDown = (event) => {
 }
 
 const showNudityInfo = async () => {
+  if (!authStore.token) {
+    notificationRef.value.showNotification(
+      'Для просмотра информации необходимо <a class="auth-link">авторизоваться</a>',
+      5000,
+      { onClick: () => navbarStore.openLogin() }
+    )
+    return
+  }
+
   if (!movieInfo.value?.imdb_id) return
 
   if (nudityInfo.value) {
