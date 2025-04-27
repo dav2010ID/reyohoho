@@ -68,6 +68,11 @@ const getKpIDfromIMDB = async (imdb_id) => {
   return data
 }
 
+const getNudityInfoFromIMDB = async (imdb_id) => {
+  const { data } = await apiCall((api) => api.get(`/imdb_parental_guide/${imdb_id}`))
+  return data
+}
+
 const getKpIDfromSHIKI = async (shiki_id) => {
   const { data } = await apiCall((api) => api.get(`/shiki_to_kp/${shiki_id}`))
   return data
@@ -93,7 +98,8 @@ export {
   getKpIDfromIMDB,
   getKpIDfromSHIKI,
   getRating,
-  setRating
+  setRating,
+  getNudityInfoFromIMDB
 }
 
 // ===== Функция для включения/выключения симуляции =====

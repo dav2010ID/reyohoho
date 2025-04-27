@@ -179,7 +179,7 @@
           </div>
 
           <!-- Parents Guide (только если есть IMDb id) -->
-          <div v-if="movieInfo.imdb_id">
+          <div v-if="movieInfo.imdb_id" class="rating-links-group">
             <a
               :href="`https://www.imdb.com/title/${movieInfo.imdb_id}/parentalguide`"
               target="_blank"
@@ -193,6 +193,20 @@
                 class="external-link-icon"
               />
             </a>
+            <button
+              v-if="authStore.token"
+              class="rating-link nudity-info-btn"
+              @click="showNudityInfo"
+              :title="nudityInfo ? 'Скрыть информацию' : 'Показать информацию о сценах'"
+            >
+              <i v-if="!nudityInfoLoading" class="fa-regular fa-face-grin-wink"></i>
+              <i v-else class="fas fa-spinner fa-spin"></i>
+              <div v-if="nudityInfo" class="nudity-info-popup">
+                <div class="nudity-info-content">
+                  {{ nudityInfo }}
+                </div>
+              </div>
+            </button>
           </div>
         </div>
 
@@ -347,7 +361,7 @@
 </template>
 
 <script setup>
-import { getKpInfo, getShikiInfo } from '@/api/movies'
+import { getKpInfo, getShikiInfo, getNudityInfoFromIMDB } from '@/api/movies'
 import { handleApiError } from '@/constants'
 import { addToList } from '@/api/user'
 import { MovieList } from '@/components/MovieList/'
@@ -384,6 +398,9 @@ const showAllSequels = ref(false)
 const showAllSimilars = ref(false)
 
 const itemsPerRow = ref(6)
+
+const nudityInfo = ref(null)
+const nudityInfoLoading = ref(false)
 
 const setDocumentTitle = () => {
   if (movieInfo.value) {
@@ -553,6 +570,26 @@ const onKeyDown = (event) => {
         theaterModeBtn.click()
       }
     }
+  }
+}
+
+const showNudityInfo = async () => {
+  if (!movieInfo.value?.imdb_id) return
+
+  if (nudityInfo.value) {
+    nudityInfo.value = null
+    return
+  }
+
+  nudityInfoLoading.value = true
+  try {
+    const response = await getNudityInfoFromIMDB(movieInfo.value.imdb_id)
+    nudityInfo.value = response.nudity_info
+  } catch (error) {
+    console.error('Ошибка при загрузке информации о сценах:', error)
+    notificationRef.value.showNotification('Ошибка при загрузке информации о сценах')
+  } finally {
+    nudityInfoLoading.value = false
   }
 }
 
@@ -1288,5 +1325,62 @@ const getStaffByProfession = (profession) => {
 .show-more-btn:active {
   background: #17850b;
   border-color: #17850b;
+}
+
+.rating-links-group {
+  display: flex;
+  gap: 10px;
+}
+
+.nudity-info-btn {
+  position: relative;
+  background: none;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  color: inherit;
+  font: inherit;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.nudity-info-btn i {
+  font-size: 20px;
+  color: #fff;
+}
+
+.nudity-info-btn .fa-spinner {
+  color: #fff;
+}
+
+.nudity-info-popup {
+  position: absolute;
+  top: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+  background: rgba(0, 0, 0, 0.9);
+  border: 1px solid #333;
+  border-radius: 8px;
+  padding: 15px;
+  margin-top: 10px;
+  min-width: 300px;
+  max-width: 500px;
+  z-index: 1000;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+}
+
+.nudity-info-content {
+  color: #fff;
+  font-size: 14px;
+  line-height: 1.5;
+  white-space: pre-wrap;
+}
+
+@media (max-width: 600px) {
+  .nudity-info-popup {
+    min-width: 250px;
+    max-width: 90vw;
+  }
 }
 </style>
