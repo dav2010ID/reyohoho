@@ -10,9 +10,6 @@ import { initYandexMetrika } from 'yandex-metrika-vue3'
 import VueLazyload from 'vue-lazyload'
 import App from './App.vue'
 import router from './router' // Import the router
-import Bugsnag from '@bugsnag/js'
-import BugsnagPluginVue from '@bugsnag/plugin-vue'
-import BugsnagPerformance from '@bugsnag/browser-performance'
 
 console.log(`App version: ${import.meta.env.VITE_APP_VERSION_FULL_VERSION}`)
 
@@ -24,17 +21,6 @@ window.addEventListener('vite:preloadError', (event) => {
   console.log(`vite:preloadError ${event}`)
   window.location.reload()
 })
-
-Bugsnag.start({
-  appVersion: import.meta.env.VITE_APP_VERSION_FULL_VERSION,
-  apiKey: import.meta.env.VITE_BUGSNAG_API_KEY,
-  plugins: [new BugsnagPluginVue()]
-})
-BugsnagPerformance.start({
-  appVersion: import.meta.env.VITE_APP_VERSION_FULL_VERSION,
-  apiKey: import.meta.env.VITE_BUGSNAG_API_KEY
-})
-const bugsnagVue = Bugsnag.getPlugin('vue')
 
 const app = createApp(App)
 
@@ -71,7 +57,6 @@ app.use(VueLazyload, {
 })
 
 app
-  .use(bugsnagVue)
   .use(VueCookies)
   .use(router)
   .use(pinia)

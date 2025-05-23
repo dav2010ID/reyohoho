@@ -3,7 +3,6 @@ import vue from '@vitejs/plugin-vue'
 import { VitePWA } from 'vite-plugin-pwa'
 import legacy from '@vitejs/plugin-legacy'
 import eslintPlugin from 'vite-plugin-eslint'
-import { BugsnagBuildReporterPlugin, BugsnagSourceMapUploaderPlugin } from 'vite-plugin-bugsnag'
 
 const base = process.env.VITE_BASE_URL || '/'
 
@@ -25,10 +24,6 @@ export default defineConfig(({ mode }) => {
       .replace(/[.,]/g, '_')
       .replace(/\s+/g, '') + '_UTC'
   process.env.VITE_APP_VERSION_FULL_VERSION = process.env.VITE_APP_VERSION + '_' + formattedDate
-  const bugsnagOptions = {
-    apiKey: process.env.VITE_BUGSNAG_API_KEY,
-    appVersion: process.env.VITE_APP_VERSION_FULL_VERSION
-  }
 
   return {
     base: base,
@@ -126,17 +121,7 @@ export default defineConfig(({ mode }) => {
         failOnWarning: false,
         cache: false,
         emitError: true
-      }),
-      isDistEnv &&
-        BugsnagBuildReporterPlugin({
-          ...bugsnagOptions,
-          releaseStage: process.env.NODE_ENV
-        }),
-      isDistEnv &&
-        BugsnagSourceMapUploaderPlugin({
-          ...bugsnagOptions,
-          overwrite: true
-        })
+      })
     ],
     resolve: {
       alias: {
