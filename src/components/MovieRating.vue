@@ -9,7 +9,9 @@
         @click.prevent="toggleTooltip"
       >
         <img src="/icons/icon-192x192.png" alt="ReYohoho" class="rating-logo" />
-        <span class="average-rating">{{ averageRating ? averageRating.toFixed(1) : '—' }}</span>
+        <span class="average-rating">{{
+          averageRating ? averageRating.toFixed(1).replace(/\.0$/, '') : '—'
+        }}</span>
       </a>
       <div
         v-show="isHovered || isTooltipVisible"
