@@ -13,7 +13,8 @@ export const USER_LIST_TYPES_ENUM = {
   WATCHING: 'watching',
   COMPLETED: 'completed',
   ABANDONED: 'abandoned',
-  HISTORY: 'history'
+  HISTORY: 'history',
+  RATED: 'rated'
 }
 
 export const handleApiError = (error) => {

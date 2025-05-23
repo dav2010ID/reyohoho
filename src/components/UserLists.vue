@@ -105,7 +105,8 @@ const typeFilters = [
   { label: 'Смотрю', value: USER_LIST_TYPES_ENUM.WATCHING },
   { label: 'Позже', value: USER_LIST_TYPES_ENUM.LATER },
   { label: 'Просмотрено', value: USER_LIST_TYPES_ENUM.COMPLETED },
-  { label: 'Брошено', value: USER_LIST_TYPES_ENUM.ABANDONED }
+  { label: 'Брошено', value: USER_LIST_TYPES_ENUM.ABANDONED },
+  { label: 'Оценено', value: USER_LIST_TYPES_ENUM.RATED }
 ]
 
 const fetchCounters = async () => {
