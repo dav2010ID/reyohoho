@@ -332,32 +332,52 @@
 
             <div v-if="getStaffByProfession('DIRECTOR').length" class="staff-category">
               <h3 class="additional-info-title">Режиссёры</h3>
-              <div class="staff-names-list">
+              <div class="staff-names-container">
+                <div class="staff-names-list">
+                  <a
+                    v-for="person in getStaffByProfession('DIRECTOR')"
+                    :key="person.staff_id"
+                    :href="`https://www.kinopoisk.ru/name/${person.staff_id}/`"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    class="staff-name-link"
+                  >
+                    {{ person.name_ru || person.name_en }}
+                  </a>
+                </div>
                 <a
-                  v-for="person in getStaffByProfession('DIRECTOR')"
-                  :key="person.staff_id"
-                  :href="`https://www.kinopoisk.ru/name/${person.staff_id}/`"
+                  class="show-all-staff-link"
+                  :href="`https://www.kinopoisk.ru/film/${kp_id}/cast/`"
                   target="_blank"
                   rel="noopener noreferrer"
-                  class="staff-name-link"
                 >
-                  {{ person.name_ru || person.name_en }}
+                  +
                 </a>
               </div>
             </div>
 
             <div v-if="getStaffByProfession('PRODUCER').length" class="staff-category">
               <h3 class="additional-info-title">Продюсеры</h3>
-              <div class="staff-names-list">
+              <div class="staff-names-container">
+                <div class="staff-names-list">
+                  <a
+                    v-for="person in getStaffByProfession('PRODUCER')"
+                    :key="person.staff_id"
+                    :href="`https://www.kinopoisk.ru/name/${person.staff_id}/`"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    class="staff-name-link"
+                  >
+                    {{ person.name_ru || person.name_en }}
+                  </a>
+                </div>
                 <a
-                  v-for="person in getStaffByProfession('PRODUCER')"
-                  :key="person.staff_id"
-                  :href="`https://www.kinopoisk.ru/name/${person.staff_id}/`"
+                  class="show-all-staff-link"
+                  :href="`https://www.kinopoisk.ru/film/${kp_id}/cast/`"
                   target="_blank"
                   rel="noopener noreferrer"
-                  class="staff-name-link"
                 >
-                  {{ person.name_ru || person.name_en }}
+                  +
                 </a>
               </div>
             </div>
@@ -1462,11 +1482,25 @@ const getStaffByProfession = (profession) => {
   }
 }
 
+.staff-names-container {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  margin-bottom: 15px;
+}
+
 .staff-names-list {
   display: flex;
-  flex-wrap: wrap;
+  flex-wrap: nowrap;
   gap: 10px;
-  margin-bottom: 15px;
+  overflow-x: auto;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+  padding-bottom: 5px;
+}
+
+.staff-names-list::-webkit-scrollbar {
+  display: none;
 }
 
 .staff-name-link {
@@ -1476,6 +1510,7 @@ const getStaffByProfession = (profession) => {
   background: rgba(255, 255, 255, 0.1);
   border-radius: 4px;
   transition: all 0.2s ease;
+  white-space: nowrap;
 }
 
 .staff-name-link:hover {
@@ -1483,14 +1518,51 @@ const getStaffByProfession = (profession) => {
   transform: translateY(-2px);
 }
 
+.show-all-staff-link {
+  color: #fff;
+  text-decoration: none;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 50%;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+  flex-shrink: 0;
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 20px;
+  padding: 0;
+  border: none;
+  cursor: pointer;
+}
+
+.show-all-staff-link:hover {
+  background: rgba(255, 255, 255, 0.2);
+  transform: translateY(-2px);
+}
+
 @media (max-width: 600px) {
+  .staff-names-container {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 10px;
+  }
+
   .staff-names-list {
-    gap: 8px;
+    width: 100%;
   }
 
   .staff-name-link {
     font-size: 14px;
     padding: 4px 8px;
+  }
+
+  .show-all-staff-link {
+    align-self: flex-start;
+    font-size: 16px;
+    width: 35px;
+    height: 35px;
   }
 }
 </style>
