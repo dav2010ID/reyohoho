@@ -329,6 +329,38 @@
                 </a>
               </div>
             </div>
+
+            <div v-if="getStaffByProfession('DIRECTOR').length" class="staff-category">
+              <h3 class="additional-info-title">Режиссёры</h3>
+              <div class="staff-names-list">
+                <a
+                  v-for="person in getStaffByProfession('DIRECTOR')"
+                  :key="person.staff_id"
+                  :href="`https://www.kinopoisk.ru/name/${person.staff_id}/`"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  class="staff-name-link"
+                >
+                  {{ person.name_ru || person.name_en }}
+                </a>
+              </div>
+            </div>
+
+            <div v-if="getStaffByProfession('PRODUCER').length" class="staff-category">
+              <h3 class="additional-info-title">Продюсеры</h3>
+              <div class="staff-names-list">
+                <a
+                  v-for="person in getStaffByProfession('PRODUCER')"
+                  :key="person.staff_id"
+                  :href="`https://www.kinopoisk.ru/name/${person.staff_id}/`"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  class="staff-name-link"
+                >
+                  {{ person.name_ru || person.name_en }}
+                </a>
+              </div>
+            </div>
           </div>
         </div>
 
@@ -1427,6 +1459,38 @@ const getStaffByProfession = (profession) => {
   .nudity-info-popup {
     min-width: 250px;
     max-width: 90vw;
+  }
+}
+
+.staff-names-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-bottom: 15px;
+}
+
+.staff-name-link {
+  color: #fff;
+  text-decoration: none;
+  padding: 5px 10px;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 4px;
+  transition: all 0.2s ease;
+}
+
+.staff-name-link:hover {
+  background: rgba(255, 255, 255, 0.2);
+  transform: translateY(-2px);
+}
+
+@media (max-width: 600px) {
+  .staff-names-list {
+    gap: 8px;
+  }
+
+  .staff-name-link {
+    font-size: 14px;
+    padding: 4px 8px;
   }
 }
 </style>
