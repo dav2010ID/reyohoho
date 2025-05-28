@@ -15,9 +15,8 @@
         }}</span>
       </a>
       <div
-        v-show="isHovered || isTooltipVisible"
+        v-show="(isHovered || isTooltipVisible) && !mainStore.isMobile"
         class="rating-tooltip"
-        :class="{ 'mobile-tooltip': mainStore.isMobile }"
         @mouseenter="handleMouseEnter"
         @mouseleave="handleMouseLeave"
       >
@@ -42,6 +41,34 @@
       </div>
     </div>
     <Notification ref="notificationRef" />
+
+    <div
+      v-if="mainStore.isMobile && isTooltipVisible"
+      class="mobile-modal-overlay"
+      @click="closeModal"
+    >
+      <div class="mobile-modal" @click.stop>
+        <div class="mobile-modal-header">
+          <h3>Оценить фильм</h3>
+          <button class="close-button" @click="closeModal">&times;</button>
+        </div>
+        <div class="rating-numbers mobile-rating-numbers">
+          <button
+            v-for="num in 10"
+            :key="num"
+            class="number-btn"
+            :class="{
+              active: num === userRating,
+              'average-highlight': averageRating && num <= Math.round(averageRating)
+            }"
+            @click="setRating(num)"
+          >
+            {{ num }}
+          </button>
+        </div>
+        <div v-if="voteCount" class="mobile-modal-footer">Оценок: {{ voteCount }}</div>
+      </div>
+    </div>
   </div>
 </template>
 
@@ -148,6 +175,10 @@ const setRating = async (rating) => {
       isTooltipVisible.value = false
     }
   }
+}
+
+const closeModal = () => {
+  isTooltipVisible.value = false
 }
 
 onMounted(() => {
@@ -399,5 +430,76 @@ onMounted(() => {
   transform: translate(-50%, -50%);
   margin-top: 0;
   z-index: 1001;
+}
+
+.mobile-modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.7);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
+
+.mobile-modal {
+  background: #1a1a1a;
+  border-radius: 8px;
+  padding: 20px;
+  width: 90%;
+  max-width: 320px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+}
+
+.mobile-modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.mobile-modal-header h3 {
+  margin: 0;
+  color: #fff;
+  font-size: 18px;
+  font-weight: 500;
+}
+
+.close-button {
+  background: none;
+  border: none;
+  color: #fff;
+  font-size: 24px;
+  cursor: pointer;
+  padding: 0;
+  opacity: 0.7;
+  transition: opacity 0.2s;
+}
+
+.close-button:hover {
+  opacity: 1;
+}
+
+.mobile-rating-numbers {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 8px;
+  margin-bottom: 16px;
+}
+
+.mobile-rating-numbers .number-btn {
+  font-size: 18px;
+  padding: 12px 0;
+}
+
+.mobile-modal-footer {
+  text-align: center;
+  color: rgba(255, 255, 255, 0.7);
+  font-size: 14px;
+  padding-top: 12px;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
 }
 </style>
