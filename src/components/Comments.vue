@@ -109,6 +109,14 @@
             >
               <i class="fas fa-eye-slash"></i>
             </button>
+            <button
+              type="button"
+              class="emoji-button-inline link-button"
+              @click="insertLink"
+              title="Добавить ссылку"
+            >
+              <i class="fas fa-link"></i>
+            </button>
             <EmojiPicker
               :is-visible="showEmojiPicker && canComment"
               @emoji-selected="insertEmoji"
@@ -124,6 +132,12 @@
               @mouse-leave="handleImageMouseLeave"
               @close="closeImagePicker"
               @login-required="openLogin"
+            />
+            <LinkModal
+              :is-visible="showLinkModal"
+              :selected-text="selectedTextForLink"
+              @close="closeLinkModal"
+              @submit="insertLinkFromModal"
             />
           </div>
         </div>
@@ -166,6 +180,7 @@ import CommentThread from './CommentThread.vue'
 import Notification from '@/components/notification/ToastMessage.vue'
 import EmojiPicker from '@/components/EmojiPicker.vue'
 import ImagePicker from '@/components/ImagePicker.vue'
+import LinkModal from '@/components/LinkModal.vue'
 
 export default {
   name: 'Comments',
@@ -173,7 +188,8 @@ export default {
     CommentThread,
     Notification,
     EmojiPicker,
-    ImagePicker
+    ImagePicker,
+    LinkModal
   },
   props: {
     movieId: {
@@ -195,6 +211,8 @@ export default {
     const showComments = ref(false)
     const showEmojiPicker = ref(false)
     const showImagePicker = ref(false)
+    const showLinkModal = ref(false)
+    const selectedTextForLink = ref('')
     const isEmojiHovered = ref(false)
     const isImageHovered = ref(false)
     const isButtonHovered = ref(false)
@@ -574,6 +592,36 @@ export default {
       }
     }
 
+    const insertLink = () => {
+      const textarea = commentTextarea.value
+      if (textarea) {
+        const start = textarea.selectionStart
+        const end = textarea.selectionEnd
+        const selectedText = newComment.value.slice(start, end)
+        selectedTextForLink.value = selectedText.trim() || ''
+      }
+      showLinkModal.value = true
+    }
+
+    const insertLinkFromModal = (linkData) => {
+      if (commentTextarea.value) {
+        const start = commentTextarea.value.selectionStart
+        const end = commentTextarea.value.selectionEnd
+        const linkTag = `[link=${linkData.url}]${linkData.title}[/link]`
+        newComment.value = newComment.value.slice(0, start) + linkTag + newComment.value.slice(end)
+
+        nextTick(() => {
+          commentTextarea.value.focus()
+          commentTextarea.value.setSelectionRange(start + linkTag.length, start + linkTag.length)
+          autoResize()
+        })
+      }
+    }
+
+    const closeLinkModal = () => {
+      showLinkModal.value = false
+    }
+
     const formatCommentContent = (content) => {
       if (!content) return ''
 
@@ -768,6 +816,8 @@ export default {
       getCommentWordForm,
       showEmojiPicker,
       showImagePicker,
+      showLinkModal,
+      selectedTextForLink,
       insertEmoji,
       insertImage,
       formatCommentContent,
@@ -784,7 +834,10 @@ export default {
       canComment,
       handleStartEdit,
       handleCancelEdit,
-      insertSpoiler
+      insertSpoiler,
+      insertLink,
+      insertLinkFromModal,
+      closeLinkModal
     }
   }
 }
@@ -1236,6 +1289,19 @@ export default {
 }
 
 .spoiler-button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.link-button {
+  color: #999;
+}
+
+.link-button:hover {
+  color: #fff;
+}
+
+.link-button:disabled {
   opacity: 0.5;
   cursor: not-allowed;
 }

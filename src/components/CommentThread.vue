@@ -97,6 +97,14 @@
           >
             <i class="fas fa-eye-slash"></i>
           </button>
+          <button
+            type="button"
+            class="emoji-button-inline link-button"
+            @click="insertLink"
+            title="Добавить ссылку"
+          >
+            <i class="fas fa-link"></i>
+          </button>
           <EmojiPicker
             :is-visible="showEmojiPicker"
             @emoji-selected="insertEmoji"
@@ -111,7 +119,13 @@
             @mouse-enter="handleImageMouseEnter"
             @mouse-leave="handleImageMouseLeave"
             @close="closeImagePicker"
-            @login-required="openLogin"
+            @login-required="() => $router.push('/login')"
+          />
+          <LinkModal
+            :is-visible="showLinkModal"
+            :selected-text="selectedTextForLink"
+            @close="closeLinkModal"
+            @submit="insertLinkFromModal"
           />
         </div>
       </div>
@@ -172,13 +186,15 @@ import { ref, nextTick, onMounted, onBeforeUnmount } from 'vue'
 import CommentItem from './CommentItem.vue'
 import EmojiPicker from '@/components/EmojiPicker.vue'
 import ImagePicker from '@/components/ImagePicker.vue'
+import LinkModal from '@/components/LinkModal.vue'
 
 export default {
   name: 'CommentThread',
   components: {
     CommentItem,
     EmojiPicker,
-    ImagePicker
+    ImagePicker,
+    LinkModal
   },
   props: {
     comment: {
@@ -222,6 +238,8 @@ export default {
     const isEmojiHovered = ref(false)
     const isImageHovered = ref(false)
     const isCollapsed = ref(false)
+    const showLinkModal = ref(false)
+    const selectedTextForLink = ref('')
 
     const handleReplyInput = (event) => {
       emit('update-reply-content', event.target.value)
@@ -356,6 +374,39 @@ export default {
       }
     }
 
+    const insertLink = () => {
+      const textarea = replyTextarea.value
+      if (textarea) {
+        const start = textarea.selectionStart
+        const end = textarea.selectionEnd
+        const selectedText = textarea.value.slice(start, end)
+        selectedTextForLink.value = selectedText.trim() || ''
+      }
+      showLinkModal.value = true
+    }
+
+    const closeLinkModal = () => {
+      showLinkModal.value = false
+    }
+
+    const insertLinkFromModal = (linkData) => {
+      const textarea = replyTextarea.value
+      if (textarea) {
+        const start = textarea.selectionStart
+        const end = textarea.selectionEnd
+        const linkTag = `[link=${linkData.url}]${linkData.title}[/link]`
+        const newValue = textarea.value.slice(0, start) + linkTag + textarea.value.slice(end)
+        textarea.value = newValue
+        emit('update-reply-content', newValue)
+
+        nextTick(() => {
+          textarea.focus()
+          textarea.setSelectionRange(start + linkTag.length, start + linkTag.length)
+          handleReplyInput({ target: textarea })
+        })
+      }
+    }
+
     const toggleCollapsed = () => {
       isCollapsed.value = !isCollapsed.value
     }
@@ -402,7 +453,12 @@ export default {
       handleImageButtonMouseEnter,
       handleReplyInput,
       toggleCollapsed,
-      closeAllPickers
+      closeAllPickers,
+      showLinkModal,
+      selectedTextForLink,
+      insertLink,
+      closeLinkModal,
+      insertLinkFromModal
     }
   },
   computed: {
@@ -825,6 +881,19 @@ export default {
 }
 
 .spoiler-button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.link-button {
+  color: #999;
+}
+
+.link-button:hover {
+  color: #fff;
+}
+
+.link-button:disabled {
   opacity: 0.5;
   cursor: not-allowed;
 }

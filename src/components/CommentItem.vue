@@ -163,6 +163,14 @@
                 >
                   <i class="fas fa-eye-slash"></i>
                 </button>
+                <button
+                  type="button"
+                  class="emoji-button-inline link-button"
+                  @click="insertLinkEdit"
+                  title="Добавить ссылку"
+                >
+                  <i class="fas fa-link"></i>
+                </button>
                 <EmojiPicker
                   :is-visible="showEmojiPicker"
                   @emoji-selected="insertEmojiEdit"
@@ -178,6 +186,12 @@
                   @mouse-leave="handleImageMouseLeave"
                   @close="closeImagePicker"
                   @login-required="openLogin"
+                />
+                <LinkModal
+                  :is-visible="showLinkModal"
+                  :selected-text="selectedTextForLink"
+                  @close="closeLinkModal"
+                  @submit="insertLinkFromModal"
                 />
               </div>
             </div>
@@ -266,12 +280,14 @@ import { getBaseURL } from '@/api/axios'
 import { useRouter } from 'vue-router'
 import EmojiPicker from '@/components/EmojiPicker.vue'
 import ImagePicker from '@/components/ImagePicker.vue'
+import LinkModal from '@/components/LinkModal.vue'
 
 export default {
   name: 'CommentItem',
   components: {
     EmojiPicker,
-    ImagePicker
+    ImagePicker,
+    LinkModal
   },
   props: {
     comment: {
@@ -311,6 +327,8 @@ export default {
     const isEmojiHovered = ref(false)
     const showImagePicker = ref(false)
     const isImageHovered = ref(false)
+    const showLinkModal = ref(false)
+    const selectedTextForLink = ref('')
 
     const getInitials = (name) => {
       if (!name) return '?'
@@ -655,6 +673,24 @@ export default {
         }
       )
 
+      processedContent = processedContent.replace(
+        /\[link=([^\]]+)\](.*?)\[\/link\]/g,
+        (match, url, linkText) => {
+          const trimmedUrl = url.trim()
+          const trimmedText = linkText.trim()
+
+          const isValidUrl = /^https?:\/\/.+/.test(trimmedUrl)
+
+          if (isValidUrl && trimmedText) {
+            const safeUrl = escapeHtml(trimmedUrl)
+            const safeText = escapeHtml(trimmedText)
+            return `<a href="${safeUrl}" target="_blank" rel="noopener noreferrer" class="comment-link">${safeText}</a>`
+          }
+
+          return escapeHtml(trimmedText || trimmedUrl)
+        }
+      )
+
       return processedContent
     })
 
@@ -803,6 +839,18 @@ export default {
       }
     }
 
+    const insertLinkEdit = () => {
+      const textarea = editTextarea.value
+      if (textarea) {
+        const start = textarea.selectionStart
+        const end = textarea.selectionEnd
+        const selectedText = editContent.value.slice(start, end)
+
+        selectedTextForLink.value = selectedText.trim() || ''
+        showLinkModal.value = true
+      }
+    }
+
     const closeAllPickers = () => {
       showEmojiPicker.value = false
       showImagePicker.value = false
@@ -820,6 +868,28 @@ export default {
 
     const openLogin = () => {
       router.push('/login')
+    }
+
+    const insertLinkFromModal = (linkData) => {
+      const textarea = editTextarea.value
+      if (textarea) {
+        const start = textarea.selectionStart
+        const end = textarea.selectionEnd
+        const linkTag = `[link=${linkData.url}]${linkData.title}[/link]`
+
+        editContent.value =
+          editContent.value.slice(0, start) + linkTag + editContent.value.slice(end)
+
+        nextTick(() => {
+          textarea.focus()
+          textarea.setSelectionRange(start + linkTag.length, start + linkTag.length)
+          autoResizeEdit({ target: textarea })
+        })
+      }
+    }
+
+    const closeLinkModal = () => {
+      showLinkModal.value = false
     }
 
     watch(editContent, () => {
@@ -863,6 +933,7 @@ export default {
       insertEmojiEdit,
       insertImageEdit,
       insertSpoilerEdit,
+      insertLinkEdit,
       handleEmojiMouseEnter,
       handleEmojiMouseLeave,
       handleImageMouseEnter,
@@ -873,7 +944,11 @@ export default {
       handleButtonMouseLeave,
       handleImageButtonMouseEnter,
       handleAvatarError,
-      openLogin
+      openLogin,
+      showLinkModal,
+      selectedTextForLink,
+      insertLinkFromModal,
+      closeLinkModal
     }
   }
 }
@@ -1468,5 +1543,40 @@ export default {
 
 .user-rating i {
   font-size: 0.75rem;
+}
+
+.link-button {
+  color: #999;
+}
+
+.link-button:hover {
+  color: #4a90e2;
+}
+
+.link-button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+:deep(.comment-link) {
+  color: #4a90e2;
+  text-decoration: none;
+  transition: color 0.2s ease;
+  border-bottom: 1px solid transparent;
+}
+
+:deep(.comment-link:hover) {
+  color: #66a3e0;
+  border-bottom-color: #66a3e0;
+  text-decoration: none;
+}
+
+:deep(.comment-link:visited) {
+  color: #8a7ca8;
+}
+
+:deep(.comment-link:visited:hover) {
+  color: #a393c2;
+  border-bottom-color: #a393c2;
 }
 </style>
