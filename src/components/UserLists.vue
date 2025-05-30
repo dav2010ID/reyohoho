@@ -393,7 +393,7 @@ onMounted(fetchMovies)
   gap: 4px;
 }
 
-@media (max-width: 768px) {
+@media (max-width: 900px) {
   .controls {
     flex-direction: column;
     gap: 6px;
@@ -402,6 +402,12 @@ onMounted(fetchMovies)
 
   .filter-card {
     width: 100%;
+  }
+
+  .button-group {
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 4px;
   }
 }
 
@@ -420,14 +426,6 @@ onMounted(fetchMovies)
 
   .button-group {
     gap: 3px;
-  }
-
-  .filter-btn,
-  .share-btn,
-  .clear-btn {
-    padding: 6px 10px;
-    min-width: 70px;
-    font-size: 0.8em;
   }
 
   .card-icon {
