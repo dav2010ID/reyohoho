@@ -275,12 +275,16 @@
 </template>
 
 <script>
-import { ref, computed, onMounted, nextTick, watch, onBeforeUnmount } from 'vue'
+import { ref, computed, onMounted, nextTick, watch } from 'vue'
 import { getBaseURL } from '@/api/axios'
 import { useRouter } from 'vue-router'
 import EmojiPicker from '@/components/EmojiPicker.vue'
 import ImagePicker from '@/components/ImagePicker.vue'
 import LinkModal from '@/components/LinkModal.vue'
+import { useCommentActions } from '@/composables/useCommentActions'
+import { useCommentFormatting } from '@/composables/useCommentFormatting'
+import { formatDate, formatRelativeTime } from '@/utils/dateUtils'
+import { getInitials } from '@/utils/textUtils'
 
 export default {
   name: 'CommentItem',
@@ -322,156 +326,37 @@ export default {
     const userRating = ref(props.comment?.user_rating || 0)
     const avatarUrl = ref(null)
     const editTextarea = ref(null)
-    const showEmojiPicker = ref(false)
-    const isButtonHovered = ref(false)
-    const isEmojiHovered = ref(false)
-    const showImagePicker = ref(false)
-    const isImageHovered = ref(false)
-    const showLinkModal = ref(false)
-    const selectedTextForLink = ref('')
 
-    const getInitials = (name) => {
-      if (!name) return '?'
-      const words = name.split(' ')
-      if (words.length === 1) {
-        return name.slice(0, 2).toUpperCase()
-      }
-      return (words[0][0] + words[words.length - 1][0]).toUpperCase()
-    }
+    const {
+      showEmojiPicker,
+      showImagePicker,
+      showLinkModal,
+      selectedTextForLink,
+      handleEmojiMouseEnter,
+      handleEmojiMouseLeave,
+      handleImageMouseEnter,
+      handleImageMouseLeave,
+      handleButtonMouseEnter,
+      handleImageButtonMouseEnter,
+      handleButtonMouseLeave,
+      closeEmojiPicker,
+      closeImagePicker,
+      closeLinkModal,
+      insertEmojiUniversal,
+      insertImageUniversal,
+      insertLinkUniversal,
+      insertLinkFromModalUniversal,
+      insertSpoilerUniversal,
+      autoResize
+    } = useCommentActions()
 
-    const formatDate = (dateStr) => {
-      if (!dateStr) return ''
-
-      const year = dateStr.substring(0, 4)
-      const month = dateStr.substring(4, 6)
-      const day = dateStr.substring(6, 8)
-      const hour = dateStr.substring(9, 11)
-      const minute = dateStr.substring(11, 13)
-      const second = dateStr.substring(13, 15)
-
-      const utcDate = new Date(
-        Date.UTC(
-          parseInt(year),
-          parseInt(month) - 1,
-          parseInt(day),
-          parseInt(hour),
-          parseInt(minute),
-          parseInt(second)
-        )
-      )
-
-      return utcDate.toLocaleDateString('ru-RU', {
-        year: 'numeric',
-        month: 'short',
-        day: 'numeric',
-        hour: '2-digit',
-        minute: '2-digit',
-        timeZone: Intl.DateTimeFormat().resolvedOptions().timeZone
-      })
-    }
-
-    const formatRelativeTime = (dateStr) => {
-      if (!dateStr) return ''
-
-      const year = dateStr.substring(0, 4)
-      const month = dateStr.substring(4, 6)
-      const day = dateStr.substring(6, 8)
-      const hour = dateStr.substring(9, 11)
-      const minute = dateStr.substring(11, 13)
-      const second = dateStr.substring(13, 15)
-
-      const commentDate = new Date(
-        Date.UTC(
-          parseInt(year),
-          parseInt(month) - 1,
-          parseInt(day),
-          parseInt(hour),
-          parseInt(minute),
-          parseInt(second)
-        )
-      )
-      const now = new Date()
-      const diffInSeconds = Math.floor((now - commentDate) / 1000)
-
-      if (diffInSeconds < 60) {
-        return 'только что'
-      }
-
-      const diffInMinutes = Math.floor(diffInSeconds / 60)
-      if (diffInMinutes < 60) {
-        return `${diffInMinutes} ${getMinutesWord(diffInMinutes)} назад`
-      }
-
-      const diffInHours = Math.floor(diffInMinutes / 60)
-      if (diffInHours < 24) {
-        return `${diffInHours} ${getHoursWord(diffInHours)} назад`
-      }
-
-      const diffInDays = Math.floor(diffInHours / 24)
-      if (diffInDays < 7) {
-        return `${diffInDays} ${getDaysWord(diffInDays)} назад`
-      }
-
-      const diffInWeeks = Math.floor(diffInDays / 7)
-      if (diffInWeeks < 4) {
-        return `${diffInWeeks} ${getWeeksWord(diffInWeeks)} назад`
-      }
-
-      const diffInMonths = Math.floor(diffInDays / 30)
-      if (diffInMonths < 12) {
-        return `${diffInMonths} ${getMonthsWord(diffInMonths)} назад`
-      }
-
-      const diffInYears = Math.floor(diffInDays / 365)
-      return `${diffInYears} ${getYearsWord(diffInYears)} назад`
-    }
-
-    const getMinutesWord = (minutes) => {
-      if (minutes % 10 === 1 && minutes % 100 !== 11) return 'минуту'
-      if ([2, 3, 4].includes(minutes % 10) && ![12, 13, 14].includes(minutes % 100)) return 'минуты'
-      return 'минут'
-    }
-
-    const getHoursWord = (hours) => {
-      if (hours % 10 === 1 && hours % 100 !== 11) return 'час'
-      if ([2, 3, 4].includes(hours % 10) && ![12, 13, 14].includes(hours % 100)) return 'часа'
-      return 'часов'
-    }
-
-    const getDaysWord = (days) => {
-      if (days % 10 === 1 && days % 100 !== 11) return 'день'
-      if ([2, 3, 4].includes(days % 10) && ![12, 13, 14].includes(days % 100)) return 'дня'
-      return 'дней'
-    }
-
-    const getWeeksWord = (weeks) => {
-      if (weeks % 10 === 1 && weeks % 100 !== 11) return 'неделю'
-      if ([2, 3, 4].includes(weeks % 10) && ![12, 13, 14].includes(weeks % 100)) return 'недели'
-      return 'недель'
-    }
-
-    const getMonthsWord = (months) => {
-      if (months % 10 === 1 && months % 100 !== 11) return 'месяц'
-      if ([2, 3, 4].includes(months % 10) && ![12, 13, 14].includes(months % 100)) return 'месяца'
-      return 'месяцев'
-    }
-
-    const getYearsWord = (years) => {
-      if (years % 10 === 1 && years % 100 !== 11) return 'год'
-      if ([2, 3, 4].includes(years % 10) && ![12, 13, 14].includes(years % 100)) return 'года'
-      return 'лет'
-    }
+    const { formatContentWithTruncation } = useCommentFormatting()
 
     onMounted(async () => {
       if (props.comment?.user_avatar) {
         const baseURL = await getBaseURL()
         avatarUrl.value = `${baseURL}${props.comment.user_avatar}`
       }
-      document.addEventListener('click', handleGlobalClick)
-    })
-
-    onBeforeUnmount(() => {
-      document.removeEventListener('click', handleGlobalClick)
     })
 
     const isCommentOwner = computed(() => {
@@ -511,7 +396,7 @@ export default {
       nextTick(() => {
         if (editTextarea.value) {
           editTextarea.value.focus()
-          autoResizeEdit({ target: editTextarea.value })
+          autoResize({ target: editTextarea.value })
         }
       })
     }
@@ -543,10 +428,6 @@ export default {
       }
     }
 
-    const goToUserLists = () => {
-      router.push(`/lists/${props.comment?.user_id}`)
-    }
-
     const handleEditKeydown = (event) => {
       if (event.key === 'Enter' && !event.shiftKey) {
         event.preventDefault()
@@ -556,206 +437,13 @@ export default {
 
     const isLongComment = computed(() => props.comment?.content?.length > 300)
     const isExpanded = ref(false)
-    const displayedText = computed(() => {
-      if (isLongComment.value && !isExpanded.value) {
-        return props.comment?.content?.slice(0, 300) + '...'
-      }
-      return props.comment?.content || ''
-    })
 
     const formattedContent = computed(() => {
-      if (!props.comment?.content) return ''
-
-      let content = props.comment.content
-
-      if (isLongComment.value && !isExpanded.value) {
-        let truncatedContent = content.slice(0, 300)
-
-        const fullContent = content
-        const allImagesCount = (fullContent.match(/\[img\].*?\[\/img\]/g) || []).length
-        const visibleImagesCount = (truncatedContent.match(/\[img\].*?\[\/img\]/g) || []).length
-        const hiddenImagesCount = allImagesCount - visibleImagesCount
-
-        const lastOpenTag = truncatedContent.lastIndexOf('[img]')
-        const lastCloseTag = truncatedContent.lastIndexOf('[/img]')
-
-        if (lastOpenTag > lastCloseTag && lastOpenTag !== -1) {
-          truncatedContent = content.slice(0, lastOpenTag)
-        }
-
-        truncatedContent = truncatedContent.trim()
-
-        const partialOpenTags = ['[img', '[im', '[i', '[']
-        for (const partialTag of partialOpenTags) {
-          if (truncatedContent.endsWith(partialTag)) {
-            const lastBracket = truncatedContent.lastIndexOf('[')
-            if (lastBracket !== -1) {
-              truncatedContent = truncatedContent.slice(0, lastBracket).trim()
-              break
-            }
-          }
-        }
-
-        const partialCloseTags = ['[/img', '[/im', '[/i', '[/']
-        for (const partialTag of partialCloseTags) {
-          if (truncatedContent.endsWith(partialTag)) {
-            const lastBracket = truncatedContent.lastIndexOf('[')
-            if (lastBracket !== -1) {
-              truncatedContent = truncatedContent.slice(0, lastBracket).trim()
-              break
-            }
-          }
-        }
-
-        let ellipsis = '...'
-        if (hiddenImagesCount > 0) {
-          ellipsis = `... (+${hiddenImagesCount} ${hiddenImagesCount === 1 ? 'изображение' : 'изображений'})`
-        }
-
-        content = truncatedContent + ellipsis
-      }
-
-      const isValidImageUrl = (url) => {
-        try {
-          const urlObj = new URL(url)
-          const isValid = urlObj.hostname === 'cdn.7tv.app' && urlObj.protocol === 'https:'
-
-          if (!isValid) {
-            console.warn('URL изображения отклонен:', {
-              url: url,
-              hostname: urlObj.hostname,
-              protocol: urlObj.protocol,
-              reason:
-                urlObj.hostname !== 'cdn.7tv.app' ? 'неразрешенный домен' : 'неразрешенный протокол'
-            })
-          }
-
-          return isValid
-        } catch (error) {
-          console.warn('Недопустимый URL изображения:', url, 'Ошибка:', error.message)
-          return false
-        }
-      }
-
-      const escapeHtml = (text) => {
-        const div = document.createElement('div')
-        div.textContent = text
-        return div.innerHTML
-      }
-
-      let processedContent = content.replace(/\[img\](.*?)\[\/img\]/g, (match, url) => {
-        const trimmedUrl = url.trim()
-        if (isValidImageUrl(trimmedUrl)) {
-          const safeUrl = escapeHtml(trimmedUrl)
-          return `<img src="${safeUrl}" alt="7TV emote" class="inline-emoji" loading="lazy" />`
-        }
-        return `[недопустимое изображение: ${escapeHtml(trimmedUrl)}]`
-      })
-
-      processedContent = processedContent.replace(
-        /\[spoiler\](.*?)\[\/spoiler\]/gs,
-        (match, spoilerText, offset, string) => {
-          const escapedText = escapeHtml(spoilerText.trim())
-
-          const beforeChar = offset > 0 ? string[offset - 1] : ' '
-          const afterChar =
-            offset + match.length < string.length ? string[offset + match.length] : ' '
-
-          const needSpaceBefore =
-            beforeChar && beforeChar !== ' ' && beforeChar !== '\n' && beforeChar !== '\t'
-          const needSpaceAfter =
-            afterChar && afterChar !== ' ' && afterChar !== '\n' && afterChar !== '\t'
-
-          const spaceBefore = needSpaceBefore ? ' ' : ''
-          const spaceAfter = needSpaceAfter ? ' ' : ''
-
-          return `${spaceBefore}<span class="spoiler-text" onclick="this.classList.toggle('revealed')" title="Нажмите, чтобы показать спойлер">${escapedText}</span>${spaceAfter}`
-        }
-      )
-
-      processedContent = processedContent.replace(
-        /\[link=([^\]]+)\](.*?)\[\/link\]/g,
-        (match, url, linkText) => {
-          const trimmedUrl = url.trim()
-          const trimmedText = linkText.trim()
-
-          const isValidUrl = /^https?:\/\/.+/.test(trimmedUrl)
-
-          if (isValidUrl && trimmedText) {
-            const safeUrl = escapeHtml(trimmedUrl)
-            const safeText = escapeHtml(trimmedText)
-            return `<a href="${safeUrl}" target="_blank" rel="noopener noreferrer" class="comment-link">${safeText}</a>`
-          }
-
-          return escapeHtml(trimmedText || trimmedUrl)
-        }
-      )
-
-      return processedContent
+      return formatContentWithTruncation(props.comment?.content, 300, isExpanded.value)
     })
 
     const toggleExpanded = () => {
       isExpanded.value = !isExpanded.value
-    }
-
-    const autoResizeEdit = (event) => {
-      const textarea = event.target
-      if (textarea) {
-        textarea.style.height = 'auto'
-        textarea.style.height = `${Math.min(textarea.scrollHeight, 200)}px`
-      }
-    }
-
-    const insertEmojiEdit = (emoji) => {
-      const textarea = editTextarea.value
-      if (textarea) {
-        const start = textarea.selectionStart
-        const end = textarea.selectionEnd
-        const before = editContent.value.substring(0, start)
-        const after = editContent.value.substring(end)
-        editContent.value = before + emoji + after
-
-        nextTick(() => {
-          textarea.focus()
-          textarea.setSelectionRange(start + emoji.length, start + emoji.length)
-          autoResizeEdit({ target: textarea })
-        })
-      } else {
-        editContent.value += emoji
-      }
-    }
-
-    const handleEmojiMouseEnter = () => {
-      isEmojiHovered.value = true
-    }
-
-    const handleEmojiMouseLeave = () => {
-      isEmojiHovered.value = false
-      setTimeout(() => {
-        if (!isEmojiHovered.value && !isButtonHovered.value) {
-          showEmojiPicker.value = false
-        }
-      }, 300)
-    }
-
-    const closeEmojiPicker = () => {
-      showEmojiPicker.value = false
-    }
-
-    const handleButtonMouseEnter = () => {
-      isButtonHovered.value = true
-      showEmojiPicker.value = true
-      showImagePicker.value = false
-    }
-
-    const handleButtonMouseLeave = () => {
-      isButtonHovered.value = false
-      setTimeout(() => {
-        if (!isEmojiHovered.value && !isImageHovered.value && !isButtonHovered.value) {
-          showEmojiPicker.value = false
-          showImagePicker.value = false
-        }
-      }, 300)
     }
 
     const handleAvatarError = () => {
@@ -769,127 +457,42 @@ export default {
       })
     }
 
-    const handleImageMouseEnter = () => {
-      isImageHovered.value = true
-    }
-
-    const handleImageMouseLeave = () => {
-      isImageHovered.value = false
-      setTimeout(() => {
-        if (!isImageHovered.value && !isButtonHovered.value) {
-          showImagePicker.value = false
-        }
-      }, 300)
-    }
-
-    const closeImagePicker = () => {
-      showImagePicker.value = false
-    }
-
-    const handleImageButtonMouseEnter = () => {
-      isButtonHovered.value = true
-      showImagePicker.value = true
-      showEmojiPicker.value = false
-    }
-
-    const insertImageEdit = (imageUrl) => {
-      const textarea = editTextarea.value
-      if (textarea) {
-        const start = textarea.selectionStart
-        const end = textarea.selectionEnd
-        const imageTag = `[img]${imageUrl}[/img]`
-        editContent.value =
-          editContent.value.slice(0, start) + imageTag + editContent.value.slice(end)
-
-        nextTick(() => {
-          textarea.focus()
-          textarea.setSelectionRange(start + imageTag.length, start + imageTag.length)
-          autoResizeEdit({ target: textarea })
-        })
-      }
-    }
-
-    const insertSpoilerEdit = () => {
-      const textarea = editTextarea.value
-      if (textarea) {
-        const start = textarea.selectionStart
-        const end = textarea.selectionEnd
-        const selectedText = editContent.value.slice(start, end)
-
-        let spoilerTag
-        if (selectedText.trim()) {
-          spoilerTag = `[spoiler]${selectedText}[/spoiler]`
-        } else {
-          spoilerTag = '[spoiler][/spoiler]'
-        }
-
-        editContent.value =
-          editContent.value.slice(0, start) + spoilerTag + editContent.value.slice(end)
-
-        nextTick(() => {
-          textarea.focus()
-          if (selectedText.trim()) {
-            textarea.setSelectionRange(start + spoilerTag.length, start + spoilerTag.length)
-          } else {
-            const cursorPosition = start + '[spoiler]'.length
-            textarea.setSelectionRange(cursorPosition, cursorPosition)
-          }
-          autoResizeEdit({ target: textarea })
-        })
-      }
-    }
-
-    const insertLinkEdit = () => {
-      const textarea = editTextarea.value
-      if (textarea) {
-        const start = textarea.selectionStart
-        const end = textarea.selectionEnd
-        const selectedText = editContent.value.slice(start, end)
-
-        selectedTextForLink.value = selectedText.trim() || ''
-        showLinkModal.value = true
-      }
-    }
-
-    const closeAllPickers = () => {
-      showEmojiPicker.value = false
-      showImagePicker.value = false
-    }
-
-    const handleGlobalClick = (event) => {
-      if (
-        !event.target.closest('.emoji-picker') &&
-        !event.target.closest('.image-picker') &&
-        !event.target.closest('.emoji-button-inline')
-      ) {
-        closeAllPickers()
-      }
-    }
-
     const openLogin = () => {
       router.push('/login')
     }
 
-    const insertLinkFromModal = (linkData) => {
-      const textarea = editTextarea.value
-      if (textarea) {
-        const start = textarea.selectionStart
-        const end = textarea.selectionEnd
-        const linkTag = `[link=${linkData.url}]${linkData.title}[/link]`
-
-        editContent.value =
-          editContent.value.slice(0, start) + linkTag + editContent.value.slice(end)
-
-        nextTick(() => {
-          textarea.focus()
-          textarea.setSelectionRange(start + linkTag.length, start + linkTag.length)
-          autoResizeEdit({ target: textarea })
-        })
-      }
+    const insertEmojiEdit = (emoji) => {
+      insertEmojiUniversal(emoji, editTextarea, editContent, (value) => {
+        editContent.value = value
+      })
     }
 
-    const closeLinkModal = () => {
-      showLinkModal.value = false
+    const insertImageEdit = (imageUrl) => {
+      insertImageUniversal(imageUrl, editTextarea, editContent, (value) => {
+        editContent.value = value
+      })
+    }
+
+    const insertSpoilerEdit = () => {
+      insertSpoilerUniversal(editTextarea, editContent, (value) => {
+        editContent.value = value
+      })
+    }
+
+    const insertLinkEdit = () => {
+      insertLinkUniversal(editTextarea, editContent, (value) => {
+        editContent.value = value
+      })
+    }
+
+    const insertLinkFromModal = (linkData) => {
+      insertLinkFromModalUniversal(linkData, editTextarea, editContent, (value) => {
+        editContent.value = value
+      })
+    }
+
+    const autoResizeEdit = (event) => {
+      autoResize(event)
     }
 
     watch(editContent, () => {
@@ -916,14 +519,12 @@ export default {
       rateComment,
       avatarUrl,
       getInitials,
-      goToUserLists,
       handleEditKeydown,
       isCommentHidden,
       showHiddenComment,
       hiddenCommentReason,
       isLongComment,
       isExpanded,
-      displayedText,
       formattedContent,
       toggleExpanded,
       autoResizeEdit,

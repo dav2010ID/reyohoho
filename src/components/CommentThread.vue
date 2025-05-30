@@ -182,11 +182,13 @@
 </template>
 
 <script>
-import { ref, nextTick, onMounted, onBeforeUnmount } from 'vue'
+import { ref } from 'vue'
 import CommentItem from './CommentItem.vue'
 import EmojiPicker from '@/components/EmojiPicker.vue'
 import ImagePicker from '@/components/ImagePicker.vue'
 import LinkModal from '@/components/LinkModal.vue'
+import { useCommentActions } from '@/composables/useCommentActions'
+import { useCommentFormatting } from '@/composables/useCommentFormatting'
 
 export default {
   name: 'CommentThread',
@@ -232,14 +234,29 @@ export default {
   ],
   setup(props, { emit }) {
     const replyTextarea = ref(null)
-    const showEmojiPicker = ref(false)
-    const showImagePicker = ref(false)
-    const isButtonHovered = ref(false)
-    const isEmojiHovered = ref(false)
-    const isImageHovered = ref(false)
     const isCollapsed = ref(false)
-    const showLinkModal = ref(false)
-    const selectedTextForLink = ref('')
+
+    const {
+      showEmojiPicker,
+      showImagePicker,
+      showLinkModal,
+      selectedTextForLink,
+      handleEmojiMouseEnter,
+      handleEmojiMouseLeave,
+      handleImageMouseEnter,
+      handleImageMouseLeave,
+      handleButtonMouseEnter,
+      handleImageButtonMouseEnter,
+      handleButtonMouseLeave,
+      closeEmojiPicker,
+      closeImagePicker,
+      closeLinkModal,
+      insertEmojiUniversal,
+      insertImageUniversal,
+      insertLinkUniversal,
+      insertLinkFromModalUniversal,
+      insertSpoilerUniversal
+    } = useCommentActions()
 
     const handleReplyInput = (event) => {
       emit('update-reply-content', event.target.value)
@@ -250,189 +267,48 @@ export default {
       }
     }
 
-    const insertEmoji = (emoji) => {
-      const textarea = replyTextarea.value
-      if (textarea) {
-        const start = textarea.selectionStart
-        const end = textarea.selectionEnd
-        const value = textarea.value
-        const before = value.substring(0, start)
-        const after = value.substring(end)
-        textarea.value = before + emoji + after
-        emit('update-reply-content', textarea.value)
-
-        nextTick(() => {
-          textarea.focus()
-          textarea.setSelectionRange(start + emoji.length, start + emoji.length)
-          handleReplyInput({ target: textarea })
-        })
+    const replyContentModel = {
+      get value() {
+        return props.replyContent
+      },
+      set value(newValue) {
+        emit('update-reply-content', newValue)
       }
     }
 
-    const handleEmojiMouseEnter = () => {
-      isEmojiHovered.value = true
-    }
-
-    const handleEmojiMouseLeave = () => {
-      isEmojiHovered.value = false
-      setTimeout(() => {
-        if (!isEmojiHovered.value && !isButtonHovered.value) {
-          showEmojiPicker.value = false
-        }
-      }, 300)
-    }
-
-    const handleButtonMouseEnter = () => {
-      isButtonHovered.value = true
-      showEmojiPicker.value = true
-      showImagePicker.value = false
-    }
-
-    const handleButtonMouseLeave = () => {
-      isButtonHovered.value = false
-      setTimeout(() => {
-        if (!isEmojiHovered.value && !isImageHovered.value && !isButtonHovered.value) {
-          showEmojiPicker.value = false
-          showImagePicker.value = false
-        }
-      }, 300)
-    }
-
-    const closeEmojiPicker = () => {
-      showEmojiPicker.value = false
-    }
-
-    const handleImageMouseEnter = () => {
-      isImageHovered.value = true
-    }
-
-    const handleImageMouseLeave = () => {
-      isImageHovered.value = false
-      setTimeout(() => {
-        if (!isImageHovered.value && !isButtonHovered.value) {
-          showImagePicker.value = false
-        }
-      }, 300)
-    }
-
-    const closeImagePicker = () => {
-      showImagePicker.value = false
-    }
-
-    const handleImageButtonMouseEnter = () => {
-      isButtonHovered.value = true
-      showImagePicker.value = true
-      showEmojiPicker.value = false
+    const insertEmoji = (emoji) => {
+      insertEmojiUniversal(emoji, replyTextarea, replyContentModel, (value) => {
+        emit('update-reply-content', value)
+      })
     }
 
     const insertImage = (imageUrl) => {
-      const textarea = replyTextarea.value
-      if (textarea) {
-        const start = textarea.selectionStart
-        const end = textarea.selectionEnd
-        const imageTag = `[img]${imageUrl}[/img]`
-        const newValue = textarea.value.slice(0, start) + imageTag + textarea.value.slice(end)
-        textarea.value = newValue
-        emit('update-reply-content', newValue)
-
-        nextTick(() => {
-          textarea.focus()
-          textarea.setSelectionRange(start + imageTag.length, start + imageTag.length)
-          handleReplyInput({ target: textarea })
-        })
-      }
+      insertImageUniversal(imageUrl, replyTextarea, replyContentModel, (value) => {
+        emit('update-reply-content', value)
+      })
     }
 
     const insertSpoiler = () => {
-      const textarea = replyTextarea.value
-      if (textarea) {
-        const start = textarea.selectionStart
-        const end = textarea.selectionEnd
-        const selectedText = textarea.value.slice(start, end)
-
-        let spoilerTag
-        if (selectedText.trim()) {
-          spoilerTag = `[spoiler]${selectedText}[/spoiler]`
-        } else {
-          spoilerTag = '[spoiler][/spoiler]'
-        }
-
-        const newValue = textarea.value.slice(0, start) + spoilerTag + textarea.value.slice(end)
-        textarea.value = newValue
-        emit('update-reply-content', newValue)
-
-        nextTick(() => {
-          textarea.focus()
-          if (selectedText.trim()) {
-            textarea.setSelectionRange(start + spoilerTag.length, start + spoilerTag.length)
-          } else {
-            const cursorPosition = start + '[spoiler]'.length
-            textarea.setSelectionRange(cursorPosition, cursorPosition)
-          }
-          handleReplyInput({ target: textarea })
-        })
-      }
+      insertSpoilerUniversal(replyTextarea, replyContentModel, (value) => {
+        emit('update-reply-content', value)
+      })
     }
 
     const insertLink = () => {
-      const textarea = replyTextarea.value
-      if (textarea) {
-        const start = textarea.selectionStart
-        const end = textarea.selectionEnd
-        const selectedText = textarea.value.slice(start, end)
-        selectedTextForLink.value = selectedText.trim() || ''
-      }
-      showLinkModal.value = true
-    }
-
-    const closeLinkModal = () => {
-      showLinkModal.value = false
+      insertLinkUniversal(replyTextarea, replyContentModel, (value) => {
+        emit('update-reply-content', value)
+      })
     }
 
     const insertLinkFromModal = (linkData) => {
-      const textarea = replyTextarea.value
-      if (textarea) {
-        const start = textarea.selectionStart
-        const end = textarea.selectionEnd
-        const linkTag = `[link=${linkData.url}]${linkData.title}[/link]`
-        const newValue = textarea.value.slice(0, start) + linkTag + textarea.value.slice(end)
-        textarea.value = newValue
-        emit('update-reply-content', newValue)
-
-        nextTick(() => {
-          textarea.focus()
-          textarea.setSelectionRange(start + linkTag.length, start + linkTag.length)
-          handleReplyInput({ target: textarea })
-        })
-      }
+      insertLinkFromModalUniversal(linkData, replyTextarea, replyContentModel, (value) => {
+        emit('update-reply-content', value)
+      })
     }
 
     const toggleCollapsed = () => {
       isCollapsed.value = !isCollapsed.value
     }
-
-    const closeAllPickers = () => {
-      showEmojiPicker.value = false
-      showImagePicker.value = false
-    }
-
-    const handleGlobalClick = (event) => {
-      if (
-        !event.target.closest('.emoji-picker') &&
-        !event.target.closest('.image-picker') &&
-        !event.target.closest('.emoji-button-inline')
-      ) {
-        closeAllPickers()
-      }
-    }
-
-    onMounted(() => {
-      document.addEventListener('click', handleGlobalClick)
-    })
-
-    onBeforeUnmount(() => {
-      document.removeEventListener('click', handleGlobalClick)
-    })
 
     return {
       replyTextarea,
@@ -453,7 +329,6 @@ export default {
       handleImageButtonMouseEnter,
       handleReplyInput,
       toggleCollapsed,
-      closeAllPickers,
       showLinkModal,
       selectedTextForLink,
       insertLink,
@@ -476,70 +351,8 @@ export default {
       return 'Напишите ваш ответ...'
     },
     formattedContent() {
-      if (!this.comment.content) return ''
-
-      const isValidImageUrl = (url) => {
-        try {
-          const urlObj = new URL(url)
-          const isValid = urlObj.hostname === 'cdn.7tv.app' && urlObj.protocol === 'https:'
-
-          if (!isValid) {
-            console.warn('URL изображения отклонен:', {
-              url: url,
-              hostname: urlObj.hostname,
-              protocol: urlObj.protocol,
-              reason:
-                urlObj.hostname !== 'cdn.7tv.app' ? 'неразрешенный домен' : 'неразрешенный протокол'
-            })
-          }
-
-          return isValid
-        } catch (error) {
-          console.warn('Недопустимый URL изображения:', url, 'Ошибка:', error.message)
-          return false
-        }
-      }
-
-      const escapeHtml = (text) => {
-        const div = document.createElement('div')
-        div.textContent = text
-        return div.innerHTML
-      }
-
-      let processedContent = this.comment.content.replace(
-        /\[img\](.*?)\[\/img\]/g,
-        (match, url) => {
-          const trimmedUrl = url.trim()
-          if (isValidImageUrl(trimmedUrl)) {
-            const safeUrl = escapeHtml(trimmedUrl)
-            return `<img src="${safeUrl}" alt="7TV emote" class="inline-emoji" loading="lazy" />`
-          }
-          return `[недопустимое изображение: ${escapeHtml(trimmedUrl)}]`
-        }
-      )
-
-      processedContent = processedContent.replace(
-        /\[spoiler\](.*?)\[\/spoiler\]/gs,
-        (match, spoilerText, offset, string) => {
-          const escapedText = escapeHtml(spoilerText.trim())
-
-          const beforeChar = offset > 0 ? string[offset - 1] : ' '
-          const afterChar =
-            offset + match.length < string.length ? string[offset + match.length] : ' '
-
-          const needSpaceBefore =
-            beforeChar && beforeChar !== ' ' && beforeChar !== '\n' && beforeChar !== '\t'
-          const needSpaceAfter =
-            afterChar && afterChar !== ' ' && afterChar !== '\n' && afterChar !== '\t'
-
-          const spaceBefore = needSpaceBefore ? ' ' : ''
-          const spaceAfter = needSpaceAfter ? ' ' : ''
-
-          return `${spaceBefore}<span class="spoiler-text" onclick="this.classList.toggle('revealed')" title="Нажмите, чтобы показать спойлер">${escapedText}</span>${spaceAfter}`
-        }
-      )
-
-      return processedContent
+      const { formatContent } = useCommentFormatting()
+      return formatContent(this.comment.content)
     }
   }
 }

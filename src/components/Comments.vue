@@ -172,7 +172,7 @@
 </template>
 
 <script>
-import { ref, onMounted, nextTick, computed, onBeforeUnmount } from 'vue'
+import { ref, onMounted, nextTick, computed } from 'vue'
 import { useAuthStore } from '@/store/auth'
 import { useRouter } from 'vue-router'
 import { getComments, createComment, updateComment, deleteComment, rateComment } from '@/api/movies'
@@ -181,6 +181,8 @@ import Notification from '@/components/notification/ToastMessage.vue'
 import EmojiPicker from '@/components/EmojiPicker.vue'
 import ImagePicker from '@/components/ImagePicker.vue'
 import LinkModal from '@/components/LinkModal.vue'
+import { useCommentActions } from '@/composables/useCommentActions'
+import { getCommentWordForm } from '@/utils/textUtils'
 
 export default {
   name: 'Comments',
@@ -209,14 +211,30 @@ export default {
     const notificationRef = ref(null)
     const commentTextarea = ref(null)
     const showComments = ref(false)
-    const showEmojiPicker = ref(false)
-    const showImagePicker = ref(false)
-    const showLinkModal = ref(false)
-    const selectedTextForLink = ref('')
-    const isEmojiHovered = ref(false)
-    const isImageHovered = ref(false)
-    const isButtonHovered = ref(false)
     const isInsertingEmoji = ref(false)
+
+    const {
+      showEmojiPicker,
+      showImagePicker,
+      showLinkModal,
+      selectedTextForLink,
+      handleEmojiMouseEnter,
+      handleEmojiMouseLeave,
+      handleImageMouseEnter,
+      handleImageMouseLeave,
+      handleButtonMouseEnter,
+      handleImageButtonMouseEnter,
+      handleButtonMouseLeave,
+      closeEmojiPicker,
+      closeImagePicker,
+      closeLinkModal,
+      insertEmojiUniversal,
+      insertImageUniversal,
+      insertLinkUniversal,
+      insertLinkFromModalUniversal,
+      insertSpoilerUniversal,
+      autoResize
+    } = useCommentActions()
 
     const groupedComments = computed(() => {
       const buildCommentTree = (parentId = null) => {
@@ -244,12 +262,6 @@ export default {
 
       return countCommentsRecursively(groupedComments.value)
     })
-
-    const getCommentWordForm = (count) => {
-      if (count === 1) return 'комментарий'
-      if (count >= 2 && count <= 4) return 'комментария'
-      return 'комментариев'
-    }
 
     const loadComments = async () => {
       try {
@@ -515,231 +527,38 @@ export default {
       router.push('/login')
     }
 
-    const autoResize = (event) => {
-      const textarea = event?.target || commentTextarea.value
-      if (textarea) {
-        textarea.style.height = 'auto'
-        textarea.style.height = `${Math.min(textarea.scrollHeight, 200)}px`
-      }
-    }
-
     const insertEmoji = (emoji) => {
       isInsertingEmoji.value = true
-
-      if (commentTextarea.value) {
-        const start = commentTextarea.value.selectionStart
-        const end = commentTextarea.value.selectionEnd
-        newComment.value = newComment.value.slice(0, start) + emoji + newComment.value.slice(end)
-
-        nextTick(() => {
-          commentTextarea.value.focus()
-          commentTextarea.value.setSelectionRange(start + emoji.length, start + emoji.length)
-          autoResize()
-
-          setTimeout(() => {
-            isInsertingEmoji.value = false
-          }, 100)
-        })
-      } else {
+      insertEmojiUniversal(emoji, commentTextarea, newComment, (value) => {
+        newComment.value = value
+      })
+      setTimeout(() => {
         isInsertingEmoji.value = false
-      }
+      }, 100)
     }
 
     const insertImage = (imageUrl) => {
-      if (commentTextarea.value) {
-        const start = commentTextarea.value.selectionStart
-        const end = commentTextarea.value.selectionEnd
-        const imageTag = `[img]${imageUrl}[/img]`
-        newComment.value = newComment.value.slice(0, start) + imageTag + newComment.value.slice(end)
-
-        nextTick(() => {
-          commentTextarea.value.focus()
-          commentTextarea.value.setSelectionRange(start + imageTag.length, start + imageTag.length)
-          autoResize()
-        })
-      }
+      insertImageUniversal(imageUrl, commentTextarea, newComment, (value) => {
+        newComment.value = value
+      })
     }
 
     const insertSpoiler = () => {
-      if (commentTextarea.value) {
-        const start = commentTextarea.value.selectionStart
-        const end = commentTextarea.value.selectionEnd
-        const selectedText = newComment.value.slice(start, end)
-
-        let spoilerTag
-        if (selectedText.trim()) {
-          spoilerTag = `[spoiler]${selectedText}[/spoiler]`
-        } else {
-          spoilerTag = '[spoiler][/spoiler]'
-        }
-
-        newComment.value =
-          newComment.value.slice(0, start) + spoilerTag + newComment.value.slice(end)
-
-        nextTick(() => {
-          commentTextarea.value.focus()
-          if (selectedText.trim()) {
-            commentTextarea.value.setSelectionRange(
-              start + spoilerTag.length,
-              start + spoilerTag.length
-            )
-          } else {
-            const cursorPosition = start + '[spoiler]'.length
-            commentTextarea.value.setSelectionRange(cursorPosition, cursorPosition)
-          }
-          autoResize()
-        })
-      }
+      insertSpoilerUniversal(commentTextarea, newComment, (value) => {
+        newComment.value = value
+      })
     }
 
     const insertLink = () => {
-      const textarea = commentTextarea.value
-      if (textarea) {
-        const start = textarea.selectionStart
-        const end = textarea.selectionEnd
-        const selectedText = newComment.value.slice(start, end)
-        selectedTextForLink.value = selectedText.trim() || ''
-      }
-      showLinkModal.value = true
+      insertLinkUniversal(commentTextarea, newComment, (value) => {
+        newComment.value = value
+      })
     }
 
     const insertLinkFromModal = (linkData) => {
-      if (commentTextarea.value) {
-        const start = commentTextarea.value.selectionStart
-        const end = commentTextarea.value.selectionEnd
-        const linkTag = `[link=${linkData.url}]${linkData.title}[/link]`
-        newComment.value = newComment.value.slice(0, start) + linkTag + newComment.value.slice(end)
-
-        nextTick(() => {
-          commentTextarea.value.focus()
-          commentTextarea.value.setSelectionRange(start + linkTag.length, start + linkTag.length)
-          autoResize()
-        })
-      }
-    }
-
-    const closeLinkModal = () => {
-      showLinkModal.value = false
-    }
-
-    const formatCommentContent = (content) => {
-      if (!content) return ''
-
-      const isValidImageUrl = (url) => {
-        try {
-          const urlObj = new URL(url)
-          const isValid = urlObj.hostname === 'cdn.7tv.app' && urlObj.protocol === 'https:'
-
-          if (!isValid) {
-            console.warn('URL изображения отклонен:', {
-              url: url,
-              hostname: urlObj.hostname,
-              protocol: urlObj.protocol,
-              reason:
-                urlObj.hostname !== 'cdn.7tv.app' ? 'неразрешенный домен' : 'неразрешенный протокол'
-            })
-          }
-
-          return isValid
-        } catch (error) {
-          console.warn('Недопустимый URL изображения:', url, 'Ошибка:', error.message)
-          return false
-        }
-      }
-
-      const escapeHtml = (text) => {
-        const div = document.createElement('div')
-        div.textContent = text
-        return div.innerHTML
-      }
-
-      let formattedContent = content.replace(/\[img\](.*?)\[\/img\]/g, (match, url) => {
-        const trimmedUrl = url.trim()
-        if (isValidImageUrl(trimmedUrl)) {
-          const safeUrl = escapeHtml(trimmedUrl)
-          return `<img src="${safeUrl}" alt="7TV emote" class="inline-emoji" loading="lazy" />`
-        }
-        return `[недопустимое изображение: ${escapeHtml(trimmedUrl)}]`
+      insertLinkFromModalUniversal(linkData, commentTextarea, newComment, (value) => {
+        newComment.value = value
       })
-
-      formattedContent = formattedContent.replace(
-        /\[spoiler\](.*?)\[\/spoiler\]/gs,
-        (match, spoilerText, offset, string) => {
-          const escapedText = escapeHtml(spoilerText.trim())
-
-          const beforeChar = offset > 0 ? string[offset - 1] : ' '
-          const afterChar =
-            offset + match.length < string.length ? string[offset + match.length] : ' '
-
-          const needSpaceBefore =
-            beforeChar && beforeChar !== ' ' && beforeChar !== '\n' && beforeChar !== '\t'
-          const needSpaceAfter =
-            afterChar && afterChar !== ' ' && afterChar !== '\n' && afterChar !== '\t'
-
-          const spaceBefore = needSpaceBefore ? ' ' : ''
-          const spaceAfter = needSpaceAfter ? ' ' : ''
-
-          return `${spaceBefore}<span class="spoiler-text" onclick="this.classList.toggle('revealed')" title="Нажмите, чтобы показать спойлер">${escapedText}</span>${spaceAfter}`
-        }
-      )
-
-      return formattedContent
-    }
-
-    const handleEmojiMouseEnter = () => {
-      isEmojiHovered.value = true
-    }
-
-    const handleEmojiMouseLeave = () => {
-      isEmojiHovered.value = false
-      setTimeout(() => {
-        if (!isEmojiHovered.value && !isButtonHovered.value) {
-          showEmojiPicker.value = false
-        }
-      }, 300)
-    }
-
-    const closeEmojiPicker = () => {
-      showEmojiPicker.value = false
-    }
-
-    const handleButtonMouseLeave = () => {
-      isButtonHovered.value = false
-      setTimeout(() => {
-        if (!isEmojiHovered.value && !isImageHovered.value && !isButtonHovered.value) {
-          showEmojiPicker.value = false
-          showImagePicker.value = false
-        }
-      }, 300)
-    }
-
-    const handleButtonMouseEnter = () => {
-      isButtonHovered.value = true
-      showEmojiPicker.value = true
-      showImagePicker.value = false
-    }
-
-    const handleImageMouseEnter = () => {
-      isImageHovered.value = true
-    }
-
-    const handleImageMouseLeave = () => {
-      isImageHovered.value = false
-      setTimeout(() => {
-        if (!isImageHovered.value && !isButtonHovered.value) {
-          showImagePicker.value = false
-        }
-      }, 300)
-    }
-
-    const closeImagePicker = () => {
-      showImagePicker.value = false
-    }
-
-    const handleImageButtonMouseEnter = () => {
-      isButtonHovered.value = true
-      showImagePicker.value = true
-      showEmojiPicker.value = false
     }
 
     const getCommentPlaceholder = computed(() => {
@@ -768,28 +587,8 @@ export default {
       editingCommentId.value = null
     }
 
-    const closeAllPickers = () => {
-      showEmojiPicker.value = false
-      showImagePicker.value = false
-    }
-
-    const handleGlobalClick = (event) => {
-      if (
-        !event.target.closest('.emoji-picker') &&
-        !event.target.closest('.image-picker') &&
-        !event.target.closest('.emoji-button-inline')
-      ) {
-        closeAllPickers()
-      }
-    }
-
     onMounted(() => {
       loadComments()
-      document.addEventListener('click', handleGlobalClick)
-    })
-
-    onBeforeUnmount(() => {
-      document.removeEventListener('click', handleGlobalClick)
     })
 
     return {
@@ -820,7 +619,6 @@ export default {
       selectedTextForLink,
       insertEmoji,
       insertImage,
-      formatCommentContent,
       handleEmojiMouseEnter,
       handleEmojiMouseLeave,
       handleImageMouseEnter,
