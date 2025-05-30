@@ -487,7 +487,6 @@ export default {
   transition: all 0.2s ease-in-out;
   max-width: 100%;
   overflow: visible;
-  overflow-x: hidden;
   word-wrap: break-word;
 }
 
@@ -572,7 +571,6 @@ export default {
   width: 100%;
   box-sizing: border-box;
   overflow: visible;
-  overflow-x: hidden;
   word-wrap: break-word;
 }
 
@@ -595,12 +593,13 @@ export default {
   width: 100%;
   box-sizing: border-box;
   overflow: visible;
+  z-index: 5;
 }
 
 .edit-textarea-container {
   position: relative;
   width: 100%;
-  overflow-x: hidden;
+  overflow: visible;
 }
 
 .edit-textarea {
@@ -634,12 +633,15 @@ export default {
   margin-top: 0.5rem;
   gap: 1rem;
   overflow: visible;
+  position: relative;
+  z-index: 10;
 }
 
 .edit-actions {
   display: flex;
   gap: 0.5rem;
   position: relative;
+  overflow: visible;
 }
 
 .emoji-button-inline {
@@ -665,6 +667,8 @@ export default {
   align-items: center;
   gap: 0.5rem;
   position: relative;
+  z-index: 15;
+  overflow: visible;
 }
 
 .character-counter-inline {

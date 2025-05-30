@@ -268,10 +268,8 @@ export default {
       this.showEmojiPicker = false
     }
   },
-  mounted() {
-  },
-  beforeUnmount() {
-  }
+  mounted() {},
+  beforeUnmount() {}
 }
 </script>
 
@@ -281,7 +279,7 @@ export default {
   flex-direction: column;
   gap: 1rem;
   width: 100%;
-  overflow-x: hidden;
+  overflow: visible;
 }
 
 .replies-container {
@@ -295,7 +293,7 @@ export default {
   border-left: 3px solid rgba(76, 175, 80, 0.3);
   padding-left: 1rem;
   margin-top: 0.5rem;
-  overflow-x: hidden;
+  overflow: visible;
 }
 
 .reply-form {
@@ -308,7 +306,8 @@ export default {
   border-left: 3px solid rgba(76, 175, 80, 0.5);
   width: calc(100% - 3rem);
   overflow: visible;
-  overflow-x: hidden;
+  position: relative;
+  z-index: 5;
 }
 
 .reply-footer {
@@ -318,12 +317,15 @@ export default {
   margin-top: 0.5rem;
   gap: 1rem;
   overflow: visible;
+  position: relative;
+  z-index: 10;
 }
 
 .reply-actions {
   display: flex;
   gap: 0.5rem;
   position: relative;
+  overflow: visible;
 }
 
 .character-counter-container {
@@ -331,6 +333,8 @@ export default {
   align-items: center;
   gap: 0.5rem;
   position: relative;
+  z-index: 15;
+  overflow: visible;
 }
 
 .character-counter-inline {
@@ -383,7 +387,7 @@ export default {
 
 .textarea-container {
   position: relative;
-  overflow-x: hidden;
+  overflow: visible;
 }
 
 .comment-textarea {
@@ -492,7 +496,7 @@ export default {
   padding-top: 1rem;
   margin-left: 0;
   width: 100%;
-  overflow-x: hidden;
+  overflow: visible;
 }
 
 .vertical-line-clickable {

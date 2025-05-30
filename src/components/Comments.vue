@@ -536,8 +536,7 @@ export default {
       loadComments()
     })
 
-    onBeforeUnmount(() => {
-    })
+    onBeforeUnmount(() => {})
 
     return {
       comments,
@@ -581,7 +580,7 @@ export default {
 .comments-section {
   margin: 0;
   padding: 20px 0;
-  overflow-x: hidden;
+  overflow: visible;
 }
 
 .comments-title {
@@ -595,12 +594,14 @@ export default {
   margin-bottom: 1.25rem;
   width: 100%;
   overflow: visible;
+  position: relative;
+  z-index: 1;
 }
 
 .textarea-container {
   position: relative;
   width: 100%;
-  overflow-x: hidden;
+  overflow: visible;
 }
 
 .comment-textarea {
@@ -658,7 +659,7 @@ export default {
   flex-direction: column;
   gap: 1rem;
   width: 100%;
-  overflow-x: hidden;
+  overflow: visible;
 }
 
 .comment-group {
@@ -666,6 +667,7 @@ export default {
   flex-direction: column;
   gap: 1rem;
   width: 100%;
+  overflow: visible;
 }
 
 .replies-container {
@@ -677,7 +679,7 @@ export default {
   flex-direction: column;
   gap: 1rem;
   width: calc(100% - 3rem);
-  overflow-x: hidden;
+  overflow: visible;
 }
 
 .reply-form {
@@ -688,7 +690,7 @@ export default {
   border-radius: 0.5rem;
   border-left: 2px solid #444;
   width: calc(100% - 3rem);
-  overflow-x: hidden;
+  overflow: visible;
 }
 
 .reply-form.nested {
@@ -696,6 +698,7 @@ export default {
   background: #333;
   border-left: none;
   width: 100%;
+  overflow: visible;
 }
 
 .reply-header {
@@ -824,7 +827,7 @@ export default {
 
 .comments-container {
   margin-bottom: 1rem;
-  overflow-x: hidden;
+  overflow: visible;
 }
 
 .comments-header {
@@ -868,6 +871,8 @@ export default {
   align-items: center;
   gap: 0.5rem;
   position: relative;
+  z-index: 10;
+  overflow: visible;
 }
 
 .character-counter-inline {
@@ -893,12 +898,15 @@ export default {
   margin-top: 0.5rem;
   gap: 1rem;
   overflow: visible;
+  position: relative;
+  z-index: 5;
 }
 
 .comment-actions {
   display: flex;
   gap: 0.5rem;
   position: relative;
+  overflow: visible;
 }
 
 .emoji-button-inline {

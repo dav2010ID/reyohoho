@@ -260,7 +260,7 @@ export default {
   border: 1px solid #444;
   border-radius: 0.5rem;
   padding: 0.75rem;
-  z-index: 9999;
+  z-index: 99999;
   width: 280px;
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
   margin-bottom: 0.5rem;
