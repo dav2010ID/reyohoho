@@ -5,9 +5,12 @@
         <i class="fas fa-eye-slash"></i>
         <h3>Комментарии скрыты</h3>
         <p>Комментарии могут содержать спойлеры. Нажмите, чтобы показать.</p>
-        <div class="comments-count">
-          {{ totalCommentsCount }}
-          {{ getCommentWordForm(totalCommentsCount) }}
+        <div class="comments-count" :class="{ 'no-comments': totalCommentsCount === 0 }">
+          <template v-if="totalCommentsCount === 0"> Комментариев пока нет </template>
+          <template v-else>
+            {{ totalCommentsCount }}
+            {{ getCommentWordForm(totalCommentsCount) }}
+          </template>
         </div>
       </div>
     </div>
@@ -817,10 +820,16 @@ export default {
   transition: all 0.3s ease;
 }
 
-.spoiler-warning:hover .comments-count {
-  background: rgba(76, 175, 80, 0.3);
-  border-color: rgba(76, 175, 80, 0.5);
-  color: #66bb6a;
+.comments-count.no-comments {
+  background: rgba(128, 128, 128, 0.2);
+  color: #808080;
+  border: 1px solid rgba(128, 128, 128, 0.3);
+}
+
+.spoiler-warning:hover .comments-count.no-comments {
+  background: rgba(128, 128, 128, 0.3);
+  border-color: rgba(128, 128, 128, 0.5);
+  color: #999;
 }
 
 .comments-container {
