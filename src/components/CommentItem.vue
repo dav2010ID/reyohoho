@@ -9,8 +9,18 @@
           class="user-avatar-link"
         >
           <div class="user-avatar">
-            <img v-if="avatarUrl" v-lazy="avatarUrl" :alt="comment?.username || 'Аноним'" />
-            <div v-else class="avatar-placeholder">
+            <img
+              v-if="avatarUrl"
+              :src="avatarUrl"
+              :alt="comment?.username || 'Аноним'"
+              @error="handleAvatarError"
+              onerror="this.onerror=null; this.style.display='none'; this.nextElementSibling.style.display='flex';"
+            />
+            <div
+              v-else
+              class="avatar-placeholder"
+              :style="{ display: avatarUrl ? 'none' : 'flex' }"
+            >
               {{ getInitials(comment?.username || 'Аноним') }}
             </div>
           </div>
@@ -432,6 +442,17 @@ export default {
       }, 300)
     }
 
+    const handleAvatarError = () => {
+      console.log('Avatar load error, falling back to initials')
+      avatarUrl.value = null
+      nextTick(() => {
+        const avatarPlaceholder = document.querySelector('.avatar-placeholder')
+        if (avatarPlaceholder) {
+          avatarPlaceholder.style.display = 'flex'
+        }
+      })
+    }
+
     watch(editContent, () => {
       if (isEditing.value && editTextarea.value) {
         nextTick(() => {
@@ -472,7 +493,8 @@ export default {
       handleEmojiMouseLeave,
       closeEmojiPicker,
       handleButtonMouseEnter,
-      handleButtonMouseLeave
+      handleButtonMouseLeave,
+      handleAvatarError
     }
   }
 }
