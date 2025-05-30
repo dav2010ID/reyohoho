@@ -234,7 +234,7 @@ export default {
   ],
   setup(props, { emit }) {
     const replyTextarea = ref(null)
-    const isCollapsed = ref(false)
+    const isCollapsed = ref(true)
 
     const {
       showEmojiPicker,
