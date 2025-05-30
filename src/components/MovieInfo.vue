@@ -294,6 +294,10 @@
           </p>
         </div>
 
+        <div v-if="isCommentsEnabled" class="comments-section">
+          <Comments :movie-id="kp_id" />
+        </div>
+
         <div v-if="movieInfo.staff" class="staff-section">
           <div class="staff-categories">
             <div v-if="getStaffByProfession('ACTOR').length" class="staff-category">
@@ -454,6 +458,7 @@ import Notification from '@/components/notification/ToastMessage.vue'
 import TrailerCarousel from '@/components/TrailerCarousel.vue'
 import { useTrailerStore } from '@/store/trailer'
 import MovieRating from '@/components/MovieRating.vue'
+import Comments from '@/components/Comments.vue'
 
 const infoLoading = ref(true)
 const mainStore = useMainStore()
@@ -476,6 +481,8 @@ const itemsPerRow = ref(6)
 
 const nudityInfo = ref(null)
 const nudityInfoLoading = ref(false)
+
+const isCommentsEnabled = computed(() => mainStore.isCommentsEnabled)
 
 const setDocumentTitle = () => {
   if (movieInfo.value) {

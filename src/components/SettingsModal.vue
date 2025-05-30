@@ -70,6 +70,11 @@
       </div>
 
       <div class="settings-group">
+        <h2>Комментарии</h2>
+        <SliderRound v-model="isCommentsEnabled">Показывать блок комментариев</SliderRound>
+      </div>
+
+      <div class="settings-group">
         <h2>Версия</h2>
         {{ appVersion }}
       </div>
@@ -158,6 +163,11 @@ const isCtrlFEnabled = computed({
 const showFavoriteTooltip = computed({
   get: () => playerStore.showFavoriteTooltip,
   set: (value) => playerStore.setFavoriteTooltip(value)
+})
+
+const isCommentsEnabled = computed({
+  get: () => mainStore.isCommentsEnabled,
+  set: (value) => mainStore.setCommentsEnabled(value)
 })
 
 // Навигация

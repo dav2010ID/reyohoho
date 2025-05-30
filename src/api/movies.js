@@ -88,6 +88,35 @@ const setRating = async (kpId, rating) => {
   return data
 }
 
+const getComments = async (movieId) => {
+  const { data } = await apiCall((api) => api.get(`/comments/${movieId}`))
+  return data
+}
+
+const createComment = async (movieId, content, parentId = null) => {
+  const { data } = await apiCall((api) =>
+    api.post(`/comments/${movieId}`, { content, parent_id: parentId })
+  )
+  return data
+}
+
+const updateComment = async (commentId, content) => {
+  const { data } = await apiCall((api) => api.put(`/comments/${commentId}`, { content }))
+  return data
+}
+
+const deleteComment = async (commentId) => {
+  const { data } = await apiCall((api) => api.delete(`/comments/${commentId}`))
+  return data
+}
+
+const rateComment = async (commentId, rating) => {
+  const { data } = await apiCall((api) =>
+    api.post(`/comments/${commentId}/rate`, { rating: rating })
+  )
+  return data
+}
+
 export {
   apiSearch,
   getShikiInfo,
@@ -99,7 +128,12 @@ export {
   getKpIDfromSHIKI,
   getRating,
   setRating,
-  getNudityInfoFromIMDB
+  getNudityInfoFromIMDB,
+  getComments,
+  createComment,
+  updateComment,
+  deleteComment,
+  rateComment
 }
 
 // ===== Функция для включения/выключения симуляции =====
