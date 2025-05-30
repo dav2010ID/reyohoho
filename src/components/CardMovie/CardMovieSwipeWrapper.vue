@@ -42,11 +42,13 @@ import { computed, nextTick, ref, useTemplateRef } from 'vue'
 const {
   thresholdPercent = 55,
   disabled = false,
-  backgroundSwipeColor = '#e53935'
+  backgroundSwipeColor = '#e53935',
+  showDelete = true
 } = defineProps({
   thresholdPercent: Number,
   disabled: Boolean,
-  backgroundSwipeColor: String
+  backgroundSwipeColor: String,
+  showDelete: Boolean
 })
 
 const emit = defineEmits(['slide'])
@@ -66,7 +68,7 @@ const translateValue = computed(() => (swiping.value ? deltaX.value : 0))
 const actualThreshold = computed(() => (width.value * thresholdPercent) / 100)
 
 function onTouchStart(e) {
-  if (disabled) return
+  if (disabled || !showDelete) return
 
   width.value = swipeElement.value?.offsetWidth ?? 0
   startX.value = e.touches[0].clientX
@@ -78,7 +80,7 @@ function onTouchStart(e) {
 }
 
 function onTouchMove(e) {
-  if (disabled || isScrolling.value) return
+  if (disabled || isScrolling.value || !showDelete) return
 
   currentX.value = e.touches[0].clientX
   currentY.value = e.touches[0].clientY
@@ -101,7 +103,7 @@ function onTouchMove(e) {
 }
 
 function onTouchEnd() {
-  if (disabled || !swiping.value) {
+  if (disabled || !swiping.value || !showDelete) {
     resetSwipe()
     return
   }

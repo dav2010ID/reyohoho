@@ -3,7 +3,7 @@
     <div v-if="movie.poster || movie.cover">
       <img v-lazy="movie.poster || movie.cover" class="movie-poster" />
       <DeleteButton
-        v-if="!isMobile && (isHistory || isUserList)"
+        v-if="!isMobile && (isHistory || isUserList) && showDelete"
         class="delete-button"
         data-test-id="delete-button"
         @click.stop.prevent="emit('remove:from-history', movie.kp_id)"
@@ -12,7 +12,11 @@
         v-if="movie.rating_kp || movie.rating_imdb || movie.average_rating"
         class="ratings-overlay"
       >
-        <span v-if="movie.rating || movie.average_rating" class="rating-our">
+        <span
+          v-if="movie.rating || movie.average_rating"
+          class="rating-our"
+          :class="{ 'with-star': showStar }"
+        >
           <img src="/icons/icon-192x192.png" alt="ReYohoho" class="rating-logo" />
           {{ `${(movie.rating || movie.average_rating).toFixed(1).replace(/\.0$/, '')}` }}
         </span>
@@ -44,12 +48,16 @@ const {
   movie,
   isMobile = false,
   isHistory = false,
-  isUserList = false
+  isUserList = false,
+  showDelete = true,
+  showStar = false
 } = defineProps({
   movie: Object,
   isMobile: Boolean,
   isHistory: Boolean,
-  isUserList: Boolean
+  isUserList: Boolean,
+  showDelete: Boolean,
+  showStar: Boolean
 })
 const emit = defineEmits(['remove:from-history'])
 </script>
@@ -114,6 +122,33 @@ const emit = defineEmits(['remove:from-history'])
   display: inline-block;
 }
 
+.rating-our {
+  font-size: 1.2em;
+  color: #fff;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  position: relative;
+  padding: 2px 6px;
+  border-radius: 4px;
+}
+
+.rating-our.with-star {
+  background: rgba(74, 144, 226, 0.15);
+  border: 1px solid rgba(74, 144, 226, 0.3);
+}
+
+.rating-our.with-star::after {
+  content: '★';
+  position: absolute;
+  top: -6px;
+  left: -6px;
+  font-size: 12px;
+  color: #4a90e2;
+  line-height: 1;
+  padding-bottom: 1px;
+}
+
 @media (max-width: 620px) {
   .ratings-overlay {
     bottom: 3px;
@@ -143,6 +178,18 @@ const emit = defineEmits(['remove:from-history'])
     width: 15px;
     height: auto;
     display: inline-block;
+  }
+
+  .rating-our {
+    font-size: 1em;
+    padding: 1px 4px;
+  }
+
+  .rating-our.with-star::after {
+    top: -5px;
+    left: -5px;
+    font-size: 10px;
+    padding-bottom: 1px;
   }
 }
 </style>

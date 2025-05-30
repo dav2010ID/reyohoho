@@ -17,6 +17,8 @@
       :is-history
       :is-mobile
       :is-user-list="isUserList"
+      :show-delete="showDelete"
+      :show-star="showStar"
       @remove:from-history="(data) => emit('remove:from-history', data)"
     />
 
@@ -40,7 +42,9 @@ const {
   isMobile = false,
   isUserList = false,
   activeMovieIndex = null,
-  index = 0
+  index = 0,
+  showDelete = true,
+  showStar = false
 } = defineProps({
   movie: Object,
   isHistory: Boolean,
@@ -48,7 +52,9 @@ const {
   isCardBorder: Boolean,
   isUserList: Boolean,
   index: Number,
-  activeMovieIndex: [Number, null]
+  activeMovieIndex: [Number, null],
+  showDelete: Boolean,
+  showStar: Boolean
 })
 
 const emit = defineEmits(['remove:from-history', 'save:element'])

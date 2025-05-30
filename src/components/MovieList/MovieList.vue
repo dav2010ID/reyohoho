@@ -6,6 +6,7 @@
           v-for="(movie, index) in moviesList"
           :key="movie.kp_id"
           :data-test-id="`movie-card-swipe-wrapper-${movie.kp_id}`"
+          :show-delete="showDelete"
           @slide="removeFromHistory(movie.kp_id)"
         >
           <CardMovie
@@ -16,6 +17,8 @@
             :index
             :is-card-border="isCardBorder"
             :active-movie-index
+            :show-delete="showDelete"
+            :show-star="showStar"
             @remove:from-history="removeFromHistory"
             @save:element="(el) => (movieRefs[index] = el)"
           />
@@ -33,6 +36,8 @@
           :index
           :is-card-border="isCardBorder"
           :active-movie-index
+          :show-delete="showDelete"
+          :show-star="showStar"
           @remove:from-history="removeFromHistory"
           @save:element="(el) => (movieRefs[index] = el)"
         />
@@ -63,11 +68,15 @@ const route = useRoute()
 const {
   moviesList,
   isHistory = false,
-  loading = true
+  loading = true,
+  showDelete = true,
+  showStar = false
 } = defineProps({
   moviesList: Array,
   isHistory: Boolean,
-  loading: Boolean
+  loading: Boolean,
+  showDelete: Boolean,
+  showStar: Boolean
 })
 
 const movieRefs = ref([])

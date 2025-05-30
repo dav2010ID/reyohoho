@@ -203,22 +203,6 @@ onMounted(() => {
   position: relative;
 }
 
-.rating-link.has-rating {
-  position: relative;
-}
-
-.rating-link.has-rating::after {
-  content: '';
-  position: absolute;
-  bottom: 0;
-  left: 0;
-  width: 100%;
-  height: 2px;
-  background: currentColor;
-  border-radius: 1px;
-  opacity: 0.6;
-}
-
 .rating-link {
   display: inline-flex;
   align-items: center;
@@ -227,11 +211,32 @@ onMounted(() => {
   font-weight: 700;
   font-family: Roboto, sans-serif;
   font-size: 16px;
-  padding: 8px;
-  background: rgba(0, 0, 0, 0.05);
-  border-radius: 4px;
+  padding: 5px 10px;
+  background: rgba(0, 0, 0, 0.7);
+  border-radius: 5px;
   cursor: pointer;
   transition: all 0.2s ease;
+  height: 32px;
+  box-sizing: border-box;
+}
+
+.rating-link.has-rating {
+  position: relative;
+  padding: 5px 10px;
+  border-radius: 5px;
+  background: rgba(0, 0, 0, 0.7);
+  border: 1px solid rgba(74, 144, 226, 0.3);
+}
+
+.rating-link.has-rating::after {
+  content: '★';
+  position: absolute;
+  top: -6px;
+  left: -6px;
+  font-size: 12px;
+  color: #4a90e2;
+  line-height: 1;
+  padding-bottom: 1px;
 }
 
 .rating-link:hover {
@@ -326,6 +331,8 @@ onMounted(() => {
   font-size: 16px;
   font-family: Roboto, sans-serif;
   transition: color 0.2s ease;
+  display: flex;
+  align-items: center;
 }
 
 .rating-link:hover .average-rating {
@@ -501,5 +508,28 @@ onMounted(() => {
   font-size: 14px;
   padding-top: 12px;
   border-top: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+@media (max-width: 620px) {
+  .rating-link {
+    padding: 4px 8px;
+    font-size: 0.8em;
+  }
+
+  .rating-link.has-rating {
+    padding: 4px 8px;
+  }
+
+  .rating-link.has-rating::after {
+    top: -5px;
+    left: -5px;
+    font-size: 10px;
+    padding-bottom: 1px;
+  }
+
+  .rating-logo {
+    width: 15px;
+    height: 15px;
+  }
 }
 </style>
