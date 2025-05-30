@@ -155,6 +155,9 @@ export default {
             ...comment,
             replies: buildCommentTree(comment.id)
           }))
+          .filter((comment) => {
+            return !comment.is_deleted || (comment.replies && comment.replies.length > 0)
+          })
       }
 
       return buildCommentTree()
