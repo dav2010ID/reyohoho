@@ -426,7 +426,7 @@ export default {
     }
 
     const handleCommentKeydown = (event) => {
-      if (isInsertingEmoji.value) return
+      if (isInsertingEmoji.value || showEmojiPicker.value) return
 
       if (event.key === 'Enter' && !event.shiftKey) {
         event.preventDefault()

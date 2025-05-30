@@ -16,6 +16,7 @@
         @click="activeCategory = category.name"
         :class="{ active: activeCategory === category.name }"
         class="category-btn"
+        type="button"
       >
         {{ category.icon }}
       </button>
@@ -27,6 +28,7 @@
         :key="emoji"
         @click="selectEmoji(emoji)"
         class="emoji-btn"
+        type="button"
       >
         {{ emoji }}
       </button>
