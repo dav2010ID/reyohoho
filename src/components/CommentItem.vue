@@ -25,20 +25,37 @@
             </div>
           </div>
         </a>
-        <div>
+        <div class="user-details">
           <a
             :href="`/lists/${comment?.user_id}`"
             target="_blank"
             rel="noopener noreferrer"
             class="username-link"
           >
-            {{ comment?.username || 'Аноним' }}
+            <span class="username">{{ comment?.username || 'Аноним' }}</span>
           </a>
-          <span class="date" :title="formatDate(comment?.created_at)">
+          <span v-if="comment?.user_movie_rating" class="user-rating">
+            <i class="fas fa-star"></i>
+            {{ comment.user_movie_rating }}
+          </span>
+          <span
+            class="date"
+            :title="
+              isCommentEdited
+                ? `Создано: ${formatDate(comment?.created_at)}\nИзменено: ${formatDate(comment?.updated_at)}`
+                : `Создано: ${formatDate(comment?.created_at)}`
+            "
+          >
             {{ formatRelativeTime(comment?.created_at) }}
-            <span v-if="isCommentEdited" class="edited-indicator">
-              (изменено {{ formatDate(comment?.updated_at) }})
-            </span>
+            <i
+              v-if="isCommentEdited"
+              class="fas fa-pencil-alt edit-icon"
+              :title="
+                isCommentEdited
+                  ? `Создано: ${formatDate(comment?.created_at)}\nИзменено: ${formatDate(comment?.updated_at)}`
+                  : `Создано: ${formatDate(comment?.created_at)}`
+              "
+            ></i>
           </span>
         </div>
       </div>
@@ -943,6 +960,17 @@ export default {
   font-size: 0.8rem;
   color: #999;
   margin-left: 0.375rem;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+.edit-icon {
+  font-size: 0.7rem;
+  color: #666;
+  vertical-align: baseline;
+  position: relative;
+  top: 0.02em;
 }
 
 .edited-indicator {
@@ -1420,5 +1448,25 @@ export default {
 .spoiler-button:disabled {
   opacity: 0.5;
   cursor: not-allowed;
+}
+
+.user-details {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.user-rating {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  color: #ffd700;
+  font-size: 0.8rem;
+  font-weight: 500;
+}
+
+.user-rating i {
+  font-size: 0.75rem;
 }
 </style>
