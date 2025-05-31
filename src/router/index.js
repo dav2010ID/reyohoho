@@ -21,7 +21,18 @@ router.beforeEach((to, from, next) => {
   document.title = title
 
   if (to.hash) {
-    if (to.hash.startsWith('#search=')) {
+    if (to.hash.startsWith('#/')) {
+      const route = to.hash.substring(2)
+      const routePath = route.split('?')[0]
+      const queryString = route.includes('?') ? route.split('?')[1] : ''
+
+      const queryParams = new URLSearchParams(queryString)
+      const query = Object.fromEntries(queryParams)
+
+      const targetPath = routePath || '/'
+      next({ path: targetPath, query })
+      return
+    } else if (to.hash.startsWith('#search=')) {
       next()
     } else if (to.hash.startsWith('#imdb=')) {
       next()
