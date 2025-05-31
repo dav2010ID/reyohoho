@@ -46,3 +46,7 @@ export const getBaseURL = async () => {
     return apiInstance.defaults.baseURL
   }
 }
+
+export const getBaseURLSync = () => {
+  return apiInstance.defaults.baseURL
+}

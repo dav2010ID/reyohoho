@@ -1,15 +1,6 @@
-import { getBaseURL } from '@/api/axios'
+import { getBaseURLSync } from '@/api/axios'
 
 export function useCommentFormatting() {
-  let cachedBaseURL = null
-
-  const initializeBaseURL = async () => {
-    if (!cachedBaseURL) {
-      cachedBaseURL = await getBaseURL()
-    }
-    return cachedBaseURL
-  }
-
   const isValidImageUrl = (url) => {
     try {
       const urlObj = new URL(url)
@@ -28,12 +19,8 @@ export function useCommentFormatting() {
         return false
       }
 
-      if (cachedBaseURL) {
-        const modifiedUrl = `${cachedBaseURL}${urlObj.pathname}${urlObj.search}${urlObj.hash}`
-        return modifiedUrl
-      }
-
-      return url
+      const modifiedUrl = `${getBaseURLSync()}${urlObj.pathname}${urlObj.search}${urlObj.hash}`
+      return modifiedUrl
     } catch (error) {
       console.warn('Недопустимый URL изображения:', url, 'Ошибка:', error.message)
       return false
@@ -170,7 +157,6 @@ export function useCommentFormatting() {
     formatContent,
     formatContentWithTruncation,
     isValidImageUrl,
-    escapeHtml,
-    initializeBaseURL
+    escapeHtml
   }
 }
