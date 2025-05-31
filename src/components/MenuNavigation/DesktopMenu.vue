@@ -20,7 +20,20 @@
             @pointerenter="showTooltip(idx, $event)"
             @pointerleave="hideTooltip"
           >
+            <template v-if="link.component === 'NotificationBadge'">
+              <router-link
+                :to="link.to"
+                :exact="link.exact"
+                class="notification-link"
+                @click="closeSidebar"
+              >
+                <NotificationBadge />
+                <span v-show="isSidebarOpen" class="menu-text">{{ link.text }}</span>
+              </router-link>
+            </template>
+
             <component
+              v-else
               :is="link.to ? 'router-link' : 'a'"
               v-bind="
                 link.to ? { to: link.to, exact: link.exact } : { href: link.href, target: '_blank' }
@@ -66,6 +79,7 @@
 import { ref, onMounted, onBeforeUnmount, computed } from 'vue'
 import { useRoute } from 'vue-router'
 import { useNavbarStore } from '@/store/navbar'
+import NotificationBadge from '@/components/notification/NotificationBadge.vue'
 
 const props = defineProps({
   links: Array
@@ -337,5 +351,26 @@ onBeforeUnmount(() => {
 
 a {
   cursor: pointer;
+}
+
+.notification-link {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  color: rgba(255, 255, 255, 0.8);
+  text-decoration: none;
+  padding: 10px 20px;
+  transition: all 0.3s ease;
+  height: 20px;
+}
+
+.notification-link:hover {
+  background: rgba(255, 255, 255, 0.05);
+  color: #fff;
+}
+
+.side-panel.collapsed .notification-link {
+  justify-content: center;
+  padding: 10px;
 }
 </style>

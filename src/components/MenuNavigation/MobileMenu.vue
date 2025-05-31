@@ -4,7 +4,20 @@
       <div class="nav-links-wrapper">
         <ul class="nav-links">
           <li v-for="link in props.links" :key="link.text">
+            <template v-if="link.component === 'NotificationBadge'">
+              <router-link
+                :to="link.to"
+                :exact="link.exact"
+                class="notification-link"
+                @click="closeNavbar"
+              >
+                <NotificationBadge />
+                <span class="menu-text">{{ link.text }}</span>
+              </router-link>
+            </template>
+
             <component
+              v-else
               :is="link.to ? 'router-link' : 'a'"
               v-bind="
                 link.to ? { to: link.to, exact: link.exact } : { href: link.href, target: '_blank' }
@@ -36,6 +49,7 @@
 <script setup>
 import { storeToRefs } from 'pinia'
 import { useNavbarStore } from '@/store/navbar'
+import NotificationBadge from '@/components/notification/NotificationBadge.vue'
 
 const props = defineProps({
   links: Array
@@ -105,6 +119,22 @@ const { closeNavbar } = navbarStore
 }
 
 .nav-links a:hover {
+  background: rgba(255, 255, 255, 0.05);
+  color: #fff;
+}
+
+.notification-link {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  color: rgba(255, 255, 255, 0.8);
+  text-decoration: none;
+  padding: 10px 20px;
+  transition: all 0.3s ease;
+  min-width: 250px;
+}
+
+.notification-link:hover {
   background: rgba(255, 255, 255, 0.05);
   color: #fff;
 }

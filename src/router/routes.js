@@ -40,6 +40,15 @@ export const routes = [
     }
   },
   {
+    path: '/notifications',
+    name: 'notifications',
+    component: () => import('@/components/NotificationsPage.vue'),
+    meta: {
+      title: 'ReYohoho - Уведомления',
+      requiresAuth: true
+    }
+  },
+  {
     path: '/:pathMatch(.*)*',
     component: () => import('@/components/NotFound.vue'),
     name: 'NotFound',

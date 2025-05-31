@@ -63,6 +63,13 @@ onMounted(async () => {
             exact: true,
             icon: 'fas fa-bookmark',
             text: 'Мои списки'
+          },
+          {
+            to: '/notifications',
+            exact: true,
+            icon: 'fas fa-bell',
+            text: 'Уведомления',
+            component: 'NotificationBadge'
           }
         ]
       : []),
