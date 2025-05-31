@@ -34,6 +34,11 @@ export function useCommentFormatting() {
 
     let processedContent = content
 
+    // Remove empty tags
+    processedContent = processedContent.replace(/\[spoiler\]\s*\[\/spoiler\]/g, '')
+    processedContent = processedContent.replace(/\[img\]\s*\[\/img\]/g, '')
+    processedContent = processedContent.replace(/\[link=[^\]]+\]\s*\[\/link\]/g, '')
+
     processedContent = processedContent.replace(/\[img\](.*?)\[\/img\]/g, (match, url) => {
       const trimmedUrl = url.trim()
       if (isValidImageUrl(trimmedUrl)) {
@@ -47,6 +52,7 @@ export function useCommentFormatting() {
       /\[spoiler\](.*?)\[\/spoiler\]/gs,
       (match, spoilerText, offset, string) => {
         const escapedText = escapeHtml(spoilerText.trim())
+        if (!escapedText) return ''
 
         const beforeChar = offset > 0 ? string[offset - 1] : ' '
         const afterChar =
@@ -69,6 +75,7 @@ export function useCommentFormatting() {
       (match, url, linkText) => {
         const trimmedUrl = url.trim()
         const trimmedText = linkText.trim()
+        if (!trimmedText) return ''
 
         const isValidUrl = /^https?:\/\/.+/.test(trimmedUrl)
 

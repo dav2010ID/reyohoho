@@ -292,7 +292,16 @@ export default {
         return
       }
 
-      if (!newComment.value.trim()) return
+      const contentWithoutEmptyTags = newComment.value
+        .replace(/\[spoiler\]\s*\[\/spoiler\]/g, '')
+        .replace(/\[img\]\s*\[\/img\]/g, '')
+        .replace(/\[link=[^\]]+\]\s*\[\/link\]/g, '')
+        .trim()
+
+      if (!contentWithoutEmptyTags) {
+        notificationRef.value.showNotification('Комментарий не может быть пустым')
+        return
+      }
 
       if (newComment.value.length > 1500) {
         notificationRef.value.showNotification(
@@ -1065,6 +1074,13 @@ export default {
   font-weight: 500;
 }
 
+:deep(.spoiler-text a) {
+  color: transparent !important;
+  text-decoration: none !important;
+  border-bottom: none !important;
+  pointer-events: none !important;
+}
+
 :deep(.spoiler-text.revealed) {
   background: transparent;
   color: inherit;
@@ -1076,6 +1092,30 @@ export default {
 
 :deep(.spoiler-text.revealed::before) {
   display: none;
+}
+
+:deep(.spoiler-text.revealed a) {
+  color: #4a90e2 !important;
+  text-decoration: none !important;
+  border-bottom: 1px solid transparent !important;
+  transition:
+    color 0.2s ease,
+    border-bottom-color 0.2s ease !important;
+  pointer-events: auto !important;
+}
+
+:deep(.spoiler-text.revealed a:hover) {
+  color: #66a3e0 !important;
+  border-bottom-color: #66a3e0 !important;
+}
+
+:deep(.spoiler-text.revealed a:visited) {
+  color: #8a7ca8 !important;
+}
+
+:deep(.spoiler-text.revealed a:visited:hover) {
+  color: #a393c2 !important;
+  border-bottom-color: #a393c2 !important;
 }
 
 .spoiler-button {
