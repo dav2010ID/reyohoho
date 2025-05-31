@@ -2,8 +2,8 @@
   <div class="comment-item" :data-comment-id="comment?.id">
     <div class="comment-header">
       <div class="user-info">
-        <a
-          :href="`/lists/${comment?.user_id}`"
+        <router-link
+          :to="{ path: `/lists/${comment?.user_id}` }"
           target="_blank"
           rel="noopener noreferrer"
           class="user-avatar-link"
@@ -24,16 +24,16 @@
               {{ getInitials(comment?.username || 'Аноним') }}
             </div>
           </div>
-        </a>
+        </router-link>
         <div class="user-details">
-          <a
-            :href="`/lists/${comment?.user_id}`"
+          <router-link
+            :to="{ path: `/lists/${comment?.user_id}` }"
             target="_blank"
             rel="noopener noreferrer"
             class="username-link"
           >
             <span class="username">{{ comment?.username || 'Аноним' }}</span>
-          </a>
+          </router-link>
           <span v-if="comment?.user_movie_rating" class="user-rating">
             <i class="fas fa-star"></i>
             {{ comment.user_movie_rating }}
