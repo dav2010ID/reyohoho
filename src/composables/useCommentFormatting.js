@@ -2,7 +2,9 @@ export function useCommentFormatting() {
   const isValidImageUrl = (url) => {
     try {
       const urlObj = new URL(url)
-      const isValid = urlObj.hostname === 'cdn.7tv.app' && urlObj.protocol === 'https:'
+      const isValid =
+        (urlObj.hostname === 'cdn.7tv.app' && urlObj.protocol === 'https:') ||
+        (urlObj.pathname.includes('/api/7tv') && urlObj.protocol === 'https:')
 
       if (!isValid) {
         console.warn('URL изображения отклонен:', {
