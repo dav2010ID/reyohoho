@@ -869,7 +869,7 @@ const getStaffByProfession = (profession) => {
 }
 
 .rating-link:hover {
-  background: var(--accent-color);
+  background: rgba(255, 255, 255, 0.1);
   border-color: var(--accent-color);
   box-shadow: 0 0 10px var(--accent-semi-transparent);
 }
