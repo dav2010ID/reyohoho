@@ -188,6 +188,11 @@ onBeforeUnmount(() => {
   font-size: 1.2rem;
   cursor: pointer;
   margin-top: 10px;
+  transition: all 0.3s ease;
+}
+.toggle-sidebar-btn:hover {
+  color: var(--accent-color, #6c5ce7);
+  transform: scale(1.1);
 }
 .logo-section,
 .home-link {
@@ -322,8 +327,17 @@ onBeforeUnmount(() => {
   margin: 0;
 }
 .nav-links a:hover {
-  background: rgba(255, 255, 255, 0.05);
-  color: #fff;
+  background: var(--accent-transparent, rgba(108, 92, 231, 0.15));
+  color: var(--accent-color, #6c5ce7);
+  border-left: 3px solid var(--accent-color, #6c5ce7);
+  transform: translateX(3px);
+}
+
+.nav-links a:active,
+.nav-links a.router-link-active {
+  background: var(--accent-transparent, rgba(108, 92, 231, 0.2));
+  color: var(--accent-color, #6c5ce7);
+  border-left: 3px solid var(--accent-color, #6c5ce7);
 }
 
 .icon-user {
@@ -365,8 +379,17 @@ a {
 }
 
 .notification-link:hover {
-  background: rgba(255, 255, 255, 0.05);
-  color: #fff;
+  background: var(--accent-transparent, rgba(108, 92, 231, 0.15));
+  color: var(--accent-color, #6c5ce7);
+  border-left: 3px solid var(--accent-color, #6c5ce7);
+  transform: translateX(3px);
+}
+
+.notification-link:active,
+.notification-link.router-link-active {
+  background: var(--accent-transparent, rgba(108, 92, 231, 0.2));
+  color: var(--accent-color, #6c5ce7);
+  border-left: 3px solid var(--accent-color, #6c5ce7);
 }
 
 .side-panel.collapsed .notification-link {

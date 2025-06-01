@@ -119,8 +119,17 @@ const { closeNavbar } = navbarStore
 }
 
 .nav-links a:hover {
-  background: rgba(255, 255, 255, 0.05);
-  color: #fff;
+  background: var(--accent-transparent, rgba(108, 92, 231, 0.15));
+  color: var(--accent-color, #6c5ce7);
+  border-left: 3px solid var(--accent-color, #6c5ce7);
+  transform: translateX(3px);
+}
+
+.nav-links a:active,
+.nav-links a.router-link-active {
+  background: var(--accent-transparent, rgba(108, 92, 231, 0.2));
+  color: var(--accent-color, #6c5ce7);
+  border-left: 3px solid var(--accent-color, #6c5ce7);
 }
 
 .notification-link {
@@ -135,8 +144,17 @@ const { closeNavbar } = navbarStore
 }
 
 .notification-link:hover {
-  background: rgba(255, 255, 255, 0.05);
-  color: #fff;
+  background: var(--accent-transparent, rgba(108, 92, 231, 0.15));
+  color: var(--accent-color, #6c5ce7);
+  border-left: 3px solid var(--accent-color, #6c5ce7);
+  transform: translateX(3px);
+}
+
+.notification-link:active,
+.notification-link.router-link-active {
+  background: var(--accent-transparent, rgba(108, 92, 231, 0.2));
+  color: var(--accent-color, #6c5ce7);
+  border-left: 3px solid var(--accent-color, #6c5ce7);
 }
 
 .slide-enter-active,
