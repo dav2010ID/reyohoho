@@ -93,7 +93,9 @@ onMounted(() => {
 
 .movie-card:hover {
   transform: translateY(-5px);
-  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.3);
+  box-shadow:
+    0 8px 16px rgba(0, 0, 0, 0.3),
+    0 0 20px var(--accent-semi-transparent);
 }
 
 .hover-disabled:hover {

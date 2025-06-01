@@ -781,6 +781,12 @@ const getStaffByProfession = (profession) => {
   width: auto;
   object-fit: contain;
   max-width: 100%;
+  transition: all 0.3s ease;
+  cursor: pointer;
+}
+
+.content-logo:hover {
+  filter: drop-shadow(0 0 15px var(--accent-semi-transparent));
 }
 
 .content-title-container {
@@ -826,6 +832,13 @@ const getStaffByProfession = (profession) => {
   white-space: normal;
   word-break: break-word;
   overflow-wrap: anywhere;
+  transition: all 0.3s ease;
+  cursor: pointer;
+}
+
+.content-title:hover {
+  text-shadow: 0 0 20px var(--accent-semi-transparent);
+  color: #fff;
 }
 
 .content-subtitle {
@@ -857,6 +870,8 @@ const getStaffByProfession = (profession) => {
 
 .rating-link:hover {
   background: rgba(255, 255, 255, 0.1);
+  border-color: var(--accent-color);
+  box-shadow: 0 0 10px var(--accent-semi-transparent);
 }
 
 .rating-logo {
@@ -900,6 +915,7 @@ const getStaffByProfession = (profession) => {
 
 .movie-poster-container:hover {
   transform: scale(1.02);
+  box-shadow: 0 6px 20px var(--accent-semi-transparent);
 }
 
 .movie-poster {
@@ -1402,6 +1418,7 @@ const getStaffByProfession = (profession) => {
 
 .staff-link:hover {
   transform: translateY(-3px);
+  filter: drop-shadow(0 4px 8px var(--accent-semi-transparent));
 }
 
 .staff-photo {
@@ -1412,6 +1429,12 @@ const getStaffByProfession = (profession) => {
   margin-bottom: 8px;
   border: 2px solid rgba(255, 255, 255, 0.1);
   flex-shrink: 0;
+  transition: all 0.2s ease;
+}
+
+.staff-link:hover .staff-photo {
+  border-color: var(--accent-color);
+  box-shadow: 0 0 12px var(--accent-semi-transparent);
 }
 
 .staff-name {
@@ -1508,8 +1531,9 @@ const getStaffByProfession = (profession) => {
 }
 
 .expand-circle-button:hover {
-  background: rgba(255, 255, 255, 0.2);
+  background: var(--accent-color);
   transform: scale(1.05);
+  box-shadow: 0 4px 12px var(--accent-semi-transparent);
 }
 
 @media (max-width: 600px) {
@@ -1533,8 +1557,9 @@ const getStaffByProfession = (profession) => {
 }
 
 .show-more-btn:hover {
-  background: #505050;
-  border-color: #17850b;
+  background: var(--accent-color);
+  border-color: var(--accent-color);
+  box-shadow: 0 4px 8px var(--accent-semi-transparent);
 }
 
 .show-more-btn:active {
@@ -1558,6 +1583,10 @@ const getStaffByProfession = (profession) => {
   display: flex;
   align-items: center;
   gap: 5px;
+}
+
+.nudity-info-btn:hover i {
+  color: var(--accent-color);
 }
 
 .nudity-info-btn i {
@@ -1627,6 +1656,13 @@ const getStaffByProfession = (profession) => {
   flex-shrink: 0;
 }
 
+.staff-name-link:hover {
+  background: var(--accent-color);
+  color: #fff;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px var(--accent-semi-transparent);
+}
+
 .staff-list .expand-actors-circle-button {
   width: 80px;
   height: 80px;
@@ -1644,6 +1680,12 @@ const getStaffByProfession = (profession) => {
   flex-shrink: 0;
 }
 
+.staff-list .expand-actors-circle-button:hover {
+  background: var(--accent-color);
+  transform: scale(1.05);
+  box-shadow: 0 4px 12px var(--accent-semi-transparent);
+}
+
 .staff-names-list .expand-actors-circle-button {
   width: 40px;
   height: 40px;
@@ -1659,6 +1701,12 @@ const getStaffByProfession = (profession) => {
   font-size: 16px;
   text-decoration: none;
   flex-shrink: 0;
+}
+
+.staff-names-list .expand-actors-circle-button:hover {
+  background: var(--accent-color);
+  transform: scale(1.05);
+  box-shadow: 0 4px 12px var(--accent-semi-transparent);
 }
 
 @media (max-width: 600px) {
