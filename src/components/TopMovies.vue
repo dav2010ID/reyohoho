@@ -265,7 +265,7 @@ onMounted(fetchMovies)
 }
 
 /* Адаптивность */
-@media (max-width: 768px) {
+@media (max-width: 1000px) {
   .controls {
     flex-direction: column;
     gap: 6px;
@@ -277,7 +277,7 @@ onMounted(fetchMovies)
   }
 }
 
-@media (max-width: 480px) {
+@media (max-width: 700px) {
   .controls {
     padding: 0 5px;
     gap: 4px;
@@ -305,7 +305,7 @@ onMounted(fetchMovies)
   }
 }
 
-@media (max-width: 400px) {
+@media (max-width: 600px) {
   .button-group {
     flex-wrap: wrap;
     justify-content: center;
