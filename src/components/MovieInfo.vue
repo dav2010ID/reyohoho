@@ -1589,6 +1589,12 @@ const getStaffByProfession = (profession) => {
   color: var(--accent-color);
 }
 
+.nudity-info-btn:hover {
+  background: none !important;
+  border: none !important;
+  box-shadow: none !important;
+}
+
 .nudity-info-btn i {
   font-size: 20px;
   color: #fff;
