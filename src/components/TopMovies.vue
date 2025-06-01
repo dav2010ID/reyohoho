@@ -71,7 +71,7 @@ const timeFilters = [
   { label: '30 дней', apiUrl: '30d' },
   { label: 'Всё время', apiUrl: 'all' },
   { label: '---', apiUrl: 'separator', type: 'separator' },
-  { label: 'Обсуждаемое за месяц', apiUrl: 'discussed' }
+  { label: 'Обсуждаемое', apiUrl: 'discussed' }
 ]
 
 // Фильтры по типу контента
