@@ -1316,8 +1316,9 @@ onBeforeUnmount(() => {
 }
 
 .player-btn:hover {
-  background: #505050;
+  background: var(--accent-color);
   border-color: var(--accent-color);
+  box-shadow: 0 0 10px var(--accent-semi-transparent);
 }
 
 .player-btn:active {
@@ -1412,7 +1413,7 @@ onBeforeUnmount(() => {
 /* Делаем кнопку видимой при наведении на зону */
 .close-theater-btn:hover,
 .close-theater-btn::before:hover {
-  background: rgba(255, 0, 0, 1);
+  background: var(--accent-color);
   opacity: 1;
 }
 
@@ -1461,9 +1462,9 @@ html.no-scroll {
 }
 
 .controls button:hover {
-  background-color: #555;
+  background-color: var(--accent-color);
   transform: translateY(-3px);
-  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+  box-shadow: 0 4px 10px var(--accent-semi-transparent);
 }
 
 .controls button:active {
@@ -1588,8 +1589,9 @@ html.no-scroll {
 }
 
 .aspect-ratio-option:hover {
-  background-color: rgba(255, 255, 255, 0.12);
+  background-color: var(--accent-color);
   transform: translateY(-1px);
+  box-shadow: 0 2px 8px var(--accent-semi-transparent);
 }
 
 .aspect-ratio-option.active {
@@ -1664,8 +1666,9 @@ html.no-scroll {
 }
 
 .list-button-item button:hover {
-  background-color: rgba(255, 255, 255, 0.15);
+  background-color: var(--accent-color);
   transform: translateX(4px);
+  box-shadow: 0 2px 8px var(--accent-semi-transparent);
 }
 
 .list-button-item button.active {
@@ -1722,6 +1725,7 @@ html.no-scroll {
 .electron-only:hover {
   transform: none !important;
   box-shadow: none !important;
+  background-color: #333 !important;
 }
 
 .custom-tooltip:has(+ .electron-only) {
@@ -1747,6 +1751,12 @@ html.no-scroll {
   width: 50px;
   height: 50px;
   position: relative;
+}
+
+.favorite-btn:hover {
+  background-color: var(--accent-color);
+  transform: translateY(-3px);
+  box-shadow: 0 4px 10px var(--accent-semi-transparent);
 }
 
 .dropdown-arrow {

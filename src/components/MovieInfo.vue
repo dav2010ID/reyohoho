@@ -869,7 +869,7 @@ const getStaffByProfession = (profession) => {
 }
 
 .rating-link:hover {
-  background: rgba(255, 255, 255, 0.1);
+  background: var(--accent-color);
   border-color: var(--accent-color);
   box-shadow: 0 0 10px var(--accent-semi-transparent);
 }
@@ -1073,9 +1073,9 @@ const getStaffByProfession = (profession) => {
 }
 
 .controls button:hover {
-  background-color: #555;
+  background-color: var(--accent-color);
   transform: translateY(-3px);
-  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+  box-shadow: 0 4px 10px var(--accent-semi-transparent);
 }
 
 .controls button:active {
@@ -1563,8 +1563,8 @@ const getStaffByProfession = (profession) => {
 }
 
 .show-more-btn:active {
-  background: #17850b;
-  border-color: #17850b;
+  background: var(--accent-color);
+  border-color: var(--accent-color);
 }
 
 .rating-links-group {
