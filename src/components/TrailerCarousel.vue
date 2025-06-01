@@ -227,13 +227,18 @@ onBeforeUnmount(() => {
   background: #161616;
   border-radius: 12px;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
-  transition: transform 0.2s;
+  transition:
+    transform 0.3s ease,
+    box-shadow 0.3s ease;
   cursor: pointer;
   overflow: hidden;
 }
 
 .carousel-item:hover {
-  transform: scale(1.03);
+  transform: translateY(-5px);
+  box-shadow:
+    0 8px 16px rgba(0, 0, 0, 0.3),
+    0 0 20px var(--accent-semi-transparent);
 }
 
 .carousel-item img {
