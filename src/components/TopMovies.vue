@@ -25,7 +25,7 @@
           <div class="button-group type-buttons">
             <i class="material-icons card-icon">movie</i>
             <button
-              v-for="(btn, idx) in typeFilters"
+              v-for="(btn, idx) in currentTypeFilters"
               :key="idx"
               class="filter-btn type-btn"
               :class="{ active: typeFilter === btn.value }"
@@ -50,10 +50,10 @@
 </template>
 
 <script setup>
-import { getMovies } from '@/api/movies'
+import { getMovies, getDiscussedMovies } from '@/api/movies'
 import { handleApiError } from '@/constants'
 import { MovieList } from '@/components/MovieList'
-import { onMounted, ref } from 'vue'
+import { onMounted, ref, computed } from 'vue'
 import ErrorMessage from '@/components/ErrorMessage.vue'
 
 // Состояния
@@ -75,11 +75,20 @@ const timeFilters = [
 ]
 
 // Фильтры по типу контента
-const typeFilters = [
+const normalTypeFilters = [
   { label: 'Все', value: 'all' },
   { label: 'Фильмы', value: 'movie' },
   { label: 'Сериалы', value: 'series' }
 ]
+
+const discussedTypeFilters = [
+  { label: 'Горячее', value: 'hot' },
+  { label: 'Недавнее', value: 'recent' }
+]
+
+const currentTypeFilters = computed(() => {
+  return activeTimeFilter.value === 'discussed' ? discussedTypeFilters : normalTypeFilters
+})
 
 // Получение данных
 const fetchMovies = async () => {
@@ -88,10 +97,14 @@ const fetchMovies = async () => {
   errorCode.value = null
 
   try {
-    movies.value = await getMovies({
-      activeTime: activeTimeFilter.value,
-      typeFilter: typeFilter.value
-    })
+    if (activeTimeFilter.value === 'discussed') {
+      movies.value = await getDiscussedMovies(typeFilter.value)
+    } else {
+      movies.value = await getMovies({
+        activeTime: activeTimeFilter.value,
+        typeFilter: typeFilter.value
+      })
+    }
   } catch (error) {
     const { message, code } = handleApiError(error)
     errorMessage.value = message
@@ -105,6 +118,11 @@ const fetchMovies = async () => {
 // Обработчики
 const changeTimeFilter = (apiUrl) => {
   activeTimeFilter.value = apiUrl
+  if (apiUrl === 'discussed') {
+    typeFilter.value = 'hot'
+  } else {
+    typeFilter.value = 'all'
+  }
   fetchMovies()
 }
 

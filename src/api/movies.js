@@ -58,6 +58,11 @@ const getMovies = async ({ activeTime = 'all', typeFilter = 'all', limit = null 
   return data
 }
 
+const getDiscussedMovies = async (type = 'hot') => {
+  const { data } = await apiCall((api) => api.get(`/discussed/${type}`))
+  return data
+}
+
 const getDons = async () => {
   const { data } = await apiCall((api) => api.get('/get_dons'))
   return data
@@ -123,6 +128,7 @@ export {
   getKpInfo,
   getPlayers,
   getMovies,
+  getDiscussedMovies,
   getDons,
   getKpIDfromIMDB,
   getKpIDfromSHIKI,
