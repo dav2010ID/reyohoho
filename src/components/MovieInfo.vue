@@ -87,6 +87,7 @@
         >
           <MovieRating
             v-if="movieInfo.kinopoisk_id"
+            :key="movieInfo.kinopoisk_id"
             :kp-id="movieInfo.kinopoisk_id"
             :show-dash="true"
           />
@@ -851,6 +852,7 @@ const getStaffByProfession = (profession) => {
   border-radius: 5px;
   gap: 5px;
   transition: all 0.2s ease;
+  vertical-align: middle;
 }
 
 .rating-link:hover {

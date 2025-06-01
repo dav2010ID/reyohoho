@@ -223,7 +223,7 @@ onMounted(() => {
   transition: all 0.2s ease;
   gap: 5px;
   box-sizing: border-box;
-  line-height: 1;
+  vertical-align: middle;
 }
 
 .rating-link.has-rating {
