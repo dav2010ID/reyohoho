@@ -123,6 +123,7 @@ export default {
   width: 150px;
   height: 150px;
   border-radius: 50%;
+  border: 2px solid var(--accent-color);
   overflow: hidden;
   background-color: #f0f0f0;
   display: flex;
