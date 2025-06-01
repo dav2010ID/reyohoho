@@ -216,7 +216,8 @@
               rel="noopener noreferrer"
               class="rating-link"
             >
-              <span>Parents Guide</span>
+              <span class="desktop-text">Parents Guide</span>
+              <span class="mobile-text">PG</span>
               <img
                 src="/src/assets/icon-external-link.png"
                 alt="Внешняя ссылка"
@@ -984,6 +985,24 @@ const getStaffByProfession = (profession) => {
 
   .ratings-links {
     margin: 5px 0;
+    gap: 8px;
+    flex-wrap: wrap;
+  }
+
+  .rating-link {
+    padding: 3px 6px;
+    font-size: 14px;
+  }
+
+  .rating-logo {
+    width: 16px;
+    height: 16px;
+    margin-right: 3px;
+  }
+
+  .external-link-icon {
+    width: 16px;
+    margin-left: 3px;
   }
 
   .additional-info-title {
@@ -1701,5 +1720,27 @@ const getStaffByProfession = (profession) => {
 
 .rating-value.high {
   color: #51cf66 !important;
+}
+
+.desktop-text {
+  display: inline;
+}
+
+.mobile-text {
+  display: none;
+}
+
+@media (max-width: 600px) {
+  .desktop-text {
+    display: none;
+  }
+
+  .mobile-text {
+    display: inline;
+  }
+}
+
+.rating-links-group {
+  gap: 5px;
 }
 </style>
