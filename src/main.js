@@ -3,18 +3,16 @@ import jQuery from 'jquery'
 import { createPinia } from 'pinia'
 import piniaPluginPersistedstate from 'pinia-plugin-persistedstate'
 import 'regenerator-runtime/runtime'
-import { registerSW } from 'virtual:pwa-register'
-import { createApp } from 'vue' // Import createApp from Vue
+import { createApp } from 'vue'
 import VueCookies from 'vue3-cookies'
 import { initYandexMetrika } from 'yandex-metrika-vue3'
 import VueLazyload from 'vue-lazyload'
 import App from './App.vue'
-import router from './router' // Import the router
+import router from './router'
 import { useThemeStore } from './store/theme'
 
 console.log(`App version: ${import.meta.env.VITE_APP_VERSION_FULL_VERSION}`)
 
-registerSW({ immediate: true })
 const $ = jQuery
 window.$ = $
 

@@ -13,18 +13,22 @@
 
   <!-- Затемняющий оверлей для обычного режима, включается тумблером -->
   <div v-if="dimmingEnabled" class="dimming-overlay" @click="toggleDimming"></div>
+
+  <PwaUpdateNotification ref="pwaUpdateRef" />
 </template>
 
 <script setup>
 import BackgroundSpace from '@/components/BackgroundSpace.vue'
 import MenuNavigation from '@/components/MenuNavigation.vue'
 import MobileHeader from '@/components/MobileHeader.vue'
+import PwaUpdateNotification from '@/components/PwaUpdateNotification.vue'
 import { useMainStore } from '@/store/main'
 import { useNavbarStore } from '@/store/navbar'
-import { computed, onMounted, onUnmounted } from 'vue'
+import { computed, onMounted, onUnmounted, ref } from 'vue'
 
 const store = useMainStore()
 const navbarStore = useNavbarStore()
+const pwaUpdateRef = ref(null)
 
 const isMobile = computed(() => store.isMobile)
 
@@ -40,12 +44,19 @@ const handleKeyDown = (event) => {
     event.stopPropagation()
     navbarStore.openSearchModal()
   }
-  
+
   // ESC
   if (event.keyCode === 27 && navbarStore.isModalSearchVisible) {
     event.preventDefault()
     event.stopPropagation()
     navbarStore.closeSearchModal()
+  }
+
+  if (import.meta.env.DEV && event.ctrlKey && event.shiftKey && event.keyCode === 85) {
+    event.preventDefault()
+    event.stopPropagation()
+    console.log('🚀 Triggering PWA update test via keyboard shortcut')
+    window.testPwaUpdate?.()
   }
 }
 
@@ -53,6 +64,12 @@ onMounted(() => {
   store.setIsMobile(window.innerWidth < 600)
   window.addEventListener('resize', updateIsMobile)
   document.addEventListener('keydown', handleKeyDown, true)
+
+  if (import.meta.env.DEV) {
+    console.log('🎯 Development shortcuts:')
+    console.log('   • Ctrl+Shift+U: Test PWA update')
+    console.log('   • window.testPwaUpdate(): Test PWA update via console')
+  }
 })
 
 onUnmounted(() => {
