@@ -8,18 +8,17 @@
   >
     <div class="notification-content">
       <div v-if="notification.movie_cover" class="movie-poster">
-        <img
-          :src="notification.movie_cover"
-          :alt="notification.movie_title"
-          class="poster-img"
-          @click="goToMovie"
-        />
+        <router-link :to="`/movie/${notification.movie_id}`">
+          <img :src="notification.movie_cover" :alt="notification.movie_title" class="poster-img" />
+        </router-link>
       </div>
 
       <div class="notification-main">
         <div class="notification-header">
           <div class="notification-info">
-            <span class="movie-title" @click="goToMovie">{{ notification.movie_title }}</span>
+            <router-link :to="`/movie/${notification.movie_id}`" class="movie-title">{{
+              notification.movie_title
+            }}</router-link>
           </div>
           <div class="notification-time">
             {{ formatRelativeTime(notification.created_at) }}
@@ -76,7 +75,6 @@
 </template>
 
 <script setup>
-import { useRouter } from 'vue-router'
 import { formatRelativeTime } from '@/utils/dateUtils'
 import { useCommentFormatting } from '@/composables/useCommentFormatting'
 
@@ -89,7 +87,6 @@ const props = defineProps({
 
 const emit = defineEmits(['mark-read', 'delete'])
 
-const router = useRouter()
 const { formatContent } = useCommentFormatting()
 
 const formatCommentContent = (content) => {
@@ -103,10 +100,6 @@ const markAsRead = () => {
 
 const deleteNotification = () => {
   emit('delete', props.notification.id)
-}
-
-const goToMovie = () => {
-  router.push(`/movie/${props.notification.movie_id}`)
 }
 </script>
 
@@ -192,8 +185,8 @@ const goToMovie = () => {
 .movie-title {
   color: var(--text-color);
   font-weight: 500;
-  cursor: pointer;
   text-decoration: underline;
+  display: inline;
 }
 
 .movie-title:hover {
