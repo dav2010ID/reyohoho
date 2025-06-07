@@ -197,14 +197,7 @@
             </div>
           </div>
           <div v-else class="comment-text-container">
-            <p
-              class="comment-text"
-              :class="{ truncated: isLongComment && !isExpanded }"
-              v-html="formattedContent"
-            ></p>
-            <button v-if="isLongComment" @click="toggleExpanded" class="expand-button">
-              {{ isExpanded ? 'Свернуть' : 'Развернуть' }}
-            </button>
+            <p class="comment-text" v-html="formattedContent"></p>
           </div>
         </div>
       </div>
@@ -435,16 +428,9 @@ export default {
       }
     }
 
-    const isLongComment = computed(() => props.comment?.content?.length > 500)
-    const isExpanded = ref(false)
-
     const formattedContent = computed(() => {
-      return formatContentWithTruncation(props.comment?.content, 500, isExpanded.value)
+      return formatContentWithTruncation(props.comment?.content)
     })
-
-    const toggleExpanded = () => {
-      isExpanded.value = !isExpanded.value
-    }
 
     const handleAvatarError = () => {
       console.log('Avatar load error, falling back to initials')
@@ -523,10 +509,7 @@ export default {
       isCommentHidden,
       showHiddenComment,
       hiddenCommentReason,
-      isLongComment,
-      isExpanded,
       formattedContent,
-      toggleExpanded,
       autoResizeEdit,
       editTextarea,
       showEmojiPicker,

@@ -98,57 +98,10 @@ export function useCommentFormatting() {
     return processedContent
   }
 
-  const formatContentWithTruncation = (content, maxLength = 500, isExpanded = false) => {
+  const formatContentWithTruncation = (content) => {
     if (!content) return ''
 
     let processedContent = content
-
-    if (content.length > maxLength && !isExpanded) {
-      let truncatedContent = content.slice(0, maxLength)
-
-      const fullContent = content
-      const allImagesCount = (fullContent.match(/\[img\].*?\[\/img\]/g) || []).length
-      const visibleImagesCount = (truncatedContent.match(/\[img\].*?\[\/img\]/g) || []).length
-      const hiddenImagesCount = allImagesCount - visibleImagesCount
-
-      const lastOpenTag = truncatedContent.lastIndexOf('[img]')
-      const lastCloseTag = truncatedContent.lastIndexOf('[/img]')
-
-      if (lastOpenTag > lastCloseTag && lastOpenTag !== -1) {
-        truncatedContent = content.slice(0, lastOpenTag)
-      }
-
-      truncatedContent = truncatedContent.trim()
-
-      const partialOpenTags = ['[img', '[im', '[i', '[']
-      for (const partialTag of partialOpenTags) {
-        if (truncatedContent.endsWith(partialTag)) {
-          const lastBracket = truncatedContent.lastIndexOf('[')
-          if (lastBracket !== -1) {
-            truncatedContent = truncatedContent.slice(0, lastBracket).trim()
-            break
-          }
-        }
-      }
-
-      const partialCloseTags = ['[/img', '[/im', '[/i', '[/']
-      for (const partialTag of partialCloseTags) {
-        if (truncatedContent.endsWith(partialTag)) {
-          const lastBracket = truncatedContent.lastIndexOf('[')
-          if (lastBracket !== -1) {
-            truncatedContent = truncatedContent.slice(0, lastBracket).trim()
-            break
-          }
-        }
-      }
-
-      let ellipsis = '...'
-      if (hiddenImagesCount > 0) {
-        ellipsis = `... (+${hiddenImagesCount} ${hiddenImagesCount === 1 ? 'изображение' : 'изображений'})`
-      }
-
-      processedContent = truncatedContent + ellipsis
-    }
 
     return formatContent(processedContent)
   }
