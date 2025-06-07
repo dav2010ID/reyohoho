@@ -656,6 +656,7 @@ export default {
   width: 100%;
   max-width: 100%;
   white-space: pre-wrap;
+  padding: 0.2em 0;
 }
 
 .comment-text :deep(img.inline-emoji) {
@@ -1045,6 +1046,15 @@ export default {
   text-decoration: underline;
 }
 
+@keyframes spoiler-shimmer {
+  0% {
+    background-position: -200% 0;
+  }
+  100% {
+    background-position: 200% 0;
+  }
+}
+
 .seven-tv-icon {
   height: 1.2em;
   width: auto;
@@ -1053,21 +1063,47 @@ export default {
 }
 
 :deep(.spoiler-text) {
-  background: rgba(64, 64, 64, 0.8);
+  background-color: #333;
   color: transparent;
   cursor: pointer;
   padding: 0.2em 0.6em;
+  margin: 0.2em 0;
   border-radius: 4px;
   transition: all 0.3s ease;
   user-select: none;
   position: relative;
-  display: inline-block;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
   min-width: 60px;
+  min-height: 1.5em;
   text-align: center;
+  overflow: hidden;
+  line-height: 1.5;
+  font-size: 0.9rem;
+  vertical-align: middle;
+}
+
+:deep(.spoiler-text:not(.revealed)) {
+  background-image: linear-gradient(
+    110deg,
+    transparent 25%,
+    rgba(255, 255, 255, 0.05) 40%,
+    rgba(255, 255, 255, 0.05) 60%,
+    transparent 75%
+  );
+  background-size: 200% 100%;
+  background-repeat: no-repeat;
+  animation: spoiler-shimmer 3s linear infinite;
+  color: transparent;
+}
+
+:deep(.spoiler-text:not(.revealed) .spoiler-hidden-content) {
+  display: none;
 }
 
 :deep(.spoiler-text:hover) {
-  background: rgba(64, 64, 64, 0.9);
+  /* No change on hover for non-revealed */
 }
 
 :deep(.spoiler-text::before) {
@@ -1088,8 +1124,15 @@ export default {
   color: inherit;
   user-select: text;
   min-width: auto;
+  min-height: auto;
   text-align: left;
   padding: 0;
+  margin: 0;
+  animation: none;
+  display: inline;
+  line-height: inherit;
+  font-size: inherit;
+  vertical-align: baseline;
 }
 
 :deep(.spoiler-text.revealed::before) {
