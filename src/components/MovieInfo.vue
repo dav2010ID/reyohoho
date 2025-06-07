@@ -226,19 +226,14 @@
               />
             </a>
             <button
-              class="rating-link nudity-info-btn"
-              @click="showNudityInfo"
+              class="nudity-info-btn"
+              @click="showNudityInfo($event)"
               :title="
                 nudityInfo ? 'Скрыть информацию' : 'Показать информацию о сценах(Sex & Nudity)'
               "
             >
               <i v-if="!nudityInfoLoading" class="fa-regular fa-face-grin-wink"></i>
               <i v-else class="fas fa-spinner fa-spin"></i>
-              <div v-if="nudityInfo" class="nudity-info-popup">
-                <div class="nudity-info-content">
-                  {{ nudityInfo }}
-                </div>
-              </div>
             </button>
           </div>
         </div>
@@ -526,6 +521,21 @@
     </div>
   </div>
   <Notification ref="notificationRef" />
+  <div v-if="nudityInfo" :style="nudityPopupStyle" class="nudity-info-popup">
+    <div class="nudity-info-content">
+      {{ nudityInfo }}
+    </div>
+    <div class="nudity-info-actions">
+      <button class="nudity-info-button" @click="copyNudityInfo">
+        <i class="fas fa-copy"></i>
+        <span>Copy</span>
+      </button>
+      <button class="nudity-info-button" @click="openInGoogleTranslate">
+        <i class="fas fa-language"></i>
+        <span>Translate</span>
+      </button>
+    </div>
+  </div>
 </template>
 
 <script setup>
@@ -573,6 +583,8 @@ const itemsPerRow = ref(10)
 
 const nudityInfo = ref(null)
 const nudityInfoLoading = ref(false)
+const nudityPopupStyle = ref({})
+const nudityInfoTrigger = ref(null)
 const isListExpanded = ref(false)
 
 const isInAnyList = computed(() => {
@@ -762,21 +774,31 @@ const onKeyDown = (event) => {
   }
 }
 
-const showNudityInfo = async () => {
-  if (!authStore.token) {
-    notificationRef.value.showNotification(
-      'Для просмотра информации необходимо <a class="auth-link">авторизоваться</a>',
-      5000,
-      { onClick: () => navbarStore.openLogin() }
-    )
-    return
-  }
+const showNudityInfo = async (event) => {
+  // if (!authStore.token) {
+  //   notificationRef.value.showNotification(
+  //     'Для просмотра информации необходимо <a class="auth-link">авторизоваться</a>',
+  //     5000,
+  //     { onClick: () => navbarStore.openLogin() }
+  //   )
+  //   return
+  // }
 
   if (!movieInfo.value?.imdb_id) return
 
   if (nudityInfo.value) {
     nudityInfo.value = null
     return
+  }
+
+  nudityInfoTrigger.value = event.currentTarget
+  const rect = nudityInfoTrigger.value.getBoundingClientRect()
+
+  nudityPopupStyle.value = {
+    position: 'absolute',
+    top: `${rect.bottom + window.scrollY + 10}px`,
+    left: `${rect.right + window.scrollX}px`,
+    transform: 'translateX(-100%)'
   }
 
   nudityInfoLoading.value = true
@@ -846,6 +868,18 @@ const handleClickOutside = (event) => {
   }
 }
 
+const handleNudityPopupOutsideClick = (event) => {
+  const popup = document.querySelector('.nudity-info-popup')
+  if (
+    popup &&
+    !popup.contains(event.target) &&
+    nudityInfoTrigger.value &&
+    !nudityInfoTrigger.value.contains(event.target)
+  ) {
+    nudityInfo.value = null
+  }
+}
+
 onMounted(async () => {
   await fetchMovieInfo()
   infoLoading.value = false
@@ -853,6 +887,7 @@ onMounted(async () => {
   window.addEventListener('resize', onResize)
   setTimeout(updateItemsPerRow, 100)
   document.addEventListener('click', handleClickOutside)
+  document.addEventListener('click', handleNudityPopupOutsideClick, true)
 })
 
 onUnmounted(async () => {
@@ -860,6 +895,7 @@ onUnmounted(async () => {
   document.removeEventListener('keydown', onKeyDown)
   window.removeEventListener('resize', onResize)
   document.removeEventListener('click', handleClickOutside)
+  document.removeEventListener('click', handleNudityPopupOutsideClick, true)
 })
 
 watch(
@@ -884,8 +920,38 @@ watch(
   { deep: true }
 )
 
+watch(
+  nudityInfo,
+  (newValue) => {
+    if (newValue) {
+      document.addEventListener('click', handleNudityPopupOutsideClick, true)
+    } else {
+      document.removeEventListener('click', handleNudityPopupOutsideClick, true)
+    }
+  },
+  { deep: true }
+)
+
 const getStaffByProfession = (profession) => {
   return movieInfo.value?.staff?.filter((person) => person.profession_key === profession) || []
+}
+
+const copyNudityInfo = async () => {
+  try {
+    await navigator.clipboard.writeText(nudityInfo.value)
+    notificationRef.value.showNotification('Текст скопирован')
+  } catch (err) {
+    console.error('Ошибка копирования:', err)
+    notificationRef.value.showNotification('Ошибка при копировании текста')
+  } finally {
+    nudityInfo.value = null
+  }
+}
+
+const openInGoogleTranslate = () => {
+  const text = encodeURIComponent(nudityInfo.value)
+  window.open(`https://translate.google.com/?sl=en&tl=ru&text=${text}`, '_blank')
+  nudityInfo.value = null
 }
 </script>
 
@@ -1744,14 +1810,10 @@ const getStaffByProfession = (profession) => {
 
 .nudity-info-popup {
   position: absolute;
-  top: 100%;
-  left: 50%;
-  transform: translateX(-50%);
-  background: rgba(0, 0, 0, 0.9);
+  background: rgba(0, 0, 0, 0.95);
   border: 1px solid #333;
   border-radius: 8px;
   padding: 15px;
-  margin-top: 10px;
   min-width: 300px;
   max-width: 500px;
   z-index: 1000;
@@ -1763,12 +1825,48 @@ const getStaffByProfession = (profession) => {
   font-size: 14px;
   line-height: 1.5;
   white-space: pre-wrap;
+  margin-bottom: 15px;
+  max-height: 60vh;
+  overflow-y: auto;
+}
+
+.nudity-info-actions {
+  display: flex;
+  gap: 10px;
+  margin-top: 10px;
+  pointer-events: all;
+}
+
+.nudity-info-button {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  padding: 8px 12px;
+  background: rgba(255, 255, 255, 0.1);
+  border: none;
+  border-radius: 4px;
+  color: #fff;
+  font-size: 14px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  pointer-events: all;
+}
+
+.nudity-info-button:hover {
+  background: var(--accent-color);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px var(--accent-semi-transparent);
+}
+
+.nudity-info-button i {
+  font-size: 16px;
 }
 
 @media (max-width: 600px) {
   .nudity-info-popup {
     min-width: 250px;
     max-width: 90vw;
+    margin: 0 10px;
   }
 }
 
