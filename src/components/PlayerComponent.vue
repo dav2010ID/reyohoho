@@ -247,6 +247,25 @@
             </div>
           </div>
 
+          <div class="tooltip-container" data-tooltip-container="pip">
+            <button
+              class="pip-btn"
+              :class="{ 'electron-only': !isElectron }"
+              @mouseenter="showTooltip('pip')"
+              @mouseleave="activeTooltip = null"
+              @click="togglePiP"
+            >
+              <span class="material-icons">picture_in_picture_alt</span>
+            </button>
+            <div v-show="activeTooltip === 'pip'" class="custom-tooltip" data-tooltip="pip">
+              {{
+                isElectron
+                  ? 'Картинка в картинке'
+                  : 'Картинка в картинке, функция доступна в приложении'
+              }}
+            </div>
+          </div>
+
           <div class="tooltip-container" data-tooltip-container="aspect_ratio">
             <button
               class="aspect-ratio-dropdown-btn"
@@ -1173,6 +1192,38 @@ const showFavoriteTooltip = computed(() => playerStore.showFavoriteTooltip)
 const openSettings = () => {
   router.push('/settings')
   hideTooltip()
+}
+
+const togglePiP = async () => {
+  if (!isElectron.value) {
+    showMessageToast('Доступно только в приложении ReYohoho Desktop')
+    window.open('https://t.me/ReYohoho/126', '_blank')
+    return
+  }
+
+  if (!playerIframe.value) return
+
+  try {
+    const iframe = playerIframe.value
+    const iframeDoc = iframe.contentDocument || iframe.contentWindow.document
+    if (!iframeDoc) return
+
+    const video = iframeDoc.querySelector('video')
+    if (!video) return
+
+    if (document.pictureInPictureElement) {
+      await document.exitPictureInPicture()
+    } else {
+      if (document.pictureInPictureEnabled) {
+        await video.requestPictureInPicture()
+      } else {
+        showMessageToast('Ваш браузер не поддерживает режим "Картинка в картинке"')
+      }
+    }
+  } catch (error) {
+    console.error('Error toggling PiP:', error)
+    showMessageToast('Не удалось включить режим "Картинка в картинке"')
+  }
 }
 
 onMounted(() => {
