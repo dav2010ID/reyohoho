@@ -999,10 +999,11 @@ const openInGoogleTranslate = () => {
   max-width: 100%;
   transition: all 0.3s ease;
   cursor: pointer;
+  padding: 10px 0;
 }
 
 .content-logo:hover {
-  filter: drop-shadow(0 0 15px var(--accent-semi-transparent));
+  filter: drop-shadow(0 0 15px var(--accent-color));
 }
 
 .content-title-container {
@@ -1053,8 +1054,8 @@ const openInGoogleTranslate = () => {
 }
 
 .content-title:hover {
-  text-shadow: 0 0 20px var(--accent-semi-transparent);
-  color: #fff;
+  text-shadow: 0 0 20px var(--accent-color);
+  color: var(--accent-color);
 }
 
 .content-subtitle {
