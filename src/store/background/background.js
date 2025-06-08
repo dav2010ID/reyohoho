@@ -80,12 +80,14 @@ export const useBackgroundStore = defineStore(BACKGROUND_STORE_NAME, {
         // Автовключение блюра для динамического фона
         this.isBlurActive = true
         this.backgroundUrl = this.topMoviePoster
-      } else if (type === 'disabled' || type === 'stars') {
+      } else if (type === 'disabled' || type === 'stars' || type === 'lava-lamp') {
         this.isBlurActive = false
         if (type === 'disabled') {
           this.backgroundUrl = ''
         } else if (type === 'stars') {
           this.backgroundUrl = starsBackground
+        } else if (type === 'lava-lamp') {
+          this.backgroundUrl = ''
         }
       }
     }

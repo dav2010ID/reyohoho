@@ -18,6 +18,10 @@
             <span class="radio-label">Звездный фон</span>
           </label>
           <label class="radio">
+            <input v-model="backgroundType" type="radio" value="lava-lamp" />
+            <span class="radio-label">Лава-лампа</span>
+          </label>
+          <label class="radio">
             <input v-model="backgroundType" type="radio" value="disabled" />
             <span class="radio-label">Отключить фон</span>
           </label>

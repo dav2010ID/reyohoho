@@ -1,5 +1,6 @@
 <template>
-  <div v-if="backgroundType !== 'disabled'" class="background-container">
+  <LavaLampBackground v-if="backgroundType === 'lava-lamp'" />
+  <div v-else-if="backgroundType !== 'disabled'" class="background-container">
     <div
       v-for="(bg, index) in backgrounds"
       :key="index"
@@ -11,6 +12,7 @@
 </template>
 
 <script setup>
+import LavaLampBackground from './LavaLampBackground.vue'
 import { getMovies } from '@/api/movies'
 import { useBackgroundStore } from '@/store/background'
 import { computed, onMounted, ref, watch } from 'vue'
