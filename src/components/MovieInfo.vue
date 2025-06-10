@@ -210,7 +210,7 @@
           </div>
 
           <!-- Parents Guide (только если есть IMDb id) -->
-          <div v-if="movieInfo.imdb_id" class="rating-links-group">
+          <template v-if="movieInfo.imdb_id">
             <a
               :href="`https://www.imdb.com/title/${movieInfo.imdb_id}/parentalguide`"
               target="_blank"
@@ -235,7 +235,7 @@
               <i v-if="!nudityInfoLoading" class="fa-regular fa-face-grin-wink"></i>
               <i v-else class="fas fa-spinner fa-spin"></i>
             </button>
-          </div>
+          </template>
           <button
             class="nudity-info-btn"
             @click="showNudityTimings($event)"
@@ -1988,11 +1988,6 @@ const showTimingForm = ref(false)
   border-color: var(--accent-color);
 }
 
-.rating-links-group {
-  display: flex;
-  gap: 5px;
-}
-
 .nudity-info-btn {
   position: relative;
   background: none;
@@ -2247,10 +2242,6 @@ const showTimingForm = ref(false)
   .mobile-text {
     display: inline;
   }
-}
-
-.rating-links-group {
-  gap: 5px;
 }
 
 .mobile-list-dropdown {
