@@ -236,6 +236,16 @@
               <i v-else class="fas fa-spinner fa-spin"></i>
             </button>
           </div>
+          <button
+            class="nudity-info-btn"
+            @click="showNudityTimings($event)"
+            :title="nudityTimings !== undefined ? 'Скрыть тайминги' : 'Показать тайминги сцен'"
+          >
+            <i
+              class="fa-regular fa-clock"
+              :class="{ 'text-red': shouldShowRedTimings, 'text-green': shouldShowGreenTimings }"
+            ></i>
+          </button>
         </div>
 
         <!-- Интеграция компонента плеера -->
@@ -548,6 +558,41 @@
       </button>
     </div>
   </div>
+  <div
+    v-if="nudityTimings !== undefined"
+    :style="nudityTimingsPopupStyle"
+    class="nudity-info-popup"
+  >
+    <div class="nudity-info-content">
+      <div v-if="nudityTimings" class="acknowledgment-table">
+        <div class="acknowledgment-header">
+          <i class="fa-solid fa-heart"></i>
+          <span>Благодарности</span>
+        </div>
+        <div class="acknowledgment-content">
+          <a
+            href="https://www.twitch.tv/tanyabelkova"
+            target="_blank"
+            rel="noopener noreferrer"
+            class="twitch-link"
+          >
+            <i class="fa-brands fa-twitch"></i>
+            <span>TanyaBelkova</span>
+          </a>
+          <div class="acknowledgment-text">За ведение таблички таймингов</div>
+        </div>
+      </div>
+      <div class="timings-content" :class="{ 'no-border': !nudityTimings }">
+        {{ nudityTimings || 'Записей о таймингах не найдено' }}
+      </div>
+    </div>
+    <div v-if="nudityTimings" class="nudity-info-actions">
+      <button class="nudity-info-button" @click="copyNudityTimings">
+        <i class="fas fa-copy"></i>
+        <span>Copy</span>
+      </button>
+    </div>
+  </div>
 </template>
 
 <script setup>
@@ -598,6 +643,20 @@ const nudityInfoLoading = ref(false)
 const nudityPopupStyle = ref({})
 const nudityInfoTrigger = ref(null)
 const isListExpanded = ref(false)
+
+const nudityTimings = ref(undefined)
+const nudityTimingsPopupStyle = ref({})
+const nudityTimingsTrigger = ref(null)
+
+const shouldShowRedTimings = computed(() => {
+  if (!movieInfo.value?.nudity_timings) return false
+  return movieInfo.value.nudity_timings !== 'NO HORNY'
+})
+
+const shouldShowGreenTimings = computed(() => {
+  if (!movieInfo.value?.nudity_timings) return false
+  return movieInfo.value.nudity_timings === 'NO HORNY'
+})
 
 const isInAnyList = computed(() => {
   return (
@@ -796,12 +855,13 @@ const showNudityInfo = async (event) => {
   //   return
   // }
 
-  if (!movieInfo.value?.imdb_id) return
-
+  // if (!movieInfo.value?.imdb_id) return
   if (nudityInfo.value) {
     nudityInfo.value = null
     return
   }
+
+  nudityTimings.value = undefined
 
   nudityInfoTrigger.value = event.currentTarget
   const rect = nudityInfoTrigger.value.getBoundingClientRect()
@@ -823,6 +883,28 @@ const showNudityInfo = async (event) => {
   } finally {
     nudityInfoLoading.value = false
   }
+}
+
+const showNudityTimings = (event) => {
+  nudityInfo.value = null
+
+  if (nudityTimings.value !== undefined) {
+    nudityTimings.value = undefined
+    return
+  }
+
+  nudityTimingsTrigger.value = event.currentTarget
+  const rect = nudityTimingsTrigger.value.getBoundingClientRect()
+
+  nudityTimingsPopupStyle.value = {
+    position: 'absolute',
+    top: `${rect.bottom + window.scrollY + 10}px`,
+    left: `${rect.right + window.scrollX}px`,
+    transform: 'translateX(-100%)'
+  }
+
+  nudityTimings.value =
+    movieInfo.value?.nudity_timings === null ? '' : movieInfo.value?.nudity_timings || ''
 }
 
 const getListStatus = (listType) => {
@@ -892,6 +974,18 @@ const handleNudityPopupOutsideClick = (event) => {
   }
 }
 
+const handleNudityTimingsPopupOutsideClick = (event) => {
+  const popup = document.querySelector('.nudity-info-popup')
+  if (
+    popup &&
+    !popup.contains(event.target) &&
+    nudityTimingsTrigger.value &&
+    !nudityTimingsTrigger.value.contains(event.target)
+  ) {
+    nudityTimings.value = undefined
+  }
+}
+
 onMounted(async () => {
   await fetchMovieInfo()
   infoLoading.value = false
@@ -900,6 +994,7 @@ onMounted(async () => {
   setTimeout(updateItemsPerRow, 100)
   document.addEventListener('click', handleClickOutside)
   document.addEventListener('click', handleNudityPopupOutsideClick, true)
+  document.addEventListener('click', handleNudityTimingsPopupOutsideClick, true)
 })
 
 onUnmounted(async () => {
@@ -908,6 +1003,7 @@ onUnmounted(async () => {
   window.removeEventListener('resize', onResize)
   document.removeEventListener('click', handleClickOutside)
   document.removeEventListener('click', handleNudityPopupOutsideClick, true)
+  document.removeEventListener('click', handleNudityTimingsPopupOutsideClick, true)
 })
 
 watch(
@@ -944,6 +1040,18 @@ watch(
   { deep: true }
 )
 
+watch(
+  nudityTimings,
+  (newValue) => {
+    if (newValue) {
+      document.addEventListener('click', handleNudityTimingsPopupOutsideClick, true)
+    } else {
+      document.removeEventListener('click', handleNudityTimingsPopupOutsideClick, true)
+    }
+  },
+  { deep: true }
+)
+
 const getStaffByProfession = (profession) => {
   return movieInfo.value?.staff?.filter((person) => person.profession_key === profession) || []
 }
@@ -957,6 +1065,20 @@ const copyNudityInfo = async () => {
     notificationRef.value.showNotification('Ошибка при копировании текста')
   } finally {
     nudityInfo.value = null
+  }
+}
+
+const copyNudityTimings = async () => {
+  if (!nudityTimings.value) return
+
+  try {
+    await navigator.clipboard.writeText(nudityTimings.value)
+    notificationRef.value.showNotification('Текст скопирован')
+  } catch (err) {
+    console.error('Ошибка копирования:', err)
+    notificationRef.value.showNotification('Ошибка при копировании текста')
+  } finally {
+    nudityTimings.value = undefined
   }
 }
 
@@ -2215,5 +2337,78 @@ const openInGoogleTranslate = () => {
     font-size: 14px;
     padding: 3px 6px;
   }
+}
+
+.text-red {
+  color: #ff4444 !important;
+}
+
+.text-green {
+  color: #51cf66 !important;
+}
+
+.acknowledgment-table {
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 8px;
+  margin-bottom: 15px;
+  overflow: hidden;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.acknowledgment-header {
+  background: rgba(145, 70, 255, 0.15);
+  padding: 10px 15px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: 500;
+  color: #fff;
+  border-bottom: 1px solid rgba(145, 70, 255, 0.2);
+}
+
+.acknowledgment-header i {
+  color: #ff66ab;
+}
+
+.acknowledgment-content {
+  padding: 15px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.twitch-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  color: #9146ff;
+  text-decoration: none;
+  font-weight: 500;
+  transition: all 0.2s ease;
+}
+
+.twitch-link:hover {
+  color: #a970ff;
+  transform: translateX(4px);
+}
+
+.twitch-link i {
+  font-size: 20px;
+}
+
+.acknowledgment-text {
+  color: rgba(255, 255, 255, 0.7);
+  font-size: 13px;
+  margin-top: 4px;
+}
+
+.timings-content {
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+  padding-top: 15px;
+}
+
+.timings-content.no-border {
+  border-top: none;
+  padding-top: 0;
 }
 </style>
