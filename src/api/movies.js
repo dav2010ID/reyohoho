@@ -132,6 +132,11 @@ const submitTiming = async (kpId, username, timingText) => {
   return data
 }
 
+const getTopTimingSubmitters = async () => {
+  const { data } = await apiCall((api) => api.get('/timings/top'))
+  return data
+}
+
 export {
   apiSearch,
   getShikiInfo,
@@ -150,7 +155,8 @@ export {
   updateComment,
   deleteComment,
   rateComment,
-  submitTiming
+  submitTiming,
+  getTopTimingSubmitters
 }
 
 // ===== Функция для включения/выключения симуляции =====

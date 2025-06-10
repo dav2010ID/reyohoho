@@ -644,10 +644,66 @@
       </div>
     </div>
   </div>
+
+  <div v-if="showTopSubmittersModal" class="modal-overlay" @click="showTopSubmittersModal = false">
+    <div class="modal-content" @click.stop>
+      <div class="modal-header">
+        <h3>Топ авторов таймингов</h3>
+        <button class="close-modal-btn" @click="showTopSubmittersModal = false">
+          <i class="fas fa-times"></i>
+        </button>
+      </div>
+      <div class="modal-body">
+        <div class="top-submitters-list">
+          <div
+            v-for="(submitter, index) in topSubmitters"
+            :key="submitter.username"
+            class="top-submitter-item"
+          >
+            <div
+              class="submitter-rank"
+              :class="{
+                gold: index === 0,
+                silver: index === 1,
+                bronze: index === 2
+              }"
+            >
+              {{ index + 1 }}
+            </div>
+            <div class="submitter-info">
+              <div class="submitter-name">{{ submitter.username }}</div>
+              <div class="submitter-count">
+                {{ submitter.approved_submissions_count }}
+                {{
+                  getNounForm(submitter.approved_submissions_count, [
+                    'тайминг',
+                    'тайминга',
+                    'таймингов'
+                  ])
+                }}
+              </div>
+            </div>
+            <div class="submitter-contribution">
+              <div
+                class="contribution-bar"
+                :style="{ width: getContributionWidth(submitter.approved_submissions_count) + '%' }"
+              ></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
 </template>
 
 <script setup>
-import { getKpInfo, getShikiInfo, getNudityInfoFromIMDB, submitTiming } from '@/api/movies'
+import {
+  getKpInfo,
+  getShikiInfo,
+  getNudityInfoFromIMDB,
+  submitTiming,
+  getTopTimingSubmitters
+} from '@/api/movies'
 import { handleApiError } from '@/constants'
 import { addToList, delFromList } from '@/api/user'
 import { MovieList } from '@/components/MovieList/'
@@ -1165,11 +1221,33 @@ const submitNewTiming = async () => {
   }
 }
 
-const showTopSubmitters = () => {
-  notificationRef.value.showNotification('TODO список топа авторов таймингов')
+const showTopSubmitters = async () => {
+  try {
+    const { submissions } = await getTopTimingSubmitters()
+    topSubmitters.value = submissions
+    showTopSubmittersModal.value = true
+  } catch (error) {
+    const { message } = handleApiError(error)
+    notificationRef.value.showNotification(message)
+  }
 }
 
 const showTimingForm = ref(false)
+
+const topSubmitters = ref([])
+
+const showTopSubmittersModal = ref(false)
+
+const getNounForm = (number, forms) => {
+  const cases = [2, 0, 1, 1, 1, 2]
+  return forms[number % 100 > 4 && number % 100 < 20 ? 2 : cases[Math.min(number % 10, 5)]]
+}
+
+const getContributionWidth = (count) => {
+  if (!topSubmitters.value.length) return 0
+  const maxCount = Math.max(...topSubmitters.value.map((s) => s.approved_submissions_count))
+  return (count / maxCount) * 100
+}
 </script>
 
 <style scoped>
@@ -2735,6 +2813,231 @@ const showTimingForm = ref(false)
   .timing-submission-form {
     padding-right: 15px;
     padding-left: 15px;
+  }
+}
+
+.top-submitters {
+  padding: 10px 0;
+}
+
+.top-submitters h3 {
+  margin: 0 0 15px 0;
+  color: #fff;
+  font-size: 18px;
+  text-align: center;
+}
+
+.top-submitters-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.top-submitter-item {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  padding: 8px;
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 6px;
+  transition: all 0.2s ease;
+}
+
+.top-submitter-item:hover {
+  background: rgba(255, 255, 255, 0.1);
+  transform: translateX(5px);
+}
+
+.submitter-rank {
+  width: 24px;
+  height: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--accent-color);
+  color: #fff;
+  border-radius: 50%;
+  font-weight: bold;
+  font-size: 14px;
+}
+
+.submitter-info {
+  flex: 1;
+}
+
+.submitter-name {
+  color: #fff;
+  font-weight: 500;
+  font-size: 15px;
+}
+
+.submitter-count {
+  color: rgba(255, 255, 255, 0.7);
+  font-size: 13px;
+  margin-top: 2px;
+}
+
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.85);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+  backdrop-filter: blur(5px);
+}
+
+.modal-content {
+  background: #1a1a1a;
+  border-radius: 12px;
+  width: 90%;
+  max-width: 600px;
+  max-height: 90vh;
+  overflow-y: auto;
+  position: relative;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  animation: modalSlideIn 0.3s ease;
+}
+
+@keyframes modalSlideIn {
+  from {
+    opacity: 0;
+    transform: translateY(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.modal-header {
+  padding: 20px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.modal-header h3 {
+  margin: 0;
+  font-size: 24px;
+  color: #fff;
+}
+
+.modal-body {
+  padding: 20px;
+}
+
+.top-submitters-list {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+.top-submitter-item {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  padding: 15px;
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 10px;
+  transition: all 0.2s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+.top-submitter-item:hover {
+  transform: translateX(5px);
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.submitter-rank {
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--accent-color);
+  color: #fff;
+  border-radius: 50%;
+  font-weight: bold;
+  font-size: 16px;
+  flex-shrink: 0;
+}
+
+.submitter-rank.gold {
+  background: linear-gradient(45deg, #ffd700, #ffa500);
+  box-shadow: 0 0 15px rgba(255, 215, 0, 0.5);
+}
+
+.submitter-rank.silver {
+  background: linear-gradient(45deg, #c0c0c0, #a9a9a9);
+  box-shadow: 0 0 15px rgba(192, 192, 192, 0.5);
+}
+
+.submitter-rank.bronze {
+  background: linear-gradient(45deg, #cd7f32, #8b4513);
+  box-shadow: 0 0 15px rgba(205, 127, 50, 0.5);
+}
+
+.submitter-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.submitter-name {
+  color: #fff;
+  font-weight: 500;
+  font-size: 16px;
+  margin-bottom: 4px;
+}
+
+.submitter-count {
+  color: rgba(255, 255, 255, 0.7);
+  font-size: 14px;
+}
+
+.submitter-contribution {
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  width: 100%;
+  height: 3px;
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.contribution-bar {
+  height: 100%;
+  background: var(--accent-color);
+  transition: width 1s ease;
+}
+
+@media (max-width: 600px) {
+  .modal-content {
+    width: 95%;
+    margin: 10px;
+  }
+
+  .modal-header h3 {
+    font-size: 20px;
+  }
+
+  .submitter-rank {
+    width: 28px;
+    height: 28px;
+    font-size: 14px;
+  }
+
+  .submitter-name {
+    font-size: 14px;
+  }
+
+  .submitter-count {
+    font-size: 12px;
   }
 }
 </style>
