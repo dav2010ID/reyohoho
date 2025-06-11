@@ -1180,7 +1180,10 @@ const copyNudityTimings = async () => {
   if (!nudityTimings.value) return
 
   try {
-    await navigator.clipboard.writeText(nudityTimings.value)
+    const formattedTimings = nudityTimings.value
+      .map((timing) => `${timing.timing_text} (by @${timing.username})`)
+      .join('\n')
+    await navigator.clipboard.writeText(formattedTimings)
     notificationRef.value.showNotification('Текст скопирован')
   } catch (err) {
     console.error('Ошибка копирования:', err)
