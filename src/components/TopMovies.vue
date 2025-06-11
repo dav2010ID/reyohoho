@@ -11,7 +11,8 @@
               <button
                 v-else
                 class="filter-btn time-btn"
-                :class="{ active: activeTimeFilter === btn.apiUrl }"
+                :class="{ active: activeTimeFilter === btn.apiUrl, disabled: loading }"
+                :disabled="loading"
                 @click="changeTimeFilter(btn.apiUrl)"
               >
                 {{ btn.label }}
@@ -28,7 +29,8 @@
               v-for="(btn, idx) in currentTypeFilters"
               :key="idx"
               class="filter-btn type-btn"
-              :class="{ active: typeFilter === btn.value }"
+              :class="{ active: typeFilter === btn.value, disabled: loading }"
+              :disabled="loading"
               @click="changeTypeFilter(btn.value)"
             >
               {{ btn.label }}
@@ -53,7 +55,8 @@
 import { getMovies, getDiscussedMovies } from '@/api/movies'
 import { handleApiError } from '@/constants'
 import { MovieList } from '@/components/MovieList'
-import { onMounted, ref, computed } from 'vue'
+import { onMounted, ref, computed, watch } from 'vue'
+import { useRoute, useRouter } from 'vue-router'
 import ErrorMessage from '@/components/ErrorMessage.vue'
 
 // Состояния
@@ -61,8 +64,11 @@ const movies = ref([])
 const loading = ref(false)
 const activeTimeFilter = ref('24h')
 const typeFilter = ref('all')
+const lastNormalTypeFilter = ref('all')
 const errorMessage = ref('')
 const errorCode = ref(null)
+const route = useRoute()
+const router = useRouter()
 
 // Фильтры по времени (реверснутый порядок)
 const timeFilters = [
@@ -117,21 +123,89 @@ const fetchMovies = async () => {
 
 // Обработчики
 const changeTimeFilter = (apiUrl) => {
+  const previousTimeFilter = activeTimeFilter.value
   activeTimeFilter.value = apiUrl
+
   if (apiUrl === 'discussed') {
+    if (previousTimeFilter !== 'discussed') {
+      lastNormalTypeFilter.value = typeFilter.value
+    }
     typeFilter.value = 'hot'
   } else {
-    typeFilter.value = 'all'
+    if (previousTimeFilter === 'discussed') {
+      typeFilter.value = lastNormalTypeFilter.value
+    }
   }
-  fetchMovies()
+
+  router
+    .push({
+      query: {
+        ...route.query,
+        time: activeTimeFilter.value,
+        type: typeFilter.value
+      }
+    })
+    .then(() => {
+      fetchMovies()
+    })
 }
 
 const changeTypeFilter = (value) => {
   typeFilter.value = value
-  fetchMovies()
+  if (activeTimeFilter.value !== 'discussed') {
+    lastNormalTypeFilter.value = value
+  }
+  router
+    .push({
+      query: {
+        ...route.query,
+        type: value
+      }
+    })
+    .then(() => {
+      fetchMovies()
+    })
 }
 
-onMounted(fetchMovies)
+
+watch(
+  () => route.query,
+  (newQuery, oldQuery) => {
+    const { time, type } = newQuery
+    let shouldFetch = false
+
+    if (time !== oldQuery?.time || type !== oldQuery?.type) {
+      if (time && time !== activeTimeFilter.value) {
+        activeTimeFilter.value = time
+        shouldFetch = true
+      }
+      if (type && type !== typeFilter.value) {
+        typeFilter.value = type
+        if (time !== 'discussed') {
+          lastNormalTypeFilter.value = type
+        }
+        shouldFetch = true
+      }
+      if (shouldFetch) {
+        fetchMovies()
+      }
+    }
+  }
+)
+
+onMounted(() => {
+  const { time, type } = route.query
+  if (time) {
+    activeTimeFilter.value = time
+  }
+  if (type) {
+    typeFilter.value = type
+    if (time !== 'discussed') {
+      lastNormalTypeFilter.value = type
+    }
+  }
+  fetchMovies()
+})
 </script>
 
 <style scoped>
@@ -328,5 +402,19 @@ onMounted(fetchMovies)
     flex-wrap: wrap;
     justify-content: center;
   }
+}
+
+.filter-btn.disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  pointer-events: none;
+  transform: none !important;
+}
+
+.filter-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  pointer-events: none;
+  transform: none !important;
 }
 </style>

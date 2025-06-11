@@ -9,7 +9,8 @@
               v-for="(btn, idx) in typeFilters"
               :key="idx"
               class="filter-btn type-btn"
-              :class="{ active: typeFilter === btn.value }"
+              :class="{ active: typeFilter === btn.value, disabled: loading }"
+              :disabled="loading"
               @click="changeTypeFilter(btn.value)"
             >
               {{ btn.label }}
@@ -17,13 +18,21 @@
                 listCounters[btn.value]
               }}</span>
             </button>
-            <button class="share-btn" @click="copyShareLink()" title="Поделиться списком">
+            <button
+              class="share-btn"
+              @click="copyShareLink()"
+              :disabled="loading"
+              title="Поделиться списком"
+            >
               <span class="material-icons">{{ 'share' }}</span>
             </button>
             <button
               v-if="!user_id || String(user_id) === String(authStore.user?.id)"
               class="clear-btn"
-              :class="{ disabled: !movies.length || typeFilter === USER_LIST_TYPES_ENUM.RATED }"
+              :class="{
+                disabled: !movies.length || typeFilter === USER_LIST_TYPES_ENUM.RATED || loading
+              }"
+              :disabled="!movies.length || typeFilter === USER_LIST_TYPES_ENUM.RATED || loading"
               @click="
                 movies.length && typeFilter !== USER_LIST_TYPES_ENUM.RATED && (showModal = true)
               "
@@ -69,7 +78,7 @@ import { getMyLists, getUserLists, delFromList, delAllFromList, getListCounters 
 import { useAuthStore } from '@/store/auth'
 import { handleApiError, USER_LIST_TYPES_ENUM } from '@/constants'
 import { MovieList } from '@/components/MovieList'
-import { onMounted, ref } from 'vue'
+import { onMounted, ref, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import ErrorMessage from '@/components/ErrorMessage.vue'
 import Notification from '@/components/notification/ToastMessage.vue'
@@ -92,11 +101,12 @@ const mainStore = useMainStore()
 const notificationRef = ref(null)
 const copyShareLink = async () => {
   try {
-    if (user_id.value) {
-      await navigator.clipboard.writeText(`${window.location.href}`)
-    } else {
-      await navigator.clipboard.writeText(`${window.location.href}/${authStore.user.id}`)
-    }
+    const baseUrl = window.location.origin + window.location.pathname.split('/lists')[0] + '/lists'
+    const userId = user_id.value || authStore.user?.id
+    const type = route.query.type || typeFilter.value
+    const url = userId ? `${baseUrl}/${userId}?type=${type}` : `${baseUrl}?type=${type}`
+
+    await navigator.clipboard.writeText(url)
     notificationRef.value.showNotification('Скопировано')
   } catch (err) {
     console.error('Ошибка копирования:', err)
@@ -147,7 +157,12 @@ const fetchMovies = async () => {
 
 const changeTypeFilter = (value) => {
   typeFilter.value = value
-  fetchMovies()
+  router.push({
+    query: {
+      ...route.query,
+      type: value
+    }
+  })
 }
 
 const clearList = async () => {
@@ -195,7 +210,23 @@ const handleItemDeleted = async (deletedItemId) => {
   }
 }
 
-onMounted(fetchMovies)
+watch(
+  () => route.query.type,
+  (newType) => {
+    if (newType && Object.values(USER_LIST_TYPES_ENUM).includes(newType)) {
+      typeFilter.value = newType
+      fetchMovies()
+    }
+  }
+)
+
+onMounted(() => {
+  const queryType = route.query.type
+  if (queryType && Object.values(USER_LIST_TYPES_ENUM).includes(queryType)) {
+    typeFilter.value = queryType
+  }
+  fetchMovies()
+})
 </script>
 
 <style scoped>
@@ -452,5 +483,23 @@ onMounted(fetchMovies)
     flex-wrap: wrap;
     justify-content: center;
   }
+}
+
+.filter-btn.disabled,
+.share-btn.disabled,
+.clear-btn.disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  pointer-events: none;
+  transform: none !important;
+}
+
+.filter-btn:disabled,
+.share-btn:disabled,
+.clear-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  pointer-events: none;
+  transform: none !important;
 }
 </style>
