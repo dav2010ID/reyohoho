@@ -1195,7 +1195,11 @@ const openInGoogleTranslate = () => {
   nudityInfo.value = null
 }
 
-const submitterUsername = ref('')
+const submitterUsername = computed({
+  get: () => mainStore.submitterUsername,
+  set: (value) => mainStore.setSubmitterUsername(value)
+})
+
 const newTimingText = ref('')
 const isSubmittingTiming = ref(false)
 

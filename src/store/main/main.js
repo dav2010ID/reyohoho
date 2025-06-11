@@ -11,7 +11,8 @@ export const useMainStore = defineStore(MAIN_STORE_NAME, {
     isAutoShowComments: false,
     isMobile: false,
     dimmingEnabled: false,
-    isCtrlFEnabled: true
+    isCtrlFEnabled: true,
+    submitterUsername: ''
   }),
 
   actions: {
@@ -26,6 +27,9 @@ export const useMainStore = defineStore(MAIN_STORE_NAME, {
     },
     toggleCtrlF() {
       this.isCtrlFEnabled = !this.isCtrlFEnabled
+    },
+    setSubmitterUsername(username) {
+      this.submitterUsername = username
     },
 
     addToHistory(movie) {
@@ -90,7 +94,8 @@ export const useMainStore = defineStore(MAIN_STORE_NAME, {
       'isHistoryAllowed',
       'isCommentsEnabled',
       'isAutoShowComments',
-      'isCtrlFEnabled'
+      'isCtrlFEnabled',
+      'submitterUsername'
     ],
     beforeHydrate: beforeHydrateLegacyVuex
   }
