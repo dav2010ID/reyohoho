@@ -1303,11 +1303,11 @@ const getContributionWidth = (count) => {
   max-width: 100%;
   transition: all 0.3s ease;
   cursor: pointer;
-  padding: 10px 0;
+  padding: 10px 0 30px;
 }
 
 .content-logo:hover {
-  filter: drop-shadow(0 0 15px var(--accent-color));
+  filter: drop-shadow(0 0 10px var(--accent-color));
 }
 
 .content-title-container {
