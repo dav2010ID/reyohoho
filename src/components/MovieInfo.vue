@@ -563,31 +563,31 @@
     class="nudity-info-popup"
   >
     <div class="nudity-info-content">
-      <div v-if="nudityTimings" class="acknowledgment-table">
+      <div class="acknowledgment-table">
         <div class="acknowledgment-header">
           <i class="fa-solid fa-heart"></i>
           <span>Благодарности</span>
         </div>
         <div class="acknowledgment-content">
-          <a
-            href="https://www.twitch.tv/tanyabelkova"
-            target="_blank"
-            rel="noopener noreferrer"
-            class="twitch-link"
-          >
-            <i class="fa-brands fa-twitch"></i>
-            <span>TanyaBelkova</span>
-          </a>
-          <div class="acknowledgment-text">За основу базы таймингов</div>
-        </div>
-      </div>
-      <div class="acknowledgment-table clickable-acknowledgment" @click="showTopSubmitters">
-        <div class="acknowledgment-header">
-          <i class="fa-solid fa-users"></i>
-          <span>Благодарности сообществу</span>
-        </div>
-        <div class="acknowledgment-content">
-          <div class="acknowledgment-text">За добавление таймингов</div>
+          <div class="acknowledgment-row">
+            <a
+              href="https://www.twitch.tv/tanyabelkova"
+              target="_blank"
+              rel="noopener noreferrer"
+              class="twitch-link"
+            >
+              <i class="fa-brands fa-twitch"></i>
+              <span>TanyaBelkova</span>
+            </a>
+            <span class="acknowledgment-text">— за основу базы таймингов</span>
+          </div>
+          <div class="acknowledgment-row clickable" @click="showTopSubmitters">
+            <div class="community-link">
+              <i class="fa-solid fa-users"></i>
+              <span>Сообщество</span>
+            </div>
+            <span class="acknowledgment-text">— за добавление таймингов</span>
+          </div>
         </div>
       </div>
       <div class="timings-content" :class="{ 'no-border': !nudityTimings }">
@@ -623,11 +623,11 @@
             @click="copyNudityTimings"
           >
             <i class="fas fa-copy"></i>
-            <span>Copy</span>
+            <span>Скопировать</span>
           </button>
           <button class="nudity-info-button" @click="showTimingForm = true">
             <i class="fas fa-plus"></i>
-            <span>Add Timing</span>
+            <span>Добавить/дополнить тайминг</span>
           </button>
         </div>
       </div>
@@ -2569,6 +2569,34 @@ const getContributionWidth = (count) => {
   gap: 8px;
 }
 
+.acknowledgment-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 2px 0;
+}
+
+.acknowledgment-row.clickable {
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.acknowledgment-row.clickable:hover {
+  transform: translateX(4px);
+}
+
+.community-link {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: #9146ff;
+  font-weight: 500;
+}
+
+.community-link i {
+  font-size: 20px;
+}
+
 .twitch-link {
   display: inline-flex;
   align-items: center;
@@ -2591,7 +2619,6 @@ const getContributionWidth = (count) => {
 .acknowledgment-text {
   color: rgba(255, 255, 255, 0.7);
   font-size: 13px;
-  margin-top: 4px;
 }
 
 .timings-content {
@@ -2600,11 +2627,6 @@ const getContributionWidth = (count) => {
   display: flex;
   flex-direction: column;
   gap: 15px;
-}
-
-.timings-content.no-border {
-  border-top: none;
-  padding-top: 0;
 }
 
 .timings-content.no-border {
