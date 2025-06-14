@@ -18,12 +18,18 @@ remoteConfig.settings.minimumFetchIntervalMillis = 60000
 remoteConfig.settings.fetchTimeoutMillis = 10000
 
 remoteConfig.defaultConfig = {
-  api_url: import.meta.env.VITE_APP_API_URL
+  api_url: import.meta.env.VITE_APP_API_URL,
+  load_script: false
 }
 
+let isConfigInitialized = false
+
 async function initRemoteConfig() {
+  if (isConfigInitialized) return
+
   try {
     await fetchAndActivate(remoteConfig)
+    isConfigInitialized = true
     console.log('Remote Config initialized:', getConfigValue('api_url'))
     console.log('Remote Config loaded')
   } catch (err) {
@@ -32,6 +38,9 @@ async function initRemoteConfig() {
 }
 
 function getConfigValue(key) {
+  if (!isConfigInitialized) {
+    console.warn('Remote Config not initialized yet, using default value')
+  }
   return getValue(remoteConfig, key).asString()
 }
 
