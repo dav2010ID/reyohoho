@@ -47,7 +47,7 @@
         ></iframe>
         <SpinnerLoading
           v-if="iframeLoading"
-          :text="`Загружается плеер: ${selectedPlayerInternal ? cleanName(selectedPlayerInternal.translate) : ''}\nЕсли плеер не грузится, то смените плеер выше или включите VPN`"
+          :text="`Загружается плеер: ${selectedPlayerInternal ? cleanName(selectedPlayerInternal.translate) : 'Загружается список плееров'}\nЕсли плеер не грузится, то смените плеер выше или включите VPN`"
           style="white-space: pre-line"
         />
       </div>
