@@ -25,21 +25,38 @@
         <span>или</span>
       </div>
 
-      <div class="qr-section">
-        <h3>Отсканируйте QR-код</h3>
-        <p class="qr-hint">
-          Перебросит в приложение Telegram
-        </p>
-        <div class="qr-background">
-          <qrcode-vue v-if="!error" :value="qrValue" :size="qrSize" level="H" class="qr-code" />
-          <div v-else class="error-placeholder">Ошибка загрузки QR-кода</div>
+      <!-- Кнопка для показа QR-кода -->
+      <div class="qr-btn-container">
+        <button @click="showQRModal" class="qr-btn">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512" class="qr-icon">
+            <path
+              d="M0 224h192V32H0v192zM64 96h64v64H64V96zm192-64v192h192V32H256zm128 128h-64V96h64v64zM0 480h192V288H0v192zm64-128h64v64H64v-64zm352-64h32v32h-32v-32zm0 64h32v32h-32v-32zm0 64h32v32h-32v-32zm-64-64h32v32h-32v-32zm0 64h32v32h-32v-32zm0 64h32v32h-32v-32zm-64-192h32v32h-32v-32zm0 64h32v32h-32v-32zm0 64h32v32h-32v-32zm0 64h32v32h-32v-32zm64-256h32v32h-32v-32zm0 64h32v32h-32v-32zm64-64h32v32h-32v-32z"
+            />
+          </svg>
+          Войти через QR-код
+        </button>
+      </div>
+    </div>
+
+    <!-- Модальное окно с QR-кодом -->
+    <div v-if="showModal" class="modal-overlay" @click="closeModal">
+      <div class="modal-content" @click.stop>
+        <div class="modal-header">
+          <h3>Вход через QR-код</h3>
+          <button @click="closeModal" class="close-btn">&times;</button>
         </div>
-        <p class="qr-hint">
-          Используйте любое приложение для сканирования QR(это не QR код приложения Telegram)
-        </p>
-        <p class="qr-hint">
-          Передаётся только временный токен сайта через Telegram-бота, авторизация самого Telegram не нужна
-        </p>
+        <div class="modal-body">
+          <p class="qr-hint">Отсканируйте QR-код для входа через Telegram</p>
+          <div class="qr-background">
+            <qrcode-vue v-if="!error" :value="qrValue" :size="qrSize" level="H" class="qr-code" />
+            <div v-else class="error-placeholder">Ошибка загрузки QR-кода</div>
+          </div>
+          <p class="qr-hint">Используйте любое приложение для сканирования QR-кода</p>
+          <p class="qr-hint">
+            Передаётся только временный токен сайта через Telegram-бота, авторизация самого Telegram
+            не нужна
+          </p>
+        </div>
       </div>
     </div>
 
@@ -66,6 +83,7 @@ export default {
     const error = ref(null)
     const popup = ref(null)
     const base = ref(import.meta.env.VITE_BASE_URL || '/')
+    const showModal = ref(false)
 
     const initAuth = async () => {
       try {
@@ -107,6 +125,14 @@ export default {
       }
     }
 
+    function showQRModal() {
+      showModal.value = true
+    }
+
+    function closeModal() {
+      showModal.value = false
+    }
+
     onMounted(async () => {
       await initAuth()
     })
@@ -116,7 +142,10 @@ export default {
       qrSize,
       loading,
       error,
-      loginWithTelegram
+      loginWithTelegram,
+      showModal,
+      showQRModal,
+      closeModal
     }
   }
 }
@@ -202,15 +231,36 @@ h1 {
   margin-left: 0.5rem;
 }
 
-.qr-background {
-  background: white;
-  padding: 10px;
-  border-radius: 5px;
-  display: inline-block;
+.qr-btn-container {
+  margin-bottom: 1rem;
 }
 
-.qr-code {
-  margin: 0 auto;
+.qr-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  width: 100%;
+  padding: 0.75rem;
+  background: var(--accent-color);
+  color: white;
+  border: none;
+  border-radius: 5px;
+  font-size: 1rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.qr-btn:hover {
+  background: var(--accent-hover);
+  transform: translateY(-1px);
+}
+
+.qr-icon {
+  width: 20px;
+  height: 20px;
+  fill: currentColor;
 }
 
 .qr-hint {
@@ -241,5 +291,52 @@ h1 {
 
 .qr-section {
   animation: fadeIn 0.9s ease-out;
+}
+
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.modal-content {
+  background-color: #1e1e1e;
+  padding: 2rem;
+  border-radius: 10px;
+  max-width: 400px;
+  width: 100%;
+  text-align: center;
+}
+
+.modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+}
+
+.close-btn {
+  background: none;
+  border: none;
+  font-size: 1.5rem;
+  color: #aaa;
+  cursor: pointer;
+}
+
+.qr-background {
+  background: white;
+  padding: 10px;
+  border-radius: 5px;
+  display: inline-block;
+}
+
+.qr-code {
+  margin: 0 auto;
 }
 </style>
