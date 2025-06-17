@@ -13,7 +13,7 @@ export const useMainStore = defineStore(MAIN_STORE_NAME, {
     dimmingEnabled: false,
     isCtrlFEnabled: true,
     submitterUsername: '',
-    cardSize: 'small'
+    cardSize: 'medium'
   }),
 
   actions: {
