@@ -106,7 +106,7 @@
       </div>
 
       <div class="settings-group">
-        <h2>Версия</h2>
+        <h2>Версия сайта</h2>
         {{ appVersion }}
       </div>
     </div>
@@ -229,7 +229,7 @@ const resetBackground = () => {
   align-items: center;
   padding: 20px;
   color: #fff;
-  height: 100vh;
+  min-height: 100vh;
 }
 
 .settings-header {
@@ -270,6 +270,7 @@ const resetBackground = () => {
   display: flex;
   flex-direction: column;
   gap: 35px;
+  margin-bottom: 40px;
 }
 
 .setting-item {
