@@ -27,12 +27,6 @@
 <script setup>
 const externalLinks = [
   {
-    href: 'https://t.me/ReYohoho_Donut_Bot?start=1',
-    icon: 'fas fa-heart',
-    text: 'Поддержать проект',
-    style: { color: 'var(--accent-color)' }
-  },
-  {
     href: 'https://gitlab.com/-/snippets/4830428',
     icon: 'fas fa-heart',
     text: 'Спасибо Вам!',
