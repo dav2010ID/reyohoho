@@ -27,7 +27,7 @@
             class="search-input"
             :class="{ 'wrong-layout': showLayoutWarning }"
             :inputmode="searchType === 'title' ? 'text' : 'numeric'"
-            @keydown.enter="search"
+            @keydown.enter.prevent="search"
             @keydown.tab.prevent="handleTabKey"
             @keydown.down.prevent="focusFirstMovieCard"
             @input="handleInput"
@@ -224,6 +224,8 @@ const resetSearch = () => {
 const search = () => {
   debouncedPerformSearch.cancel()
   if (searchTerm.value) {
+    errorMessage.value = ''
+    errorCode.value = null
     performSearch()
   } else {
     alert('Введите запрос для поиска')
