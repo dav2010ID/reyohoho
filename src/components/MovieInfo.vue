@@ -658,8 +658,11 @@
         <textarea
           v-model="newTimingText"
           placeholder="Пожалуйста, указывайте длительность фильма, к которому вы прилагаете тайминг
-          
-Для сериалов, пожалуйста, указывайте сезон и номер эпизода"
+
+Для сериалов указывайте сезон и номер эпизода
+
+Тайминги вида 'без бан моментов' и 'чисто' не принимаются, так как это сложно промодерировать, поэтому достаточно добавлять только тайминги с бан моментами
+"
           class="timing-textarea"
         ></textarea>
         <div class="timing-form-actions">
@@ -1391,6 +1394,11 @@ const canSubmitTiming = computed(() => {
 
 const submitNewTiming = async () => {
   if (!canSubmitTiming.value || isSubmittingTiming.value) return
+
+  if (!/\d/.test(newTimingText.value.trim())) {
+    notificationRef.value.showNotification('Тайминг должен содержать цифры', 5000)
+    return
+  }
 
   try {
     isSubmittingTiming.value = true
@@ -2990,7 +2998,7 @@ const filteredTimings = computed(() => {
 }
 
 .timing-textarea {
-  min-height: 100px;
+  min-height: 200px;
   padding: 10px 12px;
   resize: vertical;
 }
