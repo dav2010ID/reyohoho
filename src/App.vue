@@ -40,7 +40,7 @@ const handleKeyDown = (event) => {
     event.stopPropagation()
     navbarStore.openSearchModal()
   }
-  
+
   // ESC
   if (event.keyCode === 27 && navbarStore.isModalSearchVisible) {
     event.preventDefault()
@@ -96,6 +96,7 @@ const toggleDimming = () => {
 /* Стиль для страницы с учетом мобильного хедера */
 .router-view-container {
   padding-top: 0; /* По умолчанию без отступа */
+  padding-bottom: 50px;
 }
 
 /* Отступ сверху для мобильного хедера */

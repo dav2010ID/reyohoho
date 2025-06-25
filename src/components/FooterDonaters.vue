@@ -1,5 +1,5 @@
 <template>
-  <footer>
+  <footer :class="{ 'footer-fixed': !isAtBottom, 'footer-static': isAtBottom }">
     <div class="donaters-wrapper">
       <transition name="fade" mode="out-in">
         <span v-if="currentDonater" :key="currentIndex" class="donater">
@@ -16,6 +16,7 @@ import { getDons } from '@/api/movies'
 
 const donaters = ref([])
 const currentIndex = ref(-1)
+const isAtBottom = ref(false)
 const CACHE_KEY_DONATERS = 'donatersCache'
 let intervalId = null
 
@@ -23,6 +24,14 @@ const currentDonater = computed(() => {
   if (currentIndex.value === -1 || !donaters.value.length) return ''
   return donaters.value[currentIndex.value]
 })
+
+const handleScroll = () => {
+  const scrollTop = window.pageYOffset || document.documentElement.scrollTop
+  const windowHeight = window.innerHeight
+  const documentHeight = document.documentElement.scrollHeight
+
+  isAtBottom.value = scrollTop + windowHeight >= documentHeight - 10
+}
 
 const fetchDonaters = async () => {
   const today = new Date().toISOString().split('T')[0]
@@ -73,21 +82,42 @@ function startShowingDonaters() {
 onMounted(async () => {
   await fetchDonaters()
   startShowingDonaters()
+  window.addEventListener('scroll', handleScroll)
+  handleScroll()
 })
 
 onUnmounted(() => {
   if (intervalId) clearInterval(intervalId)
+  window.removeEventListener('scroll', handleScroll)
 })
 </script>
 
 <style scoped>
+footer {
+  width: 100%;
+  background: rgba(0, 0, 0, 0.8);
+  backdrop-filter: blur(10px);
+  z-index: 1000;
+  transition: all 0.3s ease;
+}
+
+.footer-fixed {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+}
+
+.footer-static {
+  position: static;
+}
+
 .donaters-wrapper {
   width: 100%;
   height: 20px;
   display: flex;
   justify-content: center;
   align-items: center;
-  padding-bottom: 10px;
+  padding: 10px 0;
 }
 
 .donater {
