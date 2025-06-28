@@ -1062,7 +1062,9 @@ const handlePlayerSelect = (player) => {
     clearInterval(mirrorCheckInterval.value)
     mirrorCheckInterval.value = null
   }
-  playerStore.updatePreferredPlayer(normalizeKey(player.key))
+  if (!player.key.toLowerCase().includes('torrents')) {
+    playerStore.updatePreferredPlayer(normalizeKey(player.key))
+  }
   emit('update:selectedPlayer', player)
 }
 
@@ -1076,7 +1078,9 @@ watch(selectedPlayerInternal, (newVal) => {
       clearInterval(mirrorCheckInterval.value)
       mirrorCheckInterval.value = null
     }
-    playerStore.updatePreferredPlayer(normalizeKey(newVal.key))
+    if (!newVal.key.toLowerCase().includes('torrents')) {
+      playerStore.updatePreferredPlayer(normalizeKey(newVal.key))
+    }
     emit('update:selectedPlayer', newVal)
   }
 })
