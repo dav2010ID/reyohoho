@@ -9,6 +9,7 @@ export const useMainStore = defineStore(MAIN_STORE_NAME, {
     isHistoryAllowed: true,
     isCommentsEnabled: true,
     isAutoShowComments: false,
+    commentsSortBy: 'rating',
     isMobile: false,
     dimmingEnabled: false,
     isCtrlFEnabled: true,
@@ -88,6 +89,10 @@ export const useMainStore = defineStore(MAIN_STORE_NAME, {
       this.isAutoShowComments = value
     },
 
+    setCommentsSortBy(value) {
+      this.commentsSortBy = value
+    },
+
     updateCardSize(size) {
       this.cardSize = size
     },
@@ -104,6 +109,7 @@ export const useMainStore = defineStore(MAIN_STORE_NAME, {
       'isHistoryAllowed',
       'isCommentsEnabled',
       'isAutoShowComments',
+      'commentsSortBy',
       'isCtrlFEnabled',
       'submitterUsername',
       'cardSize',

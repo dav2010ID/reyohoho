@@ -17,6 +17,16 @@
 
     <div v-else class="comments-container">
       <div class="comments-header">
+        <div class="comments-controls">
+          <button
+            class="sort-button"
+            @click="toggleSort"
+            :title="sortBy === 'date' ? 'Сортировать по рейтингу' : 'Сортировать по дате'"
+          >
+            <i class="fas" :class="sortBy === 'date' ? 'fa-clock' : 'fa-thumbs-up'"></i>
+            {{ sortBy === 'date' ? 'По дате' : 'По рейтингу' }}
+          </button>
+        </div>
         <button class="hide-comments-btn" @click="showComments = false">
           <i class="fas fa-eye-slash"></i>
           Скрыть комментарии
@@ -222,6 +232,7 @@ export default {
     const isInsertingEmoji = ref(false)
     const commentsPerPage = ref(3)
     const displayedCommentsCount = ref(3)
+    const sortBy = ref(mainStore.commentsSortBy)
 
     const {
       showEmojiPicker,
@@ -248,16 +259,30 @@ export default {
 
     const groupedComments = computed(() => {
       const buildCommentTree = (parentId = null) => {
-        return comments.value
+        const filteredComments = comments.value
           .filter((comment) => comment.parent_id === parentId)
-          .sort((a, b) => a.id - b.id)
-          .map((comment) => ({
-            ...comment,
-            replies: buildCommentTree(comment.id)
-          }))
           .filter((comment) => {
             return !comment.is_deleted || (comment.replies && comment.replies.length > 0)
           })
+
+        let sortedComments
+        if (parentId === null) {
+          sortedComments = filteredComments.sort((a, b) => {
+            if (sortBy.value === 'rating') {
+              const ratingDiff = (b.rating || 0) - (a.rating || 0)
+              if (ratingDiff !== 0) return ratingDiff
+              return a.id - b.id
+            }
+            return a.id - b.id
+          })
+        } else {
+          sortedComments = filteredComments.sort((a, b) => a.id - b.id)
+        }
+
+        return sortedComments.map((comment) => ({
+          ...comment,
+          replies: buildCommentTree(comment.id)
+        }))
       }
 
       return buildCommentTree()
@@ -287,6 +312,13 @@ export default {
 
     const showMoreComments = () => {
       displayedCommentsCount.value += commentsPerPage.value
+    }
+
+    const toggleSort = () => {
+      const newSortBy = sortBy.value === 'date' ? 'rating' : 'date'
+      sortBy.value = newSortBy
+      mainStore.setCommentsSortBy(newSortBy)
+      displayedCommentsCount.value = commentsPerPage.value
     }
 
     const loadComments = async () => {
@@ -633,6 +665,8 @@ export default {
       hasMoreComments,
       remainingCommentsCount,
       showMoreComments,
+      sortBy,
+      toggleSort,
       newComment,
       replyTo,
       replyContent,
@@ -946,12 +980,50 @@ export default {
   align-items: center;
   margin-bottom: 1rem;
   padding-bottom: 0.5rem;
+  gap: 1rem;
 }
 
 .comments-header h3 {
   margin: 0;
   color: #fff;
   font-size: 1.1rem;
+}
+
+.comments-controls {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.sort-button {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 6px;
+  padding: 0.5rem 1rem;
+  cursor: pointer;
+  color: #999;
+  font-size: 0.85rem;
+  transition: all 0.2s ease;
+  position: relative;
+}
+
+.sort-button:hover {
+  background: rgba(255, 255, 255, 0.1);
+  border-color: var(--accent-color);
+  color: var(--accent-color);
+  transform: translateY(-1px);
+}
+
+.sort-button i {
+  opacity: 0.8;
+  transition: opacity 0.2s ease;
+}
+
+.sort-button:hover i {
+  opacity: 1;
 }
 
 .hide-comments-btn {
@@ -1204,6 +1276,29 @@ export default {
 }
 
 @media (max-width: 768px) {
+  .comments-header {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0.5rem;
+  }
+
+  .comments-controls {
+    justify-content: center;
+    order: 2;
+  }
+
+  .sort-button {
+    flex: 1;
+    justify-content: center;
+    min-height: 44px;
+  }
+
+  .hide-comments-btn {
+    order: 1;
+    align-self: flex-end;
+    min-height: 44px;
+  }
+
   .comment-footer {
     flex-direction: column;
     align-items: stretch;
@@ -1274,6 +1369,16 @@ export default {
 }
 
 @media (max-width: 360px) {
+  .sort-button {
+    font-size: 0.8rem;
+    padding: 0.4rem 0.8rem;
+  }
+
+  .hide-comments-btn {
+    font-size: 0.8rem;
+    padding: 0.4rem 0.8rem;
+  }
+
   .emoji-button-inline {
     min-width: 36px;
     height: 36px;
