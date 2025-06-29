@@ -1,10 +1,6 @@
 <template>
   <div class="settings-page">
-    <header class="settings-header">
-      <button class="back-button" @click="goBack">← Назад</button>
-      <h1>Настройки</h1>
-    </header>
-
+    <h1>Настройки</h1>
     <div class="settings-container">
       <div class="settings-group">
         <h2>Фон</h2>
@@ -128,14 +124,12 @@ import { useMainStore } from '@/store/main'
 import { usePlayerStore } from '@/store/player'
 import { useTrailerStore } from '@/store/trailer' // Импортируем store для трейлеров
 import { computed, ref, watch } from 'vue'
-import { useRouter } from 'vue-router'
 import BaseModal from './BaseModal.vue'
 
 const mainStore = useMainStore()
 const backgroundStore = useBackgroundStore()
 const playerStore = usePlayerStore()
 const trailerStore = useTrailerStore() // Инициализируем store для трейлеров
-const router = useRouter()
 const showModal = ref(false)
 const appVersion = ref(import.meta.env.VITE_APP_VERSION_FULL_VERSION)
 
@@ -224,11 +218,6 @@ const isStreamerMode = computed({
   set: (value) => mainStore.setStreamerMode(value)
 })
 
-// Навигация
-const goBack = () => {
-  router.go(-1)
-}
-
 const resetBackground = () => {
   backgroundStore.resetBackground()
 }
@@ -239,18 +228,17 @@ const resetBackground = () => {
   display: flex;
   flex-direction: column;
   align-items: center;
-  padding: 20px;
+  padding: 1rem;
   color: #fff;
   min-height: 100vh;
 }
 
-.settings-header {
-  display: flex;
-  align-items: center;
-  width: 100%;
-  max-width: 600px;
-  justify-content: space-between;
-  margin-bottom: 20px;
+h1 {
+  text-align: center;
+  margin-bottom: 2.5rem;
+  color: #ffffff;
+  font-size: 2rem;
+  font-weight: 500;
 }
 
 .settings-group {

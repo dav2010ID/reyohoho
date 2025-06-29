@@ -55,7 +55,7 @@ const externalLinks = [
 .links-page.dark-theme {
   max-width: 1200px;
   margin: 0 auto;
-  padding: 2rem;
+  padding: 1rem;
   min-height: 100vh;
   color: #e0e0e0;
 }

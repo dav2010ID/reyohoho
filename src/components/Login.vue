@@ -1,67 +1,68 @@
 <template>
-  <div class="login-container dark-theme">
+  <div class="login-page">
     <h1>Вход в систему</h1>
-
-    <div v-if="loading" class="loading-container">
-      <div class="loader"></div>
-      <p>Загрузка данных...</p>
-    </div>
-
-    <div v-else class="login-methods">
-      <!-- Кнопка входа через Telegram -->
-      <div class="telegram-btn-container">
-        <button @click="loginWithTelegram" class="telegram-btn">
-          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 496 512" class="telegram-icon">
-            <path
-              d="M248 8C111 8 0 119 0 256s111 248 248 248 248-111 248-248S385 8 248 8zm121.8 169.9l-40.7 191.8c-3 13.6-11.1 16.9-22.4 10.5l-62-45.7-29.9 28.8c-3.3 3.3-6.1 6.1-12.5 6.1l4.4-63.1 114.9-103.8c5-4.4-1.1-6.9-7.7-2.5l-142 89.4-61.2-19.1c-13.3-4.2-13.6-13.3 2.8-19.7l239.1-92.2c11.1-4 20.8 2.7 17.2 19.5z"
-            />
-          </svg>
-          Войти через Telegram
-        </button>
+    <div class="login-container dark-theme">
+      <div v-if="loading" class="loading-container">
+        <div class="loader"></div>
+        <p>Загрузка данных...</p>
       </div>
 
-      <!-- Разделитель -->
-      <div class="divider">
-        <span>или</span>
-      </div>
-
-      <!-- Кнопка для показа QR-кода -->
-      <div class="qr-btn-container">
-        <button @click="showQRModal" class="qr-btn">
-          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512" class="qr-icon">
-            <path
-              d="M0 224h192V32H0v192zM64 96h64v64H64V96zm192-64v192h192V32H256zm128 128h-64V96h64v64zM0 480h192V288H0v192zm64-128h64v64H64v-64zm352-64h32v32h-32v-32zm0 64h32v32h-32v-32zm0 64h32v32h-32v-32zm-64-64h32v32h-32v-32zm0 64h32v32h-32v-32zm0 64h32v32h-32v-32zm-64-192h32v32h-32v-32zm0 64h32v32h-32v-32zm0 64h32v32h-32v-32zm0 64h32v32h-32v-32zm64-256h32v32h-32v-32zm0 64h32v32h-32v-32zm64-64h32v32h-32v-32z"
-            />
-          </svg>
-          Войти через QR-код
-        </button>
-      </div>
-    </div>
-
-    <!-- Модальное окно с QR-кодом -->
-    <div v-if="showModal" class="modal-overlay" @click="closeModal">
-      <div class="modal-content" @click.stop>
-        <div class="modal-header">
-          <h3>Вход через QR-код</h3>
-          <button @click="closeModal" class="close-btn">&times;</button>
+      <div v-else class="login-methods">
+        <!-- Кнопка входа через Telegram -->
+        <div class="telegram-btn-container">
+          <button @click="loginWithTelegram" class="telegram-btn">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 496 512" class="telegram-icon">
+              <path
+                d="M248 8C111 8 0 119 0 256s111 248 248 248 248-111 248-248S385 8 248 8zm121.8 169.9l-40.7 191.8c-3 13.6-11.1 16.9-22.4 10.5l-62-45.7-29.9 28.8c-3.3 3.3-6.1 6.1-12.5 6.1l4.4-63.1 114.9-103.8c5-4.4-1.1-6.9-7.7-2.5l-142 89.4-61.2-19.1c-13.3-4.2-13.6-13.3 2.8-19.7l239.1-92.2c11.1-4 20.8 2.7 17.2 19.5z"
+              />
+            </svg>
+            Войти через Telegram
+          </button>
         </div>
-        <div class="modal-body">
-          <p class="qr-hint">Отсканируйте QR-код для входа через Telegram</p>
-          <div class="qr-background">
-            <qrcode-vue v-if="!error" :value="qrValue" :size="qrSize" level="H" class="qr-code" />
-            <div v-else class="error-placeholder">Ошибка загрузки QR-кода</div>
+
+        <!-- Разделитель -->
+        <div class="divider">
+          <span>или</span>
+        </div>
+
+        <!-- Кнопка для показа QR-кода -->
+        <div class="qr-btn-container">
+          <button @click="showQRModal" class="qr-btn">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512" class="qr-icon">
+              <path
+                d="M0 224h192V32H0v192zM64 96h64v64H64V96zm192-64v192h192V32H256zm128 128h-64V96h64v64zM0 480h192V288H0v192zm64-128h64v64H64v-64zm352-64h32v32h-32v-32zm0 64h32v32h-32v-32zm0 64h32v32h-32v-32zm-64-64h32v32h-32v-32zm0 64h32v32h-32v-32zm0 64h32v32h-32v-32zm-64-192h32v32h-32v-32zm0 64h32v32h-32v-32zm0 64h32v32h-32v-32zm0 64h32v32h-32v-32zm64-256h32v32h-32v-32zm0 64h32v32h-32v-32zm64-64h32v32h-32v-32z"
+              />
+            </svg>
+            Войти через QR-код
+          </button>
+        </div>
+      </div>
+
+      <!-- Модальное окно с QR-кодом -->
+      <div v-if="showModal" class="modal-overlay" @click="closeModal">
+        <div class="modal-content" @click.stop>
+          <div class="modal-header">
+            <h3>Вход через QR-код</h3>
+            <button @click="closeModal" class="close-btn">&times;</button>
           </div>
-          <p class="qr-hint">Используйте любое приложение для сканирования QR-кода</p>
-          <p class="qr-hint">
-            Передаётся только временный токен сайта через Telegram-бота, авторизация самого Telegram
-            не нужна
-          </p>
+          <div class="modal-body">
+            <p class="qr-hint">Отсканируйте QR-код для входа через Telegram</p>
+            <div class="qr-background">
+              <qrcode-vue v-if="!error" :value="qrValue" :size="qrSize" level="H" class="qr-code" />
+              <div v-else class="error-placeholder">Ошибка загрузки QR-кода</div>
+            </div>
+            <p class="qr-hint">Используйте любое приложение для сканирования QR-кода</p>
+            <p class="qr-hint">
+              Передаётся только временный токен сайта через Telegram-бота, авторизация самого
+              Telegram не нужна
+            </p>
+          </div>
         </div>
       </div>
-    </div>
 
-    <div v-if="error" class="error-message">
-      {{ error }}
+      <div v-if="error" class="error-message">
+        {{ error }}
+      </div>
     </div>
   </div>
 </template>
@@ -152,6 +153,14 @@ export default {
 </script>
 
 <style scoped>
+.login-page {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 1rem;
+  min-height: 100vh;
+  color: #e0e0e0;
+}
+
 .login-container {
   max-width: 450px;
   margin: 0 auto;
@@ -159,16 +168,20 @@ export default {
   text-align: center;
   border-radius: 10px;
   box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+  border: 1px solid var(--accent-transparent);
 }
 
 .dark-theme {
-  background: #1e1e1e;
+  background: #2a2a2a;
   color: #e0e0e0;
 }
 
 h1 {
+  text-align: center;
+  margin-bottom: 2.5rem;
   color: #ffffff;
-  margin-bottom: 2rem;
+  font-size: 2rem;
+  font-weight: 500;
 }
 
 .login-methods {
@@ -229,10 +242,6 @@ h1 {
 
 .divider::after {
   margin-left: 0.5rem;
-}
-
-.qr-btn-container {
-  margin-bottom: 1rem;
 }
 
 .qr-btn {

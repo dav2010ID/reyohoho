@@ -33,8 +33,8 @@ export const routes = [
   },
   {
     path: '/settings',
-    name: 'SettingsModal',
-    component: () => import('@/components/SettingsModal.vue'),
+    name: 'Settings',
+    component: () => import('@/components/Settings.vue'),
     meta: {
       title: 'ReYohoho - Настройки'
     }
