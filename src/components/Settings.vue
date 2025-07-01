@@ -109,6 +109,101 @@
       </div>
 
       <div class="settings-group">
+        <h2>API сервер</h2>
+        <p>После смены сервера обновите страницу</p>
+        <div class="api-info">
+          <div class="api-item">
+            <strong>Текущий API:</strong>
+            <span class="api-url">{{ currentApiInfo.url }}</span>
+          </div>
+
+          <div v-if="currentApiInfo.isCheckingHealth" class="api-item">
+            <span class="checking-health">
+              <i class="fas fa-spinner fa-spin"></i>
+              Проверка доступности серверов...
+            </span>
+          </div>
+          <div v-if="currentApiInfo.availableEndpoints.length > 1" class="api-item">
+            <strong>Выбор сервера:</strong>
+            <ul class="endpoints-list">
+              <li class="server-item">
+                <div
+                  class="server-option"
+                  :class="{
+                    'selected-endpoint': !currentApiInfo.userSelectedApiUrl,
+                    'current-endpoint': !currentApiInfo.userSelectedApiUrl && currentApiInfo.url
+                  }"
+                  @click="resetApiSelection"
+                >
+                  <div class="endpoint-info">
+                    <span class="endpoint-description">Автоматический выбор</span>
+                    <span class="endpoint-url">Система выберет лучший доступный сервер</span>
+                  </div>
+                  <i
+                    v-if="!currentApiInfo.userSelectedApiUrl"
+                    class="fas fa-check endpoint-active"
+                  ></i>
+                </div>
+                <button
+                  class="health-check-btn"
+                  @click="checkAllEndpoints"
+                  :disabled="healthCheckStates.checking_all"
+                  title="Проверить все серверы"
+                >
+                  <i v-if="healthCheckStates.checking_all" class="fas fa-spinner fa-spin"></i>
+                  <i v-else class="fas fa-heartbeat"></i>
+                </button>
+              </li>
+              <li
+                v-for="endpoint in currentApiInfo.availableEndpoints"
+                :key="endpoint.url"
+                class="server-item"
+              >
+                <div
+                  class="server-option"
+                  :class="{
+                    'selected-endpoint': currentApiInfo.userSelectedApiUrl === endpoint.url,
+                    'current-endpoint': endpoint.url === currentApiInfo.url
+                  }"
+                  @click="selectApi(endpoint.url)"
+                >
+                  <div class="endpoint-info">
+                    <span class="endpoint-description">{{ endpoint.description }}</span>
+                    <span class="endpoint-url">{{ endpoint.url }}</span>
+                  </div>
+                  <i
+                    v-if="currentApiInfo.userSelectedApiUrl === endpoint.url"
+                    class="fas fa-check endpoint-active"
+                  ></i>
+                </div>
+                <button
+                  class="health-check-btn"
+                  :class="getHealthStatusClass(endpoint.url)"
+                  @click="checkEndpointHealth(endpoint.url)"
+                  :disabled="healthCheckStates[endpoint.url]?.checking"
+                  :title="getHealthCheckTitle(endpoint.url)"
+                >
+                  <i
+                    v-if="healthCheckStates[endpoint.url]?.checking"
+                    class="fas fa-spinner fa-spin"
+                  ></i>
+                  <i
+                    v-else-if="healthCheckStates[endpoint.url]?.status === 'healthy'"
+                    class="fas fa-check"
+                  ></i>
+                  <i
+                    v-else-if="healthCheckStates[endpoint.url]?.status === 'unhealthy'"
+                    class="fas fa-times"
+                  ></i>
+                  <i v-else class="fas fa-heartbeat"></i>
+                </button>
+              </li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
+      <div class="settings-group">
         <h2>Версия сайта</h2>
         {{ appVersion }}
       </div>
@@ -122,16 +217,23 @@ import ThemeSelector from '@/components/ThemeSelector.vue'
 import { useBackgroundStore } from '@/store/background'
 import { useMainStore } from '@/store/main'
 import { usePlayerStore } from '@/store/player'
-import { useTrailerStore } from '@/store/trailer' // Импортируем store для трейлеров
-import { computed, ref, watch } from 'vue'
+import { useTrailerStore } from '@/store/trailer'
+import { useApiStore } from '@/store/api'
+import { computed, ref, watch, onMounted } from 'vue'
 import BaseModal from './BaseModal.vue'
+import { getCurrentApiInfo } from '@/api/axios'
 
 const mainStore = useMainStore()
 const backgroundStore = useBackgroundStore()
 const playerStore = usePlayerStore()
-const trailerStore = useTrailerStore() // Инициализируем store для трейлеров
+const trailerStore = useTrailerStore()
+const apiStore = useApiStore()
 const showModal = ref(false)
 const appVersion = ref(import.meta.env.VITE_APP_VERSION_FULL_VERSION)
+
+const healthCheckStates = ref({
+  checking_all: false
+})
 
 const clearAllHistory = () => {
   mainStore.clearAllHistory()
@@ -221,6 +323,93 @@ const isStreamerMode = computed({
 const resetBackground = () => {
   backgroundStore.resetBackground()
 }
+
+const currentApiInfo = ref({
+  url: '',
+  description: '',
+  isCheckingHealth: false,
+  lastCheckedAt: null,
+  availableEndpoints: []
+})
+
+const updateApiInfo = () => {
+  const info = getCurrentApiInfo()
+  currentApiInfo.value = { ...info }
+}
+
+const selectApi = async (url) => {
+  apiStore.setUserSelectedApiUrl(url)
+  updateApiInfo()
+}
+
+const resetApiSelection = async () => {
+  apiStore.resetUserSelection()
+  const endpoints = apiStore.availableEndpoints
+  if (endpoints.length > 0) {
+    await apiStore.selectWorkingEndpoint(endpoints)
+  }
+  updateApiInfo()
+}
+
+const checkEndpointHealth = async (url) => {
+  if (!healthCheckStates.value[url]) {
+    healthCheckStates.value[url] = {}
+  }
+
+  healthCheckStates.value[url].checking = true
+  healthCheckStates.value[url].status = null
+
+  try {
+    const isHealthy = await apiStore.checkEndpointHealth(url)
+    healthCheckStates.value[url].status = isHealthy ? 'healthy' : 'unhealthy'
+    healthCheckStates.value[url].lastChecked = Date.now()
+  } catch (error) {
+    healthCheckStates.value[url].status = 'unhealthy'
+    console.error('Health check failed:', error)
+  } finally {
+    healthCheckStates.value[url].checking = false
+  }
+}
+
+const checkAllEndpoints = async () => {
+  healthCheckStates.value.checking_all = true
+
+  const checkPromises = currentApiInfo.value.availableEndpoints.map((endpoint) =>
+    checkEndpointHealth(endpoint.url)
+  )
+
+  await Promise.all(checkPromises)
+  healthCheckStates.value.checking_all = false
+}
+
+const getHealthStatusClass = (url) => {
+  const state = healthCheckStates.value[url]
+  if (!state) return ''
+
+  if (state.status === 'healthy') return 'health-success'
+  if (state.status === 'unhealthy') return 'health-error'
+  return ''
+}
+
+const getHealthCheckTitle = (url) => {
+  const state = healthCheckStates.value[url]
+  if (!state) return 'Проверить сервер'
+
+  if (state.checking) return 'Проверка...'
+  if (state.status === 'healthy') return 'Сервер доступен'
+  if (state.status === 'unhealthy') return 'Сервер недоступен'
+  return 'Проверить сервер'
+}
+
+onMounted(() => {
+  updateApiInfo()
+
+  const interval = setInterval(updateApiInfo, 1000)
+
+  return () => {
+    clearInterval(interval)
+  }
+})
 </script>
 
 <style scoped>
@@ -335,5 +524,159 @@ h2 {
 .card-size-group label:first-child {
   font-weight: 500;
   margin-bottom: 5px;
+}
+
+.api-info {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.api-item {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.api-url {
+  font-family: 'Courier New', monospace;
+  color: var(--accent-color);
+  font-size: 14px;
+  word-break: break-all;
+}
+
+.api-description {
+  color: #ccc;
+}
+
+.api-time {
+  color: #aaa;
+  font-size: 14px;
+}
+
+.checking-health {
+  color: var(--accent-color);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.endpoints-list {
+  list-style: none;
+  padding: 0;
+  margin: 8px 0 0 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.server-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.server-option {
+  flex: 1;
+  padding: 8px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 6px;
+  background: rgba(255, 255, 255, 0.02);
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  position: relative;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.server-option:hover {
+  border-color: rgba(255, 255, 255, 0.3);
+  background: rgba(255, 255, 255, 0.05);
+  transform: translateY(-1px);
+}
+
+.server-option.current-endpoint {
+  border-color: var(--accent-color);
+  background: rgba(76, 175, 80, 0.1);
+}
+
+.server-option.selected-endpoint {
+  border-color: var(--accent-color);
+  background: rgba(76, 175, 80, 0.15);
+  box-shadow: 0 2px 8px rgba(76, 175, 80, 0.2);
+}
+
+.endpoint-description {
+  font-weight: 500;
+  color: #fff;
+}
+
+.endpoint-url {
+  font-family: 'Courier New', monospace;
+  font-size: 12px;
+  color: #aaa;
+  word-break: break-all;
+}
+
+.endpoint-active {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  color: var(--accent-color);
+}
+
+.endpoint-info {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.health-check-btn {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 6px;
+  color: #fff;
+  font-size: 16px;
+  cursor: pointer;
+  transition: 0.2s;
+  padding: 8px;
+  min-width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.health-check-btn:hover {
+  background: rgba(255, 255, 255, 0.1);
+  border-color: rgba(255, 255, 255, 0.3);
+  color: var(--accent-color);
+}
+
+.health-check-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.health-check-btn.health-success {
+  color: #4caf50;
+}
+
+.health-check-btn.health-error {
+  color: #f44336;
+}
+
+.health-check-btn.health-success:hover {
+  background: rgba(76, 175, 80, 0.1);
+  border-color: #4caf50;
+  color: #66bb6a;
+}
+
+.health-check-btn.health-error:hover {
+  background: rgba(244, 67, 54, 0.1);
+  border-color: #f44336;
+  color: #ef5350;
 }
 </style>

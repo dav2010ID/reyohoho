@@ -1,5 +1,7 @@
 import { initializeApp } from 'firebase/app'
 import { getRemoteConfig, getValue, fetchAndActivate } from 'firebase/remote-config'
+import { useApiStore } from '@/store/api'
+
 console.log(import.meta.env.FIREBASE_PROJECT_ID)
 const firebaseConfig = {
   apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
@@ -18,22 +20,72 @@ remoteConfig.settings.minimumFetchIntervalMillis = 60000
 remoteConfig.settings.fetchTimeoutMillis = 10000
 
 remoteConfig.defaultConfig = {
-  api_url: import.meta.env.VITE_APP_API_URL,
+  api_endpoints: JSON.stringify([
+    {
+      url: import.meta.env.VITE_APP_API_URL,
+      description: 'Primary API'
+    }
+  ]),
   load_script: false
 }
 
 let isConfigInitialized = false
 
+function parseApiEndpoints(configValue) {
+  try {
+    const parsed = JSON.parse(configValue)
+    if (Array.isArray(parsed)) {
+      return parsed.filter(
+        (endpoint) =>
+          endpoint && typeof endpoint.url === 'string' && typeof endpoint.description === 'string'
+      )
+    }
+    return []
+  } catch (error) {
+    console.error('Failed to parse API endpoints from Remote Config:', error)
+    return [
+      {
+        url: import.meta.env.VITE_APP_API_URL,
+        description: 'Fallback API'
+      }
+    ]
+  }
+}
+
 async function initRemoteConfig() {
   if (isConfigInitialized) return
+
+  const apiStore = useApiStore()
 
   try {
     await fetchAndActivate(remoteConfig)
     isConfigInitialized = true
-    console.log('Remote Config initialized:', getConfigValue('api_url'))
-    console.log('Remote Config loaded')
+
+    const endpointsConfig = getValue(remoteConfig, 'api_endpoints').asString()
+    const endpoints = parseApiEndpoints(endpointsConfig)
+
+    console.log('Remote Config loaded, available endpoints:', endpoints)
+
+    apiStore.setAvailableEndpoints(endpoints)
+
+    if (apiStore.shouldRecheckEndpoints()) {
+      await apiStore.selectWorkingEndpoint(endpoints)
+      console.log('Selected API URL:', apiStore.currentApiUrl)
+    } else {
+      console.log('Using cached API URL:', apiStore.currentApiUrl)
+    }
   } catch (err) {
-    console.error('Failed load Remote Config:', err)
+    console.error('Failed to load Remote Config:', err)
+
+    const fallbackEndpoints = [
+      {
+        url: import.meta.env.VITE_APP_API_URL,
+        description: 'Fallback API'
+      }
+    ]
+
+    apiStore.setAvailableEndpoints(fallbackEndpoints)
+    await apiStore.selectWorkingEndpoint(fallbackEndpoints)
   }
 }
 
@@ -44,4 +96,10 @@ function getConfigValue(key) {
   return getValue(remoteConfig, key).asString()
 }
 
-export { remoteConfig, getValue, initRemoteConfig, getConfigValue }
+async function getCurrentApiUrl() {
+  await initRemoteConfig()
+  const apiStore = useApiStore()
+  return apiStore.currentApiUrl || import.meta.env.VITE_APP_API_URL
+}
+
+export { remoteConfig, getValue, initRemoteConfig, getConfigValue, getCurrentApiUrl }

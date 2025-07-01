@@ -1,6 +1,7 @@
 import axios from 'axios'
-import { getConfigValue, initRemoteConfig } from '@/firebase/firebase'
+import { getCurrentApiUrl } from '@/firebase/firebase'
 import { useAuthStore } from '@/store/auth'
+import { useApiStore } from '@/store/api'
 
 let apiInstance = null
 
@@ -8,8 +9,7 @@ export const getApi = async () => {
   if (!apiInstance) {
     const authStore = useAuthStore()
 
-    await initRemoteConfig()
-    const apiUrl = getConfigValue('api_url') || import.meta.env.VITE_APP_API_URL
+    const apiUrl = await getCurrentApiUrl()
 
     apiInstance = axios.create({
       baseURL: apiUrl,
@@ -39,14 +39,28 @@ export const getApi = async () => {
 
 export const getBaseURL = async () => {
   if (!apiInstance) {
-    await initRemoteConfig()
-    const apiUrl = getConfigValue('api_url') || import.meta.env.VITE_APP_API_URL
-    return apiUrl
+    return await getCurrentApiUrl()
   } else {
     return apiInstance.defaults.baseURL
   }
 }
 
 export const getBaseURLSync = () => {
+  if (!apiInstance) {
+    const apiStore = useApiStore()
+    return apiStore.currentApiUrl || import.meta.env.VITE_APP_API_URL
+  }
   return apiInstance.defaults.baseURL
+}
+
+export const getCurrentApiInfo = () => {
+  const apiStore = useApiStore()
+  return {
+    url: apiStore.currentApiUrl || import.meta.env.VITE_APP_API_URL,
+    description: apiStore.getCurrentApiDescription(),
+    isCheckingHealth: apiStore.isCheckingHealth,
+    lastCheckedAt: apiStore.lastCheckedAt,
+    availableEndpoints: apiStore.availableEndpoints,
+    userSelectedApiUrl: apiStore.userSelectedApiUrl
+  }
 }

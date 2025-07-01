@@ -28,7 +28,9 @@ export default [
         process: 'readonly', // Для переменных, связанных с Node.js
         URLSearchParams: 'readonly', // Для работы с URLSearchParams
         URL: 'readonly',
-        Image: 'readonly'
+        Image: 'readonly',
+        AbortController: 'readonly',
+        AbortSignal: 'readonly'
       }
     },
     rules: {
