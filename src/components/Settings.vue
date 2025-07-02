@@ -96,6 +96,11 @@
       </div>
 
       <div class="settings-group">
+        <h2>Навигация</h2>
+        <SliderRound v-model="rememberScrollPosition">Запоминать позицию скролла</SliderRound>
+      </div>
+
+      <div class="settings-group">
         <h2>Комментарии</h2>
         <SliderRound v-model="isCommentsEnabled">Показывать блок комментариев</SliderRound>
         <SliderRound v-model="isAutoShowComments">Автоматически показывать комментарии</SliderRound>
@@ -318,6 +323,11 @@ const cardSize = computed({
 const isStreamerMode = computed({
   get: () => mainStore.isStreamerMode,
   set: (value) => mainStore.setStreamerMode(value)
+})
+
+const rememberScrollPosition = computed({
+  get: () => mainStore.rememberScrollPosition,
+  set: (value) => mainStore.setRememberScrollPosition(value)
 })
 
 const resetBackground = () => {

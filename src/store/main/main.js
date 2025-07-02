@@ -15,7 +15,8 @@ export const useMainStore = defineStore(MAIN_STORE_NAME, {
     isCtrlFEnabled: true,
     submitterUsername: '',
     cardSize: 'medium',
-    isStreamerMode: true
+    isStreamerMode: true,
+    rememberScrollPosition: true
   }),
 
   actions: {
@@ -99,6 +100,10 @@ export const useMainStore = defineStore(MAIN_STORE_NAME, {
 
     setStreamerMode(value) {
       this.isStreamerMode = value
+    },
+
+    setRememberScrollPosition(value) {
+      this.rememberScrollPosition = value
     }
   },
 
@@ -113,7 +118,8 @@ export const useMainStore = defineStore(MAIN_STORE_NAME, {
       'isCtrlFEnabled',
       'submitterUsername',
       'cardSize',
-      'isStreamerMode'
+      'isStreamerMode',
+      'rememberScrollPosition'
     ],
     beforeHydrate: beforeHydrateLegacyVuex
   }
