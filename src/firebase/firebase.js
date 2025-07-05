@@ -68,12 +68,8 @@ async function initRemoteConfig() {
 
     apiStore.setAvailableEndpoints(endpoints)
 
-    if (apiStore.shouldRecheckEndpoints()) {
-      await apiStore.selectWorkingEndpoint(endpoints)
-      console.log('Selected API URL:', apiStore.currentApiUrl)
-    } else {
-      console.log('Using cached API URL:', apiStore.currentApiUrl)
-    }
+    await apiStore.selectWorkingEndpoint(endpoints)
+    console.log('Selected API URL:', apiStore.currentApiUrl)
   } catch (err) {
     console.error('Failed to load Remote Config:', err)
 
