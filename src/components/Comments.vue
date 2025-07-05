@@ -20,11 +20,21 @@
         <div class="comments-controls">
           <button
             class="sort-button"
-            @click="toggleSort"
-            :title="sortBy === 'date' ? 'Сортировать по рейтингу' : 'Сортировать по дате'"
+            :class="{ active: sortBy === 'date' }"
+            @click="setSortBy('date')"
+            title="Сортировать по дате"
           >
-            <i class="fas" :class="sortBy === 'date' ? 'fa-clock' : 'fa-thumbs-up'"></i>
-            {{ sortBy === 'date' ? 'По дате' : 'По рейтингу' }}
+            <i class="fas fa-clock"></i>
+            По дате
+          </button>
+          <button
+            class="sort-button"
+            :class="{ active: sortBy === 'rating' }"
+            @click="setSortBy('rating')"
+            title="Сортировать по рейтингу"
+          >
+            <i class="fas fa-thumbs-up"></i>
+            По рейтингу
           </button>
         </div>
         <button class="hide-comments-btn" @click="showComments = false">
@@ -230,7 +240,6 @@ export default {
     const commentTextarea = ref(null)
     const showComments = ref(mainStore.isAutoShowComments)
     const isInsertingEmoji = ref(false)
-    const commentsPerPage = ref(3)
     const displayedCommentsCount = ref(3)
     const sortBy = ref(mainStore.commentsSortBy)
 
@@ -311,14 +320,13 @@ export default {
     })
 
     const showMoreComments = () => {
-      displayedCommentsCount.value += commentsPerPage.value
+      displayedCommentsCount.value = groupedComments.value.length
     }
 
-    const toggleSort = () => {
-      const newSortBy = sortBy.value === 'date' ? 'rating' : 'date'
+    const setSortBy = (newSortBy) => {
+      if (sortBy.value === newSortBy) return
       sortBy.value = newSortBy
       mainStore.setCommentsSortBy(newSortBy)
-      displayedCommentsCount.value = commentsPerPage.value
     }
 
     const loadComments = async () => {
@@ -666,7 +674,7 @@ export default {
       remainingCommentsCount,
       showMoreComments,
       sortBy,
-      toggleSort,
+      setSortBy,
       newComment,
       replyTo,
       replyContent,
@@ -1024,6 +1032,18 @@ export default {
 
 .sort-button:hover i {
   opacity: 1;
+}
+
+.sort-button.active {
+  background: var(--accent-color);
+  border-color: var(--accent-color);
+  color: white;
+}
+
+.sort-button.active:hover {
+  background: var(--accent-hover);
+  border-color: var(--accent-hover);
+  color: white;
 }
 
 .hide-comments-btn {
