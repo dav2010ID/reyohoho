@@ -4,9 +4,18 @@ import { useAuthStore } from '@/store/auth'
 import { useApiStore } from '@/store/api'
 
 let apiInstance = null
+let apiInstancePromise = null
 
 export const getApi = async () => {
-  if (!apiInstance) {
+  if (apiInstance) {
+    return apiInstance
+  }
+
+  if (apiInstancePromise) {
+    return apiInstancePromise
+  }
+
+  apiInstancePromise = (async () => {
     const authStore = useAuthStore()
 
     const apiUrl = await getCurrentApiUrl()
@@ -32,9 +41,11 @@ export const getApi = async () => {
         return Promise.reject(err)
       }
     )
-  }
 
-  return apiInstance
+    return apiInstance
+  })()
+
+  return apiInstancePromise
 }
 
 export const getBaseURL = async () => {

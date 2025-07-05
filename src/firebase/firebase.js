@@ -30,6 +30,7 @@ remoteConfig.defaultConfig = {
 }
 
 let isConfigInitialized = false
+let initPromise = null
 
 function parseApiEndpoints(configValue) {
   try {
@@ -55,34 +56,42 @@ function parseApiEndpoints(configValue) {
 async function initRemoteConfig() {
   if (isConfigInitialized) return
 
-  const apiStore = useApiStore()
-
-  try {
-    await fetchAndActivate(remoteConfig)
-    isConfigInitialized = true
-
-    const endpointsConfig = getValue(remoteConfig, 'api_endpoints').asString()
-    const endpoints = parseApiEndpoints(endpointsConfig)
-
-    console.log('Remote Config loaded, available endpoints:', endpoints)
-
-    apiStore.setAvailableEndpoints(endpoints)
-
-    await apiStore.selectWorkingEndpoint(endpoints)
-    console.log('Selected API URL:', apiStore.currentApiUrl)
-  } catch (err) {
-    console.error('Failed to load Remote Config:', err)
-
-    const fallbackEndpoints = [
-      {
-        url: import.meta.env.VITE_APP_API_URL,
-        description: 'Fallback API'
-      }
-    ]
-
-    apiStore.setAvailableEndpoints(fallbackEndpoints)
-    await apiStore.selectWorkingEndpoint(fallbackEndpoints)
+  if (initPromise) {
+    return initPromise
   }
+
+  initPromise = (async () => {
+    const apiStore = useApiStore()
+
+    try {
+      await fetchAndActivate(remoteConfig)
+      isConfigInitialized = true
+
+      const endpointsConfig = getValue(remoteConfig, 'api_endpoints').asString()
+      const endpoints = parseApiEndpoints(endpointsConfig)
+
+      console.log('Remote Config loaded, available endpoints:', endpoints)
+
+      apiStore.setAvailableEndpoints(endpoints)
+
+      await apiStore.selectWorkingEndpoint(endpoints)
+      console.log('Selected API URL:', apiStore.currentApiUrl)
+    } catch (err) {
+      console.error('Failed to load Remote Config:', err)
+
+      const fallbackEndpoints = [
+        {
+          url: import.meta.env.VITE_APP_API_URL,
+          description: 'Fallback API'
+        }
+      ]
+
+      apiStore.setAvailableEndpoints(fallbackEndpoints)
+      await apiStore.selectWorkingEndpoint(fallbackEndpoints)
+    }
+  })()
+
+  return initPromise
 }
 
 function getConfigValue(key) {
