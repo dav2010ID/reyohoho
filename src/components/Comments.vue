@@ -26,6 +26,11 @@
           >
             <i class="fas fa-clock"></i>
             По дате
+            <i
+              v-if="sortBy === 'date'"
+              class="fas"
+              :class="sortDirection === 'asc' ? 'fa-arrow-up' : 'fa-arrow-down'"
+            ></i>
           </button>
           <button
             class="sort-button"
@@ -35,6 +40,11 @@
           >
             <i class="fas fa-thumbs-up"></i>
             По рейтингу
+            <i
+              v-if="sortBy === 'rating'"
+              class="fas"
+              :class="sortDirection === 'asc' ? 'fa-arrow-up' : 'fa-arrow-down'"
+            ></i>
           </button>
         </div>
         <button class="hide-comments-btn" @click="showComments = false">
@@ -242,6 +252,7 @@ export default {
     const isInsertingEmoji = ref(false)
     const displayedCommentsCount = ref(3)
     const sortBy = ref(mainStore.commentsSortBy)
+    const sortDirection = ref(sortBy.value === 'date' ? 'asc' : 'desc')
 
     const {
       showEmojiPicker,
@@ -278,11 +289,15 @@ export default {
         if (parentId === null) {
           sortedComments = filteredComments.sort((a, b) => {
             if (sortBy.value === 'rating') {
-              const ratingDiff = (b.rating || 0) - (a.rating || 0)
-              if (ratingDiff !== 0) return ratingDiff
+              const ratingA = a.rating || 0
+              const ratingB = b.rating || 0
+              if (ratingA !== ratingB) {
+                return sortDirection.value === 'asc' ? ratingA - ratingB : ratingB - ratingA
+              }
               return a.id - b.id
             }
-            return a.id - b.id
+
+            return sortDirection.value === 'asc' ? a.id - b.id : b.id - a.id
           })
         } else {
           sortedComments = filteredComments.sort((a, b) => a.id - b.id)
@@ -324,9 +339,13 @@ export default {
     }
 
     const setSortBy = (newSortBy) => {
-      if (sortBy.value === newSortBy) return
-      sortBy.value = newSortBy
-      mainStore.setCommentsSortBy(newSortBy)
+      if (sortBy.value === newSortBy) {
+        sortDirection.value = sortDirection.value === 'asc' ? 'desc' : 'asc'
+      } else {
+        sortBy.value = newSortBy
+        sortDirection.value = newSortBy === 'date' ? 'asc' : 'desc'
+        mainStore.setCommentsSortBy(newSortBy)
+      }
     }
 
     const loadComments = async () => {
@@ -675,6 +694,7 @@ export default {
       showMoreComments,
       sortBy,
       setSortBy,
+      sortDirection,
       newComment,
       replyTo,
       replyContent,
