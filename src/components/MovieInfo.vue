@@ -3610,8 +3610,6 @@ const filteredTimings = computed(() => {
 
 .timing-hover-container.blurred {
   filter: blur(4px);
-  user-select: none;
-  cursor: not-allowed;
 }
 
 .timing-hover-container.blurred:hover {
