@@ -4857,6 +4857,14 @@ const handleFilterSelect = () => {
 }
 
 @media (max-width: 600px) {
+  .timing-actions-row {
+    display: none !important;
+  }
+
+  .obs-button {
+    display: none !important;
+  }
+
   .obs-actions {
     flex-direction: column;
   }
