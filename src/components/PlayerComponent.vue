@@ -1109,7 +1109,6 @@ const startVideoPositionMonitoring = (isDebug = false) => {
           const currentTime = video.currentTime
           const selectedTimings = []
           const activeTimingIds = []
-          const isAutoBlurEnabled = blurIntervals.length > 0
           const isObsBlurEnabled = obsSettings.value.enabled && obsConnected.value
 
           if (
@@ -1124,7 +1123,7 @@ const startVideoPositionMonitoring = (isDebug = false) => {
                 if (parsedRanges && parsedRanges.length > 0) {
                   const intervals = []
 
-                  if (!isAutoBlurEnabled && !isObsBlurEnabled) {
+                  if (!isObsBlurEnabled) {
                     for (const [start, end] of parsedRanges) {
                       let status = 'normal'
                       if (currentTime >= start && currentTime <= end) {

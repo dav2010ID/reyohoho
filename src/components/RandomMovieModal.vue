@@ -451,11 +451,14 @@ const handleImageError = (event) => {
   .modal-actions {
     flex-direction: column;
     gap: 8px;
+    padding: 16px 20px;
   }
 
-  .modern-dark-btn {
+  .modal-actions .modern-dark-btn,
+  .modal-actions a.modern-dark-btn {
     width: 100%;
     justify-content: center;
+    box-sizing: border-box;
   }
 }
 </style>
