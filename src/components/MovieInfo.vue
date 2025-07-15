@@ -643,6 +643,27 @@
                       <span>Добавить в автоблюр</span>
                     </button>
                   </template>
+
+                  <template v-if="overlayTimings.has(timing.id)">
+                    <button
+                      class="nudity-info-button overlay-button"
+                      @click="onRemoveFromOverlay(timing.id)"
+                      :title="'Удалить из оверлея'"
+                    >
+                      <i class="fas fa-eye-slash"></i>
+                      <span>Удалить из оверлея</span>
+                    </button>
+                  </template>
+                  <template v-else>
+                    <button
+                      class="nudity-info-button overlay-button"
+                      @click="onAddToOverlay(timing.id)"
+                      :title="'Добавить в оверлей'"
+                    >
+                      <i class="fas fa-eye"></i>
+                      <span>Добавить в оверлей</span>
+                    </button>
+                  </template>
                 </div>
                 <div
                   class="timing-hover-container"
@@ -657,7 +678,7 @@
                   style="color: #fff; font-size: 13px; margin: 4px 0 0 0"
                 >
                   <b
-                    >Парсер(к таймингам добавится -2 и +2 секунд по краям тайминга для
+                    >Парсер(к таймингам добавится -1 и +1 секунд по краям тайминга для
                     предосторожности, но в превью парсера их нет для удобства проверки):</b
                   >
                   <span v-if="showParseResult[timing.id].length === 0">Не удалось распарсить</span>
@@ -704,6 +725,32 @@
             </span>
           </div>
         </div>
+        <div
+          v-if="showOverlayParserResult && overlayTimings.size > 0"
+          class="overlay-parser-result"
+          style="
+            margin-top: 15px;
+            padding: 15px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 8px;
+          "
+        >
+          <h4 style="margin: 0 0 10px 0; color: #fff">
+            Парсер оверлея ({{ overlayTimings.size }} таймингов):
+          </h4>
+          <div style="color: #fff; font-size: 13px">
+            <span v-if="getOverlayParserResult().length === 0"
+              >Не удалось распарсить выбранные тайминги</span
+            >
+            <span v-else>
+              <span v-for="(range, idx) in getOverlayParserResult()" :key="idx">
+                [{{ formatSecondsToTime(range[0]) }} - {{ formatSecondsToTime(range[1]) }}]{{
+                  idx < getOverlayParserResult().length - 1 ? ', ' : ''
+                }}
+              </span>
+            </span>
+          </div>
+        </div>
         <div class="nudity-info-actions">
           <button
             v-if="nudityTimings.length > 0"
@@ -720,6 +767,14 @@
           >
             <i class="fas fa-eye"></i>
             <span>Общий парсер ({{ selectedTimings.size }})</span>
+          </button>
+          <button
+            v-if="overlayTimings.size > 0"
+            class="nudity-info-button overlay-button"
+            @click="showOverlayParser"
+          >
+            <i class="fas fa-layer-group"></i>
+            <span>Парсер оверлея ({{ overlayTimings.size }})</span>
           </button>
           <button class="nudity-info-button" @click="showTimingForm = true">
             <i class="fas fa-plus"></i>
@@ -1064,7 +1119,9 @@ const isListExpanded = ref(false)
 const nudityTimings = ref(undefined)
 const nudityTimingsTrigger = ref(null)
 const selectedTimings = ref(new Set())
+const overlayTimings = ref(new Set())
 const showGeneralParserResult = ref(false)
+const showOverlayParserResult = ref(false)
 
 const shouldShowRedTimings = computed(() => {
   return movieInfo.value?.nudity_timings.length > 0
@@ -1230,7 +1287,6 @@ const fetchMovieInfo = async (updateHistory = true) => {
 }
 
 const videos = computed(() => {
-  console.log('Трейлеры:', movieInfo.value?.videos)
   return movieInfo.value?.videos
 })
 
@@ -1409,6 +1465,7 @@ onMounted(async () => {
   document.addEventListener('click', handleNudityPopupOutsideClick, true)
   document.addEventListener('click', handleNudityTimingsPopupOutsideClick, true)
   window.selectedNudityTimings = Array.from(selectedTimings.value)
+  window.overlayNudityTimings = Array.from(overlayTimings.value)
 })
 
 onUnmounted(async () => {
@@ -1419,6 +1476,7 @@ onUnmounted(async () => {
   document.removeEventListener('click', handleNudityPopupOutsideClick, true)
   document.removeEventListener('click', handleNudityTimingsPopupOutsideClick, true)
   delete window.selectedNudityTimings
+  delete window.overlayNudityTimings
 })
 
 watch(
@@ -1475,12 +1533,22 @@ watch(
   { deep: true }
 )
 
+watch(
+  overlayTimings,
+  () => {
+    window.overlayNudityTimings = Array.from(overlayTimings.value)
+  },
+  { deep: true }
+)
+
 onMounted(() => {
   window.selectedNudityTimings = Array.from(selectedTimings.value)
+  window.overlayNudityTimings = Array.from(overlayTimings.value)
 })
 
 onUnmounted(() => {
   delete window.selectedNudityTimings
+  delete window.overlayNudityTimings
 })
 
 const getStaffByProfession = (profession) => {
@@ -1763,8 +1831,44 @@ function onRemoveFromAutoblur(id) {
   toggleTimingSelection(id)
 }
 
+function onAddToOverlay(id) {
+  if (!isElectron.value) {
+    if (notificationRef.value) {
+      notificationRef.value.showNotification('Доступно только в приложении')
+    } else {
+      alert('Доступно только в приложении')
+    }
+    return
+  }
+  toggleOverlaySelection(id)
+}
+
+function onRemoveFromOverlay(id) {
+  if (!isElectron.value) {
+    if (notificationRef.value) {
+      notificationRef.value.showNotification('Доступно только в приложении')
+    } else {
+      alert('Доступно только в приложении')
+    }
+    return
+  }
+  toggleOverlaySelection(id)
+}
+
+const toggleOverlaySelection = (timingId) => {
+  if (overlayTimings.value.has(timingId)) {
+    overlayTimings.value.delete(timingId)
+  } else {
+    overlayTimings.value.add(timingId)
+  }
+}
+
 function showGeneralParser() {
   showGeneralParserResult.value = !showGeneralParserResult.value
+}
+
+function showOverlayParser() {
+  showOverlayParserResult.value = !showOverlayParserResult.value
 }
 
 function getGeneralParserResult() {
@@ -1772,6 +1876,21 @@ function getGeneralParserResult() {
   if (nudityTimings.value && Array.isArray(nudityTimings.value)) {
     for (const timing of nudityTimings.value) {
       if (selectedTimings.value.has(timing.id)) {
+        const parsedRanges = parseTimingTextToSeconds(timing.timing_text, true)
+        if (parsedRanges && parsedRanges.length > 0) {
+          allRanges.push(...parsedRanges)
+        }
+      }
+    }
+  }
+  return allRanges
+}
+
+function getOverlayParserResult() {
+  const allRanges = []
+  if (nudityTimings.value && Array.isArray(nudityTimings.value) && nudityTimings.value.length > 0) {
+    for (const timing of nudityTimings.value) {
+      if (overlayTimings.value.has(timing.id)) {
         const parsedRanges = parseTimingTextToSeconds(timing.timing_text, true)
         if (parsedRanges && parsedRanges.length > 0) {
           allRanges.push(...parsedRanges)
@@ -4215,5 +4334,16 @@ function getGeneralParserResult() {
 .timing-preview-duration {
   color: rgba(255, 255, 255, 0.6);
   font-size: 12px;
+}
+
+.overlay-button {
+  background: rgba(255, 255, 255, 0.1) !important;
+  border: none !important;
+}
+
+.overlay-button:hover {
+  background: var(--accent-color) !important;
+  transform: translateY(-2px) !important;
+  box-shadow: 0 4px 8px var(--accent-semi-transparent) !important;
 }
 </style>

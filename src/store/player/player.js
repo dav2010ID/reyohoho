@@ -9,7 +9,13 @@ export const usePlayerStore = defineStore(PLAYER_STORE_NAME, {
     isCentered: false,
     showFavoriteTooltip: true,
     compressorEnabled: false,
-    mirrorEnabled: false
+    mirrorEnabled: false,
+    videoOverlayEnabled: true,
+    overlaySettings: {
+      showTitle: true,
+      showDuration: true,
+      showStartTime: true
+    }
   }),
 
   actions: {
@@ -30,6 +36,14 @@ export const usePlayerStore = defineStore(PLAYER_STORE_NAME, {
     },
     updateMirror(value) {
       this.mirrorEnabled = value
+    },
+    updateVideoOverlay(value) {
+      this.videoOverlayEnabled = value
+    },
+    updateOverlaySettings(settings) {
+      this.overlaySettings = { ...this.overlaySettings, ...settings }
+    },
+    resetStartTime() {
     }
   },
 
