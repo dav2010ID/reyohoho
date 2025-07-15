@@ -1724,6 +1724,10 @@ const showOverlaySettings = () => {
         <span style="font-size: 16px;">Показывать продолжительность</span>
       </label>
       
+      <label style="display: flex; align-items: center; gap: 12px; color: white; cursor: pointer; padding: 8px; border-radius: 8px; background: rgba(255, 255, 255, 0.05);">
+        <input type="checkbox" id="showBackground" ${settings.showBackground ? 'checked' : ''} style="width: 18px; height: 18px; accent-color: #ff6b35;">
+        <span style="font-size: 16px;">Показывать затемненный фон</span>
+      </label>
 
     </div>
     
@@ -1748,7 +1752,8 @@ const showOverlaySettings = () => {
   modalContent.querySelector('#saveSettings').addEventListener('click', () => {
     const newSettings = {
       showTitle: modalContent.querySelector('#showTitle').checked,
-      showDuration: modalContent.querySelector('#showDuration').checked
+      showDuration: modalContent.querySelector('#showDuration').checked,
+      showBackground: modalContent.querySelector('#showBackground').checked
     }
     overlaySettings.value = newSettings
     window.electronAPI?.showToast('Настройки оверлея сохранены')
@@ -1825,42 +1830,70 @@ const createVideoOverlay = (iframeDoc, video) => {
   `
 
   const movieTitle = iframeDoc.createElement('div')
+  const initialTitleBackground = overlaySettings.value.showBackground
+    ? 'rgba(0, 0, 0, 0.7)'
+    : 'transparent'
+  const initialTitleBackdropFilter = overlaySettings.value.showBackground ? 'blur(10px)' : 'none'
+  const initialTitleWidth = overlaySettings.value.showBackground ? 'fit-content' : 'auto'
+
   movieTitle.style.cssText = `
     font-size: 20px !important;
     font-weight: 600 !important;
     margin-bottom: 8px !important;
     text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.8) !important;
     line-height: 1.2 !important;
-    background: rgba(0, 0, 0, 0.6) !important;
     padding: 8px 12px !important;
     border-radius: 6px !important;
     display: inline-block !important;
     color: rgba(255, 255, 255, 0.6) !important;
+    background: ${initialTitleBackground} !important;
+    backdrop-filter: ${initialTitleBackdropFilter} !important;
+    width: ${initialTitleWidth} !important;
   `
 
   const videoProgress = iframeDoc.createElement('div')
+  const initialProgressBackground = overlaySettings.value.showBackground
+    ? 'rgba(0, 0, 0, 0.7)'
+    : 'transparent'
+  const initialProgressBackdropFilter = overlaySettings.value.showBackground ? 'blur(10px)' : 'none'
+  const initialProgressBorderRadius = overlaySettings.value.showBackground ? '6px' : '0'
+  const initialProgressDisplay = overlaySettings.value.showBackground ? 'inline-flex' : 'flex'
+  const initialProgressWidth = overlaySettings.value.showBackground ? 'fit-content' : 'auto'
+
   videoProgress.style.cssText = `
     font-size: 18px !important;
     font-weight: 500 !important;
     text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.8) !important;
-    display: flex !important;
+    display: ${initialProgressDisplay} !important;
     align-items: center !important;
     gap: 8px !important;
     flex-wrap: wrap !important;
     color: rgba(255, 255, 255, 0.6) !important;
     margin-left: 12px !important;
+    background: ${initialProgressBackground} !important;
+    backdrop-filter: ${initialProgressBackdropFilter} !important;
+    border-radius: ${initialProgressBorderRadius} !important;
+    width: ${initialProgressWidth} !important;
   `
 
   const timingsPanel = iframeDoc.createElement('div')
+  const initialTimingsPanelBackground = overlaySettings.value.showBackground
+    ? 'rgba(0, 0, 0, 0.7)'
+    : 'transparent'
+  const initialTimingsPanelBackdropFilter = overlaySettings.value.showBackground
+    ? 'blur(10px)'
+    : 'none'
+
   timingsPanel.style.cssText = `
     position: absolute !important;
     top: 20px !important;
     right: 110px !important;
-    backdrop-filter: blur(10px) !important;
+    background: ${initialTimingsPanelBackground} !important;
+    backdrop-filter: ${initialTimingsPanelBackdropFilter} !important;
     border-radius: 12px !important;
     padding: 16px !important;
-    min-width: 280px !important;
-    max-width: 400px !important;
+    width: fit-content !important;
+    max-width: 800px !important;
     pointer-events: none !important;
     display: none !important;
   `
@@ -1954,22 +1987,24 @@ const createVideoOverlay = (iframeDoc, video) => {
   overlay.appendChild(timingsPanel)
   overlay.appendChild(controlsContainer)
 
-  controlsContainer.style.transition = 'opacity 0.3s ease'
-  controlsContainer.style.opacity = '0.8'
-  controlsContainer.style.visibility = 'visible'
+  controlsContainer.style.transition = 'opacity 0.3s ease, visibility 0.3s ease'
+  controlsContainer.style.opacity = '0'
+  controlsContainer.style.visibility = 'hidden'
 
   mainInfo.style.transition = 'opacity 0.3s ease'
   let hideMainInfoTimeout = null
 
   const handleMouseMove = () => {
     controlsContainer.style.opacity = '1'
+    controlsContainer.style.visibility = 'visible'
     mainInfo.style.opacity = '0'
 
     clearTimeout(overlayControlsTimeout.value)
     clearTimeout(hideMainInfoTimeout)
 
     overlayControlsTimeout.value = setTimeout(() => {
-      controlsContainer.style.opacity = '0.8'
+      controlsContainer.style.opacity = '0'
+      controlsContainer.style.visibility = 'hidden'
     }, 3000)
 
     hideMainInfoTimeout = setTimeout(() => {
@@ -1981,6 +2016,7 @@ const createVideoOverlay = (iframeDoc, video) => {
 
   overlay.addEventListener('mouseenter', () => {
     controlsContainer.style.opacity = '1'
+    controlsContainer.style.visibility = 'visible'
     mainInfo.style.opacity = '0'
     clearTimeout(hideMainInfoTimeout)
   })
@@ -1988,7 +2024,8 @@ const createVideoOverlay = (iframeDoc, video) => {
   overlay.addEventListener('mouseleave', () => {
     clearTimeout(overlayControlsTimeout.value)
     clearTimeout(hideMainInfoTimeout)
-    controlsContainer.style.opacity = '0.8'
+    controlsContainer.style.opacity = '0'
+    controlsContainer.style.visibility = 'hidden'
     mainInfo.style.opacity = '1'
   })
 
@@ -2225,6 +2262,18 @@ const updateVideoOverlay = () => {
       'Загрузка...'
     const year = props.movieInfo?.year ? ` (${props.movieInfo.year})` : ''
     movieTitle.textContent = title + year
+
+    if (overlaySettings.value.showBackground) {
+      movieTitle.style.background = 'rgba(0, 0, 0, 0.7) !important'
+      movieTitle.style.backdropFilter = 'blur(10px) !important'
+      movieTitle.style.width = 'fit-content !important'
+      movieTitle.style.display = 'inline-block !important'
+    } else {
+      movieTitle.style.background = 'transparent !important'
+      movieTitle.style.backdropFilter = 'none !important'
+      movieTitle.style.width = 'auto !important'
+      movieTitle.style.display = 'inline-block !important'
+    }
   } else {
     movieTitle.style.display = 'none'
   }
@@ -2274,6 +2323,22 @@ const updateVideoOverlay = () => {
   if (progressHtml) {
     videoProgress.style.display = 'flex'
     videoProgress.innerHTML = progressHtml
+
+    if (overlaySettings.value.showBackground) {
+      videoProgress.style.background = 'rgba(0, 0, 0, 0.7) !important'
+      videoProgress.style.backdropFilter = 'blur(10px) !important'
+      videoProgress.style.borderRadius = '6px !important'
+      videoProgress.style.padding = '8px 12px !important'
+      videoProgress.style.width = 'fit-content !important'
+      videoProgress.style.display = 'inline-flex !important'
+    } else {
+      videoProgress.style.background = 'transparent !important'
+      videoProgress.style.backdropFilter = 'none !important'
+      videoProgress.style.borderRadius = '0 !important'
+      videoProgress.style.padding = '0 !important'
+      videoProgress.style.width = 'auto !important'
+      videoProgress.style.display = 'flex !important'
+    }
   } else {
     videoProgress.style.display = 'none'
   }
@@ -2321,6 +2386,18 @@ const updateVideoOverlay = () => {
     })
 
     timingsPanel.style.display = 'block'
+
+    if (overlaySettings.value.showBackground) {
+      timingsPanel.style.background = 'rgba(0, 0, 0, 0.7) !important'
+      timingsPanel.style.backdropFilter = 'blur(10px) !important'
+      timingsPanel.style.width = 'fit-content !important'
+      timingsPanel.style.minWidth = 'auto !important'
+    } else {
+      timingsPanel.style.background = 'transparent !important'
+      timingsPanel.style.backdropFilter = 'none !important'
+      timingsPanel.style.width = 'fit-content !important'
+      timingsPanel.style.minWidth = 'auto !important'
+    }
   } else {
     timingsPanel.style.display = 'none'
   }
