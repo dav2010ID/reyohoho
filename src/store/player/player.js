@@ -14,6 +14,16 @@ export const usePlayerStore = defineStore(PLAYER_STORE_NAME, {
     overlaySettings: {
       showTitle: true,
       showDuration: true
+    },
+    obsSettings: {
+      enabled: false,
+      host: 'localhost',
+      port: 4455,
+      password: '',
+      connected: false,
+      filtersFound: [],
+      selectedFilterId: null,
+      showObsInOverlay: true
     }
   }),
 
@@ -41,6 +51,15 @@ export const usePlayerStore = defineStore(PLAYER_STORE_NAME, {
     },
     updateOverlaySettings(settings) {
       this.overlaySettings = { ...this.overlaySettings, ...settings }
+    },
+    updateObsSettings(settings) {
+      this.obsSettings = { ...this.obsSettings, ...settings }
+    },
+    setObsConnected(connected) {
+      this.obsSettings.connected = connected
+    },
+    setObsSelectedFilter(filterId) {
+      this.obsSettings.selectedFilterId = filterId
     }
   },
 

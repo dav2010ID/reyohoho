@@ -479,6 +479,7 @@ import { computed, nextTick, onBeforeUnmount, onMounted, ref, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import PlayerModal from '@/components/PlayerModal.vue'
 import { parseTimingTextToSeconds, formatSecondsToTime } from '@/utils/dateUtils'
+import { OBSWebSocket } from '@/utils/obsWebSocket'
 
 const mainStore = useMainStore()
 const playerStore = usePlayerStore()
@@ -552,6 +553,17 @@ const activeTimingTexts = ref([])
 const currentOverlayElement = ref(null)
 const overlayControlsTimeout = ref(null)
 const overlayCreationInProgress = ref(false)
+
+// OBS WebSocket
+const obsWebSocket = ref(null)
+const obsConnected = ref(false)
+const obsSources = ref([])
+const obsFiltersFound = ref([])
+
+const obsSettings = computed({
+  get: () => playerStore.obsSettings,
+  set: (value) => playerStore.updateObsSettings(value)
+})
 
 const updateTooltipPosition = (tooltipName) => {
   const container = document.querySelector(`[data-tooltip-container="${tooltipName}"]`)
@@ -1098,6 +1110,7 @@ const startVideoPositionMonitoring = (isDebug = false) => {
           const selectedTimings = []
           const activeTimingIds = []
           const isAutoBlurEnabled = blurIntervals.length > 0
+          const isObsBlurEnabled = obsSettings.value.enabled && obsConnected.value
 
           if (
             window.overlayNudityTimings &&
@@ -1111,7 +1124,7 @@ const startVideoPositionMonitoring = (isDebug = false) => {
                 if (parsedRanges && parsedRanges.length > 0) {
                   const intervals = []
 
-                  if (!isAutoBlurEnabled) {
+                  if (!isAutoBlurEnabled && !isObsBlurEnabled) {
                     for (const [start, end] of parsedRanges) {
                       let status = 'normal'
                       if (currentTime >= start && currentTime <= end) {
@@ -1128,9 +1141,21 @@ const startVideoPositionMonitoring = (isDebug = false) => {
                     }
                   } else {
                     for (const [start, end] of parsedRanges) {
+                      let status = 'normal'
+                      if (isObsBlurEnabled && currentTime >= start && currentTime <= end) {
+                        status = 'active'
+                        activeTimingIds.push(timing.id)
+                      } else if (
+                        isObsBlurEnabled &&
+                        start > currentTime &&
+                        start - currentTime <= 20
+                      ) {
+                        status = 'upcoming'
+                      }
+
                       intervals.push({
                         text: `[${formatSecondsToTime(start)}-${formatSecondsToTime(end)}]`,
-                        status: 'normal'
+                        status: status
                       })
                     }
                   }
@@ -1179,11 +1204,28 @@ const startVideoPositionMonitoring = (isDebug = false) => {
             }
           }
 
-          if (shouldBlur && !blurApplied && isElectron.value) {
+          // Use OBS blur if enabled and connected, otherwise use internal blur
+          if (
+            obsSettings.value.enabled &&
+            obsConnected.value &&
+            obsSettings.value.selectedFilterId
+          ) {
+            // OBS blur logic
+            if (shouldBlur && !blurApplied) {
+              obsWebSocket.value?.enableBlur(obsSettings.value.selectedFilterId)
+              blurApplied = true
+              console.log('OBS Blur applied at', currentTime.toFixed(2), 'seconds')
+            } else if (!shouldBlur && blurApplied) {
+              obsWebSocket.value?.disableBlur(obsSettings.value.selectedFilterId)
+              blurApplied = false
+              console.log('OBS Blur removed at', currentTime.toFixed(2), 'seconds')
+            }
+          } else if (shouldBlur && !blurApplied && isElectron.value) {
+            // Internal blur logic
             window.electronAPI.sendHotKey('F2')
             blurApplied = true
             console.log('Blur applied at', currentTime.toFixed(2), 'seconds')
-          } else if (!shouldBlur && blurApplied) {
+          } else if (!shouldBlur && blurApplied && !obsSettings.value.enabled) {
             window.electronAPI.sendHotKey('F2')
             blurApplied = false
             console.log('Blur removed at', currentTime.toFixed(2), 'seconds')
@@ -1409,6 +1451,17 @@ watch(
   { deep: true }
 )
 
+watch(
+  () => obsSettings.value.enabled,
+  (enabled) => {
+    if (enabled && !obsConnected.value) {
+      connectToOBS()
+    } else if (!enabled && obsConnected.value) {
+      disconnectFromOBS()
+    }
+  }
+)
+
 const aspectRatios = ['16:9', '12:5', '4:3']
 
 const cycleAspectRatio = () => {
@@ -1539,6 +1592,83 @@ const toggleVideoOverlay = () => {
     }
     createOverlayAfterDelay()
   }
+}
+
+const initializeOBSWebSocket = () => {
+  if (obsWebSocket.value) {
+    obsWebSocket.value.disconnect()
+  }
+
+  obsWebSocket.value = new OBSWebSocket()
+
+  obsWebSocket.value.setCallbacks({
+    onConnect: () => {
+      obsConnected.value = true
+      playerStore.setObsConnected(true)
+      if (isElectron.value && window.electronAPI) {
+        window.electronAPI.showToast('Подключен к OBS WebSocket')
+      }
+    },
+    onDisconnect: () => {
+      obsConnected.value = false
+      playerStore.setObsConnected(false)
+      obsSources.value = []
+      obsFiltersFound.value = []
+    },
+    onSourcesUpdated: (sources) => {
+      obsSources.value = sources
+      window.obsSources = sources
+    },
+    onFiltersFound: (filters) => {
+      obsFiltersFound.value = filters
+      window.obsFiltersFound = filters
+      playerStore.updateObsSettings({ filtersFound: filters })
+    },
+    onError: (error) => {
+      console.error('OBS WebSocket error:', error)
+      if (isElectron.value && window.electronAPI) {
+        window.electronAPI.showToast(`Ошибка OBS: ${error}`)
+      }
+    }
+  })
+}
+
+const connectToOBS = async () => {
+  if (!obsWebSocket.value) {
+    initializeOBSWebSocket()
+  }
+
+  await obsWebSocket.value.connect(
+    obsSettings.value.host,
+    obsSettings.value.port,
+    obsSettings.value.password
+  )
+}
+
+const disconnectFromOBS = () => {
+  if (obsWebSocket.value) {
+    obsWebSocket.value.disconnect()
+  }
+}
+
+const testOBSBlur = (selectedFilterId) => {
+  if (obsWebSocket.value && obsConnected.value && selectedFilterId) {
+    obsWebSocket.value.testBlur(selectedFilterId)
+  } else {
+    if (isElectron.value && window.electronAPI) {
+      window.electronAPI.showToast('Фильтр не выбран или не найден в OBS')
+    }
+  }
+}
+
+const refreshOBSFilters = () => {
+  if (obsWebSocket.value && obsConnected.value) {
+    obsWebSocket.value.loadSourcesAndSearchFilters()
+  }
+}
+
+const getOBSFiltersInfo = () => {
+  return obsFiltersFound.value
 }
 
 const showOverlaySettings = () => {
@@ -2112,6 +2242,35 @@ const updateVideoOverlay = () => {
     `
   }
 
+  if (obsSettings.value.enabled && obsSettings.value.showObsInOverlay) {
+    let statusText = 'Отключен'
+    const statusColor = '#999999'
+
+    if (obsConnected.value) {
+      if (obsSettings.value.selectedFilterId) {
+        const selectedFilter = obsFiltersFound.value.find(
+          (f) => f.id === obsSettings.value.selectedFilterId
+        )
+        if (selectedFilter) {
+          statusText = `${selectedFilter.filterName} (${selectedFilter.sceneName})`
+        } else {
+          statusText = 'Фильтр не найден'
+        }
+      } else if (obsFiltersFound.value.length > 0) {
+        statusText = 'Фильтр не выбран'
+      } else {
+        statusText = 'Фильтры не найдены'
+      }
+    }
+
+    const obsStatusHtml = `
+      <span style="background: rgba(0, 0, 0, 0.6); padding: 2px 8px; border-radius: 4px; color: ${statusColor};">
+        OBS: ${statusText}
+      </span>
+    `
+    progressHtml = progressHtml ? `${progressHtml} ${obsStatusHtml}` : obsStatusHtml
+  }
+
   if (progressHtml) {
     videoProgress.style.display = 'flex'
     videoProgress.innerHTML = progressHtml
@@ -2216,6 +2375,32 @@ onMounted(() => {
   window.toggleCompressor = toggleCompressor
   window.toggleMirror = toggleMirror
 
+  initializeOBSWebSocket()
+
+  window.connectToOBS = connectToOBS
+  window.testOBSBlur = testOBSBlur
+  window.refreshOBSFilters = refreshOBSFilters
+  window.getOBSFiltersInfo = getOBSFiltersInfo
+  window.testOBSConnection = testOBSConnection
+
+  window.debugOBS = () => {
+    console.log('=== OBS Debug Info ===')
+    console.log('OBS Settings:', obsSettings.value)
+    console.log('OBS Connected:', obsConnected.value)
+    console.log('OBS Filters Found:', obsFiltersFound.value)
+    console.log('OBS WebSocket instance:', obsWebSocket.value)
+
+    if (obsWebSocket.value) {
+      console.log('WebSocket state:', obsWebSocket.value.ws?.readyState)
+      console.log('Is Connected:', obsWebSocket.value.isConnected)
+      console.log('Is Authenticated:', obsWebSocket.value.isAuthenticated)
+    }
+  }
+
+  if (obsSettings.value.enabled) {
+    connectToOBS()
+  }
+
   if (isElectron.value) {
     overlayTimingsCheckInterval.value = setInterval(() => {
       const currentCount = window.overlayNudityTimings ? window.overlayNudityTimings.length : 0
@@ -2300,9 +2485,28 @@ onBeforeUnmount(() => {
   removeVideoOverlay()
   cleanupAudioContext()
 
+  disconnectFromOBS()
+
   delete window.toggleCompressor
   delete window.toggleMirror
+  delete window.connectToOBS
+  delete window.testOBSBlur
+  delete window.refreshOBSFilters
+  delete window.getOBSFiltersInfo
+  delete window.testOBSConnection
+  delete window.debugOBS
+  delete window.obsSources
+  delete window.obsFiltersFound
 })
+
+const testOBSConnection = async () => {
+  if (obsWebSocket.value && obsConnected.value) {
+    const result = await obsWebSocket.value.testConnection()
+    return result
+  } else {
+    return { success: false, error: 'Not connected' }
+  }
+}
 </script>
 
 <style scoped>

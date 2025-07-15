@@ -30,7 +30,12 @@ export default [
         URL: 'readonly',
         Image: 'readonly',
         AbortController: 'readonly',
-        AbortSignal: 'readonly'
+        AbortSignal: 'readonly',
+        WebSocket: 'readonly',
+        TextEncoder: 'readonly',
+        crypto: 'readonly',
+        btoa: 'readonly',
+        atob: 'readonly'
       }
     },
     rules: {

@@ -780,6 +780,14 @@
             <i class="fas fa-plus"></i>
             <span>Добавить/дополнить тайминг</span>
           </button>
+          <button
+            v-if="isElectron"
+            class="nudity-info-button obs-button"
+            @click="showObsSettings = true"
+          >
+            <i class="fas fa-cog"></i>
+            <span>Настройки OBS</span>
+          </button>
         </div>
       </div>
     </div>
@@ -1054,6 +1062,126 @@
       </div>
     </div>
   </div>
+
+  <div v-if="showObsSettings" class="timing-modal obs-modal">
+    <div class="timing-modal-content obs-modal-content">
+      <div class="timing-modal-header">
+        <h3>Настройки OBS WebSocket</h3>
+        <button class="close-modal-btn" @click="showObsSettings = false">
+          <i class="fas fa-times"></i>
+        </button>
+      </div>
+      <div class="obs-settings-form">
+        <div class="obs-setting-group">
+          <label class="obs-checkbox-label">
+            <input type="checkbox" v-model="obsEnabled" @change="handleObsEnabledChange" />
+            <span>Использовать автоблюр в OBS</span>
+          </label>
+          <div class="obs-setting-description">
+            Если включено, автоблюр будет применяться через OBS WebSocket вместо внутреннего блюра
+          </div>
+        </div>
+
+        <div v-if="obsEnabled" class="obs-connection-settings">
+          <div class="obs-setting-group">
+            <label>Хост OBS WebSocket:</label>
+            <input type="text" v-model="obsHost" placeholder="localhost" class="obs-input" />
+          </div>
+
+          <div class="obs-setting-group">
+            <label>Порт OBS WebSocket:</label>
+            <input type="number" v-model="obsPort" placeholder="4455" class="obs-input" />
+          </div>
+
+          <div class="obs-setting-group">
+            <label>Пароль (если установлен):</label>
+            <input
+              type="password"
+              v-model="obsPassword"
+              placeholder="Оставьте пустым если пароль не установлен"
+              class="obs-input"
+            />
+          </div>
+
+          <div v-if="obsConnected" class="obs-setting-group">
+            <label>Выбор фильтра для блюра:</label>
+            <div v-if="obsFiltersFound.length === 0" class="obs-warning">
+              ⚠️ Фильтры не найдены в OBS. Убедитесь, что в источниках есть фильтры.
+            </div>
+            <div v-else class="obs-filter-selection">
+              <select
+                v-model="selectedFilterId"
+                @change="handleFilterSelect"
+                class="obs-filter-select"
+              >
+                <option value="">Выберите фильтр</option>
+                <option v-for="filter in obsFiltersFound" :key="filter.id" :value="filter.id">
+                  {{ filter.sourceName }} - {{ filter.filterName }} ({{ filter.sceneName }})
+                </option>
+              </select>
+              <div v-if="selectedFilter" class="selected-filter-info">
+                <div class="filter-details">
+                  <strong>{{ selectedFilter.filterName }}</strong> в источнике
+                  <strong>{{ selectedFilter.sourceName }}</strong>
+                </div>
+                <span class="filter-status" :class="{ enabled: selectedFilter.enabled }">
+                  Статус: {{ selectedFilter.enabled ? '✅ Включен' : '⭕ Отключен' }}
+                </span>
+              </div>
+              <div class="obs-info">
+                💡 Найдено {{ obsFiltersFound.length }} фильтров. Выберите любой для использования в
+                качестве блюра.
+              </div>
+            </div>
+          </div>
+
+          <div class="obs-setting-group">
+            <label class="obs-checkbox-label">
+              <input type="checkbox" v-model="showObsInOverlay" />
+              <span>Показывать статус OBS в видео оверлее</span>
+            </label>
+            <div class="obs-setting-description">
+              Отображает информацию о выбранном фильтре OBS в видео оверлее
+            </div>
+          </div>
+
+          <div class="obs-status" :class="{ connected: obsConnected }">
+            {{ obsConnected ? 'Подключен к OBS' : 'Не подключен к OBS' }}
+          </div>
+
+          <div class="obs-actions">
+            <button
+              class="obs-action-btn connect-btn"
+              @click="handleObsConnect"
+              :disabled="obsConnecting"
+            >
+              <i v-if="obsConnecting" class="fas fa-spinner fa-spin"></i>
+              <i v-else class="fas fa-plug"></i>
+              {{ obsConnected ? 'Переподключиться' : 'Подключиться' }}
+            </button>
+
+            <button
+              class="obs-action-btn test-btn"
+              @click="handleObsTestBlur"
+              :disabled="!obsConnected || obsFiltersFound.length === 0"
+            >
+              <i class="fas fa-eye"></i>
+              Тестировать блюр
+            </button>
+
+            <button
+              class="obs-action-btn refresh-btn"
+              @click="handleObsRefreshFilters"
+              :disabled="!obsConnected"
+            >
+              <i class="fas fa-sync"></i>
+              Обновить фильтры
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
 </template>
 
 <script setup>
@@ -1081,6 +1209,7 @@ import { useBackgroundStore } from '@/store/background'
 import { useMainStore } from '@/store/main'
 import { useAuthStore } from '@/store/auth'
 import { useNavbarStore } from '@/store/navbar'
+import { usePlayerStore } from '@/store/player'
 import { computed, onMounted, onUnmounted, ref, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import Notification from '@/components/notification/ToastMessage.vue'
@@ -1094,6 +1223,7 @@ const infoLoading = ref(true)
 const mainStore = useMainStore()
 const authStore = useAuthStore()
 const backgroundStore = useBackgroundStore()
+const playerStore = usePlayerStore()
 const route = useRoute()
 const router = useRouter()
 const kp_id = ref(route.params.kp_id)
@@ -1544,6 +1674,23 @@ watch(
 onMounted(() => {
   window.selectedNudityTimings = Array.from(selectedTimings.value)
   window.overlayNudityTimings = Array.from(overlayTimings.value)
+
+  const checkObsSources = setInterval(() => {
+    if (window.obsSources && Array.isArray(window.obsSources)) {
+      obsSources.value = window.obsSources
+    }
+
+    if (window.getOBSFiltersInfo) {
+      const filtersInfo = window.getOBSFiltersInfo()
+      if (filtersInfo && Array.isArray(filtersInfo)) {
+        playerStore.updateObsSettings({ filtersFound: filtersInfo })
+      }
+    }
+  }, 1000)
+
+  onUnmounted(() => {
+    clearInterval(checkObsSources)
+  })
 })
 
 onUnmounted(() => {
@@ -1655,6 +1802,49 @@ const processingTimingId = ref(null)
 const isApproving = ref(false)
 const isMarkingCleanText = ref(false)
 const timingFilter = ref('all')
+
+// OBS Settings
+const showObsSettings = ref(false)
+const obsConnecting = ref(false)
+
+const obsEnabled = computed({
+  get: () => playerStore.obsSettings.enabled,
+  set: (value) => playerStore.updateObsSettings({ enabled: value })
+})
+
+const obsHost = computed({
+  get: () => playerStore.obsSettings.host,
+  set: (value) => playerStore.updateObsSettings({ host: value })
+})
+
+const obsPort = computed({
+  get: () => playerStore.obsSettings.port,
+  set: (value) => playerStore.updateObsSettings({ port: value })
+})
+
+const obsPassword = computed({
+  get: () => playerStore.obsSettings.password,
+  set: (value) => playerStore.updateObsSettings({ password: value })
+})
+
+const obsConnected = computed(() => playerStore.obsSettings.connected)
+const obsSources = ref([])
+const obsFiltersFound = computed(() => playerStore.obsSettings.filtersFound)
+
+const selectedFilterId = computed({
+  get: () => playerStore.obsSettings.selectedFilterId,
+  set: (value) => playerStore.setObsSelectedFilter(value)
+})
+
+const selectedFilter = computed(() => {
+  if (!selectedFilterId.value) return null
+  return obsFiltersFound.value.find((filter) => filter.id === selectedFilterId.value)
+})
+
+const showObsInOverlay = computed({
+  get: () => playerStore.obsSettings.showObsInOverlay,
+  set: (value) => playerStore.updateObsSettings({ showObsInOverlay: value })
+})
 
 const handleApproveTiming = async (timingId) => {
   if (isProcessingTiming.value) return
@@ -1899,6 +2089,65 @@ function getOverlayParserResult() {
     }
   }
   return allRanges
+}
+
+// OBS Functions
+const handleObsEnabledChange = () => {
+  if (obsEnabled.value) {
+    handleObsConnect()
+  }
+}
+
+const handleObsConnect = async () => {
+  if (obsConnecting.value) return
+
+  obsConnecting.value = true
+  try {
+    if (window.connectToOBS) {
+      await window.connectToOBS()
+      setTimeout(() => {
+        if (window.obsSources) {
+          obsSources.value = window.obsSources
+        }
+      }, 1000)
+      notificationRef.value?.showNotification('Подключение к OBS...')
+    } else {
+      notificationRef.value?.showNotification('Плеер не загружен')
+    }
+  } catch (error) {
+    console.error('Error connecting to OBS:', error)
+    notificationRef.value?.showNotification('Ошибка подключения к OBS')
+  } finally {
+    obsConnecting.value = false
+  }
+}
+
+const handleObsTestBlur = () => {
+  if (!selectedFilterId.value) {
+    notificationRef.value?.showNotification('Выберите фильтр для тестирования')
+    return
+  }
+
+  if (window.testOBSBlur) {
+    window.testOBSBlur(selectedFilterId.value)
+  } else {
+    notificationRef.value?.showNotification('OBS функции недоступны')
+  }
+}
+
+const handleObsRefreshFilters = () => {
+  if (window.refreshOBSFilters) {
+    window.refreshOBSFilters()
+    notificationRef.value?.showNotification('Поиск фильтров...')
+  } else {
+    notificationRef.value?.showNotification('OBS функции недоступны')
+  }
+}
+
+const handleFilterSelect = () => {
+  if (selectedFilterId.value) {
+    notificationRef.value?.showNotification(`Выбран фильтр: ${selectedFilter.value?.sourceName}`)
+  }
 }
 </script>
 
@@ -4345,5 +4594,269 @@ function getOverlayParserResult() {
   background: var(--accent-color) !important;
   transform: translateY(-2px) !important;
   box-shadow: 0 4px 8px var(--accent-semi-transparent) !important;
+}
+
+.obs-button {
+  background: linear-gradient(135deg, #ff6b35 0%, #f7931e 100%) !important;
+  color: white !important;
+}
+
+.obs-button:hover {
+  background: linear-gradient(135deg, #e55a2b 0%, #e68900 100%) !important;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(255, 107, 53, 0.4);
+}
+
+.obs-modal {
+  z-index: 10001;
+}
+
+.obs-modal-content {
+  max-width: 600px;
+  width: 90%;
+  max-height: 80vh;
+  overflow-y: auto;
+}
+
+.obs-settings-form {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  padding: 20px 0;
+}
+
+.obs-setting-group {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.obs-checkbox-label {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  cursor: pointer;
+  font-size: 16px;
+  font-weight: 500;
+  color: #fff;
+}
+
+.obs-checkbox-label input[type='checkbox'] {
+  width: 18px;
+  height: 18px;
+  accent-color: #ff6b35;
+}
+
+.obs-setting-description {
+  font-size: 13px;
+  color: rgba(255, 255, 255, 0.7);
+  margin-top: 4px;
+  line-height: 1.4;
+}
+
+.obs-connection-settings {
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 12px;
+  padding: 20px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.obs-setting-group label {
+  color: #fff;
+  font-size: 14px;
+  font-weight: 500;
+  margin-bottom: 6px;
+}
+
+.obs-input,
+.obs-select {
+  width: 100%;
+  padding: 10px 12px;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 6px;
+  background: rgba(255, 255, 255, 0.1);
+  color: #fff;
+  font-size: 14px;
+  transition: all 0.3s ease;
+}
+
+.obs-input:focus,
+.obs-select:focus {
+  outline: none;
+  border-color: #ff6b35;
+  box-shadow: 0 0 0 2px rgba(255, 107, 53, 0.2);
+}
+
+.obs-range {
+  width: 100%;
+  height: 6px;
+  border-radius: 3px;
+  background: rgba(255, 255, 255, 0.2);
+  outline: none;
+  accent-color: #ff6b35;
+}
+
+.obs-status {
+  padding: 12px 16px;
+  border-radius: 8px;
+  text-align: center;
+  font-weight: 500;
+  background: rgba(244, 67, 54, 0.2);
+  color: #f44336;
+  border: 1px solid rgba(244, 67, 54, 0.3);
+}
+
+.obs-status.connected {
+  background: rgba(76, 175, 80, 0.2);
+  color: #4caf50;
+  border: 1px solid rgba(76, 175, 80, 0.3);
+}
+
+.obs-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-top: 16px;
+}
+
+.obs-action-btn {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 16px;
+  border: none;
+  border-radius: 6px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  flex: 1;
+  min-width: 140px;
+  justify-content: center;
+}
+
+.obs-action-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  transform: none !important;
+}
+
+.connect-btn {
+  background: linear-gradient(135deg, #9c27b0, #7b1fa2);
+  color: white;
+}
+
+.connect-btn:hover:not(:disabled) {
+  background: linear-gradient(135deg, #8e24aa, #6a1b9a);
+  transform: translateY(-1px);
+}
+
+.test-btn {
+  background: linear-gradient(135deg, #2196f3, #0b7dda);
+  color: white;
+}
+
+.test-btn:hover:not(:disabled) {
+  background: linear-gradient(135deg, #1976d2, #0b6cb7);
+  transform: translateY(-1px);
+}
+
+.refresh-btn {
+  background: linear-gradient(135deg, #ff9800, #e68900);
+  color: white;
+}
+
+.refresh-btn:hover:not(:disabled) {
+  background: linear-gradient(135deg, #f57c00, #bf6900);
+  transform: translateY(-1px);
+}
+
+.obs-warning {
+  padding: 12px;
+  background: rgba(255, 152, 0, 0.2);
+  color: #ff9800;
+  border: 1px solid rgba(255, 152, 0, 0.3);
+  border-radius: 6px;
+  font-size: 14px;
+  line-height: 1.4;
+}
+
+.obs-filters-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.obs-filter-selection {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.obs-filter-select {
+  padding: 10px 12px;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 6px;
+  color: #fff;
+  font-size: 14px;
+  outline: none;
+  transition: all 0.3s ease;
+}
+
+.obs-filter-select:focus {
+  border-color: var(--accent-color);
+  box-shadow: 0 0 5px var(--accent-semi-transparent);
+}
+
+.obs-filter-select option {
+  background: #2a2a2a;
+  color: #fff;
+}
+
+.selected-filter-info {
+  padding: 12px;
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 6px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.filter-details {
+  font-size: 14px;
+  color: #fff;
+  text-align: center;
+}
+
+.filter-status {
+  font-size: 13px;
+  color: #f44336;
+  font-weight: 500;
+  text-align: center;
+}
+
+.filter-status.enabled {
+  color: #4caf50;
+}
+
+.obs-info {
+  padding: 10px 12px;
+  background: rgba(76, 175, 80, 0.1);
+  border: 1px solid rgba(76, 175, 80, 0.3);
+  border-radius: 6px;
+  color: #4caf50;
+  font-size: 13px;
+  text-align: center;
+}
+
+@media (max-width: 600px) {
+  .obs-actions {
+    flex-direction: column;
+  }
+
+  .obs-action-btn {
+    min-width: unset;
+  }
 }
 </style>
