@@ -15,6 +15,10 @@
         <button :class="{ active: searchType === 'imdb' }" @click="setSearchType('imdb')">
           ID IMDB
         </button>
+        <button class="random-button" @click="openRandomMovie" :disabled="randomLoading">
+          <i class="fas fa-dice"></i>
+          {{ randomLoading ? 'Подбираем...' : 'Случайный фильм' }}
+        </button>
       </div>
 
       <!-- Поиск -->
@@ -105,11 +109,20 @@
       </div>
     </div>
     <FooterDonaters />
+
+    <RandomMovieModal
+      :is-open="showRandomModal"
+      :movie="randomMovie"
+      :loading="randomLoading"
+      :error="randomError"
+      @close="closeRandomModal"
+      @get-new-movie="fetchRandomMovie"
+    />
   </div>
 </template>
 
 <script setup>
-import { apiSearch, getKpIDfromIMDB, getKpIDfromSHIKI } from '@/api/movies'
+import { apiSearch, getKpIDfromIMDB, getKpIDfromSHIKI, getRandomMovie } from '@/api/movies'
 import { handleApiError } from '@/constants'
 import { getMyLists, delAllFromList } from '@/api/user'
 import BaseModal from '@/components/BaseModal.vue'
@@ -125,6 +138,7 @@ import debounce from 'lodash/debounce'
 import { watchEffect, onMounted, ref, watch, computed } from 'vue'
 import { useRouter } from 'vue-router'
 import SpinnerLoading from '@/components/SpinnerLoading.vue'
+import RandomMovieModal from '@/components/RandomMovieModal.vue'
 
 const mainStore = useMainStore()
 const authStore = useAuthStore()
@@ -143,6 +157,11 @@ const history = ref([])
 
 const showLayoutWarning = ref(false)
 const suggestedLayout = ref('')
+
+const showRandomModal = ref(false)
+const randomMovie = ref(null)
+const randomLoading = ref(false)
+const randomError = ref('')
 
 const searchInput = ref(null)
 
@@ -366,6 +385,33 @@ const focusFirstMovieCard = () => {
     }
   }
 }
+
+const openRandomMovie = () => {
+  showRandomModal.value = true
+  fetchRandomMovie()
+}
+
+const closeRandomModal = () => {
+  showRandomModal.value = false
+  randomMovie.value = null
+  randomError.value = ''
+}
+
+const fetchRandomMovie = async () => {
+  randomLoading.value = true
+  randomError.value = ''
+
+  try {
+    const response = await getRandomMovie()
+    randomMovie.value = response
+  } catch (error) {
+    const { message } = handleApiError(error)
+    randomError.value = message
+    console.error('Ошибка при получении случайного фильма:', error)
+  } finally {
+    randomLoading.value = false
+  }
+}
 </script>
 
 <style scoped>
@@ -419,6 +465,33 @@ const focusFirstMovieCard = () => {
 
 .search-type-buttons button:hover {
   color: #ffffff;
+}
+
+.random-button {
+  background: var(--accent-color) !important;
+  color: white !important;
+  border-radius: 8px;
+  padding: 8px 16px !important;
+  font-weight: 600;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.random-button:hover:not(:disabled) {
+  background: var(--accent-hover-color) !important;
+  transform: translateY(-1px);
+}
+
+.random-button:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.random-button::after {
+  display: none;
 }
 
 .search-container {

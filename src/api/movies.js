@@ -142,6 +142,11 @@ const getAllTimingSubmissions = async () => {
   return data
 }
 
+const getRandomMovie = async () => {
+  const { data } = await apiCall((api) => api.get('/chance'))
+  return data
+}
+
 const approveTiming = async (submissionId) => {
   const { data } = await apiCall((api) => api.post(`/timings/submission/${submissionId}/approve`))
   return data
@@ -180,6 +185,7 @@ export {
   submitTiming,
   getTopTimingSubmitters,
   getAllTimingSubmissions,
+  getRandomMovie,
   approveTiming,
   rejectTiming,
   markAsCleanText

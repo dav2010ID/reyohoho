@@ -1049,7 +1049,7 @@ const navbarStore = useNavbarStore()
 const trailerStore = useTrailerStore()
 const notificationRef = ref(null)
 
-const areTrailersActive = trailerStore.areTrailersActive
+const areTrailersActive = computed(() => trailerStore.areTrailersActive)
 const activeTrailerIndex = ref(null)
 const showAllSequels = ref(false)
 const showAllSimilars = ref(false)
