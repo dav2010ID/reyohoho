@@ -1129,8 +1129,7 @@
                 </span>
               </div>
               <div class="obs-info">
-                💡 Найдено {{ obsFiltersFound.length }} фильтров. Выберите любой для использования в
-                качестве блюра.
+                💡 Найдено {{ obsFiltersFound.length }} фильтров. Выберите фильтр блюра.
               </div>
             </div>
           </div>
@@ -1140,9 +1139,6 @@
               <input type="checkbox" v-model="showObsInOverlay" />
               <span>Показывать статус OBS в видео оверлее</span>
             </label>
-            <div class="obs-setting-description">
-              Отображает информацию о выбранном фильтре OBS в видео оверлее
-            </div>
           </div>
 
           <div class="obs-status" :class="{ connected: obsConnected }">
@@ -4614,21 +4610,28 @@ const handleFilterSelect = () => {
 .obs-modal-content {
   max-width: 600px;
   width: 90%;
-  max-height: 80vh;
+  max-height: 85vh;
   overflow-y: auto;
+  padding: 15px;
+  box-sizing: border-box;
 }
 
 .obs-settings-form {
   display: flex;
   flex-direction: column;
-  gap: 20px;
-  padding: 20px 0;
+  gap: 15px;
+  padding: 0;
 }
 
 .obs-setting-group {
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 6px;
+  margin-bottom: 12px;
+}
+
+.obs-setting-group:last-child {
+  margin-bottom: 0;
 }
 
 .obs-checkbox-label {
@@ -4650,15 +4653,16 @@ const handleFilterSelect = () => {
 .obs-setting-description {
   font-size: 13px;
   color: rgba(255, 255, 255, 0.7);
-  margin-top: 4px;
-  line-height: 1.4;
+  margin-top: 6px;
+  line-height: 1.3;
 }
 
 .obs-connection-settings {
   background: rgba(255, 255, 255, 0.05);
   border-radius: 12px;
-  padding: 20px;
+  padding: 15px;
   border: 1px solid rgba(255, 255, 255, 0.1);
+  overflow: hidden;
 }
 
 .obs-setting-group label {
@@ -4671,13 +4675,15 @@ const handleFilterSelect = () => {
 .obs-input,
 .obs-select {
   width: 100%;
-  padding: 10px 12px;
+  padding: 8px 10px;
   border: 1px solid rgba(255, 255, 255, 0.2);
   border-radius: 6px;
   background: rgba(255, 255, 255, 0.1);
   color: #fff;
   font-size: 14px;
   transition: all 0.3s ease;
+  margin-bottom: 6px;
+  box-sizing: border-box;
 }
 
 .obs-input:focus,
@@ -4715,15 +4721,15 @@ const handleFilterSelect = () => {
 .obs-actions {
   display: flex;
   flex-wrap: wrap;
-  gap: 12px;
-  margin-top: 16px;
+  gap: 10px;
+  margin-top: 12px;
 }
 
 .obs-action-btn {
   display: flex;
   align-items: center;
   gap: 8px;
-  padding: 10px 16px;
+  padding: 8px 14px;
   border: none;
   border-radius: 6px;
   font-size: 14px;
