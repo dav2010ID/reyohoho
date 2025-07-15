@@ -1818,7 +1818,6 @@ const createVideoOverlay = (iframeDoc, video) => {
 
   const mainInfo = iframeDoc.createElement('div')
   mainInfo.style.cssText = `
-    background: linear-gradient(180deg, rgba(0, 0, 0, 0.8) 0%, rgba(0, 0, 0, 0.4) 70%, transparent 100%) !important;
     color: white !important;
     padding: 20px !important;
     text-align: left !important;
@@ -1849,6 +1848,7 @@ const createVideoOverlay = (iframeDoc, video) => {
     gap: 8px !important;
     flex-wrap: wrap !important;
     color: rgba(255, 255, 255, 0.6) !important;
+    margin-left: 12px !important;
   `
 
   const timingsPanel = iframeDoc.createElement('div')
@@ -2236,9 +2236,9 @@ const updateVideoOverlay = () => {
     const currentTimeFormatted = formatSecondsToTime(currentVideoTime.value)
     const totalTimeFormatted = formatSecondsToTime(totalVideoDuration.value)
     progressHtml = `
-      <span style="font-family: 'Courier New', monospace; background: rgba(0, 0, 0, 0.6); padding: 2px 8px; border-radius: 4px; color: rgba(255, 255, 255, 0.6);">${currentTimeFormatted}</span>
+      <span style="font-family: 'Courier New', monospace; color: rgba(255, 255, 255, 0.6);">${currentTimeFormatted}</span>
       <span style="opacity: 0.6;">/</span>
-      <span style="font-family: 'Courier New', monospace; background: rgba(0, 0, 0, 0.6); padding: 2px 8px; border-radius: 4px; color: rgba(255, 255, 255, 0.6);">${totalTimeFormatted}</span>
+      <span style="font-family: 'Courier New', monospace; color: rgba(255, 255, 255, 0.6);">${totalTimeFormatted}</span>
     `
   }
 
@@ -2264,7 +2264,7 @@ const updateVideoOverlay = () => {
     }
 
     const obsStatusHtml = `
-      <span style="background: rgba(0, 0, 0, 0.6); padding: 2px 8px; border-radius: 4px; color: ${statusColor};">
+      <span style="color: ${statusColor};">
         OBS: ${statusText}
       </span>
     `
