@@ -897,9 +897,79 @@ const applyCompressorEffect = async (enabled) => {
   }
 }
 
+const enableBlur = () => {
+  if (!playerIframe.value) return
+
+  try {
+    const iframe = playerIframe.value
+    const iframeDoc = iframe.contentDocument || iframe.contentWindow.document
+    if (!iframeDoc) return
+
+    const videos = iframeDoc.querySelectorAll('video')
+    if (videos.length > 0) {
+      const video = videos[0]
+      if (!video.style.filter.includes('blur')) {
+        video.style.filter = 'blur(50px)'
+      }
+    } else {
+      if (!iframe.style.filter.includes('blur')) {
+        iframe.style.filter = 'blur(50px)'
+      }
+    }
+  } catch (error) {
+    console.log('Error enabling blur:', error)
+  }
+}
+
+const disableBlur = () => {
+  if (!playerIframe.value) return
+
+  try {
+    const iframe = playerIframe.value
+    const iframeDoc = iframe.contentDocument || iframe.contentWindow.document
+    if (!iframeDoc) return
+
+    const videos = iframeDoc.querySelectorAll('video')
+    if (videos.length > 0) {
+      const video = videos[0]
+      if (video.style.filter.includes('blur')) {
+        video.style.filter = ''
+      }
+    } else {
+      if (iframe.style.filter.includes('blur')) {
+        iframe.style.filter = ''
+      }
+    }
+  } catch (error) {
+    console.log('Error disabling blur:', error)
+  }
+}
+
 const toggleBlur = () => {
   if (isElectron.value) {
-    window.electronAPI.sendHotKey('F2')
+    try {
+      const iframe = playerIframe.value
+      const iframeDoc = iframe.contentDocument || iframe.contentWindow.document
+      if (!iframeDoc) return
+
+      const videos = iframeDoc.querySelectorAll('video')
+      if (videos.length > 0) {
+        const video = videos[0]
+        if (video.style.filter.includes('blur')) {
+          video.style.filter = ''
+        } else {
+          video.style.filter = 'blur(50px)'
+        }
+      } else {
+        if (iframe.style.filter.includes('blur')) {
+          iframe.style.filter = ''
+        } else {
+          iframe.style.filter = 'blur(50px)'
+        }
+      }
+    } catch (error) {
+      console.log('Error toggling blur:', error)
+    }
   } else {
     showMessageToast('Доступно только в приложении ReYohoho Desktop')
     window.open('https://t.me/ReYohoho/126', '_blank')
@@ -1121,7 +1191,6 @@ const startVideoPositionMonitoring = (isDebug = false) => {
           const currentTime = video.currentTime
           const selectedTimings = []
           const activeTimingIds = []
-          const isObsBlurEnabled = obsSettings.value.enabled && obsConnected.value
 
           if (
             window.overlayNudityTimings &&
@@ -1135,40 +1204,19 @@ const startVideoPositionMonitoring = (isDebug = false) => {
                 if (parsedRanges && parsedRanges.length > 0) {
                   const intervals = []
 
-                  if (!isObsBlurEnabled) {
-                    for (const [start, end] of parsedRanges) {
-                      let status = 'normal'
-                      if (currentTime >= start && currentTime <= end) {
-                        status = 'active'
-                        activeTimingIds.push(timing.id)
-                      } else if (start > currentTime && start - currentTime <= 20) {
-                        status = 'upcoming'
-                      }
-
-                      intervals.push({
-                        text: `[${formatSecondsToTime(start)}-${formatSecondsToTime(end)}]`,
-                        status: status
-                      })
+                  for (const [start, end] of parsedRanges) {
+                    let status = 'normal'
+                    if (currentTime >= start && currentTime <= end) {
+                      status = 'active'
+                      activeTimingIds.push(timing.id)
+                    } else if (start > currentTime && start - currentTime <= 5) {
+                      status = 'upcoming'
                     }
-                  } else {
-                    for (const [start, end] of parsedRanges) {
-                      let status = 'normal'
-                      if (isObsBlurEnabled && currentTime >= start && currentTime <= end) {
-                        status = 'active'
-                        activeTimingIds.push(timing.id)
-                      } else if (
-                        isObsBlurEnabled &&
-                        start > currentTime &&
-                        start - currentTime <= 20
-                      ) {
-                        status = 'upcoming'
-                      }
 
-                      intervals.push({
-                        text: `[${formatSecondsToTime(start)}-${formatSecondsToTime(end)}]`,
-                        status: status
-                      })
-                    }
+                    intervals.push({
+                      text: `[${formatSecondsToTime(start)}-${formatSecondsToTime(end)}]`,
+                      status: status
+                    })
                   }
 
                   selectedTimings.push({
@@ -1233,11 +1281,11 @@ const startVideoPositionMonitoring = (isDebug = false) => {
             }
           } else if (shouldBlur && !blurApplied && isElectron.value) {
             // Internal blur logic
-            window.electronAPI.sendHotKey('F2')
+            enableBlur()
             blurApplied = true
             console.log('Blur applied at', currentTime.toFixed(2), 'seconds')
           } else if (!shouldBlur && blurApplied && !obsSettings.value.enabled) {
-            window.electronAPI.sendHotKey('F2')
+            disableBlur()
             blurApplied = false
             console.log('Blur removed at', currentTime.toFixed(2), 'seconds')
           }
@@ -1777,6 +1825,11 @@ const showOverlaySettings = () => {
         <input type="checkbox" id="showTimingsOnMouseMove" ${settings.showTimingsOnMouseMove ? 'checked' : ''} style="width: 18px; height: 18px; accent-color: #ff6b35;">
         <span style="font-size: 16px;">Показывать тайминги только при движении мышки</span>
       </label>
+      
+      <label style="display: flex; align-items: center; gap: 12px; color: white; cursor: pointer; padding: 8px; border-radius: 8px; background: rgba(255, 255, 255, 0.05);">
+        <input type="checkbox" id="highlightTimings" ${settings.highlightTimings ? 'checked' : ''} style="width: 18px; height: 18px; accent-color: #ff6b35;">
+        <span style="font-size: 16px;">Подсвечивать близкие и текущие тайминги</span>
+      </label>
 
     </div>
     
@@ -1803,7 +1856,8 @@ const showOverlaySettings = () => {
       showTitle: modalContent.querySelector('#showTitle').checked,
       showDuration2: modalContent.querySelector('#showDuration').checked,
       showBackground: modalContent.querySelector('#showBackground').checked,
-      showTimingsOnMouseMove: modalContent.querySelector('#showTimingsOnMouseMove').checked
+      showTimingsOnMouseMove: modalContent.querySelector('#showTimingsOnMouseMove').checked,
+      highlightTimings: modalContent.querySelector('#highlightTimings').checked
     }
     overlaySettings.value = newSettings
     window.electronAPI?.showToast('Настройки оверлея сохранены')
@@ -2436,10 +2490,10 @@ const updateVideoOverlay = () => {
         const intervalSpan = iframeDoc.createElement('span')
         intervalSpan.textContent = interval.text
 
-        if (interval.status === 'active') {
+        if (interval.status === 'active' && overlaySettings.value.highlightTimings) {
           intervalSpan.style.color = '#ff4444'
           intervalSpan.style.fontWeight = 'bold'
-        } else if (interval.status === 'upcoming') {
+        } else if (interval.status === 'upcoming' && overlaySettings.value.highlightTimings) {
           intervalSpan.style.color = '#ff6b35'
           intervalSpan.style.fontWeight = '500'
         } else {
@@ -2582,24 +2636,6 @@ onMounted(() => {
               } else {
                 setTimeout(initializeOverlay, 3000 - timeSinceLoad)
               }
-            } else {
-              const checkVideo = setInterval(() => {
-                try {
-                  const video = iframeDoc.querySelector('video')
-                  if (video) {
-                    clearInterval(checkVideo)
-                    const timeSinceLoad = Date.now() - (window.iframeLoadTime || 0)
-                    if (timeSinceLoad >= 3000) {
-                      createVideoOverlay(iframeDoc, video)
-                    } else {
-                      setTimeout(() => createVideoOverlay(iframeDoc, video), 3000 - timeSinceLoad)
-                    }
-                  }
-                } catch (e) {
-                  console.log('Waiting for video element...', e)
-                }
-              }, 1000)
-              setTimeout(() => clearInterval(checkVideo), 15000)
             }
           }
         } catch (error) {
