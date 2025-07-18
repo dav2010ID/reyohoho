@@ -623,7 +623,7 @@
                   <button class="nudity-info-button" @click="handleShowParse(timing)">
                     {{ showParseResult[timing.id] ? 'Скрыть парсер' : 'Показать парсер' }}
                   </button>
-                  <template v-if="selectedTimings.has(timing.id)">
+                  <!-- <template v-if="selectedTimings.has(timing.id)">
                     <button
                       class="nudity-info-button"
                       @click="onRemoveFromAutoblur(timing.id)"
@@ -642,7 +642,7 @@
                       <i class="fas fa-plus"></i>
                       <span>Добавить в автоблюр</span>
                     </button>
-                  </template>
+                  </template> -->
 
                   <template v-if="overlayTimings.has(timing.id)">
                     <button
@@ -780,14 +780,14 @@
             <i class="fas fa-plus"></i>
             <span>Добавить/дополнить тайминг</span>
           </button>
-          <button
+          <!-- <button
             v-if="isElectron"
             class="nudity-info-button obs-button"
             @click="showObsSettings = true"
           >
             <i class="fas fa-cog"></i>
             <span>Настройки OBS</span>
-          </button>
+          </button> -->
         </div>
       </div>
     </div>
@@ -2003,6 +2003,7 @@ function handleShowParse(timing) {
 
 const isElectron = computed(() => !!window.electronAPI)
 
+// eslint-disable-next-line no-unused-vars
 function onAddToAutoblur(id) {
   if (!isElectron.value) {
     if (notificationRef.value) {
@@ -2029,6 +2030,7 @@ function closeAutoblurWarning() {
   timingIdToAdd.value = null
 }
 
+// eslint-disable-next-line no-unused-vars
 function onRemoveFromAutoblur(id) {
   if (!isElectron.value) {
     if (notificationRef.value) {
@@ -2050,6 +2052,7 @@ function onAddToOverlay(id) {
     }
     return
   }
+  showAutoblurWarning.value = true
   toggleOverlaySelection(id)
 }
 
