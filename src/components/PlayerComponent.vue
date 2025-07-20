@@ -1169,7 +1169,7 @@ const startVideoPositionMonitoring = (isDebug = false) => {
           !overlayCreationInProgress.value
         ) {
           const timeSinceLoad = Date.now() - (window.iframeLoadTime || 0)
-          if (timeSinceLoad >= 3000) {
+          if (timeSinceLoad >= 100) {
             try {
               createVideoOverlay(iframeDoc, video)
             } catch (error) {
@@ -1318,7 +1318,7 @@ const onIframeLoad = () => {
         console.log('Error creating overlay on iframe load:', error)
         overlayCreationInProgress.value = false
       }
-    }, 3000)
+    }, 100)
   }
 }
 
@@ -1471,10 +1471,10 @@ watch(videoOverlayEnabled2, (enabled) => {
             const video = iframeDoc.querySelector('video')
             if (video) {
               const timeSinceLoad = Date.now() - (window.iframeLoadTime || 0)
-              if (timeSinceLoad >= 3000) {
+              if (timeSinceLoad >= 100) {
                 createVideoOverlay(iframeDoc, video)
               } else {
-                setTimeout(checkAndCreate, 3000 - timeSinceLoad)
+                setTimeout(checkAndCreate, 100 - timeSinceLoad)
               }
             }
           }
@@ -1669,10 +1669,10 @@ const toggleVideoOverlay = () => {
             const video = iframeDoc.querySelector('video')
             if (video) {
               const timeSinceLoad = Date.now() - (window.iframeLoadTime || 0)
-              if (timeSinceLoad >= 3000) {
+              if (timeSinceLoad >= 100) {
                 createVideoOverlay(iframeDoc, video)
               } else {
-                setTimeout(createOverlayAfterDelay, 3000 - timeSinceLoad)
+                setTimeout(createOverlayAfterDelay, 100 - timeSinceLoad)
               }
             }
           }
@@ -2877,10 +2877,10 @@ onMounted(() => {
             const video = iframeDoc.querySelector('video')
             if (video) {
               const timeSinceLoad = Date.now() - (window.iframeLoadTime || 0)
-              if (timeSinceLoad >= 3000) {
+              if (timeSinceLoad >= 100) {
                 createVideoOverlay(iframeDoc, video)
               } else {
-                setTimeout(initializeOverlay, 3000 - timeSinceLoad)
+                setTimeout(initializeOverlay, 100 - timeSinceLoad)
               }
             }
           }
