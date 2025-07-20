@@ -50,6 +50,11 @@ const getTGAuthResult = async (token) => {
   return data
 }
 
+const updateUserName = async (name) => {
+  const { data } = await apiCall((api) => api.put('/user/name', { name }))
+  return data
+}
+
 export {
   addToList,
   getMyLists,
@@ -59,5 +64,6 @@ export {
   generateToken,
   getTGAuthResult,
   getUserLists,
-  getListCounters
+  getListCounters,
+  updateUserName
 }

@@ -686,11 +686,13 @@
                   <br />
                   <span class="timing-author">
                     by {{ timing.username }}
-                    <i
-                      v-if="timing.user_id && timing.user_id !== 0"
-                      class="fas fa-user-check verified-icon"
-                      title="Авторизованный пользователь"
-                    ></i>
+                    <span
+                      v-if="timing.user_id && timing.user_id !== 0 && timing.user_timing_count > 0"
+                      class="timing-count"
+                      :title="`Авторизованный пользователь (${timing.user_timing_count} таймингов)`"
+                    >
+                      ({{ timing.user_timing_count }})
+                    </span>
                   </span>
                 </div>
                 <div
@@ -4943,5 +4945,18 @@ const handleFilterSelect = () => {
   .obs-action-btn {
     min-width: unset;
   }
+}
+
+.timing-author {
+  color: rgba(255, 255, 255, 0.7);
+  font-size: 0.85em;
+  font-style: italic;
+}
+
+.timing-count {
+  color: var(--accent-color);
+  font-weight: 500;
+  font-style: normal;
+  margin-left: 4px;
 }
 </style>

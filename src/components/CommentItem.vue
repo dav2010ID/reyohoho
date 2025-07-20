@@ -12,7 +12,7 @@
             <img
               v-if="avatarUrl"
               :src="avatarUrl"
-              :alt="comment?.username || 'Аноним'"
+              :alt="comment?.name || 'Аноним'"
               @error="handleAvatarError"
               onerror="this.onerror=null; this.style.display='none'; this.nextElementSibling.style.display='flex';"
             />
@@ -21,7 +21,7 @@
               class="avatar-placeholder"
               :style="{ display: avatarUrl ? 'none' : 'flex' }"
             >
-              {{ getInitials(comment?.username || 'Аноним') }}
+              {{ getInitials(comment?.name || 'Аноним') }}
             </div>
           </div>
         </router-link>
@@ -32,7 +32,7 @@
             rel="noopener noreferrer"
             class="username-link"
           >
-            <span class="username">{{ comment?.username || 'Аноним' }}</span>
+            <span class="username">{{ comment?.name || 'Аноним' }}</span>
           </router-link>
           <span v-if="comment?.user_movie_rating" class="user-rating">
             <i class="fas fa-star"></i>
@@ -291,7 +291,7 @@ export default {
       type: Object,
       required: true,
       default: () => ({
-        username: 'Аноним',
+        name: 'Аноним',
         user_avatar: null,
         content: '',
         created_at: new Date().toISOString(),

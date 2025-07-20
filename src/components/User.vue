@@ -15,12 +15,25 @@
       <div class="profile-info">
         <div class="info-item">
           <label>Имя:</label>
-          <span>{{ user.name }}</span>
-        </div>
-
-        <div class="info-item">
-          <label>Никнейм:</label>
-          <span>{{ user.username ?? 'Не указан' }}</span>
+          <div class="editable-field">
+            <span v-if="!isEditingName" @click="startEditName" class="editable-text">
+              {{ user.name }}
+              <i class="fas fa-edit edit-icon"></i>
+            </span>
+            <div v-else class="edit-input-container">
+              <input
+                v-model="editingName"
+                @keyup.enter="saveName"
+                @keyup.esc="cancelEditName"
+                @blur="saveName"
+                ref="nameInput"
+                class="edit-input"
+                maxlength="50"
+              />
+              <button @click="saveName" class="save-btn">✓</button>
+              <button @click="cancelEditName" class="cancel-btn">✕</button>
+            </div>
+          </div>
         </div>
       </div>
 
@@ -47,7 +60,7 @@
 </template>
 
 <script>
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, nextTick } from 'vue'
 import { useAuthStore } from '@/store/auth'
 import { useRouter } from 'vue-router'
 import { getBaseURL } from '@/api/axios'
@@ -61,6 +74,9 @@ export default {
     const router = useRouter()
     const user = ref(authStore.user)
     const photoURL = ref(null)
+    const isEditingName = ref(false)
+    const editingName = ref('')
+    const nameInput = ref(null)
 
     const confirmLogout = () => {
       showDialog.value = true
@@ -75,6 +91,32 @@ export default {
         await router.push('/login')
       }
       router.go(0)
+    }
+
+    const startEditName = () => {
+      editingName.value = user.value.name
+      isEditingName.value = true
+      nextTick(() => {
+        nameInput.value?.focus()
+        nameInput.value?.select()
+      })
+    }
+
+    const saveName = async () => {
+      if (editingName.value.trim() && editingName.value.trim() !== user.value.name) {
+        try {
+          await authStore.updateUserName(editingName.value.trim())
+          user.value.name = editingName.value.trim()
+        } catch (error) {
+          console.error('Ошибка при обновлении имени:', error)
+        }
+      }
+      isEditingName.value = false
+    }
+
+    const cancelEditName = () => {
+      isEditingName.value = false
+      editingName.value = ''
     }
 
     onMounted(async () => {
@@ -93,7 +135,13 @@ export default {
       showDialog,
       confirmLogout,
       logout,
-      photoURL
+      photoURL,
+      isEditingName,
+      editingName,
+      nameInput,
+      startEditName,
+      saveName,
+      cancelEditName
     }
   }
 }
@@ -150,6 +198,7 @@ export default {
 .info-item {
   display: flex;
   justify-content: space-between;
+  align-items: center;
   padding: 10px 0;
   border-bottom: 1px solid #eee;
 }
@@ -157,6 +206,81 @@ export default {
 .info-item label {
   font-weight: bold;
   color: #555;
+}
+
+.editable-field {
+  flex: 1;
+  margin-left: 10px;
+}
+
+.editable-text {
+  cursor: pointer;
+  padding: 2px 4px;
+  border-radius: 3px;
+  transition: background-color 0.2s;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.editable-text:hover {
+  background-color: rgba(0, 0, 0, 0.05);
+}
+
+.edit-icon {
+  font-size: 12px;
+  color: #999;
+  opacity: 0.7;
+  transition: opacity 0.2s ease;
+}
+
+.editable-text:hover .edit-icon {
+  opacity: 1;
+  color: var(--accent-color);
+}
+
+.edit-input-container {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.edit-input {
+  flex: 1;
+  padding: 4px 8px;
+  border: 1px solid var(--accent-color);
+  border-radius: 4px;
+  font-size: 14px;
+  background-color: white;
+  color: #333;
+}
+
+.save-btn,
+.cancel-btn {
+  padding: 4px 8px;
+  border: none;
+  border-radius: 3px;
+  cursor: pointer;
+  font-size: 12px;
+  transition: background-color 0.2s;
+}
+
+.save-btn {
+  background-color: #10b981;
+  color: white;
+}
+
+.save-btn:hover {
+  background-color: #059669;
+}
+
+.cancel-btn {
+  background-color: #ef4444;
+  color: white;
+}
+
+.cancel-btn:hover {
+  background-color: #dc2626;
 }
 
 .logout-btn {
