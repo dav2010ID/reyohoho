@@ -1763,6 +1763,47 @@ const getOBSFiltersInfo = () => {
   return obsFiltersFound.value
 }
 
+const exitFullscreen = () => {
+  try {
+    if (document.exitFullscreen) {
+      document.exitFullscreen()
+    } else if (document.webkitExitFullscreen) {
+      document.webkitExitFullscreen()
+    } else if (document.mozCancelFullScreen) {
+      document.mozCancelFullScreen()
+    } else if (document.msExitFullscreen) {
+      document.msExitFullscreen()
+    }
+
+    const iframe = playerIframe.value
+    if (iframe) {
+      const iframeDoc = iframe.contentDocument || iframe.contentWindow.document
+      if (iframeDoc) {
+        if (iframeDoc.exitFullscreen) {
+          iframeDoc.exitFullscreen()
+        } else if (iframeDoc.webkitExitFullscreen) {
+          iframeDoc.webkitExitFullscreen()
+        } else if (iframeDoc.mozCancelFullScreen) {
+          iframeDoc.mozCancelFullScreen()
+        } else if (iframeDoc.msExitFullscreen) {
+          iframeDoc.msExitFullscreen()
+        }
+
+        const video = iframeDoc.querySelector('video')
+        if (video) {
+          if (video.webkitExitFullscreen) {
+            video.webkitExitFullscreen()
+          } else if (video.exitFullscreen) {
+            video.exitFullscreen()
+          }
+        }
+      }
+    }
+  } catch (error) {
+    console.log('Error exiting fullscreen:', error)
+  }
+}
+
 const showOverlaySettings = () => {
   if (!isElectron.value) return
 
@@ -1842,16 +1883,35 @@ const showOverlaySettings = () => {
       </button>
     </div>
   `
+  ;['click', 'mousedown', 'mouseup', 'mousemove', 'wheel', 'contextmenu'].forEach((eventType) => {
+    modalContent.addEventListener(eventType, (e) => {
+      e.stopPropagation()
+      e.stopImmediatePropagation()
+    })
+  })
 
   modal.appendChild(modalContent)
 
   modal.addEventListener('click', (e) => {
+    e.preventDefault()
+    e.stopPropagation()
+    e.stopImmediatePropagation()
     if (e.target === modal) {
       modal.remove()
     }
   })
+  ;['mousedown', 'mouseup', 'mousemove', 'wheel', 'contextmenu'].forEach((eventType) => {
+    modal.addEventListener(eventType, (e) => {
+      e.preventDefault()
+      e.stopPropagation()
+      e.stopImmediatePropagation()
+    })
+  })
 
-  modalContent.querySelector('#saveSettings').addEventListener('click', () => {
+  modalContent.querySelector('#saveSettings').addEventListener('click', (e) => {
+    e.preventDefault()
+    e.stopPropagation()
+    e.stopImmediatePropagation()
     const newSettings = {
       showTitle: modalContent.querySelector('#showTitle').checked,
       showDuration2: modalContent.querySelector('#showDuration').checked,
@@ -1864,13 +1924,19 @@ const showOverlaySettings = () => {
     modal.remove()
   })
 
-  modalContent.querySelector('#cancelSettings').addEventListener('click', () => {
+  modalContent.querySelector('#cancelSettings').addEventListener('click', (e) => {
+    e.preventDefault()
+    e.stopPropagation()
+    e.stopImmediatePropagation()
     modal.remove()
   })
 
   const buttons = modalContent.querySelectorAll('button')
   buttons.forEach((button) => {
-    button.addEventListener('mouseenter', () => {
+    button.addEventListener('mouseenter', (e) => {
+      e.preventDefault()
+      e.stopPropagation()
+      e.stopImmediatePropagation()
       if (button.id === 'saveSettings') {
         button.style.background = '#e55a2b'
         button.style.transform = 'translateY(-1px)'
@@ -1878,13 +1944,50 @@ const showOverlaySettings = () => {
         button.style.background = 'rgba(255, 255, 255, 0.15)'
       }
     })
-    button.addEventListener('mouseleave', () => {
+    button.addEventListener('mouseleave', (e) => {
+      e.preventDefault()
+      e.stopPropagation()
+      e.stopImmediatePropagation()
       if (button.id === 'saveSettings') {
         button.style.background = '#ff6b35'
         button.style.transform = 'translateY(0)'
       } else {
         button.style.background = 'rgba(255, 255, 255, 0.1)'
       }
+    })
+    ;['mousedown', 'mouseup', 'mousemove', 'wheel', 'contextmenu'].forEach((eventType) => {
+      button.addEventListener(eventType, (e) => {
+        e.preventDefault()
+        e.stopPropagation()
+        e.stopImmediatePropagation()
+      })
+    })
+  })
+
+  const checkboxes = modalContent.querySelectorAll('input[type="checkbox"]')
+  const labels = modalContent.querySelectorAll('label')
+
+  checkboxes.forEach((checkbox) => {
+    ;['click', 'mousedown', 'mouseup', 'mousemove', 'wheel', 'contextmenu'].forEach((eventType) => {
+      checkbox.addEventListener(eventType, (e) => {
+        if (eventType !== 'click') {
+          e.preventDefault()
+          e.stopPropagation()
+          e.stopImmediatePropagation()
+        } else {
+          e.stopPropagation()
+        }
+      })
+    })
+  })
+
+  labels.forEach((label) => {
+    ;['mousedown', 'mouseup', 'mousemove', 'wheel', 'contextmenu'].forEach((eventType) => {
+      label.addEventListener(eventType, (e) => {
+        e.preventDefault()
+        e.stopPropagation()
+        e.stopImmediatePropagation()
+      })
     })
   })
 
@@ -2062,23 +2165,54 @@ const createVideoOverlay = (iframeDoc, video) => {
   toggleBtn.innerHTML = '👁️'
   toggleBtn.title = 'Отключить оверлей'
 
-  toggleBtn.addEventListener('click', () => {
+  toggleBtn.addEventListener('click', (e) => {
+    e.preventDefault()
+    e.stopPropagation()
+    e.stopImmediatePropagation()
     videoOverlayEnabled2.value = false
   })
 
-  settingsBtn.addEventListener('click', () => {
-    showOverlaySettings()
+  settingsBtn.addEventListener('click', (e) => {
+    e.preventDefault()
+    e.stopPropagation()
+    e.stopImmediatePropagation()
+
+    exitFullscreen()
+
+    setTimeout(() => {
+      showOverlaySettings()
+    }, 100)
   })
   ;[settingsBtn, toggleBtn].forEach((btn) => {
-    btn.addEventListener('mouseenter', () => {
+    btn.addEventListener('mouseenter', (e) => {
+      e.preventDefault()
+      e.stopPropagation()
+      e.stopImmediatePropagation()
       btn.style.background = '#ff6b35'
       btn.style.borderColor = '#ff6b35'
       btn.style.transform = 'scale(1.1)'
     })
-    btn.addEventListener('mouseleave', () => {
+    btn.addEventListener('mouseleave', (e) => {
+      e.preventDefault()
+      e.stopPropagation()
+      e.stopImmediatePropagation()
       btn.style.background = 'rgba(0, 0, 0, 0.8)'
       btn.style.borderColor = 'rgba(255, 255, 255, 0.2)'
       btn.style.transform = 'scale(1)'
+    })
+    ;['mousedown', 'mouseup', 'mousemove', 'wheel', 'contextmenu'].forEach((eventType) => {
+      btn.addEventListener(eventType, (e) => {
+        e.preventDefault()
+        e.stopPropagation()
+        e.stopImmediatePropagation()
+      })
+    })
+  })
+  ;['click', 'mousedown', 'mouseup', 'mousemove', 'wheel', 'contextmenu'].forEach((eventType) => {
+    controlsContainer.addEventListener(eventType, (e) => {
+      e.preventDefault()
+      e.stopPropagation()
+      e.stopImmediatePropagation()
     })
   })
 
@@ -2151,6 +2285,17 @@ const createVideoOverlay = (iframeDoc, video) => {
   overlay._mouseHandler = handleMouseMove
 
   const findBestContainer = (videoElement) => {
+    const isFullscreen =
+      document.fullscreenElement === videoElement ||
+      document.webkitFullscreenElement === videoElement ||
+      videoElement.webkitDisplayingFullscreen ||
+      (videoElement.offsetWidth === window.screen.width &&
+        videoElement.offsetHeight === window.screen.height)
+
+    if (isFullscreen) {
+      return iframeDoc.body || iframeDoc.documentElement
+    }
+
     let container = videoElement.parentNode
     let attempts = 0
     const maxAttempts = 5
@@ -2183,28 +2328,61 @@ const createVideoOverlay = (iframeDoc, video) => {
   overlay._videoElement = video
 
   const applyOverlayStylesUpdated = () => {
-    const videoRect = overlay._videoElement.getBoundingClientRect()
-    const containerRect = overlay._targetContainer.getBoundingClientRect()
+    const video = overlay._videoElement
+    const container = overlay._targetContainer
 
-    const relativeTop = videoRect.top - containerRect.top
-    const relativeLeft = videoRect.left - containerRect.left
+    const isFullscreen =
+      document.fullscreenElement === video ||
+      document.webkitFullscreenElement === video ||
+      video.webkitDisplayingFullscreen ||
+      (video.offsetWidth === window.screen.width && video.offsetHeight === window.screen.height)
 
-    overlay.style.cssText = `
-      position: absolute !important;
-      top: ${relativeTop}px !important;
-      left: ${relativeLeft}px !important;
-      width: ${videoRect.width}px !important;
-      height: ${videoRect.height}px !important;
-      pointer-events: none !important;
-      z-index: 999999999 !important;
-      display: flex !important;
-      flex-direction: column !important;
-      justify-content: space-between !important;
-      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif !important;
-      visibility: visible !important;
-      opacity: 1 !important;
-      box-sizing: border-box !important;
-    `
+    if (isFullscreen) {
+      overlay.style.cssText = `
+        position: fixed !important;
+        top: 0 !important;
+        left: 0 !important;
+        width: 100vw !important;
+        height: 100vh !important;
+        pointer-events: none !important;
+        z-index: 999999999 !important;
+        display: flex !important;
+        flex-direction: column !important;
+        justify-content: space-between !important;
+        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif !important;
+        visibility: visible !important;
+        opacity: 1 !important;
+        box-sizing: border-box !important;
+      `
+    } else {
+      const videoStyle = iframeDoc.defaultView.getComputedStyle(video)
+      const containerRect = container.getBoundingClientRect()
+
+      const videoWidth = video.offsetWidth || video.clientWidth || parseFloat(videoStyle.width) || 0
+      const videoHeight =
+        video.offsetHeight || video.clientHeight || parseFloat(videoStyle.height) || 0
+
+      const videoRect = video.getBoundingClientRect()
+      const relativeTop = videoRect.top - containerRect.top + container.scrollTop
+      const relativeLeft = videoRect.left - containerRect.left + container.scrollLeft
+
+      overlay.style.cssText = `
+        position: absolute !important;
+        top: ${relativeTop}px !important;
+        left: ${relativeLeft}px !important;
+        width: ${videoWidth}px !important;
+        height: ${videoHeight}px !important;
+        pointer-events: none !important;
+        z-index: 999999999 !important;
+        display: flex !important;
+        flex-direction: column !important;
+        justify-content: space-between !important;
+        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif !important;
+        visibility: visible !important;
+        opacity: 1 !important;
+        box-sizing: border-box !important;
+      `
+    }
   }
 
   applyOverlayStyles = applyOverlayStylesUpdated
@@ -2236,6 +2414,17 @@ const createVideoOverlay = (iframeDoc, video) => {
           overlay._videoElement = newVideo
 
           const findBestContainer = (videoElement) => {
+            const isFullscreen =
+              document.fullscreenElement === videoElement ||
+              document.webkitFullscreenElement === videoElement ||
+              videoElement.webkitDisplayingFullscreen ||
+              (videoElement.offsetWidth === window.screen.width &&
+                videoElement.offsetHeight === window.screen.height)
+
+            if (isFullscreen) {
+              return iframeDoc.body || iframeDoc.documentElement
+            }
+
             let container = videoElement.parentNode
             let attempts = 0
             const maxAttempts = 5
@@ -2292,13 +2481,32 @@ const createVideoOverlay = (iframeDoc, video) => {
     }
 
     if (overlay._videoElement && overlay._targetContainer) {
-      const videoRect = overlay._videoElement.getBoundingClientRect()
+      const video = overlay._videoElement
+      const videoStyle = iframeDoc.defaultView.getComputedStyle(video)
+
+      const isFullscreen =
+        document.fullscreenElement === video ||
+        document.webkitFullscreenElement === video ||
+        video.webkitDisplayingFullscreen ||
+        (video.offsetWidth === window.screen.width && video.offsetHeight === window.screen.height)
+
+      let expectedWidth, expectedHeight
+
+      if (isFullscreen) {
+        expectedWidth = window.innerWidth
+        expectedHeight = window.innerHeight
+      } else {
+        expectedWidth = video.offsetWidth || video.clientWidth || parseFloat(videoStyle.width) || 0
+        expectedHeight =
+          video.offsetHeight || video.clientHeight || parseFloat(videoStyle.height) || 0
+      }
+
       const currentWidth = parseInt(computedStyle.width) || 0
       const currentHeight = parseInt(computedStyle.height) || 0
 
       if (
-        Math.abs(currentWidth - videoRect.width) > 5 ||
-        Math.abs(currentHeight - videoRect.height) > 5
+        Math.abs(currentWidth - expectedWidth) > 5 ||
+        Math.abs(currentHeight - expectedHeight) > 5
       ) {
         applyOverlayStyles()
       }
@@ -2330,11 +2538,25 @@ const createVideoOverlay = (iframeDoc, video) => {
     }
   }
 
+  const fullscreenHandler = () => {
+    if (currentOverlayElement.value && videoOverlayEnabled2.value) {
+      setTimeout(() => {
+        applyOverlayStyles()
+      }, 100)
+    }
+  }
+
   iframeDoc.defaultView.addEventListener('resize', resizeHandler)
+  iframeDoc.addEventListener('fullscreenchange', fullscreenHandler)
+  iframeDoc.addEventListener('webkitfullscreenchange', fullscreenHandler)
+
+  video.addEventListener('webkitbeginfullscreen', fullscreenHandler)
+  video.addEventListener('webkitendfullscreen', fullscreenHandler)
 
   overlay._monitorInterval = overlayMonitorInterval
   overlay._mutationObserver = overlayObserver
   overlay._resizeHandler = resizeHandler
+  overlay._fullscreenHandler = fullscreenHandler
   overlay._iframeDoc = iframeDoc
 
   const initialProtectionInterval = setInterval(() => {
@@ -2541,6 +2763,30 @@ const removeVideoOverlay = () => {
           'resize',
           currentOverlayElement.value._resizeHandler
         )
+      }
+      if (
+        currentOverlayElement.value._fullscreenHandler &&
+        currentOverlayElement.value._iframeDoc
+      ) {
+        currentOverlayElement.value._iframeDoc.removeEventListener(
+          'fullscreenchange',
+          currentOverlayElement.value._fullscreenHandler
+        )
+        currentOverlayElement.value._iframeDoc.removeEventListener(
+          'webkitfullscreenchange',
+          currentOverlayElement.value._fullscreenHandler
+        )
+
+        if (currentOverlayElement.value._videoElement) {
+          currentOverlayElement.value._videoElement.removeEventListener(
+            'webkitbeginfullscreen',
+            currentOverlayElement.value._fullscreenHandler
+          )
+          currentOverlayElement.value._videoElement.removeEventListener(
+            'webkitendfullscreen',
+            currentOverlayElement.value._fullscreenHandler
+          )
+        }
       }
       if (currentOverlayElement.value._mouseHandler && currentOverlayElement.value._iframeDoc) {
         currentOverlayElement.value._iframeDoc.removeEventListener(

@@ -81,7 +81,7 @@ const close = () => {
   color: #e2e8f0;
   border-radius: 12px;
   overflow: hidden;
-  width: 320px;
+  width: 420px;
   box-shadow:
     0 10px 15px -3px rgba(0, 0, 0, 0.3),
     0 4px 6px -2px rgba(0, 0, 0, 0.25);
@@ -173,7 +173,7 @@ const close = () => {
 
 @media (max-width: 600px) {
   .modern-dark-dialog {
-    width: 280px;
+    width: 340px;
     margin: 0 20px;
   }
 
