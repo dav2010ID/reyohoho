@@ -553,6 +553,8 @@ const overlaySettings = computed({
 const currentVideoTime = ref(0)
 const totalVideoDuration = ref(0)
 const activeTimingTexts = ref([])
+const hasActiveTimings = ref(false)
+let hideTimingsTimeout = null
 
 const currentOverlayElement = ref(null)
 const overlayControlsTimeout = ref(null)
@@ -1229,6 +1231,11 @@ const startVideoPositionMonitoring = (isDebug = false) => {
           }
 
           activeTimingTexts.value = selectedTimings
+          hasActiveTimings.value =
+            activeTimingIds.length > 0 ||
+            selectedTimings.some((timing) =>
+              timing.intervals.some((interval) => interval.status === 'upcoming')
+            )
         }
 
         if (isElectron.value && currentOverlayElement.value && videoOverlayEnabled2.value) {
@@ -2234,7 +2241,6 @@ const createVideoOverlay = (iframeDoc, video) => {
 
   mainInfo.style.transition = 'opacity 0.3s ease'
   let hideMainInfoTimeout = null
-  let hideTimingsTimeout = null
 
   const handleMouseMove = () => {
     controlsContainer.style.opacity = '1'
@@ -2245,11 +2251,15 @@ const createVideoOverlay = (iframeDoc, video) => {
       timingsPanel.style.opacity = '1'
       timingsPanel.style.visibility = 'visible'
       clearTimeout(hideTimingsTimeout)
+      hideTimingsTimeout = null
 
-      hideTimingsTimeout = setTimeout(() => {
-        timingsPanel.style.opacity = '0'
-        timingsPanel.style.visibility = 'hidden'
-      }, 3000)
+      if (!hasActiveTimings.value) {
+        hideTimingsTimeout = setTimeout(() => {
+          timingsPanel.style.opacity = '0'
+          timingsPanel.style.visibility = 'hidden'
+          hideTimingsTimeout = null
+        }, 3000)
+      }
     }
 
     clearTimeout(overlayControlsTimeout.value)
@@ -2728,7 +2738,7 @@ const updateVideoOverlay = () => {
 
     timingsPanel.style.display = 'block'
 
-    if (!overlaySettings.value.showTimingsOnMouseMove) {
+    if (!overlaySettings.value.showTimingsOnMouseMove || hasActiveTimings.value) {
       timingsPanel.style.opacity = '1'
       timingsPanel.style.visibility = 'visible'
     }
@@ -2746,6 +2756,28 @@ const updateVideoOverlay = () => {
     }
   } else {
     timingsPanel.style.display = 'none'
+  }
+
+  if (
+    overlaySettings.value.showTimingsOnMouseMove &&
+    hasActiveTimings.value &&
+    activeTimingTexts.value.length > 0
+  ) {
+    timingsPanel.style.opacity = '1'
+    timingsPanel.style.visibility = 'visible'
+    clearTimeout(hideTimingsTimeout)
+  } else if (
+    overlaySettings.value.showTimingsOnMouseMove &&
+    !hasActiveTimings.value &&
+    activeTimingTexts.value.length > 0 &&
+    timingsPanel.style.opacity === '1' &&
+    !hideTimingsTimeout
+  ) {
+    hideTimingsTimeout = setTimeout(() => {
+      timingsPanel.style.opacity = '0'
+      timingsPanel.style.visibility = 'hidden'
+      hideTimingsTimeout = null
+    }, 3000)
   }
 }
 
