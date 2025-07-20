@@ -596,6 +596,10 @@
         </div>
       </div>
       <div class="timings-content" :class="{ 'no-border': !nudityTimings }">
+        <div class="timings-warning">
+          <i class="fas fa-exclamation-triangle"></i>
+          <span>Тайминги не модерируются - проверьте перед просмотром</span>
+        </div>
         <div class="timings-text">
           <div v-if="nudityTimings.length > 0" class="timing-entries">
             <div
@@ -623,26 +627,6 @@
                   <button class="nudity-info-button" @click="handleShowParse(timing)">
                     {{ showParseResult[timing.id] ? 'Скрыть парсер' : 'Показать парсер' }}
                   </button>
-                  <!-- <template v-if="selectedTimings.has(timing.id)">
-                    <button
-                      class="nudity-info-button"
-                      @click="onRemoveFromAutoblur(timing.id)"
-                      :title="'Удалить из автоблюра'"
-                    >
-                      <i class="fas fa-minus"></i>
-                      <span>Удалить из автоблюра</span>
-                    </button>
-                  </template>
-                  <template v-else>
-                    <button
-                      class="nudity-info-button"
-                      @click="onAddToAutoblur(timing.id)"
-                      :title="'Добавить в автоблюр'"
-                    >
-                      <i class="fas fa-plus"></i>
-                      <span>Добавить в автоблюр</span>
-                    </button>
-                  </template> -->
 
                   <template v-if="overlayTimings.has(timing.id)">
                     <button
@@ -664,6 +648,35 @@
                       <span>Добавить в оверлей</span>
                     </button>
                   </template>
+
+                  <template v-if="canEditTiming(timing)">
+                    <button
+                      class="nudity-info-button edit-button"
+                      @click="editTiming(timing)"
+                      :title="'Редактировать тайминг'"
+                    >
+                      <i class="fas fa-edit"></i>
+                      <span>Редактировать</span>
+                    </button>
+                    <button
+                      class="nudity-info-button delete-button"
+                      @click="deleteTimingHandler(timing.id)"
+                      :title="'Удалить тайминг'"
+                    >
+                      <i class="fas fa-trash"></i>
+                      <span>Удалить</span>
+                    </button>
+                  </template>
+
+                  <button
+                    v-if="!canEditTiming(timing)"
+                    class="nudity-info-button report-button"
+                    @click="reportTimingHandler(timing.id)"
+                    :title="'Пожаловаться на тайминг'"
+                  >
+                    <i class="fas fa-flag"></i>
+                    <span>Пожаловаться</span>
+                  </button>
                 </div>
                 <div
                   class="timing-hover-container"
@@ -671,7 +684,14 @@
                 >
                   <span class="timing-text">{{ timing.timing_text }}</span>
                   <br />
-                  <span class="timing-author">by {{ timing.username }}</span>
+                  <span class="timing-author">
+                    by {{ timing.username }}
+                    <i
+                      v-if="timing.user_id && timing.user_id !== 0"
+                      class="fas fa-user-check verified-icon"
+                      title="Авторизованный пользователь"
+                    ></i>
+                  </span>
                 </div>
                 <div
                   v-if="showParseResult[timing.id] && Array.isArray(showParseResult[timing.id])"
@@ -773,7 +793,7 @@
             <i class="fas fa-layer-group"></i>
             <span>Парсер оверлея ({{ overlayTimings.size }})</span>
           </button>
-          <button class="nudity-info-button" @click="showTimingForm = true">
+          <button class="nudity-info-button" @click="handleAddTiming">
             <i class="fas fa-plus"></i>
             <span>Добавить/дополнить тайминг</span>
           </button>
@@ -793,18 +813,12 @@
   <div v-if="showTimingForm" class="timing-modal">
     <div class="timing-modal-content">
       <div class="timing-modal-header">
-        <h3>Добавить тайминг</h3>
-        <button class="close-modal-btn" @click="showTimingForm = false">
+        <h3>{{ editingTiming ? 'Редактировать тайминг' : 'Добавить тайминг' }}</h3>
+        <button class="close-modal-btn" @click="closeTimingForm">
           <i class="fas fa-times"></i>
         </button>
       </div>
       <div class="timing-submission-form">
-        <input
-          v-model="submitterUsername"
-          placeholder="Ваш ник"
-          class="timing-input"
-          maxlength="50"
-        />
         <textarea
           v-model="newTimingText"
           placeholder="Пожалуйста, указывайте длительность фильма(в [] скобках, например [01:36] или [01:36:55]), к которому вы прилагаете тайминг
@@ -838,11 +852,41 @@
         <div class="timing-form-actions">
           <button
             class="submit-timing-btn"
-            @click="submitNewTiming"
+            @click="editingTiming ? updateExistingTiming() : submitNewTiming()"
             :disabled="!canSubmitTiming || isSubmittingTiming"
           >
             <i v-if="isSubmittingTiming" class="fas fa-spinner fa-spin"></i>
-            <span v-else>Отправить на модерацию</span>
+            <span v-else>{{ editingTiming ? 'Обновить тайминг' : 'Добавить тайминг' }}</span>
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div v-if="showReportForm" class="timing-modal">
+    <div class="timing-modal-content">
+      <div class="timing-modal-header">
+        <h3>Пожаловаться на тайминг</h3>
+        <button class="close-modal-btn" @click="closeReportForm">
+          <i class="fas fa-times"></i>
+        </button>
+      </div>
+      <div class="timing-submission-form">
+        <textarea
+          v-model="reportText"
+          placeholder="Опишите причину жалобы..."
+          class="timing-textarea"
+          rows="4"
+        ></textarea>
+
+        <div class="timing-form-actions">
+          <button
+            class="submit-timing-btn"
+            @click="submitReport"
+            :disabled="!reportText.trim() || isSubmittingReport"
+          >
+            <i v-if="isSubmittingReport" class="fas fa-spinner fa-spin"></i>
+            <span v-else>Отправить жалобу</span>
           </button>
         </div>
       </div>
@@ -937,36 +981,6 @@
         </button>
       </div>
       <div class="modal-body">
-        <div v-if="!isLoadingAllTimings && allTimings.length > 0" class="timing-filters">
-          <button
-            class="timing-filter-btn"
-            :class="{ active: timingFilter === 'all' }"
-            @click="timingFilter = 'all'"
-          >
-            Все ({{ allTimings.length }})
-          </button>
-          <button
-            class="timing-filter-btn"
-            :class="{ active: timingFilter === 'approved' }"
-            @click="timingFilter = 'approved'"
-          >
-            Одобренные ({{ allTimings.filter((t) => t.status === 'approved').length }})
-          </button>
-          <button
-            class="timing-filter-btn"
-            :class="{ active: timingFilter === 'pending' }"
-            @click="timingFilter = 'pending'"
-          >
-            На модерации ({{ allTimings.filter((t) => t.status === 'pending').length }})
-          </button>
-          <button
-            class="timing-filter-btn"
-            :class="{ active: timingFilter === 'clean_text' }"
-            @click="timingFilter = 'clean_text'"
-          >
-            Не модерируются ({{ allTimings.filter((t) => t.status === 'clean_text').length }})
-          </button>
-        </div>
         <div v-if="isLoadingAllTimings" class="loading-spinner">
           <i class="fas fa-spinner fa-spin"></i>
           <span>Загрузка всех таймингов...</span>
@@ -978,22 +992,9 @@
           <p>Тайминги по выбранному фильтру не найдены</p>
         </div>
         <div v-else class="all-timings-list">
-          <div
-            v-for="timing in filteredTimings"
-            :key="timing.id"
-            class="timing-item"
-            :class="{
-              pending: timing.status === 'pending',
-              approved: timing.status === 'approved',
-              rejected: timing.status === 'rejected',
-              'clean-text': timing.status === 'clean_text'
-            }"
-          >
+          <div v-for="timing in filteredTimings" :key="timing.id" class="timing-item">
             <div class="timing-header">
               <div class="timing-meta">
-                <span class="timing-status" :class="timing.status">
-                  {{ getStatusText(timing.status) }}
-                </span>
                 <span class="timing-author">{{ timing.username }}</span>
                 <span class="timing-date">{{ formatDate(timing.submitted_at) }}</span>
               </div>
@@ -1190,6 +1191,9 @@ import {
   getShikiInfo,
   getNudityInfoFromIMDB,
   submitTiming,
+  updateTiming,
+  deleteTiming,
+  reportTiming,
   getTopTimingSubmitters,
   getAllTimingSubmissions,
   approveTiming as apiApproveTiming,
@@ -1509,6 +1513,12 @@ const showNudityTimings = (event) => {
     movieInfo.value?.nudity_timings === null ? '' : movieInfo.value?.nudity_timings || ''
 }
 
+const showTimingsPanel = () => {
+  nudityInfo.value = null
+  nudityTimings.value =
+    movieInfo.value?.nudity_timings === null ? '' : movieInfo.value?.nudity_timings || ''
+}
+
 const getListStatus = (listType) => {
   const statusMap = {
     [USER_LIST_TYPES_ENUM.FAVORITE]: movieInfo.value?.lists?.isFavorite || false,
@@ -1741,11 +1751,6 @@ const openInGoogleTranslate = () => {
   nudityInfo.value = null
 }
 
-const submitterUsername = computed({
-  get: () => mainStore.submitterUsername,
-  set: (value) => mainStore.setSubmitterUsername(value)
-})
-
 const newTimingText = ref('')
 const isSubmittingTiming = ref(false)
 
@@ -1760,23 +1765,115 @@ const parsedTimingPreview = computed(() => {
 })
 
 const canSubmitTiming = computed(() => {
-  return submitterUsername.value.trim() && newTimingText.value.trim()
+  return newTimingText.value.trim()
 })
+
+const canEditTiming = (timing) => {
+  return authStore.user && timing.user_id && timing.user_id === authStore.user.id
+}
+
+const handleAddTiming = () => {
+  if (!authStore.token) {
+    notificationRef.value.showNotification(
+      'Необходимо <a class="auth-link">авторизоваться</a> для добавления таймингов',
+      5000,
+      { onClick: () => router.push('/login') }
+    )
+    return
+  }
+  editingTiming.value = null
+  newTimingText.value = ''
+  showTimingForm.value = true
+}
+
+const editTiming = (timing) => {
+  editingTiming.value = timing
+  newTimingText.value = timing.timing_text
+  showTimingForm.value = true
+}
+
+const closeTimingForm = () => {
+  showTimingForm.value = false
+  editingTiming.value = null
+  newTimingText.value = ''
+}
 
 const submitNewTiming = async () => {
   if (!canSubmitTiming.value || isSubmittingTiming.value) return
 
   try {
     isSubmittingTiming.value = true
-    await submitTiming(kp_id.value, submitterUsername.value.trim(), newTimingText.value)
-    notificationRef.value.showNotification('Тайминг отправлен на модерацию, спасибо!')
+    await submitTiming(kp_id.value, newTimingText.value)
+    notificationRef.value.showNotification('Тайминг добавлен успешно!')
     newTimingText.value = ''
-    showTimingForm.value = false
+    closeTimingForm()
+    await fetchMovieInfo(false)
+    showTimingsPanel()
   } catch (error) {
     const { message } = handleApiError(error)
     notificationRef.value.showNotification(message, 5000)
   } finally {
     isSubmittingTiming.value = false
+  }
+}
+
+const updateExistingTiming = async () => {
+  if (!canSubmitTiming.value || isSubmittingTiming.value || !editingTiming.value) return
+
+  try {
+    isSubmittingTiming.value = true
+    await updateTiming(editingTiming.value.id, newTimingText.value)
+    notificationRef.value.showNotification('Тайминг обновлен успешно!')
+    closeTimingForm()
+    await fetchMovieInfo(false)
+    showTimingsPanel()
+  } catch (error) {
+    const { message } = handleApiError(error)
+    notificationRef.value.showNotification(message, 5000)
+  } finally {
+    isSubmittingTiming.value = false
+  }
+}
+
+const deleteTimingHandler = async (timingId) => {
+  if (!confirm('Вы уверены, что хотите удалить этот тайминг?')) return
+
+  try {
+    await deleteTiming(timingId)
+    notificationRef.value.showNotification('Тайминг удален успешно!')
+    await fetchMovieInfo(false)
+    showTimingsPanel()
+  } catch (error) {
+    const { message } = handleApiError(error)
+    notificationRef.value.showNotification(message, 5000)
+  }
+}
+
+const reportTimingHandler = (timingId) => {
+  reportTimingId.value = timingId
+  reportText.value = ''
+  showReportForm.value = true
+}
+
+const closeReportForm = () => {
+  showReportForm.value = false
+  reportText.value = ''
+  reportTimingId.value = null
+}
+
+const submitReport = async () => {
+  if (!reportText.value.trim() || isSubmittingReport.value || !reportTimingId.value) return
+
+  try {
+    isSubmittingReport.value = true
+    await reportTiming(reportTimingId.value, reportText.value)
+    notificationRef.value.showNotification('Жалоба отправлена успешно!')
+    closeReportForm()
+  } catch (error) {
+    const { message } = handleApiError(error)
+    notificationRef.value.showNotification(message, 5000)
+  } finally {
+    isSubmittingReport.value = false
   }
 }
 
@@ -1792,6 +1889,11 @@ const showTopSubmitters = async () => {
 }
 
 const showTimingForm = ref(false)
+const editingTiming = ref(null)
+const showReportForm = ref(false)
+const reportText = ref('')
+const reportTimingId = ref(null)
+const isSubmittingReport = ref(false)
 
 const topSubmitters = ref([])
 
@@ -1804,7 +1906,6 @@ const isProcessingTiming = ref(false)
 const processingTimingId = ref(null)
 const isApproving = ref(false)
 const isMarkingCleanText = ref(false)
-const timingFilter = ref('all')
 
 // OBS Settings
 const showObsSettings = ref(false)
@@ -1951,16 +2052,6 @@ const showAllTimingsModal = async () => {
   }
 }
 
-const getStatusText = (status) => {
-  const statusMap = {
-    pending: 'На модерации',
-    approved: 'Одобрено',
-    rejected: 'Отклонено',
-    clean_text: 'Не модерируется'
-  }
-  return statusMap[status] || status
-}
-
 const getNounForm = (number, forms) => {
   const cases = [2, 0, 1, 1, 1, 2]
   return forms[number % 100 > 4 && number % 100 < 20 ? 2 : cases[Math.min(number % 10, 5)]]
@@ -1973,10 +2064,7 @@ const getContributionWidth = (count) => {
 }
 
 const filteredTimings = computed(() => {
-  if (timingFilter.value === 'all') {
-    return allTimings.value
-  }
-  return allTimings.value.filter((timing) => timing.status === timingFilter.value)
+  return allTimings.value
 })
 
 const toggleTimingSelection = (timingId) => {
@@ -3603,6 +3691,56 @@ const handleFilterSelect = () => {
   gap: 15px;
 }
 
+.timings-warning {
+  background: rgba(255, 193, 7, 0.1);
+  border: 1px solid rgba(255, 193, 7, 0.3);
+  border-radius: 8px;
+  padding: 12px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: #ffc107;
+  font-weight: 500;
+  margin-bottom: 10px;
+}
+
+.timings-warning i {
+  font-size: 16px;
+}
+
+.verified-icon {
+  color: #28a745;
+  margin-left: 4px;
+  font-size: 12px;
+}
+
+.edit-button {
+  background: rgba(40, 167, 69, 0.1) !important;
+  border: 1px solid rgba(40, 167, 69, 0.3) !important;
+}
+
+.edit-button:hover {
+  background: rgba(40, 167, 69, 0.2) !important;
+}
+
+.delete-button {
+  background: rgba(220, 53, 69, 0.1) !important;
+  border: 1px solid rgba(220, 53, 69, 0.3) !important;
+}
+
+.delete-button:hover {
+  background: rgba(220, 53, 69, 0.2) !important;
+}
+
+.report-button {
+  background: rgba(255, 193, 7, 0.1) !important;
+  border: 1px solid rgba(255, 193, 7, 0.3) !important;
+}
+
+.report-button:hover {
+  background: rgba(255, 193, 7, 0.2) !important;
+}
+
 .timings-content.no-border {
   border-top: none;
   padding-top: 0;
@@ -4298,22 +4436,6 @@ const handleFilterSelect = () => {
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
 }
 
-.timing-item.pending {
-  border-left: 4px solid #ffa500;
-}
-
-.timing-item.approved {
-  border-left: 4px solid #51cf66;
-}
-
-.timing-item.rejected {
-  border-left: 4px solid #ff6b6b;
-}
-
-.timing-item.clean-text {
-  border-left: 4px solid #ffa500;
-}
-
 .all-timings-list .timing-item .timing-content {
   padding: 15px;
 }
@@ -4332,34 +4454,6 @@ const handleFilterSelect = () => {
   align-items: center;
   gap: 12px;
   flex-wrap: wrap;
-}
-
-.timing-status {
-  padding: 4px 8px;
-  border-radius: 4px;
-  font-size: 12px;
-  font-weight: 500;
-  text-transform: uppercase;
-}
-
-.timing-status.pending {
-  background: rgba(255, 165, 0, 0.2);
-  color: #ffa500;
-}
-
-.timing-status.approved {
-  background: rgba(81, 207, 102, 0.2);
-  color: #51cf66;
-}
-
-.timing-status.rejected {
-  background: rgba(255, 107, 107, 0.2);
-  color: #ff6b6b;
-}
-
-.timing-status.clean_text {
-  background: rgba(255, 165, 0, 0.2);
-  color: #ffa500;
 }
 
 .timing-date {
@@ -4506,56 +4600,6 @@ const handleFilterSelect = () => {
     width: 28px;
     height: 28px;
     font-size: 12px;
-  }
-}
-
-.timing-filters {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 10px;
-  margin-bottom: 20px;
-  padding: 15px;
-  background: rgba(255, 255, 255, 0.03);
-  border-radius: 8px;
-  border: 1px solid rgba(255, 255, 255, 0.1);
-}
-
-.timing-filter-btn {
-  padding: 8px 12px;
-  background: rgba(255, 255, 255, 0.1);
-  color: rgba(255, 255, 255, 0.7);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  border-radius: 6px;
-  cursor: pointer;
-  font-size: 14px;
-  transition: all 0.2s ease;
-  white-space: nowrap;
-}
-
-.timing-filter-btn:hover {
-  background: rgba(255, 255, 255, 0.15);
-  color: #fff;
-  transform: translateY(-1px);
-}
-
-.timing-filter-btn.active {
-  background: var(--accent-color);
-  color: #fff;
-  border-color: var(--accent-color);
-  box-shadow: 0 0 10px var(--accent-semi-transparent);
-}
-
-@media (max-width: 600px) {
-  .timing-filters {
-    padding: 10px;
-    gap: 8px;
-  }
-
-  .timing-filter-btn {
-    padding: 6px 10px;
-    font-size: 12px;
-    flex: 1;
-    text-align: center;
   }
 }
 

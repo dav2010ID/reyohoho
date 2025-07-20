@@ -136,11 +136,33 @@ const rateComment = async (commentId, rating) => {
   return data
 }
 
-const submitTiming = async (kpId, username, timingText) => {
+const submitTiming = async (kpId, timingText) => {
   const { data } = await apiCall((api) =>
     api.post(`/timings/${kpId}`, {
-      timing_text: timingText,
-      username: username
+      timing_text: timingText
+    })
+  )
+  return data
+}
+
+const updateTiming = async (timingId, timingText) => {
+  const { data } = await apiCall((api) =>
+    api.put(`/timings/${timingId}`, {
+      timing_text: timingText
+    })
+  )
+  return data
+}
+
+const deleteTiming = async (timingId) => {
+  const { data } = await apiCall((api) => api.delete(`/timings/${timingId}`))
+  return data
+}
+
+const reportTiming = async (timingId, reportText) => {
+  const { data } = await apiCall((api) =>
+    api.post(`/timings/${timingId}/report`, {
+      report_text: reportText
     })
   )
   return data
@@ -198,6 +220,9 @@ export {
   deleteComment,
   rateComment,
   submitTiming,
+  updateTiming,
+  deleteTiming,
+  reportTiming,
   getTopTimingSubmitters,
   getAllTimingSubmissions,
   getRandomMovie,
