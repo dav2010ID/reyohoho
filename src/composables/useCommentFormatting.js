@@ -1,4 +1,4 @@
-import { getBaseURLSync } from '@/api/axios'
+// import { getBaseURLSync } from '@/api/axios'
 
 export function useCommentFormatting() {
   const isValidImageUrl = (url) => {
@@ -6,6 +6,7 @@ export function useCommentFormatting() {
       const urlObj = new URL(url)
       const isValid =
         (urlObj.hostname === 'cdn.7tv.app' && urlObj.protocol === 'https:') ||
+        (urlObj.hostname === 'starege.rhhhhhhh.live' && urlObj.protocol === 'https:') ||
         (urlObj.pathname.includes('/api/7tv') && urlObj.protocol === 'https:')
 
       if (!isValid) {
@@ -19,8 +20,9 @@ export function useCommentFormatting() {
         return false
       }
 
-      const modifiedUrl = `${getBaseURLSync()}${urlObj.pathname}${urlObj.search}${urlObj.hash}`
-      return modifiedUrl
+      // const modifiedUrl = `${getBaseURLSync()}${urlObj.pathname}${urlObj.search}${urlObj.hash}`
+      // return modifiedUrl
+      return url
     } catch (error) {
       console.warn('Недопустимый URL изображения:', url, 'Ошибка:', error.message)
       return false
