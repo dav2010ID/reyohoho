@@ -20,9 +20,9 @@
         <div class="comments-controls">
           <button
             class="sort-button"
+            title="Сортировать по дате"
             :class="{ active: sortBy === 'date' }"
             @click="setSortBy('date')"
-            title="Сортировать по дате"
           >
             <i class="fas fa-clock"></i>
             По дате
@@ -34,9 +34,9 @@
           </button>
           <button
             class="sort-button"
+            title="Сортировать по рейтингу"
             :class="{ active: sortBy === 'rating' }"
             @click="setSortBy('rating')"
-            title="Сортировать по рейтингу"
           >
             <i class="fas fa-thumbs-up"></i>
             По рейтингу
@@ -132,18 +132,18 @@
             </button>
             <button
               type="button"
+              title="Добавить спойлер"
               class="emoji-button-inline spoiler-button"
               :disabled="currentUser && currentUser.allow_comments !== 1"
               @click="insertSpoiler"
-              title="Добавить спойлер"
             >
               <i class="fas fa-eye-slash"></i>
             </button>
             <button
               type="button"
+              title="Добавить ссылку"
               class="emoji-button-inline link-button"
               @click="insertLink"
-              title="Добавить ссылку"
             >
               <i class="fas fa-link"></i>
             </button>

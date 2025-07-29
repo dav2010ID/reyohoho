@@ -17,6 +17,35 @@ export const USER_LIST_TYPES_ENUM = {
   RATED: 'rated'
 }
 
+export const LAZY_LOADING_CONFIG = {
+  preLoad: 1.3,
+  error: '/src/assets/image-no-poster.gif',
+  attempt: 2,
+  observer: true,
+  observerOptions: {
+    rootMargin: '0px',
+    threshold: 0.1
+  },
+  filter: {
+    progressive(listener) {
+      const quality = 'q_auto,f_auto,w_auto,dpr_auto'
+      listener.src = `${listener.src}?${quality}`
+    }
+  },
+  adapter: {
+    loaded({ el }) {
+      el.classList.add('loaded')
+      el.classList.remove('loading')
+    },
+    loading({ el }) {
+      el.classList.add('loading')
+    },
+    error({ el }) {
+      el.classList.add('error')
+    }
+  }
+}
+
 export const handleApiError = (error) => {
   if (error.code === 'ECONNABORTED') {
     return {

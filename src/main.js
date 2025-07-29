@@ -1,22 +1,14 @@
 import 'core-js/stable'
-import jQuery from 'jquery'
-import { createPinia } from 'pinia'
-import piniaPluginPersistedstate from 'pinia-plugin-persistedstate'
 import 'regenerator-runtime/runtime'
 import { registerSW } from 'virtual:pwa-register'
-import { createApp } from 'vue' // Import createApp from Vue
-import VueCookies from 'vue3-cookies'
-import { initYandexMetrika } from 'yandex-metrika-vue3'
-import VueLazyload from 'vue-lazyload'
-import App from './App.vue'
-import router from './router' // Import the router
 import { useThemeStore } from './store/theme'
+import { useAppSetup } from './composables/useAppSetup'
+import { createApp } from 'vue'
+import App from './App.vue'
 
 console.log(`App version: ${import.meta.env.VITE_APP_VERSION_FULL_VERSION}`)
 
 registerSW({ immediate: true })
-const $ = jQuery
-window.$ = $
 
 window.addEventListener('vite:preloadError', (event) => {
   console.log(`vite:preloadError ${event}`)
@@ -25,48 +17,8 @@ window.addEventListener('vite:preloadError', (event) => {
 
 const app = createApp(App)
 
-const pinia = createPinia()
-pinia.use(piniaPluginPersistedstate)
+useAppSetup(app)
 
-app.use(VueLazyload, {
-  preLoad: 1.3,
-  error: '/src/assets/image-no-poster.gif',
-  attempt: 2,
-  observer: true,
-  observerOptions: {
-    rootMargin: '0px',
-    threshold: 0.1
-  },
-  filter: {
-    progressive(listener) {
-      const quality = 'q_auto,f_auto,w_auto,dpr_auto'
-      listener.src = `${listener.src}?${quality}`
-    }
-  },
-  adapter: {
-    loaded({ el }) {
-      el.classList.add('loaded')
-      el.classList.remove('loading')
-    },
-    loading({ el }) {
-      el.classList.add('loading')
-    },
-    error({ el }) {
-      el.classList.add('error')
-    }
-  }
-})
-
-app
-  .use(VueCookies)
-  .use(router)
-  .use(pinia)
-  .use(initYandexMetrika, {
-    id: import.meta.env.VITE_YANDEX_METRIKA_ID,
-    router: router,
-    env: process.env.NODE_ENV
-  })
-  .mount('#app')
-
+// Может перенести это в App.vue? Выглядит здесь не к месту после .mount
 const themeStore = useThemeStore()
 themeStore.initTheme()

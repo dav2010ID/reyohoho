@@ -13,8 +13,8 @@
               v-if="avatarUrl"
               :src="avatarUrl"
               :alt="comment?.name || 'Аноним'"
-              @error="handleAvatarError"
               onerror="this.onerror=null; this.style.display='none'; this.nextElementSibling.style.display='flex';"
+              @error="handleAvatarError"
             />
             <div
               v-else
@@ -99,11 +99,11 @@
             </div>
             <div class="edit-footer">
               <div class="edit-actions">
-                <button @click="cancelEdit" class="cancel-button">Отмена</button>
+                <button class="cancel-button" @click="cancelEdit">Отмена</button>
                 <button
-                  @click="saveEdit"
                   class="save-button"
                   :disabled="!editContent.trim() || editContent.length > 1500"
+                  @click="saveEdit"
                 >
                   Сохранить
                 </button>
@@ -121,9 +121,9 @@
                 <button
                   type="button"
                   class="emoji-button-inline"
+                  :class="{ active: showEmojiPicker }"
                   @mouseenter="handleButtonMouseEnter"
                   @mouseleave="handleButtonMouseLeave"
-                  :class="{ active: showEmojiPicker }"
                 >
                   😊
                 </button>
@@ -157,17 +157,17 @@
                 </button>
                 <button
                   type="button"
+                  title="Добавить спойлер"
                   class="emoji-button-inline spoiler-button"
                   @click="insertSpoilerEdit"
-                  title="Добавить спойлер"
                 >
                   <i class="fas fa-eye-slash"></i>
                 </button>
                 <button
                   type="button"
                   class="emoji-button-inline link-button"
-                  @click="insertLinkEdit"
                   title="Добавить ссылку"
+                  @click="insertLinkEdit"
                 >
                   <i class="fas fa-link"></i>
                 </button>
@@ -208,9 +208,9 @@
         <div class="rating-buttons">
           <button
             v-if="!isCommentOwner && !comment?.is_deleted"
-            @click="rateComment(1)"
             class="rating-button"
             :class="{ 'rated-up': userRating === 1 }"
+            @click="rateComment(1)"
           >
             <i class="fas fa-thumbs-up"></i>
           </button>
@@ -224,9 +224,9 @@
           >
           <button
             v-if="!isCommentOwner && !comment?.is_deleted"
-            @click="rateComment(-1)"
             class="rating-button"
             :class="{ 'rated-down': userRating === -1 }"
+            @click="rateComment(-1)"
           >
             <i class="fas fa-thumbs-down"></i>
           </button>
@@ -235,8 +235,8 @@
         <div class="action-buttons">
           <button
             v-if="!currentUser || currentUser.allow_comments === 1"
-            @click="$emit('reply', comment)"
             class="action-button reply-button"
+            @click="$emit('reply', comment)"
           >
             <i class="fas fa-reply"></i>
           </button>
@@ -248,16 +248,16 @@
               !isEditing &&
               currentUser?.allow_comments === 1
             "
-            @click="startEdit"
             class="action-button edit-button"
+            @click="startEdit"
           >
             <i class="fas fa-edit"></i>
           </button>
 
           <button
             v-if="canDeleteComment && !comment?.is_deleted"
-            @click="confirmDelete"
             class="action-button delete-button"
+            @click="confirmDelete"
           >
             <i class="fas fa-trash"></i>
           </button>
@@ -289,6 +289,7 @@ export default {
   props: {
     comment: {
       type: Object,
+      // Зачем  required: true, если прописаны default?
       required: true,
       default: () => ({
         name: 'Аноним',
@@ -301,6 +302,7 @@ export default {
     },
     currentUser: {
       type: Object,
+      // Зачем  required: true, если прописаны default?
       required: true,
       default: () => ({})
     },
