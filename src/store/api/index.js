@@ -50,9 +50,12 @@ export const useApiStore = defineStore(API_STORE_NAME, {
               return this.userSelectedApiUrl
             } else {
               console.warn(
-                `User selected API ${this.userSelectedApiUrl} is not healthy, selecting another`
+                `User selected API ${this.userSelectedApiUrl} is not healthy, but keeping user selection`
               )
-              this.userSelectedApiUrl = null
+              this.currentApiUrl = this.userSelectedApiUrl
+              this.lastCheckedAt = Date.now()
+              this.isCheckingHealth = false
+              return this.userSelectedApiUrl
             }
           } else {
             console.warn(
