@@ -1177,13 +1177,6 @@
       </div>
     </div>
   </div>
-
-  <BaseModal
-    :is-open="showAutoblurWarning"
-    message="<span style='color: orange; font-weight: bold;'>Автоблюр удален из-за нестабильности(пока?)<br>Доступен только оверлей</span><br><br>Перед просмотром проверьте выбранные тайминги на соответствие фильму в плеере! Мы не несём ответственности за расхождение в таймингах, используйте их на свой страх и риск и только после проверки выбранной версии фильма!<br>В плеере alloha если смените озвучку, то выключите и включите оверлей(снизу справа под плеером), иначе в полноэкранном режиме перестанет работать!"
-    @confirm="confirmAutoblur"
-    @close="closeAutoblurWarning"
-  />
 </template>
 
 <script setup>
@@ -1223,7 +1216,6 @@ import { useTrailerStore } from '@/store/trailer'
 import MovieRating from '@/components/MovieRating.vue'
 import Comments from '@/components/Comments.vue'
 import { getRatingColor } from '@/utils/ratingUtils'
-import BaseModal from '@/components/BaseModal.vue'
 
 const infoLoading = ref(true)
 const mainStore = useMainStore()
@@ -1257,7 +1249,6 @@ const nudityTimingsTrigger = ref(null)
 const selectedTimings = ref(new Set())
 const overlayTimings = ref(new Set())
 const showGeneralParserResult = ref(false)
-const showAutoblurWarning = ref(false)
 const timingIdToAdd = ref(null)
 const showOverlayParserResult = ref(false)
 
@@ -2101,22 +2092,6 @@ function onAddToAutoblur(id) {
   }
 
   timingIdToAdd.value = id
-  showAutoblurWarning.value = true
-}
-
-function confirmAutoblur() {
-  if (timingIdToAdd.value !== null) {
-    toggleTimingSelection(timingIdToAdd.value)
-  }
-  closeAutoblurWarning()
-}
-
-function closeAutoblurWarning() {
-  showAutoblurWarning.value = false
-  timingIdToAdd.value = null
-
-  nudityTimings.value =
-    movieInfo.value?.nudity_timings === null ? '' : movieInfo.value?.nudity_timings || ''
 }
 
 // eslint-disable-next-line no-unused-vars
@@ -2141,7 +2116,6 @@ function onAddToOverlay(id) {
     }
     return
   }
-  showAutoblurWarning.value = true
   toggleOverlaySelection(id)
 }
 
