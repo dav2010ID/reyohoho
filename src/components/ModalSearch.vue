@@ -55,7 +55,7 @@
               <img :src="movie.poster" alt="poster" class="movie__poster" />
               <div class="movie__info">
                 <div class="movie__title">
-                  {{ movie.raw_data?.name_ru ?? movie.raw_data?.name_en }}
+                  {{ movie.raw_data?.nameRu ?? movie.raw_data?.nameEn }}
                 </div>
                 <div class="movie__meta">
                   <span class="movie__rating" :class="getRatingColor(movie.raw_data?.rating)">
