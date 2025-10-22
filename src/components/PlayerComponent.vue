@@ -1010,7 +1010,12 @@ const toggleTheaterMode = () => {
     document.body.classList.remove('no-scroll')
   }
   closeButtonVisible.value = theaterMode.value
-  nextTick(() => centerPlayer())
+  nextTick(() => {
+    centerPlayer()
+    if (playerIframe.value) {
+      playerIframe.value.focus()
+    }
+  })
 }
 
 const theaterModeCloseButtonTimeout = ref(null)
