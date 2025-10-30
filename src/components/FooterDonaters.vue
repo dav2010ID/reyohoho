@@ -108,35 +108,40 @@ const featuredDonors = ref([
     twitchUsername: 'xaksflax',
     avatar: null,
     isLive: false,
-    category: null
+    category: null,
+    originalIndex: 0
   },
   {
     name: 'F1ashko',
     twitchUsername: 'f1ashko',
     avatar: null,
     isLive: false,
-    category: null
+    category: null,
+    originalIndex: 1
   },
   {
     name: 'Krabick',
     twitchUsername: 'krabick',
     avatar: null,
     isLive: false,
-    category: null
+    category: null,
+    originalIndex: 2
   },
   {
     name: 'Kati',
     twitchUsername: 'Kati',
     avatar: null,
     isLive: false,
-    category: null
+    category: null,
+    originalIndex: 3
   },
   {
     name: 'Timofey',
     twitchUsername: 'Timofey',
     avatar: null,
     isLive: false,
-    category: null
+    category: null,
+    originalIndex: 4
   }
 ])
 
@@ -270,22 +275,29 @@ const fetchTwitchData = async () => {
 }
 
 const updateDonorsWithTwitchData = (twitchData) => {
-  featuredDonors.value = featuredDonors.value.map((donor) => {
-    if (!donor.twitchUsername) return donor
+  featuredDonors.value = featuredDonors.value
+    .map((donor) => {
+      if (!donor.twitchUsername) return donor
 
-    const streamData = twitchData.find(
-      (d) => d.username.toLowerCase() === donor.twitchUsername.toLowerCase()
-    )
-    if (streamData) {
-      return {
-        ...donor,
-        isLive: streamData.isLive || false,
-        category: streamData.category || null,
-        avatar: streamData.avatar || donor.avatar
+      const streamData = twitchData.find(
+        (d) => d.username.toLowerCase() === donor.twitchUsername.toLowerCase()
+      )
+      if (streamData) {
+        return {
+          ...donor,
+          isLive: streamData.isLive || false,
+          category: streamData.category || null,
+          avatar: streamData.avatar || donor.avatar
+        }
       }
-    }
-    return donor
-  })
+      return donor
+    })
+    .sort((a, b) => {
+      if (a.isLive !== b.isLive) {
+        return a.isLive ? -1 : 1
+      }
+      return a.originalIndex - b.originalIndex
+    })
 }
 
 const fetchDonaters = async () => {
