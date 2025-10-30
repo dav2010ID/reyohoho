@@ -4,7 +4,7 @@
       <span class="donaters-text">Спасибо топ донатерам</span>
 
       <div class="top-donators-carousel">
-        <transition name="slide" mode="out-in">
+        <transition name="fade" mode="out-in">
           <a
             v-if="currentFeaturedDonor"
             :key="currentFeaturedDonorIndex"
@@ -659,21 +659,6 @@ footer {
   text-align: left;
   white-space: nowrap;
   min-width: 150px;
-}
-
-.slide-enter-active,
-.slide-leave-active {
-  transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
-}
-
-.slide-enter-from {
-  opacity: 0;
-  transform: translateX(30px);
-}
-
-.slide-leave-to {
-  opacity: 0;
-  transform: translateX(-30px);
 }
 
 .fade-enter-active,
