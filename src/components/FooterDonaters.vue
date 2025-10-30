@@ -298,6 +298,8 @@ const updateDonorsWithTwitchData = (twitchData) => {
       }
       return a.originalIndex - b.originalIndex
     })
+
+  currentFeaturedDonorIndex.value = 0
 }
 
 const fetchDonaters = async () => {
