@@ -112,12 +112,20 @@ const featuredDonors = ref([
     originalIndex: 0
   },
   {
+    name: 'TanyaBelkova',
+    twitchUsername: 'tanyabelkova',
+    avatar: null,
+    isLive: false,
+    category: null,
+    originalIndex: 1
+  },
+  {
     name: 'F1ashko',
     twitchUsername: 'f1ashko',
     avatar: null,
     isLive: false,
     category: null,
-    originalIndex: 1
+    originalIndex: 2
   },
   {
     name: 'Krabick',
@@ -125,7 +133,7 @@ const featuredDonors = ref([
     avatar: null,
     isLive: false,
     category: null,
-    originalIndex: 2
+    originalIndex: 3
   },
   {
     name: 'Kati',
@@ -133,7 +141,7 @@ const featuredDonors = ref([
     avatar: null,
     isLive: false,
     category: null,
-    originalIndex: 3
+    originalIndex: 4
   },
   {
     name: 'Timofey',
@@ -141,7 +149,7 @@ const featuredDonors = ref([
     avatar: null,
     isLive: false,
     category: null,
-    originalIndex: 4
+    originalIndex: 5
   }
 ])
 
