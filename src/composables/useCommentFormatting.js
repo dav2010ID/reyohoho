@@ -6,7 +6,7 @@ export function useCommentFormatting() {
       const urlObj = new URL(url)
       const isValid =
         (urlObj.hostname === 'cdn.7tv.app' && urlObj.protocol === 'https:') ||
-        (urlObj.hostname === 'starege.rhhhhhhh.live' && urlObj.protocol === 'https:') ||
+        (urlObj.hostname === 'cdn.rte.net.ru' && urlObj.protocol === 'https:') ||
         (urlObj.pathname.includes('/api/7tv') && urlObj.protocol === 'https:')
 
       if (!isValid) {
