@@ -13,6 +13,8 @@
 
   <!-- Затемняющий оверлей для обычного режима, включается тумблером -->
   <div v-if="dimmingEnabled" class="dimming-overlay" @click="toggleDimming"></div>
+
+  <div v-if="showGarland" id="garland" :style="{ backgroundImage: `url(${garlandImage})` }"></div>
 </template>
 
 <script setup>
@@ -22,6 +24,8 @@ import MobileHeader from '@/components/MobileHeader.vue'
 import { useMainStore } from '@/store/main'
 import { useNavbarStore } from '@/store/navbar'
 import { computed, onMounted, onUnmounted } from 'vue'
+import { isNewYearPeriod } from '@/utils/dateUtils'
+import garlandImage from '@/assets/trn-christmas-lights.webp'
 
 const store = useMainStore()
 const navbarStore = useNavbarStore()
@@ -64,6 +68,8 @@ const dimmingEnabled = computed(() => store.dimmingEnabled)
 const toggleDimming = () => {
   store.toggleDimming()
 }
+
+const showGarland = computed(() => isNewYearPeriod())
 </script>
 
 <style>
@@ -102,5 +108,18 @@ const toggleDimming = () => {
 /* Отступ сверху для мобильного хедера */
 .router-view-container--with-mobile-header {
   padding-top: 60px; /* Здесь height хедера */
+}
+
+#garland {
+  position: fixed;
+  left: 0;
+  bottom: 0;
+  background-repeat: repeat-x;
+  height: 34px;
+  width: 100%;
+  pointer-events: none;
+  overflow: hidden;
+  transform: rotate(180deg);
+  z-index: 1;
 }
 </style>

@@ -3,7 +3,7 @@
     <div class="top-section">
       <div class="logo-section">
         <router-link to="/" class="home-link" @click="closeSidebar">
-          <img src="@/assets/basedge.png" alt="Base Edge" class="logo-image" />
+          <img :src="logoIcon" alt="Base Edge" class="logo-image" />
           <h1 v-show="isSidebarOpen" class="logo-title">ReYohoho</h1>
         </router-link>
       </div>
@@ -89,6 +89,9 @@ import { ref, onMounted, onBeforeUnmount, computed, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useNavbarStore } from '@/store/navbar'
 import NotificationBadge from '@/components/notification/NotificationBadge.vue'
+import { isNewYearPeriod } from '@/utils/dateUtils'
+import basedgeIcon from '@/assets/basedge.png'
+import basedgeNyIcon from '@/assets/basedge_ny.png'
 
 const props = defineProps({
   links: Array
@@ -102,6 +105,10 @@ const navbarStore = useNavbarStore()
 
 // Флаг состояния боковой панели
 const isSidebarOpen = ref(false)
+
+const logoIcon = computed(() => {
+  return isNewYearPeriod() ? basedgeNyIcon : basedgeIcon
+})
 
 const internalNavigationHistory = ref([])
 const isNavigatingBack = ref(false)

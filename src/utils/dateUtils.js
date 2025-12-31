@@ -170,3 +170,18 @@ export function formatSecondsToTime(seconds) {
   const secs = Math.floor(seconds % 60)
   return `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`
 }
+
+export function isNewYearPeriod() {
+  const currentDate = new Date()
+  const currentMonth = currentDate.getMonth()
+  const currentDay = currentDate.getDate()
+
+  if (currentMonth === 0 && currentDay <= 15) {
+    return true
+  }
+  if (currentMonth === 11 && currentDay >= 15) {
+    return true
+  }
+
+  return false
+}
