@@ -205,6 +205,39 @@ const getTwitchStream = async (username) => {
   return data
 }
 
+const voteOnTiming = async (timingId, voteType) => {
+  const { data } = await apiCall((api) =>
+    api.post(`/timings/${timingId}/vote`, {
+      vote_type: voteType
+    })
+  )
+  return data
+}
+
+const getTimingVote = async (timingId) => {
+  const { data } = await apiCall((api) => api.get(`/timings/${timingId}/vote`))
+  return data
+}
+
+const getMovieNote = async (kpId) => {
+  const { data } = await apiCall((api) => api.get(`/movies/${kpId}/note`))
+  return data
+}
+
+const saveMovieNote = async (kpId, noteText) => {
+  const { data } = await apiCall((api) =>
+    api.post(`/movies/${kpId}/note`, {
+      note_text: noteText
+    })
+  )
+  return data
+}
+
+const deleteMovieNote = async (kpId) => {
+  const { data } = await apiCall((api) => api.delete(`/movies/${kpId}/note`))
+  return data
+}
+
 export {
   apiSearch,
   getShikiInfo,
@@ -234,7 +267,12 @@ export {
   approveTiming,
   rejectTiming,
   markAsCleanText,
-  getTwitchStream
+  getTwitchStream,
+  voteOnTiming,
+  getTimingVote,
+  getMovieNote,
+  saveMovieNote,
+  deleteMovieNote
 }
 
 // ===== Функция для включения/выключения симуляции =====

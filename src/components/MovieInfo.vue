@@ -239,6 +239,15 @@
               :class="{ 'text-red': shouldShowRedTimings, 'text-red-blink': shouldBlinkRedTimings }"
             ></i>
           </button>
+          <button
+            v-if="authStore.token"
+            class="nudity-info-btn note-btn"
+            @click="toggleNoteEditor"
+            :class="{ 'has-note': movieNote }"
+            :title="movieNote ? 'Редактировать заметку' : 'Добавить заметку'"
+          >
+            <i class="fa-regular fa-note-sticky"></i>
+          </button>
         </div>
 
         <!-- Интеграция компонента плеера -->
@@ -384,6 +393,38 @@
                 </p>
               </div>
             </div>
+          </div>
+        </div>
+
+        <div v-if="movieNote && authStore.token" class="movie-note-display">
+          <div class="movie-note-header">
+            <div class="movie-note-title">
+              <i class="fa-solid fa-note-sticky"></i>
+              <h3>Моя заметка</h3>
+            </div>
+            <div class="movie-note-actions">
+              <button class="note-edit-btn" @click="toggleNoteEditor" title="Редактировать">
+                <i class="fas fa-edit"></i>
+              </button>
+            </div>
+          </div>
+          <div class="movie-note-content">
+            {{ movieNote.note_text }}
+          </div>
+          <div class="movie-note-footer">
+            <span class="note-date">
+              <i class="far fa-calendar"></i>
+              Обновлено:
+              {{
+                new Date(movieNote.updated_at).toLocaleDateString('ru-RU', {
+                  day: 'numeric',
+                  month: 'long',
+                  year: 'numeric',
+                  hour: '2-digit',
+                  minute: '2-digit'
+                })
+              }}
+            </span>
           </div>
         </div>
 
@@ -603,13 +644,15 @@
         <div class="timings-text">
           <div v-if="nudityTimings.length > 0" class="timing-entries">
             <div
-              v-for="timing in nudityTimings"
+              v-for="timing in sortedNudityTimings"
               :key="timing.id"
               class="timing-entry"
               :class="{
                 pending: timing.status === 'pending',
                 'clean-text': timing.status === 'clean_text',
-                selected: selectedTimings.has(timing.id)
+                selected: selectedTimings.has(timing.id),
+                'top-rated': (timing.voteScore || 0) >= 5,
+                'highly-rated': (timing.voteScore || 0) >= 10
               }"
             >
               <div class="timing-content">
@@ -617,6 +660,12 @@
                   <div v-if="timing.status === 'pending'" class="pending-badge">На модерации</div>
                   <div v-if="timing.status === 'clean_text'" class="clean-text-badge">
                     Тайминги такого типа не модерируются, для уверенности сверяйтесь с ParentsGuide
+                  </div>
+                  <div v-if="(timing.voteScore || 0) >= 10" class="highly-rated-badge">
+                    <i class="fas fa-star"></i> Проверено сообществом
+                  </div>
+                  <div v-else-if="(timing.voteScore || 0) >= 5" class="top-rated-badge">
+                    <i class="fas fa-thumbs-up"></i> Рекомендуется
                   </div>
                 </div>
                 <div
@@ -693,6 +742,31 @@
                       ({{ timing.user_timing_count }})
                     </span>
                   </span>
+                </div>
+                <div class="timing-vote-container">
+                  <button
+                    class="vote-button upvote-button"
+                    :class="{ active: timing.userVote === 'upvote' }"
+                    @click="handleVote(timing.id, 'upvote')"
+                    :disabled="votingTimingId === timing.id"
+                    :title="'Этот тайминг полезен и точен'"
+                  >
+                    <i class="fas fa-arrow-up"></i>
+                    <span class="vote-count">{{ timing.upvotes || 0 }}</span>
+                  </button>
+                  <span class="vote-score" :class="getVoteScoreClass(timing.voteScore || 0)">
+                    {{ timing.voteScore || 0 }}
+                  </span>
+                  <button
+                    class="vote-button downvote-button"
+                    :class="{ active: timing.userVote === 'downvote' }"
+                    @click="handleVote(timing.id, 'downvote')"
+                    :disabled="votingTimingId === timing.id"
+                    :title="'Этот тайминг неточен или некорректен'"
+                  >
+                    <i class="fas fa-arrow-down"></i>
+                    <span class="vote-count">{{ timing.downvotes || 0 }}</span>
+                  </button>
                 </div>
                 <div
                   v-if="showParseResult[timing.id] && Array.isArray(showParseResult[timing.id])"
@@ -888,6 +962,60 @@
           >
             <i v-if="isSubmittingReport" class="fas fa-spinner fa-spin"></i>
             <span v-else>Отправить жалобу</span>
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div v-if="showNoteEditor" class="timing-modal note-modal">
+    <div class="timing-modal-content">
+      <div class="timing-modal-header">
+        <h3>
+          <i class="fa-regular fa-note-sticky"></i>
+          {{ movieNote ? 'Редактировать заметку' : 'Новая заметка' }}
+        </h3>
+        <button class="close-modal-btn" @click="cancelNoteEdit">
+          <i class="fas fa-times"></i>
+        </button>
+      </div>
+      <div class="timing-submission-form">
+        <div class="note-info">
+          <i class="fas fa-info-circle"></i>
+          <span>Личная заметка о фильме, видна только вам</span>
+        </div>
+        <textarea
+          v-model="noteText"
+          placeholder="Напишите свою заметку о фильме..."
+          class="timing-textarea note-textarea"
+          rows="10"
+          maxlength="10000"
+        ></textarea>
+        <div class="char-counter">{{ noteText.length }} / 10000 символов</div>
+
+        <div class="timing-form-actions note-form-actions">
+          <button
+            class="submit-timing-btn"
+            @click="handleSaveNote"
+            :disabled="!noteText.trim() || isSavingNote"
+          >
+            <i v-if="isSavingNote" class="fas fa-spinner fa-spin"></i>
+            <i v-else class="fas fa-save"></i>
+            <span>{{ movieNote ? 'Обновить' : 'Сохранить' }}</span>
+          </button>
+          <button
+            v-if="movieNote"
+            class="delete-note-btn"
+            @click="handleDeleteNote"
+            :disabled="isDeletingNote"
+          >
+            <i v-if="isDeletingNote" class="fas fa-spinner fa-spin"></i>
+            <i v-else class="fas fa-trash"></i>
+            <span>Удалить</span>
+          </button>
+          <button class="cancel-note-btn" @click="cancelNoteEdit">
+            <i class="fas fa-times"></i>
+            <span>Отмена</span>
           </button>
         </div>
       </div>
@@ -1192,7 +1320,12 @@ import {
   getAllTimingSubmissions,
   approveTiming as apiApproveTiming,
   rejectTiming as apiRejectTiming,
-  markAsCleanText as apiMarkAsCleanText
+  markAsCleanText as apiMarkAsCleanText,
+  voteOnTiming,
+  getTimingVote,
+  getMovieNote,
+  saveMovieNote,
+  deleteMovieNote
 } from '@/api/movies'
 import { formatDate } from '@/utils/dateUtils'
 import { parseTimingTextToSeconds, formatSecondsToTime } from '@/utils/dateUtils'
@@ -1251,6 +1384,37 @@ const overlayTimings = ref(new Set())
 const showGeneralParserResult = ref(false)
 const timingIdToAdd = ref(null)
 const showOverlayParserResult = ref(false)
+
+const votingTimingId = ref(null)
+
+const movieNote = ref(null)
+const showNoteEditor = ref(false)
+const noteText = ref('')
+const isSavingNote = ref(false)
+const isDeletingNote = ref(false)
+
+const sortedNudityTimings = computed(() => {
+  if (!nudityTimings.value || !Array.isArray(nudityTimings.value)) {
+    return []
+  }
+
+  return [...nudityTimings.value].sort((a, b) => {
+    const scoreA = a.voteScore || 0
+    const scoreB = b.voteScore || 0
+
+    if (scoreB !== scoreA) {
+      return scoreB - scoreA
+    }
+
+    const upvotesA = a.upvotes || 0
+    const upvotesB = b.upvotes || 0
+    if (upvotesB !== upvotesA) {
+      return upvotesB - upvotesA
+    }
+
+    return a.id - b.id
+  })
+})
 
 const shouldShowRedTimings = computed(() => {
   return movieInfo.value?.nudity_timings.length > 0
@@ -1359,6 +1523,10 @@ const fetchMovieInfo = async (updateHistory = true) => {
         title: movieInfo.value.name_ru || movieInfo.value.name_en || movieInfo.value.name_original,
         kinopoisk_id: kp_id.value
       }
+    }
+
+    if (authStore.token) {
+      loadMovieNote()
     }
 
     navbarStore.setHeaderContent({
@@ -1653,6 +1821,7 @@ watch(
   (newValue) => {
     if (newValue) {
       document.addEventListener('click', handleNudityTimingsPopupOutsideClick, true)
+      loadTimingVotes()
     } else {
       document.removeEventListener('click', handleNudityTimingsPopupOutsideClick, true)
     }
@@ -1867,6 +2036,171 @@ const submitReport = async () => {
   } finally {
     isSubmittingReport.value = false
   }
+}
+
+const handleVote = async (timingId, voteType) => {
+  if (!authStore.token) {
+    notificationRef.value.showNotification(
+      'Необходимо <a class="auth-link">авторизоваться</a> для голосования',
+      5000,
+      { onClick: () => router.push('/login') }
+    )
+    return
+  }
+
+  if (votingTimingId.value === timingId) {
+    return
+  }
+
+  try {
+    votingTimingId.value = timingId
+
+    const response = await voteOnTiming(timingId, voteType)
+
+    const timing = nudityTimings.value.find((t) => t.id === timingId)
+    if (timing) {
+      timing.upvotes = response.upvotes
+      timing.downvotes = response.downvotes
+      timing.voteScore = response.vote_score
+
+      if (timing.userVote === voteType) {
+        timing.userVote = null
+      } else {
+        timing.userVote = voteType
+      }
+    }
+  } catch (error) {
+    const { message } = handleApiError(error)
+    notificationRef.value.showNotification(message, 5000)
+  } finally {
+    votingTimingId.value = null
+  }
+}
+
+const getVoteScoreClass = (score) => {
+  if (score > 0) return 'positive'
+  if (score < 0) return 'negative'
+  return 'neutral'
+}
+
+const loadTimingVotes = async () => {
+  if (!nudityTimings.value || nudityTimings.value.length === 0) return
+
+  try {
+    for (const timing of nudityTimings.value) {
+      try {
+        const voteData = await getTimingVote(timing.id)
+        timing.upvotes = voteData.upvotes || 0
+        timing.downvotes = voteData.downvotes || 0
+        timing.voteScore = voteData.vote_score || 0
+        timing.userVote = voteData.user_vote || null
+      } catch {
+        timing.upvotes = 0
+        timing.downvotes = 0
+        timing.voteScore = 0
+        timing.userVote = null
+      }
+    }
+  } catch (error) {
+    console.error('Error loading timing votes:', error)
+  }
+}
+
+const loadMovieNote = async () => {
+  if (!authStore.isAuthenticated || !kp_id.value) return
+
+  try {
+    const response = await getMovieNote(kp_id.value)
+    movieNote.value = response.note
+    if (movieNote.value) {
+      noteText.value = movieNote.value.note_text
+    } else {
+      noteText.value = ''
+    }
+  } catch {
+    movieNote.value = null
+    noteText.value = ''
+  }
+}
+
+const toggleNoteEditor = () => {
+  if (!authStore.token) {
+    notificationRef.value.showNotification(
+      'Необходимо <a class="auth-link">авторизоваться</a> для создания заметок',
+      5000,
+      { onClick: () => router.push('/login') }
+    )
+    return
+  }
+  showNoteEditor.value = !showNoteEditor.value
+}
+
+const handleSaveNote = async () => {
+  if (!authStore.token) {
+    notificationRef.value.showNotification(
+      'Необходимо <a class="auth-link">авторизоваться</a>',
+      5000,
+      { onClick: () => router.push('/login') }
+    )
+    return
+  }
+
+  if (!noteText.value.trim()) {
+    notificationRef.value.showNotification('Заметка не может быть пустой')
+    return
+  }
+
+  if (noteText.value.length > 10000) {
+    notificationRef.value.showNotification('Заметка слишком длинная (максимум 10000 символов)')
+    return
+  }
+
+  try {
+    isSavingNote.value = true
+    const response = await saveMovieNote(kp_id.value, noteText.value)
+    movieNote.value = response.note
+    noteText.value = response.note.note_text
+    notificationRef.value.showNotification('Заметка сохранена')
+    showNoteEditor.value = false
+  } catch (error) {
+    const { message } = handleApiError(error)
+    notificationRef.value.showNotification(message, 5000)
+  } finally {
+    isSavingNote.value = false
+  }
+}
+
+const handleDeleteNote = async () => {
+  if (!authStore.token) {
+    return
+  }
+
+  if (!confirm('Вы уверены, что хотите удалить заметку?')) {
+    return
+  }
+
+  try {
+    isDeletingNote.value = true
+    await deleteMovieNote(kp_id.value)
+    movieNote.value = null
+    noteText.value = ''
+    showNoteEditor.value = false
+    notificationRef.value.showNotification('Заметка удалена')
+  } catch (error) {
+    const { message } = handleApiError(error)
+    notificationRef.value.showNotification(message, 5000)
+  } finally {
+    isDeletingNote.value = false
+  }
+}
+
+const cancelNoteEdit = () => {
+  if (movieNote.value) {
+    noteText.value = movieNote.value.note_text
+  } else {
+    noteText.value = ''
+  }
+  showNoteEditor.value = false
 }
 
 const showTopSubmitters = async () => {
@@ -4249,6 +4583,18 @@ const handleFilterSelect = () => {
   padding: 8px;
   background: rgba(255, 255, 255, 0.05);
   border-radius: 4px;
+  transition: all 0.2s ease;
+}
+
+.timing-entry.top-rated {
+  background: rgba(34, 197, 94, 0.08);
+  border: 1px solid rgba(34, 197, 94, 0.2);
+}
+
+.timing-entry.highly-rated {
+  background: rgba(34, 197, 94, 0.12);
+  border: 1px solid rgba(34, 197, 94, 0.3);
+  box-shadow: 0 0 10px rgba(34, 197, 94, 0.1);
 }
 
 .timing-content {
@@ -4267,6 +4613,87 @@ const handleFilterSelect = () => {
   color: rgba(255, 255, 255, 0.7);
   font-size: 0.85em;
   font-style: italic;
+}
+
+.timing-vote-container {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 8px;
+}
+
+.vote-button {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 8px;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 4px;
+  color: rgba(255, 255, 255, 0.7);
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-size: 0.85em;
+}
+
+.vote-button:hover:not(:disabled) {
+  background: rgba(255, 255, 255, 0.1);
+  border-color: rgba(255, 255, 255, 0.2);
+}
+
+.vote-button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.vote-button.upvote-button.active {
+  background: rgba(34, 197, 94, 0.2);
+  border-color: rgba(34, 197, 94, 0.4);
+  color: #22c55e;
+}
+
+.vote-button.upvote-button.active:hover {
+  background: rgba(34, 197, 94, 0.3);
+}
+
+.vote-button.downvote-button.active {
+  background: rgba(239, 68, 68, 0.2);
+  border-color: rgba(239, 68, 68, 0.4);
+  color: #ef4444;
+}
+
+.vote-button.downvote-button.active:hover {
+  background: rgba(239, 68, 68, 0.3);
+}
+
+.vote-count {
+  font-weight: 600;
+  min-width: 20px;
+  text-align: center;
+}
+
+.vote-score {
+  font-weight: 700;
+  font-size: 0.9em;
+  padding: 4px 8px;
+  border-radius: 4px;
+  min-width: 30px;
+  text-align: center;
+}
+
+.vote-score.positive {
+  color: #22c55e;
+  background: rgba(34, 197, 94, 0.1);
+}
+
+.vote-score.negative {
+  color: #ef4444;
+  background: rgba(239, 68, 68, 0.1);
+}
+
+.vote-score.neutral {
+  color: rgba(255, 255, 255, 0.5);
+  background: rgba(255, 255, 255, 0.05);
 }
 
 .timing-entry.pending {
@@ -4297,6 +4724,33 @@ const handleFilterSelect = () => {
   border-radius: 4px;
   font-size: 0.8em;
   margin-bottom: 4px;
+}
+
+.top-rated-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  background: rgba(34, 197, 94, 0.2);
+  color: #22c55e;
+  padding: 2px 8px;
+  border-radius: 4px;
+  font-size: 0.8em;
+  margin-bottom: 4px;
+  font-weight: 600;
+}
+
+.highly-rated-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  background: rgba(34, 197, 94, 0.3);
+  color: #22c55e;
+  padding: 3px 10px;
+  border-radius: 4px;
+  font-size: 0.8em;
+  margin-bottom: 4px;
+  font-weight: 700;
+  box-shadow: 0 0 8px rgba(34, 197, 94, 0.2);
 }
 
 .timing-hover-container.blurred {
@@ -4930,5 +5384,230 @@ const handleFilterSelect = () => {
   font-weight: 500;
   font-style: normal;
   margin-left: 4px;
+}
+
+.note-btn {
+  transition: all 0.3s ease;
+}
+
+.note-btn.has-note {
+  color: #ffd700;
+  animation: pulse-note 2s infinite;
+}
+
+.note-btn.has-note i {
+  color: #ffd700;
+  filter: drop-shadow(0 0 3px rgba(255, 215, 0, 0.5));
+}
+
+@keyframes pulse-note {
+  0%,
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+  50% {
+    transform: scale(1.1);
+    opacity: 0.8;
+  }
+}
+
+.movie-note-display {
+  margin: 30px 0;
+  padding: 20px;
+  background: linear-gradient(135deg, rgba(255, 107, 53, 0.05) 0%, rgba(255, 107, 53, 0.02) 100%);
+  border: 2px solid rgba(255, 107, 53, 0.2);
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+  transition: all 0.3s ease;
+}
+
+.movie-note-display:hover {
+  box-shadow: 0 6px 16px rgba(255, 107, 53, 0.15);
+  transform: translateY(-2px);
+}
+
+.movie-note-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 15px;
+  padding-bottom: 10px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.movie-note-title {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.movie-note-title i {
+  color: var(--accent-color);
+  font-size: 1.5em;
+}
+
+.movie-note-title h3 {
+  margin: 0;
+  color: #fff;
+  font-size: 1.3em;
+}
+
+.movie-note-actions {
+  display: flex;
+  gap: 8px;
+}
+
+.note-edit-btn {
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 6px;
+  padding: 8px 12px;
+  color: #fff;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.note-edit-btn:hover {
+  background: var(--accent-color);
+  border-color: var(--accent-color);
+  transform: scale(1.05);
+}
+
+.movie-note-content {
+  color: rgba(255, 255, 255, 0.9);
+  font-size: 1.05em;
+  line-height: 1.7;
+  white-space: pre-wrap;
+  word-wrap: break-word;
+  padding: 15px;
+  background: rgba(0, 0, 0, 0.2);
+  border-radius: 8px;
+  margin-bottom: 10px;
+}
+
+.movie-note-footer {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+}
+
+.note-date {
+  color: rgba(255, 255, 255, 0.5);
+  font-size: 0.9em;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.note-modal .note-info {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px;
+  background: rgba(33, 150, 243, 0.1);
+  border: 1px solid rgba(33, 150, 243, 0.3);
+  border-radius: 8px;
+  color: rgba(255, 255, 255, 0.8);
+  margin-bottom: 15px;
+  font-size: 0.95em;
+}
+
+.note-info i {
+  color: #2196f3;
+  font-size: 1.2em;
+}
+
+.note-textarea {
+  min-height: 200px;
+  font-family: inherit;
+  line-height: 1.6;
+}
+
+.char-counter {
+  text-align: right;
+  color: rgba(255, 255, 255, 0.5);
+  font-size: 0.85em;
+  margin-top: -10px;
+  margin-bottom: 10px;
+}
+
+.note-form-actions {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.note-form-actions button {
+  flex: 1;
+  min-width: 120px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
+.delete-note-btn {
+  background: rgba(239, 68, 68, 0.2);
+  color: #ef4444;
+  border: 1px solid rgba(239, 68, 68, 0.3);
+  padding: 12px 20px;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-size: 1em;
+  font-weight: 600;
+}
+
+.delete-note-btn:hover:not(:disabled) {
+  background: rgba(239, 68, 68, 0.3);
+  border-color: rgba(239, 68, 68, 0.5);
+  transform: scale(1.02);
+}
+
+.delete-note-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.cancel-note-btn {
+  background: rgba(255, 255, 255, 0.05);
+  color: rgba(255, 255, 255, 0.7);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  padding: 12px 20px;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-size: 1em;
+}
+
+.cancel-note-btn:hover {
+  background: rgba(255, 255, 255, 0.1);
+  color: #fff;
+}
+
+@media (max-width: 600px) {
+  .movie-note-display {
+    margin: 20px -10px;
+    padding: 15px;
+  }
+
+  .movie-note-title h3 {
+    font-size: 1.1em;
+  }
+
+  .movie-note-content {
+    font-size: 1em;
+    padding: 12px;
+  }
+
+  .note-form-actions {
+    flex-direction: column;
+  }
+
+  .note-form-actions button {
+    width: 100%;
+    min-width: unset;
+  }
 }
 </style>

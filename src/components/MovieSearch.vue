@@ -15,7 +15,7 @@
         <button :class="{ active: searchType === 'imdb' }" @click="setSearchType('imdb')">
           ID IMDB
         </button>
-        <button class="random-button" @click="openRandomMovie" :disabled="randomLoading">
+        <button class="random-button" :disabled="randomLoading" @click="openRandomMovie">
           <i class="fas fa-dice"></i>
           {{ randomLoading ? 'Подбираем...' : 'Случайный фильм' }}
         </button>
@@ -431,7 +431,7 @@ const fetchRandomMovie = async () => {
           duration: kpInfo.duration,
           total_rating: kpInfo.total_rating
         }
-      } catch (kpError) {
+      } catch {
         randomMovie.value = response
       }
     } else {
