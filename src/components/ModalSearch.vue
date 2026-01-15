@@ -55,7 +55,7 @@
               <img :src="movie.poster" alt="poster" class="movie__poster" />
               <div class="movie__info">
                 <div class="movie__title">
-                  {{ movie.raw_data?.nameRu ?? movie.raw_data?.nameEn }}
+                  {{ getMovieName(movie.raw_data) }}
                 </div>
                 <div class="movie__meta">
                   <span class="movie__rating" :class="getRatingColor(movie.raw_data?.rating)">
@@ -92,6 +92,7 @@ import debounce from 'lodash/debounce'
 import { ref, watch, nextTick, onMounted, onUnmounted, computed } from 'vue'
 import { useMainStore } from '@/store/main'
 import { getRatingColor } from '@/utils/ratingUtils'
+import { getMovieName } from '@/utils/textUtils'
 
 const navbarStore = useNavbarStore()
 

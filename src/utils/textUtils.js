@@ -1,3 +1,8 @@
+export const getMovieName = (rawData) => {
+  if (!rawData) return ''
+  return rawData.nameRu ?? rawData.name_ru ?? rawData.nameEn ?? rawData.name_en ?? ''
+}
+
 export const getCommentWordForm = (count) => {
   if (count === 1) return 'комментарий'
   if (count >= 2 && count <= 4) return 'комментария'
