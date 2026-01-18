@@ -209,45 +209,48 @@
             </a>
           </div>
 
-          <!-- Parents Guide (только если есть IMDb id) -->
-          <template v-if="movieInfo.imdb_id">
+          <span class="action-buttons-group">
+            <template v-if="movieInfo.imdb_id">
+              <button
+                class="nudity-info-btn parents-guide-btn"
+                @click="showNudityInfo($event)"
+                @mousedown="handleMiddleClick($event)"
+                :title="
+                  nudityInfo ? 'Скрыть информацию' : 'Показать Parents Guide и информацию о сценах'
+                "
+              >
+                <span class="desktop-text">Parents Guide</span>
+                <span class="mobile-text">PG</span>
+                <i v-if="!nudityInfoLoading" class="fa-regular fa-face-grin-wink"></i>
+                <i v-else class="fas fa-spinner fa-spin"></i>
+              </button>
+            </template>
             <button
-              class="nudity-info-btn parents-guide-btn"
-              @click="showNudityInfo($event)"
-              @mousedown="handleMiddleClick($event)"
+              class="nudity-info-btn"
+              @click="showNudityTimings($event)"
               :title="
-                nudityInfo ? 'Скрыть информацию' : 'Показать Parents Guide и информацию о сценах'
+                nudityTimings !== undefined
+                  ? 'Скрыть тайминги'
+                  : 'Показать тайминги сцен 18+(для твича, мигание отключается в настройках)'
               "
             >
-              <span class="desktop-text">Parents Guide</span>
-              <span class="mobile-text">PG</span>
-              <i v-if="!nudityInfoLoading" class="fa-regular fa-face-grin-wink"></i>
-              <i v-else class="fas fa-spinner fa-spin"></i>
+              <i
+                class="fa-regular fa-clock"
+                :class="{ 'text-red': shouldShowRedTimings, 'text-red-blink': shouldBlinkRedTimings }"
+              ></i>
+              <span class="mobile-text">Тайминги</span>
             </button>
-          </template>
-          <button
-            class="nudity-info-btn"
-            @click="showNudityTimings($event)"
-            :title="
-              nudityTimings !== undefined
-                ? 'Скрыть тайминги'
-                : 'Показать тайминги сцен 18+(для твича, мигание отключается в настройках)'
-            "
-          >
-            <i
-              class="fa-regular fa-clock"
-              :class="{ 'text-red': shouldShowRedTimings, 'text-red-blink': shouldBlinkRedTimings }"
-            ></i>
-          </button>
-          <button
-            v-if="authStore.token"
-            class="nudity-info-btn note-btn"
-            @click="toggleNoteEditor"
-            :class="{ 'has-note': movieNote }"
-            :title="movieNote ? 'Редактировать заметку' : 'Добавить заметку'"
-          >
-            <i class="fa-regular fa-note-sticky"></i>
-          </button>
+            <button
+              v-if="authStore.token"
+              class="nudity-info-btn note-btn"
+              @click="toggleNoteEditor"
+              :class="{ 'has-note': movieNote }"
+              :title="movieNote ? 'Редактировать заметку' : 'Добавить заметку'"
+            >
+              <i class="fa-regular fa-note-sticky"></i>
+              <span class="mobile-text">Заметка</span>
+            </button>
+          </span>
         </div>
 
         <!-- Интеграция компонента плеера -->
@@ -1386,6 +1389,7 @@ const timingIdToAdd = ref(null)
 const showOverlayParserResult = ref(false)
 
 const votingTimingId = ref(null)
+const isLoadingVotes = ref(false)
 
 const movieNote = ref(null)
 const showNoteEditor = ref(false)
@@ -1817,16 +1821,15 @@ watch(
 )
 
 watch(
-  nudityTimings,
-  (newValue) => {
-    if (newValue) {
+  () => nudityTimings.value !== undefined,
+  (isOpen) => {
+    if (isOpen) {
       document.addEventListener('click', handleNudityTimingsPopupOutsideClick, true)
       loadTimingVotes()
     } else {
       document.removeEventListener('click', handleNudityTimingsPopupOutsideClick, true)
     }
-  },
-  { deep: true }
+  }
 )
 
 watch(
@@ -2085,24 +2088,53 @@ const getVoteScoreClass = (score) => {
 
 const loadTimingVotes = async () => {
   if (!nudityTimings.value || nudityTimings.value.length === 0) return
+  if (isLoadingVotes.value) return
+
+  isLoadingVotes.value = true
 
   try {
-    for (const timing of nudityTimings.value) {
+    const votePromises = nudityTimings.value.map(async (timing) => {
       try {
         const voteData = await getTimingVote(timing.id)
-        timing.upvotes = voteData.upvotes || 0
-        timing.downvotes = voteData.downvotes || 0
-        timing.voteScore = voteData.vote_score || 0
-        timing.userVote = voteData.user_vote || null
+        return {
+          id: timing.id,
+          upvotes: voteData.upvotes || 0,
+          downvotes: voteData.downvotes || 0,
+          voteScore: voteData.vote_score || 0,
+          userVote: voteData.user_vote || null
+        }
       } catch {
-        timing.upvotes = 0
-        timing.downvotes = 0
-        timing.voteScore = 0
-        timing.userVote = null
+        return {
+          id: timing.id,
+          upvotes: 0,
+          downvotes: 0,
+          voteScore: 0,
+          userVote: null
+        }
       }
-    }
+    })
+
+    const voteResults = await Promise.all(votePromises)
+
+    const voteMap = new Map(voteResults.map((v) => [v.id, v]))
+
+    nudityTimings.value = nudityTimings.value.map((timing) => {
+      const voteData = voteMap.get(timing.id)
+      if (voteData) {
+        return {
+          ...timing,
+          upvotes: voteData.upvotes,
+          downvotes: voteData.downvotes,
+          voteScore: voteData.voteScore,
+          userVote: voteData.userVote
+        }
+      }
+      return timing
+    })
   } catch (error) {
     console.error('Error loading timing votes:', error)
+  } finally {
+    isLoadingVotes.value = false
   }
 }
 
@@ -2674,6 +2706,16 @@ const handleFilterSelect = () => {
   margin: 15px 0;
 }
 
+.action-buttons-group {
+  display: inline-flex;
+  align-items: center;
+  gap: 15px;
+}
+
+.action-buttons-group .mobile-text {
+  display: none;
+}
+
 .rating-link {
   display: inline-flex;
   align-items: center;
@@ -2841,6 +2883,33 @@ const handleFilterSelect = () => {
   .external-link-icon {
     width: 16px;
     margin-left: 3px;
+  }
+
+  .action-buttons-group {
+    width: 100%;
+    justify-content: center;
+    gap: 10px;
+    margin-top: 10px;
+  }
+
+  .action-buttons-group .nudity-info-btn {
+    background: rgba(0, 0, 0, 0.7);
+    padding: 12px 16px;
+    border-radius: 8px;
+    min-height: 44px;
+    font-size: 14px;
+  }
+
+  .action-buttons-group .mobile-text {
+    display: inline;
+  }
+
+  .action-buttons-group .desktop-text {
+    display: none;
+  }
+
+  .action-buttons-group .nudity-info-btn i {
+    font-size: 18px;
   }
 
   .additional-info-title {
