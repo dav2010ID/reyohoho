@@ -16,7 +16,8 @@ export const usePlayerStore = defineStore(PLAYER_STORE_NAME, {
       showDuration2: false,
       showBackground: false,
       showTimingsOnMouseMove: false,
-      highlightTimings: true
+      highlightTimings: true,
+      fontSize: 18
     },
     obsSettings: {
       enabled: false,

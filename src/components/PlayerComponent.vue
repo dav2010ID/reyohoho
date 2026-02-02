@@ -2054,9 +2054,10 @@ const createVideoOverlay = (iframeDoc, video) => {
     : 'transparent'
   const initialTitleBackdropFilter = overlaySettings.value.showBackground ? 'blur(10px)' : 'none'
   const initialTitleWidth = overlaySettings.value.showBackground ? 'fit-content' : 'auto'
+  const initialFontSize = overlaySettings.value.fontSize || 18
 
   movieTitle.style.cssText = `
-    font-size: 20px !important;
+    font-size: ${initialFontSize + 2}px !important;
     font-weight: 600 !important;
     margin-bottom: 8px !important;
     text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.8) !important;
@@ -2080,7 +2081,7 @@ const createVideoOverlay = (iframeDoc, video) => {
   const initialProgressWidth = overlaySettings.value.showBackground ? 'fit-content' : 'auto'
 
   videoProgress.style.cssText = `
-    font-size: 18px !important;
+    font-size: ${initialFontSize}px !important;
     font-weight: 500 !important;
     text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.8) !important;
     display: ${initialProgressDisplay} !important;
@@ -2122,7 +2123,7 @@ const createVideoOverlay = (iframeDoc, video) => {
 
   const timingsContent = iframeDoc.createElement('div')
   timingsContent.style.cssText = `
-    font-size: 14px !important;
+    font-size: ${initialFontSize - 4}px !important;
     color: rgba(255, 255, 255, 0.6) !important;
     text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.8) !important;
     line-height: 1.4 !important;
@@ -2157,6 +2158,46 @@ const createVideoOverlay = (iframeDoc, video) => {
   `
   settingsBtn.innerHTML = '⚙️'
   settingsBtn.title = 'Настройки оверлея'
+
+  const fontDecreaseBtn = iframeDoc.createElement('button')
+  fontDecreaseBtn.style.cssText = `
+    background: rgba(0, 0, 0, 0.8) !important;
+    backdrop-filter: blur(10px) !important;
+    color: white !important;
+    border: 1px solid rgba(255, 255, 255, 0.2) !important;
+    border-radius: 50% !important;
+    width: 40px !important;
+    height: 40px !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    cursor: pointer !important;
+    transition: all 0.3s ease !important;
+    font-size: 20px !important;
+    font-weight: bold !important;
+  `
+  fontDecreaseBtn.innerHTML = 'A-'
+  fontDecreaseBtn.title = 'Уменьшить шрифт'
+
+  const fontIncreaseBtn = iframeDoc.createElement('button')
+  fontIncreaseBtn.style.cssText = `
+    background: rgba(0, 0, 0, 0.8) !important;
+    backdrop-filter: blur(10px) !important;
+    color: white !important;
+    border: 1px solid rgba(255, 255, 255, 0.2) !important;
+    border-radius: 50% !important;
+    width: 40px !important;
+    height: 40px !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    cursor: pointer !important;
+    transition: all 0.3s ease !important;
+    font-size: 20px !important;
+    font-weight: bold !important;
+  `
+  fontIncreaseBtn.innerHTML = 'A+'
+  fontIncreaseBtn.title = 'Увеличить шрифт'
 
   const toggleBtn = iframeDoc.createElement('button')
   toggleBtn.style.cssText = `
@@ -2195,7 +2236,27 @@ const createVideoOverlay = (iframeDoc, video) => {
       showOverlaySettings()
     }, 100)
   })
-  ;[settingsBtn, toggleBtn].forEach((btn) => {
+
+  fontDecreaseBtn.addEventListener('click', (e) => {
+    e.preventDefault()
+    e.stopPropagation()
+    e.stopImmediatePropagation()
+    const currentSize = overlaySettings.value.fontSize || 18
+    if (currentSize > 10) {
+      overlaySettings.value = { ...overlaySettings.value, fontSize: currentSize - 2 }
+    }
+  })
+
+  fontIncreaseBtn.addEventListener('click', (e) => {
+    e.preventDefault()
+    e.stopPropagation()
+    e.stopImmediatePropagation()
+    const currentSize = overlaySettings.value.fontSize || 18
+    if (currentSize < 36) {
+      overlaySettings.value = { ...overlaySettings.value, fontSize: currentSize + 2 }
+    }
+  })
+  ;[settingsBtn, toggleBtn, fontDecreaseBtn, fontIncreaseBtn].forEach((btn) => {
     btn.addEventListener('mouseenter', (e) => {
       e.preventDefault()
       e.stopPropagation()
@@ -2228,6 +2289,8 @@ const createVideoOverlay = (iframeDoc, video) => {
     })
   })
 
+  controlsContainer.appendChild(fontDecreaseBtn)
+  controlsContainer.appendChild(fontIncreaseBtn)
   controlsContainer.appendChild(settingsBtn)
   controlsContainer.appendChild(toggleBtn)
 
@@ -2607,7 +2670,9 @@ const updateVideoOverlay = () => {
     overlay.style.visibility = 'visible !important'
   }
 
+  const currentFontSize = overlaySettings.value.fontSize || 18
   const movieTitle = mainInfo.children[0]
+  movieTitle.style.fontSize = `${currentFontSize + 2}px`
   if (overlaySettings.value.showTitle) {
     movieTitle.style.display = 'block'
     const title =
@@ -2635,6 +2700,7 @@ const updateVideoOverlay = () => {
   }
 
   const videoProgress = mainInfo.children[1]
+  videoProgress.style.fontSize = `${currentFontSize}px`
   let progressHtml = ''
 
   if (overlaySettings.value.showDuration2) {
@@ -2701,6 +2767,7 @@ const updateVideoOverlay = () => {
 
   if (activeTimingTexts.value.length > 0) {
     const timingsContent = timingsPanel.children[0]
+    timingsContent.style.fontSize = `${currentFontSize - 4}px`
     timingsContent.innerHTML = ''
 
     const header = iframeDoc.createElement('span')
