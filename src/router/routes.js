@@ -95,13 +95,5 @@ export const routes = [
     meta: {
       title: 'ReYohoho - Логин'
     }
-  },
-  {
-    path: '/links',
-    name: 'links',
-    component: () => import('@/components/Links.vue'),
-    meta: {
-      title: 'ReYohoho - Полезные ссылки'
-    }
   }
 ]

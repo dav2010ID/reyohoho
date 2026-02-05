@@ -1,12 +1,6 @@
 <template>
   <aside ref="sidebar" :class="['side-panel', { collapsed: !isSidebarOpen }]">
     <div class="top-section">
-      <div class="logo-section">
-        <router-link to="/" class="home-link" @click="closeSidebar">
-          <img :src="logoIcon" alt="Base Edge" class="logo-image" />
-          <h1 v-show="isSidebarOpen" class="logo-title">ReYohoho</h1>
-        </router-link>
-      </div>
       <button
         v-if="canGoBack"
         class="back-btn"
@@ -89,9 +83,6 @@ import { ref, onMounted, onBeforeUnmount, computed, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useNavbarStore } from '@/store/navbar'
 import NotificationBadge from '@/components/notification/NotificationBadge.vue'
-import { isNewYearPeriod } from '@/utils/dateUtils'
-import basedgeIcon from '@/assets/basedge.png'
-import basedgeNyIcon from '@/assets/basedge_ny.png'
 
 const props = defineProps({
   links: Array
@@ -106,9 +97,6 @@ const navbarStore = useNavbarStore()
 // Флаг состояния боковой панели
 const isSidebarOpen = ref(false)
 
-const logoIcon = computed(() => {
-  return isNewYearPeriod() ? basedgeNyIcon : basedgeIcon
-})
 
 const internalNavigationHistory = ref([])
 const isNavigatingBack = ref(false)
@@ -240,10 +228,6 @@ watch(
 </script>
 
 <style lang="scss" scoped>
-.home-link {
-  text-decoration: none;
-  background: transparent;
-}
 
 /* Десктопная боковая панель */
 .side-panel {
@@ -285,32 +269,6 @@ watch(
 .toggle-sidebar-btn:hover {
   color: var(--accent-color, #6c5ce7);
   transform: scale(1.1);
-}
-.logo-section,
-.home-link {
-  display: flex;
-  align-items: center;
-}
-.logo-title {
-  white-space: nowrap;
-  overflow: hidden;
-  transition:
-    max-width 0.3s ease,
-    opacity 0.3s ease,
-    margin 0.3s ease;
-  max-width: 0;
-  opacity: 0;
-  margin-left: 0;
-  color: #fff;
-}
-.side-panel:not(.collapsed) .logo-title {
-  max-width: 200px;
-  opacity: 1;
-  margin: 0;
-  margin-left: 8px;
-}
-.logo-image {
-  height: 50px;
 }
 
 .side-nav {
