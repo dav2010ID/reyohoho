@@ -139,7 +139,6 @@ docker compose up -d
 
 - 📧 **Email:** [reyohoho@proton.me](mailto:reyohoho@proton.me)
 - 🐙 **GitHub Issues:** [Создать issue](https://github.com/reyohoho/reyohoho/issues)
-- ✍🏼 **Telegram:** [@ReYohoho](https://t.me/ReYohoho)
 
 ---
 
