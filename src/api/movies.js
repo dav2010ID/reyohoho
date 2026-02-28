@@ -20,9 +20,9 @@ const KINOBD_SUPPORTED_METHODS = new Set([
 const getCurrentProvider = () => {
   try {
     const mainStore = useMainStore()
-    return mainStore.contentApiProvider || CONTENT_PROVIDERS.RHSERV
+    return mainStore.contentApiProvider || CONTENT_PROVIDERS.KINOBD
   } catch {
-    return CONTENT_PROVIDERS.RHSERV
+    return CONTENT_PROVIDERS.KINOBD
   }
 }
 
