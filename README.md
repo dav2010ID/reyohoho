@@ -47,18 +47,18 @@ ReYohoho — это современное веб-приложение, пред
 
 ## 🪞 Зеркала
 
-### 🔹 Статус работы сервера:
+### Статус работы сервера
 
 - [Status](http://38.180.83.227:8080/status/reyohoho)
 
-### 🔹 Новый фронтенд (Vue 3):
+### Новый фронтенд (Vue 3)
 
 - [reyohoho.gitlab.io/reyohoho](https://reyohoho.gitlab.io/reyohoho)
 - [reyohoho-vue.vercel.app](https://reyohoho-vue.vercel.app)
 - [reyohoho.onrender.com](https://reyohoho.onrender.com)
 - [reyohoho.serv00.net](https://reyohoho.serv00.net)
 
-### 🔸 Старый фронтенд:
+### Старый фронтенд
 
 - [reyohoho.vercel.app](https://reyohoho.vercel.app)
 - [reyohoho.surge.sh](https://reyohoho.surge.sh)
