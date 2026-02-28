@@ -155,6 +155,24 @@ const toLegacyType = (typeValue) => {
   return 'FILM'
 }
 
+const extractKinopoiskRating = (film) => {
+  const rating =
+    film?.rating_kp ??
+    film?.rating_kinopoisk ??
+    film?.ratings?.kp ??
+    film?.ratings?.kinopoisk ??
+    null
+  const voteCount =
+    film?.rating_kp_count ??
+    film?.rating_kinopoisk_count ??
+    film?.ratings_count_kp ??
+    film?.ratings?.kp_count ??
+    film?.ratings?.kinopoisk_count ??
+    0
+
+  return { rating, voteCount }
+}
+
 const buildLegacyMovie = (film) => {
   const kpId = film?.kinopoisk_id || film?.kp_id || film?.id || null
   const year = film?.year || film?.year_start || ''
@@ -162,7 +180,7 @@ const buildLegacyMovie = (film) => {
   const nameEn = film?.name_original || ''
   const titleBase = nameRu || nameEn || 'Без названия'
   const title = year ? `${titleBase} (${year})` : titleBase
-  const ratingKp = film?.rating_kp
+  const { rating: ratingKp, voteCount: ratingKpCount } = extractKinopoiskRating(film)
   const normalizedRating =
     ratingKp === null || ratingKp === undefined || ratingKp === '' ? 'null' : String(ratingKp)
   const posters = resolvePosterSetByMovie({
@@ -191,7 +209,7 @@ const buildLegacyMovie = (film) => {
       countries: parseCountries(film),
       genres: parseGenres(film),
       rating: normalizedRating,
-      rating_vote_count: film?.rating_kp_count || 0,
+      rating_vote_count: ratingKpCount || 0,
       poster_url: posters.full,
       poster_url_preview: posters.preview
     },
@@ -203,6 +221,7 @@ const mapKpInfo = (film) => {
   const legacy = buildLegacyMovie(film)
   const countries = parseCountries(film)
   const genres = parseGenres(film)
+  const { rating: ratingKp, voteCount: ratingKpCount } = extractKinopoiskRating(film)
 
   return {
     ...film,
@@ -236,7 +255,10 @@ const mapKpInfo = (film) => {
     similars: [],
     staff: [],
     rating: legacy.raw_data.rating,
-    rating_vote_count: legacy.raw_data.rating_vote_count
+    rating_vote_count: legacy.raw_data.rating_vote_count,
+    rating_kinopoisk:
+      ratingKp === null || ratingKp === undefined || ratingKp === '' ? null : Number(ratingKp),
+    rating_kinopoisk_vote_count: Number(ratingKpCount) || 0
   }
 }
 
