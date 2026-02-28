@@ -30,7 +30,7 @@
               v-if="canManageOwnLists"
               class="share-btn"
               :disabled="loading"
-              title="??????????????"
+              title="Экспортировать"
               @click="exportListsAndHistory"
             >
               <span class="material-icons">{{ 'download' }}</span>
@@ -39,7 +39,7 @@
               v-if="canManageOwnLists"
               class="share-btn"
               :disabled="loading || isImporting"
-              title="?????????????"
+              title="Импортировать"
               @click="openImportDialog"
             >
               <span class="material-icons">{{ isImporting ? 'hourglass_top' : 'upload' }}</span>

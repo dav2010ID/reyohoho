@@ -9,6 +9,7 @@ const base = process.env.VITE_BASE_URL || '/'
 export default defineConfig(({ mode }) => {
   process.env = { ...process.env, ...loadEnv(mode, process.cwd()) }
   const isDistEnv = process.env.NODE_ENV === 'production'
+  const isDev = mode === 'development'
   const now = new Date()
   const formattedDate =
     now
@@ -115,13 +116,17 @@ export default defineConfig(({ mode }) => {
           ]
         }
       }),
-      eslintPlugin({
-        include: ['src/**/*.js', 'src/**/*.vue', 'src/**/*.jsx', 'src/**/*.ts', 'src/**/*.tsx'],
-        failOnError: true,
-        failOnWarning: false,
-        cache: false,
-        emitError: true
-      })
+      ...(isDev
+        ? [
+            eslintPlugin({
+              include: ['src/**/*.js', 'src/**/*.vue', 'src/**/*.jsx', 'src/**/*.ts', 'src/**/*.tsx'],
+              failOnError: true,
+              failOnWarning: false,
+              cache: false,
+              emitError: true
+            })
+          ]
+        : [])
     ],
     resolve: {
       alias: {
