@@ -27,6 +27,24 @@
               <span class="material-icons">{{ 'share' }}</span>
             </button>
             <button
+              v-if="canManageOwnLists"
+              class="share-btn"
+              :disabled="loading"
+              title="??????????????"
+              @click="exportListsAndHistory"
+            >
+              <span class="material-icons">{{ 'download' }}</span>
+            </button>
+            <button
+              v-if="canManageOwnLists"
+              class="share-btn"
+              :disabled="loading || isImporting"
+              title="?????????????"
+              @click="openImportDialog"
+            >
+              <span class="material-icons">{{ isImporting ? 'hourglass_top' : 'upload' }}</span>
+            </button>
+            <button
               v-if="!user_id || String(user_id) === String(authStore.user?.id)"
               class="clear-btn"
               :class="{
@@ -43,6 +61,14 @@
           </div>
         </div>
       </div>
+
+      <input
+        ref="importFileInput"
+        type="file"
+        accept="application/json,.json"
+        class="hidden-file-input"
+        @change="handleImportFileSelect"
+      />
 
       <div v-if="movies.length === 0 && !loading" class="empty-state">
         <span class="material-icons">movie</span>
@@ -74,11 +100,18 @@
 </template>
 
 <script setup>
-import { getMyLists, getUserLists, delFromList, delAllFromList, getListCounters } from '@/api/user'
+import {
+  addToList,
+  getMyLists,
+  getUserLists,
+  delFromList,
+  delAllFromList,
+  getListCounters
+} from '@/api/user'
 import { useAuthStore } from '@/store/auth'
 import { handleApiError, USER_LIST_TYPES_ENUM } from '@/constants'
 import { MovieList } from '@/components/MovieList'
-import { onMounted, ref, watch } from 'vue'
+import { computed, onMounted, ref, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import ErrorMessage from '@/components/ErrorMessage.vue'
 import Notification from '@/components/notification/ToastMessage.vue'
@@ -97,8 +130,246 @@ const user_id = ref(route.params.user_id)
 const showModal = ref(false)
 const listCounters = ref({})
 const mainStore = useMainStore()
+const importFileInput = ref(null)
+const isImporting = ref(false)
 
 const notificationRef = ref(null)
+const exportableListTypes = [
+  USER_LIST_TYPES_ENUM.FAVORITE,
+  USER_LIST_TYPES_ENUM.LATER,
+  USER_LIST_TYPES_ENUM.WATCHING,
+  USER_LIST_TYPES_ENUM.COMPLETED,
+  USER_LIST_TYPES_ENUM.ABANDONED,
+  USER_LIST_TYPES_ENUM.RATED,
+  USER_LIST_TYPES_ENUM.HISTORY
+]
+
+const canManageOwnLists = computed(() => {
+  return !user_id.value || String(user_id.value) === String(authStore.user?.id)
+})
+
+const toValidKpId = (value) => {
+  const parsed = Number(value)
+  return Number.isInteger(parsed) && parsed > 0 ? parsed : null
+}
+
+const normalizeHistoryItems = (historyItems) => {
+  if (!Array.isArray(historyItems)) return []
+
+  return historyItems
+    .map((item) => {
+      const kpId = toValidKpId(item?.kp_id)
+      if (!kpId) return null
+
+      return {
+        kp_id: kpId,
+        title: typeof item?.title === 'string' ? item.title : '',
+        year: item?.year ?? '',
+        type: item?.type ?? '',
+        poster: typeof item?.poster === 'string' ? item.poster : '',
+        addedAt:
+          typeof item?.addedAt === 'string' && !Number.isNaN(Date.parse(item.addedAt))
+            ? item.addedAt
+            : new Date().toISOString()
+      }
+    })
+    .filter(Boolean)
+}
+
+const mergeHistory = (currentHistory, importedHistory) => {
+  const merged = new Map()
+  const put = (item) => {
+    const existing = merged.get(item.kp_id)
+    if (!existing) {
+      merged.set(item.kp_id, item)
+      return
+    }
+    const existingTime = Date.parse(existing.addedAt || 0)
+    const itemTime = Date.parse(item.addedAt || 0)
+    if (itemTime > existingTime) {
+      merged.set(item.kp_id, item)
+    }
+  }
+
+  normalizeHistoryItems(currentHistory).forEach(put)
+  normalizeHistoryItems(importedHistory).forEach(put)
+
+  return Array.from(merged.values()).sort((a, b) => Date.parse(b.addedAt) - Date.parse(a.addedAt))
+}
+
+const buildExportPayload = async () => {
+  if (!authStore.token) {
+    throw new Error('Необходимо авторизоваться')
+  }
+
+  const exportedLists = {}
+  const listResults = await Promise.allSettled(
+    exportableListTypes.map(async (type) => {
+      const list = await getMyLists(type)
+      const ids = Array.isArray(list)
+        ? [...new Set(list.map((item) => toValidKpId(item?.kp_id)).filter(Boolean))]
+        : []
+      return { type, ids }
+    })
+  )
+
+  listResults.forEach((result, index) => {
+    const type = exportableListTypes[index]
+    exportedLists[type] = result.status === 'fulfilled' ? result.value.ids : []
+  })
+
+  return {
+    format: 'reyohoho-user-data',
+    version: 1,
+    exportedAt: new Date().toISOString(),
+    data: {
+      serverLists: exportedLists,
+      localHistory: normalizeHistoryItems(mainStore.history)
+    }
+  }
+}
+
+const downloadJson = (payload) => {
+  const blob = new window.Blob([JSON.stringify(payload, null, 2)], { type: 'application/json' })
+  const url = window.URL.createObjectURL(blob)
+  const anchor = document.createElement('a')
+  const date = new Date().toISOString().slice(0, 10)
+  anchor.href = url
+  anchor.download = `reyohoho-export-${date}.json`
+  document.body.appendChild(anchor)
+  anchor.click()
+  document.body.removeChild(anchor)
+  window.URL.revokeObjectURL(url)
+}
+
+const exportListsAndHistory = async () => {
+  if (!canManageOwnLists.value) return
+
+  try {
+    loading.value = true
+    const payload = await buildExportPayload()
+    downloadJson(payload)
+    notificationRef.value.showNotification('Экспорт сохранен')
+  } catch (error) {
+    notificationRef.value.showNotification(error?.message || 'Ошибка при экспорте')
+  } finally {
+    loading.value = false
+  }
+}
+
+const openImportDialog = () => {
+  if (!canManageOwnLists.value) return
+  importFileInput.value?.click()
+}
+
+const parseImportPayload = (rawPayload) => {
+  const payload = rawPayload && typeof rawPayload === 'object' ? rawPayload : {}
+  const sourceLists = payload?.data?.serverLists || payload?.serverLists || payload?.lists || {}
+  const sourceLocalHistory = payload?.data?.localHistory || payload?.localHistory || payload?.history || []
+
+  const parsedLists = {}
+  exportableListTypes.forEach((type) => {
+    const ids = Array.isArray(sourceLists[type])
+      ? [...new Set(sourceLists[type].map(toValidKpId).filter(Boolean))]
+      : []
+    parsedLists[type] = ids
+  })
+
+  return {
+    lists: parsedLists,
+    localHistory: normalizeHistoryItems(sourceLocalHistory)
+  }
+}
+
+const importServerLists = async (parsedLists) => {
+  if (!authStore.token) {
+    throw new Error('Необходимо авторизоваться для импорта списков')
+  }
+
+  let addedCount = 0
+  let failedCount = 0
+
+  const currentLists = {}
+  for (const type of exportableListTypes) {
+    try {
+      const list = await getMyLists(type)
+      currentLists[type] = new Set(
+        (Array.isArray(list) ? list : []).map((item) => toValidKpId(item?.kp_id)).filter(Boolean)
+      )
+    } catch {
+      currentLists[type] = new Set()
+    }
+  }
+
+  for (const type of exportableListTypes) {
+    const incomingIds = parsedLists[type] || []
+    for (const kpId of incomingIds) {
+      if (currentLists[type].has(kpId)) continue
+      try {
+        await addToList(kpId, type)
+        currentLists[type].add(kpId)
+        addedCount += 1
+      } catch {
+        failedCount += 1
+      }
+    }
+  }
+
+  return { addedCount, failedCount }
+}
+
+const handleImportFileSelect = async (event) => {
+  const [file] = event.target.files || []
+  event.target.value = ''
+  if (!file || !canManageOwnLists.value) return
+
+  try {
+    isImporting.value = true
+    loading.value = true
+
+    const fileText = await file.text()
+    const parsedJson = JSON.parse(fileText)
+    const parsedPayload = parseImportPayload(parsedJson)
+    const hasAnyServerData = exportableListTypes.some(
+      (type) => (parsedPayload.lists[type] || []).length > 0
+    )
+    const hasLocalHistory = parsedPayload.localHistory.length > 0
+
+    if (!hasAnyServerData && !hasLocalHistory) {
+      notificationRef.value.showNotification('Файл импорта пустой или невалидный')
+      return
+    }
+
+    const summary = []
+
+    if (hasAnyServerData) {
+      const { addedCount, failedCount } = await importServerLists(parsedPayload.lists)
+      summary.push(`списки: +${addedCount}`)
+      if (failedCount > 0) {
+        summary.push(`ошибок: ${failedCount}`)
+      }
+    }
+
+    if (hasLocalHistory) {
+      const beforeCount = mainStore.history.length
+      const mergedHistory = mergeHistory(mainStore.history, parsedPayload.localHistory)
+      mainStore.setHistory(mergedHistory)
+      const importedCount = Math.max(0, mergedHistory.length - beforeCount)
+      summary.push(`история: +${importedCount}`)
+    }
+
+    await fetchMovies()
+    notificationRef.value.showNotification(
+      summary.length ? `Импорт завершен (${summary.join(', ')})` : 'Импорт завершен'
+    )
+  } catch {
+    notificationRef.value.showNotification('Ошибка импорта: проверьте формат JSON')
+  } finally {
+    isImporting.value = false
+    loading.value = false
+  }
+}
+
 const copyShareLink = async () => {
   try {
     const baseUrl = window.location.origin + window.location.pathname.split('/lists')[0] + '/lists'
@@ -502,4 +773,9 @@ onMounted(() => {
   pointer-events: none;
   transform: none !important;
 }
+
+.hidden-file-input {
+  display: none;
+}
 </style>
+
