@@ -9,20 +9,20 @@
 </p>
 
 <p align="center">
-  <a href="https://github.com/reyohoho/reyohoho/stargazers">
-    <img src="https://img.shields.io/github/stars/reyohoho/reyohoho?style=social" alt="GitHub stars">
+  <a href="https://github.com/dav2010id/reyohoho/stargazers">
+    <img src="https://img.shields.io/github/stars/dav2010id/reyohoho?style=social" alt="GitHub stars">
   </a>
-  <a href="https://github.com/reyohoho/reyohoho/network/members">
-    <img src="https://img.shields.io/github/forks/reyohoho/reyohoho?style=social" alt="GitHub forks">
+  <a href="https://github.com/dav2010id/reyohoho/network/members">
+    <img src="https://img.shields.io/github/forks/dav2010id/reyohoho?style=social" alt="GitHub forks">
   </a>
 </p>
 
 <p align="center">
-  🖥 <a href="https://gitlab.com/reyohoho/reyohoho-desktop">Desktop App</a>
+  🖥 <a href="https://gitlab.com/dav2010id/reyohoho-desktop">Desktop App</a>
 </p>
 
 <p align="center">
-  🖥 <a href="https://gitlab.com/reyohoho/reyohoho-chrome-ff-ext">Расширение для браузера</a>
+  🖥 <a href="https://gitlab.com/dav2010id/reyohoho-chrome-ff-ext">Расширение для браузера</a>
 </p>
 
 ---
@@ -80,7 +80,7 @@ ReYohoho — это современное веб-приложение, пред
 
 ### Форк и клонирование репозитория
 
-1. Форкните репозиторий [(нажмите здесь, чтобы сделать форк)](https://github.com/reyohoho/reyohoho/fork).
+1. Форкните репозиторий [(нажмите здесь, чтобы сделать форк)](https://github.com/dav2010id/reyohoho/fork).
 2. Склонируйте ваш форк:
    ```bash
    git clone https://github.com/ваше_имя_пользователя/reyohoho
@@ -123,13 +123,14 @@ yarn dev
 ```bash
 docker compose up -d
 ```
+
 [Установка](https://docs.docker.com/engine/install/) docker
 
 ---
 
 ## 💕 Участники
 
-<a href="https://github.com/reyohoho/reyohoho/contributors">
+<a href="https://github.com/dav2010id/reyohoho/contributors">
   <img src="https://contrib.rocks/image?repo=reyohoho/reyohoho" />
 </a>
 
@@ -138,7 +139,7 @@ docker compose up -d
 ## 📬 Контакты
 
 - 📧 **Email:** [reyohoho@proton.me](mailto:reyohoho@proton.me)
-- 🐙 **GitHub Issues:** [Создать issue](https://github.com/reyohoho/reyohoho/issues)
+- 🐙 **GitHub Issues:** [Создать issue](https://github.com/dav2010id/reyohoho/issues)
 
 ---
 

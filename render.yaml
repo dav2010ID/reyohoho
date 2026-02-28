@@ -1,8 +1,8 @@
 services:
-- type: web
-  name: reyohoho
-  runtime: static
-  repo: https://gitlab.com/reyohoho/reyohoho
-  buildCommand: yarn build
-  staticPublishPath: ./dist
-version: "1"
+  - type: web
+    name: reyohoho
+    runtime: static
+    repo: https://gitlab.com/dav2010id/reyohoho
+    buildCommand: yarn build
+    staticPublishPath: ./dist
+version: '1'
