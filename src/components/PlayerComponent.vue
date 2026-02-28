@@ -12,6 +12,7 @@
             : 'Загрузка плееров...'
         }}
       </button>
+      <button v-if="isKinoBdProvider" class="source-btn" @click="openSourceModal">Источник</button>
     </div>
 
     <!-- Модальное окно выбора плеера -->
@@ -22,6 +23,26 @@
       @close="closePlayerModal"
       @select="handlePlayerSelect"
     />
+
+    <div v-if="showSourceModal" class="source-modal-backdrop" @click.self="closeSourceModal">
+      <div class="source-modal">
+        <div class="source-modal-header">
+          <h3>Выбор источника KinoBD</h3>
+          <button class="source-close-btn" @click="closeSourceModal">×</button>
+        </div>
+        <div v-if="sourceLoading" class="source-loading">Загрузка источников...</div>
+        <div v-else-if="sourceError" class="source-error">{{ sourceError }}</div>
+        <div v-else-if="sourceCandidates.length === 0" class="source-empty">Источники не найдены</div>
+        <ul v-else class="source-candidate-list">
+          <li v-for="candidate in sourceCandidates" :key="candidate.id">
+            <button class="source-candidate-btn" @click="applySourceCandidate(candidate)">
+              <span class="source-title">{{ candidate.title || `ID ${candidate.id}` }}</span>
+              <span class="source-meta">inid: {{ candidate.id }} · kp: {{ candidate.kp_id || '-' }}</span>
+            </button>
+          </li>
+        </ul>
+      </div>
+    </div>
 
     <!-- Единый контейнер плеера -->
     <div
@@ -467,7 +488,12 @@
 </template>
 
 <script setup>
-import { getPlayers, getShikiPlayers } from '@/api/movies'
+import {
+  getPlayers,
+  getShikiPlayers,
+  searchKinoBDPlayerCandidates,
+  getKinoBDPlayerDataByInid
+} from '@/api/movies'
 import { handleApiError } from '@/constants'
 import { addToList, delFromList } from '@/api/user'
 import ErrorMessage from '@/components/ErrorMessage.vue'
@@ -509,6 +535,10 @@ const closeButtonVisible = ref(false)
 const playerIframe = ref(null)
 const containerRef = ref(null)
 const showPlayerModal = ref(false)
+const showSourceModal = ref(false)
+const sourceCandidates = ref([])
+const sourceLoading = ref(false)
+const sourceError = ref('')
 
 // Переменные для ошибок
 const errorMessage = ref('')
@@ -518,6 +548,9 @@ const maxPlayerHeightValue = ref(window.innerHeight * 0.9)
 const maxPlayerHeight = computed(() => `${maxPlayerHeightValue.value}px`)
 const isMobile = computed(() => mainStore.isMobile)
 const isElectron = computed(() => !!window.electronAPI)
+const isKinoBdProvider = computed(
+  () => mainStore.contentApiProvider === 'kinobd' && !String(props.kpId || '').startsWith('shiki')
+)
 
 const activeTooltip = ref(null)
 const tooltipHovered = ref(false)
@@ -647,6 +680,26 @@ const naturalHeight = ref(0)
 
 const normalizeKey = (key) => key.toUpperCase()
 
+const applyPlayersData = (players) => {
+  playersInternal.value = Object.entries(players || {}).map(([key, value]) => ({
+    key: key.toUpperCase(),
+    ...value
+  }))
+
+  if (playersInternal.value.length === 0) return
+
+  if (preferredPlayer.value) {
+    const normalizedPreferred = normalizeKey(preferredPlayer.value)
+    const preferred = playersInternal.value.find(
+      (player) => normalizeKey(player.key) === normalizedPreferred
+    )
+    selectedPlayerInternal.value = preferred || playersInternal.value[0]
+  } else {
+    selectedPlayerInternal.value = playersInternal.value[0]
+  }
+  emit('update:selectedPlayer', selectedPlayerInternal.value)
+}
+
 const updateScaleFactor = () => {
   if (theaterMode.value || !containerRef.value) return
   const [w, h] = aspectRatio.value.split(':').map(Number)
@@ -703,25 +756,14 @@ const fetchPlayers = async () => {
       const cleanShikiId = props.kpId.replace('shiki', '')
       players = await getShikiPlayers(cleanShikiId)
     } else {
-      players = await getPlayers(props.kpId)
+      const savedInid = playerStore.kinobdSourceByKpId?.[String(props.kpId)] || null
+      players = await getPlayers(props.kpId, {
+        mode: 'kp_id',
+        usePlayerData: true,
+        forceInid: isKinoBdProvider.value ? savedInid : null
+      })
     }
-
-    playersInternal.value = Object.entries(players).map(([key, value]) => ({
-      key: key.toUpperCase(),
-      ...value
-    }))
-    if (playersInternal.value.length > 0) {
-      if (preferredPlayer.value) {
-        const normalizedPreferred = normalizeKey(preferredPlayer.value)
-        const preferred = playersInternal.value.find(
-          (player) => normalizeKey(player.key) === normalizedPreferred
-        )
-        selectedPlayerInternal.value = preferred || playersInternal.value[0]
-      } else {
-        selectedPlayerInternal.value = playersInternal.value[0]
-      }
-      emit('update:selectedPlayer', selectedPlayerInternal.value)
-    }
+    applyPlayersData(players)
   } catch (error) {
     const { message, code } = handleApiError(error)
     errorMessage.value = message
@@ -736,6 +778,60 @@ const openPlayerModal = () => {
 
 const closePlayerModal = () => {
   showPlayerModal.value = false
+}
+
+const openSourceModal = async () => {
+  showSourceModal.value = true
+  sourceError.value = ''
+  sourceLoading.value = true
+
+  try {
+    const query =
+      props.movieInfo?.title ||
+      props.movieInfo?.name_ru ||
+      props.movieInfo?.name_en ||
+      props.movieInfo?.name_original ||
+      props.kpId
+
+    let candidates = []
+    if (query) {
+      candidates = await searchKinoBDPlayerCandidates(query, { type: 'title', page: 1 })
+    }
+    if (!candidates.length && props.kpId) {
+      candidates = await searchKinoBDPlayerCandidates(props.kpId, { type: 'kp_id', page: 1 })
+    }
+    sourceCandidates.value = candidates
+  } catch (error) {
+    sourceError.value = 'Не удалось загрузить список источников'
+    console.error('Ошибка при загрузке источников KinoBD:', error)
+  } finally {
+    sourceLoading.value = false
+  }
+}
+
+const closeSourceModal = () => {
+  showSourceModal.value = false
+}
+
+const applySourceCandidate = async (candidate) => {
+  if (!candidate?.id) return
+
+  sourceLoading.value = true
+  sourceError.value = ''
+
+  try {
+    const players = await getKinoBDPlayerDataByInid(candidate.id, {
+      playerUrl: candidate.iframe
+    })
+    applyPlayersData(players)
+    playerStore.setKinoBdSource(props.kpId, candidate.id)
+    closeSourceModal()
+  } catch (error) {
+    sourceError.value = 'Не удалось применить выбранный источник'
+    console.error('Ошибка применения источника KinoBD:', error)
+  } finally {
+    sourceLoading.value = false
+  }
 }
 
 const initializeAudioContext = () => {
@@ -3088,6 +3184,110 @@ const testOBSConnection = async () => {
 .player-btn:focus {
   outline: none;
   box-shadow: 0 0 5px var(--accent-color);
+}
+
+.source-btn {
+  padding: 10px 14px;
+  border: 2px solid #505050;
+  border-radius: 5px;
+  background: #2f2f2f;
+  color: #fff;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 600;
+  transition: all 0.2s ease-in-out;
+}
+
+.source-btn:hover {
+  background: var(--accent-color);
+  border-color: var(--accent-color);
+}
+
+.source-modal-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.65);
+  z-index: 20;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 12px;
+}
+
+.source-modal {
+  width: min(720px, 100%);
+  max-height: 80vh;
+  overflow: auto;
+  background: #222;
+  border: 1px solid #444;
+  border-radius: 10px;
+  padding: 14px;
+}
+
+.source-modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 10px;
+}
+
+.source-modal-header h3 {
+  margin: 0;
+  font-size: 18px;
+}
+
+.source-close-btn {
+  background: transparent;
+  border: none;
+  color: #fff;
+  font-size: 26px;
+  cursor: pointer;
+}
+
+.source-loading,
+.source-error,
+.source-empty {
+  padding: 10px 0;
+}
+
+.source-error {
+  color: #ff7a7a;
+}
+
+.source-candidate-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 8px;
+}
+
+.source-candidate-btn {
+  width: 100%;
+  text-align: left;
+  background: #333;
+  border: 1px solid #4f4f4f;
+  color: #fff;
+  border-radius: 8px;
+  padding: 10px;
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.source-candidate-btn:hover {
+  border-color: var(--accent-color);
+  background: #3a3a3a;
+}
+
+.source-title {
+  font-weight: 600;
+}
+
+.source-meta {
+  opacity: 0.8;
+  font-size: 12px;
 }
 
 .player-container {

@@ -1,5 +1,6 @@
 import axios from 'axios'
 import * as rhserv from '@/api/movies.rhserv'
+import { resolvePosterSetByMovie } from '@/utils/mediaUtils'
 
 let apiInstance = null
 let isErrorSimulationEnabled = false
@@ -154,30 +155,6 @@ const toLegacyType = (typeValue) => {
   return 'FILM'
 }
 
-const buildPosterUrls = (film, kpId) => {
-  const small = toAbsoluteUrl(film?.small_poster || '')
-  const big = toAbsoluteUrl(film?.big_poster || '')
-
-  if (small || big) {
-    return {
-      small: small || big,
-      big: big || small
-    }
-  }
-
-  if (kpId) {
-    return {
-      small: `https://kinopoiskapiunofficial.tech/images/posters/kp_small/${kpId}.jpg`,
-      big: `https://kinopoiskapiunofficial.tech/images/posters/kp/${kpId}.jpg`
-    }
-  }
-
-  return {
-    small: '',
-    big: ''
-  }
-}
-
 const buildLegacyMovie = (film) => {
   const kpId = film?.kinopoisk_id || film?.kp_id || film?.id || null
   const year = film?.year || film?.year_start || ''
@@ -188,14 +165,17 @@ const buildLegacyMovie = (film) => {
   const ratingKp = film?.rating_kp
   const normalizedRating =
     ratingKp === null || ratingKp === undefined || ratingKp === '' ? 'null' : String(ratingKp)
-  const posters = buildPosterUrls(film, kpId)
+  const posters = resolvePosterSetByMovie({
+    ...film,
+    kp_id: kpId
+  })
 
   return {
     id: kpId,
     kp_id: kpId ? String(kpId) : '',
     title,
     year: year ? String(year) : '',
-    poster: posters.small,
+    poster: posters.preview,
     average_rating:
       ratingKp === null || ratingKp === undefined || Number.isNaN(Number(ratingKp))
         ? null
@@ -212,8 +192,8 @@ const buildLegacyMovie = (film) => {
       genres: parseGenres(film),
       rating: normalizedRating,
       rating_vote_count: film?.rating_kp_count || 0,
-      poster_url: posters.big,
-      poster_url_preview: posters.small
+      poster_url: posters.full,
+      poster_url_preview: posters.preview
     },
     source: 'kinobd'
   }
@@ -426,19 +406,27 @@ const getPlayers = async (kpId, options = {}) => {
     mode = 'kp_id',
     selectIndex = 0,
     usePlayerData = true,
-    providers = DEFAULT_PLAYER_PROVIDERS
+    providers = DEFAULT_PLAYER_PROVIDERS,
+    forceInid = null
   } = options
   const searchType = mode === 'title' ? 'title' : 'kp_id'
   const candidates = await searchPlayerCandidates(kpId, { type: searchType, page: 1 })
 
-  if (!candidates.length) return {}
+  if (!candidates.length && !forceInid) return {}
 
   if (usePlayerData) {
-    const selected = candidates[Math.max(0, Math.min(selectIndex, candidates.length - 1))]
-    if (selected?.id) {
+    let selected = null
+    if (forceInid) {
+      selected = candidates.find((item) => String(item.id) === String(forceInid)) || null
+    }
+    if (!selected && candidates.length > 0) {
+      selected = candidates[Math.max(0, Math.min(selectIndex, candidates.length - 1))]
+    }
+
+    if (selected?.id || forceInid) {
       try {
-        return await getPlayerDataByInid(selected.id, {
-          playerUrl: selected.iframe,
+        return await getPlayerDataByInid(selected?.id || forceInid, {
+          playerUrl: selected?.iframe || '',
           providers
         })
       } catch (error) {

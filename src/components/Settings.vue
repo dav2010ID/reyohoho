@@ -85,6 +85,16 @@
             <span class="radio-label">KinoBD (search/cards/players)</span>
           </label>
         </div>
+        <p class="api-note">
+          RHServ: полный функционал (комментарии, тайминги, рейтинги). KinoBD: поиск/карточки/плееры.
+          Неподдерживаемые функции автоматически идут через RHServ.
+        </p>
+        <div class="settings-actions">
+          <button class="reset-button" @click="resetKinoBdSources">
+            <i class="fa-solid fa-arrow-rotate-left"></i>
+            Сбросить выбранные источники KinoBD
+          </button>
+        </div>
       </div>
 
       <div class="settings-group">
@@ -251,6 +261,10 @@ const rememberScrollPosition = computed({
 const resetBackground = () => {
   backgroundStore.resetBackground()
 }
+
+const resetKinoBdSources = () => {
+  playerStore.clearKinoBdSources()
+}
 </script>
 
 <style scoped>
@@ -365,5 +379,12 @@ h2 {
 .card-size-group label:first-child {
   font-weight: 500;
   margin-bottom: 5px;
+}
+
+.api-note {
+  margin: 0;
+  opacity: 0.85;
+  font-size: 13px;
+  line-height: 1.35;
 }
 </style>

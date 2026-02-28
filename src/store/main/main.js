@@ -2,6 +2,7 @@ import noPosterImage from '@/assets/image-no-poster.gif'
 import { defineStore } from 'pinia'
 import { MAIN_STORE_NAME } from '../constants'
 import { beforeHydrateLegacyVuex } from '../utils'
+import { resolvePosterByMovie } from '@/utils/mediaUtils'
 
 export const useMainStore = defineStore(MAIN_STORE_NAME, {
   state: () => ({
@@ -58,12 +59,7 @@ export const useMainStore = defineStore(MAIN_STORE_NAME, {
           title: movie.title || '',
           year: movie.year || '',
           type: movie.type || '',
-          poster:
-            movie.poster ||
-            movie.cover ||
-            (movie.kp_id
-              ? `https://kinopoiskapiunofficial.tech/images/posters/kp_small/${movie.kp_id}.jpg`
-              : noPosterImage),
+          poster: resolvePosterByMovie(movie) || noPosterImage,
           addedAt: new Date().toISOString()
         }
         this.history.unshift(movieWithDate)

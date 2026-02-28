@@ -53,6 +53,7 @@ import { TYPES_ENUM } from '@/constants'
 import { getRatingColor } from '@/utils/ratingUtils'
 import { useMainStore } from '@/store/main'
 import { computed } from 'vue'
+import { resolvePosterByMovie } from '@/utils/mediaUtils'
 
 const mainStore = useMainStore()
 const cardSize = computed(() => mainStore.cardSize)
@@ -75,12 +76,7 @@ const {
 const emit = defineEmits(['remove:from-history'])
 
 const posterSrc = computed(() => {
-  if (movie?.poster) return movie.poster
-  if (movie?.cover) return movie.cover
-  if (movie?.kp_id) {
-    return `https://kinopoiskapiunofficial.tech/images/posters/kp_small/${movie.kp_id}.jpg`
-  }
-  return ''
+  return resolvePosterByMovie(movie)
 })
 </script>
 
