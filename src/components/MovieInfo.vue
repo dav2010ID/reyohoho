@@ -213,11 +213,11 @@
             <template v-if="movieInfo.imdb_id">
               <button
                 class="nudity-info-btn parents-guide-btn"
-                @click="showNudityInfo($event)"
-                @mousedown="handleMiddleClick($event)"
                 :title="
                   nudityInfo ? 'Скрыть информацию' : 'Показать Parents Guide и информацию о сценах'
                 "
+                @click="showNudityInfo($event)"
+                @mousedown="handleMiddleClick($event)"
               >
                 <span class="desktop-text">Parents Guide</span>
                 <span class="mobile-text">PG</span>
@@ -227,12 +227,12 @@
             </template>
             <button
               class="nudity-info-btn"
-              @click="showNudityTimings($event)"
               :title="
                 nudityTimings !== undefined
                   ? 'Скрыть тайминги'
                   : 'Показать тайминги сцен 18+(для твича, мигание отключается в настройках)'
               "
+              @click="showNudityTimings($event)"
             >
               <i
                 class="fa-regular fa-clock"
@@ -243,9 +243,9 @@
             <button
               v-if="authStore.token"
               class="nudity-info-btn note-btn"
-              @click="toggleNoteEditor"
               :class="{ 'has-note': movieNote }"
               :title="movieNote ? 'Редактировать заметку' : 'Добавить заметку'"
+              @click="toggleNoteEditor"
             >
               <i class="fa-regular fa-note-sticky"></i>
               <span class="mobile-text">Заметка</span>
@@ -406,7 +406,7 @@
               <h3>Моя заметка</h3>
             </div>
             <div class="movie-note-actions">
-              <button class="note-edit-btn" @click="toggleNoteEditor" title="Редактировать">
+              <button class="note-edit-btn" title="Редактировать" @click="toggleNoteEditor">
                 <i class="fas fa-edit"></i>
               </button>
             </div>
@@ -432,7 +432,7 @@
         </div>
 
         <div v-if="isCommentsEnabled" class="comments-section">
-          <Comments :movie-id="kp_id" :key="kp_id" />
+          <Comments :key="kp_id" :movie-id="kp_id" />
         </div>
 
         <div v-if="movieInfo.staff" class="staff-section">
@@ -551,8 +551,8 @@
           <a
             v-if="sequelsAndPrequels.length > itemsPerRow"
             class="expand-circle-button"
-            @click="showAllSequels = !showAllSequels"
             :title="`${showAllSequels ? 'Скрыть' : 'Показать все'} (${sequelsAndPrequels.length})`"
+            @click="showAllSequels = !showAllSequels"
           >
             {{ showAllSequels ? '−' : `+${sequelsAndPrequels.length - itemsPerRow}` }}
           </a>
@@ -570,8 +570,8 @@
           <a
             v-if="similars.length > itemsPerRow"
             class="expand-circle-button"
-            @click="showAllSimilars = !showAllSimilars"
             :title="`${showAllSimilars ? 'Скрыть' : 'Показать все'} (${similars.length})`"
+            @click="showAllSimilars = !showAllSimilars"
           >
             {{ showAllSimilars ? '−' : `+${similars.length - itemsPerRow}` }}
           </a>
@@ -682,8 +682,8 @@
                   <template v-if="overlayTimings.has(timing.id)">
                     <button
                       class="nudity-info-button overlay-button"
-                      @click="onRemoveFromOverlay(timing.id)"
                       :title="'Удалить из оверлея'"
+                      @click="onRemoveFromOverlay(timing.id)"
                     >
                       <i class="fas fa-eye-slash"></i>
                       <span>Удалить из оверлея</span>
@@ -692,8 +692,8 @@
                   <template v-else>
                     <button
                       class="nudity-info-button overlay-button"
-                      @click="onAddToOverlay(timing.id)"
                       :title="'Добавить в оверлей'"
+                      @click="onAddToOverlay(timing.id)"
                     >
                       <i class="fas fa-eye"></i>
                       <span>Добавить в оверлей</span>
@@ -703,16 +703,16 @@
                   <template v-if="canEditTiming(timing)">
                     <button
                       class="nudity-info-button edit-button"
-                      @click="editTiming(timing)"
                       :title="'Редактировать тайминг'"
+                      @click="editTiming(timing)"
                     >
                       <i class="fas fa-edit"></i>
                       <span>Редактировать</span>
                     </button>
                     <button
                       class="nudity-info-button delete-button"
-                      @click="deleteTimingHandler(timing.id)"
                       :title="'Удалить тайминг'"
+                      @click="deleteTimingHandler(timing.id)"
                     >
                       <i class="fas fa-trash"></i>
                       <span>Удалить</span>
@@ -722,8 +722,8 @@
                   <button
                     v-if="!canEditTiming(timing)"
                     class="nudity-info-button report-button"
-                    @click="reportTimingHandler(timing.id)"
                     :title="'Пожаловаться на тайминг'"
+                    @click="reportTimingHandler(timing.id)"
                   >
                     <i class="fas fa-flag"></i>
                     <span>Пожаловаться</span>
@@ -750,9 +750,9 @@
                   <button
                     class="vote-button upvote-button"
                     :class="{ active: timing.userVote === 'upvote' }"
-                    @click="handleVote(timing.id, 'upvote')"
                     :disabled="votingTimingId === timing.id"
                     :title="'Этот тайминг полезен и точен'"
+                    @click="handleVote(timing.id, 'upvote')"
                   >
                     <i class="fas fa-arrow-up"></i>
                     <span class="vote-count">{{ timing.upvotes || 0 }}</span>
@@ -763,9 +763,9 @@
                   <button
                     class="vote-button downvote-button"
                     :class="{ active: timing.userVote === 'downvote' }"
-                    @click="handleVote(timing.id, 'downvote')"
                     :disabled="votingTimingId === timing.id"
                     :title="'Этот тайминг неточен или некорректен'"
+                    @click="handleVote(timing.id, 'downvote')"
                   >
                     <i class="fas fa-arrow-down"></i>
                     <span class="vote-count">{{ timing.downvotes || 0 }}</span>
@@ -930,8 +930,8 @@
         <div class="timing-form-actions">
           <button
             class="submit-timing-btn"
-            @click="editingTiming ? updateExistingTiming() : submitNewTiming()"
             :disabled="!canSubmitTiming || isSubmittingTiming"
+            @click="editingTiming ? updateExistingTiming() : submitNewTiming()"
           >
             <i v-if="isSubmittingTiming" class="fas fa-spinner fa-spin"></i>
             <span v-else>{{ editingTiming ? 'Обновить тайминг' : 'Добавить тайминг' }}</span>
@@ -960,8 +960,8 @@
         <div class="timing-form-actions">
           <button
             class="submit-timing-btn"
-            @click="submitReport"
             :disabled="!reportText.trim() || isSubmittingReport"
+            @click="submitReport"
           >
             <i v-if="isSubmittingReport" class="fas fa-spinner fa-spin"></i>
             <span v-else>Отправить жалобу</span>
@@ -999,8 +999,8 @@
         <div class="timing-form-actions note-form-actions">
           <button
             class="submit-timing-btn"
-            @click="handleSaveNote"
             :disabled="!noteText.trim() || isSavingNote"
+            @click="handleSaveNote"
           >
             <i v-if="isSavingNote" class="fas fa-spinner fa-spin"></i>
             <i v-else class="fas fa-save"></i>
@@ -1009,8 +1009,8 @@
           <button
             v-if="movieNote"
             class="delete-note-btn"
-            @click="handleDeleteNote"
             :disabled="isDeletingNote"
+            @click="handleDeleteNote"
           >
             <i v-if="isDeletingNote" class="fas fa-spinner fa-spin"></i>
             <i v-else class="fas fa-trash"></i>
@@ -1046,8 +1046,8 @@
       <div class="modal-body">
         <button
           class="show-all-timings-btn"
-          @click="showAllTimingsModal"
           :disabled="isLoadingAllTimings"
+          @click="showAllTimingsModal"
         >
           <i v-if="isLoadingAllTimings" class="fas fa-spinner fa-spin"></i>
           <i v-else class="fas fa-list"></i>
@@ -1145,9 +1145,9 @@
                   <button
                     v-if="timing.status === 'pending'"
                     class="approve-btn"
-                    @click="handleApproveTiming(timing.id)"
                     :disabled="isProcessingTiming"
                     :title="'Одобрить тайминг'"
+                    @click="handleApproveTiming(timing.id)"
                   >
                     <i
                       v-if="processingTimingId === timing.id && isApproving"
@@ -1158,9 +1158,9 @@
                   <button
                     v-if="timing.status === 'pending'"
                     class="reject-btn"
-                    @click="handleRejectTiming(timing.id)"
                     :disabled="isProcessingTiming"
                     :title="'Отклонить тайминг'"
+                    @click="handleRejectTiming(timing.id)"
                   >
                     <i
                       v-if="processingTimingId === timing.id && !isApproving && !isMarkingCleanText"
@@ -1171,9 +1171,9 @@
                   <button
                     v-if="timing.status === 'pending'"
                     class="clean-text-btn"
-                    @click="handleMarkAsCleanText(timing.id)"
                     :disabled="isProcessingTiming"
                     :title="'Отметить как clean_text'"
+                    @click="handleMarkAsCleanText(timing.id)"
                   >
                     <i
                       v-if="processingTimingId === timing.id && isMarkingCleanText"
@@ -1204,7 +1204,7 @@
       <div class="obs-settings-form">
         <div class="obs-setting-group">
           <label class="obs-checkbox-label">
-            <input type="checkbox" v-model="obsEnabled" @change="handleObsEnabledChange" />
+            <input v-model="obsEnabled" type="checkbox" @change="handleObsEnabledChange" />
             <span>Использовать автоблюр в OBS</span>
           </label>
           <div class="obs-setting-description">
@@ -1215,19 +1215,19 @@
         <div v-if="obsEnabled" class="obs-connection-settings">
           <div class="obs-setting-group">
             <label>Хост OBS WebSocket:</label>
-            <input type="text" v-model="obsHost" placeholder="localhost" class="obs-input" />
+            <input v-model="obsHost" type="text" placeholder="localhost" class="obs-input" />
           </div>
 
           <div class="obs-setting-group">
             <label>Порт OBS WebSocket:</label>
-            <input type="number" v-model="obsPort" placeholder="4455" class="obs-input" />
+            <input v-model="obsPort" type="number" placeholder="4455" class="obs-input" />
           </div>
 
           <div class="obs-setting-group">
             <label>Пароль (если установлен):</label>
             <input
-              type="password"
               v-model="obsPassword"
+              type="password"
               placeholder="Оставьте пустым если пароль не установлен"
               class="obs-input"
             />
@@ -1241,8 +1241,8 @@
             <div v-else class="obs-filter-selection">
               <select
                 v-model="selectedFilterId"
-                @change="handleFilterSelect"
                 class="obs-filter-select"
+                @change="handleFilterSelect"
               >
                 <option value="">Выберите фильтр</option>
                 <option v-for="filter in obsFiltersFound" :key="filter.id" :value="filter.id">
@@ -1266,7 +1266,7 @@
 
           <div class="obs-setting-group">
             <label class="obs-checkbox-label">
-              <input type="checkbox" v-model="showObsInOverlay" />
+              <input v-model="showObsInOverlay" type="checkbox" />
               <span>Показывать статус OBS в видео оверлее</span>
             </label>
           </div>
@@ -1278,8 +1278,8 @@
           <div class="obs-actions">
             <button
               class="obs-action-btn connect-btn"
-              @click="handleObsConnect"
               :disabled="obsConnecting"
+              @click="handleObsConnect"
             >
               <i v-if="obsConnecting" class="fas fa-spinner fa-spin"></i>
               <i v-else class="fas fa-plug"></i>
@@ -1288,8 +1288,8 @@
 
             <button
               class="obs-action-btn test-btn"
-              @click="handleObsTestBlur"
               :disabled="!obsConnected || obsFiltersFound.length === 0"
+              @click="handleObsTestBlur"
             >
               <i class="fas fa-eye"></i>
               Тестировать блюр
@@ -1297,8 +1297,8 @@
 
             <button
               class="obs-action-btn refresh-btn"
-              @click="handleObsRefreshFilters"
               :disabled="!obsConnected"
+              @click="handleObsRefreshFilters"
             >
               <i class="fas fa-sync"></i>
               Обновить фильтры

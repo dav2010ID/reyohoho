@@ -6,12 +6,12 @@ import { useAppSetup } from './composables/useAppSetup'
 import { createApp } from 'vue'
 import App from './App.vue'
 
-console.log(`App version: ${import.meta.env.VITE_APP_VERSION_FULL_VERSION}`)
-
 registerSW({ immediate: true })
 
 window.addEventListener('vite:preloadError', (event) => {
-  console.log(`vite:preloadError ${event}`)
+  if (import.meta.env.DEV) {
+    window.__LAST_VITE_PRELOAD_ERROR__ = String(event)
+  }
   window.location.reload()
 })
 

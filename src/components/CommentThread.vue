@@ -92,16 +92,16 @@
             type="button"
             class="emoji-button-inline spoiler-button"
             :disabled="currentUser && currentUser.allow_comments !== 1"
-            @click="insertSpoiler"
             title="Добавить спойлер"
+            @click="insertSpoiler"
           >
             <i class="fas fa-eye-slash"></i>
           </button>
           <button
             type="button"
             class="emoji-button-inline link-button"
-            @click="insertLink"
             title="Добавить ссылку"
+            @click="insertLink"
           >
             <i class="fas fa-link"></i>
           </button>

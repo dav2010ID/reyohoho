@@ -290,7 +290,6 @@ export default {
     comment: {
       type: Object,
       // Зачем  required: true, если прописаны default?
-      required: true,
       default: () => ({
         name: 'Аноним',
         user_avatar: null,
@@ -303,7 +302,6 @@ export default {
     currentUser: {
       type: Object,
       // Зачем  required: true, если прописаны default?
-      required: true,
       default: () => ({})
     },
     editingCommentId: {

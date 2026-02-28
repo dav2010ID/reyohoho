@@ -4,10 +4,10 @@
       <h1>Профиль</h1>
     </div>
 
-    <div class="profile-content" v-if="user">
+    <div v-if="user" class="profile-content">
       <div class="profile-photo">
-        <img v-lazy="photoURL" alt="Profile Photo" v-if="user.photo && photoURL" />
-        <div class="photo-placeholder" v-else>
+        <img v-if="user.photo && photoURL" v-lazy="photoURL" alt="Profile Photo" />
+        <div v-else class="photo-placeholder">
           {{ String.fromCodePoint(user.name.codePointAt(0)).toLocaleUpperCase() }}
         </div>
       </div>
@@ -16,22 +16,22 @@
         <div class="info-item">
           <label>Имя:</label>
           <div class="editable-field">
-            <span v-if="!isEditingName" @click="startEditName" class="editable-text">
+            <span v-if="!isEditingName" class="editable-text" @click="startEditName">
               {{ user.name }}
               <i class="fas fa-edit edit-icon"></i>
             </span>
             <div v-else class="edit-input-container">
               <input
+                ref="nameInput"
                 v-model="editingName"
+                class="edit-input"
+                maxlength="50"
                 @keyup.enter="saveName"
                 @keyup.esc="cancelEditName"
                 @blur="saveName"
-                ref="nameInput"
-                class="edit-input"
-                maxlength="50"
               />
-              <button @click="saveName" class="save-btn">✓</button>
-              <button @click="cancelEditName" class="cancel-btn">✕</button>
+              <button class="save-btn" @click="saveName">✓</button>
+              <button class="cancel-btn" @click="cancelEditName">✕</button>
             </div>
           </div>
         </div>
@@ -40,9 +40,9 @@
       <button class="logout-btn" @click="confirmLogout">Выйти</button>
     </div>
 
-    <div class="loading" v-else>Загрузка профиля...</div>
+    <div v-else class="loading">Загрузка профиля...</div>
 
-    <div class="dialog-overlay" v-if="showDialog">
+    <div v-if="showDialog" class="dialog-overlay">
       <div class="dialog modern-dark-dialog">
         <div class="dialog-header">
           <h3>Выход</h3>

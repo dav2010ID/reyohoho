@@ -8,8 +8,8 @@
     <div class="color-picker-section">
       <div class="color-picker-wrapper">
         <input
-          type="color"
           v-model="customColorValue"
+          type="color"
           class="color-picker"
           @change="addCustomColor"
         />
@@ -31,8 +31,8 @@
         <button
           v-if="color.isCustom"
           class="remove-color"
-          @click.stop="removeCustomColor(color.value)"
           title="Удалить цвет"
+          @click.stop="removeCustomColor(color.value)"
         >
           <i class="material-icons">close</i>
         </button>

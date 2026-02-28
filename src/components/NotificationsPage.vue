@@ -7,12 +7,12 @@
           Уведомления
         </h1>
 
-        <div class="header-actions" v-if="notifications.length > 0">
+        <div v-if="notifications.length > 0" class="header-actions">
           <button
             v-if="notificationsStore.unreadCount > 0"
-            @click="markAllAsRead"
             class="btn"
             :disabled="loading"
+            @click="markAllAsRead"
           >
             <i class="fas fa-check-double"></i>
             Отметить все как прочитанные

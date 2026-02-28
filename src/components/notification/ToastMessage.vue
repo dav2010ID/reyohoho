@@ -1,7 +1,7 @@
 <template>
   <transition name="fade">
     <div v-if="visible" class="notification">
-      <span v-html="message" @click="handleClick"></span>
+      <span @click="handleClick" v-html="message"></span>
       <button class="close-btn" @click="hideNotification">✕</button>
     </div>
   </transition>

@@ -6,7 +6,6 @@ import { handleHashNavigation } from '@/helpers/hashHandler'
 import { useScrollTracking } from '@/composables/useScrollTracking'
 
 const base = import.meta.env.VITE_BASE_URL || '/'
-console.log(`base: ${base}`)
 const { userHasScrolled, startTracking } = useScrollTracking()
 const router = createRouter({
   history: createWebHistory(base),

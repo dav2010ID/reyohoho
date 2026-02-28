@@ -2,7 +2,6 @@ import { initializeApp } from 'firebase/app'
 import { getRemoteConfig, getValue, fetchAndActivate } from 'firebase/remote-config'
 import { useApiStore } from '@/store/api'
 
-console.log(import.meta.env.FIREBASE_PROJECT_ID)
 const firebaseConfig = {
   apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
   authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN,
@@ -42,8 +41,7 @@ function parseApiEndpoints(configValue) {
       )
     }
     return []
-  } catch (error) {
-    console.error('Failed to parse API endpoints from Remote Config:', error)
+  } catch {
     return [
       {
         url: import.meta.env.VITE_APP_API_URL,
@@ -70,15 +68,10 @@ async function initRemoteConfig() {
       const endpointsConfig = getValue(remoteConfig, 'api_endpoints').asString()
       const endpoints = parseApiEndpoints(endpointsConfig)
 
-      console.log('Remote Config loaded, available endpoints:', endpoints)
-
       apiStore.setAvailableEndpoints(endpoints)
 
       await apiStore.selectWorkingEndpoint(endpoints)
-      console.log('Selected API URL:', apiStore.currentApiUrl)
-    } catch (err) {
-      console.error('Failed to load Remote Config:', err)
-
+    } catch {
       const fallbackEndpoints = [
         {
           url: import.meta.env.VITE_APP_API_URL,
@@ -95,9 +88,6 @@ async function initRemoteConfig() {
 }
 
 function getConfigValue(key) {
-  if (!isConfigInitialized) {
-    console.warn('Remote Config not initialized yet, using default value')
-  }
   return getValue(remoteConfig, key).asString()
 }
 

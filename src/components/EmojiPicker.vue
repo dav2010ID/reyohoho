@@ -1,7 +1,7 @@
 <template>
   <div
-    class="emoji-picker"
     v-if="isVisible"
+    class="emoji-picker"
     @mouseenter="$emit('mouse-enter')"
     @mouseleave="$emit('mouse-leave')"
   >
@@ -13,10 +13,10 @@
       <button
         v-for="category in categories"
         :key="category.name"
-        @click="activeCategory = category.name"
         :class="{ active: activeCategory === category.name }"
         class="category-btn"
         type="button"
+        @click="activeCategory = category.name"
       >
         {{ category.icon }}
       </button>
@@ -26,9 +26,9 @@
       <button
         v-for="emoji in currentEmojis"
         :key="emoji"
-        @click="selectEmoji(emoji)"
         class="emoji-btn"
         type="button"
+        @click="selectEmoji(emoji)"
       >
         {{ emoji }}
       </button>

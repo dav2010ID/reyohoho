@@ -53,17 +53,17 @@
       <div class="notification-actions">
         <button
           v-if="!notification.is_read"
-          @click="markAsRead"
           class="action-btn mark-read-btn"
           title="Отметить как прочитанное"
+          @click="markAsRead"
         >
           <i class="fas fa-check"></i>
         </button>
 
         <button
-          @click="deleteNotification"
           class="action-btn delete-btn"
           title="Удалить уведомление"
+          @click="deleteNotification"
         >
           <i class="fas fa-trash"></i>
         </button>

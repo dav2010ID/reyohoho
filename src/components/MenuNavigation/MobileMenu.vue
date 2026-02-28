@@ -17,8 +17,8 @@
             </template>
 
             <component
-              v-else
               :is="link.to ? 'router-link' : 'a'"
+              v-else
               v-bind="
                 link.to ? { to: link.to, exact: link.exact } : { href: link.href, target: '_blank' }
               "

@@ -14,15 +14,15 @@
               @click="changeTypeFilter(btn.value)"
             >
               {{ btn.label }}
-              <span class="counter" v-if="listCounters[btn.value]">{{
+              <span v-if="listCounters[btn.value]" class="counter">{{
                 listCounters[btn.value]
               }}</span>
             </button>
             <button
               class="share-btn"
-              @click="copyShareLink()"
               :disabled="loading"
               title="Поделиться списком"
+              @click="copyShareLink()"
             >
               <span class="material-icons">{{ 'share' }}</span>
             </button>
@@ -33,10 +33,10 @@
                 disabled: !movies.length || typeFilter === USER_LIST_TYPES_ENUM.RATED || loading
               }"
               :disabled="!movies.length || typeFilter === USER_LIST_TYPES_ENUM.RATED || loading"
+              title="Очистить список"
               @click="
                 movies.length && typeFilter !== USER_LIST_TYPES_ENUM.RATED && (showModal = true)
               "
-              title="Очистить список"
             >
               <span class="material-icons">{{ 'delete_sweep' }}</span>
             </button>

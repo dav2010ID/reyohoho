@@ -56,8 +56,8 @@ const fetchTopMovie = async () => {
       localStorage.setItem(CACHE_KEY, JSON.stringify({ url: topMovies[0].cover, expiresAt }))
       backgroundStore.updateTopMoviePoster(topMovies[0].cover)
     }
-  } catch (err) {
-    console.error('Ошибка:', err)
+  } catch {
+    // Ignore background fetch errors; keep current background.
   } finally {
     isFetching.value = false
   }
@@ -82,22 +82,15 @@ const checkCachedTopMovie = () => {
 }
 
 onMounted(async () => {
-  'mounted'
   backgrounds.value = [backgroundUrl.value, backgroundUrl.value]
   await router.isReady()
-  ;('route check')
 
   if (route.path.includes('movie')) return
-  ;('route check passed')
 
   if (backgroundType.value !== 'disabled') {
-    ;('first if')
-
     const hasValidCache = checkCachedTopMovie()
-    ;('valid cache')
 
     if (!hasValidCache && !isFetching.value) {
-      ;('second if')
       await fetchTopMovie()
     }
   }

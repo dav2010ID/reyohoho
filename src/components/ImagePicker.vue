@@ -23,8 +23,8 @@
       <div class="image-picker-header">
         <input
           ref="searchInput"
-          type="text"
           v-model="searchQuery"
+          type="text"
           placeholder="Введите название смайла 7tv"
           class="image-search-input"
           @input="handleSearch"

@@ -10,7 +10,7 @@
       <div v-else class="login-methods">
         <!-- Кнопка входа через Telegram -->
         <div class="telegram-btn-container">
-          <button @click="loginWithTelegram" class="telegram-btn">
+          <button class="telegram-btn" @click="loginWithTelegram">
             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 496 512" class="telegram-icon">
               <path
                 d="M248 8C111 8 0 119 0 256s111 248 248 248 248-111 248-248S385 8 248 8zm121.8 169.9l-40.7 191.8c-3 13.6-11.1 16.9-22.4 10.5l-62-45.7-29.9 28.8c-3.3 3.3-6.1 6.1-12.5 6.1l4.4-63.1 114.9-103.8c5-4.4-1.1-6.9-7.7-2.5l-142 89.4-61.2-19.1c-13.3-4.2-13.6-13.3 2.8-19.7l239.1-92.2c11.1-4 20.8 2.7 17.2 19.5z"
@@ -27,7 +27,7 @@
 
         <!-- Кнопка для показа QR-кода -->
         <div class="qr-btn-container">
-          <button @click="showQRModal" class="qr-btn">
+          <button class="qr-btn" @click="showQRModal">
             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512" class="qr-icon">
               <path
                 d="M0 224h192V32H0v192zM64 96h64v64H64V96zm192-64v192h192V32H256zm128 128h-64V96h64v64zM0 480h192V288H0v192zm64-128h64v64H64v-64zm352-64h32v32h-32v-32zm0 64h32v32h-32v-32zm0 64h32v32h-32v-32zm-64-64h32v32h-32v-32zm0 64h32v32h-32v-32zm0 64h32v32h-32v-32zm-64-192h32v32h-32v-32zm0 64h32v32h-32v-32zm0 64h32v32h-32v-32zm0 64h32v32h-32v-32zm64-256h32v32h-32v-32zm0 64h32v32h-32v-32zm64-64h32v32h-32v-32z"
@@ -43,7 +43,7 @@
         <div class="modal-content" @click.stop>
           <div class="modal-header">
             <h3>Вход через QR-код</h3>
-            <button @click="closeModal" class="close-btn">&times;</button>
+            <button class="close-btn" @click="closeModal">&times;</button>
           </div>
           <div class="modal-body">
             <p class="qr-hint">Отсканируйте QR-код для входа через Telegram</p>
