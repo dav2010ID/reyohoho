@@ -355,6 +355,12 @@ const extractSequelsAndPrequels = (film) => {
   return []
 }
 
+const hasRelatedMovies = (film) => {
+  const sequels = Array.isArray(film?.sequels_and_prequels) ? film.sequels_and_prequels.length : 0
+  const similars = Array.isArray(film?.similars) ? film.similars.length : 0
+  return sequels > 0 || similars > 0
+}
+
 const ensureUniqueKey = (obj, baseKey) => {
   if (!obj[baseKey]) return baseKey
   let idx = 2
@@ -513,7 +519,29 @@ const getKpInfo = async (kpId) => {
   )
 
   const film = Array.isArray(data?.data) ? data.data[0] : null
-  return film ? mapKpInfo(film) : null
+  if (!film) return null
+
+  const mappedFilm = mapKpInfo(film)
+  if (hasRelatedMovies(mappedFilm)) return mappedFilm
+
+  // KinoBD can miss related blocks for some titles; in that case use RH server fallback.
+  try {
+    const rhFilm = await rhserv.getKpInfo(kpId)
+    const fallbackSequels = uniqueRelated(rhFilm?.sequels_and_prequels || [])
+    const fallbackSimilars = uniqueRelated(rhFilm?.similars || [])
+
+    if (fallbackSequels.length || fallbackSimilars.length) {
+      return {
+        ...mappedFilm,
+        sequels_and_prequels: fallbackSequels,
+        similars: fallbackSimilars
+      }
+    }
+  } catch (error) {
+    console.warn('[movies.kinobd] RH related fallback failed', error)
+  }
+
+  return mappedFilm
 }
 
 const getPlayers = async (kpId, options = {}) => {
