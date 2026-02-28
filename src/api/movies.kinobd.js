@@ -251,8 +251,8 @@ const mapKpInfo = (film) => {
           }
         ]
       : [],
-    sequels_and_prequels: extractSequelsAndPrequels(film),
-    similars: extractSimilars(film),
+    sequels_and_prequels: [],
+    similars: [],
     staff: [],
     rating: legacy.raw_data.rating,
     rating_vote_count: legacy.raw_data.rating_vote_count,
@@ -260,105 +260,6 @@ const mapKpInfo = (film) => {
       ratingKp === null || ratingKp === undefined || ratingKp === '' ? null : Number(ratingKp),
     rating_kinopoisk_vote_count: Number(ratingKpCount) || 0
   }
-}
-
-const toRelatedItem = (item) => {
-  const source = item?.film || item?.movie || item?.related || item || {}
-  const legacy = buildLegacyMovie(source)
-  const filmId =
-    source?.film_id ||
-    source?.kinopoisk_id ||
-    source?.kp_id ||
-    source?.id ||
-    item?.film_id ||
-    item?.kinopoisk_id ||
-    item?.kp_id ||
-    item?.id ||
-    null
-
-  const titleRu = source?.name_ru || source?.name_russian || item?.name_ru || item?.name_russian || ''
-  const titleEn =
-    source?.name_en || source?.name_original || item?.name_en || item?.name_original || ''
-  const posters = resolvePosterSetByMovie({
-    ...source,
-    kp_id: filmId
-  })
-
-  return {
-    film_id: filmId,
-    name_ru: titleRu || titleEn || legacy?.raw_data?.name_ru || '',
-    name_en: titleEn || '',
-    name_original: source?.name_original || item?.name_original || titleEn || '',
-    poster_url: posters.full || legacy?.raw_data?.poster_url || '',
-    poster_url_preview: posters.preview || legacy?.raw_data?.poster_url_preview || ''
-  }
-}
-
-const uniqueRelated = (items = []) => {
-  const seen = new Set()
-  const result = []
-
-  for (const item of items) {
-    const normalized = toRelatedItem(item)
-    if (!normalized?.film_id) continue
-    const key = String(normalized.film_id)
-    if (seen.has(key)) continue
-    seen.add(key)
-    result.push(normalized)
-  }
-
-  return result
-}
-
-const extractSimilars = (film) => {
-  const related = film?.related || film?.relations || {}
-  const candidates = [
-    film?.similars,
-    film?.similar,
-    film?.similars,
-    film?.similar_movies,
-    related?.similars,
-    related?.similar_movies,
-    related?.similar
-  ]
-
-  for (const list of candidates) {
-    if (Array.isArray(list) && list.length) {
-      return uniqueRelated(list)
-    }
-  }
-
-  return []
-}
-
-const extractSequelsAndPrequels = (film) => {
-  const related = film?.related || film?.relations || {}
-  const direct = [
-    film?.sequels_and_prequels,
-    film?.sequelsAndPrequels,
-    related?.sequels_and_prequels,
-    related?.sequelsAndPrequels
-  ]
-
-  for (const list of direct) {
-    if (Array.isArray(list) && list.length) {
-      return uniqueRelated(list)
-    }
-  }
-
-  const sequels = film?.sequels || related?.sequels || []
-  const prequels = film?.prequels || related?.prequels || []
-  if (Array.isArray(sequels) || Array.isArray(prequels)) {
-    return uniqueRelated([...(Array.isArray(sequels) ? sequels : []), ...(Array.isArray(prequels) ? prequels : [])])
-  }
-
-  return []
-}
-
-const hasRelatedMovies = (film) => {
-  const sequels = Array.isArray(film?.sequels_and_prequels) ? film.sequels_and_prequels.length : 0
-  const similars = Array.isArray(film?.similars) ? film.similars.length : 0
-  return sequels > 0 || similars > 0
 }
 
 const ensureUniqueKey = (obj, baseKey) => {
@@ -508,40 +409,30 @@ const apiSearch = async (searchTerm, page = 1) => {
 }
 
 const getKpInfo = async (kpId) => {
-  const { data } = await apiCall((api) =>
-    api.get('/api/films/search/kp_id', {
-      params: {
-        q: String(kpId),
-        page: 1,
-        with: 'persons,genres,countries,popularity,images,similars,sequels_and_prequels'
-      }
-    })
-  )
+  const [kbResponse, rhFilm] = await Promise.all([
+    apiCall((api) =>
+      api.get('/api/films/search/kp_id', {
+        params: {
+          q: String(kpId),
+          page: 1,
+          with: 'persons,genres,countries,popularity,images'
+        }
+      })
+    ),
+    rhserv.getKpInfo(kpId).catch(() => null)
+  ])
 
-  const film = Array.isArray(data?.data) ? data.data[0] : null
+  const film = Array.isArray(kbResponse?.data?.data) ? kbResponse.data.data[0] : null
   if (!film) return null
 
   const mappedFilm = mapKpInfo(film)
-  if (hasRelatedMovies(mappedFilm)) return mappedFilm
-
-  // KinoBD can miss related blocks for some titles; in that case use RH server fallback.
-  try {
-    const rhFilm = await rhserv.getKpInfo(kpId)
-    const fallbackSequels = uniqueRelated(rhFilm?.sequels_and_prequels || [])
-    const fallbackSimilars = uniqueRelated(rhFilm?.similars || [])
-
-    if (fallbackSequels.length || fallbackSimilars.length) {
-      return {
-        ...mappedFilm,
-        sequels_and_prequels: fallbackSequels,
-        similars: fallbackSimilars
-      }
-    }
-  } catch (error) {
-    console.warn('[movies.kinobd] RH related fallback failed', error)
+  return {
+    ...mappedFilm,
+    sequels_and_prequels: Array.isArray(rhFilm?.sequels_and_prequels)
+      ? rhFilm.sequels_and_prequels
+      : [],
+    similars: Array.isArray(rhFilm?.similars) ? rhFilm.similars : []
   }
-
-  return mappedFilm
 }
 
 const getPlayers = async (kpId, options = {}) => {
