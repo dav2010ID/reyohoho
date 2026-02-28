@@ -76,7 +76,7 @@ const checkCachedTopMovie = () => {
     localStorage.removeItem(CACHE_KEY)
   } catch (e) {
     localStorage.removeItem(CACHE_KEY)
-    throw new Error(e)
+    throw new Error('Failed to parse cached top movie poster', { cause: e })
   }
   return false
 }

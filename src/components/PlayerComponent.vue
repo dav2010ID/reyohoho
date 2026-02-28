@@ -359,6 +359,20 @@
             </div>
           </div>
 
+          <div v-if="selectedPlayerInternal?.iframe" class="tooltip-container" data-tooltip-container="mpv">
+            <button
+              class="mpv-btn"
+              @mouseenter="showTooltip('mpv')"
+              @mouseleave="activeTooltip = null"
+              @click="copyMpvLink"
+            >
+              <span class="material-icons">terminal</span>
+            </button>
+            <div v-show="activeTooltip === 'mpv'" class="custom-tooltip" data-tooltip="mpv">
+              Скопировать для mpv
+            </div>
+          </div>
+
           <!-- Кнопка для копирования ссылки на фильм (только в Electron) -->
           <div v-if="isElectron" class="tooltip-container" data-tooltip-container="copy_link">
             <button
@@ -1452,6 +1466,113 @@ const openAppLink = () => {
   } catch (e) {
     console.error('Ошибка при открытии ссылки:', e)
   }
+}
+
+const getBestMpvStreamUrl = (player) => {
+  if (!player) return ''
+
+  const directCandidates = [player.hls, player.stream, player.url, player.file, player.src].filter(
+    (v) => typeof v === 'string' && v
+  )
+  const direct = directCandidates.find(
+    (v) => /\.m3u8(\?|$)/i.test(v) || /manifest/i.test(v) || /\/hls\//i.test(v)
+  )
+  if (direct) return direct
+
+  const raw = player.raw_data
+  if (raw && typeof raw === 'object') {
+    const queue = [raw]
+    const visited = new Set()
+
+    while (queue.length) {
+      const cur = queue.shift()
+      if (!cur || typeof cur !== 'object') continue
+      if (visited.has(cur)) continue
+      visited.add(cur)
+
+      for (const value of Object.values(cur)) {
+        if (!value) continue
+        if (typeof value === 'string') {
+          if (
+            /^https?:\/\//i.test(value) &&
+            (/\.m3u8(\?|$)/i.test(value) || /manifest/i.test(value) || /\/hls\//i.test(value))
+          ) {
+            return value
+          }
+        } else if (typeof value === 'object') {
+          queue.push(value)
+        }
+      }
+    }
+  }
+
+  const iframeUrl = String(player.iframe || '')
+  if (!iframeUrl) return ''
+
+  try {
+    const parsed = new URL(iframeUrl)
+    const queryValues = []
+    parsed.searchParams.forEach((value) => queryValues.push(value))
+    for (const value of queryValues) {
+      if (/^https?:\/\//i.test(value) && /\.m3u8(\?|$)/i.test(value)) {
+        return value
+      }
+    }
+  } catch {
+    return ''
+  }
+
+  return ''
+}
+
+const copyText = async (text) => {
+  if (!text) return false
+  try {
+    await navigator.clipboard.writeText(text)
+    return true
+  } catch {
+    return false
+  }
+}
+
+const copyMpvLink = async () => {
+  const current = selectedPlayerInternal.value
+  if (!current) return
+
+  const streamUrl = getBestMpvStreamUrl(current)
+  const targetUrl = streamUrl || String(current.iframe || '')
+
+  if (!targetUrl) {
+    notificationRef.value.showNotification('Не удалось получить ссылку для mpv')
+    return
+  }
+
+  const referrer = (() => {
+    try {
+      const base = new URL(String(current.iframe || ''))
+      return `${base.origin}/`
+    } catch {
+      return ''
+    }
+  })()
+
+  const mpvCommand = referrer
+    ? `mpv --referrer="${referrer}" "${targetUrl}"`
+    : `mpv "${targetUrl}"`
+
+  const ok = await copyText(mpvCommand)
+  if (ok) {
+    notificationRef.value.showNotification('Команда mpv скопирована')
+    return
+  }
+
+  const linkOk = await copyText(targetUrl)
+  if (linkOk) {
+    notificationRef.value.showNotification('Ссылка для mpv скопирована')
+    return
+  }
+
+  notificationRef.value.showNotification('Не удалось скопировать ссылку для mpv')
 }
 
 const copyMovieLink = () => {

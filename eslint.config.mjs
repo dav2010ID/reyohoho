@@ -40,6 +40,8 @@ export default [
     },
     rules: {
       'no-console': process.env.NODE_ENV === 'production' ? 'warn' : 'off',
+      'no-useless-assignment': 'off',
+      'preserve-caught-error': 'off',
       // Кавычки
       quotes: ['error', 'single', { avoidEscape: true }], // Одинарные кавычки, кроме случаев, когда нужны двойные
       // Точки с запятой
