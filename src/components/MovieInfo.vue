@@ -1421,12 +1421,15 @@ const sortedNudityTimings = computed(() => {
 })
 
 const shouldShowRedTimings = computed(() => {
-  return movieInfo.value?.nudity_timings.length > 0
+  return Array.isArray(movieInfo.value?.nudity_timings) && movieInfo.value.nudity_timings.length > 0
 })
 
 const shouldBlinkRedTimings = computed(() => {
   return (
-    movieInfo.value?.nudity_timings.length > 0 && mainStore.isStreamerMode && !mainStore.isMobile
+    Array.isArray(movieInfo.value?.nudity_timings) &&
+    movieInfo.value.nudity_timings.length > 0 &&
+    mainStore.isStreamerMode &&
+    !mainStore.isMobile
   )
 })
 
@@ -1546,7 +1549,7 @@ const fetchMovieInfo = async (updateHistory = true) => {
       poster:
         movieInfo.value?.poster_url ||
         movieInfo.value?.cover_url ||
-        movieInfo.value?.screenshots[0],
+        movieInfo.value?.screenshots?.[0],
       year: movieInfo.value?.year,
       type: movieInfo.value?.type
     }
@@ -1588,7 +1591,7 @@ const fetchMovieInfo = async (updateHistory = true) => {
 }
 
 const videos = computed(() => {
-  return movieInfo.value?.videos
+  return movieInfo.value?.videos || []
 })
 
 const sequelsAndPrequels = computed(() =>

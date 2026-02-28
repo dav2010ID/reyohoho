@@ -74,6 +74,20 @@
       </div>
 
       <div class="settings-group">
+        <h2>API</h2>
+        <div class="radio-group">
+          <label class="radio">
+            <input v-model="contentApiProvider" type="radio" value="rhserv" />
+            <span class="radio-label">RHServ (original API)</span>
+          </label>
+          <label class="radio">
+            <input v-model="contentApiProvider" type="radio" value="kinobd" />
+            <span class="radio-label">KinoBD (search/cards/players)</span>
+          </label>
+        </div>
+      </div>
+
+      <div class="settings-group">
         <h2>История</h2>
         <SliderRound v-model="isHistoryAllowed"> Сохранять историю просмотра</SliderRound>
         <div class="settings-actions">
@@ -191,6 +205,12 @@ const areTrailersActive = computed({
       trailerStore.deactivateTrailers() // Выключаем трейлеры
     }
   }
+})
+
+
+const contentApiProvider = computed({
+  get: () => mainStore.contentApiProvider,
+  set: (value) => mainStore.setContentApiProvider(value)
 })
 
 const isCtrlFEnabled = computed({

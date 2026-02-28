@@ -1,7 +1,7 @@
 <template>
   <div class="movie-poster-container" :class="`card-size-${cardSize}`">
-    <div v-if="movie.poster || movie.cover">
-      <img v-lazy="movie.poster || movie.cover" class="movie-poster" />
+    <div v-if="posterSrc">
+      <img v-lazy="posterSrc" class="movie-poster" />
       <DeleteButton
         v-if="!isMobile && (isHistory || isUserList) && showDelete"
         class="delete-button"
@@ -73,6 +73,15 @@ const {
   showStar: Boolean
 })
 const emit = defineEmits(['remove:from-history'])
+
+const posterSrc = computed(() => {
+  if (movie?.poster) return movie.poster
+  if (movie?.cover) return movie.cover
+  if (movie?.kp_id) {
+    return `https://kinopoiskapiunofficial.tech/images/posters/kp_small/${movie.kp_id}.jpg`
+  }
+  return ''
+})
 </script>
 
 <style scoped>

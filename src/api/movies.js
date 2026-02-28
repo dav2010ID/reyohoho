@@ -1,244 +1,88 @@
-import { getApi } from '@/api/axios'
+import { useMainStore } from '@/store/main'
+import * as rhserv from '@/api/movies.rhserv'
+import * as kinobd from '@/api/movies.kinobd'
 
-// ===== Симуляция ошибки =====
-let isErrorSimulationEnabled = false // Переменная для включения/отключения симуляции ошибки
-const simulatedErrorCode = 500
+const CONTENT_PROVIDERS = {
+  RHSERV: 'rhserv',
+  KINOBD: 'kinobd'
+}
 
-const simulateErrorIfNeeded = async () => {
-  if (isErrorSimulationEnabled && simulatedErrorCode) {
-    const status = parseInt(simulatedErrorCode, 10)
-    const error = new Error(`Симулированная ошибка ${status}`)
-    error.response = { status }
-    throw error
+const KINOBD_SUPPORTED_METHODS = new Set([
+  'apiSearch',
+  'getKpInfo',
+  'getPlayers',
+  'getMovies',
+  'getDiscussedMovies',
+  'getKpIDfromIMDB',
+  'getRandomMovie'
+])
+
+const getCurrentProvider = () => {
+  try {
+    const mainStore = useMainStore()
+    return mainStore.contentApiProvider || CONTENT_PROVIDERS.RHSERV
+  } catch {
+    return CONTENT_PROVIDERS.RHSERV
   }
 }
 
-// Универсальный вызов запроса с симуляцией ошибки
-const apiCall = async (callFn) => {
-  await simulateErrorIfNeeded()
-  const api = await getApi()
-  return await callFn(api)
+const searchKinoBDPlayerCandidates = async (...args) => kinobd.searchPlayerCandidates(...args)
+const getKinoBDPlayerDataByInid = async (...args) => kinobd.getPlayerDataByInid(...args)
+
+const callWithProvider = async (methodName, ...args) => {
+  const provider = getCurrentProvider()
+
+  if (provider === CONTENT_PROVIDERS.KINOBD && KINOBD_SUPPORTED_METHODS.has(methodName)) {
+    try {
+      return await kinobd[methodName](...args)
+    } catch (error) {
+      console.warn(`[movies] ${methodName} failed on KinoBD, fallback to RHServ`, error)
+      return await rhserv[methodName](...args)
+    }
+  }
+
+  return await rhserv[methodName](...args)
 }
 
-// ===== API-функции =====
-const apiSearch = async (searchTerm) => {
-  const { data } = await apiCall((api) => api.get(`/search/${searchTerm}`))
-  return data
-}
-
-const getShikiInfo = async (shikiId) => {
-  const { data } = await apiCall((api) => api.get(`/shiki_info/${shikiId}`))
-  return data
-}
-
-const getKpInfo = async (kpId) => {
-  const { data } = await apiCall((api) => api.get(`/kp_info2/${kpId}`))
-  return data
-}
-
-const getPlayers = async (kpId) => {
-  const { data } = await apiCall((api) =>
-    api.post(
-      '/cache',
-      new URLSearchParams({
-        kinopoisk: kpId,
-        type: 'movie'
-      }),
-      { headers: { 'Content-Type': 'application/x-www-form-urlencoded' } }
-    )
-  )
-  return data
-}
-
-const getShikiPlayers = async (shikiId) => {
-  const { data } = await apiCall((api) =>
-    api.post(
-      '/cache_shiki',
-      new URLSearchParams({
-        shikimori: shikiId,
-        type: 'anime'
-      }),
-      { headers: { 'Content-Type': 'application/x-www-form-urlencoded' } }
-    )
-  )
-  return data
-}
-
-const getMovies = async ({ activeTime = 'all', typeFilter = 'all', limit = null } = {}) => {
-  const limitParam = limit ? `&limit=${limit}` : ''
-  const { data } = await apiCall((api) =>
-    api.get(`/top/${activeTime}?type=${typeFilter}${limitParam}`)
-  )
-  return data
-}
-
-const getDiscussedMovies = async (type = 'hot') => {
-  const { data } = await apiCall((api) => api.get(`/discussed/${type}`))
-  return data
-}
-
-const getDons = async () => {
-  const { data } = await apiCall((api) => api.get('/get_dons'))
-  return data
-}
-
-const getKpIDfromIMDB = async (imdb_id) => {
-  const { data } = await apiCall((api) => api.get(`/imdb_to_kp/${imdb_id}`))
-  return data
-}
-
-const getNudityInfoFromIMDB = async (imdb_id) => {
-  const { data } = await apiCall((api) => api.get(`/imdb_parental_guide/${imdb_id}`))
-  return data
-}
-
-const getKpIDfromSHIKI = async (shiki_id) => {
-  const { data } = await apiCall((api) => api.get(`/shiki_to_kp/${shiki_id}`))
-  return data
-}
-
-const getRating = async (kpId) => {
-  const { data } = await apiCall((api) => api.get(`/rating/${kpId}`))
-  return data
-}
-
-const setRating = async (kpId, rating) => {
-  const { data } = await apiCall((api) => api.post(`/rating/${kpId}`, { rating }))
-  return data
-}
-
-const getComments = async (movieId) => {
-  const { data } = await apiCall((api) => api.get(`/comments/${movieId}`))
-  return data
-}
-
-const createComment = async (movieId, content, parentId = null) => {
-  const { data } = await apiCall((api) =>
-    api.post(`/comments/${movieId}`, { content, parent_id: parentId })
-  )
-  return data
-}
-
-const updateComment = async (commentId, content) => {
-  const { data } = await apiCall((api) => api.put(`/comments/${commentId}`, { content }))
-  return data
-}
-
-const deleteComment = async (commentId) => {
-  const { data } = await apiCall((api) => api.delete(`/comments/${commentId}`))
-  return data
-}
-
-const rateComment = async (commentId, rating) => {
-  const { data } = await apiCall((api) =>
-    api.post(`/comments/${commentId}/rate`, { rating: rating })
-  )
-  return data
-}
-
-const submitTiming = async (kpId, timingText) => {
-  const { data } = await apiCall((api) =>
-    api.post(`/timings/${kpId}`, {
-      timing_text: timingText
-    })
-  )
-  return data
-}
-
-const updateTiming = async (timingId, timingText) => {
-  const { data } = await apiCall((api) =>
-    api.put(`/timings/${timingId}`, {
-      timing_text: timingText
-    })
-  )
-  return data
-}
-
-const deleteTiming = async (timingId) => {
-  const { data } = await apiCall((api) => api.delete(`/timings/${timingId}`))
-  return data
-}
-
-const reportTiming = async (timingId, reportText) => {
-  const { data } = await apiCall((api) =>
-    api.post(`/timings/${timingId}/report`, {
-      report_text: reportText
-    })
-  )
-  return data
-}
-
-const getTopTimingSubmitters = async () => {
-  const { data } = await apiCall((api) => api.get('/timings/top'))
-  return data
-}
-
-const getAllTimingSubmissions = async () => {
-  const { data } = await apiCall((api) => api.get('/timings/all'))
-  return data
-}
-
-const getRandomMovie = async () => {
-  const { data } = await apiCall((api) => api.get('/chance'))
-  return data
-}
-
-const approveTiming = async (submissionId) => {
-  const { data } = await apiCall((api) => api.post(`/timings/submission/${submissionId}/approve`))
-  return data
-}
-
-const rejectTiming = async (submissionId) => {
-  const { data } = await apiCall((api) => api.post(`/timings/submission/${submissionId}/reject`))
-  return data
-}
-
-const markAsCleanText = async (submissionId) => {
-  const { data } = await apiCall((api) =>
-    api.post(`/timings/submission/${submissionId}/clean_text`)
-  )
-  return data
-}
-
-const getTwitchStream = async (username) => {
-  const { data } = await apiCall((api) => api.get(`/twitch/${username}`))
-  return data
-}
-
-const voteOnTiming = async (timingId, voteType) => {
-  const { data } = await apiCall((api) =>
-    api.post(`/timings/${timingId}/vote`, {
-      vote_type: voteType
-    })
-  )
-  return data
-}
-
-const getTimingVote = async (timingId) => {
-  const { data } = await apiCall((api) => api.get(`/timings/${timingId}/vote`))
-  return data
-}
-
-const getMovieNote = async (kpId) => {
-  const { data } = await apiCall((api) => api.get(`/movies/${kpId}/note`))
-  return data
-}
-
-const saveMovieNote = async (kpId, noteText) => {
-  const { data } = await apiCall((api) =>
-    api.post(`/movies/${kpId}/note`, {
-      note_text: noteText
-    })
-  )
-  return data
-}
-
-const deleteMovieNote = async (kpId) => {
-  const { data } = await apiCall((api) => api.delete(`/movies/${kpId}/note`))
-  return data
-}
+const apiSearch = async (...args) => callWithProvider('apiSearch', ...args)
+const getShikiInfo = async (...args) => callWithProvider('getShikiInfo', ...args)
+const getKpInfo = async (...args) => callWithProvider('getKpInfo', ...args)
+const getPlayers = async (...args) => callWithProvider('getPlayers', ...args)
+const getShikiPlayers = async (...args) => callWithProvider('getShikiPlayers', ...args)
+// Top lists must always come from original RHServ API.
+const getMovies = async (...args) => rhserv.getMovies(...args)
+const getDiscussedMovies = async (...args) => rhserv.getDiscussedMovies(...args)
+const getDons = async (...args) => callWithProvider('getDons', ...args)
+const getKpIDfromIMDB = async (...args) => callWithProvider('getKpIDfromIMDB', ...args)
+const getNudityInfoFromIMDB = async (...args) => callWithProvider('getNudityInfoFromIMDB', ...args)
+const getKpIDfromSHIKI = async (...args) => callWithProvider('getKpIDfromSHIKI', ...args)
+const getRating = async (...args) => callWithProvider('getRating', ...args)
+const setRating = async (...args) => callWithProvider('setRating', ...args)
+const getComments = async (...args) => callWithProvider('getComments', ...args)
+const createComment = async (...args) => callWithProvider('createComment', ...args)
+const updateComment = async (...args) => callWithProvider('updateComment', ...args)
+const deleteComment = async (...args) => callWithProvider('deleteComment', ...args)
+const rateComment = async (...args) => callWithProvider('rateComment', ...args)
+const submitTiming = async (...args) => callWithProvider('submitTiming', ...args)
+const updateTiming = async (...args) => callWithProvider('updateTiming', ...args)
+const deleteTiming = async (...args) => callWithProvider('deleteTiming', ...args)
+const reportTiming = async (...args) => callWithProvider('reportTiming', ...args)
+const getTopTimingSubmitters = async (...args) => callWithProvider('getTopTimingSubmitters', ...args)
+const getAllTimingSubmissions = async (...args) => callWithProvider('getAllTimingSubmissions', ...args)
+const getRandomMovie = async (...args) => callWithProvider('getRandomMovie', ...args)
+const approveTiming = async (...args) => callWithProvider('approveTiming', ...args)
+const rejectTiming = async (...args) => callWithProvider('rejectTiming', ...args)
+const markAsCleanText = async (...args) => callWithProvider('markAsCleanText', ...args)
+const getTwitchStream = async (...args) => callWithProvider('getTwitchStream', ...args)
+const voteOnTiming = async (...args) => callWithProvider('voteOnTiming', ...args)
+const getTimingVote = async (...args) => callWithProvider('getTimingVote', ...args)
+const getMovieNote = async (...args) => callWithProvider('getMovieNote', ...args)
+const saveMovieNote = async (...args) => callWithProvider('saveMovieNote', ...args)
+const deleteMovieNote = async (...args) => callWithProvider('deleteMovieNote', ...args)
 
 export {
+  searchKinoBDPlayerCandidates,
+  getKinoBDPlayerDataByInid,
   apiSearch,
   getShikiInfo,
   getKpInfo,
@@ -275,7 +119,12 @@ export {
   deleteMovieNote
 }
 
-// ===== Функция для включения/выключения симуляции =====
 export const toggleErrorSimulation = (enabled) => {
-  isErrorSimulationEnabled = enabled
+  if (typeof rhserv.toggleErrorSimulation === 'function') {
+    rhserv.toggleErrorSimulation(enabled)
+  }
+  if (typeof kinobd.toggleErrorSimulation === 'function') {
+    kinobd.toggleErrorSimulation(enabled)
+  }
 }
+

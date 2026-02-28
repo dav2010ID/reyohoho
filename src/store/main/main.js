@@ -16,7 +16,8 @@ export const useMainStore = defineStore(MAIN_STORE_NAME, {
     submitterUsername: '',
     cardSize: 'medium',
     isStreamerMode: true,
-    rememberScrollPosition: true
+    rememberScrollPosition: true,
+    contentApiProvider: 'rhserv'
   }),
 
   actions: {
@@ -57,7 +58,12 @@ export const useMainStore = defineStore(MAIN_STORE_NAME, {
           title: movie.title || '',
           year: movie.year || '',
           type: movie.type || '',
-          poster: movie.poster || movie.cover || noPosterImage,
+          poster:
+            movie.poster ||
+            movie.cover ||
+            (movie.kp_id
+              ? `https://kinopoiskapiunofficial.tech/images/posters/kp_small/${movie.kp_id}.jpg`
+              : noPosterImage),
           addedAt: new Date().toISOString()
         }
         this.history.unshift(movieWithDate)
@@ -104,6 +110,10 @@ export const useMainStore = defineStore(MAIN_STORE_NAME, {
 
     setRememberScrollPosition(value) {
       this.rememberScrollPosition = value
+    },
+
+    setContentApiProvider(value) {
+      this.contentApiProvider = value
     }
   },
 
@@ -119,7 +129,8 @@ export const useMainStore = defineStore(MAIN_STORE_NAME, {
       'submitterUsername',
       'cardSize',
       'isStreamerMode',
-      'rememberScrollPosition'
+      'rememberScrollPosition',
+      'contentApiProvider'
     ],
     beforeHydrate: beforeHydrateLegacyVuex
   }

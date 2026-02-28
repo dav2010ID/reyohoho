@@ -1,0 +1,796 @@
+openapi: 3.0.3
+info:
+  title: ReYohoho API
+  version: 1.0.0
+  description: Swagger/OpenAPI спецификация по фактическим вызовам фронтенда.
+
+servers:
+  - url: https://api4.rhserv.vu
+    description: Fallback API из VITE_APP_API_URL
+
+tags:
+  - name: Movies
+  - name: User
+  - name: Notifications
+  - name: Emotes
+  - name: Health
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+  schemas:
+    GenericObject:
+      type: object
+      additionalProperties: true
+    CountryItem:
+      type: object
+      properties:
+        country:
+          type: string
+      required: [country]
+    GenreItem:
+      type: object
+      properties:
+        genre:
+          type: string
+      required: [genre]
+    SearchRawData:
+      type: object
+      properties:
+        film_id:
+          type: integer
+        name_ru:
+          type: string
+          nullable: true
+        name_en:
+          type: string
+          nullable: true
+        type:
+          type: string
+          example: FILM
+        year:
+          type: string
+          nullable: true
+        description:
+          type: string
+          nullable: true
+        film_length:
+          type: string
+          nullable: true
+          example: "02:11"
+        countries:
+          type: array
+          items:
+            $ref: '#/components/schemas/CountryItem'
+        genres:
+          type: array
+          items:
+            $ref: '#/components/schemas/GenreItem'
+        rating:
+          type: string
+          nullable: true
+        rating_vote_count:
+          type: integer
+        poster_url:
+          type: string
+          format: uri
+        poster_url_preview:
+          type: string
+          format: uri
+      required:
+        - film_id
+        - type
+        - countries
+        - genres
+        - rating_vote_count
+        - poster_url
+        - poster_url_preview
+    SearchItem:
+      type: object
+      properties:
+        id:
+          type: integer
+        title:
+          type: string
+        year:
+          type: string
+          nullable: true
+        poster:
+          type: string
+          format: uri
+        raw_data:
+          $ref: '#/components/schemas/SearchRawData'
+        average_rating:
+          type: number
+          nullable: true
+      required:
+        - id
+        - title
+        - poster
+        - raw_data
+        - average_rating
+    RatingRequest:
+      type: object
+      required: [rating]
+      properties:
+        rating:
+          type: number
+    CommentCreateRequest:
+      type: object
+      required: [content]
+      properties:
+        content:
+          type: string
+        parent_id:
+          type: string
+          nullable: true
+    CommentUpdateRequest:
+      type: object
+      required: [content]
+      properties:
+        content:
+          type: string
+    CommentRateRequest:
+      type: object
+      required: [rating]
+      properties:
+        rating:
+          type: integer
+    TimingTextRequest:
+      type: object
+      required: [timing_text]
+      properties:
+        timing_text:
+          type: string
+    TimingReportRequest:
+      type: object
+      required: [report_text]
+      properties:
+        report_text:
+          type: string
+    TimingVoteRequest:
+      type: object
+      required: [vote_type]
+      properties:
+        vote_type:
+          type: string
+    MovieNoteRequest:
+      type: object
+      required: [note_text]
+      properties:
+        note_text:
+          type: string
+    UserNameRequest:
+      type: object
+      required: [name]
+      properties:
+        name:
+          type: string
+    MarkReadRequest:
+      type: object
+      properties:
+        notification_ids:
+          type: array
+          nullable: true
+          items:
+            oneOf:
+              - type: integer
+              - type: string
+
+security:
+  - bearerAuth: []
+
+paths:
+  /health:
+    get:
+      tags: [Health]
+      summary: Проверка доступности API
+      security: []
+      responses:
+        '200':
+          description: API доступно
+
+  /search/{searchTerm}:
+    get:
+      tags: [Movies]
+      summary: Поиск фильмов/аниме
+      description: |
+        Пример запроса:
+        `GET https://api4.rhserv.vu/search/Паразит`
+      parameters:
+        - name: searchTerm
+          in: path
+          required: true
+          schema: { type: string }
+          example: Паразит
+      security: []
+      responses:
+        '200':
+          description: Успешный ответ (массив результатов поиска)
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/SearchItem'
+              example:
+                - id: 1043758
+                  title: "Паразиты (2019)"
+                  year: "2019"
+                  poster: "https://kinopoiskapiunofficial.tech/images/posters/kp_small/1043758.jpg"
+                  raw_data:
+                    film_id: 1043758
+                    name_ru: "Паразиты"
+                    name_en: "Gisaengchung"
+                    type: "FILM"
+                    year: "2019"
+                    description: "Обычное корейское семейство Кимов жизнь не балует."
+                    film_length: "02:11"
+                    countries:
+                      - country: "Корея Южная"
+                    genres:
+                      - genre: "драма"
+                      - genre: "комедия"
+                      - genre: "триллер"
+                    rating: "8.1"
+                    rating_vote_count: 919964
+                    poster_url: "https://kinopoiskapiunofficial.tech/images/posters/kp/1043758.jpg"
+                    poster_url_preview: "https://kinopoiskapiunofficial.tech/images/posters/kp_small/1043758.jpg"
+                  average_rating: 8.1772
+
+  /shiki_info/{shikiId}:
+    get:
+      tags: [Movies]
+      summary: Информация по Shikimori ID
+      parameters:
+        - name: shikiId
+          in: path
+          required: true
+          schema: { type: string }
+      responses: { '200': { description: OK } }
+
+  /kp_info2/{kpId}:
+    get:
+      tags: [Movies]
+      summary: Информация по Kinopoisk ID
+      parameters:
+        - name: kpId
+          in: path
+          required: true
+          schema: { type: string }
+      responses: { '200': { description: OK } }
+
+  /cache:
+    post:
+      tags: [Movies]
+      summary: Получить плееры по Kinopoisk ID
+      requestBody:
+        required: true
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              type: object
+              required: [kinopoisk, type]
+              properties:
+                kinopoisk: { type: string }
+                type: { type: string, example: movie }
+      responses: { '200': { description: OK } }
+
+  /cache_shiki:
+    post:
+      tags: [Movies]
+      summary: Получить плееры по Shikimori ID
+      requestBody:
+        required: true
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              type: object
+              required: [shikimori, type]
+              properties:
+                shikimori: { type: string }
+                type: { type: string, example: anime }
+      responses: { '200': { description: OK } }
+
+  /top/{activeTime}:
+    get:
+      tags: [Movies]
+      summary: Топ фильмов
+      parameters:
+        - name: activeTime
+          in: path
+          required: true
+          schema: { type: string, example: all }
+        - name: type
+          in: query
+          required: true
+          schema: { type: string, example: all }
+        - name: limit
+          in: query
+          required: false
+          schema: { type: integer }
+      responses: { '200': { description: OK } }
+
+  /discussed/{type}:
+    get:
+      tags: [Movies]
+      summary: Обсуждаемые фильмы
+      parameters:
+        - name: type
+          in: path
+          required: true
+          schema: { type: string, example: hot }
+      responses: { '200': { description: OK } }
+
+  /get_dons:
+    get:
+      tags: [Movies]
+      summary: Список донатеров
+      responses: { '200': { description: OK } }
+
+  /imdb_to_kp/{imdb_id}:
+    get:
+      tags: [Movies]
+      summary: Конвертация IMDb -> Kinopoisk
+      parameters:
+        - name: imdb_id
+          in: path
+          required: true
+          schema: { type: string }
+      responses: { '200': { description: OK } }
+
+  /imdb_parental_guide/{imdb_id}:
+    get:
+      tags: [Movies]
+      summary: Данные parental guide из IMDb
+      parameters:
+        - name: imdb_id
+          in: path
+          required: true
+          schema: { type: string }
+      responses: { '200': { description: OK } }
+
+  /shiki_to_kp/{shiki_id}:
+    get:
+      tags: [Movies]
+      summary: Конвертация Shikimori -> Kinopoisk
+      parameters:
+        - name: shiki_id
+          in: path
+          required: true
+          schema: { type: string }
+      responses: { '200': { description: OK } }
+
+  /rating/{kpId}:
+    get:
+      tags: [Movies]
+      summary: Получить рейтинг пользователя
+      parameters:
+        - name: kpId
+          in: path
+          required: true
+          schema: { type: string }
+      responses: { '200': { description: OK } }
+    post:
+      tags: [Movies]
+      summary: Установить рейтинг пользователя
+      parameters:
+        - name: kpId
+          in: path
+          required: true
+          schema: { type: string }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RatingRequest'
+      responses: { '200': { description: OK } }
+
+  /comments/{id}:
+    get:
+      tags: [Movies]
+      summary: Получить комментарии фильма
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: string }
+      responses: { '200': { description: OK } }
+    post:
+      tags: [Movies]
+      summary: Создать комментарий к фильму
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: string }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CommentCreateRequest'
+      responses: { '200': { description: OK } }
+    put:
+      tags: [Movies]
+      summary: Обновить комментарий
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: string }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CommentUpdateRequest'
+      responses: { '200': { description: OK } }
+    delete:
+      tags: [Movies]
+      summary: Удалить комментарий
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: string }
+      responses: { '200': { description: OK } }
+
+  /comments/{commentId}/rate:
+    post:
+      tags: [Movies]
+      summary: Оценить комментарий
+      parameters:
+        - name: commentId
+          in: path
+          required: true
+          schema: { type: string }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CommentRateRequest'
+      responses: { '200': { description: OK } }
+
+  /timings/top:
+    get:
+      tags: [Movies]
+      summary: Топ авторов таймингов
+      responses: { '200': { description: OK } }
+
+  /timings/all:
+    get:
+      tags: [Movies]
+      summary: Все тайминги (модерация)
+      responses: { '200': { description: OK } }
+
+  /timings/{timingId}:
+    put:
+      tags: [Movies]
+      summary: Обновить тайминг
+      parameters:
+        - name: timingId
+          in: path
+          required: true
+          schema: { type: string }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TimingTextRequest'
+      responses: { '200': { description: OK } }
+    delete:
+      tags: [Movies]
+      summary: Удалить тайминг
+      parameters:
+        - name: timingId
+          in: path
+          required: true
+          schema: { type: string }
+      responses: { '200': { description: OK } }
+
+    post:
+      tags: [Movies]
+      summary: Отправить тайминг для фильма
+      description: Для POST здесь используется идентификатор фильма (kpId).
+      parameters:
+        - name: timingId
+          in: path
+          required: true
+          schema: { type: string }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TimingTextRequest'
+      responses: { '200': { description: OK } }
+
+  /timings/{timingId}/report:
+    post:
+      tags: [Movies]
+      summary: Репорт тайминга
+      parameters:
+        - name: timingId
+          in: path
+          required: true
+          schema: { type: string }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TimingReportRequest'
+      responses: { '200': { description: OK } }
+
+  /timings/{timingId}/vote:
+    get:
+      tags: [Movies]
+      summary: Получить голос текущего пользователя по таймингу
+      parameters:
+        - name: timingId
+          in: path
+          required: true
+          schema: { type: string }
+      responses: { '200': { description: OK } }
+    post:
+      tags: [Movies]
+      summary: Проголосовать за тайминг
+      parameters:
+        - name: timingId
+          in: path
+          required: true
+          schema: { type: string }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TimingVoteRequest'
+      responses: { '200': { description: OK } }
+
+  /timings/submission/{submissionId}/approve:
+    post:
+      tags: [Movies]
+      summary: Одобрить отправку тайминга
+      parameters:
+        - name: submissionId
+          in: path
+          required: true
+          schema: { type: string }
+      responses: { '200': { description: OK } }
+
+  /timings/submission/{submissionId}/reject:
+    post:
+      tags: [Movies]
+      summary: Отклонить отправку тайминга
+      parameters:
+        - name: submissionId
+          in: path
+          required: true
+          schema: { type: string }
+      responses: { '200': { description: OK } }
+
+  /timings/submission/{submissionId}/clean_text:
+    post:
+      tags: [Movies]
+      summary: Пометить тайминг как clean text
+      parameters:
+        - name: submissionId
+          in: path
+          required: true
+          schema: { type: string }
+      responses: { '200': { description: OK } }
+
+  /chance:
+    get:
+      tags: [Movies]
+      summary: Случайный фильм
+      responses: { '200': { description: OK } }
+
+  /twitch/{username}:
+    get:
+      tags: [Movies]
+      summary: Данные Twitch-стрима
+      parameters:
+        - name: username
+          in: path
+          required: true
+          schema: { type: string }
+      responses: { '200': { description: OK } }
+
+  /movies/{kpId}/note:
+    get:
+      tags: [Movies]
+      summary: Получить заметку пользователя к фильму
+      parameters:
+        - name: kpId
+          in: path
+          required: true
+          schema: { type: string }
+      responses: { '200': { description: OK } }
+    post:
+      tags: [Movies]
+      summary: Сохранить заметку пользователя к фильму
+      parameters:
+        - name: kpId
+          in: path
+          required: true
+          schema: { type: string }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/MovieNoteRequest'
+      responses: { '200': { description: OK } }
+    delete:
+      tags: [Movies]
+      summary: Удалить заметку пользователя к фильму
+      parameters:
+        - name: kpId
+          in: path
+          required: true
+          schema: { type: string }
+      responses: { '200': { description: OK } }
+
+  /list/{type}/{id}:
+    put:
+      tags: [User]
+      summary: Добавить фильм/аниме в список пользователя
+      parameters:
+        - name: type
+          in: path
+          required: true
+          schema: { type: string }
+        - name: id
+          in: path
+          required: true
+          schema: { type: string }
+      responses: { '200': { description: OK } }
+    delete:
+      tags: [User]
+      summary: Удалить элемент из списка пользователя
+      parameters:
+        - name: type
+          in: path
+          required: true
+          schema: { type: string }
+        - name: id
+          in: path
+          required: true
+          schema: { type: string }
+      responses: { '200': { description: OK } }
+
+  /list/{type}:
+    get:
+      tags: [User]
+      summary: Получить список текущего пользователя
+      parameters:
+        - name: type
+          in: path
+          required: true
+          schema: { type: string }
+      responses: { '200': { description: OK } }
+    delete:
+      tags: [User]
+      summary: Удалить весь список текущего пользователя
+      parameters:
+        - name: type
+          in: path
+          required: true
+          schema: { type: string }
+      responses: { '200': { description: OK } }
+
+  /user-list/{userId}/{type}:
+    get:
+      tags: [User]
+      summary: Получить список пользователя по userId
+      parameters:
+        - name: userId
+          in: path
+          required: true
+          schema: { type: string }
+        - name: type
+          in: path
+          required: true
+          schema: { type: string }
+      responses: { '200': { description: OK } }
+
+  /user-list-counters/{userId}:
+    get:
+      tags: [User]
+      summary: Счетчики списков пользователя
+      parameters:
+        - name: userId
+          in: path
+          required: true
+          schema: { type: string }
+      responses: { '200': { description: OK } }
+
+  /user:
+    get:
+      tags: [User]
+      summary: Профиль текущего пользователя
+      responses: { '200': { description: OK } }
+
+  /user/name:
+    put:
+      tags: [User]
+      summary: Обновить имя пользователя
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserNameRequest'
+      responses: { '200': { description: OK } }
+
+  /auth/telegram-login-token:
+    get:
+      tags: [User]
+      summary: Получить токен для Telegram-логина
+      responses: { '200': { description: OK } }
+
+  /auth/check-telegram-auth:
+    get:
+      tags: [User]
+      summary: Проверить Telegram-авторизацию по токену
+      parameters:
+        - name: token
+          in: query
+          required: true
+          schema: { type: string }
+      responses: { '200': { description: OK } }
+
+  /search_emotes/{query}:
+    get:
+      tags: [Emotes]
+      summary: Поиск эмодзи/эмоутов
+      parameters:
+        - name: query
+          in: path
+          required: true
+          schema: { type: string }
+      responses: { '200': { description: OK } }
+
+  /notifications:
+    get:
+      tags: [Notifications]
+      summary: Получить уведомления
+      responses: { '200': { description: OK } }
+
+  /notifications/unread-count:
+    get:
+      tags: [Notifications]
+      summary: Количество непрочитанных уведомлений
+      responses: { '200': { description: OK } }
+
+  /notifications/mark-read:
+    post:
+      tags: [Notifications]
+      summary: Пометить уведомления как прочитанные
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/MarkReadRequest'
+      responses: { '200': { description: OK } }
+
+  /notifications/{notificationId}:
+    delete:
+      tags: [Notifications]
+      summary: Удалить уведомление
+      parameters:
+        - name: notificationId
+          in: path
+          required: true
+          schema: { type: string }
+      responses: { '200': { description: OK } }
