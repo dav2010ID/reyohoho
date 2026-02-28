@@ -13,7 +13,6 @@
               v-if="avatarUrl"
               :src="avatarUrl"
               :alt="comment?.name || 'Аноним'"
-              onerror="this.onerror=null; this.style.display='none'; this.nextElementSibling.style.display='flex';"
               @error="handleAvatarError"
             />
             <div
@@ -197,7 +196,7 @@
             </div>
           </div>
           <div v-else class="comment-text-container">
-            <p class="comment-text" v-html="formattedContent"></p>
+            <p class="comment-text" @click="handleFormattedContentClick" v-html="formattedContent"></p>
           </div>
         </div>
       </div>
@@ -435,12 +434,12 @@ export default {
     const handleAvatarError = () => {
       console.log('Avatar load error, falling back to initials')
       avatarUrl.value = null
-      nextTick(() => {
-        const avatarPlaceholder = document.querySelector('.avatar-placeholder')
-        if (avatarPlaceholder) {
-          avatarPlaceholder.style.display = 'flex'
-        }
-      })
+    }
+
+    const handleFormattedContentClick = (event) => {
+      const spoiler = event.target.closest('.spoiler-text')
+      if (!spoiler) return
+      spoiler.classList.toggle('revealed')
     }
 
     const openLogin = () => {
@@ -528,6 +527,7 @@ export default {
       handleButtonMouseLeave,
       handleImageButtonMouseEnter,
       handleAvatarError,
+      handleFormattedContentClick,
       openLogin,
       showLinkModal,
       selectedTextForLink,

@@ -218,6 +218,7 @@ import EmojiPicker from '@/components/EmojiPicker.vue'
 import ImagePicker from '@/components/ImagePicker.vue'
 import LinkModal from '@/components/LinkModal.vue'
 import { useCommentActions } from '@/composables/useCommentActions'
+import { useNotificationService } from '@/composables/useNotificationService'
 import { getCommentWordForm } from '@/utils/textUtils'
 import { useMainStore } from '@/store/main'
 
@@ -253,6 +254,10 @@ export default {
     const displayedCommentsCount = ref(3)
     const sortBy = ref(mainStore.commentsSortBy)
     const sortDirection = ref(sortBy.value === 'date' ? 'asc' : 'desc')
+    const openLogin = () => {
+      router.push('/login')
+    }
+    const { notify, notifyAuthRequired } = useNotificationService(notificationRef, openLogin)
 
     const {
       showEmojiPicker,
@@ -354,7 +359,7 @@ export default {
         comments.value = response
       } catch (error) {
         console.error('Failed to load comments:', error)
-        notificationRef.value.showNotification(
+        notify(
           'Ошибка при загрузке комментариев. Попробуйте обновить страницу.'
         )
       }
@@ -364,16 +369,12 @@ export default {
       if (isInsertingEmoji.value) return
 
       if (!authStore.token) {
-        notificationRef.value.showNotification(
-          'Необходимо <a class="auth-link">авторизоваться</a>',
-          5000,
-          { onClick: openLogin }
-        )
+        notifyAuthRequired()
         return
       }
 
       if (currentUser.value && currentUser.value.allow_comments !== 1) {
-        notificationRef.value.showNotification('У вас нет прав на создание комментариев')
+        notify('У вас нет прав на создание комментариев')
         return
       }
 
@@ -384,12 +385,12 @@ export default {
         .trim()
 
       if (!contentWithoutEmptyTags) {
-        notificationRef.value.showNotification('Комментарий не может быть пустым')
+        notify('Комментарий не может быть пустым')
         return
       }
 
       if (newComment.value.length > 1500) {
-        notificationRef.value.showNotification(
+        notify(
           'Комментарий слишком длинный. Максимум 1500 символов.'
         )
         return
@@ -432,7 +433,7 @@ export default {
         })
       } catch (error) {
         console.error('Failed to create comment:', error)
-        notificationRef.value.showNotification(
+        notify(
           'Ошибка при создании комментария. Попробуйте еще раз.'
         )
       }
@@ -440,11 +441,7 @@ export default {
 
     const handleReply = (comment) => {
       if (!authStore.token) {
-        notificationRef.value.showNotification(
-          'Необходимо <a class="auth-link">авторизоваться</a>',
-          5000,
-          { onClick: openLogin }
-        )
+        notifyAuthRequired()
         return
       }
 
@@ -462,23 +459,19 @@ export default {
 
     const submitReply = async () => {
       if (!authStore.token) {
-        notificationRef.value.showNotification(
-          'Необходимо <a class="auth-link">авторизоваться</a>',
-          5000,
-          { onClick: openLogin }
-        )
+        notifyAuthRequired()
         return
       }
 
       if (currentUser.value && currentUser.value.allow_comments !== 1) {
-        notificationRef.value.showNotification('У вас нет прав на создание комментариев')
+        notify('У вас нет прав на создание комментариев')
         return
       }
 
       if (!replyContent.value.trim() || !replyTo.value) return
 
       if (replyContent.value.length > 1500) {
-        notificationRef.value.showNotification('Ответ слишком длинный. Максимум 1500 символов.')
+        notify('Ответ слишком длинный. Максимум 1500 символов.')
         return
       }
 
@@ -523,27 +516,23 @@ export default {
         })
       } catch (error) {
         console.error('Error submitting reply:', error)
-        notificationRef.value.showNotification('Ошибка при отправке ответа. Попробуйте еще раз.')
+        notify('Ошибка при отправке ответа. Попробуйте еще раз.')
       }
     }
 
     const handleEdit = async (commentId, newContent) => {
       if (!authStore.token) {
-        notificationRef.value.showNotification(
-          'Необходимо <a class="auth-link">авторизоваться</a>',
-          5000,
-          { onClick: openLogin }
-        )
+        notifyAuthRequired()
         return
       }
 
       if (currentUser.value && currentUser.value.allow_comments !== 1) {
-        notificationRef.value.showNotification('У вас нет прав на редактирование комментариев')
+        notify('У вас нет прав на редактирование комментариев')
         return
       }
 
       if (newContent.length > 1500) {
-        notificationRef.value.showNotification(
+        notify(
           'Комментарий слишком длинный. Максимум 1500 символов.'
         )
         return
@@ -555,7 +544,7 @@ export default {
         editingCommentId.value = null
       } catch (error) {
         console.error('Failed to update comment:', error)
-        notificationRef.value.showNotification(
+        notify(
           'Ошибка при редактировании комментария. Попробуйте еще раз.'
         )
       }
@@ -563,11 +552,7 @@ export default {
 
     const handleDelete = async (commentId) => {
       if (!authStore.token) {
-        notificationRef.value.showNotification(
-          'Необходимо <a class="auth-link">авторизоваться</a>',
-          5000,
-          { onClick: openLogin }
-        )
+        notifyAuthRequired()
         return
       }
 
@@ -576,7 +561,7 @@ export default {
         await loadComments()
       } catch (error) {
         console.error('Failed to delete comment:', error)
-        notificationRef.value.showNotification(
+        notify(
           'Ошибка при удалении комментария. Попробуйте еще раз.'
         )
       }
@@ -584,11 +569,7 @@ export default {
 
     const handleRate = async (commentId, rating) => {
       if (!authStore.token) {
-        notificationRef.value.showNotification(
-          'Необходимо <a class="auth-link">авторизоваться</a>',
-          5000,
-          { onClick: openLogin }
-        )
+        notifyAuthRequired()
         return
       }
 
@@ -597,7 +578,7 @@ export default {
         await loadComments()
       } catch (error) {
         console.error('Failed to rate comment:', error)
-        notificationRef.value.showNotification('Ошибка при оценке комментария. Попробуйте еще раз.')
+        notify('Ошибка при оценке комментария. Попробуйте еще раз.')
       }
     }
 
@@ -615,10 +596,6 @@ export default {
         event.preventDefault()
         submitReply()
       }
-    }
-
-    const openLogin = () => {
-      router.push('/login')
     }
 
     const insertEmoji = (emoji) => {

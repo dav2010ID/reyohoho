@@ -30,24 +30,54 @@ remoteConfig.defaultConfig = {
 
 let isConfigInitialized = false
 let initPromise = null
+const fallbackEndpoint = {
+  url: import.meta.env.VITE_APP_API_URL,
+  description: 'Fallback API'
+}
+
+function getAllowedApiHosts() {
+  let fallbackHost = null
+  try {
+    fallbackHost = new URL(import.meta.env.VITE_APP_API_URL).hostname
+  } catch {
+    fallbackHost = null
+  }
+  const configuredHosts = (import.meta.env.VITE_ALLOWED_API_HOSTS || '')
+    .split(',')
+    .map((host) => host.trim())
+    .filter(Boolean)
+
+  return new Set([fallbackHost, ...configuredHosts].filter(Boolean))
+}
+
+function isValidApiEndpoint(endpoint) {
+  if (!endpoint || typeof endpoint.url !== 'string' || typeof endpoint.description !== 'string') {
+    return false
+  }
+
+  try {
+    const endpointUrl = new URL(endpoint.url)
+    const allowedHosts = getAllowedApiHosts()
+    const isAllowedHost = allowedHosts.has(endpointUrl.hostname)
+    const isHttps = endpointUrl.protocol === 'https:'
+    const isLocalDevHttp = import.meta.env.DEV && endpointUrl.hostname === 'localhost'
+
+    return isAllowedHost && (isHttps || isLocalDevHttp)
+  } catch {
+    return false
+  }
+}
 
 function parseApiEndpoints(configValue) {
   try {
     const parsed = JSON.parse(configValue)
     if (Array.isArray(parsed)) {
-      return parsed.filter(
-        (endpoint) =>
-          endpoint && typeof endpoint.url === 'string' && typeof endpoint.description === 'string'
-      )
+      const safeEndpoints = parsed.filter(isValidApiEndpoint)
+      return safeEndpoints.length > 0 ? safeEndpoints : [fallbackEndpoint]
     }
-    return []
+    return [fallbackEndpoint]
   } catch {
-    return [
-      {
-        url: import.meta.env.VITE_APP_API_URL,
-        description: 'Fallback API'
-      }
-    ]
+    return [fallbackEndpoint]
   }
 }
 
@@ -72,12 +102,7 @@ async function initRemoteConfig() {
 
       await apiStore.selectWorkingEndpoint(endpoints)
     } catch {
-      const fallbackEndpoints = [
-        {
-          url: import.meta.env.VITE_APP_API_URL,
-          description: 'Fallback API'
-        }
-      ]
+      const fallbackEndpoints = [fallbackEndpoint]
 
       apiStore.setAvailableEndpoints(fallbackEndpoints)
       await apiStore.selectWorkingEndpoint(fallbackEndpoints)

@@ -1,4 +1,5 @@
 // import { getBaseURLSync } from '@/api/axios'
+import { sanitizeCommentHtml } from '@/utils/htmlSanitizer'
 
 export function useCommentFormatting() {
   const isValidImageUrl = (url) => {
@@ -103,7 +104,7 @@ export function useCommentFormatting() {
         const spaceBefore = needSpaceBefore ? ' ' : ''
         const spaceAfter = needSpaceAfter ? ' ' : ''
 
-        return `${spaceBefore}<span class="spoiler-text" onclick="this.classList.toggle('revealed')" title="Нажмите, чтобы показать спойлер">${processedSpoilerContent}</span>${spaceAfter}`
+        return `${spaceBefore}<span class="spoiler-text" data-spoiler="true" title="Нажмите, чтобы показать спойлер">${processedSpoilerContent}</span>${spaceAfter}`
       }
     )
 
@@ -137,7 +138,7 @@ export function useCommentFormatting() {
       }
     )
 
-    return processedContent
+    return sanitizeCommentHtml(processedContent)
   }
 
   const formatContentWithTruncation = (content) => {

@@ -32,6 +32,7 @@
         <div
           v-if="notification.comment_content || notification.reply_content"
           class="comment-preview"
+          @click="toggleSpoiler"
         >
           <div v-if="notification.comment_content" class="original-comment">
             <i class="fas fa-quote-left"></i>
@@ -100,6 +101,12 @@ const markAsRead = () => {
 
 const deleteNotification = () => {
   emit('delete', props.notification.id)
+}
+
+const toggleSpoiler = (event) => {
+  const spoiler = event.target.closest('.spoiler-text')
+  if (!spoiler) return
+  spoiler.classList.toggle('revealed')
 }
 </script>
 

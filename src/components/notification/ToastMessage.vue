@@ -1,35 +1,48 @@
 <template>
   <transition name="fade">
     <div v-if="visible" class="notification">
-      <span @click="handleClick" v-html="message"></span>
+      <span @click="handleClick" v-html="safeMessage"></span>
       <button class="close-btn" @click="hideNotification">✕</button>
     </div>
   </transition>
 </template>
 
 <script setup>
-import { ref } from 'vue'
+import { computed, ref } from 'vue'
+import { sanitizeToastHtml } from '@/utils/htmlSanitizer'
 
 const visible = ref(false)
 const message = ref('')
 const onClick = ref(null)
+const hideTimeoutId = ref(null)
+const safeMessage = computed(() => sanitizeToastHtml(message.value))
 
 const showNotification = (msg, duration = 3000, options = {}) => {
   message.value = msg
   onClick.value = options.onClick || null
   visible.value = true
 
-  setTimeout(() => {
+  if (hideTimeoutId.value) {
+    clearTimeout(hideTimeoutId.value)
+  }
+
+  hideTimeoutId.value = setTimeout(() => {
     visible.value = false
+    hideTimeoutId.value = null
   }, duration)
 }
 
 const hideNotification = () => {
+  if (hideTimeoutId.value) {
+    clearTimeout(hideTimeoutId.value)
+    hideTimeoutId.value = null
+  }
   visible.value = false
 }
 
 const handleClick = (event) => {
-  if (event.target.tagName === 'A' && onClick.value) {
+  const link = event.target.closest('a')
+  if (link && onClick.value) {
     event.preventDefault()
     onClick.value()
   }
