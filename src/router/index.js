@@ -9,8 +9,15 @@ const base = import.meta.env.VITE_BASE_URL || '/'
 const { userHasScrolled, startTracking } = useScrollTracking()
 let hasTrackedInitialRoute = false
 
+const shouldSkipGoatCounterTracking = (to) => {
+  const path = to?.path || ''
+
+  return path === '/auth-success' || path === '/reyohoho/auth-success'
+}
+
 const trackGoatCounterPageView = (to, attempt = 0) => {
   if (typeof window === 'undefined') return
+  if (shouldSkipGoatCounterTracking(to)) return
 
   const goatcounter = window.goatcounter
   if (goatcounter?.count) {
