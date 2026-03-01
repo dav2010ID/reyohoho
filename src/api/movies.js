@@ -26,6 +26,15 @@ const getCurrentProvider = () => {
   }
 }
 
+const getCurrentSearchProvider = () => {
+  try {
+    const mainStore = useMainStore()
+    return mainStore.searchApiProvider || CONTENT_PROVIDERS.RHSERV
+  } catch {
+    return CONTENT_PROVIDERS.RHSERV
+  }
+}
+
 const searchKinoBDPlayerCandidates = async (...args) => kinobd.searchPlayerCandidates(...args)
 const getKinoBDPlayerDataByInid = async (...args) => kinobd.getPlayerDataByInid(...args)
 
@@ -44,7 +53,20 @@ const callWithProvider = async (methodName, ...args) => {
   return await rhserv[methodName](...args)
 }
 
-const apiSearch = async (...args) => callWithProvider('apiSearch', ...args)
+const apiSearch = async (...args) => {
+  const provider = getCurrentSearchProvider()
+
+  if (provider === CONTENT_PROVIDERS.KINOBD) {
+    try {
+      return await kinobd.apiSearch(...args)
+    } catch (error) {
+      console.warn('[movies] apiSearch failed on KinoBD, fallback to RHServ', error)
+      return await rhserv.apiSearch(...args)
+    }
+  }
+
+  return await rhserv.apiSearch(...args)
+}
 const getShikiInfo = async (...args) => callWithProvider('getShikiInfo', ...args)
 const getKpInfo = async (...args) => callWithProvider('getKpInfo', ...args)
 const getPlayers = async (...args) => callWithProvider('getPlayers', ...args)

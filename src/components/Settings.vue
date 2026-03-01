@@ -89,6 +89,18 @@
           RHServ: полный функционал (комментарии, тайминги, рейтинги). KinoBD: поиск/карточки/плееры.
           Неподдерживаемые функции автоматически идут через RHServ.
         </p>
+        <h3 class="api-subtitle">API для поиска</h3>
+        <div class="radio-group">
+          <label class="radio">
+            <input v-model="searchApiProvider" type="radio" value="rhserv" />
+            <span class="radio-label">RHServ (по умолчанию)</span>
+          </label>
+          <label class="radio">
+            <input v-model="searchApiProvider" type="radio" value="kinobd" />
+            <span class="radio-label">KinoBD</span>
+          </label>
+        </div>
+        <p class="api-note">Этот параметр влияет только на поиск по названию.</p>
         <div class="settings-actions">
           <button class="reset-button" @click="resetKinoBdSources">
             <i class="fa-solid fa-arrow-rotate-left"></i>
@@ -221,6 +233,11 @@ const areTrailersActive = computed({
 const contentApiProvider = computed({
   get: () => mainStore.contentApiProvider,
   set: (value) => mainStore.setContentApiProvider(value)
+})
+
+const searchApiProvider = computed({
+  get: () => mainStore.searchApiProvider,
+  set: (value) => mainStore.setSearchApiProvider(value)
 })
 
 const isCtrlFEnabled = computed({
@@ -386,5 +403,11 @@ h2 {
   opacity: 0.85;
   font-size: 13px;
   line-height: 1.35;
+}
+
+.api-subtitle {
+  margin: 6px 0 0;
+  font-size: 14px;
+  font-weight: 600;
 }
 </style>

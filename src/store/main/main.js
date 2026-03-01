@@ -18,7 +18,8 @@ export const useMainStore = defineStore(MAIN_STORE_NAME, {
     cardSize: 'medium',
     isStreamerMode: true,
     rememberScrollPosition: true,
-    contentApiProvider: 'kinobd'
+    contentApiProvider: 'kinobd',
+    searchApiProvider: 'rhserv'
   }),
 
   actions: {
@@ -110,6 +111,10 @@ export const useMainStore = defineStore(MAIN_STORE_NAME, {
 
     setContentApiProvider(value) {
       this.contentApiProvider = value
+    },
+
+    setSearchApiProvider(value) {
+      this.searchApiProvider = value
     }
   },
 
@@ -126,7 +131,8 @@ export const useMainStore = defineStore(MAIN_STORE_NAME, {
       'cardSize',
       'isStreamerMode',
       'rememberScrollPosition',
-      'contentApiProvider'
+      'contentApiProvider',
+      'searchApiProvider'
     ],
     beforeHydrate: beforeHydrateLegacyVuex
   }
