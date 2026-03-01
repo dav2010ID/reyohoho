@@ -1,10 +1,12 @@
 import { useMainStore } from '@/store/main'
 import * as rhserv from '@/api/movies.rhserv'
 import * as kinobd from '@/api/movies.kinobd'
+import * as kinobox from '@/api/movies.kinobox'
 
 const CONTENT_PROVIDERS = {
   RHSERV: 'rhserv',
-  KINOBD: 'kinobd'
+  KINOBD: 'kinobd',
+  KINOBOX: 'kinobox'
 }
 
 const KINOBD_SUPPORTED_METHODS = new Set([
@@ -16,6 +18,7 @@ const KINOBD_SUPPORTED_METHODS = new Set([
   'getKpIDfromIMDB',
   'getRandomMovie'
 ])
+const KINOBOX_SUPPORTED_METHODS = new Set(['getPlayers'])
 
 const getCurrentProvider = () => {
   try {
@@ -40,6 +43,22 @@ const getKinoBDPlayerDataByInid = async (...args) => kinobd.getPlayerDataByInid(
 
 const callWithProvider = async (methodName, ...args) => {
   const provider = getCurrentProvider()
+
+  if (provider === CONTENT_PROVIDERS.KINOBOX && KINOBOX_SUPPORTED_METHODS.has(methodName)) {
+    try {
+      return await kinobox[methodName](...args)
+    } catch (error) {
+      console.warn(`[movies] ${methodName} failed on Kinobox, fallback to KinoBD/RHServ`, error)
+      if (KINOBD_SUPPORTED_METHODS.has(methodName)) {
+        try {
+          return await kinobd[methodName](...args)
+        } catch (fallbackError) {
+          console.warn(`[movies] ${methodName} failed on KinoBD, fallback to RHServ`, fallbackError)
+        }
+      }
+      return await rhserv[methodName](...args)
+    }
+  }
 
   if (provider === CONTENT_PROVIDERS.KINOBD && KINOBD_SUPPORTED_METHODS.has(methodName)) {
     try {
@@ -147,6 +166,9 @@ export const toggleErrorSimulation = (enabled) => {
   }
   if (typeof kinobd.toggleErrorSimulation === 'function') {
     kinobd.toggleErrorSimulation(enabled)
+  }
+  if (typeof kinobox.toggleErrorSimulation === 'function') {
+    kinobox.toggleErrorSimulation(enabled)
   }
 }
 

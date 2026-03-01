@@ -84,6 +84,10 @@
             <input v-model="contentApiProvider" type="radio" value="kinobd" />
             <span class="radio-label">KinoBD (search/cards/players)</span>
           </label>
+          <label class="radio">
+            <input v-model="contentApiProvider" type="radio" value="kinobox" />
+            <span class="radio-label">Kinobox (players)</span>
+          </label>
         </div>
         <p class="api-note">
           RHServ: полный функционал (комментарии, тайминги, рейтинги). KinoBD: поиск/карточки/плееры.

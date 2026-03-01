@@ -17,7 +17,7 @@
               :class="['player-item', { active: isSelected(item.data) }]"
               @click="selectPlayer(item.data)"
             >
-              {{ cleanName(item.data.translate) }}
+              {{ formatPlayerLabel(item.data) }}
               <span v-if="item.data.warning" class="warning-icon material-icons" title="Внимание!"
                 >warning</span
               >
@@ -44,7 +44,7 @@
               :class="['player-item', { active: isSelected(player) }]"
               @click="selectPlayer(player)"
             >
-              {{ cleanName(player.translate) }}
+              {{ formatPlayerLabel(player) }}
               <span v-if="player.warning" class="warning-icon material-icons" title="Внимание!"
                 >warning</span
               >
@@ -102,10 +102,42 @@ const isVeoVeo = (player) => player.name.toUpperCase().includes('VEOVEO')
 const isKodik = (player) => player.name.toUpperCase().includes('KODIK')
 
 const cleanName = (name) =>
-  name
+  String(name || '')
     .replace(/VEOVEO>/, '')
     .replace(/KODIK>/, '')
+    .replace(/KINOBOX>/, '')
     .trim()
+
+const getProviderName = (player) => {
+  const directProvider = String(player?.provider || '').trim()
+  if (directProvider) return cleanName(directProvider)
+
+  const rawName = String(player?.name || player?.key || '')
+  if (!rawName.includes('>')) return ''
+
+  const segments = rawName
+    .split('>')
+    .map((segment) => segment.trim())
+    .filter(Boolean)
+  if (!segments.length) return ''
+
+  const root = segments[0].toUpperCase()
+  if ((root === 'KINOBOX' || root === 'KINOBD' || root === 'RHSERV') && segments[1]) {
+    return cleanName(segments[1])
+  }
+
+  return cleanName(segments[0])
+}
+
+const formatPlayerLabel = (player) => {
+  const voice = cleanName(player?.translate)
+  const provider = getProviderName(player)
+
+  if (!provider) return voice
+  if (!voice || voice.toLowerCase() === provider.toLowerCase()) return provider
+
+  return `${provider} / ${voice}`
+}
 
 const selectPlayer = (player) => {
   emit('select', player)
