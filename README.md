@@ -15,6 +15,9 @@
   <a href="https://github.com/dav2010id/reyohoho/network/members">
     <img src="https://img.shields.io/github/forks/dav2010id/reyohoho?style=social" alt="GitHub forks">
   </a>
+  <a href="https://visitor-badge.laobi.icu/badge?page_id=dav2010id.reyohoho.md&left_text=README%20views&left_color=1f2937&right_color=0ea5e9">
+    <img src="https://visitor-badge.laobi.icu/badge?page_id=dav2010id.reyohoho.md&left_text=README%20views&left_color=1f2937&right_color=0ea5e9" alt="README visitors">
+  </a>
 </p>
 
 <p align="center">

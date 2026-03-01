@@ -76,6 +76,20 @@
           {{ currentDonater }}
         </span>
       </transition>
+
+      <a
+        class="visitor-badge-link"
+        href="https://visitor-badge.laobi.icu/badge?page_id=dav2010id.reyohoho&left_text=Site%20views&left_color=111827&right_color=14b8a6"
+        target="_blank"
+        rel="noopener noreferrer"
+        aria-label="Site visitors badge"
+      >
+        <img
+          class="visitor-badge-image"
+          src="https://visitor-badge.laobi.icu/badge?page_id=dav2010id.reyohoho&left_text=Site%20views&left_color=111827&right_color=14b8a6"
+          alt="Site visitors"
+        />
+      </a>
     </div>
   </footer>
 </template>
@@ -703,6 +717,24 @@ footer {
   min-width: 150px;
 }
 
+.visitor-badge-link {
+  display: inline-flex;
+  align-items: center;
+  line-height: 0;
+  opacity: 0.92;
+  transition: opacity 0.2s ease, transform 0.2s ease;
+}
+
+.visitor-badge-link:hover {
+  opacity: 1;
+  transform: translateY(-1px);
+}
+
+.visitor-badge-image {
+  height: 20px;
+  width: auto;
+}
+
 .fade-enter-active,
 .fade-leave-active {
   transition: opacity 1s ease;
@@ -746,6 +778,10 @@ footer {
   .donater {
     font-size: 14px;
     min-width: 120px;
+  }
+
+  .visitor-badge-image {
+    height: 18px;
   }
 }
 
@@ -799,6 +835,10 @@ footer {
     font-size: 13px;
     min-width: 100px;
     text-align: center;
+  }
+
+  .visitor-badge-image {
+    height: 16px;
   }
 }
 </style>
