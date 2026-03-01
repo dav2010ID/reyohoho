@@ -7,6 +7,27 @@ import { useScrollTracking } from '@/composables/useScrollTracking'
 
 const base = import.meta.env.VITE_BASE_URL || '/'
 const { userHasScrolled, startTracking } = useScrollTracking()
+let hasTrackedInitialRoute = false
+
+const trackGoatCounterPageView = (to, attempt = 0) => {
+  if (typeof window === 'undefined') return
+
+  const goatcounter = window.goatcounter
+  if (goatcounter?.count) {
+    goatcounter.count({
+      path: to.fullPath,
+      title: document.title,
+      event: false
+    })
+    return
+  }
+
+  // GoatCounter script is async in index.html; short retries cover fast route changes.
+  if (attempt < 10) {
+    setTimeout(() => trackGoatCounterPageView(to, attempt + 1), 200)
+  }
+}
+
 const router = createRouter({
   history: createWebHistory(base),
   routes,
@@ -45,6 +66,15 @@ router.beforeEach((to, _from, next) => {
   } else {
     next()
   }
+})
+
+router.afterEach((to) => {
+  if (!hasTrackedInitialRoute) {
+    hasTrackedInitialRoute = true
+    return
+  }
+
+  trackGoatCounterPageView(to)
 })
 
 export default router
