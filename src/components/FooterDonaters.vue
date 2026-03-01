@@ -79,15 +79,15 @@
 
       <a
         class="visitor-badge-link"
-        href="https://visitor-badge.laobi.icu/badge?page_id=dav2010id.reyohoho&left_text=Site%20views&left_color=111827&right_color=14b8a6"
+        href="https://visitor-badge.laobi.icu/badge?page_id=dav2010id.reyohoho&left_text=%D0%9F%D1%80%D0%BE%D1%81%D0%BC%D0%BE%D1%82%D1%80%D1%8B%20%D1%81%D0%B0%D0%B9%D1%82%D0%B0&left_color=0f172a&right_color=38bdf8"
         target="_blank"
         rel="noopener noreferrer"
-        aria-label="Site visitors badge"
+        aria-label="Просмотры сайта"
       >
         <img
           class="visitor-badge-image"
-          src="https://visitor-badge.laobi.icu/badge?page_id=dav2010id.reyohoho&left_text=Site%20views&left_color=111827&right_color=14b8a6"
-          alt="Site visitors"
+          src="https://visitor-badge.laobi.icu/badge?page_id=dav2010id.reyohoho&left_text=%D0%9F%D1%80%D0%BE%D1%81%D0%BC%D0%BE%D1%82%D1%80%D1%8B%20%D1%81%D0%B0%D0%B9%D1%82%D0%B0&left_color=0f172a&right_color=38bdf8"
+          alt="Просмотры сайта"
         />
       </a>
     </div>
@@ -721,18 +721,25 @@ footer {
   display: inline-flex;
   align-items: center;
   line-height: 0;
-  opacity: 0.92;
-  transition: opacity 0.2s ease, transform 0.2s ease;
+  margin-left: 2px;
+  position: relative;
+  left: -8px;
+  opacity: 0.88;
+  filter: saturate(0.92);
+  transition: opacity 0.2s ease, transform 0.2s ease, filter 0.2s ease;
 }
 
 .visitor-badge-link:hover {
   opacity: 1;
   transform: translateY(-1px);
+  filter: saturate(1.06);
 }
 
 .visitor-badge-image {
-  height: 20px;
+  height: 21px;
   width: auto;
+  border-radius: 4px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.35);
 }
 
 .fade-enter-active,
@@ -781,7 +788,15 @@ footer {
   }
 
   .visitor-badge-image {
-    height: 18px;
+    height: 19px;
+  }
+
+  .visitor-badge-link {
+    left: -5px;
+  }
+
+  .visitor-badge-link:hover {
+    transform: translateY(-1px);
   }
 }
 
@@ -838,7 +853,16 @@ footer {
   }
 
   .visitor-badge-image {
-    height: 16px;
+    height: 17px;
+  }
+
+  .visitor-badge-link {
+    left: -2px;
+  }
+
+  .visitor-badge-link:hover {
+    transform: translateY(-1px);
   }
 }
 </style>
+
