@@ -1469,8 +1469,8 @@ const syncCanonicalMovieRoute = async () => {
   if (typeof window !== 'undefined') {
     const currentUrl = `${window.location.pathname}${window.location.search}${window.location.hash}`
 
-    if (currentUrl !== resolvedTarget.fullPath) {
-      window.location.replace(resolvedTarget.fullPath)
+    if (currentUrl !== resolvedTarget.href) {
+      window.location.replace(resolvedTarget.href)
     }
     return
   }
