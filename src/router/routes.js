@@ -17,6 +17,10 @@ export const routes = [
   },
   {
     path: '/movie/:kp_id',
+    redirect: (to) => `/movie/${to.params.kp_id}/`
+  },
+  {
+    path: '/movie/:kp_id/:slug?',
     component: () => import('@/components/MovieInfo.vue'),
     name: 'movie-info',
     meta: {

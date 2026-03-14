@@ -1,6 +1,8 @@
 import { LEGACY_STORE_KEY, LEGACY_STORE_KEY_BACKUP } from './constants'
 
 export function beforeHydrateLegacyVuex(ctx) {
+  if (typeof window === 'undefined' || !window.localStorage) return
+
   const legacyRaw = localStorage.getItem(LEGACY_STORE_KEY)
   if (!legacyRaw) return
 

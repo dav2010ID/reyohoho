@@ -27,3 +27,4 @@ coverage
 *.sln
 *.sw?
 dist.zip
+yarn.lock

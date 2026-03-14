@@ -1,5 +1,11 @@
 import { defineStore } from 'pinia'
 
+const createNoopStorage = () => ({
+  getItem: () => null,
+  setItem: () => {},
+  removeItem: () => {}
+})
+
 export const useThemeStore = defineStore('theme', {
   state: () => ({
     accentColor: '#4caf50',
@@ -88,6 +94,8 @@ export const useThemeStore = defineStore('theme', {
     },
 
     updateCSSVariables() {
+      if (typeof document === 'undefined') return
+
       const root = document.documentElement
       const currentColor = this.currentAccentColor
 
@@ -145,7 +153,7 @@ export const useThemeStore = defineStore('theme', {
 
   persist: {
     key: 'theme-settings-5',
-    storage: localStorage,
+    storage: typeof window !== 'undefined' ? window.localStorage : createNoopStorage(),
     paths: ['accentColor', 'customColors']
   }
 })

@@ -1,5 +1,5 @@
 <template>
-  <div class="rating-container">
+  <div v-if="isClientReady" class="rating-container">
     <div class="rating-display">
       <a
         href="#"
@@ -73,7 +73,7 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, onUnmounted } from 'vue'
 import { getRating, setRating as setRatingApi } from '@/api/movies'
 import Notification from '@/components/notification/ToastMessage.vue'
 import { useRouter } from 'vue-router'
@@ -100,6 +100,7 @@ const voteCount = ref(null)
 const hoverRating = ref(0)
 const isHovered = ref(false)
 const isTooltipVisible = ref(false)
+const isClientReady = ref(false)
 let hideTimeout = null
 
 const formatRatingNumber = (num) => {
@@ -183,7 +184,15 @@ const closeModal = () => {
 }
 
 onMounted(() => {
+  isClientReady.value = true
   loadRating()
+})
+
+onUnmounted(() => {
+  if (hideTimeout) {
+    clearTimeout(hideTimeout)
+    hideTimeout = null
+  }
 })
 </script>
 

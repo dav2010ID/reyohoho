@@ -1,5 +1,7 @@
 import DOMPurify from 'dompurify'
 
+const isClient = typeof window !== 'undefined'
+
 const commonConfig = {
   ALLOWED_ATTR: ['class', 'title'],
   FORBID_TAGS: ['style', 'script'],
@@ -28,9 +30,11 @@ const toastHtmlConfig = {
 }
 
 export const sanitizeCommentHtml = (html) => {
+  if (!isClient) return html
   return DOMPurify.sanitize(html, commentHtmlConfig)
 }
 
 export const sanitizeToastHtml = (html) => {
+  if (!isClient) return html
   return DOMPurify.sanitize(html, toastHtmlConfig)
 }

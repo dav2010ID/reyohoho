@@ -39,8 +39,10 @@
 
       <ErrorMessage v-if="errorMessage" :message="errorMessage" :code="errorCode" />
 
-      <div v-if="errorMessage" class="content-card">
-        <PlayerComponent
+      <div v-if="errorMessage && clientReady" class="content-card">
+        <component
+          :is="moviePlayerComponent"
+          v-if="clientReady && moviePlayerComponent"
           :key="kp_id"
           :kp-id="kp_id"
           :movie-info="movieInfo"
@@ -85,8 +87,9 @@
           "
           class="ratings-links"
         >
-          <MovieRating
-            v-if="movieInfo.kinopoisk_id"
+          <component
+            :is="movieRatingComponent"
+            v-if="clientReady && movieRatingComponent && movieInfo.kinopoisk_id"
             :key="movieInfo.kinopoisk_id"
             :kp-id="movieInfo.kinopoisk_id"
             :show-dash="true"
@@ -254,7 +257,9 @@
         </div>
 
         <!-- Интеграция компонента плеера -->
-        <PlayerComponent
+        <component
+          :is="moviePlayerComponent"
+          v-if="clientReady && moviePlayerComponent"
           :key="kp_id"
           :kp-id="kp_id"
           :movie-info="movieInfo"
@@ -330,20 +335,6 @@
           </div>
         </div>
 
-        <meta
-          name="title-and-year"
-          :content="
-            movieInfo.type === 'FILM' && movieInfo.year
-              ? `${movieInfo.title} (${movieInfo.year})`
-              : movieInfo.title
-          "
-        />
-
-        <meta
-          v-if="movieInfo.name_original"
-          name="original-title"
-          :content="movieInfo.name_original"
-        />
         <div class="additional-info">
           <h2 class="additional-info-title">Подробнее</h2>
           <div class="info-content">
@@ -431,7 +422,7 @@
           </div>
         </div>
 
-        <div v-if="isCommentsEnabled" class="comments-section">
+        <div v-if="clientReady && isCommentsEnabled" class="comments-section">
           <Comments :key="kp_id" :movie-id="kp_id" />
         </div>
 
@@ -1335,7 +1326,6 @@ import { parseTimingTextToSeconds, formatSecondsToTime } from '@/utils/dateUtils
 import { handleApiError } from '@/constants'
 import { addToList, delFromList } from '@/api/user'
 import { MovieList } from '@/components/MovieList/'
-import PlayerComponent from '@/components/PlayerComponent.vue'
 import ErrorMessage from '@/components/ErrorMessage.vue'
 import SpinnerLoading from '@/components/SpinnerLoading.vue'
 import { TYPES_ENUM, USER_LIST_TYPES_ENUM } from '@/constants'
@@ -1346,14 +1336,14 @@ import { useNavbarStore } from '@/store/navbar'
 import { usePlayerStore } from '@/store/player'
 import { computed, onMounted, onUnmounted, ref, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
+import { useHead } from '@unhead/vue'
 import Notification from '@/components/notification/ToastMessage.vue'
 import TrailerCarousel from '@/components/TrailerCarousel.vue'
 import { useTrailerStore } from '@/store/trailer'
-import MovieRating from '@/components/MovieRating.vue'
 import Comments from '@/components/Comments.vue'
 import { getRatingColor } from '@/utils/ratingUtils'
+import { buildMovieSeo, getMovieSeoEntry } from '@/utils/movieSeo'
 
-const infoLoading = ref(true)
 const mainStore = useMainStore()
 const authStore = useAuthStore()
 const backgroundStore = useBackgroundStore()
@@ -1363,10 +1353,27 @@ const router = useRouter()
 const kp_id = ref(route.params.kp_id)
 const errorMessage = ref('')
 const errorCode = ref(null)
-const movieInfo = ref(null)
+const moviePlayerComponent = ref(null)
+const movieRatingComponent = ref(null)
+const initialSeoEntry = getMovieSeoEntry(route.params.kp_id)
+const infoLoading = ref(!initialSeoEntry)
+const movieInfo = ref(
+  initialSeoEntry
+    ? {
+        kp_id: initialSeoEntry.kp_id,
+        kinopoisk_id: initialSeoEntry.kp_id,
+        title: initialSeoEntry.title,
+        name_ru: initialSeoEntry.title,
+        year: initialSeoEntry.year,
+        description: initialSeoEntry.description,
+        poster_url: initialSeoEntry.poster
+      }
+    : null
+)
 const navbarStore = useNavbarStore()
 const trailerStore = useTrailerStore()
 const notificationRef = ref(null)
+const clientReady = ref(false)
 
 const areTrailersActive = computed(() => trailerStore.areTrailersActive)
 const activeTrailerIndex = ref(null)
@@ -1455,6 +1462,82 @@ const setDocumentTitle = () => {
     document.title = title
   }
 }
+
+const seoMeta = computed(() => buildMovieSeo(movieInfo.value || {}, kp_id.value))
+
+useHead(() => {
+  const seo = seoMeta.value
+  const titleBase =
+    movieInfo.value?.title || movieInfo.value?.name_ru || movieInfo.value?.name_original || ''
+
+  return {
+    title: seo.title,
+    link: [
+      {
+        rel: 'canonical',
+        href: seo.canonicalUrl
+      }
+    ],
+    meta: [
+      {
+        name: 'description',
+        content: seo.description
+      },
+      {
+        property: 'og:type',
+        content: seo.type
+      },
+      {
+        property: 'og:title',
+        content: seo.title
+      },
+      {
+        property: 'og:description',
+        content: seo.description
+      },
+      {
+        property: 'og:url',
+        content: seo.canonicalUrl
+      },
+      {
+        property: 'og:image',
+        content: seo.poster
+      },
+      {
+        name: 'twitter:card',
+        content: seo.poster ? 'summary_large_image' : 'summary'
+      },
+      {
+        name: 'twitter:title',
+        content: seo.title
+      },
+      {
+        name: 'twitter:description',
+        content: seo.description
+      },
+      {
+        name: 'twitter:image',
+        content: seo.poster
+      }
+    ].filter((entry) => entry.content),
+    script: titleBase
+      ? [
+          {
+            type: 'application/ld+json',
+            textContent: JSON.stringify({
+              '@context': 'https://schema.org',
+              '@type': 'Movie',
+              name: titleBase,
+              description: seo.description,
+              image: seo.poster || undefined,
+              datePublished: movieInfo.value?.year || undefined,
+              url: seo.canonicalUrl
+            })
+          }
+        ]
+      : []
+  }
+})
 
 const formatRatingNumber = (num) => {
   if (!num) return '0'
@@ -1766,6 +1849,9 @@ const handleNudityTimingsPopupOutsideClick = (event) => {
 }
 
 onMounted(async () => {
+  clientReady.value = true
+  moviePlayerComponent.value = (await import('@/components/PlayerComponent.vue')).default
+  movieRatingComponent.value = (await import('@/components/MovieRating.vue')).default
   await fetchMovieInfo()
   infoLoading.value = false
   document.addEventListener('keydown', onKeyDown)
@@ -1799,8 +1885,7 @@ watch(
       await fetchMovieInfo()
       infoLoading.value = false
     }
-  },
-  { immediate: true }
+  }
 )
 
 watch(

@@ -130,7 +130,8 @@ export default defineConfig(({ mode }) => {
     ],
     resolve: {
       alias: {
-        '@': '/src'
+        '@': '/src',
+        '@nuxt/devalue': '@nuxt/devalue/dist/devalue.js'
       }
     }
   }
