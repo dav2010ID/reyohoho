@@ -340,15 +340,7 @@
           <div class="info-content">
             <div v-if="movieInfo.poster_url" class="movie-poster-container desktop-only">
               <a :href="movieInfo.poster_url" target="_blank" rel="noopener noreferrer">
-                <img
-                  :src="movieInfo.poster_url"
-                  :alt="`Постер фильма ${movieInfo.title}${movieInfo.year ? ` (${movieInfo.year})` : ''}`"
-                  class="movie-poster"
-                  width="300"
-                  height="445"
-                  loading="lazy"
-                  decoding="async"
-                />
+                <img :src="movieInfo.poster_url" alt="Постер фильма" class="movie-poster" />
               </a>
             </div>
             <div class="details-container">
