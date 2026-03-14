@@ -1,7 +1,7 @@
 import fs from 'node:fs/promises'
 import path from 'node:path'
 import { normalizeBasePath } from '../src/utils/basePath.js'
-import { getCanonicalSlugCandidate } from '../src/utils/movieSlug.js'
+import { resolveCanonicalMovieIdentity } from '../src/utils/movieSlug.js'
 
 const SITE_ORIGIN = process.env.VITE_SITE_ORIGIN || 'https://dav2010id.github.io'
 const SITE_BASE_PATH = process.env.VITE_BASE_URL || '/reyohoho'
@@ -31,7 +31,7 @@ async function main() {
       lastmod
     })),
     ...movies.map((movie) => ({
-      loc: `${SITE_ORIGIN}${BASE_PATH}/movie/${movie.kp_id}/${getCanonicalSlugCandidate(movie)}`,
+      loc: `${SITE_ORIGIN}${BASE_PATH}/movie/${movie.kp_id}/${resolveCanonicalMovieIdentity(movie).slug}`,
       lastmod: String(movie.updatedAt || '').slice(0, 10) || lastmod
     }))
   ]

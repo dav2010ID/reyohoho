@@ -1,5 +1,6 @@
 import * as kinobd from '@/api/movies.kinobd'
 import {
+  getMovieSeoEntry,
   getMovieSeoSlug,
   needsMovieSeoEnrichment,
   registerMovieSeoEntry
@@ -26,8 +27,9 @@ export const normalizeMovieListEntry = (item, seoEntry = null) => {
   const kpId = String(item.kp_id || item.kinopoisk_id || item.id || '').trim()
   if (!kpId) return item
 
-  const registeredEntry = registerMovieSeoEntry(item)
-  const canonicalEntry = seoEntry || registeredEntry
+  const existingEntry = getMovieSeoEntry(kpId)
+  const registeredEntry = needsMovieSeoEnrichment(item, kpId) ? existingEntry : registerMovieSeoEntry(item)
+  const canonicalEntry = seoEntry || registeredEntry || existingEntry
   const rawData = mergeRawData(item, canonicalEntry)
   const movieForSeo = {
     ...item,

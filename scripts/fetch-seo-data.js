@@ -1,6 +1,6 @@
 import fs from 'node:fs/promises'
 import path from 'node:path'
-import { getCanonicalSlugCandidate } from '../src/utils/movieSlug.js'
+import { resolveCanonicalMovieIdentity } from '../src/utils/movieSlug.js'
 
 const OUTPUT_PATH = path.resolve(process.cwd(), 'src/data/movies.json')
 const API_BASE_URL = process.env.SEO_SOURCE_API_URL || 'https://kinobd.net'
@@ -24,16 +24,17 @@ const fetchPage = async (page) => {
 }
 
 const mapMovie = (movie) => {
-  const kpId = movie?.kinopoisk_id || movie?.kp_id || movie?.id
-  const title = movie?.name_russian || movie?.name_original || ''
+  const identity = resolveCanonicalMovieIdentity(movie)
+  const kpId = identity.kpId
+  const title = identity.localizedTitle || identity.originalTitle
 
   if (!kpId || !title) return null
 
   return {
     kp_id: String(kpId),
-    slug: getCanonicalSlugCandidate(movie),
+    slug: identity.slug,
     title,
-    name_original: String(movie?.name_original || '').trim(),
+    name_original: identity.originalTitle,
     year: String(movie?.year || movie?.year_start || ''),
     description: String(movie?.description || '').trim(),
     poster: String(movie?.best_poster || movie?.big_poster || movie?.small_poster || '').trim(),

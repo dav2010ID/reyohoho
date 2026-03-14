@@ -38,4 +38,31 @@ describe('movieSeo', () => {
       })
     ).toBe('/movie/5591410/young-sherlock')
   })
+
+  it('falls back to a deterministic movie-id slug when the title cannot be transliterated', () => {
+    const movie = {
+      kp_id: '424242',
+      title: '天空の城ラピュタ'
+    }
+
+    expect(getMovieSeoSlug(movie)).toBe('movie-424242')
+    expect(getMovieSeoPath(movie)).toBe('/movie/424242/movie-424242')
+  })
+
+  it('prefers richer incoming canonical data when registering the same kp id again', () => {
+    registerMovieSeoEntry({
+      kp_id: '777777',
+      title: 'Старый слаг',
+      slug: 'staryy-slag'
+    })
+
+    registerMovieSeoEntry({
+      kp_id: '777777',
+      title: 'Молодой Шерлок',
+      name_original: 'Young Sherlock'
+    })
+
+    expect(getMovieSeoSlug({ kp_id: '777777' })).toBe('young-sherlock')
+    expect(getMovieSeoPath({ kp_id: '777777' })).toBe('/movie/777777/young-sherlock')
+  })
 })

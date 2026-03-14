@@ -61,65 +61,74 @@ export const sanitizeSlug = (value) =>
     .replace(/^-+|-+$/g, '')
     .replace(/-{2,}/g, '-')
 
-export const resolveSlugSource = (movie = {}) => {
-  const originalTitle = getTrimmedString(
-    movie?.name_original,
-    movie?.name_en,
-    movie?.raw_data?.name_original,
-    movie?.raw_data?.name_en,
-    movie?.raw_data?.Name_original
-  )
-  const localizedTitle = getTrimmedString(
-    movie?.name_russian,
-    movie?.title,
-    movie?.name_ru,
-    movie?.raw_data?.name_ru,
-    movie?.raw_data?.nameRu
-  )
+export const getMovieIdentifier = (movieLike = {}, kpIdOverride = null) =>
+  getTrimmedString(movieLike?.kinopoisk_id, movieLike?.kp_id, movieLike?.id_kp, movieLike?.id, kpIdOverride)
 
-  if (hasLatinLetters(originalTitle)) return originalTitle
-  return localizedTitle || originalTitle
-}
-
-export const toSlug = (valueOrMovie) => {
-  if (valueOrMovie && typeof valueOrMovie === 'object') {
-    return sanitizeSlug(transliterateCyrillic(resolveSlugSource(valueOrMovie)))
-  }
-
-  return sanitizeSlug(transliterateCyrillic(valueOrMovie))
-}
-
-export const getCanonicalSlugCandidate = (movieLike = {}, fallbackEntry = null) =>
+export const extractOriginalTitle = (movieLike = {}, fallbackEntry = null) =>
   getTrimmedString(
-    toSlug({
-      name_original:
-        movieLike?.name_original ||
-        movieLike?.name_en ||
-        movieLike?.raw_data?.name_original ||
-        movieLike?.raw_data?.name_en ||
-        movieLike?.raw_data?.Name_original ||
-        fallbackEntry?.name_original,
-      name_en:
-        movieLike?.name_en ||
-        movieLike?.raw_data?.name_en ||
-        movieLike?.raw_data?.Name_original ||
-        fallbackEntry?.name_original,
-      title:
-        movieLike?.name_russian ||
-        movieLike?.title ||
-        movieLike?.name_ru ||
-        movieLike?.raw_data?.name_ru ||
-        movieLike?.raw_data?.nameRu ||
-        fallbackEntry?.title,
-      name_ru:
-        movieLike?.name_ru ||
-        movieLike?.name_russian ||
-        movieLike?.raw_data?.name_ru ||
-        movieLike?.raw_data?.nameRu ||
-        fallbackEntry?.title
-    }),
-    movieLike?.slug,
-    movieLike?.seo_slug,
-    movieLike?.raw_data?.slug,
-    fallbackEntry?.slug
+    movieLike?.name_original,
+    movieLike?.name_en,
+    movieLike?.raw_data?.name_original,
+    movieLike?.raw_data?.name_en,
+    movieLike?.raw_data?.Name_original,
+    fallbackEntry?.name_original
   )
+
+export const extractLocalizedTitle = (movieLike = {}, fallbackEntry = null) =>
+  getTrimmedString(
+    movieLike?.name_russian,
+    movieLike?.title,
+    movieLike?.name_ru,
+    movieLike?.raw_data?.name_ru,
+    movieLike?.raw_data?.nameRu,
+    fallbackEntry?.name_ru,
+    fallbackEntry?.title
+  )
+
+export const resolveCanonicalMovieTitles = (movieLike = {}, fallbackEntry = null) => {
+  const localizedTitle = extractLocalizedTitle(movieLike, fallbackEntry)
+  const originalTitle = extractOriginalTitle(movieLike, fallbackEntry)
+  const hasLatinOriginalTitle = hasLatinLetters(originalTitle)
+  const preferredTitle = hasLatinOriginalTitle ? originalTitle : localizedTitle || originalTitle
+
+  return {
+    localizedTitle,
+    originalTitle,
+    preferredTitle,
+    hasLatinOriginalTitle
+  }
+}
+
+export const buildFallbackSlug = (kpId) => {
+  const normalizedKpId = String(kpId || '').trim()
+  return normalizedKpId ? `movie-${normalizedKpId}` : ''
+}
+
+export const toSlug = (value) => sanitizeSlug(transliterateCyrillic(value))
+
+const getExistingSlugCandidate = (movieLike = {}, fallbackEntry = null) =>
+  getTrimmedString(
+    sanitizeSlug(movieLike?.slug),
+    sanitizeSlug(movieLike?.seo_slug),
+    sanitizeSlug(movieLike?.raw_data?.slug),
+    sanitizeSlug(fallbackEntry?.slug)
+  )
+
+export const resolveCanonicalMovieIdentity = (movieLike = {}, fallbackEntry = null, kpIdOverride = null) => {
+  const kpId = getMovieIdentifier(movieLike, kpIdOverride)
+  const titles = resolveCanonicalMovieTitles(movieLike, fallbackEntry)
+  const generatedSlug = toSlug(titles.preferredTitle)
+  const existingSlug = getExistingSlugCandidate(movieLike, fallbackEntry)
+
+  return {
+    kpId,
+    localizedTitle: titles.localizedTitle,
+    originalTitle: titles.originalTitle,
+    preferredTitle: titles.preferredTitle,
+    hasLatinOriginalTitle: titles.hasLatinOriginalTitle,
+    slug: generatedSlug || existingSlug || buildFallbackSlug(kpId)
+  }
+}
+
+export const getCanonicalSlugCandidate = (movieLike = {}, fallbackEntry = null, kpIdOverride = null) =>
+  resolveCanonicalMovieIdentity(movieLike, fallbackEntry, kpIdOverride).slug
