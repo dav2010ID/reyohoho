@@ -122,10 +122,10 @@ export const getMovieSeoSlug = (movieLike = {}, kpIdOverride = null) => {
   const fallbackEntry = kpId ? getMovieSeoEntry(kpId) : null
 
   return String(
-    movieLike?.slug ||
+    fallbackEntry?.slug ||
+      movieLike?.slug ||
       movieLike?.seo_slug ||
       movieLike?.raw_data?.slug ||
-      fallbackEntry?.slug ||
       toSlug({
         title: movieLike?.title || movieLike?.name_ru || fallbackEntry?.title,
         name_ru: movieLike?.name_ru || movieLike?.raw_data?.name_ru,

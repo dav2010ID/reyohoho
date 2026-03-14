@@ -1452,6 +1452,22 @@ const isInAnyList = computed(() => {
 
 const isCommentsEnabled = computed(() => mainStore.isCommentsEnabled)
 
+const syncCanonicalMovieRoute = async () => {
+  if (route.name !== 'movie-info' || kp_id.value.startsWith('shiki') || !movieInfo.value) {
+    return
+  }
+
+  const canonicalPath = getMovieSeoPath(movieInfo.value, kp_id.value)
+
+  if (route.path !== canonicalPath) {
+    await router.replace({
+      path: canonicalPath,
+      query: route.query,
+      hash: route.hash
+    })
+  }
+}
+
 const setDocumentTitle = () => {
   if (movieInfo.value) {
     const title =
@@ -1624,6 +1640,7 @@ const fetchMovieInfo = async (updateHistory = true) => {
       imageUrl: movieInfo.value.logo_url
     })
 
+    await syncCanonicalMovieRoute()
     setDocumentTitle()
 
     const movieToSave = {
