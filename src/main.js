@@ -5,6 +5,7 @@ import { registerSW } from 'virtual:pwa-register'
 import { useThemeStore } from './store/theme'
 import { useAppSetup } from './composables/useAppSetup'
 import { routes } from './router/routes'
+import { installRouterGuards } from './router'
 import App from './App.vue'
 import { buildMoviePath, getPrerenderMovieSeoEntries } from '@/utils/movieSeo'
 
@@ -12,6 +13,7 @@ export const createApp = ViteSSG(
   App,
   { routes, base: import.meta.env.VITE_BASE_URL || '/' },
   ({ app, router, isClient }) => {
+    installRouterGuards(router, { isClient })
     useAppSetup(app, { router, isClient })
 
     if (isClient) {

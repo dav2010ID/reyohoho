@@ -6,8 +6,6 @@ import { handleHashNavigation } from '@/helpers/hashHandler'
 import { useScrollTracking } from '@/composables/useScrollTracking'
 import { buildMoviePath, getMovieSeoEntry } from '@/utils/movieSeo'
 
-const base = import.meta.env.VITE_BASE_URL || '/'
-
 const shouldSkipGoatCounterTracking = (to) => {
   const path = to?.path || ''
 
@@ -33,8 +31,8 @@ const trackGoatCounterPageView = (to, attempt = 0) => {
   }
 }
 
-export const routerOptions = {
-  history: createWebHistory(base),
+export const createRouterOptions = () => ({
+  history: createWebHistory(import.meta.env.VITE_BASE_URL || '/'),
   routes,
   scrollBehavior(to, _from, savedPosition) {
     const { userHasScrolled } = useScrollTracking()
@@ -57,7 +55,7 @@ export const routerOptions = {
       })
     })
   }
-}
+})
 
 export const installRouterGuards = (router, { isClient = typeof window !== 'undefined' } = {}) => {
   const { startTracking } = useScrollTracking()
@@ -105,6 +103,5 @@ export const installRouterGuards = (router, { isClient = typeof window !== 'unde
   return router
 }
 
-export const createAppRouter = (options = {}) => installRouterGuards(createRouter(routerOptions), options)
-
-export default createAppRouter()
+export const createAppRouter = (options = {}) =>
+  installRouterGuards(createRouter(createRouterOptions()), options)
