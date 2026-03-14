@@ -404,8 +404,7 @@ watch(
   will-change: transform;
 }
 
-.nav-links a:hover,
-.nav-links button:hover {
+.nav-links a:hover {
   background: var(--accent-transparent, rgba(108, 92, 231, 0.15));
   color: var(--accent-color, #6c5ce7);
   border-left: 3px solid var(--accent-color, #6c5ce7);
@@ -413,8 +412,7 @@ watch(
 }
 
 .nav-links a:active,
-.nav-links a.router-link-active,
-.nav-links button:active {
+.nav-links a.router-link-active {
   background: var(--accent-transparent, rgba(108, 92, 231, 0.2));
   color: var(--accent-color, #6c5ce7);
   border-left: 3px solid var(--accent-color, #6c5ce7);
@@ -427,6 +425,14 @@ watch(
   font: inherit;
   cursor: pointer;
   text-align: left;
+}
+
+.search-toggle-btn:hover,
+.search-toggle-btn:active {
+  background: var(--accent-transparent, rgba(108, 92, 231, 0.15));
+  color: var(--accent-color, #6c5ce7);
+  transform: translateX(3px);
+  border-left: none;
 }
 
 .icon-user {
