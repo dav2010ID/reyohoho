@@ -35,11 +35,11 @@
             [getRatingColor(movie.rating || movie.average_rating)]: true
           }"
         >
-          <img src="/icons/icon-192x192.png" alt="ReYohoho" class="rating-logo" />
+          <img :src="appLogoUrl" alt="ReYohoho" class="rating-logo" />
           {{ `${(movie.rating || movie.average_rating).toFixed(1).replace(/\.0$/, '')}` }}
         </span>
         <span v-if="movie.rating_kp" class="rating-kp" :class="getRatingColor(movie.rating_kp)">
-          <img src="/src/assets/icon-kp-logo.svg" alt="КП" class="rating-logo" />
+          <img :src="kpLogoUrl" alt="КП" class="rating-logo" />
           {{ movie.rating_kp }}
         </span>
         <span
@@ -47,7 +47,7 @@
           class="rating-imdb"
           :class="getRatingColor(movie.rating_imdb)"
         >
-          <img src="/src/assets/icon-imdb-logo.svg" alt="IMDb" class="rating-logo" />
+          <img :src="imdbLogoUrl" alt="IMDb" class="rating-logo" />
           {{ movie.rating_imdb }}
         </span>
       </div>
@@ -67,10 +67,13 @@ import { TYPES_ENUM } from '@/constants'
 import { useMainStore } from '@/store/main'
 import { resolvePosterByMovie } from '@/utils/mediaUtils'
 import { getRatingColor } from '@/utils/ratingUtils'
+import imdbLogoUrl from '@/assets/icon-imdb-logo.svg'
+import kpLogoUrl from '@/assets/icon-kp-logo.svg'
 import { computed } from 'vue'
 
 const mainStore = useMainStore()
 const cardSize = computed(() => mainStore.cardSize)
+const appLogoUrl = `${import.meta.env.BASE_URL || '/'}icons/icon-192x192.png`
 
 const {
   movie,

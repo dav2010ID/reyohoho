@@ -13,6 +13,21 @@ import {
 import { usePlayerStore } from '../player'
 import { useMainStore } from './main'
 
+const pickMainPersistedState = (state) => ({
+  history: state.history,
+  isHistoryAllowed: state.isHistoryAllowed,
+  isCommentsEnabled: state.isCommentsEnabled,
+  isAutoShowComments: state.isAutoShowComments,
+  commentsSortBy: state.commentsSortBy,
+  isCtrlFEnabled: state.isCtrlFEnabled,
+  submitterUsername: state.submitterUsername,
+  cardSize: state.cardSize,
+  isStreamerMode: state.isStreamerMode,
+  rememberScrollPosition: state.rememberScrollPosition,
+  contentApiProvider: state.contentApiProvider,
+  searchApiProvider: state.searchApiProvider
+})
+
 describe('Базовы persist тесты для main', () => {
   let app = null
   let pinia = null
@@ -69,12 +84,8 @@ describe('Базовы persist тесты для main', () => {
     // Плагин может писать в localStorage асинхронно, ждём тик
     await flushPromises()
 
-    expect(window.localStorage.setItem).toHaveBeenCalledWith(
-      MAIN_STORE_NAME,
-      JSON.stringify({
-        history: testData.history,
-        isHistoryAllowed: testData.isHistoryAllowed
-      })
+    expect(window.localStorage.getItem(MAIN_STORE_NAME)).toEqual(
+      JSON.stringify(pickMainPersistedState(store.$state))
     )
   })
 })
@@ -172,12 +183,36 @@ describe('Тесты миграций на новый способ хранен�
       isBlurActive: false,
       backgroundType: 'stars',
       defaultBackground: '/reyohoho/assets/image-back-stars.png',
-      isCardBorder: false
+      isCardBorder: false,
+      isCardHoverDisabled: false
     },
     player: {
       aspectRatio: '4:3',
       isCentered: false,
-      preferredPlayer: 'ALLOHA'
+      preferredPlayer: 'ALLOHA',
+      showFavoriteTooltip: true,
+      kinobdSourceByKpId: {},
+      compressorEnabled: false,
+      mirrorEnabled: false,
+      videoOverlayEnabled2: true,
+      overlaySettings: {
+        showTitle: true,
+        showDuration2: false,
+        showBackground: false,
+        showTimingsOnMouseMove: false,
+        highlightTimings: true,
+        fontSize: 18
+      },
+      obsSettings: {
+        enabled: false,
+        host: 'localhost',
+        port: 4455,
+        password: '',
+        connected: false,
+        filtersFound: [],
+        selectedFilterId: null,
+        showObsInOverlay: true
+      }
     },
     isHistoryAllowed: true
   }
@@ -227,6 +262,9 @@ describe('Тесты миграций на новый способ хранен�
       OLD_LOCAL_STORAGE_DATA.background.defaultBackground
     )
     expect(backgroundStore.isCardBorder).toEqual(OLD_LOCAL_STORAGE_DATA.background.isCardBorder)
+    expect(backgroundStore.isCardHoverDisabled).toEqual(
+      OLD_LOCAL_STORAGE_DATA.background.isCardHoverDisabled
+    )
   })
 
   it('Проверяем, что данные из старого ключа localStorage переносятся в новые ключи и старый ключ удаляется', async () => {
@@ -236,18 +274,16 @@ describe('Тесты миграций на новый способ хранен�
 
     await flushPromises()
 
-    expect(window.localStorage.getItem(MAIN_STORE_NAME)).toEqual(
-      JSON.stringify({
-        history: OLD_LOCAL_STORAGE_DATA.history,
-        isHistoryAllowed: OLD_LOCAL_STORAGE_DATA.isHistoryAllowed
-      })
-    )
-    expect(window.localStorage.getItem(PLAYER_STORE_NAME)).toEqual(
-      JSON.stringify(OLD_LOCAL_STORAGE_DATA.player)
+    expect(JSON.parse(window.localStorage.getItem(MAIN_STORE_NAME))).toEqual({
+      history: OLD_LOCAL_STORAGE_DATA.history,
+      isHistoryAllowed: OLD_LOCAL_STORAGE_DATA.isHistoryAllowed
+    })
+    expect(JSON.parse(window.localStorage.getItem(PLAYER_STORE_NAME))).toEqual(
+      OLD_LOCAL_STORAGE_DATA.player
     )
 
-    expect(window.localStorage.getItem(BACKGROUND_STORE_NAME)).toEqual(
-      JSON.stringify(OLD_LOCAL_STORAGE_DATA.background)
+    expect(JSON.parse(window.localStorage.getItem(BACKGROUND_STORE_NAME))).toEqual(
+      OLD_LOCAL_STORAGE_DATA.background
     )
     expect(window.localStorage.getItem(LEGACY_STORE_KEY)).toEqual(null)
   })
@@ -260,7 +296,7 @@ describe('Тесты миграций на новый способ хранен�
     const resultData = {
       history: [],
       isHistoryAllowed: true,
-      player: { aspectRatio: '4:3', isCentered: false, preferredPlayer: '' },
+      player: { ...OLD_LOCAL_STORAGE_DATA.player, preferredPlayer: null },
       background: {
         backgroundUrl: '/reyohoho/assets/image-back-stars.png',
         topMoviePoster: '',
@@ -268,7 +304,22 @@ describe('Тесты миграций на новый способ хранен�
         isBlurActive: false,
         backgroundType: 'stars',
         defaultBackground: '/reyohoho/assets/image-back-stars.png',
-        isCardBorder: true
+        isCardBorder: true,
+        isCardHoverDisabled: false
+      },
+      main: {
+        history: [],
+        isHistoryAllowed: true,
+        isCommentsEnabled: true,
+        isAutoShowComments: false,
+        commentsSortBy: 'rating',
+        isCtrlFEnabled: true,
+        submitterUsername: '',
+        cardSize: 'medium',
+        isStreamerMode: true,
+        rememberScrollPosition: true,
+        contentApiProvider: 'kinobd',
+        searchApiProvider: 'rhserv'
       }
     }
 
@@ -283,19 +334,12 @@ describe('Тесты миграций на новый способ хранен�
 
     await flushPromises()
 
-    expect(window.localStorage.getItem(MAIN_STORE_NAME)).toEqual(
-      JSON.stringify({
-        history: resultData.history,
-        isHistoryAllowed: resultData.isHistoryAllowed
-      })
-    )
+    expect(JSON.parse(window.localStorage.getItem(MAIN_STORE_NAME))).toEqual(resultData.main)
 
-    expect(window.localStorage.getItem(PLAYER_STORE_NAME)).toEqual(
-      JSON.stringify(resultData.player)
-    )
+    expect(JSON.parse(window.localStorage.getItem(PLAYER_STORE_NAME))).toEqual(resultData.player)
 
-    expect(window.localStorage.getItem(BACKGROUND_STORE_NAME)).toEqual(
-      JSON.stringify(resultData.background)
+    expect(JSON.parse(window.localStorage.getItem(BACKGROUND_STORE_NAME))).toEqual(
+      resultData.background
     )
   })
 })

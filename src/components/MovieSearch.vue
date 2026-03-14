@@ -74,14 +74,16 @@
           <div
             v-else-if="history.length === 0"
             class="empty-history"
-            :class="{ 'empty-history--with-top': topMovies.length > 0 }"
           >
             <template v-if="topMovies.length > 0">
+              <p>Здесь пока пусто</p>
               <h2>Популярное сейчас</h2>
               <MovieList :movies-list="topMovies" :is-history="false" :loading="false" />
             </template>
-            <span class="material-icons">movie</span>
-            <p>Здесь пока пусто</p>
+            <template v-else>
+              <span class="material-icons">movie</span>
+              <p>Здесь пока пусто</p>
+            </template>
           </div>
           <MovieList
             v-else
@@ -150,7 +152,7 @@ import { useAuthStore } from '@/store/auth'
 import { USER_LIST_TYPES_ENUM } from '@/constants'
 import { hasConsecutiveConsonants, suggestLayout, convertLayout } from '@/utils/keyboardLayout'
 import debounce from 'lodash/debounce'
-import { watchEffect, onMounted, onServerPrefetch, ref, watch, computed } from 'vue'
+import { onMounted, onServerPrefetch, ref, watch, computed } from 'vue'
 import { useRouter } from 'vue-router'
 import SpinnerLoading from '@/components/SpinnerLoading.vue'
 import RandomMovieModal from '@/components/RandomMovieModal.vue'
@@ -196,28 +198,33 @@ const loadHomeTopMovies = async () => {
 
 onServerPrefetch(loadHomeTopMovies)
 
-watchEffect(async () => {
-  if (authStore.token) {
-    loading.value = true
-    try {
-      history.value = await getMyLists(USER_LIST_TYPES_ENUM.HISTORY)
-    } catch (error) {
-      const { message, code } = handleApiError(error)
-      errorMessage.value = message
-      errorCode.value = code
-      console.error('Ошибка загрузки истории:', error)
-      if (code === 401) {
-        authStore.logout()
-        await router.push('/login')
-        router.go(0)
+watch(
+  () => authStore.token,
+  async (token) => {
+    if (token) {
+      loading.value = true
+      try {
+        history.value = await getMyLists(USER_LIST_TYPES_ENUM.HISTORY)
+      } catch (error) {
+        const { message, code } = handleApiError(error)
+        errorMessage.value = message
+        errorCode.value = code
+        console.error('Ошибка загрузки истории:', error)
+        if (code === 401) {
+          authStore.logout()
+          await router.push('/login')
+          router.go(0)
+        }
+      } finally {
+        loading.value = false
       }
-    } finally {
-      loading.value = false
+      return
     }
-  } else {
+
     history.value = mainStore.history
-  }
-})
+  },
+  { immediate: true }
+)
 
 function handleItemDeleted(deletedItemId) {
   history.value = history.value.filter((item) => item.kp_id !== deletedItemId)
@@ -724,26 +731,7 @@ h2 {
   color: #888;
 }
 
-.empty-history--with-top {
-  display: flex;
-  flex-direction: column;
-  min-height: 0;
-}
-
-.empty-history--with-top > .material-icons {
-  order: 1;
-}
-
-.empty-history--with-top > p {
-  order: 2;
-}
-
-.empty-history--with-top > h2 {
-  order: 3;
-}
-
-.empty-history--with-top > div {
-  order: 4;
+.empty-history > div {
   width: 100%;
 }
 

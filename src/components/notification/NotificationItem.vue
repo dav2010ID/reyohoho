@@ -36,17 +36,21 @@
         >
           <div v-if="notification.comment_content" class="original-comment">
             <i class="fas fa-quote-left"></i>
+            <!-- eslint-disable vue/no-v-html -->
             <span
               class="comment-text"
               v-html="formatCommentContent(notification.comment_content)"
             ></span>
+            <!-- eslint-enable vue/no-v-html -->
           </div>
           <div v-if="notification.reply_content" class="reply-comment">
             <i class="fas fa-reply"></i>
+            <!-- eslint-disable vue/no-v-html -->
             <span
               class="comment-text"
               v-html="formatCommentContent(notification.reply_content)"
             ></span>
+            <!-- eslint-enable vue/no-v-html -->
           </div>
         </div>
       </div>

@@ -4,8 +4,8 @@
   <MenuNavigation />
 
   <main
-    :class="['router-view-container', { 'router-view-container--with-mobile-header': isMobile }]"
     id="main-content"
+    :class="['router-view-container', { 'router-view-container--with-mobile-header': isMobile }]"
   >
     <router-view v-slot="{ Component }">
       <component :is="Component" />

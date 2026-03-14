@@ -21,9 +21,10 @@ describe('Тесты store background', () => {
     expect(store.topMoviePoster).toBe('')
     expect(store.moviePoster).toBe('')
     expect(store.isBlurActive).toBe(false)
-    expect(store.backgroundType).toBe('stars')
+    expect(store.backgroundType).toBe('disabled')
     expect(store.defaultBackground).toBe(starsBackground)
     expect(store.isCardBorder).toBe(false)
+    expect(store.isCardHoverDisabled).toBe(false)
   })
 
   it('Обновляет moviePoster и backgroundUrl, если фон не stars/disabled', () => {

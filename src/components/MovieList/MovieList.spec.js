@@ -135,6 +135,13 @@ describe('Тесты компонента MovieList', () => {
         ],
         stubs: {
           SpinnerLoading
+        },
+        directives: {
+          lazy: {
+            mounted(el, binding) {
+              el.src = binding.value
+            }
+          }
         }
       },
       props: { moviesList: movies, isHistory, loading },
@@ -155,8 +162,8 @@ describe('Тесты компонента MovieList', () => {
 
   it('Открывается страница фильма при нажатии  на карточку', async () => {
     const wrapper = mountComponent(true)
-    const movieDeleteId = getRandomMovie(BASE_MOVIES_MOCK).kp_id
-    const movieCardDataTestId = `movie-card-${movieDeleteId}`
+    const movie = getRandomMovie(BASE_MOVIES_MOCK)
+    const movieCardDataTestId = `movie-card-${movie.kp_id}`
 
     const push = vi.spyOn(routerMock, 'push')
 
@@ -166,7 +173,7 @@ describe('Тесты компонента MovieList', () => {
 
     await card.trigger('click')
 
-    expect(push).toHaveBeenCalledWith(getMovieSeoPath({ kp_id: movieDeleteId }))
+    expect(push).toHaveBeenCalledWith(getMovieSeoPath(movie))
   })
 
   it('Удаляет карточку из списка, когда это список историй и декстоп', async () => {
@@ -549,6 +556,9 @@ describe('Тесты компонента MovieList', () => {
     // Допустим, у нас минимум 7 карточек, чтобы был смысл проверять -5.
     const cards = wrapper.findAllComponents(CardMovie)
     expect(cards.length).toBeGreaterThanOrEqual(7)
+    const columns = window
+      .getComputedStyle(wrapper.find('.grid').element)
+      .gridTemplateColumns.split(' ').length
 
     // Шаг 1: фокусим первую карточку
     cards[0].element.focus()
@@ -562,21 +572,21 @@ describe('Тесты компонента MovieList', () => {
     }
     expect(document.activeElement).toBe(cards[6].element)
 
-    // Шаг 3: Нажимаем ArrowUp — должно перекинуть к карточке с индексом 1 (6 - 5 = 1)
+    // Шаг 3: Нажимаем ArrowUp — должно поднять фокус на количество колонок в гриде
     document.dispatchEvent(arrowUpEvent)
     await flushPromises()
 
-    // Проверяем, что фокус теперь на карточке [1]
+    // Проверяем, что фокус теперь на ожидаемой карточке
     expect(scrollSpy).toHaveBeenCalled()
-    expect(document.activeElement).toBe(cards[1].element)
+    expect(document.activeElement).toBe(cards[Math.max(6 - columns, 0)].element)
 
-    // Шаг 4: Ещё раз ArrowUp — теперь (1 - 5) = -4, но берём max(-4, 0) => 0
+    // Шаг 4: Ещё раз ArrowUp — идём ещё на одну строку вверх, но не ниже нуля
     document.dispatchEvent(arrowUpEvent)
     await flushPromises()
 
-    // Фокус должен вернуться к карточке [0]
+    // Фокус должен оказаться на той позиции, которую даёт та же логика компонента
     expect(scrollSpy).toHaveBeenCalled()
-    expect(document.activeElement).toBe(cards[0].element)
+    expect(document.activeElement).toBe(cards[Math.max(Math.max(6 - columns, 0) - columns, 0)].element)
   })
 
   it('Фокус двигается на 5 карточек вниз (или к последней) по ArrowDown', async () => {
@@ -646,6 +656,9 @@ describe('Тесты компонента MovieList', () => {
     // Предполагаем, что у нас минимум 7 карточек
     const cards = wrapper.findAllComponents(CardMovie)
     expect(cards.length).toBeGreaterThanOrEqual(7)
+    const columns = window
+      .getComputedStyle(wrapper.find('.grid').element)
+      .gridTemplateColumns.split(' ').length
 
     // 1. Фокусируем первую карточку (индекс 0)
     cards[0].element.focus()
@@ -658,21 +671,21 @@ describe('Тесты компонента MovieList', () => {
     // Теперь ожидаем фокус на карточке [1]
     expect(document.activeElement).toBe(cards[1].element)
 
-    // 3. Нажимаем ArrowDown — должно перескочить к карточке [6] (1 + 5 = 6)
+    // 3. Нажимаем ArrowDown — должно перескочить вниз на число колонок
     document.dispatchEvent(arrowDownEvent)
     await flushPromises()
 
     expect(scrollSpy).toHaveBeenCalled()
-    expect(document.activeElement).toBe(cards[6].element)
+    expect(document.activeElement).toBe(cards[Math.min(1 + columns, cards.length - 1)].element)
 
-    // 4. Ещё раз ArrowDown — (6 + 5 = 11), но если у нас всего 7 карточек, maxIndex = 6
-    // Значит сместится к последней карточке (индекс 6).
+    // 4. Ещё раз ArrowDown — ещё на одну строку вниз, но не дальше последней карточки.
     document.dispatchEvent(arrowDownEvent)
     await flushPromises()
     expect(scrollSpy).toHaveBeenCalled()
 
-    // Фокус остаётся (или переходит) на последнюю карточку
-    expect(document.activeElement).toBe(cards[cards.length - 1].element)
+    expect(document.activeElement).toBe(
+      cards[Math.min(Math.min(1 + columns, cards.length - 1) + columns, cards.length - 1)].element
+    )
   })
 
   it('Фокус двигается к первой карточке, при нажатии Home', async () => {

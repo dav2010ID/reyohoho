@@ -17,7 +17,7 @@ describe('Тесты хранилища player', () => {
     const store = usePlayerStore()
     expect(store.aspectRatio).toBe('16:9')
     expect(store.isCentered).toBe(false)
-    expect(store.preferredPlayer).toBe('')
+    expect(store.preferredPlayer).toBe(null)
   })
 
   it('Обновляет aspectRatio при вызове updateAspectRatio()', () => {
@@ -43,6 +43,6 @@ describe('Тесты хранилища player', () => {
     store.updatePreferredPlayer('ALLOHA')
     expect(store.preferredPlayer).toBe('ALLOHA')
     store.clearPreferredPlayer()
-    expect(store.preferredPlayer).toBe('')
+    expect(store.preferredPlayer).toBe(null)
   })
 })

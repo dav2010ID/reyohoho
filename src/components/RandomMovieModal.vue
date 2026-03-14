@@ -83,17 +83,17 @@
 
               <div class="ratings">
                 <div v-if="movie.rating_reyohoho" class="rating rating-our">
-                  <img src="/icons/icon-192x192.png" alt="ReYohoho" class="rating-logo" />
+                  <img :src="appLogoUrl" alt="ReYohoho" class="rating-logo" />
                   {{ movie.rating_reyohoho.toFixed(1) }}
                 </div>
 
                 <div v-if="movie.rating_kp" class="rating rating-kp">
-                  <img src="/src/assets/icon-kp-logo.svg" alt="КП" class="rating-logo" />
+                  <img :src="kpLogoUrl" alt="КП" class="rating-logo" />
                   {{ movie.rating_kp }}
                 </div>
 
                 <div v-if="movie.rating_imdb" class="rating rating-imdb">
-                  <img src="/src/assets/icon-imdb-logo.svg" alt="IMDb" class="rating-logo" />
+                  <img :src="imdbLogoUrl" alt="IMDb" class="rating-logo" />
                   {{ movie.rating_imdb }}
                 </div>
               </div>
@@ -104,7 +104,7 @@
 
               <div class="external-links">
                 <a v-if="movie.url_kp" :href="movie.url_kp" target="_blank" class="external-link">
-                  <img src="/src/assets/icon-kp-logo.svg" alt="КП" />
+                  <img :src="kpLogoUrl" alt="КП" />
                   Кинопоиск
                 </a>
                 <a
@@ -113,7 +113,7 @@
                   target="_blank"
                   class="external-link"
                 >
-                  <img src="/src/assets/icon-imdb-logo.svg" alt="IMDb" />
+                  <img :src="imdbLogoUrl" alt="IMDb" />
                   IMDb
                 </a>
               </div>
@@ -149,6 +149,10 @@
 <script setup>
 import { computed } from 'vue'
 import { getMovieSeoPath } from '@/utils/movieSeo'
+import imdbLogoUrl from '@/assets/icon-imdb-logo.svg'
+import kpLogoUrl from '@/assets/icon-kp-logo.svg'
+
+const appLogoUrl = `${import.meta.env.BASE_URL || '/'}icons/icon-192x192.png`
 
 const props = defineProps({
   isOpen: Boolean,

@@ -1,5 +1,6 @@
 import fs from 'node:fs/promises'
 import path from 'node:path'
+import { normalizeBasePath } from '../src/utils/basePath.js'
 import { getCanonicalSlugCandidate } from '../src/utils/movieSlug.js'
 
 const SITE_ORIGIN = process.env.VITE_SITE_ORIGIN || 'https://dav2010id.github.io'
@@ -8,14 +9,6 @@ const MOVIES_PATH = path.resolve(process.cwd(), 'src/data/movies.json')
 const ROBOTS_PATH = path.resolve(process.cwd(), 'public/robots.txt')
 const SITEMAP_PATH = path.resolve(process.cwd(), 'public/sitemap.xml')
 const STATIC_SITEMAP_PATHS = ['/', '/top', '/contact']
-
-const normalizeBasePath = (value) => {
-  const normalized = `/${String(value || '')
-    .trim()
-    .replace(/^\/+|\/+$/g, '')}`
-
-  return normalized === '/' ? '' : normalized
-}
 
 const BASE_PATH = normalizeBasePath(SITE_BASE_PATH)
 

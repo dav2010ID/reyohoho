@@ -1,6 +1,7 @@
 <template>
   <transition name="fade">
     <div v-if="visible" class="notification">
+      <!-- eslint-disable-next-line vue/no-v-html -->
       <span @click="handleClick" v-html="safeMessage"></span>
       <button class="close-btn" @click="hideNotification">✕</button>
     </div>

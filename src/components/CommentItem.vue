@@ -196,6 +196,7 @@
             </div>
           </div>
           <div v-else class="comment-text-container">
+            <!-- eslint-disable-next-line vue/no-v-html -->
             <p class="comment-text" @click="handleFormattedContentClick" v-html="formattedContent"></p>
           </div>
         </div>

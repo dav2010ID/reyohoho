@@ -44,6 +44,6 @@ describe('Базовы persist тесты для player', () => {
 
     await flushPromises()
 
-    expect(localStorage.setItem).toHaveBeenCalledWith(PLAYER_STORE_NAME, JSON.stringify(testData))
+    expect(localStorage.getItem(PLAYER_STORE_NAME)).toEqual(JSON.stringify(store.$state))
   })
 })

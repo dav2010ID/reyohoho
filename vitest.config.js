@@ -1,12 +1,14 @@
 import { fileURLToPath } from 'node:url'
-import { mergeConfig, defineConfig } from 'vite'
-import { configDefaults } from 'vitest/config'
+import { mergeConfig } from 'vite'
+import { configDefaults, defineConfig } from 'vitest/config'
 import viteConfig from './vite.config'
-const base = process.env.VITE_BASE_URL || '/'
-export default mergeConfig(
-  viteConfig,
-  defineConfig({
-    base: base,
+
+const resolveViteConfig = (mode) =>
+  typeof viteConfig === 'function' ? viteConfig({ mode, command: 'serve', isSsrBuild: false }) : viteConfig
+
+export default defineConfig(({ mode }) =>
+  mergeConfig(resolveViteConfig(mode), {
+    base: process.env.VITE_BASE_URL || '/',
     test: {
       environment: 'jsdom',
       exclude: [...configDefaults.exclude, 'e2e/*'],

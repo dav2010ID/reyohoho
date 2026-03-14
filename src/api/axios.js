@@ -5,7 +5,6 @@ import { useApiStore } from '@/store/api'
 
 let apiInstance = null
 let apiInstancePromise = null
-let isApiReady = false
 
 const getResolvedBaseUrl = async () => {
   const apiStore = useApiStore()
@@ -46,11 +45,6 @@ const attachDynamicRequestState = (instance) => {
 
 export const getApi = async () => {
   if (apiInstance) {
-    if (!isApiReady) {
-      const baseURL = await getResolvedBaseUrl()
-      apiInstance.defaults.baseURL = baseURL
-      isApiReady = true
-    }
     return apiInstance
   }
 
@@ -66,7 +60,6 @@ export const getApi = async () => {
       headers: { 'Content-Type': 'application/json' }
     })
     attachDynamicRequestState(apiInstance)
-    isApiReady = true
 
     return apiInstance
   })()

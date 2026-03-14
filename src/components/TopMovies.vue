@@ -153,9 +153,6 @@ const changeTimeFilter = (apiUrl) => {
         type: typeFilter.value
       }
     })
-    .then(() => {
-      fetchMovies()
-    })
 }
 
 const changeTypeFilter = (value) => {
@@ -170,9 +167,6 @@ const changeTypeFilter = (value) => {
         ...route.query,
         type: value
       }
-    })
-    .then(() => {
-      fetchMovies()
     })
 }
 

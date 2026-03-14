@@ -1,4 +1,5 @@
 import movies from '@/data/movies.json'
+import { normalizeBasePath } from './basePath'
 import { getCanonicalSlugCandidate, getTrimmedString, hasLatinLetters } from './movieSlug'
 
 const FALLBACK_DESCRIPTION =
@@ -8,14 +9,6 @@ const SITE_ORIGIN = import.meta.env.VITE_SITE_ORIGIN || 'https://dav2010id.githu
 const SITE_BASE_PATH = import.meta.env.VITE_BASE_URL || '/reyohoho'
 const MAX_PRERENDER_ENTRIES = Number(import.meta.env.VITE_SSG_MAX_PAGES || 2000)
 const runtimeMoviesByKpId = new Map()
-
-const normalizeBasePath = (value) => {
-  const normalized = `/${String(value || '')
-    .trim()
-    .replace(/^\/+|\/+$/g, '')}`
-
-  return normalized === '/' ? '' : normalized
-}
 
 const BASE_PATH = normalizeBasePath(SITE_BASE_PATH)
 
@@ -177,5 +170,4 @@ export const buildMovieSeo = (movieLike = {}, kpIdOverride = null) => {
   }
 }
 
-export const getAllMovieSeoEntries = () => normalizedMovies
 export const getPrerenderMovieSeoEntries = () => normalizedMovies.slice(0, MAX_PRERENDER_ENTRIES)

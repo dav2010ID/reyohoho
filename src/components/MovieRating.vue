@@ -9,7 +9,7 @@
         @mouseleave="handleMouseLeave"
         @click.prevent="toggleTooltip"
       >
-        <img src="/icons/icon-192x192.png" alt="ReYohoho" class="rating-logo" />
+        <img :src="appLogoUrl" alt="ReYohoho" class="rating-logo" />
         <span class="average-rating" :class="getRatingColor(averageRating)">{{
           averageRating ? averageRating.toFixed(1).replace(/\.0$/, '') : '—'
         }}</span>
@@ -78,6 +78,8 @@ import { getRating, setRating as setRatingApi } from '@/api/movies'
 import Notification from '@/components/notification/ToastMessage.vue'
 import { useRouter } from 'vue-router'
 import { useMainStore } from '@/store/main'
+
+const appLogoUrl = `${import.meta.env.BASE_URL || '/'}icons/icon-192x192.png`
 import { getRatingColor } from '@/utils/ratingUtils'
 
 const mainStore = useMainStore()

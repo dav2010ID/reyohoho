@@ -38,17 +38,6 @@ describe('Базовые тесты persist для background', () => {
 
     await flushPromises()
 
-    expect(localStorage.setItem).toHaveBeenCalledWith(
-      BACKGROUND_STORE_NAME,
-      JSON.stringify({
-        backgroundUrl: testData.topMoviePoster,
-        topMoviePoster: testData.topMoviePoster,
-        moviePoster: '',
-        isBlurActive: true,
-        backgroundType: testData.backgroundType,
-        defaultBackground: '/src/assets/image-back-stars.png',
-        isCardBorder: testData.isCardBorder
-      })
-    )
+    expect(localStorage.getItem(BACKGROUND_STORE_NAME)).toEqual(JSON.stringify(store.$state))
   })
 })

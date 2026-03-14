@@ -36,6 +36,9 @@ export const usePlayerStore = defineStore(PLAYER_STORE_NAME, {
     updatePreferredPlayer(player) {
       this.preferredPlayer = player
     },
+    clearPreferredPlayer() {
+      this.preferredPlayer = null
+    },
     updateAspectRatio(ratio) {
       this.aspectRatio = ratio
     },

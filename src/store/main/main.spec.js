@@ -1,7 +1,7 @@
-import noPosterImage from '@/assets/image-no-poster.gif'
 import { createTestingPinia } from '@pinia/testing'
 import { setActivePinia } from 'pinia'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
+import { resolvePosterByMovie } from '@/utils/mediaUtils'
 import { useMainStore } from './main'
 
 describe('Тесты хранилища main', () => {
@@ -65,7 +65,7 @@ describe('Тесты хранилища main', () => {
 
     expect(store.history.length).toBe(1)
     expect(currentMovie.kp_id).toBe('123')
-    expect(currentMovie.poster).toBe(noPosterImage)
+    expect(currentMovie.poster).toBe(resolvePosterByMovie(movie))
   })
 
   it('Не добавляет фильм без kp_id', () => {
