@@ -4,6 +4,7 @@ import { routes } from './routes'
 import { useMainStore } from '@/store/main'
 import { handleHashNavigation } from '@/helpers/hashHandler'
 import { useScrollTracking } from '@/composables/useScrollTracking'
+import { buildMoviePath, getMovieSeoEntry } from '@/utils/movieSeo'
 
 const base = import.meta.env.VITE_BASE_URL || '/'
 
@@ -63,6 +64,21 @@ export const installRouterGuards = (router, { isClient = typeof window !== 'unde
   let hasTrackedInitialRoute = false
 
   router.beforeEach((to, _from, next) => {
+    if (to.name === 'movie-info' && to.params?.kp_id) {
+      const entry = getMovieSeoEntry(to.params.kp_id)
+      const currentSlug = String(to.params.slug || '').trim()
+
+      if (entry?.slug && currentSlug !== entry.slug) {
+        next({
+          path: buildMoviePath(to.params.kp_id, entry.slug),
+          query: to.query,
+          hash: to.hash,
+          replace: true
+        })
+        return
+      }
+    }
+
     if (isClient) {
       document.title = to.meta.title || 'ReYohoho'
       startTracking()
