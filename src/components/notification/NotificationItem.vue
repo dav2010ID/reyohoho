@@ -79,7 +79,7 @@
 import { computed } from 'vue'
 import { formatRelativeTime } from '@/utils/dateUtils'
 import { useCommentFormatting } from '@/composables/useCommentFormatting'
-import { buildMoviePath, getMovieSeoEntry } from '@/utils/movieSeo'
+import { getMovieSeoPath } from '@/utils/movieSeo'
 
 const props = defineProps({
   notification: {
@@ -89,10 +89,7 @@ const props = defineProps({
 })
 
 const emit = defineEmits(['mark-read', 'delete'])
-const moviePath = computed(() => {
-  const entry = getMovieSeoEntry(props.notification.movie_id)
-  return buildMoviePath(props.notification.movie_id, entry?.slug || '')
-})
+const moviePath = computed(() => getMovieSeoPath({ kp_id: props.notification.movie_id }))
 
 const { formatContent } = useCommentFormatting()
 

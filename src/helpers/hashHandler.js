@@ -1,3 +1,5 @@
+import { getMovieSeoPath } from '@/utils/movieSeo'
+
 export const handleHashNavigation = (to, next) => {
   if (to.hash.startsWith('#/')) {
     const route = to.hash.substring(2)
@@ -14,6 +16,6 @@ export const handleHashNavigation = (to, next) => {
     next()
   } else {
     const hash = to.hash.slice(1)
-    next({ path: `/movie/${hash}` })
+    next({ path: getMovieSeoPath({ kp_id: hash }) })
   }
 }

@@ -117,12 +117,39 @@ const moviesByKpId = new Map(normalizedMovies.map((movie) => [String(movie.kp_id
 
 export const getMovieSeoEntry = (kpId) => moviesByKpId.get(String(kpId)) || null
 
+export const getMovieSeoSlug = (movieLike = {}, kpIdOverride = null) => {
+  const kpId = String(movieLike?.kinopoisk_id || movieLike?.kp_id || kpIdOverride || '').trim()
+  const fallbackEntry = kpId ? getMovieSeoEntry(kpId) : null
+
+  return String(
+    movieLike?.slug ||
+      movieLike?.seo_slug ||
+      movieLike?.raw_data?.slug ||
+      fallbackEntry?.slug ||
+      toSlug({
+        title: movieLike?.title || movieLike?.name_ru || fallbackEntry?.title,
+        name_ru: movieLike?.name_ru || movieLike?.raw_data?.name_ru,
+        name_original:
+          movieLike?.name_original ||
+          movieLike?.name_en ||
+          movieLike?.raw_data?.name_en ||
+          fallbackEntry?.name_original,
+        name_en: movieLike?.name_en || movieLike?.raw_data?.name_en
+      })
+  ).trim()
+}
+
 export const buildMoviePath = (kpId, slug = '') => {
   const normalizedKpId = String(kpId || '').trim()
   const normalizedSlug = String(slug || '').trim()
 
   if (!normalizedKpId) return '/movie'
   return normalizedSlug ? `/movie/${normalizedKpId}/${normalizedSlug}` : `/movie/${normalizedKpId}`
+}
+
+export const getMovieSeoPath = (movieLike = {}, kpIdOverride = null) => {
+  const kpId = String(movieLike?.kinopoisk_id || movieLike?.kp_id || kpIdOverride || '').trim()
+  return buildMoviePath(kpId, getMovieSeoSlug(movieLike, kpIdOverride))
 }
 
 export const buildMovieCanonicalUrl = (kpId, slug = '') =>
@@ -143,16 +170,14 @@ export const buildMovieSeo = (movieLike = {}, kpIdOverride = null) => {
       fallbackEntry?.poster ||
       ''
   ).trim()
-  const slug = String(
-    movieLike?.slug ||
-      fallbackEntry?.slug ||
-      toSlug({
-        title: baseTitle,
-        name_ru: movieLike?.name_ru,
-        name_original: movieLike?.name_original || fallbackEntry?.name_original,
-        name_en: movieLike?.name_en
-      })
-  ).trim()
+  const slug = getMovieSeoSlug(
+    {
+      ...movieLike,
+      title: baseTitle,
+      name_original: movieLike?.name_original || fallbackEntry?.name_original
+    },
+    kpId
+  )
   const title = baseTitle ? `${baseTitle}${year ? ` (${year})` : ''} смотреть онлайн - ${SITE_NAME}` : SITE_NAME
 
   return {

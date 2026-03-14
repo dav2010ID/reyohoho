@@ -148,7 +148,7 @@
 
 <script setup>
 import { computed } from 'vue'
-import { buildMoviePath, getMovieSeoEntry } from '@/utils/movieSeo'
+import { getMovieSeoPath } from '@/utils/movieSeo'
 
 const props = defineProps({
   isOpen: Boolean,
@@ -158,11 +158,7 @@ const props = defineProps({
 })
 
 const emit = defineEmits(['close', 'get-new-movie'])
-const moviePath = computed(() => {
-  const kpId = props.movie?.kp_id
-  const entry = kpId ? getMovieSeoEntry(kpId) : null
-  return buildMoviePath(kpId, props.movie?.slug || entry?.slug || '')
-})
+const moviePath = computed(() => getMovieSeoPath(props.movie || {}))
 
 const close = () => {
   emit('close')

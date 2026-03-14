@@ -58,6 +58,7 @@ import { CardMovie, CardMovieSwipeWrapper } from '../CardMovie'
 import { delFromList } from '@/api/user'
 import { handleApiError } from '@/constants'
 import { USER_LIST_TYPES_ENUM } from '@/constants'
+import { getMovieSeoPath } from '@/utils/movieSeo'
 
 const mainStore = useMainStore()
 const authStore = useAuthStore()
@@ -93,7 +94,7 @@ const isUserList = computed(() => {
 })
 
 const movieUrl = (movie) => {
-  return router.resolve({ name: 'movie-info', params: { kp_id: movie.kp_id } }).href
+  return router.resolve(getMovieSeoPath(movie)).href
 }
 
 const emit = defineEmits(['item-deleted'])
@@ -160,10 +161,7 @@ const handleKeyDown = (event) => {
         event.preventDefault()
         window.open(movieUrl(moviesList[activeMovieIndex.value]), '_blank')
       } else {
-        router.push({
-          name: 'movie-info',
-          params: { kp_id: moviesList[activeMovieIndex.value]?.kp_id }
-        })
+        router.push(getMovieSeoPath(moviesList[activeMovieIndex.value]))
       }
       break
   }

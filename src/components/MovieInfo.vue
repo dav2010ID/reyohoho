@@ -1123,7 +1123,7 @@
               </div>
               <div class="timing-movie-info">
                 <router-link
-                  :to="`/movie/${timing.kp_id}`"
+                  :to="getMovieSeoPath({ kp_id: timing.kp_id })"
                   class="timing-kp-id clickable"
                   :title="`Перейти к фильму ${timing.kp_id}`"
                 >
@@ -1342,7 +1342,7 @@ import TrailerCarousel from '@/components/TrailerCarousel.vue'
 import { useTrailerStore } from '@/store/trailer'
 import Comments from '@/components/Comments.vue'
 import { getRatingColor } from '@/utils/ratingUtils'
-import { buildMovieSeo, getMovieSeoEntry } from '@/utils/movieSeo'
+import { buildMovieSeo, getMovieSeoEntry, getMovieSeoPath } from '@/utils/movieSeo'
 
 const mainStore = useMainStore()
 const authStore = useAuthStore()

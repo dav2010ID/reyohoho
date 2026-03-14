@@ -99,16 +99,13 @@ import { ref, watch, nextTick, onMounted, onUnmounted, computed } from 'vue'
 import { useMainStore } from '@/store/main'
 import { getRatingColor } from '@/utils/ratingUtils'
 import { getMovieName } from '@/utils/textUtils'
-import { buildMoviePath, getMovieSeoEntry } from '@/utils/movieSeo'
+import { getMovieSeoPath } from '@/utils/movieSeo'
 
 const navbarStore = useNavbarStore()
 
 const searchTerm = ref('')
 const movies = ref([])
-const getMoviePath = (movie) => {
-  const entry = getMovieSeoEntry(movie.kp_id)
-  return buildMoviePath(movie.kp_id, movie.slug || movie.raw_data?.slug || entry?.slug || '')
-}
+const getMoviePath = (movie) => getMovieSeoPath(movie)
 const loading = ref(false)
 
 // Глобальные переменные для ошибок

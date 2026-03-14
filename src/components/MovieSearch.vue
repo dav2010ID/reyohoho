@@ -145,6 +145,7 @@ import { watchEffect, onMounted, ref, watch, computed } from 'vue'
 import { useRouter } from 'vue-router'
 import SpinnerLoading from '@/components/SpinnerLoading.vue'
 import RandomMovieModal from '@/components/RandomMovieModal.vue'
+import { getMovieSeoPath } from '@/utils/movieSeo'
 
 const mainStore = useMainStore()
 const authStore = useAuthStore()
@@ -270,7 +271,7 @@ const performSearch = async () => {
       if (!/^\d+$/.test(searchTerm.value)) {
         searchTerm.value = searchTerm.value.replace(/\D/g, '')
       }
-      router.push({ name: 'movie-info', params: { kp_id: searchTerm.value } })
+      router.push(getMovieSeoPath({ kp_id: searchTerm.value }))
       return
     }
 
@@ -280,7 +281,7 @@ const performSearch = async () => {
       }
       const response = await getKpIDfromIMDB(searchTerm.value)
       if (response.id_kp) {
-        router.push({ name: 'movie-info', params: { kp_id: `${response.id_kp}` } })
+        router.push(getMovieSeoPath({ kp_id: `${response.id_kp}` }))
       } else {
         throw new Error('Не найдено')
       }
@@ -295,7 +296,7 @@ const performSearch = async () => {
       try {
         const response = await getKpIDfromSHIKI(searchTerm.value)
         if (response.id_kp) {
-          router.push({ name: 'movie-info', params: { kp_id: `${response.id_kp}` } })
+          router.push(getMovieSeoPath({ kp_id: `${response.id_kp}` }))
           return
         }
       } catch (e) {

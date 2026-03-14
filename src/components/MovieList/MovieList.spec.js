@@ -7,6 +7,7 @@ import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it, vi } 
 import { defineComponent } from 'vue'
 import { createMemoryHistory, createRouter } from 'vue-router'
 import { MovieList } from '.'
+import { getMovieSeoPath } from '@/utils/movieSeo'
 
 const BASE_MOVIES_MOCK = Object.freeze([
   {
@@ -94,7 +95,7 @@ describe('Тесты компонента MovieList', () => {
           }
         },
         {
-          path: '/movie/:kp_id',
+          path: '/movie/:kp_id/:slug?',
           // eslint-disable-next-line vue/one-component-per-file
           component: defineComponent({
             template: '<div></div>'
@@ -165,10 +166,7 @@ describe('Тесты компонента MovieList', () => {
 
     await card.trigger('click')
 
-    expect(push).toHaveBeenCalledWith({
-      name: 'movie-info',
-      params: { kp_id: movieDeleteId }
-    })
+    expect(push).toHaveBeenCalledWith(getMovieSeoPath({ kp_id: movieDeleteId }))
   })
 
   it('Удаляет карточку из списка, когда это список историй и декстоп', async () => {
@@ -844,11 +842,7 @@ describe('Тесты компонента MovieList', () => {
     await flushPromises()
 
     // Проверяем, что открылся роут "movie-info" с нужным kp_id
-    const expectedKpId = movies[1].kp_id
-    expect(pushSpy).toHaveBeenCalledWith({
-      name: 'movie-info',
-      params: { kp_id: expectedKpId }
-    })
+    expect(pushSpy).toHaveBeenCalledWith(getMovieSeoPath(movies[1]))
 
     // Проверяем, что окно НЕ открылось
     expect(windowOpenMock).not.toHaveBeenCalled()
@@ -913,8 +907,7 @@ describe('Тесты компонента MovieList', () => {
     await flushPromises()
 
     // Проверяем, что окно открылось с URL карточки [2]
-    const expectedKpId = movies[2].kp_id
-    const expectedUrl = `/movie/${expectedKpId}`
+    const expectedUrl = getMovieSeoPath(movies[2])
     expect(windowOpenMock).toHaveBeenCalledWith(expectedUrl, '_blank')
     expect(ctrlEnterEvent.defaultPrevented).toBe(true) // защита от открытия ссылки без нового окна
   })
@@ -978,8 +971,7 @@ describe('Тесты компонента MovieList', () => {
     await flushPromises()
 
     // Проверяем, что окно открылось с URL карточки [2]
-    const expectedKpId = movies[2].kp_id
-    const expectedUrl = `/movie/${expectedKpId}`
+    const expectedUrl = getMovieSeoPath(movies[2])
     expect(windowOpenMock).toHaveBeenCalledWith(expectedUrl, '_blank')
     expect(ctrlEnterEvent.defaultPrevented).toBe(true) // защита от открытия ссылки без нового окна
   })
