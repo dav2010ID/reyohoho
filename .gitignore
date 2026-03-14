@@ -28,3 +28,4 @@ coverage
 *.sw?
 dist.zip
 yarn.lock
+_user_site_tmp/

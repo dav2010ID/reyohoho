@@ -419,8 +419,12 @@ watch(
 }
 
 .search-toggle-btn {
+  appearance: none;
+  -webkit-appearance: none;
   background: none;
   border: none;
+  border-left: 3px solid transparent;
+  box-sizing: border-box;
   width: 100%;
   font: inherit;
   cursor: pointer;
@@ -432,7 +436,14 @@ watch(
   background: var(--accent-transparent, rgba(108, 92, 231, 0.15));
   color: var(--accent-color, #6c5ce7);
   transform: translateX(3px);
-  border-left: none;
+  border-left: 3px solid var(--accent-color, #6c5ce7);
+}
+
+.search-toggle-btn:focus-visible {
+  outline: none;
+  background: var(--accent-transparent, rgba(108, 92, 231, 0.15));
+  color: var(--accent-color, #6c5ce7);
+  border-left: 3px solid var(--accent-color, #6c5ce7);
 }
 
 .icon-user {
