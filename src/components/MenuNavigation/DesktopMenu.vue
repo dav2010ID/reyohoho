@@ -28,6 +28,7 @@
                 :to="link.to"
                 :exact="link.exact"
                 class="notification-link"
+                :aria-label="link.text"
                 @click="closeSidebar"
               >
                 <NotificationBadge />
@@ -42,6 +43,7 @@
                 link.to ? { to: link.to, exact: link.exact } : { href: link.href, target: '_blank' }
               "
               :class="{ 'support-link': !link.icon }"
+              :aria-label="link.text"
               @click="closeSidebar"
             >
               <template v-if="typeof link.icon === 'string' && link.icon.startsWith('fa')">
@@ -332,14 +334,26 @@ watch(
   min-width: 250px;
 }
 
+.side-panel:not(.collapsed) .nav-links button {
+  min-width: 250px;
+}
+
 .side-panel.collapsed .nav-links a {
   justify-content: center;
   padding: 10px;
   min-width: auto;
 }
 
+.side-panel.collapsed .nav-links button {
+  justify-content: center;
+  padding: 10px;
+  min-width: auto;
+}
+
 .nav-links a i,
-.nav-links a img {
+.nav-links a img,
+.nav-links button i,
+.nav-links button img {
   width: 25px;
   display: flex;
   justify-content: center;
@@ -372,15 +386,26 @@ watch(
   justify-content: center;
   padding: 10px;
 }
+
+.side-panel.collapsed .nav-links button {
+  justify-content: center;
+  padding: 10px;
+}
+
 .side-panel.collapsed .nav-links a i,
-.side-panel.collapsed .nav-links a img {
+.side-panel.collapsed .nav-links a img,
+.side-panel.collapsed .nav-links button i,
+.side-panel.collapsed .nav-links button img {
   margin: 0;
 }
-.nav-links a {
+
+.nav-links a,
+.nav-links button {
   will-change: transform;
 }
 
-.nav-links a:hover {
+.nav-links a:hover,
+.nav-links button:hover {
   background: var(--accent-transparent, rgba(108, 92, 231, 0.15));
   color: var(--accent-color, #6c5ce7);
   border-left: 3px solid var(--accent-color, #6c5ce7);
@@ -388,10 +413,20 @@ watch(
 }
 
 .nav-links a:active,
-.nav-links a.router-link-active {
+.nav-links a.router-link-active,
+.nav-links button:active {
   background: var(--accent-transparent, rgba(108, 92, 231, 0.2));
   color: var(--accent-color, #6c5ce7);
   border-left: 3px solid var(--accent-color, #6c5ce7);
+}
+
+.search-toggle-btn {
+  background: none;
+  border: none;
+  width: 100%;
+  font: inherit;
+  cursor: pointer;
+  text-align: left;
 }
 
 .icon-user {
