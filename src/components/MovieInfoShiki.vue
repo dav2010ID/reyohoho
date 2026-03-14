@@ -225,8 +225,12 @@
             >
               <img
                 :src="movieInfo.screenshots[0]"
-                :alt="movieInfo.title"
+                :alt="`Постер фильма ${movieInfo.title}${movieInfo.year ? ` (${movieInfo.year})` : ''}`"
                 class="movie-poster"
+                width="300"
+                height="445"
+                loading="lazy"
+                decoding="async"
                 @error="handleImageError"
               />
             </div>
