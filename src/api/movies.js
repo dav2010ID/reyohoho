@@ -2,6 +2,7 @@ import { useMainStore } from '@/store/main'
 import * as rhserv from '@/api/movies.rhserv'
 import * as kinobd from '@/api/movies.kinobd'
 import * as kinobox from '@/api/movies.kinobox'
+import { normalizeMovieListResponse } from '@/api/movieSeoNormalizer'
 
 const CONTENT_PROVIDERS = {
   RHSERV: 'rhserv',
@@ -77,22 +78,26 @@ const apiSearch = async (...args) => {
 
   if (provider === CONTENT_PROVIDERS.KINOBD) {
     try {
-      return await kinobd.apiSearch(...args)
+      return await normalizeMovieListResponse(await kinobd.apiSearch(...args))
     } catch (error) {
       console.warn('[movies] apiSearch failed on KinoBD, fallback to RHServ', error)
-      return await rhserv.apiSearch(...args)
+      return await normalizeMovieListResponse(await rhserv.apiSearch(...args))
     }
   }
 
-  return await rhserv.apiSearch(...args)
+  return await normalizeMovieListResponse(await rhserv.apiSearch(...args))
 }
 const getShikiInfo = async (...args) => callWithProvider('getShikiInfo', ...args)
 const getKpInfo = async (...args) => callWithProvider('getKpInfo', ...args)
 const getPlayers = async (...args) => callWithProvider('getPlayers', ...args)
 const getShikiPlayers = async (...args) => callWithProvider('getShikiPlayers', ...args)
 // Top lists must always come from original RHServ API.
-const getMovies = async (...args) => rhserv.getMovies(...args)
-const getDiscussedMovies = async (...args) => rhserv.getDiscussedMovies(...args)
+const getMovies = async (...args) =>
+  await normalizeMovieListResponse(await rhserv.getMovies(...args), { enrichMissingSeo: true })
+const getDiscussedMovies = async (...args) =>
+  await normalizeMovieListResponse(await rhserv.getDiscussedMovies(...args), {
+    enrichMissingSeo: true
+  })
 const getDons = async (...args) => callWithProvider('getDons', ...args)
 const getKpIDfromIMDB = async (...args) => callWithProvider('getKpIDfromIMDB', ...args)
 const getNudityInfoFromIMDB = async (...args) => callWithProvider('getNudityInfoFromIMDB', ...args)

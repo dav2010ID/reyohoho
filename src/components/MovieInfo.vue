@@ -1342,7 +1342,7 @@ import TrailerCarousel from '@/components/TrailerCarousel.vue'
 import { useTrailerStore } from '@/store/trailer'
 import Comments from '@/components/Comments.vue'
 import { getRatingColor } from '@/utils/ratingUtils'
-import { buildMovieSeo, getMovieSeoEntry, getMovieSeoPath } from '@/utils/movieSeo'
+import { buildMovieSeo, getMovieSeoEntry, getMovieSeoPath, getMovieSeoSlug } from '@/utils/movieSeo'
 
 const mainStore = useMainStore()
 const authStore = useAuthStore()
@@ -1453,18 +1453,26 @@ const isInAnyList = computed(() => {
 const isCommentsEnabled = computed(() => mainStore.isCommentsEnabled)
 
 const syncCanonicalMovieRoute = async () => {
-  if (route.name !== 'movie-info' || kp_id.value.startsWith('shiki') || !movieInfo.value) {
+  if (kp_id.value.startsWith('shiki') || !movieInfo.value) {
     return
   }
 
   const canonicalPath = getMovieSeoPath(movieInfo.value, kp_id.value)
+  const targetLocation = {
+    path: canonicalPath,
+    query: route.query,
+    hash: route.hash
+  }
 
-  if (route.path !== canonicalPath) {
-    await router.replace({
-      path: canonicalPath,
-      query: route.query,
-      hash: route.hash
-    })
+  const resolvedTarget = router.resolve(targetLocation)
+
+  if (typeof window !== 'undefined') {
+    const currentUrl = `${window.location.pathname}${window.location.search}${window.location.hash}`
+
+    if (currentUrl !== resolvedTarget.fullPath) {
+      window.location.replace(resolvedTarget.fullPath)
+    }
+    return
   }
 }
 
@@ -1646,6 +1654,7 @@ const fetchMovieInfo = async (updateHistory = true) => {
     const movieToSave = {
       kp_id: kp_id.value,
       title: movieInfo.value?.name_ru || movieInfo.value?.name_en || movieInfo.value?.name_original,
+      slug: getMovieSeoSlug(movieInfo.value, kp_id.value),
       poster:
         movieInfo.value?.poster_url ||
         movieInfo.value?.cover_url ||
@@ -1908,6 +1917,7 @@ watch(
 watch(
   movieInfo,
   () => {
+    syncCanonicalMovieRoute()
     setDocumentTitle()
   },
   { deep: true }

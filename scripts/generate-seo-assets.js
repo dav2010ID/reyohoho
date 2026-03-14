@@ -1,11 +1,13 @@
 import fs from 'node:fs/promises'
 import path from 'node:path'
+import { getCanonicalSlugCandidate } from '../src/utils/movieSlug.js'
 
 const SITE_ORIGIN = process.env.VITE_SITE_ORIGIN || 'https://dav2010id.github.io'
 const SITE_BASE_PATH = process.env.VITE_BASE_URL || '/reyohoho'
 const MOVIES_PATH = path.resolve(process.cwd(), 'src/data/movies.json')
 const ROBOTS_PATH = path.resolve(process.cwd(), 'public/robots.txt')
 const SITEMAP_PATH = path.resolve(process.cwd(), 'public/sitemap.xml')
+const STATIC_SITEMAP_PATHS = ['/', '/top', '/contact']
 
 const normalizeBasePath = (value) => {
   const normalized = `/${String(value || '')
@@ -28,15 +30,16 @@ const escapeXml = (value) =>
 async function main() {
   const raw = await fs.readFile(MOVIES_PATH, 'utf8')
   const movies = JSON.parse(raw)
+  const lastmod = new Date().toISOString().slice(0, 10)
 
   const urls = [
-    {
-      loc: `${SITE_ORIGIN}${BASE_PATH}/`,
-      lastmod: new Date().toISOString().slice(0, 10)
-    },
+    ...STATIC_SITEMAP_PATHS.map((routePath) => ({
+      loc: `${SITE_ORIGIN}${BASE_PATH}${routePath === '/' ? '/' : routePath}`,
+      lastmod
+    })),
     ...movies.map((movie) => ({
-      loc: `${SITE_ORIGIN}${BASE_PATH}/movie/${movie.kp_id}/${movie.slug}`,
-      lastmod: String(movie.updatedAt || '').slice(0, 10) || new Date().toISOString().slice(0, 10)
+      loc: `${SITE_ORIGIN}${BASE_PATH}/movie/${movie.kp_id}/${getCanonicalSlugCandidate(movie)}`,
+      lastmod: String(movie.updatedAt || '').slice(0, 10) || lastmod
     }))
   ]
 

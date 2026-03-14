@@ -1,4 +1,5 @@
 import movies from '@/data/movies.json'
+import { getCanonicalSlugCandidate, getTrimmedString, hasLatinLetters } from './movieSlug'
 
 const FALLBACK_DESCRIPTION =
   'ReYohoho - online movie and TV streaming with collections, ratings, and simple navigation.'
@@ -6,42 +7,7 @@ const SITE_NAME = 'ReYohoho'
 const SITE_ORIGIN = import.meta.env.VITE_SITE_ORIGIN || 'https://dav2010id.github.io'
 const SITE_BASE_PATH = import.meta.env.VITE_BASE_URL || '/reyohoho'
 const MAX_PRERENDER_ENTRIES = Number(import.meta.env.VITE_SSG_MAX_PAGES || 2000)
-
-const CYRILLIC_TO_LATIN_MAP = {
-  а: 'a',
-  б: 'b',
-  в: 'v',
-  г: 'g',
-  д: 'd',
-  е: 'e',
-  ё: 'e',
-  ж: 'zh',
-  з: 'z',
-  и: 'i',
-  й: 'y',
-  к: 'k',
-  л: 'l',
-  м: 'm',
-  н: 'n',
-  о: 'o',
-  п: 'p',
-  р: 'r',
-  с: 's',
-  т: 't',
-  у: 'u',
-  ф: 'f',
-  х: 'h',
-  ц: 'ts',
-  ч: 'ch',
-  ш: 'sh',
-  щ: 'sch',
-  ъ: '',
-  ы: 'y',
-  ь: '',
-  э: 'e',
-  ю: 'yu',
-  я: 'ya'
-}
+const runtimeMoviesByKpId = new Map()
 
 const normalizeBasePath = (value) => {
   const normalized = `/${String(value || '')
@@ -53,57 +19,36 @@ const normalizeBasePath = (value) => {
 
 const BASE_PATH = normalizeBasePath(SITE_BASE_PATH)
 
-const hasLatinLetters = (value) => /[a-z]/i.test(String(value || ''))
-
-const transliterateCyrillic = (value) =>
-  String(value || '')
-    .toLowerCase()
-    .split('')
-    .map((char) => CYRILLIC_TO_LATIN_MAP[char] ?? char)
-    .join('')
-
-const sanitizeSlug = (value) =>
-  String(value || '')
-    .toLowerCase()
-    .trim()
-    .replace(/['"`]/g, '')
-    .replace(/[^a-z0-9]+/gi, '-')
-    .replace(/^-+|-+$/g, '')
-    .replace(/-{2,}/g, '-')
-
-const resolveSlugSource = (movie = {}) => {
-  const originalTitle = String(movie?.name_original || movie?.name_en || '').trim()
-  const localizedTitle = String(movie?.title || movie?.name_ru || '').trim()
-
-  if (hasLatinLetters(originalTitle)) return originalTitle
-  return localizedTitle || originalTitle
-}
-
-const toSlug = (valueOrMovie) => {
-  if (valueOrMovie && typeof valueOrMovie === 'object') {
-    return sanitizeSlug(transliterateCyrillic(resolveSlugSource(valueOrMovie)))
-  }
-
-  return sanitizeSlug(transliterateCyrillic(valueOrMovie))
-}
-
 const normalizeMovie = (movie) => {
   const kpId = String(movie?.kp_id || movie?.kinopoisk_id || '').trim()
-  const title = String(movie?.title || movie?.name_ru || movie?.name_original || '').trim()
+  const localizedTitle = getTrimmedString(
+    movie?.title,
+    movie?.name_ru,
+    movie?.raw_data?.name_ru,
+    movie?.raw_data?.nameRu
+  )
+  const nameOriginal = getTrimmedString(
+    movie?.name_original,
+    movie?.name_en,
+    movie?.raw_data?.name_original,
+    movie?.raw_data?.name_en,
+    movie?.raw_data?.Name_original
+  )
+  const title = localizedTitle || nameOriginal
 
   if (!kpId || !title) return null
 
-  const slug = String(movie?.slug || toSlug(movie)).trim()
+  const slug = getCanonicalSlugCandidate(movie)
   const year = movie?.year ? String(movie.year).trim() : ''
   const description = String(movie?.description || FALLBACK_DESCRIPTION).trim()
   const poster = String(movie?.poster || movie?.poster_url || '').trim()
   const updatedAt = String(movie?.updatedAt || movie?.updated_at || '').trim()
-  const nameOriginal = String(movie?.name_original || movie?.name_en || '').trim()
 
   return {
     kp_id: kpId,
     slug,
     title,
+    name_ru: localizedTitle,
     year,
     description,
     poster,
@@ -115,28 +60,69 @@ const normalizeMovie = (movie) => {
 const normalizedMovies = Array.isArray(movies) ? movies.map(normalizeMovie).filter(Boolean) : []
 const moviesByKpId = new Map(normalizedMovies.map((movie) => [String(movie.kp_id), movie]))
 
-export const getMovieSeoEntry = (kpId) => moviesByKpId.get(String(kpId)) || null
+const mergeMovieSeoEntries = (existing = {}, incoming = {}) => {
+  const kpId = String(incoming?.kp_id || existing?.kp_id || '').trim()
+
+  return {
+    kp_id: kpId,
+    title: getTrimmedString(existing?.title, incoming?.title),
+    name_ru: getTrimmedString(incoming?.name_ru, existing?.name_ru, existing?.title, incoming?.title),
+    name_original: getTrimmedString(incoming?.name_original, existing?.name_original),
+    year: getTrimmedString(incoming?.year, existing?.year),
+    description: getTrimmedString(incoming?.description, existing?.description, FALLBACK_DESCRIPTION),
+    poster: getTrimmedString(incoming?.poster, existing?.poster),
+    updatedAt: getTrimmedString(incoming?.updatedAt, existing?.updatedAt),
+    slug: getTrimmedString(
+      getCanonicalSlugCandidate(incoming, existing),
+      incoming?.slug,
+      existing?.slug
+    )
+  }
+}
+
+const hasCanonicalOriginalTitle = (movieLike = {}, fallbackEntry = null) =>
+  hasLatinLetters(
+    getTrimmedString(
+      movieLike?.name_original,
+      movieLike?.name_en,
+      movieLike?.raw_data?.name_original,
+      movieLike?.raw_data?.name_en,
+      movieLike?.raw_data?.Name_original,
+      fallbackEntry?.name_original
+    )
+  )
+
+export const getMovieSeoEntry = (kpId) =>
+  runtimeMoviesByKpId.get(String(kpId)) || moviesByKpId.get(String(kpId)) || null
+
+export const registerMovieSeoEntry = (movieLike = {}) => {
+  const normalizedMovie = normalizeMovie(movieLike)
+  if (!normalizedMovie) return null
+
+  const existingEntry = getMovieSeoEntry(normalizedMovie.kp_id)
+  const mergedEntry = existingEntry
+    ? mergeMovieSeoEntries(existingEntry, normalizedMovie)
+    : normalizedMovie
+
+  runtimeMoviesByKpId.set(mergedEntry.kp_id, mergedEntry)
+  return mergedEntry
+}
+
+export const registerMovieSeoEntries = (moviesList = []) =>
+  Array.isArray(moviesList) ? moviesList.map(registerMovieSeoEntry).filter(Boolean) : []
+
+export const needsMovieSeoEnrichment = (movieLike = {}, kpIdOverride = null) => {
+  const kpId = String(movieLike?.kinopoisk_id || movieLike?.kp_id || kpIdOverride || '').trim()
+  if (!kpId) return false
+
+  return !hasCanonicalOriginalTitle(movieLike, getMovieSeoEntry(kpId))
+}
 
 export const getMovieSeoSlug = (movieLike = {}, kpIdOverride = null) => {
   const kpId = String(movieLike?.kinopoisk_id || movieLike?.kp_id || kpIdOverride || '').trim()
   const fallbackEntry = kpId ? getMovieSeoEntry(kpId) : null
 
-  return String(
-    fallbackEntry?.slug ||
-      movieLike?.slug ||
-      movieLike?.seo_slug ||
-      movieLike?.raw_data?.slug ||
-      toSlug({
-        title: movieLike?.title || movieLike?.name_ru || fallbackEntry?.title,
-        name_ru: movieLike?.name_ru || movieLike?.raw_data?.name_ru,
-        name_original:
-          movieLike?.name_original ||
-          movieLike?.name_en ||
-          movieLike?.raw_data?.name_en ||
-          fallbackEntry?.name_original,
-        name_en: movieLike?.name_en || movieLike?.raw_data?.name_en
-      })
-  ).trim()
+  return String(getCanonicalSlugCandidate(movieLike, fallbackEntry)).trim()
 }
 
 export const buildMoviePath = (kpId, slug = '') => {

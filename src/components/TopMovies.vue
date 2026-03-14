@@ -2,7 +2,6 @@
   <div class="wrapper">
     <div class="top-100-page" tabindex="0">
       <div class="controls">
-        <!-- Временные фильтры -->
         <div class="filter-card time-card">
           <div class="button-group time-buttons">
             <i class="material-icons card-icon">schedule</i>
@@ -21,7 +20,6 @@
           </div>
         </div>
 
-        <!-- Типовые фильтры -->
         <div class="filter-card type-card">
           <div class="button-group type-buttons">
             <i class="material-icons card-icon">movie</i>
@@ -39,7 +37,6 @@
         </div>
       </div>
 
-      <!-- Основной контент -->
       <MovieList
         v-if="!errorMessage"
         :movies-list="movies"
@@ -52,14 +49,13 @@
 </template>
 
 <script setup>
-import { getMovies, getDiscussedMovies } from '@/api/movies'
-import { handleApiError } from '@/constants'
-import { MovieList } from '@/components/MovieList'
-import { onMounted, ref, computed, watch } from 'vue'
-import { useRoute, useRouter } from 'vue-router'
+import { getDiscussedMovies, getMovies } from '@/api/movies'
 import ErrorMessage from '@/components/ErrorMessage.vue'
+import { MovieList } from '@/components/MovieList'
+import { handleApiError } from '@/constants'
+import { computed, onMounted, onServerPrefetch, ref, watch } from 'vue'
+import { useRoute, useRouter } from 'vue-router'
 
-// Состояния
 const movies = ref([])
 const loading = ref(false)
 const activeTimeFilter = ref('24h')
@@ -70,7 +66,6 @@ const errorCode = ref(null)
 const route = useRoute()
 const router = useRouter()
 
-// Фильтры по времени (реверснутый порядок)
 const timeFilters = [
   { label: '24 часа', apiUrl: '24h' },
   { label: '7 дней', apiUrl: '7d' },
@@ -80,7 +75,6 @@ const timeFilters = [
   { label: 'Обсуждаемое', apiUrl: 'discussed' }
 ]
 
-// Фильтры по типу контента
 const normalTypeFilters = [
   { label: 'Все', value: 'all' },
   { label: 'Фильмы', value: 'movie' },
@@ -92,25 +86,38 @@ const discussedTypeFilters = [
   { label: 'Недавнее', value: 'recent' }
 ]
 
-const currentTypeFilters = computed(() => {
-  return activeTimeFilter.value === 'discussed' ? discussedTypeFilters : normalTypeFilters
-})
+const currentTypeFilters = computed(() =>
+  activeTimeFilter.value === 'discussed' ? discussedTypeFilters : normalTypeFilters
+)
 
-// Получение данных
+const applyRouteFilters = (query) => {
+  const nextTime = typeof query.time === 'string' && query.time ? query.time : '24h'
+  const nextType = typeof query.type === 'string' && query.type ? query.type : null
+
+  activeTimeFilter.value = nextTime
+
+  if (nextTime === 'discussed') {
+    typeFilter.value = nextType || 'hot'
+    return
+  }
+
+  typeFilter.value = nextType || 'all'
+  lastNormalTypeFilter.value = typeFilter.value
+}
+
 const fetchMovies = async () => {
   loading.value = true
   errorMessage.value = ''
   errorCode.value = null
 
   try {
-    if (activeTimeFilter.value === 'discussed') {
-      movies.value = await getDiscussedMovies(typeFilter.value)
-    } else {
-      movies.value = await getMovies({
-        activeTime: activeTimeFilter.value,
-        typeFilter: typeFilter.value
-      })
-    }
+    movies.value =
+      activeTimeFilter.value === 'discussed'
+        ? await getDiscussedMovies(typeFilter.value)
+        : await getMovies({
+            activeTime: activeTimeFilter.value,
+            typeFilter: typeFilter.value
+          })
   } catch (error) {
     const { message, code } = handleApiError(error)
     errorMessage.value = message
@@ -121,7 +128,10 @@ const fetchMovies = async () => {
   }
 }
 
-// Обработчики
+applyRouteFilters(route.query)
+
+onServerPrefetch(fetchMovies)
+
 const changeTimeFilter = (apiUrl) => {
   const previousTimeFilter = activeTimeFilter.value
   activeTimeFilter.value = apiUrl
@@ -131,10 +141,8 @@ const changeTimeFilter = (apiUrl) => {
       lastNormalTypeFilter.value = typeFilter.value
     }
     typeFilter.value = 'hot'
-  } else {
-    if (previousTimeFilter === 'discussed') {
-      typeFilter.value = lastNormalTypeFilter.value
-    }
+  } else if (previousTimeFilter === 'discussed') {
+    typeFilter.value = lastNormalTypeFilter.value
   }
 
   router
@@ -155,6 +163,7 @@ const changeTypeFilter = (value) => {
   if (activeTimeFilter.value !== 'discussed') {
     lastNormalTypeFilter.value = value
   }
+
   router
     .push({
       query: {
@@ -167,44 +176,23 @@ const changeTypeFilter = (value) => {
     })
 }
 
-
 watch(
   () => route.query,
   (newQuery, oldQuery) => {
-    const { time, type } = newQuery
-    let shouldFetch = false
-
-    if (time !== oldQuery?.time || type !== oldQuery?.type) {
-      if (time && time !== activeTimeFilter.value) {
-        activeTimeFilter.value = time
-        shouldFetch = true
-      }
-      if (type && type !== typeFilter.value) {
-        typeFilter.value = type
-        if (time !== 'discussed') {
-          lastNormalTypeFilter.value = type
-        }
-        shouldFetch = true
-      }
-      if (shouldFetch) {
-        fetchMovies()
-      }
+    if (newQuery.time === oldQuery?.time && newQuery.type === oldQuery?.type) {
+      return
     }
+
+    applyRouteFilters(newQuery)
+    fetchMovies()
   }
 )
 
 onMounted(() => {
-  const { time, type } = route.query
-  if (time) {
-    activeTimeFilter.value = time
+  applyRouteFilters(route.query)
+  if (!movies.value.length && !errorMessage.value) {
+    fetchMovies()
   }
-  if (type) {
-    typeFilter.value = type
-    if (time !== 'discussed') {
-      lastNormalTypeFilter.value = type
-    }
-  }
-  fetchMovies()
 })
 </script>
 
@@ -234,7 +222,6 @@ onMounted(() => {
   box-sizing: border-box;
 }
 
-/* Карточки фильтров */
 .filter-card {
   width: auto;
   background: rgba(37, 37, 37, 0.8);
@@ -288,7 +275,6 @@ onMounted(() => {
   color: #4a90e2;
 }
 
-/* Группы кнопок */
 .button-group {
   display: flex;
   gap: 4px;
@@ -341,7 +327,6 @@ onMounted(() => {
   box-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
 }
 
-/* Активные состояния */
 .time-btn.active {
   background: var(--accent-color);
   border-color: transparent;
@@ -356,7 +341,6 @@ onMounted(() => {
   box-shadow: 0 2px 8px var(--accent-transparent);
 }
 
-/* Адаптивность */
 @media (max-width: 1000px) {
   .controls {
     flex-direction: column;

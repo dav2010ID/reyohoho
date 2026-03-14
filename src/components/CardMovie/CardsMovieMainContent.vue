@@ -2,6 +2,15 @@
   <div class="movie-poster-container" :class="`card-size-${cardSize}`">
     <div v-if="posterSrc">
       <img
+        v-if="isServerRender"
+        :src="posterSrc"
+        class="movie-poster"
+        :alt="movie.title ? `Постер ${movie.title}` : 'Постер фильма'"
+        width="300"
+        height="450"
+      />
+      <img
+        v-else
         v-lazy="posterSrc"
         class="movie-poster"
         :alt="movie.title ? `Постер ${movie.title}` : 'Постер фильма'"
@@ -42,7 +51,6 @@
           {{ movie.rating_imdb }}
         </span>
       </div>
-      <!-- Добавлен блок для отображения типа (сериал/фильм) в правом верхнем углу постера -->
       <div v-if="movie.type && TYPES_ENUM[movie.type]" class="poster-type">
         {{ TYPES_ENUM[movie.type] ?? '' }}
       </div>
@@ -56,10 +64,10 @@
 <script setup>
 import DeleteButton from '@/components/buttons/DeleteButton.vue'
 import { TYPES_ENUM } from '@/constants'
-import { getRatingColor } from '@/utils/ratingUtils'
 import { useMainStore } from '@/store/main'
-import { computed } from 'vue'
 import { resolvePosterByMovie } from '@/utils/mediaUtils'
+import { getRatingColor } from '@/utils/ratingUtils'
+import { computed } from 'vue'
 
 const mainStore = useMainStore()
 const cardSize = computed(() => mainStore.cardSize)
@@ -79,7 +87,9 @@ const {
   showDelete: Boolean,
   showStar: Boolean
 })
+
 const emit = defineEmits(['remove:from-history'])
+const isServerRender = import.meta.env.SSR
 
 const posterSrc = computed(() => {
   return resolvePosterByMovie(movie)
@@ -117,7 +127,6 @@ const posterSrc = computed(() => {
   align-items: center;
 }
 
-/* Новый стиль для блока с типом, отображаемым в правом верхнем углу постера */
 .poster-type {
   position: absolute;
   top: 5px;

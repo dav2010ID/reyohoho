@@ -435,6 +435,20 @@ const getKpInfo = async (kpId) => {
   }
 }
 
+const getMovieSeoByKpId = async (kpId) => {
+  const { data } = await apiCall((api) =>
+    api.get('/api/films/search/kp_id', {
+      params: {
+        q: String(kpId),
+        page: 1
+      }
+    })
+  )
+
+  const film = Array.isArray(data?.data) ? data.data[0] : null
+  return film ? buildLegacyMovie(film) : null
+}
+
 const getPlayers = async (kpId, options = {}) => {
   const {
     mode = 'kp_id',
@@ -556,6 +570,7 @@ export {
   searchPlayerCandidates,
   getPlayerDataByInid,
   apiSearch,
+  getMovieSeoByKpId,
   getShikiInfo,
   getKpInfo,
   getPlayers,

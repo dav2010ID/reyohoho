@@ -48,7 +48,15 @@ export const useMainStore = defineStore(MAIN_STORE_NAME, {
 
       if (existingMovieIndex !== -1) {
         // Если фильм уже есть, обновляем время добавления и ставим первым
-        this.history[existingMovieIndex].addedAt = new Date().toISOString()
+        this.history[existingMovieIndex] = {
+          ...this.history[existingMovieIndex],
+          title: movie.title || this.history[existingMovieIndex].title || '',
+          slug: movie.slug || this.history[existingMovieIndex].slug || '',
+          year: movie.year || this.history[existingMovieIndex].year || '',
+          type: movie.type || this.history[existingMovieIndex].type || '',
+          poster: resolvePosterByMovie(movie) || this.history[existingMovieIndex].poster || noPosterImage,
+          addedAt: new Date().toISOString()
+        }
 
         // Перемещаем в начало
         const updatedMovie = this.history.splice(existingMovieIndex, 1)[0]
@@ -58,6 +66,7 @@ export const useMainStore = defineStore(MAIN_STORE_NAME, {
         const movieWithDate = {
           kp_id: movie.kp_id,
           title: movie.title || '',
+          slug: movie.slug || '',
           year: movie.year || '',
           type: movie.type || '',
           poster: resolvePosterByMovie(movie) || noPosterImage,

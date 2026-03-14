@@ -1,74 +1,11 @@
 import fs from 'node:fs/promises'
 import path from 'node:path'
+import { getCanonicalSlugCandidate } from '../src/utils/movieSlug.js'
 
 const OUTPUT_PATH = path.resolve(process.cwd(), 'src/data/movies.json')
 const API_BASE_URL = process.env.SEO_SOURCE_API_URL || 'https://kinobd.net'
 const PAGE_SIZE = Number(process.env.SEO_PAGE_SIZE || 100)
 const PAGE_COUNT = Number(process.env.SEO_PAGE_COUNT || 3)
-
-const CYRILLIC_TO_LATIN_MAP = {
-  а: 'a',
-  б: 'b',
-  в: 'v',
-  г: 'g',
-  д: 'd',
-  е: 'e',
-  ё: 'e',
-  ж: 'zh',
-  з: 'z',
-  и: 'i',
-  й: 'y',
-  к: 'k',
-  л: 'l',
-  м: 'm',
-  н: 'n',
-  о: 'o',
-  п: 'p',
-  р: 'r',
-  с: 's',
-  т: 't',
-  у: 'u',
-  ф: 'f',
-  х: 'h',
-  ц: 'ts',
-  ч: 'ch',
-  ш: 'sh',
-  щ: 'sch',
-  ъ: '',
-  ы: 'y',
-  ь: '',
-  э: 'e',
-  ю: 'yu',
-  я: 'ya'
-}
-
-const hasLatinLetters = (value) => /[a-z]/i.test(String(value || ''))
-
-const transliterateCyrillic = (value) =>
-  String(value || '')
-    .toLowerCase()
-    .split('')
-    .map((char) => CYRILLIC_TO_LATIN_MAP[char] ?? char)
-    .join('')
-
-const sanitizeSlug = (value) =>
-  String(value || '')
-    .toLowerCase()
-    .trim()
-    .replace(/['"`]/g, '')
-    .replace(/[^a-z0-9]+/gi, '-')
-    .replace(/^-+|-+$/g, '')
-    .replace(/-{2,}/g, '-')
-
-const resolveSlugSource = (movie = {}) => {
-  const originalTitle = String(movie?.name_original || movie?.name_en || '').trim()
-  const localizedTitle = String(movie?.name_russian || movie?.name_ru || movie?.title || '').trim()
-
-  if (hasLatinLetters(originalTitle)) return originalTitle
-  return localizedTitle || originalTitle
-}
-
-const toSlug = (movie) => sanitizeSlug(transliterateCyrillic(resolveSlugSource(movie)))
 
 const fetchPage = async (page) => {
   const url = `${API_BASE_URL}/api/films/top?page=${page}&per_page=${PAGE_SIZE}`
@@ -94,7 +31,7 @@ const mapMovie = (movie) => {
 
   return {
     kp_id: String(kpId),
-    slug: toSlug(movie),
+    slug: getCanonicalSlugCandidate(movie),
     title,
     name_original: String(movie?.name_original || '').trim(),
     year: String(movie?.year || movie?.year_start || ''),

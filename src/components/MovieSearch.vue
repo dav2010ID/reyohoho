@@ -71,7 +71,15 @@
           <div v-if="loading" class="loading-container">
             <SpinnerLoading />
           </div>
-          <div v-else-if="history.length === 0" class="empty-history">
+          <div
+            v-else-if="history.length === 0"
+            class="empty-history"
+            :class="{ 'empty-history--with-top': topMovies.length > 0 }"
+          >
+            <template v-if="topMovies.length > 0">
+              <h2>Популярное сейчас</h2>
+              <MovieList :movies-list="topMovies" :is-history="false" :loading="false" />
+            </template>
             <span class="material-icons">movie</span>
             <p>Здесь пока пусто</p>
           </div>
@@ -126,6 +134,7 @@ import {
   apiSearch,
   getKpIDfromIMDB,
   getKpIDfromSHIKI,
+  getMovies,
   getRandomMovie,
   getKpInfo
 } from '@/api/movies'
@@ -141,7 +150,7 @@ import { useAuthStore } from '@/store/auth'
 import { USER_LIST_TYPES_ENUM } from '@/constants'
 import { hasConsecutiveConsonants, suggestLayout, convertLayout } from '@/utils/keyboardLayout'
 import debounce from 'lodash/debounce'
-import { watchEffect, onMounted, ref, watch, computed } from 'vue'
+import { watchEffect, onMounted, onServerPrefetch, ref, watch, computed } from 'vue'
 import { useRouter } from 'vue-router'
 import SpinnerLoading from '@/components/SpinnerLoading.vue'
 import RandomMovieModal from '@/components/RandomMovieModal.vue'
@@ -161,6 +170,7 @@ const errorMessage = ref('')
 const errorCode = ref(null)
 const isMobile = computed(() => mainStore.isMobile)
 const history = ref([])
+const topMovies = ref([])
 
 const showLayoutWarning = ref(false)
 const suggestedLayout = ref('')
@@ -171,6 +181,20 @@ const randomLoading = ref(false)
 const randomError = ref('')
 
 const searchInput = ref(null)
+
+const loadHomeTopMovies = async () => {
+  try {
+    topMovies.value = await getMovies({
+      activeTime: '24h',
+      typeFilter: 'all'
+    })
+  } catch (error) {
+    console.error('Ошибка загрузки топов для главной:', error)
+    topMovies.value = []
+  }
+}
+
+onServerPrefetch(loadHomeTopMovies)
 
 watchEffect(async () => {
   if (authStore.token) {
@@ -331,6 +355,9 @@ const clearAllHistory = async () => {
     try {
       await delAllFromList(USER_LIST_TYPES_ENUM.HISTORY)
       history.value = []
+      if (!topMovies.value.length) {
+        await loadHomeTopMovies()
+      }
       loading.value = false
       showModal.value = false
     } catch (error) {
@@ -348,6 +375,9 @@ const clearAllHistory = async () => {
     }
   } else {
     mainStore.clearAllHistory()
+    if (!topMovies.value.length) {
+      await loadHomeTopMovies()
+    }
     loading.value = false
     showModal.value = false
   }
@@ -363,6 +393,9 @@ const debouncedPerformSearch = debounce(() => {
 }, 700)
 
 onMounted(() => {
+  if (!topMovies.value.length) {
+    loadHomeTopMovies()
+  }
   const hash = window.location.hash
   if (hash.startsWith('#search=')) {
     const searchQuery = decodeURIComponent(hash.replace('#search=', ''))
@@ -689,6 +722,29 @@ h2 {
   font-size: 18px;
   margin: 0;
   color: #888;
+}
+
+.empty-history--with-top {
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+}
+
+.empty-history--with-top > .material-icons {
+  order: 1;
+}
+
+.empty-history--with-top > p {
+  order: 2;
+}
+
+.empty-history--with-top > h2 {
+  order: 3;
+}
+
+.empty-history--with-top > div {
+  order: 4;
+  width: 100%;
 }
 
 @media (max-width: 600px) {

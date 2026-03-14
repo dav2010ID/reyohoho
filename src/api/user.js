@@ -1,4 +1,5 @@
 import { getApi } from '@/api/axios'
+import { normalizeMovieListResponse } from '@/api/movieSeoNormalizer'
 
 const apiCall = async (callFn) => {
   const api = await getApi()
@@ -22,12 +23,12 @@ const delAllFromList = async (type) => {
 
 const getMyLists = async (type) => {
   const { data } = await apiCall((api) => api.get(`/list/${type}`))
-  return data
+  return await normalizeMovieListResponse(data, { enrichMissingSeo: true })
 }
 
 const getUserLists = async (type, userId) => {
   const { data } = await apiCall((api) => api.get(`/user-list/${userId}/${type}`))
-  return data
+  return await normalizeMovieListResponse(data, { enrichMissingSeo: true })
 }
 
 const getListCounters = async (userId) => {
