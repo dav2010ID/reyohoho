@@ -2,6 +2,7 @@ import { createRouter, createWebHistory } from 'vue-router'
 import { nextTick } from 'vue'
 import { routes } from './routes'
 import { useMainStore } from '@/store/main'
+import { useAuthStore } from '@/store/auth'
 import { handleHashNavigation } from '@/helpers/hashHandler'
 import { useScrollTracking } from '@/composables/useScrollTracking'
 import { buildMoviePath, getMovieSeoEntry } from '@/utils/movieSeo'
@@ -62,6 +63,20 @@ export const installRouterGuards = (router, { isClient = typeof window !== 'unde
   let hasTrackedInitialRoute = false
 
   router.beforeEach((to, _from, next) => {
+    if (to.meta?.requiresAuth) {
+      const authStore = useAuthStore()
+
+      if (!authStore.isAuthenticated) {
+        next({
+          name: 'login',
+          query: {
+            redirect: to.fullPath
+          }
+        })
+        return
+      }
+    }
+
     if (to.name === 'movie-info' && to.params?.kp_id) {
       const entry = getMovieSeoEntry(to.params.kp_id)
       const currentSlug = String(to.params.slug || '').trim()
