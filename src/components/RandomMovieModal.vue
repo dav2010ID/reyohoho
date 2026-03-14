@@ -147,6 +147,7 @@
 </template>
 
 <script setup>
+import noPosterImage from '@/assets/image-no-poster.gif'
 import { computed } from 'vue'
 import { getMovieSeoPath } from '@/utils/movieSeo'
 import imdbLogoUrl from '@/assets/icon-imdb-logo.svg'
@@ -203,7 +204,7 @@ const formatDate = (dateString) => {
 }
 
 const handleImageError = (event) => {
-  event.target.src = '/src/assets/image-no-poster.gif'
+  event.target.src = noPosterImage
 }
 </script>
 

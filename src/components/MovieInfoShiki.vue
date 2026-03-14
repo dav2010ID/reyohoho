@@ -253,6 +253,7 @@
 </template>
 
 <script setup>
+import noPosterImage from '@/assets/image-no-poster.gif'
 import ErrorMessage from '@/components/ErrorMessage.vue'
 import SpinnerLoading from '@/components/SpinnerLoading.vue'
 import { useBackgroundStore } from '@/store/background'
@@ -295,7 +296,7 @@ const formatRatingNumber = (number) => {
 }
 
 const handleImageError = (event) => {
-  event.target.src = '/src/assets/image-no-poster.gif'
+  event.target.src = noPosterImage
 }
 
 const copyMovieMeta = async () => {

@@ -1,3 +1,5 @@
+import noPosterImage from '@/assets/image-no-poster.gif'
+
 export const TYPES_ENUM = {
   FILM: 'Фильм',
   TV_SERIES: 'Сериал',
@@ -19,7 +21,7 @@ export const USER_LIST_TYPES_ENUM = {
 
 export const LAZY_LOADING_CONFIG = {
   preLoad: 1.3,
-  error: '/src/assets/image-no-poster.gif',
+  error: noPosterImage,
   attempt: 2,
   observer: true,
   observerOptions: {
