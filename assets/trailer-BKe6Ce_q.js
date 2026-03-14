@@ -1,0 +1,1 @@
+import{aJ as e}from"./app-CoGHSYzA.js";const t=e("trailer",{state:()=>({areTrailersActive:!0}),actions:{activateTrailers(){this.areTrailersActive=!0},deactivateTrailers(){this.areTrailersActive=!1},toggleTrailers(){this.areTrailersActive=!this.areTrailersActive}},persist:!0});export{t as u};
