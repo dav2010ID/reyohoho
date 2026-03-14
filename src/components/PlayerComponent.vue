@@ -55,6 +55,7 @@
           v-show="!iframeLoading && selectedPlayerInternal?.iframe"
           ref="playerIframe"
           :src="selectedPlayerInternal?.iframe"
+          :title="movieInfo?.title ? `Плеер для ${movieInfo.title}` : 'Видео-плеер'"
           frameborder="0"
           allowfullscreen
           webkitallowfullscreen

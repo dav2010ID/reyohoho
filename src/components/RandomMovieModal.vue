@@ -22,8 +22,10 @@
             <div class="movie-poster-section">
               <img
                 v-lazy="movie.cover"
-                :alt="movie.title"
+                :alt="movie.title ? `Постер ${movie.title}` : 'Постер фильма'"
                 class="movie-poster"
+                width="300"
+                height="450"
                 @error="handleImageError"
               />
             </div>
@@ -128,7 +130,7 @@
           <button class="modern-dark-btn" @click="close">Закрыть</button>
           <router-link
             v-if="movie && !loading"
-            :to="{ name: 'movie-info', params: { kp_id: movie.kp_id } }"
+            :to="moviePath"
             class="modern-dark-btn primary"
             @click="close"
           >
@@ -145,7 +147,10 @@
 </template>
 
 <script setup>
-defineProps({
+import { computed } from 'vue'
+import { buildMoviePath, getMovieSeoEntry } from '@/utils/movieSeo'
+
+const props = defineProps({
   isOpen: Boolean,
   movie: Object,
   loading: Boolean,
@@ -153,6 +158,11 @@ defineProps({
 })
 
 const emit = defineEmits(['close', 'get-new-movie'])
+const moviePath = computed(() => {
+  const kpId = props.movie?.kp_id
+  const entry = kpId ? getMovieSeoEntry(kpId) : null
+  return buildMoviePath(kpId, props.movie?.slug || entry?.slug || '')
+})
 
 const close = () => {
   emit('close')

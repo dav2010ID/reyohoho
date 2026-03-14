@@ -3,13 +3,14 @@
   <MobileHeader v-if="isMobile" />
   <MenuNavigation />
 
-  <div
+  <main
     :class="['router-view-container', { 'router-view-container--with-mobile-header': isMobile }]"
+    id="main-content"
   >
     <router-view v-slot="{ Component }">
       <component :is="Component" />
     </router-view>
-  </div>
+  </main>
 
   <!-- Затемняющий оверлей для обычного режима, включается тумблером -->
   <div v-if="dimmingEnabled" class="dimming-overlay" @click="toggleDimming"></div>

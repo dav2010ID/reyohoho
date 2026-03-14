@@ -10,7 +10,7 @@
         <i class="fas fa-arrow-left"></i>
         <span v-show="isSidebarOpen" class="back-text">Назад</span>
       </button>
-      <button class="toggle-sidebar-btn" @click="toggleSidebar">
+      <button class="toggle-sidebar-btn" :aria-label="isSidebarOpen ? 'Свернуть меню' : 'Развернуть меню'" @click="toggleSidebar">
         <i :class="isSidebarOpen ? 'fas fa-chevron-left' : 'fas fa-chevron-right'"></i>
       </button>
     </div>
@@ -50,10 +50,10 @@
               <template
                 v-else-if="typeof link.icon === 'string' && link.icon.startsWith('https://')"
               >
-                <img :src="link.icon" alt="icon" class="icon-user" />
+                <img :src="link.icon" :alt="link.text" class="icon-user" />
               </template>
               <template v-else>
-                <img src="@/assets/icon-donut.png" alt="icon" class="icon-donut" />
+                <img src="@/assets/icon-donut.png" :alt="link.text" class="icon-donut" />
               </template>
               <span v-show="isSidebarOpen" class="menu-text">{{ link.text }}</span>
             </component>
@@ -63,10 +63,10 @@
             @pointerenter="showTooltip(links.length, $event)"
             @pointerleave="hideTooltip"
           >
-            <a @click="toggleSearch">
+            <button type="button" class="search-toggle-btn" aria-label="Открыть поиск" @click="toggleSearch">
               <i class="fas fa-search"></i>
               <span v-show="isSidebarOpen" class="menu-text">Поиск</span>
-            </a>
+            </button>
           </li>
         </ul>
       </div>

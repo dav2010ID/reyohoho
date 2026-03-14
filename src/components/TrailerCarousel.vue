@@ -6,6 +6,7 @@
       <button
         v-show="!isMobile && canScrollLeft"
         class="scroll-button left"
+        aria-label="Прокрутить трейлеры влево"
         @click="scrollCarousel(-1)"
       >
         <span class="material-symbols-outlined">arrow_back_ios</span>
@@ -28,6 +29,7 @@
       <button
         v-show="!isMobile && canScrollRight"
         class="scroll-button right"
+        aria-label="Прокрутить трейлеры вправо"
         @click="scrollCarousel(1)"
       >
         <span class="material-symbols-outlined">arrow_forward_ios</span>
@@ -35,7 +37,12 @@
     </div>
     <!-- Встроенный плеер -->
     <div v-if="activeVideoIndex !== null" class="video-player">
-      <iframe :src="videos[activeVideoIndex].iframeUrl" frameborder="0" allowfullscreen></iframe>
+      <iframe
+        :src="videos[activeVideoIndex].iframeUrl"
+        :title="availableVideos[activeVideoIndex]?.name || 'Трейлер YouTube'"
+        frameborder="0"
+        allowfullscreen
+      ></iframe>
     </div>
   </div>
 </template>

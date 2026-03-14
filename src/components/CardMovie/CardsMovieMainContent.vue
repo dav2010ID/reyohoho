@@ -1,7 +1,13 @@
 <template>
   <div class="movie-poster-container" :class="`card-size-${cardSize}`">
     <div v-if="posterSrc">
-      <img v-lazy="posterSrc" class="movie-poster" />
+      <img
+        v-lazy="posterSrc"
+        class="movie-poster"
+        :alt="movie.title ? `Постер ${movie.title}` : 'Постер фильма'"
+        width="300"
+        height="450"
+      />
       <DeleteButton
         v-if="!isMobile && (isHistory || isUserList) && showDelete"
         class="delete-button"

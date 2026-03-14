@@ -7,6 +7,42 @@ const SITE_ORIGIN = import.meta.env.VITE_SITE_ORIGIN || 'https://dav2010id.githu
 const SITE_BASE_PATH = import.meta.env.VITE_BASE_URL || '/reyohoho'
 const MAX_PRERENDER_ENTRIES = Number(import.meta.env.VITE_SSG_MAX_PAGES || 2000)
 
+const CYRILLIC_TO_LATIN_MAP = {
+  а: 'a',
+  б: 'b',
+  в: 'v',
+  г: 'g',
+  д: 'd',
+  е: 'e',
+  ё: 'e',
+  ж: 'zh',
+  з: 'z',
+  и: 'i',
+  й: 'y',
+  к: 'k',
+  л: 'l',
+  м: 'm',
+  н: 'n',
+  о: 'o',
+  п: 'p',
+  р: 'r',
+  с: 's',
+  т: 't',
+  у: 'u',
+  ф: 'f',
+  х: 'h',
+  ц: 'ts',
+  ч: 'ch',
+  ш: 'sh',
+  щ: 'sch',
+  ъ: '',
+  ы: 'y',
+  ь: '',
+  э: 'e',
+  ю: 'yu',
+  я: 'ya'
+}
+
 const normalizeBasePath = (value) => {
   const normalized = `/${String(value || '')
     .trim()
@@ -17,14 +53,39 @@ const normalizeBasePath = (value) => {
 
 const BASE_PATH = normalizeBasePath(SITE_BASE_PATH)
 
-const toSlug = (value) =>
+const hasLatinLetters = (value) => /[a-z]/i.test(String(value || ''))
+
+const transliterateCyrillic = (value) =>
+  String(value || '')
+    .toLowerCase()
+    .split('')
+    .map((char) => CYRILLIC_TO_LATIN_MAP[char] ?? char)
+    .join('')
+
+const sanitizeSlug = (value) =>
   String(value || '')
     .toLowerCase()
     .trim()
     .replace(/['"`]/g, '')
-    .replace(/[^a-zа-яё0-9]+/gi, '-')
+    .replace(/[^a-z0-9]+/gi, '-')
     .replace(/^-+|-+$/g, '')
     .replace(/-{2,}/g, '-')
+
+const resolveSlugSource = (movie = {}) => {
+  const originalTitle = String(movie?.name_original || movie?.name_en || '').trim()
+  const localizedTitle = String(movie?.title || movie?.name_ru || '').trim()
+
+  if (hasLatinLetters(originalTitle)) return originalTitle
+  return localizedTitle || originalTitle
+}
+
+const toSlug = (valueOrMovie) => {
+  if (valueOrMovie && typeof valueOrMovie === 'object') {
+    return sanitizeSlug(transliterateCyrillic(resolveSlugSource(valueOrMovie)))
+  }
+
+  return sanitizeSlug(transliterateCyrillic(valueOrMovie))
+}
 
 const normalizeMovie = (movie) => {
   const kpId = String(movie?.kp_id || movie?.kinopoisk_id || '').trim()
@@ -32,11 +93,12 @@ const normalizeMovie = (movie) => {
 
   if (!kpId || !title) return null
 
-  const slug = String(movie?.slug || toSlug(title)).trim()
+  const slug = String(movie?.slug || toSlug(movie)).trim()
   const year = movie?.year ? String(movie.year).trim() : ''
   const description = String(movie?.description || FALLBACK_DESCRIPTION).trim()
   const poster = String(movie?.poster || movie?.poster_url || '').trim()
   const updatedAt = String(movie?.updatedAt || movie?.updated_at || '').trim()
+  const nameOriginal = String(movie?.name_original || movie?.name_en || '').trim()
 
   return {
     kp_id: kpId,
@@ -45,7 +107,8 @@ const normalizeMovie = (movie) => {
     year,
     description,
     poster,
-    updatedAt
+    updatedAt,
+    name_original: nameOriginal
   }
 }
 
@@ -80,10 +143,17 @@ export const buildMovieSeo = (movieLike = {}, kpIdOverride = null) => {
       fallbackEntry?.poster ||
       ''
   ).trim()
-  const slug = String(movieLike?.slug || fallbackEntry?.slug || toSlug(baseTitle)).trim()
-  const title = baseTitle
-    ? `${baseTitle}${year ? ` (${year})` : ''} смотреть онлайн - ${SITE_NAME}`
-    : SITE_NAME
+  const slug = String(
+    movieLike?.slug ||
+      fallbackEntry?.slug ||
+      toSlug({
+        title: baseTitle,
+        name_ru: movieLike?.name_ru,
+        name_original: movieLike?.name_original || fallbackEntry?.name_original,
+        name_en: movieLike?.name_en
+      })
+  ).trim()
+  const title = baseTitle ? `${baseTitle}${year ? ` (${year})` : ''} смотреть онлайн - ${SITE_NAME}` : SITE_NAME
 
   return {
     title,
