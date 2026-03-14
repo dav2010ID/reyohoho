@@ -39,7 +39,7 @@ const mapMovie = (movie) => {
 
   return {
     kp_id: String(kpId),
-    slug: toSlug(title),
+    slug: String(movie?.slug || movie?.seo_slug || '').trim() || toSlug(title),
     title,
     year: String(movie?.year || movie?.year_start || ''),
     description: String(movie?.description || '').trim(),
@@ -65,6 +65,11 @@ async function main() {
   )
 
   const movies = dedupeMovies(pages.flat().map(mapMovie))
+  if (movies.length === 0) {
+    console.warn(`SEO fetch returned 0 movies from ${API_BASE_URL}, keeping existing ${OUTPUT_PATH}`)
+    return
+  }
+
   await fs.mkdir(path.dirname(OUTPUT_PATH), { recursive: true })
   await fs.writeFile(OUTPUT_PATH, `${JSON.stringify(movies, null, 2)}\n`, 'utf8')
 

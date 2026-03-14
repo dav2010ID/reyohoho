@@ -1,10 +1,21 @@
 import movies from '@/data/movies.json'
 
 const FALLBACK_DESCRIPTION =
-  'ReYohoho - онлайн просмотр фильмов и сериалов. Подборки, рейтинги и удобная навигация.'
+  'ReYohoho - online movie and TV streaming with collections, ratings, and simple navigation.'
 const SITE_NAME = 'ReYohoho'
-const SITE_ORIGIN = 'https://dav2010id.github.io'
-const SITE_BASE_PATH = '/reyohoho'
+const SITE_ORIGIN = import.meta.env.VITE_SITE_ORIGIN || 'https://dav2010id.github.io'
+const SITE_BASE_PATH = import.meta.env.VITE_BASE_URL || '/reyohoho'
+const MAX_PRERENDER_ENTRIES = Number(import.meta.env.VITE_SSG_MAX_PAGES || 2000)
+
+const normalizeBasePath = (value) => {
+  const normalized = `/${String(value || '')
+    .trim()
+    .replace(/^\/+|\/+$/g, '')}`
+
+  return normalized === '/' ? '' : normalized
+}
+
+const BASE_PATH = normalizeBasePath(SITE_BASE_PATH)
 
 const toSlug = (value) =>
   String(value || '')
@@ -52,7 +63,7 @@ export const buildMoviePath = (kpId, slug = '') => {
 }
 
 export const buildMovieCanonicalUrl = (kpId, slug = '') =>
-  `${SITE_ORIGIN}${SITE_BASE_PATH}${buildMoviePath(kpId, slug)}`
+  `${SITE_ORIGIN}${BASE_PATH}${buildMoviePath(kpId, slug)}`
 
 export const buildMovieSeo = (movieLike = {}, kpIdOverride = null) => {
   const fallbackEntry = kpIdOverride ? getMovieSeoEntry(kpIdOverride) : null
@@ -79,10 +90,11 @@ export const buildMovieSeo = (movieLike = {}, kpIdOverride = null) => {
     description,
     poster,
     slug,
-    canonicalUrl: kpId ? buildMovieCanonicalUrl(kpId, slug) : `${SITE_ORIGIN}${SITE_BASE_PATH}/`,
+    canonicalUrl: kpId ? buildMovieCanonicalUrl(kpId, slug) : `${SITE_ORIGIN}${BASE_PATH}/`,
     siteName: SITE_NAME,
     type: 'video.movie'
   }
 }
 
 export const getAllMovieSeoEntries = () => normalizedMovies
+export const getPrerenderMovieSeoEntries = () => normalizedMovies.slice(0, MAX_PRERENDER_ENTRIES)

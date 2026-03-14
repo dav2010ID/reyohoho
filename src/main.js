@@ -6,7 +6,7 @@ import { useThemeStore } from './store/theme'
 import { useAppSetup } from './composables/useAppSetup'
 import { routes } from './router/routes'
 import App from './App.vue'
-import { buildMoviePath, getAllMovieSeoEntries } from '@/utils/movieSeo'
+import { buildMoviePath, getPrerenderMovieSeoEntries } from '@/utils/movieSeo'
 
 export const createApp = ViteSSG(
   App,
@@ -32,6 +32,8 @@ export const createApp = ViteSSG(
 
 export const includedRoutes = async (paths) => {
   const staticPaths = paths.filter((path) => !path.includes(':'))
-  const moviePaths = getAllMovieSeoEntries().map((movie) => buildMoviePath(movie.kp_id, movie.slug))
+  const moviePaths = getPrerenderMovieSeoEntries().map((movie) =>
+    buildMoviePath(movie.kp_id, movie.slug)
+  )
   return [...new Set([...staticPaths, ...moviePaths])]
 }

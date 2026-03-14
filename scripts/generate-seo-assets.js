@@ -1,11 +1,21 @@
 import fs from 'node:fs/promises'
 import path from 'node:path'
 
-const SITE_ORIGIN = 'https://dav2010id.github.io'
-const SITE_BASE_PATH = '/reyohoho'
+const SITE_ORIGIN = process.env.VITE_SITE_ORIGIN || 'https://dav2010id.github.io'
+const SITE_BASE_PATH = process.env.VITE_BASE_URL || '/reyohoho'
 const MOVIES_PATH = path.resolve(process.cwd(), 'src/data/movies.json')
 const ROBOTS_PATH = path.resolve(process.cwd(), 'public/robots.txt')
 const SITEMAP_PATH = path.resolve(process.cwd(), 'public/sitemap.xml')
+
+const normalizeBasePath = (value) => {
+  const normalized = `/${String(value || '')
+    .trim()
+    .replace(/^\/+|\/+$/g, '')}`
+
+  return normalized === '/' ? '' : normalized
+}
+
+const BASE_PATH = normalizeBasePath(SITE_BASE_PATH)
 
 const escapeXml = (value) =>
   String(value)
@@ -21,11 +31,11 @@ async function main() {
 
   const urls = [
     {
-      loc: `${SITE_ORIGIN}${SITE_BASE_PATH}/`,
+      loc: `${SITE_ORIGIN}${BASE_PATH}/`,
       lastmod: new Date().toISOString().slice(0, 10)
     },
     ...movies.map((movie) => ({
-      loc: `${SITE_ORIGIN}${SITE_BASE_PATH}/movie/${movie.kp_id}/${movie.slug}`,
+      loc: `${SITE_ORIGIN}${BASE_PATH}/movie/${movie.kp_id}/${movie.slug}`,
       lastmod: String(movie.updatedAt || '').slice(0, 10) || new Date().toISOString().slice(0, 10)
     }))
   ]
@@ -37,7 +47,7 @@ async function main() {
     )
     .join('\n')}\n</urlset>\n`
 
-  const robots = `User-agent: *\nAllow: /\n\nSitemap: ${SITE_ORIGIN}${SITE_BASE_PATH}/sitemap.xml\n`
+  const robots = `User-agent: *\nAllow: /\n\nSitemap: ${SITE_ORIGIN}${BASE_PATH}/sitemap.xml\n`
 
   await fs.mkdir(path.dirname(SITEMAP_PATH), { recursive: true })
   await fs.writeFile(SITEMAP_PATH, sitemap, 'utf8')
