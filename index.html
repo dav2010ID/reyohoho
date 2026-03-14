@@ -44,6 +44,27 @@
 
     <!-- Тема PWA -->
     <meta name="theme-color" content="#000000" />
+    <script>
+      ;(() => {
+        const baseUrl = '%BASE_URL%'
+        const normalizedBase = baseUrl.endsWith('/') ? baseUrl.slice(0, -1) : baseUrl
+        const currentUrl = new URL(window.location.href)
+        const redirectPath = currentUrl.searchParams.get('p')
+
+        if (!redirectPath) {
+          return
+        }
+
+        const restoredPath = decodeURIComponent(redirectPath)
+        const remainingParams = new URLSearchParams(currentUrl.searchParams)
+        remainingParams.delete('p')
+
+        const searchSuffix = remainingParams.toString()
+        const nextUrl = `${normalizedBase}${restoredPath}${searchSuffix ? `?${searchSuffix}` : ''}`
+
+        window.history.replaceState(null, '', nextUrl)
+      })()
+    </script>
   </head>
   <body>
     <h1 style="position:absolute;left:-9999px;top:auto;width:1px;height:1px;overflow:hidden;">

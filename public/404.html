@@ -5,28 +5,28 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Redirecting...</title>
     <script>
-      const fullPath = window.location.pathname
-      const search = window.location.search
-      const hash = window.location.hash
+      ;(() => {
+        const configuredBasePath = '__BASE_URL__'
+        const normalizedBasePath =
+          configuredBasePath && configuredBasePath !== '/'
+            ? configuredBasePath.replace(/\/$/, '')
+            : ''
+        const { pathname, search, hash } = window.location
 
-      let basePath = ''
-      if (window.location.pathname.startsWith('/reyohoho')) {
-        basePath = '/reyohoho'
-      }
+        let appRoute = pathname
+        if (normalizedBasePath && pathname.startsWith(normalizedBasePath)) {
+          appRoute = pathname.slice(normalizedBasePath.length)
+        }
 
-      let appRoute = fullPath
-      if (basePath && fullPath.startsWith(basePath)) {
-        appRoute = fullPath.substring(basePath.length)
-      }
+        if (!appRoute.startsWith('/')) {
+          appRoute = `/${appRoute}`
+        }
 
-      if (!appRoute || appRoute === '/') {
-        appRoute = ''
-      }
+        const redirectTarget = `${appRoute}${search}${hash}`
+        const destination = `${normalizedBasePath || ''}/?p=${encodeURIComponent(redirectTarget)}`
 
-      const newUrl = `${basePath}/#/${appRoute}${search}${hash}`
-
-      console.log('Redirecting from:', fullPath, 'to:', newUrl)
-      window.location.href = newUrl
+        window.location.replace(destination)
+      })()
     </script>
   </head>
   <body>
