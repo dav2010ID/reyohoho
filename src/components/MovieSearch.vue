@@ -1,6 +1,21 @@
 <template>
   <div class="wrapper">
     <div class="mainpage">
+      <section class="page-intro" aria-labelledby="home-title">
+        <h1 id="home-title">Поиск фильмов и сериалов онлайн в ReYohoho</h1>
+        <p class="page-intro__lead">
+          Ищите фильмы и сериалы по названию, ID Кинопоиск, Shikimori или IMDb, открывайте
+          карточки с рейтингами и быстро переходите к просмотру.
+        </p>
+        <p class="page-intro__text">
+          На главной странице доступны история просмотров, популярное сейчас, быстрый поиск и
+          навигация по основным разделам каталога.
+        </p>
+        <nav class="page-intro__links" aria-label="Основные разделы">
+          <RouterLink to="/top">Популярное</RouterLink>
+          <RouterLink to="/contact">Контакты</RouterLink>
+        </nav>
+      </section>
       <!-- Кнопки выбора типа поиска -->
       <div class="search-type-buttons">
         <button :class="{ active: searchType === 'title' }" @click="setSearchType('title')">
@@ -151,9 +166,11 @@ import { useMainStore } from '@/store/main'
 import { useAuthStore } from '@/store/auth'
 import { USER_LIST_TYPES_ENUM } from '@/constants'
 import { hasConsecutiveConsonants, suggestLayout, convertLayout } from '@/utils/keyboardLayout'
+import { normalizeBasePath } from '@/utils/basePath'
 import debounce from 'lodash/debounce'
 import { onMounted, onServerPrefetch, ref, watch, computed } from 'vue'
-import { useRouter } from 'vue-router'
+import { RouterLink, useRouter } from 'vue-router'
+import { useHead } from '@unhead/vue'
 import SpinnerLoading from '@/components/SpinnerLoading.vue'
 import RandomMovieModal from '@/components/RandomMovieModal.vue'
 import { getMovieSeoPath } from '@/utils/movieSeo'
@@ -183,6 +200,58 @@ const randomLoading = ref(false)
 const randomError = ref('')
 
 const searchInput = ref(null)
+const siteOrigin = import.meta.env.VITE_SITE_ORIGIN || 'https://dav2010id.github.io'
+const basePath = normalizeBasePath(import.meta.env.VITE_BASE_URL || '/reyohoho')
+const canonicalUrl = `${siteOrigin}${basePath || ''}/`
+const homeTitle = 'ReYohoho - поиск фильмов и сериалов онлайн бесплатно'
+const homeDescription =
+  'ReYohoho - онлайн-поиск фильмов и сериалов с быстрым переходом к просмотру, рейтингами, подборками, историей просмотров и удобной навигацией.'
+
+useHead({
+  title: homeTitle,
+  link: [
+    { rel: 'canonical', href: canonicalUrl },
+    { rel: 'alternate', hreflang: 'ru', href: canonicalUrl },
+    { rel: 'alternate', hreflang: 'x-default', href: canonicalUrl }
+  ],
+  meta: [
+    { name: 'description', content: homeDescription },
+    { property: 'og:type', content: 'website' },
+    { property: 'og:title', content: 'ReYohoho - поиск фильмов и сериалов онлайн' },
+    { property: 'og:description', content: homeDescription },
+    { property: 'og:url', content: canonicalUrl },
+    { property: 'og:locale', content: 'ru_RU' },
+    { name: 'twitter:card', content: 'summary' },
+    { name: 'twitter:title', content: 'ReYohoho - поиск фильмов и сериалов онлайн' },
+    { name: 'twitter:description', content: homeDescription }
+  ],
+  script: [
+    {
+      type: 'application/ld+json',
+      textContent: JSON.stringify([
+        {
+          '@context': 'https://schema.org',
+          '@type': 'Organization',
+          name: 'ReYohoho',
+          url: canonicalUrl,
+          logo: `${siteOrigin}${basePath || ''}/icons/icon-192x192.png`
+        },
+        {
+          '@context': 'https://schema.org',
+          '@type': 'WebSite',
+          name: 'ReYohoho',
+          url: canonicalUrl,
+          inLanguage: 'ru',
+          potentialAction: {
+            '@type': 'SearchAction',
+            target: `${canonicalUrl}#search={search_term_string}`,
+            'query-input': 'required name=search_term_string'
+          }
+        }
+      ])
+    }
+  ]
+})
 
 const loadHomeTopMovies = async () => {
   try {
@@ -501,6 +570,47 @@ const fetchRandomMovie = async () => {
   padding-bottom: 40px;
 }
 
+.page-intro {
+  max-width: 980px;
+  margin: 0 auto 24px;
+  padding: 0 20px;
+  text-align: center;
+  color: #fff;
+}
+
+.page-intro h1 {
+  margin: 0 0 12px;
+  font-size: clamp(28px, 4vw, 42px);
+  line-height: 1.15;
+}
+
+.page-intro__lead,
+.page-intro__text {
+  max-width: 760px;
+  margin: 0 auto 10px;
+  font-size: 16px;
+  line-height: 1.6;
+  color: rgba(255, 255, 255, 0.88);
+}
+
+.page-intro__links {
+  display: flex;
+  justify-content: center;
+  gap: 16px;
+  margin-top: 14px;
+  flex-wrap: wrap;
+}
+
+.page-intro__links a {
+  color: var(--accent-color);
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.page-intro__links a:hover {
+  text-decoration: underline;
+}
+
 /* Общие стили */
 .search-type-buttons {
   display: flex;
@@ -739,6 +849,11 @@ h2 {
   .mainpage {
     padding-top: 0;
     height: calc(100vh - 30px - 63px);
+  }
+
+  .page-intro {
+    padding: 16px 16px 0;
+    margin-bottom: 20px;
   }
 
   .search-container,

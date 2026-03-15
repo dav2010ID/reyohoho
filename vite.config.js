@@ -41,7 +41,16 @@ export default defineConfig(({ mode }) => {
         workbox: {
           clientsClaim: true,
           skipWaiting: true,
-          maximumFileSizeToCacheInBytes: 3000000
+          maximumFileSizeToCacheInBytes: 3000000,
+          navigateFallbackDenylist: [
+            /\/sitemap\.xml$/i,
+            /\/robots\.txt$/i,
+            /\/manifest\.webmanifest$/i,
+            /\/favicon\.ico$/i,
+            /\/icons\/.*$/i,
+            /\/assets\/.*$/i,
+            /\/.*\.[a-z0-9]+$/i
+          ]
         },
         build: {
           rollupOptions: {
