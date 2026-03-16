@@ -1,21 +1,6 @@
 <template>
   <div class="wrapper">
     <div class="mainpage">
-      <section class="page-intro" aria-labelledby="home-title">
-        <h1 id="home-title">Поиск фильмов и сериалов онлайн в ReYohoho</h1>
-        <p class="page-intro__lead">
-          Ищите фильмы и сериалы по названию, ID Кинопоиск, Shikimori или IMDb, открывайте
-          карточки с рейтингами и быстро переходите к просмотру.
-        </p>
-        <p class="page-intro__text">
-          На главной странице доступны история просмотров, популярное сейчас, быстрый поиск и
-          навигация по основным разделам каталога.
-        </p>
-        <nav class="page-intro__links" aria-label="Основные разделы">
-          <RouterLink to="/top">Популярное</RouterLink>
-          <RouterLink to="/contact">Контакты</RouterLink>
-        </nav>
-      </section>
       <!-- Кнопки выбора типа поиска -->
       <div class="search-type-buttons">
         <button :class="{ active: searchType === 'title' }" @click="setSearchType('title')">
@@ -169,7 +154,7 @@ import { hasConsecutiveConsonants, suggestLayout, convertLayout } from '@/utils/
 import { normalizeBasePath } from '@/utils/basePath'
 import debounce from 'lodash/debounce'
 import { onMounted, onServerPrefetch, ref, watch, computed } from 'vue'
-import { RouterLink, useRouter } from 'vue-router'
+import { useRouter } from 'vue-router'
 import { useHead } from '@unhead/vue'
 import SpinnerLoading from '@/components/SpinnerLoading.vue'
 import RandomMovieModal from '@/components/RandomMovieModal.vue'
@@ -570,47 +555,6 @@ const fetchRandomMovie = async () => {
   padding-bottom: 40px;
 }
 
-.page-intro {
-  max-width: 980px;
-  margin: 0 auto 24px;
-  padding: 0 20px;
-  text-align: center;
-  color: #fff;
-}
-
-.page-intro h1 {
-  margin: 0 0 12px;
-  font-size: clamp(28px, 4vw, 42px);
-  line-height: 1.15;
-}
-
-.page-intro__lead,
-.page-intro__text {
-  max-width: 760px;
-  margin: 0 auto 10px;
-  font-size: 16px;
-  line-height: 1.6;
-  color: rgba(255, 255, 255, 0.88);
-}
-
-.page-intro__links {
-  display: flex;
-  justify-content: center;
-  gap: 16px;
-  margin-top: 14px;
-  flex-wrap: wrap;
-}
-
-.page-intro__links a {
-  color: var(--accent-color);
-  font-weight: 600;
-  text-decoration: none;
-}
-
-.page-intro__links a:hover {
-  text-decoration: underline;
-}
-
 /* Общие стили */
 .search-type-buttons {
   display: flex;
@@ -849,11 +793,6 @@ h2 {
   .mainpage {
     padding-top: 0;
     height: calc(100vh - 30px - 63px);
-  }
-
-  .page-intro {
-    padding: 16px 16px 0;
-    margin-bottom: 20px;
   }
 
   .search-container,
