@@ -18,7 +18,7 @@ export const useMainStore = defineStore(MAIN_STORE_NAME, {
     cardSize: 'medium',
     isStreamerMode: true,
     rememberScrollPosition: true,
-    contentApiProvider: 'kinobd',
+    contentApiProvider: 'kinobox',
     searchApiProvider: 'rhserv'
   }),
 

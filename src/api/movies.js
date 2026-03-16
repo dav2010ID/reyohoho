@@ -24,9 +24,9 @@ const KINOBOX_SUPPORTED_METHODS = new Set(['getPlayers'])
 const getCurrentProvider = () => {
   try {
     const mainStore = useMainStore()
-    return mainStore.contentApiProvider || CONTENT_PROVIDERS.KINOBD
+    return mainStore.contentApiProvider || CONTENT_PROVIDERS.KINOBOX
   } catch {
-    return CONTENT_PROVIDERS.KINOBD
+    return CONTENT_PROVIDERS.KINOBOX
   }
 }
 
