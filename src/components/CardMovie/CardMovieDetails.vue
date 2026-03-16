@@ -38,6 +38,7 @@ const removeYearFromTitle = (title) => {
 <style scoped>
 .movie-details {
   padding: 15px;
+  min-width: 0;
   flex-grow: 1;
   display: flex;
   flex-direction: column;
@@ -45,6 +46,7 @@ const removeYearFromTitle = (title) => {
 
 .movie-header {
   display: flex;
+  min-width: 0;
   justify-content: space-between;
   align-items: flex-start;
   margin-bottom: 10px;

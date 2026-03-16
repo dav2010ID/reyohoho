@@ -8,7 +8,7 @@
       <button class="player-btn" @click="openPlayerModal">
         {{
           selectedPlayerInternal
-            ? cleanName(selectedPlayerInternal.translate).toUpperCase()
+            ? getProviderDisplayName(selectedPlayerInternal).toUpperCase()
             : 'Загрузка плееров...'
         }}
       </button>
@@ -69,7 +69,7 @@
         ></iframe>
         <SpinnerLoading
           v-if="iframeLoading"
-          :text="`Загружается плеер: ${selectedPlayerInternal ? cleanName(selectedPlayerInternal.translate) : 'Загружается список плееров'}\nЕсли плеер не грузится, то смените плеер выше или включите VPN`"
+          :text="`Загружается плеер: ${selectedPlayerInternal ? getProviderDisplayName(selectedPlayerInternal) : 'Загружается список плееров'}\nЕсли плеер не грузится, то смените плеер выше или включите VPN`"
           style="white-space: pre-line"
         />
       </div>
@@ -696,17 +696,34 @@ const naturalHeight = ref(0)
 const normalizeKey = (key) => key.toUpperCase()
 
 const applyPlayersData = (players) => {
-  playersInternal.value = Object.entries(players || {}).map(([key, value]) => ({
-    key: key.toUpperCase(),
-    ...value
-  }))
+  const dedupedPlayers = []
+  const seenProviders = new Set()
+
+  for (const [key, value] of Object.entries(players || {})) {
+    const player = {
+      key: key.toUpperCase(),
+      ...value
+    }
+    const providerName = normalizeKey(getProviderDisplayName(player))
+    if (providerName && seenProviders.has(providerName)) {
+      continue
+    }
+    if (providerName) {
+      seenProviders.add(providerName)
+    }
+    dedupedPlayers.push(player)
+  }
+
+  playersInternal.value = dedupedPlayers
 
   if (playersInternal.value.length === 0) return
 
   if (preferredPlayer.value) {
     const normalizedPreferred = normalizeKey(preferredPlayer.value)
     const preferred = playersInternal.value.find(
-      (player) => normalizeKey(player.key) === normalizedPreferred
+      (player) =>
+        normalizeKey(player.key) === normalizedPreferred ||
+        normalizeKey(getProviderDisplayName(player)) === normalizedPreferred
     )
     selectedPlayerInternal.value = preferred || playersInternal.value[0]
   } else {
@@ -1583,11 +1600,38 @@ const copyMovieLink = () => {
 }
 
 function cleanName(name) {
-  const cleanedName = name
+  const cleanedName = String(name || '')
     .replace(/KODIK>/, 'Kodik - ')
     .replace(/VEOVEO>/, 'VeoVeo - ')
+    .replace(/KINOBOX>/, '')
     .trim()
   return cleanedName
+}
+
+function getProviderName(player) {
+  const directProvider = String(player?.provider || '').trim()
+  if (directProvider) return cleanName(directProvider)
+
+  const rawName = String(player?.name || player?.key || '')
+  if (!rawName.includes('>')) return ''
+
+  const segments = rawName
+    .split('>')
+    .map((segment) => segment.trim())
+    .filter(Boolean)
+  if (!segments.length) return ''
+
+  const root = segments[0].toUpperCase()
+  if ((root === 'KINOBOX' || root === 'KINOBD' || root === 'RHSERV') && segments[1]) {
+    return cleanName(segments[1])
+  }
+
+  return cleanName(segments[0])
+}
+
+function getProviderDisplayName(player) {
+  const provider = getProviderName(player)
+  return provider || cleanName(player?.translate) || 'Плеер'
 }
 
 const cleanupAudioContext = () => {

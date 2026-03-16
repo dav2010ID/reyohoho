@@ -102,6 +102,7 @@ const posterSrc = computed(() => {
 <style scoped>
 .movie-poster-container {
   position: relative;
+  flex-shrink: 0;
 }
 
 .movie-poster {
@@ -215,10 +216,12 @@ const posterSrc = computed(() => {
   .movie-poster-container {
     width: 100px;
     min-width: 100px;
+    align-self: stretch;
   }
 
   .movie-poster {
     width: 100px;
+    height: 100%;
     aspect-ratio: 2 / 3;
     border-radius: 10px 0 0 10px;
   }

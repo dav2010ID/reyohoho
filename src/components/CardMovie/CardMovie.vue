@@ -78,6 +78,7 @@ onMounted(() => {
   text-decoration: none;
   color: inherit;
   width: 100%;
+  min-width: 0;
   background: rgba(30, 30, 30, 0.6);
   border-radius: 10px;
   overflow: hidden;
@@ -177,8 +178,9 @@ onMounted(() => {
 @media (max-width: 620px) {
   .movie-card {
     flex-direction: row;
-    align-items: flex-start;
-    height: 200px;
+    align-items: stretch;
+    min-height: 150px;
+    height: auto;
     width: 100%;
     border-radius: 15px;
   }

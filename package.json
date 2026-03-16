@@ -8,7 +8,7 @@
     "npm": ">=10"
   },
   "scripts": {
-    "dev": "vite-ssg dev",
+    "dev": "vite",
     "build": "npm run seo:build && vite-ssg build && node scripts/postbuild-gh-pages.js",
     "build:github": "npm run seo:build && cross-env VITE_BASE_URL=/reyohoho/ vite-ssg build --mode github && node scripts/postbuild-gh-pages.js",
     "preview": "vite-ssg serve",

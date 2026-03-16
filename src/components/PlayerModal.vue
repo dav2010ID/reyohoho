@@ -130,13 +130,8 @@ const getProviderName = (player) => {
 }
 
 const formatPlayerLabel = (player) => {
-  const voice = cleanName(player?.translate)
   const provider = getProviderName(player)
-
-  if (!provider) return voice
-  if (!voice || voice.toLowerCase() === provider.toLowerCase()) return provider
-
-  return `${provider} / ${voice}`
+  return provider || cleanName(player?.translate) || 'Плеер'
 }
 
 const selectPlayer = (player) => {
@@ -166,7 +161,7 @@ const groupPlayers = (group) => {
   )
 
   if (group === 'kodik') {
-    return players.sort((a, b) => cleanName(a.translate).localeCompare(cleanName(b.translate)))
+    return players.sort((a, b) => formatPlayerLabel(a).localeCompare(formatPlayerLabel(b)))
   }
 
   return players

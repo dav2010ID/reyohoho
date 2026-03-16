@@ -29,3 +29,7 @@ coverage
 dist.zip
 yarn.lock
 _user_site_tmp/
+
+# Python
+__pycache__/
+*.py[cod]
