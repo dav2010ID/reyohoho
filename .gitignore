@@ -27,7 +27,6 @@ coverage
 *.sln
 *.sw?
 dist.zip
-yarn.lock
 _user_site_tmp/
 
 # Python
