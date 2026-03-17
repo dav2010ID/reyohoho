@@ -62,7 +62,7 @@ export const sanitizeSlug = (value) =>
     .replace(/-{2,}/g, '-')
 
 export const getMovieIdentifier = (movieLike = {}, kpIdOverride = null) =>
-  getTrimmedString(movieLike?.kinopoisk_id, movieLike?.kp_id, movieLike?.id_kp, movieLike?.id, kpIdOverride)
+  getTrimmedString(kpIdOverride, movieLike?.kinopoisk_id, movieLike?.kp_id, movieLike?.id_kp)
 
 export const extractOriginalTitle = (movieLike = {}, fallbackEntry = null) =>
   getTrimmedString(
@@ -114,7 +114,11 @@ const getExistingSlugCandidate = (movieLike = {}, fallbackEntry = null) =>
     sanitizeSlug(fallbackEntry?.slug)
   )
 
-export const resolveCanonicalMovieIdentity = (movieLike = {}, fallbackEntry = null, kpIdOverride = null) => {
+export const resolveCanonicalMovieIdentity = (
+  movieLike = {},
+  fallbackEntry = null,
+  kpIdOverride = null
+) => {
   const kpId = getMovieIdentifier(movieLike, kpIdOverride)
   const titles = resolveCanonicalMovieTitles(movieLike, fallbackEntry)
   const generatedSlug = toSlug(titles.preferredTitle)
@@ -130,5 +134,8 @@ export const resolveCanonicalMovieIdentity = (movieLike = {}, fallbackEntry = nu
   }
 }
 
-export const getCanonicalSlugCandidate = (movieLike = {}, fallbackEntry = null, kpIdOverride = null) =>
-  resolveCanonicalMovieIdentity(movieLike, fallbackEntry, kpIdOverride).slug
+export const getCanonicalSlugCandidate = (
+  movieLike = {},
+  fallbackEntry = null,
+  kpIdOverride = null
+) => resolveCanonicalMovieIdentity(movieLike, fallbackEntry, kpIdOverride).slug

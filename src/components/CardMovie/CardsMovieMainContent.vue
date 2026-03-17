@@ -1,6 +1,6 @@
 <template>
   <div class="movie-poster-container" :class="[`card-size-${cardSize}`, `variant-${variant}`]">
-    <div v-if="posterSrc">
+    <div v-if="posterSrc" class="movie-poster-frame">
       <img
         v-if="isServerRender"
         :src="posterSrc"
@@ -8,6 +8,7 @@
         :alt="movie.title ? `Постер ${movie.title}` : 'Постер фильма'"
         width="300"
         height="450"
+        decoding="async"
       />
       <img
         v-else
@@ -16,6 +17,8 @@
         :alt="movie.title ? `Постер ${movie.title}` : 'Постер фильма'"
         width="300"
         height="450"
+        loading="lazy"
+        decoding="async"
       />
       <DeleteButton
         v-if="!isMobile && (isHistory || isUserList) && showDelete"
@@ -103,6 +106,19 @@ const posterSrc = computed(() => {
 
 <style scoped>
 .movie-poster-container {
+  --movie-poster-frame-radius: 10px 10px 0 0;
+  --movie-poster-frame-bg: rgba(255, 255, 255, 0.04);
+  --movie-poster-overlay: none;
+  --movie-poster-hover-transform: none;
+  --movie-poster-hover-filter: none;
+  --movie-ratings-bg: rgba(0, 0, 0, 0.7);
+  --movie-ratings-border: transparent;
+  --movie-ratings-radius: 5px;
+  --movie-ratings-gap: 10px;
+  --movie-ratings-padding: 5px 10px;
+  --movie-poster-type-bg: rgba(0, 0, 0, 0.7);
+  --movie-poster-type-border: transparent;
+  --movie-poster-type-padding: 3px 8px;
   position: relative;
   flex-shrink: 0;
 }
@@ -111,10 +127,38 @@ const posterSrc = computed(() => {
   width: 100%;
 }
 
-.movie-poster {
+.movie-poster-frame {
   width: 100%;
   aspect-ratio: 2 / 3;
+  overflow: hidden;
+  border-radius: var(--movie-poster-frame-radius);
+  background: var(--movie-poster-frame-bg);
+}
+
+.movie-poster-frame::after {
+  content: '';
+  position: relative;
+  display: block;
+}
+
+.movie-poster-frame::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: var(--movie-poster-overlay);
+}
+
+.movie-poster {
+  width: 100%;
+  height: 100%;
+  display: block;
   object-fit: cover;
+}
+
+:deep(.movie-card:hover) .movie-poster {
+  transform: var(--movie-poster-hover-transform);
+  filter: var(--movie-poster-hover-filter);
 }
 
 .delete-button {
@@ -129,10 +173,11 @@ const posterSrc = computed(() => {
   bottom: 10px;
   left: 10px;
   display: flex;
-  gap: 10px;
-  background: rgba(0, 0, 0, 0.7);
-  padding: 5px 10px;
-  border-radius: 5px;
+  gap: var(--movie-ratings-gap);
+  background: var(--movie-ratings-bg);
+  border: 1px solid var(--movie-ratings-border);
+  padding: var(--movie-ratings-padding);
+  border-radius: var(--movie-ratings-radius);
   justify-content: center;
   align-items: center;
 }
@@ -141,9 +186,10 @@ const posterSrc = computed(() => {
   position: absolute;
   top: 5px;
   right: 5px;
-  background: rgba(0, 0, 0, 0.7);
+  background: var(--movie-poster-type-bg);
   color: #fff;
-  padding: 3px 8px;
+  border: 1px solid var(--movie-poster-type-border);
+  padding: var(--movie-poster-type-padding);
   border-radius: 3px;
   font-size: 0.9em;
   text-transform: uppercase;
@@ -222,12 +268,10 @@ const posterSrc = computed(() => {
   .movie-poster-container {
     width: 100px;
     min-width: 100px;
-    align-self: stretch;
   }
 
-  .movie-poster {
+  .movie-poster-frame {
     width: 100px;
-    height: 100%;
     aspect-ratio: 2 / 3;
     border-radius: 10px 0 0 10px;
   }
@@ -238,10 +282,8 @@ const posterSrc = computed(() => {
     align-self: auto;
   }
 
-  .movie-poster-container.variant-related .movie-poster {
+  .movie-poster-container.variant-related .movie-poster-frame {
     width: 100%;
-    height: auto;
-    border-radius: 12px 12px 0 0;
   }
 
   .delete-button {

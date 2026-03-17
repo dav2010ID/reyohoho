@@ -1,5 +1,11 @@
 <template>
-  <button class="deleteButton">
+  <button
+    type="button"
+    class="deleteButton"
+    @click.stop.prevent="emit('click', $event)"
+    @mousedown.stop
+    @pointerdown.stop
+  >
     <TrashIcon />
 
     <span class="tooltip">Delete</span>
@@ -7,8 +13,9 @@
 </template>
 
 <script setup>
-// eslint-disable-next-line semi
-import TrashIcon from '@/components/icons/TrashIcon.vue';
+import TrashIcon from '@/components/icons/TrashIcon.vue'
+
+const emit = defineEmits(['click'])
 </script>
 
 <style scoped>

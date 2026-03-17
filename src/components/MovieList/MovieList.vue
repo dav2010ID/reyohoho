@@ -122,6 +122,7 @@ const removeFromHistory = async (kp_id) => {
     }
   } else {
     mainStore.removeFromHistory(kp_id)
+    emit('item-deleted', kp_id)
   }
 }
 
@@ -238,7 +239,7 @@ onUnmounted(() => {
   .grid {
     grid-template-columns: 1fr;
     gap: 10px;
-    padding: 8px;
+    padding: 5px;
   }
 }
 </style>

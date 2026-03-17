@@ -721,9 +721,7 @@ footer {
   display: inline-flex;
   align-items: center;
   line-height: 0;
-  margin-left: 2px;
-  position: relative;
-  left: -8px;
+  margin-left: 6px;
   opacity: 0.88;
   filter: saturate(0.92);
   transition: opacity 0.2s ease, transform 0.2s ease, filter 0.2s ease;
@@ -792,7 +790,7 @@ footer {
   }
 
   .visitor-badge-link {
-    left: -5px;
+    margin-left: 4px;
   }
 
   .visitor-badge-link:hover {
@@ -857,7 +855,7 @@ footer {
   }
 
   .visitor-badge-link {
-    left: -2px;
+    margin-left: 0;
   }
 
   .visitor-badge-link:hover {

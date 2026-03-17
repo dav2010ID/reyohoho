@@ -1,5 +1,13 @@
+import movies from '../data/movies.json'
 import { describe, expect, it } from 'vitest'
-import { getMovieSeoPath, getMovieSeoSlug, registerMovieSeoEntry } from './movieSeo'
+import {
+  getMovieSeoEntry,
+  getMovieSeoPath,
+  getMovieSeoSlug,
+  getPrerenderMovieSeoEntries,
+  registerMovieSeoEntry
+} from './movieSeo'
+import { getMovieIdentifier } from './movieSlug'
 
 describe('movieSeo', () => {
   it('prefers the original Latin title over a stale fallback slug', () => {
@@ -34,7 +42,7 @@ describe('movieSeo', () => {
     expect(
       getMovieSeoPath({
         kp_id: '5591410',
-        title: 'ÐœÐ¾Ð»Ð¾Ð´Ð¾Ð¹ Ð¨ÐµÑ€Ð»Ð¾Ðº'
+        title: 'Молодой Шерлок'
       })
     ).toBe('/movie/5591410/young-sherlock')
   })
@@ -64,5 +72,41 @@ describe('movieSeo', () => {
 
     expect(getMovieSeoSlug({ kp_id: '777777' })).toBe('young-sherlock')
     expect(getMovieSeoPath({ kp_id: '777777' })).toBe('/movie/777777/young-sherlock')
+  })
+
+  it('prefers kpIdOverride over unrelated provider ids', () => {
+    expect(
+      getMovieIdentifier(
+        {
+          id: 'provider-123',
+          kp_id: '',
+          kinopoisk_id: ''
+        },
+        '5591410'
+      )
+    ).toBe('5591410')
+  })
+
+  it('reads SEO entries from the static catalog without runtime registration', () => {
+    const staticMovie = movies.find((movie) => movie?.kp_id && movie?.title)
+
+    expect(staticMovie).toBeTruthy()
+    expect(getMovieSeoEntry(staticMovie.kp_id)).toMatchObject({
+      kp_id: String(staticMovie.kp_id),
+      title: staticMovie.title
+    })
+  })
+
+  it('returns normalized prerender entries from the static catalog', () => {
+    const entries = getPrerenderMovieSeoEntries()
+
+    expect(entries.length).toBeGreaterThan(0)
+    expect(entries[0]).toEqual(
+      expect.objectContaining({
+        kp_id: expect.any(String),
+        slug: expect.any(String),
+        title: expect.any(String)
+      })
+    )
   })
 })

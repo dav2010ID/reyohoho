@@ -36,12 +36,9 @@ const fallbackEndpoint = {
 }
 
 function getAllowedApiHosts() {
-  let fallbackHost = null
-  try {
-    fallbackHost = new URL(import.meta.env.VITE_APP_API_URL).hostname
-  } catch {
-    fallbackHost = null
-  }
+  const fallbackHost = URL.canParse(import.meta.env.VITE_APP_API_URL)
+    ? new URL(import.meta.env.VITE_APP_API_URL).hostname
+    : null
   const configuredHosts = (import.meta.env.VITE_ALLOWED_API_HOSTS || '')
     .split(',')
     .map((host) => host.trim())

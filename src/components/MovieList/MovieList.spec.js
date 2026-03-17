@@ -188,6 +188,7 @@ describe('Тесты компонента MovieList', () => {
 
     const card = wrapper.find(`[data-test-id="${movieCardDataTestId}"]`)
     const deleteBtn = card.find('[data-test-id="delete-button"]')
+    const push = vi.spyOn(routerMock, 'push')
 
     expect(card.exists()).toBe(true)
     expect(deleteBtn.exists()).toBe(true)
@@ -195,6 +196,8 @@ describe('Тесты компонента MovieList', () => {
     await deleteBtn.trigger('click')
 
     expect(mainStore.removeFromHistory).toHaveBeenCalledWith(movieDeleteId)
+    expect(push).not.toHaveBeenCalled()
+    expect(wrapper.emitted('item-deleted')).toEqual([[movieDeleteId]])
   })
 
   it('Не удаляет карточку из списка, когда это НЕ список историй и декстоп', async () => {

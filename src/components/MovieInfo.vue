@@ -530,7 +530,9 @@
 
         <!-- Секция с сиквелами и приквелами -->
         <div v-if="sequelsAndPrequels.length" class="related-movies">
-          <h2>Сиквелы и приквелы</h2>
+          <div class="related-movies-header">
+            <h2>Сиквелы и приквелы</h2>
+          </div>
           <MovieList
             :movies-list="
               showAllSequels ? sequelsAndPrequels : sequelsAndPrequels.slice(0, itemsPerRow)
@@ -552,7 +554,9 @@
 
         <!-- Секция с похожими фильмами -->
         <div v-if="similars.length" class="related-movies">
-          <h2>Похожие</h2>
+          <div class="related-movies-header">
+            <h2>Похожие</h2>
+          </div>
           <MovieList
             :movies-list="showAllSimilars ? similars : similars.slice(0, itemsPerRow)"
             :loading="false"
@@ -1472,20 +1476,8 @@ const syncCanonicalMovieRoute = async () => {
     const currentUrl = `${window.location.pathname}${window.location.search}${window.location.hash}`
 
     if (currentUrl !== resolvedTarget.href) {
-      window.location.replace(resolvedTarget.href)
+      await router.replace(targetLocation)
     }
-    return
-  }
-}
-
-const setDocumentTitle = () => {
-  if (movieInfo.value) {
-    const title =
-      movieInfo.value.name_ru ||
-      movieInfo.value.name_en ||
-      movieInfo.value.name_original ||
-      'Информация о фильме'
-    document.title = title
   }
 }
 
@@ -1651,7 +1643,6 @@ const fetchMovieInfo = async (updateHistory = true) => {
     })
 
     await syncCanonicalMovieRoute()
-    setDocumentTitle()
 
     const movieToSave = {
       kp_id: kp_id.value,
@@ -1913,16 +1904,8 @@ watch(
       await fetchMovieInfo()
       infoLoading.value = false
     }
-  }
-)
-
-watch(
-  movieInfo,
-  () => {
-    syncCanonicalMovieRoute()
-    setDocumentTitle()
   },
-  { deep: true }
+  { immediate: true }
 )
 
 watch(
@@ -2945,12 +2928,38 @@ const handleFilterSelect = () => {
 /* Стили для секций с похожими фильмами */
 .related-movies {
   margin-top: 30px;
+  padding: 18px 18px 12px;
+  border-radius: 18px;
   position: relative;
+  background: rgba(8, 12, 10, 0.34);
+  border: 1px solid rgba(81, 207, 102, 0.16);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.03);
+}
+
+.related-movies-header {
+  position: relative;
+  z-index: 1;
+  margin-bottom: 14px;
 }
 
 .related-movies h2 {
   color: #fff;
-  margin-bottom: 15px;
+  margin: 0;
+  font-size: 1.35rem;
+  line-height: 1.1;
+  letter-spacing: -0.02em;
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.related-movies h2::before {
+  content: '';
+  width: 10px;
+  height: 10px;
+  border-radius: 999px;
+  background: #51cf66;
+  box-shadow: 0 0 10px rgba(81, 207, 102, 0.45);
 }
 
 /* Подсказка */
@@ -3808,26 +3817,48 @@ const handleFilterSelect = () => {
 }
 
 .related-movies-list :deep(.grid) {
-  grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+  position: relative;
+  z-index: 1;
+  grid-template-columns: repeat(auto-fill, minmax(156px, 1fr));
+  align-items: start;
+  gap: 14px;
+  padding: 0;
 }
 
 .related-movies-list :deep(.grid.card-size-small) {
-  grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
-  gap: 8px;
+  grid-template-columns: repeat(auto-fill, minmax(132px, 1fr));
+  gap: 10px;
 }
 
 .related-movies-list :deep(.grid.card-size-medium) {
-  grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(156px, 1fr));
 }
 
 .related-movies-list :deep(.grid.card-size-large) {
-  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
-  gap: 16px;
+  grid-template-columns: repeat(auto-fill, minmax(172px, 1fr));
+  gap: 14px;
+}
+
+.related-movies .expand-circle-button {
+  position: relative;
+  z-index: 1;
+  margin-top: 18px;
 }
 
 @media (max-width: 620px) {
+  .related-movies {
+    margin-top: 24px;
+    padding: 14px 10px 10px;
+    border-radius: 14px;
+  }
+
+  .related-movies h2 {
+    font-size: 1.15rem;
+  }
+
   .related-movies-list :deep(.grid) {
     grid-template-columns: 1fr;
+    gap: 10px;
   }
 }
 

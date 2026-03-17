@@ -362,7 +362,7 @@ const fetchMovieInfo = async () => {
 const handleApiError = (error) => {
   if (error.response) {
     const status = error.response.status
-    let message = 'Произошла ошибка при загрузке данных'
+    let message
     let code = status
 
     switch (status) {

@@ -79,12 +79,21 @@ onMounted(() => {
 
 <style scoped>
 .movie-card {
+  --card-radius: 10px;
+  --card-bg: #141414;
+  --card-border-color: transparent;
+  --card-shadow: 0 10px 24px rgba(0, 0, 0, 0.28);
+  --card-hover-shadow: 0 18px 36px rgba(0, 0, 0, 0.34);
+  --card-focus-outline: 2px solid var(--accent-color);
+  --card-focus-shadow: 0 0 0 3px color-mix(in srgb, var(--accent-color) 32%, transparent);
+  --card-hover-translate: -5px;
+  --card-hover-scale: 1.02;
   text-decoration: none;
   color: inherit;
   width: 100%;
   min-width: 0;
-  background: rgba(30, 30, 30, 0.6);
-  border-radius: 10px;
+  background: var(--card-bg);
+  border-radius: var(--card-radius);
   overflow: hidden;
   cursor: pointer;
   display: flex;
@@ -94,8 +103,8 @@ onMounted(() => {
     transform 0.3s ease,
     box-shadow 0.3s ease,
     border 0.3s ease;
-  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.4);
-  border: none;
+  box-shadow: var(--card-shadow);
+  border: 1px solid var(--card-border-color);
 }
 
 .has-border {
@@ -103,21 +112,19 @@ onMounted(() => {
 }
 
 .movie-card:hover {
-  transform: translateY(-5px);
-  box-shadow:
-    0 8px 16px rgba(0, 0, 0, 0.3),
-    0 0 20px var(--accent-semi-transparent);
+  transform: translateY(var(--card-hover-translate)) scale(var(--card-hover-scale));
+  box-shadow: var(--card-hover-shadow);
 }
 
 .hover-disabled:hover {
   transform: none;
-  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.4);
+  box-shadow: var(--card-shadow);
 }
 
-.movie-card:focus {
-  outline: 2px solid white;
+.movie-card:focus-visible {
+  outline: var(--card-focus-outline);
   outline-offset: 2px;
-  box-shadow: 0 0 15px rgba(255, 255, 255, 0.8);
+  box-shadow: var(--card-focus-shadow);
   transition: border 0.2s ease;
   cursor: pointer;
 }
@@ -179,9 +186,6 @@ onMounted(() => {
 }
 
 .movie-card.variant-related {
-  display: block;
-  align-self: start;
-  justify-content: flex-start;
   height: auto;
 }
 
@@ -197,9 +201,10 @@ onMounted(() => {
   }
 
   .movie-card.variant-related {
-    display: block;
+    flex-direction: column;
+    align-items: stretch;
     min-height: 0;
-    border-radius: 12px;
+    border-radius: 14px;
   }
 }
 </style>

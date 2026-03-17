@@ -1,13 +1,11 @@
-import 'core-js/stable'
-import 'regenerator-runtime/runtime'
 import { ViteSSG } from 'vite-ssg'
 import { registerSW } from 'virtual:pwa-register'
 import { useThemeStore } from './store/theme'
 import { useAppSetup } from './composables/useAppSetup'
 import { routes } from './router/routes'
 import { installRouterGuards } from './router'
+import { buildMoviePath, getPrerenderMovieSeoEntries } from './utils/movieSeo'
 import App from './App.vue'
-import { buildMoviePath, getPrerenderMovieSeoEntries } from '@/utils/movieSeo'
 
 export const createApp = ViteSSG(
   App,
@@ -37,5 +35,6 @@ export const includedRoutes = async (paths) => {
   const moviePaths = getPrerenderMovieSeoEntries().map((movie) =>
     buildMoviePath(movie.kp_id, movie.slug)
   )
-  return [...new Set([...staticPaths, ...moviePaths])]
+
+  return Array.from(new Set([...staticPaths, ...moviePaths]))
 }

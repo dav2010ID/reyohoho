@@ -1,5 +1,6 @@
 import fs from 'node:fs/promises'
 import path from 'node:path'
+import { pathToFileURL } from 'node:url'
 import { normalizeBasePath } from '../src/utils/basePath.js'
 import { resolveCanonicalMovieIdentity } from '../src/utils/movieSlug.js'
 
@@ -20,39 +21,78 @@ const escapeXml = (value) =>
     .replace(/"/g, '&quot;')
     .replace(/'/g, '&apos;')
 
-async function main() {
-  const raw = await fs.readFile(MOVIES_PATH, 'utf8')
-  const movies = JSON.parse(raw)
-  const lastmod = new Date().toISOString().slice(0, 10)
+export const readMoviesSeoCatalog = async (moviesPath = MOVIES_PATH) => {
+  try {
+    const raw = await fs.readFile(path.resolve(moviesPath), 'utf8')
+    const parsed = JSON.parse(raw)
+    return Array.isArray(parsed) ? parsed : []
+  } catch (error) {
+    if (error?.code === 'ENOENT') return []
+    throw error
+  }
+}
 
-  const urls = [
-    ...STATIC_SITEMAP_PATHS.map((routePath) => ({
-      loc: `${SITE_ORIGIN}${BASE_PATH}${routePath === '/' ? '/' : routePath}`,
-      lastmod
+export const createSitemapUrls = ({
+  movies = [],
+  siteOrigin = SITE_ORIGIN,
+  basePath = BASE_PATH,
+  staticPaths = STATIC_SITEMAP_PATHS,
+  currentDate = new Date().toISOString().slice(0, 10)
+} = {}) => {
+  return [
+    ...staticPaths.map((routePath) => ({
+      loc: `${siteOrigin}${basePath}${routePath === '/' ? '/' : routePath}`,
+      lastmod: currentDate
     })),
     ...movies.map((movie) => ({
-      loc: `${SITE_ORIGIN}${BASE_PATH}/movie/${movie.kp_id}/${resolveCanonicalMovieIdentity(movie).slug}`,
-      lastmod: String(movie.updatedAt || '').slice(0, 10) || lastmod
+      loc: `${siteOrigin}${basePath}/movie/${movie.kp_id}/${resolveCanonicalMovieIdentity(movie).slug}`,
+      lastmod: String(movie.updatedAt || '').slice(0, 10) || currentDate
     }))
   ]
+}
 
-  const sitemap = `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n${urls
-    .map(
-      (item) =>
-        `  <url>\n    <loc>${escapeXml(item.loc)}</loc>\n    <lastmod>${escapeXml(item.lastmod)}</lastmod>\n  </url>`
-    )
-    .join('\n')}\n</urlset>\n`
+export const createSitemapXml = (urls = []) => `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n${urls
+  .map(
+    (item) =>
+      `  <url>\n    <loc>${escapeXml(item.loc)}</loc>\n    <lastmod>${escapeXml(item.lastmod)}</lastmod>\n  </url>`
+  )
+  .join('\n')}\n</urlset>\n`
 
-  const robots = `User-agent: *\nAllow: /\n\nSitemap: ${SITE_ORIGIN}${BASE_PATH}/sitemap.xml\n`
+export const createRobotsTxt = ({
+  siteOrigin = SITE_ORIGIN,
+  basePath = BASE_PATH
+} = {}) => `User-agent: *\nAllow: /\n\nSitemap: ${siteOrigin}${basePath}/sitemap.xml\n`
 
-  await fs.mkdir(path.dirname(SITEMAP_PATH), { recursive: true })
-  await fs.writeFile(SITEMAP_PATH, sitemap, 'utf8')
-  await fs.writeFile(ROBOTS_PATH, robots, 'utf8')
+export async function generateSeoAssets({
+  moviesPath = MOVIES_PATH,
+  robotsPath = ROBOTS_PATH,
+  sitemapPath = SITEMAP_PATH,
+  siteOrigin = SITE_ORIGIN,
+  basePath = BASE_PATH
+} = {}) {
+  const movies = await readMoviesSeoCatalog(moviesPath)
+  const lastmod = new Date().toISOString().slice(0, 10)
+  const urls = createSitemapUrls({ movies, siteOrigin, basePath, currentDate: lastmod })
+  const sitemap = createSitemapXml(urls)
+  const robots = createRobotsTxt({ siteOrigin, basePath })
 
+  await fs.mkdir(path.dirname(path.resolve(sitemapPath)), { recursive: true })
+  await fs.writeFile(path.resolve(sitemapPath), sitemap, 'utf8')
+  await fs.writeFile(path.resolve(robotsPath), robots, 'utf8')
+
+  return { urls, sitemap, robots }
+}
+
+async function main() {
+  const { urls } = await generateSeoAssets()
   console.log(`Generated ${urls.length} sitemap URLs`)
 }
 
-main().catch((error) => {
-  console.error(error)
-  process.exitCode = 1
-})
+const isDirectRun = process.argv[1] && pathToFileURL(process.argv[1]).href === import.meta.url
+
+if (isDirectRun) {
+  main().catch((error) => {
+    console.error(error)
+    process.exitCode = 1
+  })
+}

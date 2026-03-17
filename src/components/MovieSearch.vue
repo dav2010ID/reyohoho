@@ -68,7 +68,7 @@
               />
             </span>
           </h2>
-          <div v-if="loading" class="loading-container">
+          <div v-if="historyLoading" class="loading-container">
             <SpinnerLoading />
           </div>
           <div
@@ -79,6 +79,9 @@
               <p>Здесь пока пусто</p>
               <h2>Популярное сейчас</h2>
               <MovieList :movies-list="topMovies" :is-history="false" :loading="false" />
+            </template>
+            <template v-else-if="topMoviesLoading">
+              <SpinnerLoading />
             </template>
             <template v-else>
               <span class="material-icons">movie</span>
@@ -152,7 +155,7 @@ import { useAuthStore } from '@/store/auth'
 import { USER_LIST_TYPES_ENUM } from '@/constants'
 import { hasConsecutiveConsonants, suggestLayout, convertLayout } from '@/utils/keyboardLayout'
 import { normalizeBasePath } from '@/utils/basePath'
-import debounce from 'lodash/debounce'
+import debounce from 'lodash.debounce'
 import { onMounted, onServerPrefetch, ref, watch, computed } from 'vue'
 import { useRouter } from 'vue-router'
 import { useHead } from '@unhead/vue'
@@ -168,6 +171,7 @@ const searchType = ref('title')
 const searchTerm = ref('')
 const movies = ref([])
 const loading = ref(false)
+const historyLoading = ref(false)
 const searchPerformed = ref(false)
 const showModal = ref(false)
 const errorMessage = ref('')
@@ -175,6 +179,7 @@ const errorCode = ref(null)
 const isMobile = computed(() => mainStore.isMobile)
 const history = ref([])
 const topMovies = ref([])
+const topMoviesLoading = ref(false)
 
 const showLayoutWarning = ref(false)
 const suggestedLayout = ref('')
@@ -239,6 +244,7 @@ useHead({
 })
 
 const loadHomeTopMovies = async () => {
+  topMoviesLoading.value = true
   try {
     topMovies.value = await getMovies({
       activeTime: '24h',
@@ -247,6 +253,8 @@ const loadHomeTopMovies = async () => {
   } catch (error) {
     console.error('Ошибка загрузки топов для главной:', error)
     topMovies.value = []
+  } finally {
+    topMoviesLoading.value = false
   }
 }
 
@@ -256,7 +264,7 @@ watch(
   () => authStore.token,
   async (token) => {
     if (token) {
-      loading.value = true
+      historyLoading.value = true
       try {
         history.value = await getMyLists(USER_LIST_TYPES_ENUM.HISTORY)
       } catch (error) {
@@ -270,7 +278,7 @@ watch(
           router.go(0)
         }
       } finally {
-        loading.value = false
+        historyLoading.value = false
       }
       return
     }
@@ -278,6 +286,16 @@ watch(
     history.value = mainStore.history
   },
   { immediate: true }
+)
+
+watch(
+  () => mainStore.history,
+  (newHistory) => {
+    if (!authStore.token) {
+      history.value = newHistory
+    }
+  },
+  { deep: true }
 )
 
 function handleItemDeleted(deletedItemId) {
@@ -411,15 +429,15 @@ const performSearch = async () => {
 }
 
 const clearAllHistory = async () => {
-  loading.value = true
+  historyLoading.value = true
   if (authStore.token) {
     try {
       await delAllFromList(USER_LIST_TYPES_ENUM.HISTORY)
       history.value = []
       if (!topMovies.value.length) {
-        await loadHomeTopMovies()
+        loadHomeTopMovies()
       }
-      loading.value = false
+      historyLoading.value = false
       showModal.value = false
     } catch (error) {
       const { message, code } = handleApiError(error)
@@ -431,15 +449,16 @@ const clearAllHistory = async () => {
         await router.push('/login')
         router.go(0)
       }
-      loading.value = false
+      historyLoading.value = false
       showModal.value = false
     }
   } else {
     mainStore.clearAllHistory()
+    history.value = []
     if (!topMovies.value.length) {
-      await loadHomeTopMovies()
+      loadHomeTopMovies()
     }
-    loading.value = false
+    historyLoading.value = false
     showModal.value = false
   }
 }

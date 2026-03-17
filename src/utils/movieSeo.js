@@ -1,5 +1,5 @@
-import movies from '@/data/movies.json'
 import { normalizeBasePath } from './basePath'
+import movies from '../data/movies.json'
 import {
   buildFallbackSlug,
   getMovieIdentifier,
@@ -12,7 +12,6 @@ const FALLBACK_DESCRIPTION =
 const SITE_NAME = 'ReYohoho'
 const SITE_ORIGIN = import.meta.env.VITE_SITE_ORIGIN || 'https://dav2010id.github.io'
 const SITE_BASE_PATH = import.meta.env.VITE_BASE_URL || '/reyohoho'
-const MAX_PRERENDER_ENTRIES = Number(import.meta.env.VITE_SSG_MAX_PAGES || 2000)
 const runtimeMoviesByKpId = new Map()
 
 const BASE_PATH = normalizeBasePath(SITE_BASE_PATH)
@@ -43,7 +42,7 @@ const normalizeMovie = (movie) => {
 }
 
 const normalizedMovies = Array.isArray(movies) ? movies.map(normalizeMovie).filter(Boolean) : []
-const moviesByKpId = new Map(normalizedMovies.map((movie) => [String(movie.kp_id), movie]))
+const moviesByKpId = new Map(normalizedMovies.map((movie) => [movie.kp_id, movie]))
 
 const mergeMovieSeoEntries = (existing = {}, incoming = {}) => {
   const kpId = String(incoming?.kp_id || existing?.kp_id || '').trim()
@@ -143,4 +142,4 @@ export const buildMovieSeo = (movieLike = {}, kpIdOverride = null) => {
   }
 }
 
-export const getPrerenderMovieSeoEntries = () => normalizedMovies.slice(0, MAX_PRERENDER_ENTRIES)
+export const getPrerenderMovieSeoEntries = () => normalizedMovies.slice()

@@ -61,7 +61,7 @@
 
 <script>
 import { ref, watch } from 'vue'
-import debounce from 'lodash/debounce'
+import debounce from 'lodash.debounce'
 import { searchEmotes } from '@/api/emotes'
 
 export default {
