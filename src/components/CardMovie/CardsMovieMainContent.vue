@@ -1,5 +1,5 @@
 <template>
-  <div class="movie-poster-container" :class="`card-size-${cardSize}`">
+  <div class="movie-poster-container" :class="[`card-size-${cardSize}`, `variant-${variant}`]">
     <div v-if="posterSrc">
       <img
         v-if="isServerRender"
@@ -81,14 +81,16 @@ const {
   isHistory = false,
   isUserList = false,
   showDelete = true,
-  showStar = false
+  showStar = false,
+  variant = 'default'
 } = defineProps({
   movie: Object,
   isMobile: Boolean,
   isHistory: Boolean,
   isUserList: Boolean,
   showDelete: Boolean,
-  showStar: Boolean
+  showStar: Boolean,
+  variant: String
 })
 
 const emit = defineEmits(['remove:from-history'])
@@ -103,6 +105,10 @@ const posterSrc = computed(() => {
 .movie-poster-container {
   position: relative;
   flex-shrink: 0;
+}
+
+.movie-poster-container.variant-related {
+  width: 100%;
 }
 
 .movie-poster {
@@ -224,6 +230,18 @@ const posterSrc = computed(() => {
     height: 100%;
     aspect-ratio: 2 / 3;
     border-radius: 10px 0 0 10px;
+  }
+
+  .movie-poster-container.variant-related {
+    width: 100%;
+    min-width: 0;
+    align-self: auto;
+  }
+
+  .movie-poster-container.variant-related .movie-poster {
+    width: 100%;
+    height: auto;
+    border-radius: 12px 12px 0 0;
   }
 
   .delete-button {

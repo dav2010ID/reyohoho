@@ -1,5 +1,5 @@
 <template>
-  <div class="movie-details">
+  <div class="movie-details" :class="`variant-${variant}`">
     <div class="movie-header">
       <h3>{{ removeYearFromTitle(movie.title) }}</h3>
     </div>
@@ -25,9 +25,10 @@
 </template>
 
 <script setup>
-const { movie } = defineProps({
+const { movie, variant = 'default' } = defineProps({
   movie: Object,
-  isHistory: Boolean
+  isHistory: Boolean,
+  variant: String
 })
 
 const removeYearFromTitle = (title) => {
@@ -42,6 +43,11 @@ const removeYearFromTitle = (title) => {
   flex-grow: 1;
   display: flex;
   flex-direction: column;
+}
+
+.movie-details.variant-related {
+  flex-grow: 0;
+  padding: 10px 10px 12px;
 }
 
 .movie-header {
@@ -133,6 +139,12 @@ const removeYearFromTitle = (title) => {
     display: flex;
     flex-direction: column;
     justify-content: space-between;
+  }
+
+  .movie-details.variant-related {
+    padding: 8px;
+    flex-grow: 0;
+    justify-content: flex-start;
   }
 
   .movie-header {

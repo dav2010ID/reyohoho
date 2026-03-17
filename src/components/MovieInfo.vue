@@ -537,6 +537,7 @@
             "
             :loading="false"
             :is-history="false"
+            variant="related"
             class="related-movies-list"
           />
           <a
@@ -556,6 +557,7 @@
             :movies-list="showAllSimilars ? similars : similars.slice(0, itemsPerRow)"
             :loading="false"
             :is-history="false"
+            variant="related"
             class="related-movies-list"
           />
           <a

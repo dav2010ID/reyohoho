@@ -7,7 +7,8 @@
       'has-border': isCardBorder,
       'hover-disabled': isCardHoverDisabled,
       'card-border': isCardBorder,
-      [`card-size-${cardSize}`]: true
+      [`card-size-${cardSize}`]: true,
+      [`variant-${variant}`]: true
     }"
     :to="moviePath"
     :data-test-id="`movie-card-${movie.kp_id}`"
@@ -20,10 +21,11 @@
       :is-user-list="isUserList"
       :show-delete="showDelete"
       :show-star="showStar"
+      :variant="variant"
       @remove:from-history="(data) => emit('remove:from-history', data)"
     />
 
-    <CardMovieDetails :movie :is-history />
+    <CardMovieDetails :movie :is-history :variant="variant" />
   </RouterLink>
 </template>
 
@@ -49,7 +51,8 @@ const {
   activeMovieIndex = null,
   index = 0,
   showDelete = true,
-  showStar = false
+  showStar = false,
+  variant = 'default'
 } = defineProps({
   movie: Object,
   isHistory: Boolean,
@@ -59,7 +62,8 @@ const {
   index: Number,
   activeMovieIndex: [Number, null],
   showDelete: Boolean,
-  showStar: Boolean
+  showStar: Boolean,
+  variant: String
 })
 
 const emit = defineEmits(['remove:from-history', 'save:element'])
@@ -174,6 +178,13 @@ onMounted(() => {
   font-size: 1em;
 }
 
+.movie-card.variant-related {
+  display: block;
+  align-self: start;
+  justify-content: flex-start;
+  height: auto;
+}
+
 /* Мобильная версия */
 @media (max-width: 620px) {
   .movie-card {
@@ -183,6 +194,12 @@ onMounted(() => {
     height: auto;
     width: 100%;
     border-radius: 15px;
+  }
+
+  .movie-card.variant-related {
+    display: block;
+    min-height: 0;
+    border-radius: 12px;
   }
 }
 </style>
