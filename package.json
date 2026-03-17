@@ -37,35 +37,23 @@
     "workbox-window": "^7.4.0"
   },
   "devDependencies": {
-    "@babel/core": "^7.29.0",
-    "@babel/preset-env": "^7.29.2",
-    "@babel/preset-typescript": "^7.28.5",
     "@eslint/js": "^10.0.1",
     "@pinia/testing": "^1.0.3",
-    "@rolldown/binding-win32-x64-msvc": "^1.0.0-rc.9",
-    "@rushstack/eslint-patch": "^1.16.1",
-    "@types/lodash": "^4.17.24",
     "@vitejs/plugin-vue": "6.0.5",
-    "@vue/eslint-config-prettier": "^10.2.0",
     "@vue/test-utils": "2.4.6",
     "cross-env": "^10.1.0",
     "eslint": "^10.0.3",
     "eslint-config-prettier": "^10.1.8",
-    "eslint-plugin-prettier": "^5.5.5",
     "eslint-plugin-vue": "^10.8.0",
-    "jquery": "^4.0.0",
     "jsdom": "^29.0.0",
-    "lightningcss-win32-x64-msvc": "^1.32.0",
     "prettier": "^3.8.1",
     "sass-embedded": "^1.98.0",
     "sharp": "^0.34.5",
-    "typescript": "^5.9.3",
     "vite": "8.0.0",
     "vite-plugin-eslint": "^1.8.1",
     "vite-ssg": "^28.3.0",
     "vitest": "^4.1.0",
-    "vue-eslint-parser": "^10.4.0",
-    "vue-tsc": "^3.2.6"
+    "vue-eslint-parser": "^10.4.0"
   },
   "packageManager": "yarn@1.22.22+sha512.a6b2f7906b721bba3d67d4aff083df04dad64c399707841b7acf00f6b133b7ac24255f2652fa22ae3534329dc6180534e98d17432037ff6fd140556e2bb3137e"
 }

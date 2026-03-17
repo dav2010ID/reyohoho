@@ -39,7 +39,7 @@ export default [
       }
     },
     rules: {
-      'no-console': process.env.NODE_ENV === 'production' ? 'warn' : 'off',
+      'no-console': 'off',
       'no-useless-assignment': 'off',
       'preserve-caught-error': 'off',
       // Кавычки
