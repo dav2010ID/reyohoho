@@ -110,6 +110,7 @@ const removeFromHistory = async (kp_id) => {
   if (authStore.token) {
     try {
       await delFromList(kp_id, USER_LIST_TYPES_ENUM.HISTORY)
+      mainStore.removeFromHistory(kp_id)
       emit('item-deleted', kp_id)
     } catch (error) {
       const { code } = handleApiError(error)

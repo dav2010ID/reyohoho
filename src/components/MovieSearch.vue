@@ -264,9 +264,12 @@ watch(
   () => authStore.token,
   async (token) => {
     if (token) {
-      historyLoading.value = true
+      history.value = mainStore.history
+      historyLoading.value = mainStore.history.length === 0
       try {
-        history.value = await getMyLists(USER_LIST_TYPES_ENUM.HISTORY)
+        const serverHistory = await getMyLists(USER_LIST_TYPES_ENUM.HISTORY)
+        mainStore.setHistory(serverHistory)
+        history.value = serverHistory
       } catch (error) {
         const { message, code } = handleApiError(error)
         errorMessage.value = message
@@ -291,9 +294,7 @@ watch(
 watch(
   () => mainStore.history,
   (newHistory) => {
-    if (!authStore.token) {
-      history.value = newHistory
-    }
+    history.value = newHistory
   },
   { deep: true }
 )
@@ -433,6 +434,7 @@ const clearAllHistory = async () => {
   if (authStore.token) {
     try {
       await delAllFromList(USER_LIST_TYPES_ENUM.HISTORY)
+      mainStore.clearAllHistory()
       history.value = []
       if (!topMovies.value.length) {
         loadHomeTopMovies()

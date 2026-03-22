@@ -1675,6 +1675,7 @@ const fetchMovieInfo = async (updateHistory = true) => {
 
     if (isHistoryAllowed.value && movieToSave.kp_id && movieToSave.title && updateHistory) {
       if (authStore.token) {
+        mainStore.addToHistory({ ...movieToSave })
         try {
           await addToList(movieToSave.kp_id, USER_LIST_TYPES_ENUM.HISTORY)
         } catch (error) {

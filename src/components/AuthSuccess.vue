@@ -53,6 +53,7 @@ export default {
         let user = await getUser()
         authStore.setUser(user)
         let response = await getMyLists(USER_LIST_TYPES_ENUM.HISTORY)
+        mainStore.setHistory(response)
         console.log(`response.length: ${response.length}`)
         if (response.length !== 0) {
           loading.value = false
@@ -70,6 +71,8 @@ export default {
           for (const title of [...mainStore.history].reverse()) {
             await addToList(title.kp_id, USER_LIST_TYPES_ENUM.HISTORY)
           }
+          response = await getMyLists(USER_LIST_TYPES_ENUM.HISTORY)
+          mainStore.setHistory(response)
         } catch (err) {
           console.error('Auth error:', err)
           error.value = 'Произошла ошибка при переноси истории, попробуйте позднее...'
