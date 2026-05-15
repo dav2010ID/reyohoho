@@ -1,5 +1,4 @@
 import { normalizeBasePath } from './basePath'
-import movies from '../data/movies.json'
 import {
   buildFallbackSlug,
   getMovieIdentifier,
@@ -13,6 +12,9 @@ const SITE_NAME = 'ReYohoho'
 const SITE_ORIGIN = import.meta.env.VITE_SITE_ORIGIN || 'https://dav2010id.github.io'
 const SITE_BASE_PATH = import.meta.env.VITE_BASE_URL || '/reyohoho'
 const runtimeMoviesByKpId = new Map()
+let normalizedMovies = []
+let moviesByKpId = new Map()
+let staticMovieSeoEntriesPromise = null
 
 const BASE_PATH = normalizeBasePath(SITE_BASE_PATH)
 
@@ -41,8 +43,18 @@ const normalizeMovie = (movie) => {
   }
 }
 
-const normalizedMovies = Array.isArray(movies) ? movies.map(normalizeMovie).filter(Boolean) : []
-const moviesByKpId = new Map(normalizedMovies.map((movie) => [movie.kp_id, movie]))
+const loadStaticMovieSeoEntries = async () => {
+  if (!staticMovieSeoEntriesPromise) {
+    staticMovieSeoEntriesPromise = import('../data/movies.json').then((module) => {
+      const movies = module.default || []
+      normalizedMovies = Array.isArray(movies) ? movies.map(normalizeMovie).filter(Boolean) : []
+      moviesByKpId = new Map(normalizedMovies.map((movie) => [movie.kp_id, movie]))
+      return normalizedMovies
+    })
+  }
+
+  return staticMovieSeoEntriesPromise
+}
 
 const mergeMovieSeoEntries = (existing = {}, incoming = {}) => {
   const kpId = String(incoming?.kp_id || existing?.kp_id || '').trim()
@@ -142,4 +154,7 @@ export const buildMovieSeo = (movieLike = {}, kpIdOverride = null) => {
   }
 }
 
-export const getPrerenderMovieSeoEntries = () => normalizedMovies.slice()
+export const getPrerenderMovieSeoEntries = async () => {
+  await loadStaticMovieSeoEntries()
+  return normalizedMovies.slice()
+}

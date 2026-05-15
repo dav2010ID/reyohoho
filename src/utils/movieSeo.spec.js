@@ -87,18 +87,19 @@ describe('movieSeo', () => {
     ).toBe('5591410')
   })
 
-  it('reads SEO entries from the static catalog without runtime registration', () => {
+  it('reads SEO entries from the static catalog after lazy loading', async () => {
     const staticMovie = movies.find((movie) => movie?.kp_id && movie?.title)
 
     expect(staticMovie).toBeTruthy()
+    await getPrerenderMovieSeoEntries()
     expect(getMovieSeoEntry(staticMovie.kp_id)).toMatchObject({
       kp_id: String(staticMovie.kp_id),
       title: staticMovie.title
     })
   })
 
-  it('returns normalized prerender entries from the static catalog', () => {
-    const entries = getPrerenderMovieSeoEntries()
+  it('returns normalized prerender entries from the static catalog', async () => {
+    const entries = await getPrerenderMovieSeoEntries()
 
     expect(entries.length).toBeGreaterThan(0)
     expect(entries[0]).toEqual(

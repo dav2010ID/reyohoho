@@ -21,8 +21,6 @@ import { computed, ref, onMounted } from 'vue'
 import DesktopMenu from './MenuNavigation/DesktopMenu.vue'
 import MobileMenu from './MenuNavigation/MobileMenu.vue'
 import ModalSearch from './ModalSearch.vue'
-import { getBaseURLSync, getBaseURL } from '@/api/axios'
-import { getUser } from '@/api/user'
 import { handleApiError } from '@/constants'
 
 const store = useMainStore()
@@ -66,12 +64,16 @@ const initializeNavLinks = (baseURL) => {
   ]
 }
 
-const baseURL = getBaseURLSync()
+const baseURL = import.meta.env.VITE_APP_API_URL
 initializeNavLinks(baseURL)
 
 onMounted(async () => {
   if (authStore.token) {
     try {
+      const [{ getUser }, { getBaseURL }] = await Promise.all([
+        import('@/api/user'),
+        import('@/api/axios')
+      ])
       let user = await getUser()
       authStore.setUser(user)
       const updatedBaseURL = await getBaseURL()

@@ -15,7 +15,13 @@ export const createApp = ViteSSG(
     useAppSetup(app, { router, isClient })
 
     if (isClient) {
-      registerSW({ immediate: true })
+      const registerServiceWorker = () => registerSW({ immediate: true })
+
+      if ('requestIdleCallback' in window) {
+        window.requestIdleCallback(registerServiceWorker, { timeout: 3000 })
+      } else {
+        window.addEventListener('load', registerServiceWorker, { once: true })
+      }
 
       window.addEventListener('vite:preloadError', (event) => {
         if (import.meta.env.DEV) {
@@ -32,7 +38,8 @@ export const createApp = ViteSSG(
 
 export const includedRoutes = async (paths) => {
   const staticPaths = paths.filter((path) => !path.includes(':'))
-  const moviePaths = getPrerenderMovieSeoEntries().map((movie) =>
+  const movieSeoEntries = await getPrerenderMovieSeoEntries()
+  const moviePaths = movieSeoEntries.map((movie) =>
     buildMoviePath(movie.kp_id, movie.slug)
   )
 

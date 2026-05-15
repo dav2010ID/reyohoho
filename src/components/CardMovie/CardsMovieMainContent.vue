@@ -8,6 +8,8 @@
         :alt="movie.title ? `Постер ${movie.title}` : 'Постер фильма'"
         width="300"
         height="450"
+        :loading="imageLoading"
+        :fetchpriority="imageFetchPriority"
         decoding="async"
       />
       <img
@@ -17,7 +19,8 @@
         :alt="movie.title ? `Постер ${movie.title}` : 'Постер фильма'"
         width="300"
         height="450"
-        loading="lazy"
+        :loading="imageLoading"
+        :fetchpriority="imageFetchPriority"
         decoding="async"
       />
       <DeleteButton
@@ -85,7 +88,8 @@ const {
   isUserList = false,
   showDelete = true,
   showStar = false,
-  variant = 'default'
+  variant = 'default',
+  priority = false
 } = defineProps({
   movie: Object,
   isMobile: Boolean,
@@ -93,7 +97,8 @@ const {
   isUserList: Boolean,
   showDelete: Boolean,
   showStar: Boolean,
-  variant: String
+  variant: String,
+  priority: Boolean
 })
 
 const emit = defineEmits(['remove:from-history'])
@@ -102,6 +107,8 @@ const isServerRender = import.meta.env.SSR
 const posterSrc = computed(() => {
   return resolvePosterByMovie(movie)
 })
+const imageLoading = computed(() => (priority ? 'eager' : 'lazy'))
+const imageFetchPriority = computed(() => (priority ? 'high' : 'low'))
 </script>
 
 <style scoped>

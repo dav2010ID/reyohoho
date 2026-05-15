@@ -4,15 +4,11 @@ let isErrorSimulationEnabled = false
 const simulatedErrorCode = 500
 
 const KINOBOX_BASE_URL = import.meta.env.VITE_KINOBOX_API_URL || 'https://api.kinobox.tv'
-const KINOBOX_REFERER = import.meta.env.VITE_KINOBOX_REFERER || 'https://tapeop.dev/'
-const KINOBOX_ORIGIN = import.meta.env.VITE_KINOBOX_ORIGIN || 'https://tapeop.dev'
 
 const api = axios.create({
   baseURL: KINOBOX_BASE_URL,
   headers: {
-    'Content-Type': 'application/json',
-    Referer: KINOBOX_REFERER,
-    Origin: KINOBOX_ORIGIN
+    'Content-Type': 'application/json'
   }
 })
 

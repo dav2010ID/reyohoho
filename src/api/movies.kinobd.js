@@ -380,7 +380,7 @@ const getPlayerDataByInid = async (
 
   const headers = { 'Content-Type': 'application/x-www-form-urlencoded' }
   if (resolvedPlayerUrl) headers['X-Re'] = resolvedPlayerUrl
-  if (playerOrigin) {
+  if (playerOrigin && import.meta.env.SSR) {
     headers.Origin = playerOrigin
     headers.Referer = `${playerOrigin}/`
   }

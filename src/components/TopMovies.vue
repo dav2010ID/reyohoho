@@ -39,10 +39,16 @@
 
       <MovieList
         v-if="!errorMessage"
-        :movies-list="movies"
+        :movies-list="visibleMovies"
         :is-history="false"
         :loading="loading"
       />
+      <div v-if="canShowMore" class="load-more-wrap">
+        <div ref="loadMoreSentinel" class="load-more-sentinel" aria-hidden="true"></div>
+        <button class="load-more-btn" type="button" :disabled="loadingMore" @click="showMore">
+          {{ loadingMore ? 'Загружаем...' : 'Показать еще' }}
+        </button>
+      </div>
       <ErrorMessage v-if="errorMessage" :message="errorMessage" :code="errorCode" />
     </div>
   </div>
@@ -53,7 +59,7 @@ import { getDiscussedMovies, getMovies } from '@/api/movies'
 import ErrorMessage from '@/components/ErrorMessage.vue'
 import { MovieList } from '@/components/MovieList'
 import { handleApiError } from '@/constants'
-import { computed, onMounted, onServerPrefetch, ref, watch } from 'vue'
+import { computed, nextTick, onMounted, onServerPrefetch, onUnmounted, ref, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 
 const movies = ref([])
@@ -65,6 +71,12 @@ const errorMessage = ref('')
 const errorCode = ref(null)
 const route = useRoute()
 const router = useRouter()
+const TOP_MOVIES_PAGE_SIZE = 36
+const page = ref(1)
+const hasMore = ref(true)
+const loadingMore = ref(false)
+const loadMoreSentinel = ref(null)
+let loadMoreObserver = null
 
 const timeFilters = [
   { label: '24 часа', apiUrl: '24h' },
@@ -89,6 +101,83 @@ const discussedTypeFilters = [
 const currentTypeFilters = computed(() =>
   activeTimeFilter.value === 'discussed' ? discussedTypeFilters : normalTypeFilters
 )
+const visibleMovies = computed(() => movies.value)
+const canShowMore = computed(() => !loading.value && hasMore.value && !errorMessage.value)
+
+const resetPagination = () => {
+  page.value = 1
+  hasMore.value = true
+}
+
+const fetchMoviesPage = async (nextPage = 1) => {
+  const displayLimit = nextPage * TOP_MOVIES_PAGE_SIZE
+  const requestLimit = displayLimit + 1
+  const request =
+    activeTimeFilter.value === 'discussed'
+      ? getDiscussedMovies(typeFilter.value, { limit: requestLimit })
+      : getMovies({
+          activeTime: activeTimeFilter.value,
+          typeFilter: typeFilter.value,
+          limit: requestLimit
+        })
+
+  const nextMovies = await request
+  hasMore.value = Array.isArray(nextMovies) && nextMovies.length > displayLimit
+  page.value = nextPage
+
+  return Array.isArray(nextMovies) ? nextMovies.slice(0, displayLimit) : []
+}
+
+const showMore = async () => {
+  if (loadingMore.value || loading.value || !hasMore.value) return
+
+  loadingMore.value = true
+  errorMessage.value = ''
+  errorCode.value = null
+
+  try {
+    const nextMovies = await fetchMoviesPage(page.value + 1)
+    if (nextMovies.length > movies.value.length) {
+      movies.value = nextMovies
+    } else {
+      hasMore.value = false
+    }
+  } catch (error) {
+    const { message, code } = handleApiError(error)
+    errorMessage.value = message
+    errorCode.value = code
+  } finally {
+    loadingMore.value = false
+  }
+}
+
+const disconnectInfiniteScroll = () => {
+  loadMoreObserver?.disconnect()
+  loadMoreObserver = null
+}
+
+const setupInfiniteScroll = async () => {
+  if (typeof window === 'undefined' || !('IntersectionObserver' in window)) return
+
+  await nextTick()
+  disconnectInfiniteScroll()
+
+  if (!loadMoreSentinel.value) return
+
+  loadMoreObserver = new window.IntersectionObserver(
+    (entries) => {
+      if (entries.some((entry) => entry.isIntersecting)) {
+        showMore()
+      }
+    },
+    {
+      rootMargin: '900px 0px',
+      threshold: 0
+    }
+  )
+
+  loadMoreObserver.observe(loadMoreSentinel.value)
+}
 
 const applyRouteFilters = (query) => {
   const nextTime = typeof query.time === 'string' && query.time ? query.time : '24h'
@@ -111,13 +200,8 @@ const fetchMovies = async () => {
   errorCode.value = null
 
   try {
-    movies.value =
-      activeTimeFilter.value === 'discussed'
-        ? await getDiscussedMovies(typeFilter.value)
-        : await getMovies({
-            activeTime: activeTimeFilter.value,
-            typeFilter: typeFilter.value
-          })
+    resetPagination()
+    movies.value = await fetchMoviesPage(1)
   } catch (error) {
     const { message, code } = handleApiError(error)
     errorMessage.value = message
@@ -131,6 +215,14 @@ const fetchMovies = async () => {
 applyRouteFilters(route.query)
 
 onServerPrefetch(fetchMovies)
+
+watch(canShowMore, (canLoad) => {
+  if (canLoad) {
+    setupInfiniteScroll()
+  } else {
+    disconnectInfiniteScroll()
+  }
+})
 
 const changeTimeFilter = (apiUrl) => {
   const previousTimeFilter = activeTimeFilter.value
@@ -178,16 +270,20 @@ watch(
     }
 
     applyRouteFilters(newQuery)
-    fetchMovies()
+    fetchMovies().then(setupInfiniteScroll)
   }
 )
 
 onMounted(() => {
   applyRouteFilters(route.query)
   if (!movies.value.length && !errorMessage.value) {
-    fetchMovies()
+    fetchMovies().then(setupInfiniteScroll)
+  } else {
+    setupInfiniteScroll()
   }
 })
+
+onUnmounted(disconnectInfiniteScroll)
 </script>
 
 <style scoped>
@@ -394,5 +490,37 @@ onMounted(() => {
   cursor: not-allowed;
   pointer-events: none;
   transform: none !important;
+}
+
+.load-more-wrap {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 20px 0 40px;
+}
+
+.load-more-sentinel {
+  width: 100%;
+  height: 1px;
+}
+
+.load-more-btn {
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 8px;
+  background: var(--accent-color);
+  color: #fff;
+  cursor: pointer;
+  font-weight: 600;
+  padding: 10px 18px;
+}
+
+.load-more-btn:hover {
+  background: var(--accent-hover);
+}
+
+.load-more-btn:disabled {
+  cursor: not-allowed;
+  opacity: 0.7;
 }
 </style>

@@ -1,7 +1,4 @@
 import { useMainStore } from '@/store/main'
-import * as rhserv from '@/api/movies.rhserv'
-import * as kinobd from '@/api/movies.kinobd'
-import * as kinobox from '@/api/movies.kinobox'
 import { normalizeMovieListResponse } from '@/api/movieSeoNormalizer'
 
 const CONTENT_PROVIDERS = {
@@ -21,6 +18,26 @@ const KINOBD_SUPPORTED_METHODS = new Set([
 ])
 const KINOBOX_SUPPORTED_METHODS = new Set(['getPlayers'])
 
+const providers = {
+  rhserv: null,
+  kinobd: null,
+  kinobox: null
+}
+
+const providerImporters = {
+  rhserv: () => import('@/api/movies.rhserv'),
+  kinobd: () => import('@/api/movies.kinobd'),
+  kinobox: () => import('@/api/movies.kinobox')
+}
+
+const loadProvider = async (provider) => {
+  if (!providers[provider]) {
+    providers[provider] = providerImporters[provider]()
+  }
+
+  return providers[provider]
+}
+
 const getCurrentProvider = () => {
   try {
     const mainStore = useMainStore()
@@ -39,37 +56,45 @@ const getCurrentSearchProvider = () => {
   }
 }
 
-const searchKinoBDPlayerCandidates = async (...args) => kinobd.searchPlayerCandidates(...args)
-const getKinoBDPlayerDataByInid = async (...args) => kinobd.getPlayerDataByInid(...args)
+const searchKinoBDPlayerCandidates = async (...args) =>
+  (await loadProvider('kinobd')).searchPlayerCandidates(...args)
+const getKinoBDPlayerDataByInid = async (...args) =>
+  (await loadProvider('kinobd')).getPlayerDataByInid(...args)
 
 const callWithProvider = async (methodName, ...args) => {
   const provider = getCurrentProvider()
 
   if (provider === CONTENT_PROVIDERS.KINOBOX && KINOBOX_SUPPORTED_METHODS.has(methodName)) {
     try {
+      const kinobox = await loadProvider('kinobox')
       return await kinobox[methodName](...args)
     } catch (error) {
       console.warn(`[movies] ${methodName} failed on Kinobox, fallback to KinoBD/RHServ`, error)
       if (KINOBD_SUPPORTED_METHODS.has(methodName)) {
         try {
+          const kinobd = await loadProvider('kinobd')
           return await kinobd[methodName](...args)
         } catch (fallbackError) {
           console.warn(`[movies] ${methodName} failed on KinoBD, fallback to RHServ`, fallbackError)
         }
       }
+      const rhserv = await loadProvider('rhserv')
       return await rhserv[methodName](...args)
     }
   }
 
   if (provider === CONTENT_PROVIDERS.KINOBD && KINOBD_SUPPORTED_METHODS.has(methodName)) {
     try {
+      const kinobd = await loadProvider('kinobd')
       return await kinobd[methodName](...args)
     } catch (error) {
       console.warn(`[movies] ${methodName} failed on KinoBD, fallback to RHServ`, error)
+      const rhserv = await loadProvider('rhserv')
       return await rhserv[methodName](...args)
     }
   }
 
+  const rhserv = await loadProvider('rhserv')
   return await rhserv[methodName](...args)
 }
 
@@ -78,25 +103,31 @@ const apiSearch = async (...args) => {
 
   if (provider === CONTENT_PROVIDERS.KINOBD) {
     try {
+      const kinobd = await loadProvider('kinobd')
       return await normalizeMovieListResponse(await kinobd.apiSearch(...args))
     } catch (error) {
       console.warn('[movies] apiSearch failed on KinoBD, fallback to RHServ', error)
+      const rhserv = await loadProvider('rhserv')
       return await normalizeMovieListResponse(await rhserv.apiSearch(...args))
     }
   }
 
+  const rhserv = await loadProvider('rhserv')
   return await normalizeMovieListResponse(await rhserv.apiSearch(...args))
 }
 const getShikiInfo = async (...args) => callWithProvider('getShikiInfo', ...args)
 const getKpInfo = async (...args) => callWithProvider('getKpInfo', ...args)
 const getPlayers = async (...args) => callWithProvider('getPlayers', ...args)
 const getShikiPlayers = async (...args) => callWithProvider('getShikiPlayers', ...args)
+const shouldEnrichListSeo = import.meta.env.SSR
 // Top lists must always come from original RHServ API.
 const getMovies = async (...args) =>
-  await normalizeMovieListResponse(await rhserv.getMovies(...args), { enrichMissingSeo: true })
+  await normalizeMovieListResponse(await (await loadProvider('rhserv')).getMovies(...args), {
+    enrichMissingSeo: shouldEnrichListSeo
+  })
 const getDiscussedMovies = async (...args) =>
-  await normalizeMovieListResponse(await rhserv.getDiscussedMovies(...args), {
-    enrichMissingSeo: true
+  await normalizeMovieListResponse(await (await loadProvider('rhserv')).getDiscussedMovies(...args), {
+    enrichMissingSeo: shouldEnrichListSeo
   })
 const getDons = async (...args) => callWithProvider('getDons', ...args)
 const getKpIDfromIMDB = async (...args) => callWithProvider('getKpIDfromIMDB', ...args)
@@ -166,14 +197,18 @@ export {
 }
 
 export const toggleErrorSimulation = (enabled) => {
-  if (typeof rhserv.toggleErrorSimulation === 'function') {
-    rhserv.toggleErrorSimulation(enabled)
-  }
-  if (typeof kinobd.toggleErrorSimulation === 'function') {
-    kinobd.toggleErrorSimulation(enabled)
-  }
-  if (typeof kinobox.toggleErrorSimulation === 'function') {
-    kinobox.toggleErrorSimulation(enabled)
-  }
+  return Promise.all([loadProvider('rhserv'), loadProvider('kinobd'), loadProvider('kinobox')]).then(
+    ([rhserv, kinobd, kinobox]) => {
+      if (typeof rhserv.toggleErrorSimulation === 'function') {
+        rhserv.toggleErrorSimulation(enabled)
+      }
+      if (typeof kinobd.toggleErrorSimulation === 'function') {
+        kinobd.toggleErrorSimulation(enabled)
+      }
+      if (typeof kinobox.toggleErrorSimulation === 'function') {
+        kinobox.toggleErrorSimulation(enabled)
+      }
+    }
+  )
 }
 

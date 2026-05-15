@@ -64,16 +64,26 @@ const getShikiPlayers = async (shikiId) => {
   return data
 }
 
-const getMovies = async ({ activeTime = 'all', typeFilter = 'all', limit = null } = {}) => {
+const getMovies = async ({
+  activeTime = 'all',
+  typeFilter = 'all',
+  limit = null,
+  page = null
+} = {}) => {
   const limitParam = limit ? `&limit=${limit}` : ''
+  const pageParam = page ? `&page=${page}` : ''
   const { data } = await apiCall((api) =>
-    api.get(`/top/${activeTime}?type=${typeFilter}${limitParam}`)
+    api.get(`/top/${activeTime}?type=${typeFilter}${limitParam}${pageParam}`)
   )
   return data
 }
 
-const getDiscussedMovies = async (type = 'hot') => {
-  const { data } = await apiCall((api) => api.get(`/discussed/${type}`))
+const getDiscussedMovies = async (type = 'hot', { page = null, limit = null } = {}) => {
+  const params = new URLSearchParams()
+  if (page) params.set('page', String(page))
+  if (limit) params.set('limit', String(limit))
+  const query = params.toString()
+  const { data } = await apiCall((api) => api.get(`/discussed/${type}${query ? `?${query}` : ''}`))
   return data
 }
 

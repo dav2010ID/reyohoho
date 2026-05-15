@@ -22,6 +22,7 @@
       :show-delete="showDelete"
       :show-star="showStar"
       :variant="variant"
+      :priority="index < 3"
       @remove:from-history="(data) => emit('remove:from-history', data)"
     />
 

@@ -35,7 +35,8 @@ export default defineConfig(({ mode }) => {
         workbox: {
           clientsClaim: true,
           skipWaiting: true,
-          maximumFileSizeToCacheInBytes: 3000000
+          maximumFileSizeToCacheInBytes: 3000000,
+          globPatterns: ['**/*.{js,css,webp,png,svg,ico,woff2,json,webmanifest}']
         },
         build: {
           rollupOptions: {
@@ -110,17 +111,34 @@ export default defineConfig(({ mode }) => {
           ]
         }
       }),
-      eslintPlugin({
-        include: ['src/**/*.js', 'src/**/*.vue', 'src/**/*.jsx', 'src/**/*.ts', 'src/**/*.tsx'],
-        failOnError: true,
-        failOnWarning: false,
-        cache: false,
-        emitError: true
-      })
-    ],
+      !isDistEnv &&
+        eslintPlugin({
+          include: ['src/**/*.js', 'src/**/*.vue', 'src/**/*.jsx', 'src/**/*.ts', 'src/**/*.tsx'],
+          failOnError: true,
+          failOnWarning: false,
+          cache: false,
+          emitError: true
+        })
+    ].filter(Boolean),
     resolve: {
       alias: {
         '@': '/src'
+      }
+    },
+    build: {
+      cssCodeSplit: true,
+      rollupOptions: {
+        output: {
+          manualChunks(id) {
+            if (!id.includes('node_modules')) return
+            if (id.includes('/firebase/') || id.includes('@firebase')) return 'vendor-firebase'
+            if (id.includes('/dompurify/')) return 'vendor-sanitize'
+            if (id.includes('/axios/')) return 'vendor-http'
+            if (id.includes('/vue') || id.includes('/pinia') || id.includes('@unhead')) {
+              return 'vendor-vue'
+            }
+          }
+        }
       }
     }
   }

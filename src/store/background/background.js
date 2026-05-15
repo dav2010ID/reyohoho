@@ -1,4 +1,5 @@
-import starsBackground from '@/assets/image-back-stars.png'
+import starsBackground from '@/assets/image-back-stars.webp'
+import { optimizePosterUrl } from '@/utils/mediaUtils'
 import { defineStore } from 'pinia'
 import { BACKGROUND_STORE_NAME } from '../constants'
 import { beforeHydrateLegacyVuex } from '../utils'
@@ -18,7 +19,7 @@ export const useBackgroundStore = defineStore(BACKGROUND_STORE_NAME, {
   actions: {
     updateMoviePoster(poster) {
       if (this.backgroundType !== 'disabled') {
-        const url = poster || this.defaultBackground
+        const url = optimizePosterUrl(poster) || this.defaultBackground
 
         if (this.backgroundType !== 'stars' && this.backgroundType !== 'disabled') {
           this.moviePoster = url
@@ -31,7 +32,7 @@ export const useBackgroundStore = defineStore(BACKGROUND_STORE_NAME, {
 
     updateTopMoviePoster(poster) {
       if (this.backgroundType !== 'disabled') {
-        const url = poster || this.defaultBackground
+        const url = optimizePosterUrl(poster) || this.defaultBackground
 
         if (this.backgroundType !== 'stars' && this.backgroundType !== 'disabled') {
           this.topMoviePoster = url

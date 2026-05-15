@@ -29,6 +29,10 @@ coverage
 dist.zip
 _user_site_tmp/
 
+# Local browser/performance artifacts
+reports-browser/
+reports-lighthouse*.json
+
 # Python
 __pycache__/
 *.py[cod]

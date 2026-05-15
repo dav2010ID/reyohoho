@@ -8,6 +8,15 @@ const normalizeUrl = (value) => {
   return value
 }
 
+export const optimizePosterUrl = (value) => {
+  const url = normalizeUrl(value)
+  if (!url) return ''
+
+  return url
+    .replace(`${KP_POSTER_BASE}/`, `${KP_SMALL_POSTER_BASE}/`)
+    .replace(/\/x1000(?=($|[?#]))/, '/x300')
+}
+
 const getKpIdFromMovie = (movie = {}) => {
   return (
     movie.kp_id ||
@@ -21,14 +30,14 @@ const getKpIdFromMovie = (movie = {}) => {
 
 export const resolvePosterByMovie = (movie = {}) => {
   const direct =
-    normalizeUrl(movie.poster) ||
-    normalizeUrl(movie.cover) ||
-    normalizeUrl(movie.poster_url_preview) ||
-    normalizeUrl(movie.poster_url) ||
-    normalizeUrl(movie.small_poster) ||
-    normalizeUrl(movie.big_poster) ||
-    normalizeUrl(movie.raw_data?.poster_url_preview) ||
-    normalizeUrl(movie.raw_data?.poster_url)
+    optimizePosterUrl(movie.poster) ||
+    optimizePosterUrl(movie.cover) ||
+    optimizePosterUrl(movie.poster_url_preview) ||
+    optimizePosterUrl(movie.poster_url) ||
+    optimizePosterUrl(movie.small_poster) ||
+    optimizePosterUrl(movie.big_poster) ||
+    optimizePosterUrl(movie.raw_data?.poster_url_preview) ||
+    optimizePosterUrl(movie.raw_data?.poster_url)
 
   if (direct) return direct
 

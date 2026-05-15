@@ -338,9 +338,9 @@
         <div class="additional-info">
           <h2 class="additional-info-title">Подробнее</h2>
           <div class="info-content">
-            <div v-if="movieInfo.poster_url" class="movie-poster-container desktop-only">
-              <a :href="movieInfo.poster_url" target="_blank" rel="noopener noreferrer">
-                <img :src="movieInfo.poster_url" alt="Постер фильма" class="movie-poster" />
+            <div v-if="moviePosterUrl" class="movie-poster-container desktop-only">
+              <a :href="movieInfo.poster_url || moviePosterUrl" target="_blank" rel="noopener noreferrer">
+                <img :src="moviePosterUrl" alt="Постер фильма" class="movie-poster" />
               </a>
             </div>
             <div class="details-container">
@@ -1349,6 +1349,7 @@ import { useTrailerStore } from '@/store/trailer'
 import Comments from '@/components/Comments.vue'
 import { getRatingColor } from '@/utils/ratingUtils'
 import { buildMovieSeo, getMovieSeoEntry, getMovieSeoPath, getMovieSeoSlug } from '@/utils/movieSeo'
+import { optimizePosterUrl, resolvePosterByMovie } from '@/utils/mediaUtils'
 
 const mainStore = useMainStore()
 const authStore = useAuthStore()
@@ -1409,6 +1410,7 @@ const showNoteEditor = ref(false)
 const noteText = ref('')
 const isSavingNote = ref(false)
 const isDeletingNote = ref(false)
+const moviePosterUrl = computed(() => resolvePosterByMovie(movieInfo.value || {}))
 
 const sortedNudityTimings = computed(() => {
   if (!nudityTimings.value || !Array.isArray(nudityTimings.value)) {
@@ -1565,7 +1567,7 @@ const formatRatingNumber = (num) => {
 const transformMoviesData = (movies) => {
   return (movies || []).map((movie) => ({
     kp_id: movie.film_id,
-    poster: movie.poster_url_preview || movie.poster_url,
+    poster: resolvePosterByMovie(movie),
     title: movie.name_ru || movie.name_en || movie.name_original
   }))
 }
@@ -1649,9 +1651,9 @@ const fetchMovieInfo = async (updateHistory = true) => {
       title: movieInfo.value?.name_ru || movieInfo.value?.name_en || movieInfo.value?.name_original,
       slug: getMovieSeoSlug(movieInfo.value, kp_id.value),
       poster:
-        movieInfo.value?.poster_url ||
-        movieInfo.value?.cover_url ||
-        movieInfo.value?.screenshots?.[0],
+        optimizePosterUrl(movieInfo.value?.poster_url) ||
+        optimizePosterUrl(movieInfo.value?.cover_url) ||
+        optimizePosterUrl(movieInfo.value?.screenshots?.[0]),
       year: movieInfo.value?.year,
       type: movieInfo.value?.type
     }

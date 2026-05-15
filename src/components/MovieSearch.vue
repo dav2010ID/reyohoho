@@ -79,6 +79,17 @@
               <p>Здесь пока пусто</p>
               <h2>Популярное сейчас</h2>
               <MovieList :movies-list="topMovies" :is-history="false" :loading="false" />
+              <div v-if="canLoadMoreTopMovies" class="home-load-more">
+                <div ref="homeTopSentinel" class="home-load-more__sentinel" aria-hidden="true"></div>
+                <button
+                  class="home-load-more__button"
+                  type="button"
+                  :disabled="topMoviesLoadingMore"
+                  @click="loadMoreHomeTopMovies"
+                >
+                  {{ topMoviesLoadingMore ? 'Р—Р°РіСЂСѓР¶Р°РµРј...' : 'РџРѕРєР°Р·Р°С‚СЊ РµС‰Рµ' }}
+                </button>
+              </div>
             </template>
             <template v-else-if="topMoviesLoading">
               <SpinnerLoading />
@@ -156,7 +167,7 @@ import { USER_LIST_TYPES_ENUM } from '@/constants'
 import { hasConsecutiveConsonants, suggestLayout, convertLayout } from '@/utils/keyboardLayout'
 import { normalizeBasePath } from '@/utils/basePath'
 import debounce from 'lodash.debounce'
-import { onMounted, onServerPrefetch, ref, watch, computed } from 'vue'
+import { nextTick, onMounted, onServerPrefetch, onUnmounted, ref, watch, computed } from 'vue'
 import { useRouter } from 'vue-router'
 import { useHead } from '@unhead/vue'
 import SpinnerLoading from '@/components/SpinnerLoading.vue'
@@ -180,6 +191,12 @@ const isMobile = computed(() => mainStore.isMobile)
 const history = ref([])
 const topMovies = ref([])
 const topMoviesLoading = ref(false)
+const topMoviesLoadingMore = ref(false)
+const topMoviesPage = ref(1)
+const topMoviesHasMore = ref(true)
+const homeTopSentinel = ref(null)
+const HOME_TOP_PAGE_SIZE = 24
+let homeTopObserver = null
 
 const showLayoutWarning = ref(false)
 const suggestedLayout = ref('')
@@ -246,19 +263,102 @@ useHead({
 const loadHomeTopMovies = async () => {
   topMoviesLoading.value = true
   try {
-    topMovies.value = await getMovies({
+    topMoviesPage.value = 1
+    const requestLimit = HOME_TOP_PAGE_SIZE + 1
+    const movies = await getMovies({
       activeTime: '24h',
-      typeFilter: 'all'
+      typeFilter: 'all',
+      limit: requestLimit
     })
+    topMoviesHasMore.value = Array.isArray(movies) && movies.length > HOME_TOP_PAGE_SIZE
+    topMovies.value = Array.isArray(movies) ? movies.slice(0, HOME_TOP_PAGE_SIZE) : []
   } catch (error) {
     console.error('Ошибка загрузки топов для главной:', error)
     topMovies.value = []
+    topMoviesHasMore.value = false
   } finally {
     topMoviesLoading.value = false
   }
 }
 
+const canLoadMoreTopMovies = computed(
+  () =>
+    !searchTerm.value &&
+    history.value.length === 0 &&
+    topMovies.value.length > 0 &&
+    topMoviesHasMore.value &&
+    !topMoviesLoading.value
+)
+
+const loadMoreHomeTopMovies = async () => {
+  if (topMoviesLoadingMore.value || topMoviesLoading.value || !topMoviesHasMore.value) return
+
+  topMoviesLoadingMore.value = true
+
+  try {
+    const nextPage = topMoviesPage.value + 1
+    const displayLimit = nextPage * HOME_TOP_PAGE_SIZE
+    const requestLimit = displayLimit + 1
+    const movies = await getMovies({
+      activeTime: '24h',
+      typeFilter: 'all',
+      limit: requestLimit
+    })
+    const nextMovies = Array.isArray(movies) ? movies.slice(0, displayLimit) : []
+
+    topMoviesHasMore.value = Array.isArray(movies) && movies.length > displayLimit
+    topMoviesPage.value = nextPage
+
+    if (nextMovies.length > topMovies.value.length) {
+      topMovies.value = nextMovies
+    } else {
+      topMoviesHasMore.value = false
+    }
+  } catch (error) {
+    console.error('РћС€РёР±РєР° РґРѕРіСЂСѓР·РєРё С‚РѕРїРѕРІ РґР»СЏ РіР»Р°РІРЅРѕР№:', error)
+    topMoviesHasMore.value = false
+  } finally {
+    topMoviesLoadingMore.value = false
+  }
+}
+
+const disconnectHomeTopInfiniteScroll = () => {
+  homeTopObserver?.disconnect()
+  homeTopObserver = null
+}
+
+const setupHomeTopInfiniteScroll = async () => {
+  if (typeof window === 'undefined' || !('IntersectionObserver' in window)) return
+
+  await nextTick()
+  disconnectHomeTopInfiniteScroll()
+
+  if (!homeTopSentinel.value) return
+
+  homeTopObserver = new window.IntersectionObserver(
+    (entries) => {
+      if (entries.some((entry) => entry.isIntersecting)) {
+        loadMoreHomeTopMovies()
+      }
+    },
+    {
+      rootMargin: '900px 0px',
+      threshold: 0
+    }
+  )
+
+  homeTopObserver.observe(homeTopSentinel.value)
+}
+
 onServerPrefetch(loadHomeTopMovies)
+
+watch(canLoadMoreTopMovies, (canLoad) => {
+  if (canLoad) {
+    setupHomeTopInfiniteScroll()
+  } else {
+    disconnectHomeTopInfiniteScroll()
+  }
+})
 
 watch(
   () => authStore.token,
@@ -476,7 +576,9 @@ const debouncedPerformSearch = debounce(() => {
 
 onMounted(() => {
   if (!topMovies.value.length) {
-    loadHomeTopMovies()
+    loadHomeTopMovies().then(setupHomeTopInfiniteScroll)
+  } else {
+    setupHomeTopInfiniteScroll()
   }
   const hash = window.location.hash
   if (hash.startsWith('#search=')) {
@@ -496,6 +598,8 @@ onMounted(() => {
   }
   searchInput.value?.focus()
 })
+
+onUnmounted(disconnectHomeTopInfiniteScroll)
 
 // Автопоиск с задержкой (только для поиска по названию)
 watch(searchTerm, () => {
@@ -808,6 +912,38 @@ h2 {
 
 .empty-history > div {
   width: 100%;
+}
+
+.home-load-more {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 100%;
+  padding: 20px 0 10px;
+}
+
+.home-load-more__sentinel {
+  width: 100%;
+  height: 1px;
+}
+
+.home-load-more__button {
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 8px;
+  background: var(--accent-color);
+  color: #fff;
+  cursor: pointer;
+  font-weight: 600;
+  padding: 10px 18px;
+}
+
+.home-load-more__button:hover {
+  background: var(--accent-hover);
+}
+
+.home-load-more__button:disabled {
+  cursor: not-allowed;
+  opacity: 0.7;
 }
 
 @media (max-width: 600px) {
