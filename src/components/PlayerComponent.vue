@@ -2,19 +2,12 @@
   <ErrorMessage v-if="errorMessage" :message="errorMessage" :code="errorCode" />
 
   <template v-else>
-    <!-- Кнопка для открытия модалки выбора плеера -->
-    <div class="players-list">
-      <span>Плеер:</span>
-      <button class="player-btn" @click="openPlayerModal">
-        {{
-          selectedPlayerInternal
-            ? getProviderDisplayName(selectedPlayerInternal).toUpperCase()
-            : 'Загрузка плееров...'
-        }}
-      </button>
-      <button v-if="isKinoBdProvider" class="source-btn" @click="openSourceModal">Источник</button>
-    </div>
-
+    <PlayerSelectorBar
+      :selected-label="selectedPlayerLabel"
+      :show-source-button="isKinoBdProvider"
+      @open-player-modal="openPlayerModal"
+      @open-source-modal="openSourceModal"
+    />
     <!-- Модальное окно выбора плеера -->
     <PlayerModal
       v-if="showPlayerModal"
@@ -24,25 +17,14 @@
       @select="handlePlayerSelect"
     />
 
-    <div v-if="showSourceModal" class="source-modal-backdrop" @click.self="closeSourceModal">
-      <div class="source-modal">
-        <div class="source-modal-header">
-          <h3>Выбор источника KinoBD</h3>
-          <button class="source-close-btn" @click="closeSourceModal">×</button>
-        </div>
-        <div v-if="sourceLoading" class="source-loading">Загрузка источников...</div>
-        <div v-else-if="sourceError" class="source-error">{{ sourceError }}</div>
-        <div v-else-if="sourceCandidates.length === 0" class="source-empty">Источники не найдены</div>
-        <ul v-else class="source-candidate-list">
-          <li v-for="candidate in sourceCandidates" :key="candidate.id">
-            <button class="source-candidate-btn" @click="applySourceCandidate(candidate)">
-              <span class="source-title">{{ candidate.title || `ID ${candidate.id}` }}</span>
-              <span class="source-meta">inid: {{ candidate.id }} · kp: {{ candidate.kp_id || '-' }}</span>
-            </button>
-          </li>
-        </ul>
-      </div>
-    </div>
+    <PlayerSourceModal
+      v-if="showSourceModal"
+      :candidates="sourceCandidates"
+      :loading="sourceLoading"
+      :error="sourceError"
+      @close="closeSourceModal"
+      @select="applySourceCandidate"
+    />
 
     <!-- Единый контейнер плеера -->
     <div
@@ -523,6 +505,8 @@ import { USER_LIST_TYPES_ENUM } from '@/constants'
 import { computed, nextTick, onBeforeUnmount, onMounted, ref, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import PlayerModal from '@/components/PlayerModal.vue'
+import PlayerSelectorBar from '@/components/player/PlayerSelectorBar.vue'
+import PlayerSourceModal from '@/components/player/PlayerSourceModal.vue'
 import { parseTimingTextToSeconds, formatSecondsToTime } from '@/utils/dateUtils'
 import { OBSWebSocket } from '@/utils/obsWebSocket'
 import { debugLog } from '@/utils/logger'
@@ -566,6 +550,11 @@ const isMobile = computed(() => mainStore.isMobile)
 const isElectron = computed(() => !!window.electronAPI)
 const isKinoBdProvider = computed(
   () => mainStore.contentApiProvider === 'kinobd' && !String(props.kpId || '').startsWith('shiki')
+)
+const selectedPlayerLabel = computed(() =>
+  selectedPlayerInternal.value
+    ? getProviderDisplayName(selectedPlayerInternal.value).toUpperCase()
+    : 'Загрузка плееров...'
 )
 
 const activeTooltip = ref(null)
@@ -3306,157 +3295,6 @@ const testOBSConnection = async () => {
 </script>
 
 <style scoped>
-.players-list {
-  width: 100%;
-  max-width: 800px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 10px;
-  margin: auto;
-  margin-bottom: 10px;
-}
-
-/* Стили для кнопки выбора плеера */
-.player-btn {
-  display: flex;
-  align-items: center;
-  justify-content: left;
-  background: #3a3a3a;
-  color: #fff;
-  border: 2px solid #505050;
-  border-radius: 5px;
-  padding: 10px;
-  font-size: 1rem;
-  font-weight: 600;
-  cursor: pointer;
-  transition: all 0.2s ease-in-out;
-  width: 100%;
-  max-width: 800px;
-  text-align: left;
-  font-size: 16px;
-}
-
-.player-btn:hover {
-  background: var(--accent-color);
-  border-color: var(--accent-color);
-  box-shadow: 0 0 10px var(--accent-semi-transparent);
-}
-
-.player-btn:active {
-  background: var(--accent-color);
-  border-color: var(--accent-color);
-}
-
-.player-btn:focus {
-  outline: none;
-  box-shadow: 0 0 5px var(--accent-color);
-}
-
-.source-btn {
-  padding: 10px 14px;
-  border: 2px solid #505050;
-  border-radius: 5px;
-  background: #2f2f2f;
-  color: #fff;
-  cursor: pointer;
-  font-size: 14px;
-  font-weight: 600;
-  transition: all 0.2s ease-in-out;
-}
-
-.source-btn:hover {
-  background: var(--accent-color);
-  border-color: var(--accent-color);
-}
-
-.source-modal-backdrop {
-  position: fixed;
-  inset: 0;
-  background: rgba(0, 0, 0, 0.65);
-  z-index: 20;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 12px;
-}
-
-.source-modal {
-  width: min(720px, 100%);
-  max-height: 80vh;
-  overflow: auto;
-  background: #222;
-  border: 1px solid #444;
-  border-radius: 10px;
-  padding: 14px;
-}
-
-.source-modal-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 10px;
-}
-
-.source-modal-header h3 {
-  margin: 0;
-  font-size: 18px;
-}
-
-.source-close-btn {
-  background: transparent;
-  border: none;
-  color: #fff;
-  font-size: 26px;
-  cursor: pointer;
-}
-
-.source-loading,
-.source-error,
-.source-empty {
-  padding: 10px 0;
-}
-
-.source-error {
-  color: #ff7a7a;
-}
-
-.source-candidate-list {
-  list-style: none;
-  margin: 0;
-  padding: 0;
-  display: grid;
-  gap: 8px;
-}
-
-.source-candidate-btn {
-  width: 100%;
-  text-align: left;
-  background: #333;
-  border: 1px solid #4f4f4f;
-  color: #fff;
-  border-radius: 8px;
-  padding: 10px;
-  cursor: pointer;
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-}
-
-.source-candidate-btn:hover {
-  border-color: var(--accent-color);
-  background: #3a3a3a;
-}
-
-.source-title {
-  font-weight: 600;
-}
-
-.source-meta {
-  opacity: 0.8;
-  font-size: 12px;
-}
-
 .player-container {
   width: 100%;
   transition:
