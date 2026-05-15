@@ -4,7 +4,7 @@
   <template v-else>
     <PlayerSelectorBar
       :selected-label="selectedPlayerLabel"
-      :show-source-button="isKinoBdProvider"
+      :show-source-button="showSourceButton"
       @open-player-modal="openPlayerModal"
       @open-source-modal="openSourceModal"
     />
@@ -50,10 +50,16 @@
           @load="onIframeLoad"
         ></iframe>
         <SpinnerLoading
-          v-if="iframeLoading"
+          v-if="iframeLoading && !playersEmptyMessage"
           class="player-loading-spinner"
           :text="`Загружается плеер: ${selectedPlayerInternal ? getProviderDisplayName(selectedPlayerInternal) : 'Загружается список плееров'}\nЕсли плеер не грузится, то смените плеер выше или включите VPN`"
         />
+        <div v-else-if="playersEmptyMessage" class="player-empty-state">
+          <p>{{ playersEmptyMessage }}</p>
+          <button v-if="showSourceButton" type="button" @click="openSourceModal">
+            Выбрать источник
+          </button>
+        </div>
       </div>
 
       <!-- Кнопка закрытия в театральном режиме -->
@@ -589,7 +595,8 @@ const {
   sourceError,
   errorMessage,
   errorCode,
-  isKinoBdProvider,
+  playersEmptyMessage,
+  showSourceButton,
   selectedPlayerLabel,
   fetchPlayers,
   openPlayerModal,

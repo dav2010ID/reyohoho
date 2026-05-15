@@ -61,6 +61,44 @@ const searchKinoBDPlayerCandidates = async (...args) =>
 const getKinoBDPlayerDataByInid = async (...args) =>
   (await loadProvider('kinobd')).getPlayerDataByInid(...args)
 
+const hasPlayers = (players) => {
+  if (Array.isArray(players)) return players.length > 0
+  if (!players || typeof players !== 'object') return false
+  return Object.keys(players).length > 0
+}
+
+const getPlayersWithFallback = async (...args) => {
+  const provider = getCurrentProvider()
+  const order =
+    provider === CONTENT_PROVIDERS.KINOBD
+      ? [CONTENT_PROVIDERS.KINOBD, CONTENT_PROVIDERS.KINOBOX]
+      : [CONTENT_PROVIDERS.KINOBOX, CONTENT_PROVIDERS.KINOBD]
+
+  let lastError = null
+
+  for (const currentProvider of order) {
+    try {
+      const providerApi = await loadProvider(currentProvider)
+      const players = await providerApi.getPlayers(...args)
+
+      if (hasPlayers(players)) {
+        return players
+      }
+
+      console.warn(`[movies] getPlayers returned no players on ${currentProvider}`)
+    } catch (error) {
+      lastError = error
+      console.warn(`[movies] getPlayers failed on ${currentProvider}`, error)
+    }
+  }
+
+  if (lastError) {
+    console.warn('[movies] getPlayers fallback exhausted; returning empty players map', lastError)
+  }
+
+  return {}
+}
+
 const callWithProvider = async (methodName, ...args) => {
   const provider = getCurrentProvider()
 
@@ -117,7 +155,7 @@ const apiSearch = async (...args) => {
 }
 const getShikiInfo = async (...args) => callWithProvider('getShikiInfo', ...args)
 const getKpInfo = async (...args) => callWithProvider('getKpInfo', ...args)
-const getPlayers = async (...args) => callWithProvider('getPlayers', ...args)
+const getPlayers = async (...args) => getPlayersWithFallback(...args)
 const getShikiPlayers = async (...args) => callWithProvider('getShikiPlayers', ...args)
 const shouldEnrichListSeo = import.meta.env.SSR
 // Top lists now come from KinoBD because it exposes stable page-based pagination.

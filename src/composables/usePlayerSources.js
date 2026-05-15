@@ -10,6 +10,8 @@ import { usePlayerStore } from '@/store/player'
 import { computed, ref } from 'vue'
 
 const normalizePlayerKey = (key) => String(key || '').toUpperCase()
+const NO_PLAYERS_MESSAGE =
+  'Плееры не найдены. Попробуйте выбрать другой источник или включить VPN.'
 
 export function usePlayerSources({ props, getProviderDisplayName, onSelectedPlayerChange }) {
   const mainStore = useMainStore()
@@ -24,16 +26,25 @@ export function usePlayerSources({ props, getProviderDisplayName, onSelectedPlay
   const sourceError = ref('')
   const errorMessage = ref('')
   const errorCode = ref(null)
+  const playersEmptyMessage = ref('')
 
   const preferredPlayer = computed(() => playerStore.preferredPlayer)
   const isKinoBdProvider = computed(
     () => mainStore.contentApiProvider === 'kinobd' && !String(props.kpId || '').startsWith('shiki')
   )
-  const selectedPlayerLabel = computed(() =>
-    selectedPlayerInternal.value
-      ? getProviderDisplayName(selectedPlayerInternal.value).toUpperCase()
-      : 'Загрузка плееров...'
+  const canPickKinoBdSource = computed(() => !String(props.kpId || '').startsWith('shiki'))
+  const showSourceButton = computed(
+    () => isKinoBdProvider.value || (canPickKinoBdSource.value && !!playersEmptyMessage.value)
   )
+  const selectedPlayerLabel = computed(() => {
+    if (selectedPlayerInternal.value) {
+      return getProviderDisplayName(selectedPlayerInternal.value).toUpperCase()
+    }
+    if (playersEmptyMessage.value) {
+      return 'Плееры не найдены'
+    }
+    return 'Загрузка плееров...'
+  })
 
   const setSelectedPlayer = (player) => {
     selectedPlayerInternal.value = player
@@ -61,7 +72,10 @@ export function usePlayerSources({ props, getProviderDisplayName, onSelectedPlay
 
     playersInternal.value = dedupedPlayers
 
-    if (playersInternal.value.length === 0) return
+    if (playersInternal.value.length === 0) {
+      setSelectedPlayer(null)
+      return false
+    }
 
     if (preferredPlayer.value) {
       const normalizedPreferred = normalizePlayerKey(preferredPlayer.value)
@@ -74,12 +88,15 @@ export function usePlayerSources({ props, getProviderDisplayName, onSelectedPlay
     } else {
       setSelectedPlayer(playersInternal.value[0])
     }
+
+    return true
   }
 
   const fetchPlayers = async () => {
     try {
       errorMessage.value = ''
       errorCode.value = null
+      playersEmptyMessage.value = ''
 
       const kpId = String(props.kpId || '')
       let players
@@ -94,7 +111,10 @@ export function usePlayerSources({ props, getProviderDisplayName, onSelectedPlay
           forceInid: isKinoBdProvider.value ? savedInid : null
         })
       }
-      applyPlayersData(players)
+      const hasPlayers = applyPlayersData(players)
+      if (!hasPlayers) {
+        playersEmptyMessage.value = NO_PLAYERS_MESSAGE
+      }
     } catch (error) {
       const { message, code } = handleApiError(error)
       errorMessage.value = message
@@ -154,7 +174,12 @@ export function usePlayerSources({ props, getProviderDisplayName, onSelectedPlay
       const players = await getKinoBDPlayerDataByInid(candidate.id, {
         playerUrl: candidate.iframe
       })
-      applyPlayersData(players)
+      const hasPlayers = applyPlayersData(players)
+      if (!hasPlayers) {
+        sourceError.value = NO_PLAYERS_MESSAGE
+        return
+      }
+      playersEmptyMessage.value = ''
       playerStore.setKinoBdSource(props.kpId, candidate.id)
       closeSourceModal()
     } catch (error) {
@@ -175,7 +200,9 @@ export function usePlayerSources({ props, getProviderDisplayName, onSelectedPlay
     sourceError,
     errorMessage,
     errorCode,
+    playersEmptyMessage,
     isKinoBdProvider,
+    showSourceButton,
     selectedPlayerLabel,
     fetchPlayers,
     openPlayerModal,
