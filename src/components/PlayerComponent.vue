@@ -489,11 +489,11 @@ import ErrorMessage from '@/components/ErrorMessage.vue'
 import SpinnerLoading from '@/components/SpinnerLoading.vue'
 import Notification from '@/components/notification/ToastMessage.vue'
 import SliderRound from '@/components/slider/SliderRound.vue'
+import { usePlayerElectronControls } from '@/composables/usePlayerElectronControls'
 import { usePlayerLayout } from '@/composables/usePlayerLayout'
 import { usePlayerLists } from '@/composables/usePlayerLists'
 import { usePlayerSharing } from '@/composables/usePlayerSharing'
 import { usePlayerSources } from '@/composables/usePlayerSources'
-import { showMessageToast } from '@/helpers/ui'
 import { useMainStore } from '@/store/main'
 import { usePlayerStore } from '@/store/player'
 import { useAuthStore } from '@/store/auth'
@@ -592,19 +592,29 @@ const { copyMpvLink, copyMovieLink } = usePlayerSharing({
 
 const tooltipContainer = ref(null)
 const tooltip = ref(null)
-const mirrorCheckInterval = ref(null)
-const currentMirrorState = ref(false)
-const currentCompressorState = ref(false)
 const videoPositionInterval = ref(null)
 const overlayTimingsCheckInterval = ref(null)
 const lastOverlayTimingsCount = ref(0)
 
-const audioContext = ref(null)
-const compressorNode = ref(null)
-const mediaSource = ref(null)
-const gainNode = ref(null)
-const bypassGainNode = ref(null)
-const currentVideoElement = ref(null)
+const {
+  compressorEnabled,
+  mirrorEnabled,
+  enableBlur,
+  disableBlur,
+  toggleBlur,
+  toggleCompressor,
+  toggleMirror,
+  startMirrorMonitoring,
+  openAppLink,
+  togglePiP,
+  resetElectronPlaybackState,
+  cleanupElectronControls
+} = usePlayerElectronControls({
+  isElectron,
+  playerStore,
+  playerIframe,
+  kpId: kp_id
+})
 
 const videoOverlayEnabled2 = computed({
   get: () => playerStore.videoOverlayEnabled2,
@@ -696,354 +706,6 @@ const isInAnyList = computed(() => {
     props.movieInfo?.lists?.isAbandoned
   )
 })
-
-const initializeAudioContext = () => {
-  try {
-    if (!audioContext.value) {
-      audioContext.value = new (window.AudioContext || window.webkitAudioContext)()
-    }
-
-    if (!compressorNode.value) {
-      compressorNode.value = audioContext.value.createDynamicsCompressor()
-      compressorNode.value.threshold.value = -50
-      compressorNode.value.knee.value = 40
-      compressorNode.value.ratio.value = 12
-      compressorNode.value.attack.value = 0
-      compressorNode.value.release.value = 0.25
-
-      gainNode.value = audioContext.value.createGain()
-      bypassGainNode.value = audioContext.value.createGain()
-
-      gainNode.value.gain.value = 0
-      bypassGainNode.value.gain.value = 1
-
-      compressorNode.value.connect(gainNode.value)
-      gainNode.value.connect(audioContext.value.destination)
-
-      bypassGainNode.value.connect(audioContext.value.destination)
-    }
-
-    return true
-  } catch (e) {
-    debugLog('Error initializing audio context:', e)
-    return false
-  }
-}
-
-const setupVideoAudio = async (video) => {
-  try {
-    if (!audioContext.value || currentVideoElement.value === video) return true
-
-    const iframe = playerIframe.value
-    const iframeSrc = iframe?.src || ''
-
-    if (
-      iframeSrc.includes('videoframe') ||
-      iframeSrc.includes('kinoserial.net') ||
-      iframeSrc.includes('allarknow')
-    ) {
-      debugLog('Player detected as unsupported for compressor:', iframeSrc)
-      currentVideoElement.value = video
-      mediaSource.value = null
-      currentCompressorState.value = false
-
-      if (isElectron.value) {
-        window.electronAPI.showToast('Компрессор не поддерживается этим плеером')
-      }
-      return false
-    }
-
-    if (mediaSource.value) {
-      try {
-        mediaSource.value.disconnect()
-      } catch {
-        // ignore
-      }
-    }
-
-    const attemptConnection = async (delay = 0) => {
-      if (delay > 0) {
-        await new Promise((resolve) => setTimeout(resolve, delay))
-      }
-
-      try {
-        mediaSource.value = audioContext.value.createMediaElementSource(video)
-        currentVideoElement.value = video
-
-        mediaSource.value.connect(compressorNode.value)
-        mediaSource.value.connect(bypassGainNode.value)
-
-        debugLog(`Video audio setup completed (attempt with ${delay}ms delay)`)
-        return true
-      } catch (e) {
-        if (e.name === 'InvalidStateError' && e.message.includes('already connected')) {
-          debugLog(`MediaElementSource already connected (${delay}ms delay attempt)`)
-          return false
-        } else {
-          throw e
-        }
-      }
-    }
-
-    if (await attemptConnection(0)) return true
-
-    if (await attemptConnection(100)) return true
-
-    if (await attemptConnection(300)) return true
-
-    if (await attemptConnection(800)) return true
-
-    debugLog(
-      'Video element has internal audio processing, compressor not available for this player'
-    )
-    currentVideoElement.value = video
-    mediaSource.value = null
-    currentCompressorState.value = false
-
-    if (isElectron.value) {
-      window.electronAPI.showToast('Компрессор не поддерживается этим плеером')
-    }
-    return false
-  } catch (e) {
-    debugLog('Error setting up video audio:', e)
-    return false
-  }
-}
-
-const applyCompressorEffect = async (enabled) => {
-  if (!playerIframe.value) return
-
-  try {
-    const iframe = playerIframe.value
-    const iframeDoc = iframe.contentDocument || iframe.contentWindow.document
-    if (!iframeDoc) return
-
-    const videos = iframeDoc.querySelectorAll('video')
-    if (videos.length === 0) return
-
-    const video = videos[0]
-
-    if (!initializeAudioContext()) return
-
-    const audioSetupSuccess = await setupVideoAudio(video)
-    if (!audioSetupSuccess || !mediaSource.value) {
-      debugLog('Compressor not available for this player')
-      return
-    }
-
-    if (enabled && !currentCompressorState.value) {
-      gainNode.value.gain.setValueAtTime(1, audioContext.value.currentTime)
-      bypassGainNode.value.gain.setValueAtTime(0, audioContext.value.currentTime)
-      currentCompressorState.value = true
-
-      if (isElectron.value) {
-        window.electronAPI.showToast('Компрессор включён')
-      }
-      debugLog('Compressor enabled')
-    } else if (!enabled && currentCompressorState.value) {
-      gainNode.value.gain.setValueAtTime(0, audioContext.value.currentTime)
-      bypassGainNode.value.gain.setValueAtTime(1, audioContext.value.currentTime)
-      currentCompressorState.value = false
-
-      if (isElectron.value) {
-        window.electronAPI.showToast('Компрессор отключён')
-      }
-      debugLog('Compressor disabled')
-    }
-  } catch (e) {
-    debugLog('Compressor error:', e)
-    if (isElectron.value) {
-      window.electronAPI.showToast('Ошибка при включении компрессора')
-    }
-  }
-}
-
-const enableBlur = () => {
-  if (!playerIframe.value) return
-
-  try {
-    const iframe = playerIframe.value
-    const iframeDoc = iframe.contentDocument || iframe.contentWindow.document
-    if (!iframeDoc) return
-
-    const videos = iframeDoc.querySelectorAll('video')
-    if (videos.length > 0) {
-      const video = videos[0]
-      if (!video.style.filter.includes('blur')) {
-        video.style.filter = 'blur(50px)'
-      }
-    } else {
-      if (!iframe.style.filter.includes('blur')) {
-        iframe.style.filter = 'blur(50px)'
-      }
-    }
-  } catch (error) {
-    debugLog('Error enabling blur:', error)
-  }
-}
-
-const disableBlur = () => {
-  if (!playerIframe.value) return
-
-  try {
-    const iframe = playerIframe.value
-    const iframeDoc = iframe.contentDocument || iframe.contentWindow.document
-    if (!iframeDoc) return
-
-    const videos = iframeDoc.querySelectorAll('video')
-    if (videos.length > 0) {
-      const video = videos[0]
-      if (video.style.filter.includes('blur')) {
-        video.style.filter = ''
-      }
-    } else {
-      if (iframe.style.filter.includes('blur')) {
-        iframe.style.filter = ''
-      }
-    }
-  } catch (error) {
-    debugLog('Error disabling blur:', error)
-  }
-}
-
-const toggleBlur = () => {
-  if (isElectron.value) {
-    try {
-      const iframe = playerIframe.value
-      const iframeDoc = iframe.contentDocument || iframe.contentWindow.document
-      if (!iframeDoc) return
-
-      const videos = iframeDoc.querySelectorAll('video')
-      if (videos.length > 0) {
-        const video = videos[0]
-        if (video.style.filter.includes('blur')) {
-          video.style.filter = ''
-        } else {
-          video.style.filter = 'blur(50px)'
-        }
-      } else {
-        if (iframe.style.filter.includes('blur')) {
-          iframe.style.filter = ''
-        } else {
-          iframe.style.filter = 'blur(50px)'
-        }
-      }
-    } catch (error) {
-      debugLog('Error toggling blur:', error)
-    }
-  } else {
-    showMessageToast('Доступно только в приложении ReYohoho Desktop')
-    window.open('https://t.me/ReYohoho/126', '_blank')
-  }
-}
-
-const toggleCompressor = () => {
-  if (isElectron.value) {
-    compressorEnabled.value = !compressorEnabled.value
-    applyCompressorEffect(compressorEnabled.value)
-  } else {
-    showMessageToast('Доступно только в приложении ReYohoho Desktop')
-    window.open('https://t.me/ReYohoho/126', '_blank')
-  }
-}
-
-const toggleMirror = () => {
-  if (isElectron.value) {
-    mirrorEnabled.value = !mirrorEnabled.value
-    applyMirrorEffect(mirrorEnabled.value)
-  } else {
-    showMessageToast('Доступно только в приложении ReYohoho Desktop')
-    window.open('https://t.me/ReYohoho/126', '_blank')
-  }
-}
-
-const compressorEnabled = computed({
-  get: () => playerStore.compressorEnabled,
-  set: (value) => playerStore.updateCompressor(value)
-})
-
-const mirrorEnabled = computed({
-  get: () => playerStore.mirrorEnabled,
-  set: (value) => playerStore.updateMirror(value)
-})
-
-const applyMirrorEffect = (enabled) => {
-  if (!playerIframe.value) return
-
-  try {
-    const iframe = playerIframe.value
-    const iframeDoc = iframe.contentDocument || iframe.contentWindow.document
-    if (!iframeDoc) return
-
-    const videos = iframeDoc.querySelectorAll('video')
-    if (videos.length > 0) {
-      videos.forEach((video) => {
-        if (enabled) {
-          video.style.transform = 'scaleX(-1)'
-        } else {
-          video.style.transform = 'scaleX(1)'
-        }
-      })
-
-      currentMirrorState.value = enabled
-
-      if (isElectron.value) {
-        const message = enabled ? 'Зеркало включено' : 'Зеркало отключено'
-        window.electronAPI.showToast(message)
-      }
-    }
-  } catch {
-    // ignore
-  }
-}
-
-const startMirrorMonitoring = () => {
-  if (mirrorCheckInterval.value) {
-    clearInterval(mirrorCheckInterval.value)
-  }
-
-  mirrorCheckInterval.value = setInterval(() => {
-    if (!playerIframe.value) return
-
-    try {
-      const iframe = playerIframe.value
-      const iframeDoc = iframe.contentDocument || iframe.contentWindow.document
-      if (!iframeDoc) return
-
-      const videos = iframeDoc.querySelectorAll('video')
-      if (videos.length > 0) {
-        const video = videos[0]
-
-        const transform = video.style.transform
-        const isCurrentlyMirrored = transform === 'scaleX(-1)'
-
-        if (mirrorEnabled.value && !isCurrentlyMirrored) {
-          video.style.transform = 'scaleX(-1)'
-          currentMirrorState.value = true
-        } else if (!mirrorEnabled.value && isCurrentlyMirrored) {
-          video.style.transform = 'scaleX(1)'
-          currentMirrorState.value = false
-        }
-
-        if (currentVideoElement.value !== video) {
-          currentVideoElement.value = null
-          currentCompressorState.value = false
-
-          if (compressorEnabled.value) {
-            setTimeout(() => {
-              applyCompressorEffect(true)
-            }, 500)
-          }
-        } else if (compressorEnabled.value !== currentCompressorState.value && mediaSource.value) {
-          debugLog('Compressor state mismatch, reapplying')
-          applyCompressorEffect(compressorEnabled.value)
-        }
-      }
-    } catch {
-      // ignore
-    }
-  }, 1000)
-}
 
 const startVideoPositionMonitoring = (isDebug = false) => {
   if (!isElectron.value) return
@@ -1257,35 +919,6 @@ const onIframeLoad = () => {
   }
 }
 
-const openAppLink = () => {
-  const appUrl = `reyohoho://#${kp_id.value}`
-  try {
-    window.location.href = appUrl
-  } catch (e) {
-    console.error('Ошибка при открытии ссылки:', e)
-  }
-}
-
-const cleanupAudioContext = () => {
-  try {
-    if (mediaSource.value) {
-      mediaSource.value.disconnect()
-      mediaSource.value = null
-    }
-    if (audioContext.value) {
-      audioContext.value.close()
-      audioContext.value = null
-    }
-    compressorNode.value = null
-    gainNode.value = null
-    bypassGainNode.value = null
-    currentVideoElement.value = null
-    currentCompressorState.value = false
-  } catch (e) {
-    debugLog('Error cleaning up audio context:', e)
-  }
-}
-
 const handlePlayerSelect = (player) => {
   if (selectedPlayerInternal.value?.key === player.key) {
     closePlayerModal()
@@ -1294,15 +927,9 @@ const handlePlayerSelect = (player) => {
 
   selectedPlayerInternal.value = player
   iframeLoading.value = true
-  currentMirrorState.value = false
-  currentCompressorState.value = false
-  currentVideoElement.value = null
+  resetElectronPlaybackState()
   if (currentOverlayElement.value) {
     removeVideoOverlay()
-  }
-  if (mirrorCheckInterval.value) {
-    clearInterval(mirrorCheckInterval.value)
-    mirrorCheckInterval.value = null
   }
   if (videoPositionInterval.value) {
     clearInterval(videoPositionInterval.value)
@@ -1317,15 +944,9 @@ const handlePlayerSelect = (player) => {
 watch(selectedPlayerInternal, (newVal) => {
   if (newVal) {
     iframeLoading.value = true
-    currentMirrorState.value = false
-    currentCompressorState.value = false
-    currentVideoElement.value = null
+    resetElectronPlaybackState()
     if (currentOverlayElement.value) {
       removeVideoOverlay()
-    }
-    if (mirrorCheckInterval.value) {
-      clearInterval(mirrorCheckInterval.value)
-      mirrorCheckInterval.value = null
     }
     if (videoPositionInterval.value) {
       clearInterval(videoPositionInterval.value)
@@ -1343,15 +964,9 @@ watch(
   async (newKpId) => {
     if (newKpId && newKpId !== kp_id.value) {
       kp_id.value = newKpId
-      currentMirrorState.value = false
-      currentCompressorState.value = false
-      currentVideoElement.value = null
+      resetElectronPlaybackState()
       if (currentOverlayElement.value) {
         removeVideoOverlay()
-      }
-      if (mirrorCheckInterval.value) {
-        clearInterval(mirrorCheckInterval.value)
-        mirrorCheckInterval.value = null
       }
       if (videoPositionInterval.value) {
         clearInterval(videoPositionInterval.value)
@@ -1478,38 +1093,6 @@ const showFavoriteTooltip = computed(() => playerStore.showFavoriteTooltip)
 const openSettings = () => {
   router.push('/settings')
   hideTooltip()
-}
-
-const togglePiP = async () => {
-  if (!isElectron.value) {
-    showMessageToast('Доступно только в приложении ReYohoho Desktop')
-    window.open('https://t.me/ReYohoho/126', '_blank')
-    return
-  }
-
-  if (!playerIframe.value) return
-
-  try {
-    const iframe = playerIframe.value
-    const iframeDoc = iframe.contentDocument || iframe.contentWindow.document
-    if (!iframeDoc) return
-
-    const video = iframeDoc.querySelector('video')
-    if (!video) return
-
-    if (document.pictureInPictureElement) {
-      await document.exitPictureInPicture()
-    } else {
-      if (document.pictureInPictureEnabled) {
-        await video.requestPictureInPicture()
-      } else {
-        showMessageToast('Ваш браузер не поддерживает режим "Картинка в картинке"')
-      }
-    }
-  } catch (error) {
-    console.error('Error toggling PiP:', error)
-    showMessageToast('Не удалось включить режим "Картинка в картинке"')
-  }
 }
 
 const toggleVideoOverlay = () => {
@@ -2850,9 +2433,6 @@ onBeforeUnmount(() => {
   window.removeEventListener('resize', updateTooltipPosition)
   cleanupPlayerLayout()
 
-  if (mirrorCheckInterval.value) {
-    clearInterval(mirrorCheckInterval.value)
-  }
   if (videoPositionInterval.value) {
     clearInterval(videoPositionInterval.value)
   }
@@ -2860,12 +2440,10 @@ onBeforeUnmount(() => {
     clearInterval(overlayTimingsCheckInterval.value)
   }
   removeVideoOverlay()
-  cleanupAudioContext()
+  cleanupElectronControls()
 
   disconnectFromOBS()
 
-  delete window.toggleCompressor
-  delete window.toggleMirror
   delete window.connectToOBS
   delete window.testOBSBlur
   delete window.refreshOBSFilters
