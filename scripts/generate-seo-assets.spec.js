@@ -2,7 +2,7 @@ import fs from 'node:fs/promises'
 import os from 'node:os'
 import path from 'node:path'
 import { describe, expect, it } from 'vitest'
-import { createSitemapUrls, generateSeoAssets } from './generate-seo-assets.js'
+import { createRobotsTxt, createSitemapUrls, generateSeoAssets } from './generate-seo-assets.js'
 
 describe('generate-seo-assets', () => {
   it('falls back to static routes when movies.json is missing', async () => {
@@ -44,5 +44,16 @@ describe('generate-seo-assets', () => {
     expect(urls.some((item) => item.loc === 'https://example.com/app/movie/123/interstellar')).toBe(
       true
     )
+  })
+
+  it('disallows auth callback routes in robots.txt', () => {
+    const robots = createRobotsTxt({
+      siteOrigin: 'https://dav2010id.github.io',
+      basePath: '/reyohoho'
+    })
+
+    expect(robots).toContain('Disallow: /auth-success')
+    expect(robots).toContain('Disallow: /reyohoho/auth-success')
+    expect(robots).toContain('Sitemap: https://dav2010id.github.io/reyohoho/sitemap.xml')
   })
 })

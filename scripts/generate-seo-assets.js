@@ -58,10 +58,15 @@ export const createSitemapXml = (urls = []) => `<?xml version="1.0" encoding="UT
   )
   .join('\n')}\n</urlset>\n`
 
-export const createRobotsTxt = ({
-  siteOrigin = SITE_ORIGIN,
-  basePath = BASE_PATH
-} = {}) => `User-agent: *\nAllow: /\n\nSitemap: ${siteOrigin}${basePath}/sitemap.xml\n`
+export const createRobotsTxt = ({ siteOrigin = SITE_ORIGIN, basePath = BASE_PATH } = {}) => {
+  const disallowPaths = Array.from(
+    new Set(['/auth-success', `${basePath}/auth-success`].filter(Boolean))
+  )
+
+  return `User-agent: *\nAllow: /\n${disallowPaths
+    .map((routePath) => `Disallow: ${routePath}`)
+    .join('\n')}\n\nSitemap: ${siteOrigin}${basePath}/sitemap.xml\n`
+}
 
 export async function generateSeoAssets({
   moviesPath = MOVIES_PATH,
