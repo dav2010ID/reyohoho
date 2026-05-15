@@ -1,4 +1,6 @@
 User-agent: *
 Allow: /
+Disallow: /auth-success
+Disallow: /reyohoho/auth-success
 
 Sitemap: https://dav2010id.github.io/reyohoho/sitemap.xml
