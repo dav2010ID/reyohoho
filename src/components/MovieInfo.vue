@@ -825,426 +825,79 @@
     </div>
   </div>
 
-  <div v-if="showTimingForm" class="timing-modal">
-    <div class="timing-modal-content">
-      <div class="timing-modal-header">
-        <h3>{{ editingTiming ? 'Редактировать тайминг' : 'Добавить тайминг' }}</h3>
-        <button class="close-modal-btn" @click="closeTimingForm">
-          <i class="fas fa-times"></i>
-        </button>
-      </div>
-      <div class="timing-submission-form">
-        <textarea
-          v-model="newTimingText"
-          placeholder="Пожалуйста, указывайте длительность фильма(в [] скобках, например [01:36] или [01:36:55]), к которому вы прилагаете тайминг
-Тк же для автоблюра прошу все тайминги указывать как диапозон, а не конкретное время, например 00:12:31-00:13:04 - текст, а не 00:12:31
-Для сериалов указывайте сезон и номер эпизода
-"
-          class="timing-textarea"
-        ></textarea>
+  <MovieTimingFormModal
+    v-if="showTimingForm"
+    v-model="newTimingText"
+    :editing-timing="editingTiming"
+    :parsed-timing-preview="parsedTimingPreview"
+    :can-submit="!!canSubmitTiming"
+    :is-submitting="isSubmittingTiming"
+    @close="closeTimingForm"
+    @submit="editingTiming ? updateExistingTiming() : submitNewTiming()"
+  />
 
-        <div v-if="parsedTimingPreview && parsedTimingPreview.length > 0" class="timing-preview">
-          <div class="timing-preview-header">
-            <i class="fas fa-eye"></i>
-            <span>Предпросмотр парсера</span>
-          </div>
-          <div class="timing-preview-content">
-            <div
-              v-for="(range, index) in parsedTimingPreview"
-              :key="index"
-              class="timing-preview-item"
-            >
-              <span class="timing-preview-range">
-                {{ formatSecondsToTime(range[0]) }} - {{ formatSecondsToTime(range[1]) }}
-              </span>
-              <span class="timing-preview-duration">
-                ({{ Math.round(range[1] - range[0]) }}с)
-              </span>
-            </div>
-          </div>
-        </div>
+  <MovieReportTimingModal
+    v-if="showReportForm"
+    v-model="reportText"
+    :is-submitting="isSubmittingReport"
+    @close="closeReportForm"
+    @submit="submitReport"
+  />
 
-        <div class="timing-form-actions">
-          <button
-            class="submit-timing-btn"
-            :disabled="!canSubmitTiming || isSubmittingTiming"
-            @click="editingTiming ? updateExistingTiming() : submitNewTiming()"
-          >
-            <i v-if="isSubmittingTiming" class="fas fa-spinner fa-spin"></i>
-            <span v-else>{{ editingTiming ? 'Обновить тайминг' : 'Добавить тайминг' }}</span>
-          </button>
-        </div>
-      </div>
-    </div>
-  </div>
+  <MovieNoteModal
+    v-if="showNoteEditor"
+    v-model="noteText"
+    :movie-note="movieNote"
+    :is-saving="isSavingNote"
+    :is-deleting="isDeletingNote"
+    @close="cancelNoteEdit"
+    @save="handleSaveNote"
+    @delete="handleDeleteNote"
+  />
 
-  <div v-if="showReportForm" class="timing-modal">
-    <div class="timing-modal-content">
-      <div class="timing-modal-header">
-        <h3>Пожаловаться на тайминг</h3>
-        <button class="close-modal-btn" @click="closeReportForm">
-          <i class="fas fa-times"></i>
-        </button>
-      </div>
-      <div class="timing-submission-form">
-        <textarea
-          v-model="reportText"
-          placeholder="Опишите причину жалобы..."
-          class="timing-textarea"
-          rows="4"
-        ></textarea>
+  <MovieTopSubmittersModal
+    v-if="showTopSubmittersModal"
+    :top-submitters="topSubmitters"
+    :is-loading-all-timings="isLoadingAllTimings"
+    @close="showTopSubmittersModal = false"
+    @show-all="showAllTimingsModal"
+  />
 
-        <div class="timing-form-actions">
-          <button
-            class="submit-timing-btn"
-            :disabled="!reportText.trim() || isSubmittingReport"
-            @click="submitReport"
-          >
-            <i v-if="isSubmittingReport" class="fas fa-spinner fa-spin"></i>
-            <span v-else>Отправить жалобу</span>
-          </button>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <div v-if="showNoteEditor" class="timing-modal note-modal">
-    <div class="timing-modal-content">
-      <div class="timing-modal-header">
-        <h3>
-          <i class="fa-regular fa-note-sticky"></i>
-          {{ movieNote ? 'Редактировать заметку' : 'Новая заметка' }}
-        </h3>
-        <button class="close-modal-btn" @click="cancelNoteEdit">
-          <i class="fas fa-times"></i>
-        </button>
-      </div>
-      <div class="timing-submission-form">
-        <div class="note-info">
-          <i class="fas fa-info-circle"></i>
-          <span>Личная заметка о фильме, видна только вам</span>
-        </div>
-        <textarea
-          v-model="noteText"
-          placeholder="Напишите свою заметку о фильме..."
-          class="timing-textarea note-textarea"
-          rows="10"
-          maxlength="10000"
-        ></textarea>
-        <div class="char-counter">{{ noteText.length }} / 10000 символов</div>
-
-        <div class="timing-form-actions note-form-actions">
-          <button
-            class="submit-timing-btn"
-            :disabled="!noteText.trim() || isSavingNote"
-            @click="handleSaveNote"
-          >
-            <i v-if="isSavingNote" class="fas fa-spinner fa-spin"></i>
-            <i v-else class="fas fa-save"></i>
-            <span>{{ movieNote ? 'Обновить' : 'Сохранить' }}</span>
-          </button>
-          <button
-            v-if="movieNote"
-            class="delete-note-btn"
-            :disabled="isDeletingNote"
-            @click="handleDeleteNote"
-          >
-            <i v-if="isDeletingNote" class="fas fa-spinner fa-spin"></i>
-            <i v-else class="fas fa-trash"></i>
-            <span>Удалить</span>
-          </button>
-          <button class="cancel-note-btn" @click="cancelNoteEdit">
-            <i class="fas fa-times"></i>
-            <span>Отмена</span>
-          </button>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <div v-if="showTopSubmittersModal" class="modal-overlay" @click="showTopSubmittersModal = false">
-    <div class="modal-content" @click.stop>
-      <div class="modal-header">
-        <h3>
-          Топ авторов таймингов
-          <span class="hint-text"
-            >(Хотите добавить ссылку на свой стрим/соцсети? Напишите нам в
-            <a href="https://t.me/reyohoho_sup" target="_blank" rel="noopener noreferrer"
-              >телеграм</a
-            >)</span
-          >
-        </h3>
-        <div class="modal-header-controls">
-          <button class="close-modal-btn" @click="showTopSubmittersModal = false">
-            <i class="fas fa-times"></i>
-          </button>
-        </div>
-      </div>
-      <div class="modal-body">
-        <button
-          class="show-all-timings-btn"
-          :disabled="isLoadingAllTimings"
-          @click="showAllTimingsModal"
-        >
-          <i v-if="isLoadingAllTimings" class="fas fa-spinner fa-spin"></i>
-          <i v-else class="fas fa-list"></i>
-          <span>Все тайминги</span>
-        </button>
-        <div class="top-submitters-list">
-          <div
-            v-for="(submitter, index) in topSubmitters"
-            :key="submitter.username"
-            class="top-submitter-item"
-          >
-            <div
-              class="submitter-rank"
-              :class="{
-                gold: index === 0,
-                silver: index === 1,
-                bronze: index === 2
-              }"
-            >
-              {{ index + 1 }}
-            </div>
-            <div class="submitter-info">
-              <div class="submitter-name">
-                <template v-if="submitter.stream_link">
-                  <a :href="submitter.stream_link" target="_blank" rel="noopener noreferrer">
-                    {{ submitter.username }}
-                    <i class="fa-brands fa-twitch"></i>
-                  </a>
-                </template>
-                <template v-else>
-                  {{ submitter.username }}
-                </template>
-              </div>
-              <div class="submitter-count">
-                {{ submitter.approved_submissions_count }}
-                {{
-                  getNounForm(submitter.approved_submissions_count, ['фильм', 'фильма', 'фильмов'])
-                }}
-              </div>
-            </div>
-            <div class="submitter-contribution">
-              <div
-                class="contribution-bar"
-                :style="{ width: getContributionWidth(submitter.approved_submissions_count) + '%' }"
-              ></div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <div
+  <MovieAllTimingsModal
     v-if="showAllTimingsModalVisible"
-    class="modal-overlay"
-    @click="showAllTimingsModalVisible = false"
-  >
-    <div class="modal-content all-timings-modal" @click.stop>
-      <div class="modal-header">
-        <h3>Все тайминги</h3>
-        <button class="close-modal-btn" @click="showAllTimingsModalVisible = false">
-          <i class="fas fa-times"></i>
-        </button>
-      </div>
-      <div class="modal-body">
-        <div v-if="isLoadingAllTimings" class="loading-spinner">
-          <i class="fas fa-spinner fa-spin"></i>
-          <span>Загрузка всех таймингов...</span>
-        </div>
-        <div v-else-if="allTimings.length === 0" class="no-timings">
-          <p>Тайминги не найдены</p>
-        </div>
-        <div v-else-if="filteredTimings.length === 0" class="no-timings">
-          <p>Тайминги по выбранному фильтру не найдены</p>
-        </div>
-        <div v-else class="all-timings-list">
-          <div v-for="timing in filteredTimings" :key="timing.id" class="timing-item">
-            <div class="timing-header">
-              <div class="timing-meta">
-                <span class="timing-author">{{ timing.username }}</span>
-                <span class="timing-date">{{ formatDate(timing.submitted_at) }}</span>
-              </div>
-              <div class="timing-movie-info">
-                <router-link
-                  :to="getMovieSeoPath({ kp_id: timing.kp_id })"
-                  class="timing-kp-id clickable"
-                  :title="`Перейти к фильму ${timing.kp_id}`"
-                >
-                  KP: {{ timing.kp_id }}
-                </router-link>
-                <div
-                  v-if="authStore.user?.is_admin && timing.status === 'pending'"
-                  class="admin-controls"
-                >
-                  <button
-                    v-if="timing.status === 'pending'"
-                    class="approve-btn"
-                    :disabled="isProcessingTiming"
-                    :title="'Одобрить тайминг'"
-                    @click="handleApproveTiming(timing.id)"
-                  >
-                    <i
-                      v-if="processingTimingId === timing.id && isApproving"
-                      class="fas fa-spinner fa-spin"
-                    ></i>
-                    <i v-else class="fas fa-check"></i>
-                  </button>
-                  <button
-                    v-if="timing.status === 'pending'"
-                    class="reject-btn"
-                    :disabled="isProcessingTiming"
-                    :title="'Отклонить тайминг'"
-                    @click="handleRejectTiming(timing.id)"
-                  >
-                    <i
-                      v-if="processingTimingId === timing.id && !isApproving && !isMarkingCleanText"
-                      class="fas fa-spinner fa-spin"
-                    ></i>
-                    <i v-else class="fas fa-times"></i>
-                  </button>
-                  <button
-                    v-if="timing.status === 'pending'"
-                    class="clean-text-btn"
-                    :disabled="isProcessingTiming"
-                    :title="'Отметить как clean_text'"
-                    @click="handleMarkAsCleanText(timing.id)"
-                  >
-                    <i
-                      v-if="processingTimingId === timing.id && isMarkingCleanText"
-                      class="fas fa-spinner fa-spin"
-                    ></i>
-                    <i v-else class="fas fa-eye-slash"></i>
-                  </button>
-                </div>
-              </div>
-            </div>
-            <div class="timing-content">
-              <pre class="timing-text">{{ timing.timing_text }}</pre>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
+    :all-timings="allTimings"
+    :filtered-timings="filteredTimings"
+    :is-loading-all-timings="isLoadingAllTimings"
+    :auth-user="authStore.user"
+    :is-processing-timing="isProcessingTiming"
+    :processing-timing-id="processingTimingId"
+    :is-approving="isApproving"
+    :is-marking-clean-text="isMarkingCleanText"
+    @close="showAllTimingsModalVisible = false"
+    @approve="handleApproveTiming"
+    @reject="handleRejectTiming"
+    @mark-clean-text="handleMarkAsCleanText"
+  />
 
-  <div v-if="showObsSettings" class="timing-modal obs-modal">
-    <div class="timing-modal-content obs-modal-content">
-      <div class="timing-modal-header">
-        <h3>Настройки OBS WebSocket</h3>
-        <button class="close-modal-btn" @click="showObsSettings = false">
-          <i class="fas fa-times"></i>
-        </button>
-      </div>
-      <div class="obs-settings-form">
-        <div class="obs-setting-group">
-          <label class="obs-checkbox-label">
-            <input v-model="obsEnabled" type="checkbox" @change="handleObsEnabledChange" />
-            <span>Использовать автоблюр в OBS</span>
-          </label>
-          <div class="obs-setting-description">
-            Если включено, автоблюр будет применяться через OBS WebSocket вместо внутреннего блюра
-          </div>
-        </div>
-
-        <div v-if="obsEnabled" class="obs-connection-settings">
-          <div class="obs-setting-group">
-            <label>Хост OBS WebSocket:</label>
-            <input v-model="obsHost" type="text" placeholder="localhost" class="obs-input" />
-          </div>
-
-          <div class="obs-setting-group">
-            <label>Порт OBS WebSocket:</label>
-            <input v-model="obsPort" type="number" placeholder="4455" class="obs-input" />
-          </div>
-
-          <div class="obs-setting-group">
-            <label>Пароль (если установлен):</label>
-            <input
-              v-model="obsPassword"
-              type="password"
-              placeholder="Оставьте пустым если пароль не установлен"
-              class="obs-input"
-            />
-          </div>
-
-          <div v-if="obsConnected" class="obs-setting-group">
-            <label>Выбор фильтра для блюра:</label>
-            <div v-if="obsFiltersFound.length === 0" class="obs-warning">
-              ⚠️ Фильтры не найдены в OBS. Убедитесь, что в источниках есть фильтры.
-            </div>
-            <div v-else class="obs-filter-selection">
-              <select
-                v-model="selectedFilterId"
-                class="obs-filter-select"
-                @change="handleFilterSelect"
-              >
-                <option value="">Выберите фильтр</option>
-                <option v-for="filter in obsFiltersFound" :key="filter.id" :value="filter.id">
-                  {{ filter.sourceName }} - {{ filter.filterName }} ({{ filter.sceneName }})
-                </option>
-              </select>
-              <div v-if="selectedFilter" class="selected-filter-info">
-                <div class="filter-details">
-                  <strong>{{ selectedFilter.filterName }}</strong> в источнике
-                  <strong>{{ selectedFilter.sourceName }}</strong>
-                </div>
-                <span class="filter-status" :class="{ enabled: selectedFilter.enabled }">
-                  Статус: {{ selectedFilter.enabled ? '✅ Включен' : '⭕ Отключен' }}
-                </span>
-              </div>
-              <div class="obs-info">
-                💡 Найдено {{ obsFiltersFound.length }} фильтров. Выберите фильтр блюра.
-              </div>
-            </div>
-          </div>
-
-          <div class="obs-setting-group">
-            <label class="obs-checkbox-label">
-              <input v-model="showObsInOverlay" type="checkbox" />
-              <span>Показывать статус OBS в видео оверлее</span>
-            </label>
-          </div>
-
-          <div class="obs-status" :class="{ connected: obsConnected }">
-            {{ obsConnected ? 'Подключен к OBS' : 'Не подключен к OBS' }}
-          </div>
-
-          <div class="obs-actions">
-            <button
-              class="obs-action-btn connect-btn"
-              :disabled="obsConnecting"
-              @click="handleObsConnect"
-            >
-              <i v-if="obsConnecting" class="fas fa-spinner fa-spin"></i>
-              <i v-else class="fas fa-plug"></i>
-              {{ obsConnected ? 'Переподключиться' : 'Подключиться' }}
-            </button>
-
-            <button
-              class="obs-action-btn test-btn"
-              :disabled="!obsConnected || obsFiltersFound.length === 0"
-              @click="handleObsTestBlur"
-            >
-              <i class="fas fa-eye"></i>
-              Тестировать блюр
-            </button>
-
-            <button
-              class="obs-action-btn refresh-btn"
-              :disabled="!obsConnected"
-              @click="handleObsRefreshFilters"
-            >
-              <i class="fas fa-sync"></i>
-              Обновить фильтры
-            </button>
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
+  <MovieObsSettingsModal
+    v-if="showObsSettings"
+    v-model:enabled="obsEnabled"
+    v-model:host="obsHost"
+    v-model:port="obsPort"
+    v-model:password="obsPassword"
+    v-model:selected-filter-id="selectedFilterId"
+    v-model:show-in-overlay="showObsInOverlay"
+    :connected="obsConnected"
+    :connecting="obsConnecting"
+    :filters-found="obsFiltersFound"
+    :selected-filter="selectedFilter"
+    @enabled-change="handleObsEnabledChange"
+    @filter-select="handleFilterSelect"
+    @close="showObsSettings = false"
+    @connect="handleObsConnect"
+    @test-blur="handleObsTestBlur"
+    @refresh-filters="handleObsRefreshFilters"
+  />
 </template>
 
 <script setup>
@@ -1267,7 +920,6 @@ import {
   saveMovieNote,
   deleteMovieNote
 } from '@/api/movies'
-import { formatDate } from '@/utils/dateUtils'
 import { parseTimingTextToSeconds, formatSecondsToTime } from '@/utils/dateUtils'
 import { handleApiError } from '@/constants'
 import { addToList, delFromList } from '@/api/user'
@@ -1280,17 +932,36 @@ import { useMainStore } from '@/store/main'
 import { useAuthStore } from '@/store/auth'
 import { useNavbarStore } from '@/store/navbar'
 import { usePlayerStore } from '@/store/player'
-import { computed, onMounted, onUnmounted, ref, watch } from 'vue'
+import { computed, defineAsyncComponent, onMounted, onUnmounted, ref, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useHead } from '@unhead/vue'
 import Notification from '@/components/notification/ToastMessage.vue'
-import TrailerCarousel from '@/components/TrailerCarousel.vue'
 import { useTrailerStore } from '@/store/trailer'
 import Comments from '@/components/Comments.vue'
-import MovieMobileListDropdown from '@/components/movie/MovieMobileListDropdown.vue'
 import { getRatingColor } from '@/utils/ratingUtils'
 import { buildMovieSeo, getMovieSeoEntry, getMovieSeoPath, getMovieSeoSlug } from '@/utils/movieSeo'
 import { optimizePosterUrl, resolvePosterByMovie } from '@/utils/mediaUtils'
+
+const TrailerCarousel = defineAsyncComponent(() => import('@/components/TrailerCarousel.vue'))
+const MovieMobileListDropdown = defineAsyncComponent(
+  () => import('@/components/movie/MovieMobileListDropdown.vue')
+)
+const MovieTimingFormModal = defineAsyncComponent(
+  () => import('@/components/movie/MovieTimingFormModal.vue')
+)
+const MovieReportTimingModal = defineAsyncComponent(
+  () => import('@/components/movie/MovieReportTimingModal.vue')
+)
+const MovieNoteModal = defineAsyncComponent(() => import('@/components/movie/MovieNoteModal.vue'))
+const MovieTopSubmittersModal = defineAsyncComponent(
+  () => import('@/components/movie/MovieTopSubmittersModal.vue')
+)
+const MovieAllTimingsModal = defineAsyncComponent(
+  () => import('@/components/movie/MovieAllTimingsModal.vue')
+)
+const MovieObsSettingsModal = defineAsyncComponent(
+  () => import('@/components/movie/MovieObsSettingsModal.vue')
+)
 
 const mainStore = useMainStore()
 const authStore = useAuthStore()
@@ -2452,17 +2123,6 @@ const showAllTimingsModal = async () => {
   } finally {
     isLoadingAllTimings.value = false
   }
-}
-
-const getNounForm = (number, forms) => {
-  const cases = [2, 0, 1, 1, 1, 2]
-  return forms[number % 100 > 4 && number % 100 < 20 ? 2 : cases[Math.min(number % 10, 5)]]
-}
-
-const getContributionWidth = (count) => {
-  if (!topSubmitters.value.length) return 0
-  const maxCount = Math.max(...topSubmitters.value.map((s) => s.approved_submissions_count))
-  return (count / maxCount) * 100
 }
 
 const filteredTimings = computed(() => {
