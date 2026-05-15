@@ -1,5 +1,6 @@
 import { useMainStore } from '@/store/main'
 import { normalizeMovieListResponse } from '@/api/movieSeoNormalizer'
+import { trackAnalyticsEvent } from '@/utils/analytics'
 
 const CONTENT_PROVIDERS = {
   RHSERV: 'rhserv',
@@ -10,7 +11,6 @@ const CONTENT_PROVIDERS = {
 const KINOBD_SUPPORTED_METHODS = new Set([
   'apiSearch',
   'getKpInfo',
-  'getPlayers',
   'getMovies',
   'getDiscussedMovies',
   'getKpIDfromIMDB',
@@ -69,6 +69,8 @@ const hasPlayers = (players) => {
 
 const getPlayersWithFallback = async (...args) => {
   const provider = getCurrentProvider()
+  const startedAt = Date.now()
+  const [contentId] = args
   const order =
     provider === CONTENT_PROVIDERS.KINOBD
       ? [CONTENT_PROVIDERS.KINOBD, CONTENT_PROVIDERS.KINOBOX]
@@ -82,12 +84,36 @@ const getPlayersWithFallback = async (...args) => {
       const players = await providerApi.getPlayers(...args)
 
       if (hasPlayers(players)) {
+        trackAnalyticsEvent('player_provider_attempt', {
+          status: 'success',
+          kp_id: contentId,
+          configured_source: provider,
+          source: currentProvider,
+          fallback_used: currentProvider !== provider,
+          duration_ms: Date.now() - startedAt
+        })
         return players
       }
 
+      trackAnalyticsEvent('player_provider_attempt', {
+        status: 'empty',
+        kp_id: contentId,
+        configured_source: provider,
+        source: currentProvider,
+        fallback_used: currentProvider !== provider,
+        duration_ms: Date.now() - startedAt
+      })
       console.warn(`[movies] getPlayers returned no players on ${currentProvider}`)
     } catch (error) {
       lastError = error
+      trackAnalyticsEvent('player_provider_attempt', {
+        status: 'error',
+        kp_id: contentId,
+        configured_source: provider,
+        source: currentProvider,
+        fallback_used: currentProvider !== provider,
+        duration_ms: Date.now() - startedAt
+      })
       console.warn(`[movies] getPlayers failed on ${currentProvider}`, error)
     }
   }

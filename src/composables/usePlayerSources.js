@@ -7,6 +7,7 @@ import {
 import { handleApiError } from '@/constants'
 import { useMainStore } from '@/store/main'
 import { usePlayerStore } from '@/store/player'
+import { trackAnalyticsEvent } from '@/utils/analytics'
 import { computed, ref } from 'vue'
 
 const normalizePlayerKey = (key) => String(key || '').toUpperCase()
@@ -93,16 +94,21 @@ export function usePlayerSources({ props, getProviderDisplayName, onSelectedPlay
   }
 
   const fetchPlayers = async () => {
+    const startedAt = Date.now()
+    const kpId = String(props.kpId || '')
+
     try {
       errorMessage.value = ''
       errorCode.value = null
       playersEmptyMessage.value = ''
 
-      const kpId = String(props.kpId || '')
       let players
+      let source = mainStore.contentApiProvider
+
       if (kpId.startsWith('shiki')) {
         const cleanShikiId = kpId.replace('shiki', '')
         players = await getShikiPlayers(cleanShikiId)
+        source = 'shiki'
       } else {
         const savedInid = playerStore.kinobdSourceByKpId?.[kpId] || null
         players = await getPlayers(kpId, {
@@ -115,10 +121,24 @@ export function usePlayerSources({ props, getProviderDisplayName, onSelectedPlay
       if (!hasPlayers) {
         playersEmptyMessage.value = NO_PLAYERS_MESSAGE
       }
+      trackAnalyticsEvent('player_list_load', {
+        status: hasPlayers ? 'success' : 'empty',
+        kp_id: kpId,
+        source,
+        player_count: playersInternal.value.length,
+        duration_ms: Date.now() - startedAt
+      })
     } catch (error) {
       const { message, code } = handleApiError(error)
       errorMessage.value = message
       errorCode.value = code
+      trackAnalyticsEvent('player_list_load', {
+        status: 'error',
+        kp_id: kpId,
+        source: mainStore.contentApiProvider,
+        error_code: code || 'unknown',
+        duration_ms: Date.now() - startedAt
+      })
       console.error('Ошибка при загрузке плееров:', error)
     }
   }
@@ -167,6 +187,7 @@ export function usePlayerSources({ props, getProviderDisplayName, onSelectedPlay
   const applySourceCandidate = async (candidate) => {
     if (!candidate?.id) return
 
+    const startedAt = Date.now()
     sourceLoading.value = true
     sourceError.value = ''
 
@@ -177,13 +198,35 @@ export function usePlayerSources({ props, getProviderDisplayName, onSelectedPlay
       const hasPlayers = applyPlayersData(players)
       if (!hasPlayers) {
         sourceError.value = NO_PLAYERS_MESSAGE
+        trackAnalyticsEvent('player_source_apply', {
+          status: 'empty',
+          kp_id: props.kpId,
+          source: 'kinobd',
+          source_id: candidate.id,
+          duration_ms: Date.now() - startedAt
+        })
         return
       }
       playersEmptyMessage.value = ''
       playerStore.setKinoBdSource(props.kpId, candidate.id)
+      trackAnalyticsEvent('player_source_apply', {
+        status: 'success',
+        kp_id: props.kpId,
+        source: 'kinobd',
+        source_id: candidate.id,
+        player_count: playersInternal.value.length,
+        duration_ms: Date.now() - startedAt
+      })
       closeSourceModal()
     } catch (error) {
       sourceError.value = 'Не удалось применить выбранный источник'
+      trackAnalyticsEvent('player_source_apply', {
+        status: 'error',
+        kp_id: props.kpId,
+        source: 'kinobd',
+        source_id: candidate.id,
+        duration_ms: Date.now() - startedAt
+      })
       console.error('Ошибка применения источника KinoBD:', error)
     } finally {
       sourceLoading.value = false

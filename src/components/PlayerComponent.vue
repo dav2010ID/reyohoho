@@ -512,6 +512,7 @@ import { parseTimingTextToSeconds, formatSecondsToTime } from '@/utils/dateUtils
 import { OBSWebSocket } from '@/utils/obsWebSocket'
 import { debugLog } from '@/utils/logger'
 import { getProviderDisplayName } from '@/utils/playerUtils'
+import { trackAnalyticsEvent } from '@/utils/analytics'
 import {
   applyOverlayButtonHoverStyle,
   applyOverlayProgressBackgroundStyle,
@@ -558,6 +559,9 @@ const emit = defineEmits(['update:selectedPlayer', 'update:movieInfo'])
 const iframeLoading = ref(true)
 const playerIframe = ref(null)
 const containerRef = ref(null)
+const PLAYER_IFRAME_LOAD_TIMEOUT_MS = 20000
+let iframeLoadStartedAt = 0
+let iframeLoadTimeout = null
 
 const isMobile = computed(() => mainStore.isMobile)
 const isElectron = computed(() => !!window.electronAPI)
@@ -925,8 +929,48 @@ const startVideoPositionMonitoring = (isDebug = false) => {
   }, 100)
 }
 
+const getPlayerAnalyticsPayload = () => ({
+  kp_id: kp_id.value,
+  player_key: selectedPlayerInternal.value?.key || '',
+  player_name: selectedPlayerInternal.value
+    ? getProviderDisplayName(selectedPlayerInternal.value)
+    : '',
+  source: mainStore.contentApiProvider
+})
+
+const clearIframeLoadTimeout = () => {
+  if (!iframeLoadTimeout) return
+  clearTimeout(iframeLoadTimeout)
+  iframeLoadTimeout = null
+}
+
+const scheduleIframeLoadTimeout = () => {
+  clearIframeLoadTimeout()
+
+  const iframe = selectedPlayerInternal.value?.iframe
+  if (!iframe) return
+
+  iframeLoadStartedAt = Date.now()
+  iframeLoadTimeout = setTimeout(() => {
+    if (!iframeLoading.value || selectedPlayerInternal.value?.iframe !== iframe) return
+
+    trackAnalyticsEvent('player_iframe_load', {
+      ...getPlayerAnalyticsPayload(),
+      status: 'timeout',
+      duration_ms: Date.now() - iframeLoadStartedAt,
+      timeout_ms: PLAYER_IFRAME_LOAD_TIMEOUT_MS
+    })
+  }, PLAYER_IFRAME_LOAD_TIMEOUT_MS)
+}
+
 const onIframeLoad = () => {
   iframeLoading.value = false
+  clearIframeLoadTimeout()
+  trackAnalyticsEvent('player_iframe_load', {
+    ...getPlayerAnalyticsPayload(),
+    status: 'success',
+    duration_ms: iframeLoadStartedAt ? Date.now() - iframeLoadStartedAt : 0
+  })
   window.iframeLoadTime = Date.now()
   startMirrorMonitoring()
   startVideoPositionMonitoring()
@@ -975,6 +1019,7 @@ const handlePlayerSelect = (player) => {
 watch(selectedPlayerInternal, (newVal) => {
   if (newVal) {
     iframeLoading.value = true
+    scheduleIframeLoadTimeout()
     resetElectronPlaybackState()
     if (currentOverlayElement.value) {
       removeVideoOverlay()
@@ -987,6 +1032,8 @@ watch(selectedPlayerInternal, (newVal) => {
       playerStore.updatePreferredPlayer(normalizePlayerKey(newVal.key))
     }
     emit('update:selectedPlayer', newVal)
+  } else {
+    clearIframeLoadTimeout()
   }
 })
 
@@ -2164,6 +2211,7 @@ onMounted(() => {
 onBeforeUnmount(() => {
   window.removeEventListener('resize', updateScaleFactor)
   window.removeEventListener('resize', updateTooltipPosition)
+  clearIframeLoadTimeout()
   cleanupPlayerLayout()
 
   if (videoPositionInterval.value) {
