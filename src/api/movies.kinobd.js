@@ -499,14 +499,22 @@ const getMovies = async ({ activeTime = 'all', typeFilter = 'all', limit = null,
 
   const { data } = await apiCall((api) => api.get(endpoint, { params }))
   let rows = Array.isArray(data?.data) ? data.data : []
+  const normalizedTypeFilter = String(typeFilter || 'all').toLowerCase()
 
-  if (typeFilter === 'movie') {
-    rows = rows.filter((f) => String(f?.type || '').toLowerCase().includes('movie'))
-  } else if (typeFilter === 'series') {
-    rows = rows.filter((f) => {
-      const t = String(f?.type || '').toLowerCase()
-      return t.includes('series') || t.includes('show')
-    })
+  const matchesMovieType = (value) => {
+    const type = String(value || '').toLowerCase()
+    return type.includes('film') || type.includes('movie')
+  }
+
+  const matchesSeriesType = (value) => {
+    const type = String(value || '').toLowerCase()
+    return type.includes('serial') || type.includes('series') || type.includes('show')
+  }
+
+  if (normalizedTypeFilter === 'movie') {
+    rows = rows.filter((f) => matchesMovieType(f?.type))
+  } else if (normalizedTypeFilter === 'series') {
+    rows = rows.filter((f) => matchesSeriesType(f?.type))
   }
 
   return rows.map(buildLegacyMovie)
