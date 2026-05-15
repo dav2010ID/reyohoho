@@ -17,6 +17,7 @@ const KINOBD_SUPPORTED_METHODS = new Set([
   'getRandomMovie'
 ])
 const KINOBOX_SUPPORTED_METHODS = new Set(['getPlayers'])
+const PLAYER_PROVIDER_TIMEOUT_MS = 15000
 
 const providers = {
   rhserv: null,
@@ -67,6 +68,39 @@ const hasPlayers = (players) => {
   return Object.keys(players).length > 0
 }
 
+const createProviderTimeoutError = (provider) => {
+  const error = new Error(`getPlayers timed out on ${provider}`)
+  error.name = 'PlayerProviderTimeoutError'
+  return error
+}
+
+const withProviderTimeout = async (promise, provider) => {
+  let timeoutId = null
+
+  try {
+    return await Promise.race([
+      promise,
+      new Promise((_, reject) => {
+        timeoutId = setTimeout(
+          () => reject(createProviderTimeoutError(provider)),
+          PLAYER_PROVIDER_TIMEOUT_MS
+        )
+      })
+    ])
+  } finally {
+    if (timeoutId) {
+      clearTimeout(timeoutId)
+    }
+  }
+}
+
+const trackPlayerProviderAttempt = (eventName, params) => {
+  trackAnalyticsEvent('player_provider_attempt', params)
+  if (eventName) {
+    trackAnalyticsEvent(eventName, params)
+  }
+}
+
 const getPlayersWithFallback = async (...args) => {
   const provider = getCurrentProvider()
   const startedAt = Date.now()
@@ -79,41 +113,56 @@ const getPlayersWithFallback = async (...args) => {
   let lastError = null
 
   for (const currentProvider of order) {
+    const attemptStartedAt = Date.now()
+
     try {
       const providerApi = await loadProvider(currentProvider)
-      const players = await providerApi.getPlayers(...args)
+      const players = await withProviderTimeout(providerApi.getPlayers(...args), currentProvider)
 
       if (hasPlayers(players)) {
-        trackAnalyticsEvent('player_provider_attempt', {
+        trackPlayerProviderAttempt(null, {
           status: 'success',
           kp_id: contentId,
           configured_source: provider,
           source: currentProvider,
           fallback_used: currentProvider !== provider,
-          duration_ms: Date.now() - startedAt
+          duration_ms: Date.now() - startedAt,
+          attempt_duration_ms: Date.now() - attemptStartedAt
         })
         return players
       }
 
-      trackAnalyticsEvent('player_provider_attempt', {
+      trackPlayerProviderAttempt(null, {
         status: 'empty',
         kp_id: contentId,
         configured_source: provider,
         source: currentProvider,
         fallback_used: currentProvider !== provider,
-        duration_ms: Date.now() - startedAt
+        duration_ms: Date.now() - startedAt,
+        attempt_duration_ms: Date.now() - attemptStartedAt
       })
       console.warn(`[movies] getPlayers returned no players on ${currentProvider}`)
     } catch (error) {
       lastError = error
-      trackAnalyticsEvent('player_provider_attempt', {
-        status: 'error',
+      const isTimeout = error?.name === 'PlayerProviderTimeoutError'
+      const attemptPayload = {
+        status: isTimeout ? 'timeout' : 'error',
         kp_id: contentId,
         configured_source: provider,
         source: currentProvider,
         fallback_used: currentProvider !== provider,
-        duration_ms: Date.now() - startedAt
-      })
+        duration_ms: Date.now() - startedAt,
+        attempt_duration_ms: Date.now() - attemptStartedAt
+      }
+
+      if (isTimeout) {
+        attemptPayload.timeout_ms = PLAYER_PROVIDER_TIMEOUT_MS
+      }
+
+      trackPlayerProviderAttempt(
+        isTimeout ? 'player_provider_timeout' : 'player_provider_error',
+        attemptPayload
+      )
       console.warn(`[movies] getPlayers failed on ${currentProvider}`, error)
     }
   }
