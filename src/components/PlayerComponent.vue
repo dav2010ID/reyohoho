@@ -485,18 +485,14 @@
 </template>
 
 <script setup>
-import {
-  getPlayers,
-  getShikiPlayers,
-  searchKinoBDPlayerCandidates,
-  getKinoBDPlayerDataByInid
-} from '@/api/movies'
-import { handleApiError } from '@/constants'
-import { addToList, delFromList } from '@/api/user'
 import ErrorMessage from '@/components/ErrorMessage.vue'
 import SpinnerLoading from '@/components/SpinnerLoading.vue'
 import Notification from '@/components/notification/ToastMessage.vue'
 import SliderRound from '@/components/slider/SliderRound.vue'
+import { usePlayerLayout } from '@/composables/usePlayerLayout'
+import { usePlayerLists } from '@/composables/usePlayerLists'
+import { usePlayerSharing } from '@/composables/usePlayerSharing'
+import { usePlayerSources } from '@/composables/usePlayerSources'
 import { showMessageToast } from '@/helpers/ui'
 import { useMainStore } from '@/store/main'
 import { usePlayerStore } from '@/store/player'
@@ -509,6 +505,7 @@ import PlayerSelectorBar from '@/components/player/PlayerSelectorBar.vue'
 import { parseTimingTextToSeconds, formatSecondsToTime } from '@/utils/dateUtils'
 import { OBSWebSocket } from '@/utils/obsWebSocket'
 import { debugLog } from '@/utils/logger'
+import { getProviderDisplayName } from '@/utils/playerUtils'
 
 const PlayerSourceModal = defineAsyncComponent(() => import('@/components/player/PlayerSourceModal.vue'))
 
@@ -528,41 +525,70 @@ const props = defineProps({
 })
 const emit = defineEmits(['update:selectedPlayer', 'update:movieInfo'])
 
-const playersInternal = ref([])
-const selectedPlayerInternal = ref(null)
 const iframeLoading = ref(true)
-const theaterMode = ref(false)
-const closeButtonVisible = ref(false)
 const playerIframe = ref(null)
 const containerRef = ref(null)
-const showPlayerModal = ref(false)
-const showSourceModal = ref(false)
-const sourceCandidates = ref([])
-const sourceLoading = ref(false)
-const sourceError = ref('')
 
-// Переменные для ошибок
-const errorMessage = ref('')
-const errorCode = ref(null)
-
-const maxPlayerHeightValue = ref(window.innerHeight * 0.9)
-const maxPlayerHeight = computed(() => `${maxPlayerHeightValue.value}px`)
 const isMobile = computed(() => mainStore.isMobile)
 const isElectron = computed(() => !!window.electronAPI)
-const isKinoBdProvider = computed(
-  () => mainStore.contentApiProvider === 'kinobd' && !String(props.kpId || '').startsWith('shiki')
-)
-const selectedPlayerLabel = computed(() =>
-  selectedPlayerInternal.value
-    ? getProviderDisplayName(selectedPlayerInternal.value).toUpperCase()
-    : 'Загрузка плееров...'
-)
+
+const {
+  theaterMode,
+  closeButtonVisible,
+  aspectRatio,
+  isCentered,
+  dimmingEnabled,
+  containerStyle,
+  iframeWrapperStyle,
+  aspectRatios,
+  updateScaleFactor,
+  centerPlayer,
+  toggleTheaterMode,
+  toggleDimming,
+  setAspectRatio,
+  cycleAspectRatio,
+  cleanupPlayerLayout
+} = usePlayerLayout({
+  mainStore,
+  playerStore,
+  containerRef,
+  playerIframe
+})
+
+const {
+  playersInternal,
+  selectedPlayerInternal,
+  showPlayerModal,
+  showSourceModal,
+  sourceCandidates,
+  sourceLoading,
+  sourceError,
+  errorMessage,
+  errorCode,
+  isKinoBdProvider,
+  selectedPlayerLabel,
+  fetchPlayers,
+  openPlayerModal,
+  closePlayerModal,
+  openSourceModal,
+  closeSourceModal,
+  applySourceCandidate,
+  normalizePlayerKey
+} = usePlayerSources({
+  props,
+  getProviderDisplayName,
+  onSelectedPlayerChange: (player) => emit('update:selectedPlayer', player)
+})
 
 const activeTooltip = ref(null)
 const tooltipHovered = ref(false)
 let hideTimeout = null
 
 const notificationRef = ref(null)
+const { copyMpvLink, copyMovieLink } = usePlayerSharing({
+  selectedPlayerInternal,
+  notificationRef
+})
 
 const tooltipContainer = ref(null)
 const tooltip = ref(null)
@@ -661,16 +687,6 @@ const hideTooltip = () => {
   activeTooltip.value = null
 }
 
-const aspectRatio = computed({
-  get: () => playerStore.aspectRatio,
-  set: (value) => playerStore.updateAspectRatio(value)
-})
-
-const isCentered = computed({
-  get: () => playerStore.isCentered,
-  set: (value) => playerStore.updateCentering(value)
-})
-
 const isInAnyList = computed(() => {
   return (
     props.movieInfo?.lists?.isFavorite ||
@@ -680,182 +696,6 @@ const isInAnyList = computed(() => {
     props.movieInfo?.lists?.isAbandoned
   )
 })
-
-const preferredPlayer = computed(() => playerStore.preferredPlayer)
-const naturalHeight = ref(0)
-
-const normalizeKey = (key) => key.toUpperCase()
-
-const applyPlayersData = (players) => {
-  const dedupedPlayers = []
-  const seenProviders = new Set()
-
-  for (const [key, value] of Object.entries(players || {})) {
-    const player = {
-      key: key.toUpperCase(),
-      ...value
-    }
-    const providerName = normalizeKey(getProviderDisplayName(player))
-    if (providerName && seenProviders.has(providerName)) {
-      continue
-    }
-    if (providerName) {
-      seenProviders.add(providerName)
-    }
-    dedupedPlayers.push(player)
-  }
-
-  playersInternal.value = dedupedPlayers
-
-  if (playersInternal.value.length === 0) return
-
-  if (preferredPlayer.value) {
-    const normalizedPreferred = normalizeKey(preferredPlayer.value)
-    const preferred = playersInternal.value.find(
-      (player) =>
-        normalizeKey(player.key) === normalizedPreferred ||
-        normalizeKey(getProviderDisplayName(player)) === normalizedPreferred
-    )
-    selectedPlayerInternal.value = preferred || playersInternal.value[0]
-  } else {
-    selectedPlayerInternal.value = playersInternal.value[0]
-  }
-  emit('update:selectedPlayer', selectedPlayerInternal.value)
-}
-
-const updateScaleFactor = () => {
-  if (theaterMode.value || !containerRef.value) return
-  const [w, h] = aspectRatio.value.split(':').map(Number)
-  maxPlayerHeightValue.value = window.innerHeight * 0.9
-  naturalHeight.value = Math.min(
-    containerRef.value.clientWidth * (h / w),
-    maxPlayerHeightValue.value
-  )
-}
-
-const containerStyle = computed(() => {
-  if (theaterMode.value) return {}
-  const [w, h] = aspectRatio.value.split(':').map(Number)
-  const maxWidth = maxPlayerHeightValue.value * (w / h)
-  return {
-    width: '100%',
-    maxWidth: `${maxWidth}px`,
-    maxHeight: maxPlayerHeight.value,
-    margin: '0 auto',
-    overflow: 'hidden'
-  }
-})
-
-const iframeWrapperStyle = computed(() => {
-  const [w, h] = aspectRatio.value.split(':').map(Number)
-  return {
-    position: 'relative',
-    width: '100%',
-    paddingTop: `${(h / w) * 100}%`
-  }
-})
-
-const centerPlayer = () => {
-  if (containerRef.value) {
-    setTimeout(() => {
-      nextTick(() => {
-        containerRef.value.scrollIntoView({
-          behavior: 'smooth',
-          block: 'center',
-          inline: 'center'
-        })
-      })
-    }, 500)
-  }
-}
-
-const fetchPlayers = async () => {
-  try {
-    errorMessage.value = ''
-    errorCode.value = null
-
-    let players
-    if (props.kpId.startsWith('shiki')) {
-      const cleanShikiId = props.kpId.replace('shiki', '')
-      players = await getShikiPlayers(cleanShikiId)
-    } else {
-      const savedInid = playerStore.kinobdSourceByKpId?.[String(props.kpId)] || null
-      players = await getPlayers(props.kpId, {
-        mode: 'kp_id',
-        usePlayerData: true,
-        forceInid: isKinoBdProvider.value ? savedInid : null
-      })
-    }
-    applyPlayersData(players)
-  } catch (error) {
-    const { message, code } = handleApiError(error)
-    errorMessage.value = message
-    errorCode.value = code
-    console.error('Ошибка при загрузке плееров:', error)
-  }
-}
-
-const openPlayerModal = () => {
-  showPlayerModal.value = true
-}
-
-const closePlayerModal = () => {
-  showPlayerModal.value = false
-}
-
-const openSourceModal = async () => {
-  showSourceModal.value = true
-  sourceError.value = ''
-  sourceLoading.value = true
-
-  try {
-    const query =
-      props.movieInfo?.title ||
-      props.movieInfo?.name_ru ||
-      props.movieInfo?.name_en ||
-      props.movieInfo?.name_original ||
-      props.kpId
-
-    let candidates = []
-    if (query) {
-      candidates = await searchKinoBDPlayerCandidates(query, { type: 'title', page: 1 })
-    }
-    if (!candidates.length && props.kpId) {
-      candidates = await searchKinoBDPlayerCandidates(props.kpId, { type: 'kp_id', page: 1 })
-    }
-    sourceCandidates.value = candidates
-  } catch (error) {
-    sourceError.value = 'Не удалось загрузить список источников'
-    console.error('Ошибка при загрузке источников KinoBD:', error)
-  } finally {
-    sourceLoading.value = false
-  }
-}
-
-const closeSourceModal = () => {
-  showSourceModal.value = false
-}
-
-const applySourceCandidate = async (candidate) => {
-  if (!candidate?.id) return
-
-  sourceLoading.value = true
-  sourceError.value = ''
-
-  try {
-    const players = await getKinoBDPlayerDataByInid(candidate.id, {
-      playerUrl: candidate.iframe
-    })
-    applyPlayersData(players)
-    playerStore.setKinoBdSource(props.kpId, candidate.id)
-    closeSourceModal()
-  } catch (error) {
-    sourceError.value = 'Не удалось применить выбранный источник'
-    console.error('Ошибка применения источника KinoBD:', error)
-  } finally {
-    sourceLoading.value = false
-  }
-}
 
 const initializeAudioContext = () => {
   try {
@@ -1114,42 +954,6 @@ const toggleMirror = () => {
   } else {
     showMessageToast('Доступно только в приложении ReYohoho Desktop')
     window.open('https://t.me/ReYohoho/126', '_blank')
-  }
-}
-
-const toggleTheaterMode = () => {
-  theaterMode.value = !theaterMode.value
-  if (theaterMode.value) {
-    window.addEventListener('mousemove', showCloseButton)
-    document.addEventListener('keydown', onKeyDown)
-    document.body.classList.add('no-scroll')
-  } else {
-    window.removeEventListener('mousemove', showCloseButton)
-    document.removeEventListener('keydown', onKeyDown)
-    document.body.classList.remove('no-scroll')
-  }
-  closeButtonVisible.value = theaterMode.value
-  nextTick(() => {
-    centerPlayer()
-    if (playerIframe.value) {
-      playerIframe.value.focus()
-    }
-  })
-}
-
-const theaterModeCloseButtonTimeout = ref(null)
-const showCloseButton = () => {
-  theaterModeCloseButtonTimeout.value = setTimeout(() => {
-    clearTimeout(theaterModeCloseButtonTimeout.value)
-    closeButtonVisible.value = false
-  }, 4000)
-  closeButtonVisible.value = true
-}
-
-const dimmingEnabled = computed(() => mainStore.dimmingEnabled)
-const toggleDimming = () => {
-  if (!theaterMode.value) {
-    mainStore.toggleDimming()
   }
 }
 
@@ -1453,21 +1257,6 @@ const onIframeLoad = () => {
   }
 }
 
-const onKeyDown = (event) => {
-  if (event.key === 'Escape' && theaterMode.value) {
-    toggleTheaterMode()
-  } else if (event.altKey && event.keyCode === 84) {
-    toggleTheaterMode()
-  }
-}
-
-const setAspectRatio = (ratio) => {
-  aspectRatio.value = ratio
-  setTimeout(() => {
-    if (isCentered.value) centerPlayer()
-  }, 310)
-}
-
 const openAppLink = () => {
   const appUrl = `reyohoho://#${kp_id.value}`
   try {
@@ -1475,154 +1264,6 @@ const openAppLink = () => {
   } catch (e) {
     console.error('Ошибка при открытии ссылки:', e)
   }
-}
-
-const getBestMpvStreamUrl = (player) => {
-  if (!player) return ''
-
-  const directCandidates = [player.hls, player.stream, player.url, player.file, player.src].filter(
-    (v) => typeof v === 'string' && v
-  )
-  const direct = directCandidates.find(
-    (v) => /\.m3u8(\?|$)/i.test(v) || /manifest/i.test(v) || /\/hls\//i.test(v)
-  )
-  if (direct) return direct
-
-  const raw = player.raw_data
-  if (raw && typeof raw === 'object') {
-    const queue = [raw]
-    const visited = new Set()
-
-    while (queue.length) {
-      const cur = queue.shift()
-      if (!cur || typeof cur !== 'object') continue
-      if (visited.has(cur)) continue
-      visited.add(cur)
-
-      for (const value of Object.values(cur)) {
-        if (!value) continue
-        if (typeof value === 'string') {
-          if (
-            /^https?:\/\//i.test(value) &&
-            (/\.m3u8(\?|$)/i.test(value) || /manifest/i.test(value) || /\/hls\//i.test(value))
-          ) {
-            return value
-          }
-        } else if (typeof value === 'object') {
-          queue.push(value)
-        }
-      }
-    }
-  }
-
-  const iframeUrl = String(player.iframe || '')
-  if (!iframeUrl) return ''
-
-  try {
-    const parsed = new URL(iframeUrl)
-    const queryValues = []
-    parsed.searchParams.forEach((value) => queryValues.push(value))
-    for (const value of queryValues) {
-      if (/^https?:\/\//i.test(value) && /\.m3u8(\?|$)/i.test(value)) {
-        return value
-      }
-    }
-  } catch {
-    return ''
-  }
-
-  return ''
-}
-
-const copyText = async (text) => {
-  if (!text) return false
-  try {
-    await navigator.clipboard.writeText(text)
-    return true
-  } catch {
-    return false
-  }
-}
-
-const copyMpvLink = async () => {
-  const current = selectedPlayerInternal.value
-  if (!current) return
-
-  const streamUrl = getBestMpvStreamUrl(current)
-  const targetUrl = streamUrl || String(current.iframe || '')
-
-  if (!targetUrl) {
-    notificationRef.value.showNotification('Не удалось получить ссылку для mpv')
-    return
-  }
-
-  const referrer = (() => {
-    try {
-      const base = new URL(String(current.iframe || ''))
-      return `${base.origin}/`
-    } catch {
-      return ''
-    }
-  })()
-
-  const mpvCommand = referrer
-    ? `mpv --referrer="${referrer}" "${targetUrl}"`
-    : `mpv "${targetUrl}"`
-
-  const ok = await copyText(mpvCommand)
-  if (ok) {
-    notificationRef.value.showNotification('Команда mpv скопирована')
-    return
-  }
-
-  const linkOk = await copyText(targetUrl)
-  if (linkOk) {
-    notificationRef.value.showNotification('Ссылка для mpv скопирована')
-    return
-  }
-
-  notificationRef.value.showNotification('Не удалось скопировать ссылку для mpv')
-}
-
-const copyMovieLink = () => {
-  const movieLink = window.location.href
-  navigator.clipboard.writeText(movieLink).then(() => {})
-  notificationRef.value.showNotification('Ссылка на фильм скопирована')
-}
-
-function cleanName(name) {
-  const cleanedName = String(name || '')
-    .replace(/KODIK>/, 'Kodik - ')
-    .replace(/VEOVEO>/, 'VeoVeo - ')
-    .replace(/KINOBOX>/, '')
-    .trim()
-  return cleanedName
-}
-
-function getProviderName(player) {
-  const directProvider = String(player?.provider || '').trim()
-  if (directProvider) return cleanName(directProvider)
-
-  const rawName = String(player?.name || player?.key || '')
-  if (!rawName.includes('>')) return ''
-
-  const segments = rawName
-    .split('>')
-    .map((segment) => segment.trim())
-    .filter(Boolean)
-  if (!segments.length) return ''
-
-  const root = segments[0].toUpperCase()
-  if ((root === 'KINOBOX' || root === 'KINOBD' || root === 'RHSERV') && segments[1]) {
-    return cleanName(segments[1])
-  }
-
-  return cleanName(segments[0])
-}
-
-function getProviderDisplayName(player) {
-  const provider = getProviderName(player)
-  return provider || cleanName(player?.translate) || 'Плеер'
 }
 
 const cleanupAudioContext = () => {
@@ -1668,7 +1309,7 @@ const handlePlayerSelect = (player) => {
     videoPositionInterval.value = null
   }
   if (!player.key.toLowerCase().includes('torrents')) {
-    playerStore.updatePreferredPlayer(normalizeKey(player.key))
+    playerStore.updatePreferredPlayer(normalizePlayerKey(player.key))
   }
   emit('update:selectedPlayer', player)
 }
@@ -1691,7 +1332,7 @@ watch(selectedPlayerInternal, (newVal) => {
       videoPositionInterval.value = null
     }
     if (!newVal.key.toLowerCase().includes('torrents')) {
-      playerStore.updatePreferredPlayer(normalizeKey(newVal.key))
+      playerStore.updatePreferredPlayer(normalizePlayerKey(newVal.key))
     }
     emit('update:selectedPlayer', newVal)
   }
@@ -1819,66 +1460,18 @@ watch(
   { deep: true }
 )
 
-const aspectRatios = ['16:9', '12:5', '4:3']
-
-const cycleAspectRatio = () => {
-  const currentIndex = aspectRatios.indexOf(aspectRatio.value)
-  const nextIndex = (currentIndex + 1) % aspectRatios.length
-  setAspectRatio(aspectRatios[nextIndex])
-}
-
-const getListStatus = (listType) => {
-  const statusMap = {
-    [USER_LIST_TYPES_ENUM.FAVORITE]: props.movieInfo?.lists?.isFavorite || false,
-    [USER_LIST_TYPES_ENUM.HISTORY]: props.movieInfo?.lists?.isHistory || false,
-    [USER_LIST_TYPES_ENUM.LATER]: props.movieInfo?.lists?.isLater || false,
-    [USER_LIST_TYPES_ENUM.COMPLETED]: props.movieInfo?.lists?.isCompleted || false,
-    [USER_LIST_TYPES_ENUM.ABANDONED]: props.movieInfo?.lists?.isAbandoned || false,
-    [USER_LIST_TYPES_ENUM.WATCHING]: props.movieInfo?.lists?.isWatching || false
-  }
-
-  return statusMap[listType] ?? false
-}
-
-const toggleList = async (type) => {
-  if (!authStore.token) {
-    notificationRef.value.showNotification(
-      'Необходимо <a class="auth-link">авторизоваться</a>',
-      5000,
-      { onClick: openLogin }
-    )
-    return
-  }
-  let hasError = false
-  try {
-    const listNames = {
-      [USER_LIST_TYPES_ENUM.FAVORITE]: 'избранное',
-      [USER_LIST_TYPES_ENUM.HISTORY]: 'историю',
-      [USER_LIST_TYPES_ENUM.LATER]: 'список "Смотреть позже"',
-      [USER_LIST_TYPES_ENUM.COMPLETED]: 'список "Просмотрено"',
-      [USER_LIST_TYPES_ENUM.ABANDONED]: 'список "Брошено"',
-      [USER_LIST_TYPES_ENUM.WATCHING]: 'список "Смотрю"'
-    }
-
-    if (getListStatus(type)) {
-      await delFromList(kp_id.value, type)
-      notificationRef.value.showNotification(`Удалено из ${listNames[type]}`)
-    } else {
-      await addToList(kp_id.value, type)
-      notificationRef.value.showNotification(`Добавлено в ${listNames[type]}`)
-    }
-  } catch (error) {
-    const { message, code } = handleApiError(error)
-    notificationRef.value.showNotification(`${message} ${code}`)
-  }
-  if (!hasError) {
-    emit('update:movieInfo')
-  }
-}
-
 const openLogin = () => {
   router.push('/login')
 }
+
+const { toggleList } = usePlayerLists({
+  authStore,
+  emit,
+  kpId: kp_id,
+  movieInfo: computed(() => props.movieInfo),
+  notificationRef,
+  openLogin
+})
 
 const showFavoriteTooltip = computed(() => playerStore.showFavoriteTooltip)
 
@@ -3255,9 +2848,7 @@ onMounted(() => {
 onBeforeUnmount(() => {
   window.removeEventListener('resize', updateScaleFactor)
   window.removeEventListener('resize', updateTooltipPosition)
-  window.removeEventListener('mousemove', showCloseButton)
-  document.removeEventListener('keydown', onKeyDown)
-  document.body.classList.remove('no-scroll')
+  cleanupPlayerLayout()
 
   if (mirrorCheckInterval.value) {
     clearInterval(mirrorCheckInterval.value)
@@ -3295,505 +2886,4 @@ const testOBSConnection = async () => {
 }
 </script>
 
-<style scoped>
-.player-container {
-  width: 100%;
-  transition:
-    max-width 0.3s ease-in-out,
-    max-height 0.3s ease-in-out;
-  overflow: hidden;
-  padding-bottom: 10px;
-}
-
-.iframe-wrapper {
-  transition:
-    padding-top 0.3s ease-in-out,
-    transform 0.3s ease-in-out;
-  width: 100%;
-}
-
-.responsive-iframe {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  border: none;
-  z-index: 4;
-}
-
-.responsive-iframe.dimmed {
-  z-index: 7;
-}
-
-/* Стили для театрального режима */
-.player-container.theater-mode {
-  position: fixed;
-  top: 0 !important;
-  left: 0 !important;
-  width: 100vw !important;
-  height: 100vh !important;
-  background: #000;
-  margin: 0;
-  border-radius: 0;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  z-index: 7;
-}
-
-.player-container.theater-mode .iframe-wrapper {
-  width: 100% !important;
-  height: 100% !important;
-  padding-top: 0 !important;
-  flex-grow: 1;
-}
-
-.close-theater-btn {
-  position: fixed;
-  top: 20px;
-  right: 80px;
-  background: rgba(255, 0, 0, 0.7);
-  color: white;
-  border: none;
-  width: 50px;
-  height: 50px;
-  border-radius: 50%;
-  cursor: pointer;
-  transition:
-    background 0.3s,
-    opacity 0.3s;
-  opacity: 0;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 24px;
-  z-index: 8;
-}
-
-.close-theater-btn.visible {
-  opacity: 1;
-}
-
-/* Делаем кнопку видимой при наведении на зону */
-.close-theater-btn:hover,
-.close-theater-btn::before:hover {
-  background: var(--accent-color);
-  opacity: 1;
-}
-
-html.no-scroll {
-  overflow: hidden;
-}
-
-/* Блока управления */
-.controls {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 10px;
-  margin: 0 auto;
-  border-radius: 10px;
-  backdrop-filter: blur(10px);
-  position: relative;
-  z-index: 4;
-}
-
-.main-controls {
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: center;
-  gap: 10px;
-}
-
-.controls button {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background-color: #444;
-  color: #fff;
-  border: none;
-  padding: 12px;
-  font-size: 18px;
-  border-radius: 8px;
-  cursor: pointer;
-  transition:
-    background-color 0.3s ease,
-    transform 0.2s ease,
-    box-shadow 0.3s ease;
-  z-index: 4;
-  width: 50px;
-  height: 50px;
-}
-
-.controls button:hover {
-  background-color: var(--accent-color);
-  transform: translateY(-3px);
-  box-shadow: 0 4px 10px var(--accent-semi-transparent);
-}
-
-.controls button:active {
-  transform: translateY(0);
-  box-shadow: none;
-}
-
-.controls button.active {
-  background-color: var(--accent-color);
-  box-shadow: 0 0 10px var(--accent-semi-transparent);
-}
-
-.material-icons {
-  font-size: 24px;
-}
-
-.tooltip-container {
-  position: relative;
-  display: inline-block;
-}
-
-.custom-tooltip {
-  position: absolute;
-  left: 50%;
-  background-color: rgba(30, 30, 30, 0.95);
-  color: #fff;
-  padding: 8px 16px;
-  border-radius: 12px;
-  font-size: 14px;
-  white-space: nowrap;
-  pointer-events: none;
-  text-align: center;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.25);
-  backdrop-filter: blur(12px);
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  opacity: 0;
-  visibility: hidden;
-  transform: translateX(-50%) translateY(8px);
-  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
-  z-index: 1000;
-}
-
-.custom-tooltip::before {
-  content: '';
-  position: absolute;
-  left: 50%;
-  transform: translateX(-50%) rotate(45deg);
-  width: 10px;
-  height: 10px;
-  background-color: rgba(30, 30, 30, 0.95);
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  z-index: -1;
-}
-
-.custom-tooltip[style*='bottom: 100%']::before {
-  bottom: -5px;
-  top: auto;
-}
-
-.custom-tooltip[style*='top: 100%']::before {
-  top: -5px;
-  bottom: auto;
-}
-
-.tooltip-container:hover .custom-tooltip {
-  opacity: 1;
-  visibility: visible;
-  transform: translateX(-50%) translateY(0);
-}
-
-.advanced-tooltip {
-  white-space: normal;
-  padding: 20px;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 16px;
-  top: calc(100% + 12px);
-  pointer-events: all;
-  text-align: center;
-  min-width: 240px;
-  background-color: rgba(30, 30, 30, 0.98);
-  border-radius: 16px;
-  box-shadow: 0 8px 40px rgba(0, 0, 0, 0.35);
-  transform: translateX(-50%) translateY(8px);
-}
-
-.advanced-tooltip::before {
-  top: -6px;
-  width: 12px;
-  height: 12px;
-}
-
-.tooltip-title {
-  font-size: 15px;
-  font-weight: 500;
-  color: rgba(255, 255, 255, 0.95);
-  margin-top: 4px;
-}
-
-.aspect-ratio-dropdown {
-  min-width: fit-content;
-  width: max-content;
-  padding: 16px;
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-  background-color: rgba(30, 30, 30, 0.98);
-  border-radius: 16px;
-}
-
-.aspect-ratio-option {
-  padding: 12px 20px;
-  border-radius: 10px;
-  cursor: pointer;
-  transition: all 0.2s ease;
-  text-align: center;
-  font-size: 14px;
-  color: rgba(255, 255, 255, 0.9);
-  white-space: nowrap;
-  width: 100%;
-}
-
-.aspect-ratio-option:hover {
-  background-color: var(--accent-color);
-  transform: translateY(-1px);
-  box-shadow: 0 2px 8px var(--accent-semi-transparent);
-}
-
-.aspect-ratio-option.active {
-  background-color: var(--accent-color);
-  color: white;
-  font-weight: 500;
-  box-shadow: 0 2px 12px var(--accent-semi-transparent);
-}
-
-.fullscreen {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100vw;
-  height: 100vh;
-  z-index: 10;
-}
-
-.theater-mode-lock {
-  pointer-events: none;
-}
-
-.theater-mode-unlock {
-  pointer-events: all;
-}
-
-.aspect-ratio-dropdown-btn {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 0 12px;
-  min-width: 60px;
-}
-
-.current-ratio {
-  font-size: 14px;
-  font-weight: 500;
-}
-
-.list-buttons-container {
-  position: relative;
-}
-
-.list-buttons-dropdown {
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-  padding: 16px;
-  min-width: 240px;
-  background-color: rgba(30, 30, 30, 0.98);
-  border-radius: 16px;
-  box-shadow: 0 8px 40px rgba(0, 0, 0, 0.35);
-}
-
-.list-button-item {
-  width: 100%;
-}
-
-.list-button-item button {
-  width: 100%;
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  padding: 12px 20px;
-  background-color: rgba(255, 255, 255, 0.08);
-  border: none;
-  border-radius: 10px;
-  color: rgba(255, 255, 255, 0.9);
-  cursor: pointer;
-  transition: all 0.2s ease;
-  min-height: 48px;
-}
-
-.list-button-item button:hover {
-  background-color: var(--accent-color);
-  transform: translateX(4px);
-  box-shadow: 0 2px 8px var(--accent-semi-transparent);
-}
-
-.list-button-item button.active {
-  background-color: var(--accent-color);
-  color: white;
-  box-shadow: 0 2px 12px var(--accent-semi-transparent);
-}
-
-.button-label {
-  font-size: 15px;
-  font-weight: 500;
-  flex: 1;
-}
-
-.list-button-item .material-icons {
-  font-size: 20px;
-  width: 24px;
-  height: 24px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.mobile-list-buttons {
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: center;
-  gap: 10px;
-  margin: 0 auto;
-  border-radius: 10px;
-  backdrop-filter: blur(10px);
-}
-
-@media (max-width: 768px) {
-  .mobile-list-buttons {
-    margin-top: 10px;
-  }
-}
-
-.shortcut-hint {
-  display: block;
-  font-size: 13px;
-  color: rgba(255, 255, 255, 0.5);
-  margin-top: 6px;
-  font-weight: 400;
-}
-
-.electron-only {
-  background-color: #333 !important;
-  opacity: 0.6;
-  cursor: not-allowed;
-}
-
-.electron-only:hover {
-  transform: none !important;
-  box-shadow: none !important;
-  background-color: #333 !important;
-}
-
-.custom-tooltip:has(+ .electron-only) {
-  color: rgba(255, 255, 255, 0.7);
-}
-
-.favorite-btn {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background-color: #444;
-  color: #fff;
-  border: none;
-  padding: 12px;
-  font-size: 18px;
-  border-radius: 8px;
-  cursor: pointer;
-  transition:
-    background-color 0.3s ease,
-    transform 0.2s ease,
-    box-shadow 0.3s ease;
-  z-index: 4;
-  width: 50px;
-  height: 50px;
-  position: relative;
-}
-
-.favorite-btn:hover {
-  background-color: var(--accent-color);
-  transform: translateY(-3px);
-  box-shadow: 0 4px 10px var(--accent-semi-transparent);
-}
-
-.dropdown-arrow {
-  position: absolute;
-  right: 2px;
-  bottom: 2px;
-  font-size: 16px;
-  opacity: 0.7;
-  pointer-events: none;
-  transition: all 0.3s ease;
-}
-
-.dropdown-arrow.highlighted {
-  opacity: 1;
-  color: var(--accent-color);
-  text-shadow: 0 0 8px var(--accent-semi-transparent);
-}
-
-.desktop-list-buttons {
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: center;
-  gap: 5px;
-  margin: 0 auto;
-  border-radius: 10px;
-  backdrop-filter: blur(10px);
-}
-
-.desktop-list-buttons .tooltip-container {
-  margin: 0;
-}
-
-.desktop-list-buttons button {
-  margin: 0;
-}
-
-.tooltip-hint {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  padding: 8px 12px;
-  background: rgba(255, 255, 255, 0.05);
-  border-radius: 8px;
-  margin-top: 8px;
-  font-size: 13px;
-  color: rgba(255, 255, 255, 0.7);
-}
-
-.tooltip-hint .material-icons {
-  font-size: 16px;
-  color: rgba(255, 255, 255, 0.5);
-}
-
-.settings-link {
-  color: var(--accent-color);
-  cursor: pointer;
-  text-decoration: underline;
-  transition: color 0.2s ease;
-}
-
-.settings-link:hover {
-  color: var(--accent-hover);
-}
-
-.auth-link {
-  color: var(--accent-color);
-  cursor: pointer;
-  text-decoration: underline;
-  transition: color 0.2s ease;
-}
-
-.auth-link:hover {
-  color: var(--accent-hover);
-}
-</style>
+<style scoped src="../assets/player-component.scss"></style>
