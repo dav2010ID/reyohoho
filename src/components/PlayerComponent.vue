@@ -48,6 +48,7 @@
             dimmed: dimmingEnabled
           }"
           @load="onIframeLoad"
+          @error="onIframeError"
         ></iframe>
         <SpinnerLoading
           v-if="iframeLoading && !playersEmptyMessage"
@@ -954,12 +955,16 @@ const scheduleIframeLoadTimeout = () => {
   iframeLoadTimeout = setTimeout(() => {
     if (!iframeLoading.value || selectedPlayerInternal.value?.iframe !== iframe) return
 
-    trackAnalyticsEvent('player_iframe_load', {
+    const payload = {
       ...getPlayerAnalyticsPayload(),
       status: 'timeout',
       duration_ms: Date.now() - iframeLoadStartedAt,
       timeout_ms: PLAYER_IFRAME_LOAD_TIMEOUT_MS
-    })
+    }
+
+    iframeLoadTimeout = null
+    trackAnalyticsEvent('player_iframe_load', payload)
+    trackAnalyticsEvent('player_iframe_timeout', payload)
   }, PLAYER_IFRAME_LOAD_TIMEOUT_MS)
 }
 
@@ -992,6 +997,20 @@ const onIframeLoad = () => {
       }
     }, 100)
   }
+}
+
+const onIframeError = () => {
+  iframeLoading.value = false
+  clearIframeLoadTimeout()
+
+  const payload = {
+    ...getPlayerAnalyticsPayload(),
+    status: 'error',
+    duration_ms: iframeLoadStartedAt ? Date.now() - iframeLoadStartedAt : 0
+  }
+
+  trackAnalyticsEvent('player_iframe_load', payload)
+  trackAnalyticsEvent('player_iframe_error', payload)
 }
 
 const handlePlayerSelect = (player) => {
