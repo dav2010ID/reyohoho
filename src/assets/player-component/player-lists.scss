@@ -1,0 +1,137 @@
+.list-buttons-container {
+  position: relative;
+}
+
+.list-buttons-dropdown {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 16px;
+  min-width: 240px;
+  background-color: rgba(30, 30, 30, 0.98);
+  border-radius: 16px;
+  box-shadow: 0 8px 40px rgba(0, 0, 0, 0.35);
+}
+
+.list-button-item {
+  width: 100%;
+}
+
+.list-button-item button {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 20px;
+  background-color: rgba(255, 255, 255, 0.08);
+  border: none;
+  border-radius: 10px;
+  color: rgba(255, 255, 255, 0.9);
+  cursor: pointer;
+  transition: all 0.2s ease;
+  min-height: 48px;
+}
+
+.list-button-item button:hover {
+  background-color: var(--accent-color);
+  transform: translateX(4px);
+  box-shadow: 0 2px 8px var(--accent-semi-transparent);
+}
+
+.list-button-item button.active {
+  background-color: var(--accent-color);
+  color: white;
+  box-shadow: 0 2px 12px var(--accent-semi-transparent);
+}
+
+.button-label {
+  font-size: 15px;
+  font-weight: 500;
+  flex: 1;
+}
+
+.list-button-item .material-icons {
+  font-size: 20px;
+  width: 24px;
+  height: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.mobile-list-buttons {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 10px;
+  margin: 0 auto;
+  border-radius: 10px;
+  backdrop-filter: blur(10px);
+}
+
+@media (max-width: 768px) {
+  .mobile-list-buttons {
+    margin-top: 10px;
+  }
+}
+
+.favorite-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: #444;
+  color: #fff;
+  border: none;
+  padding: 12px;
+  font-size: 18px;
+  border-radius: 8px;
+  cursor: pointer;
+  transition:
+    background-color 0.3s ease,
+    transform 0.2s ease,
+    box-shadow 0.3s ease;
+  z-index: 4;
+  width: 50px;
+  height: 50px;
+  position: relative;
+}
+
+.favorite-btn:hover {
+  background-color: var(--accent-color);
+  transform: translateY(-3px);
+  box-shadow: 0 4px 10px var(--accent-semi-transparent);
+}
+
+.dropdown-arrow {
+  position: absolute;
+  right: 2px;
+  bottom: 2px;
+  font-size: 16px;
+  opacity: 0.7;
+  pointer-events: none;
+  transition: all 0.3s ease;
+}
+
+.dropdown-arrow.highlighted {
+  opacity: 1;
+  color: var(--accent-color);
+  text-shadow: 0 0 8px var(--accent-semi-transparent);
+}
+
+.desktop-list-buttons {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 5px;
+  margin: 0 auto;
+  border-radius: 10px;
+  backdrop-filter: blur(10px);
+}
+
+.desktop-list-buttons .tooltip-container {
+  margin: 0;
+}
+
+.desktop-list-buttons button {
+  margin: 0;
+}

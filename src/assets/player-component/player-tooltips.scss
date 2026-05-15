@@ -1,0 +1,126 @@
+.tooltip-container {
+  position: relative;
+  display: inline-block;
+}
+
+.custom-tooltip {
+  position: absolute;
+  left: 50%;
+  background-color: rgba(30, 30, 30, 0.95);
+  color: #fff;
+  padding: 8px 16px;
+  border-radius: 12px;
+  font-size: 14px;
+  white-space: nowrap;
+  pointer-events: none;
+  text-align: center;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.25);
+  backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  opacity: 0;
+  visibility: hidden;
+  transform: translateX(-50%) translateY(8px);
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  z-index: 1000;
+}
+
+.custom-tooltip::before {
+  content: '';
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%) rotate(45deg);
+  width: 10px;
+  height: 10px;
+  background-color: rgba(30, 30, 30, 0.95);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  z-index: -1;
+}
+
+.custom-tooltip[style*='bottom: 100%']::before {
+  bottom: -5px;
+  top: auto;
+}
+
+.custom-tooltip[style*='top: 100%']::before {
+  top: -5px;
+  bottom: auto;
+}
+
+.tooltip-container:hover .custom-tooltip {
+  opacity: 1;
+  visibility: visible;
+  transform: translateX(-50%) translateY(0);
+}
+
+.advanced-tooltip {
+  white-space: normal;
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+  top: calc(100% + 12px);
+  pointer-events: all;
+  text-align: center;
+  min-width: 240px;
+  background-color: rgba(30, 30, 30, 0.98);
+  border-radius: 16px;
+  box-shadow: 0 8px 40px rgba(0, 0, 0, 0.35);
+  transform: translateX(-50%) translateY(8px);
+}
+
+.advanced-tooltip::before {
+  top: -6px;
+  width: 12px;
+  height: 12px;
+}
+
+.tooltip-title {
+  font-size: 15px;
+  font-weight: 500;
+  color: rgba(255, 255, 255, 0.95);
+  margin-top: 4px;
+}
+
+.custom-tooltip:has(+ .electron-only) {
+  color: rgba(255, 255, 255, 0.7);
+}
+
+.tooltip-hint {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 12px;
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 8px;
+  margin-top: 8px;
+  font-size: 13px;
+  color: rgba(255, 255, 255, 0.7);
+}
+
+.tooltip-hint .material-icons {
+  font-size: 16px;
+  color: rgba(255, 255, 255, 0.5);
+}
+
+.settings-link {
+  color: var(--accent-color);
+  cursor: pointer;
+  text-decoration: underline;
+  transition: color 0.2s ease;
+}
+
+.settings-link:hover {
+  color: var(--accent-hover);
+}
+
+.auth-link {
+  color: var(--accent-color);
+  cursor: pointer;
+  text-decoration: underline;
+  transition: color 0.2s ease;
+}
+
+.auth-link:hover {
+  color: var(--accent-hover);
+}

@@ -1,0 +1,127 @@
+.controls {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  margin: 0 auto;
+  border-radius: 10px;
+  backdrop-filter: blur(10px);
+  position: relative;
+  z-index: 4;
+}
+
+.main-controls {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 10px;
+}
+
+.controls button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: #444;
+  color: #fff;
+  border: none;
+  padding: 12px;
+  font-size: 18px;
+  border-radius: 8px;
+  cursor: pointer;
+  transition:
+    background-color 0.3s ease,
+    transform 0.2s ease,
+    box-shadow 0.3s ease;
+  z-index: 4;
+  width: 50px;
+  height: 50px;
+}
+
+.controls button:hover {
+  background-color: var(--accent-color);
+  transform: translateY(-3px);
+  box-shadow: 0 4px 10px var(--accent-semi-transparent);
+}
+
+.controls button:active {
+  transform: translateY(0);
+  box-shadow: none;
+}
+
+.controls button.active {
+  background-color: var(--accent-color);
+  box-shadow: 0 0 10px var(--accent-semi-transparent);
+}
+
+.material-icons {
+  font-size: 24px;
+}
+
+.aspect-ratio-dropdown {
+  min-width: fit-content;
+  width: max-content;
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  background-color: rgba(30, 30, 30, 0.98);
+  border-radius: 16px;
+}
+
+.aspect-ratio-option {
+  padding: 12px 20px;
+  border-radius: 10px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  text-align: center;
+  font-size: 14px;
+  color: rgba(255, 255, 255, 0.9);
+  white-space: nowrap;
+  width: 100%;
+}
+
+.aspect-ratio-option:hover {
+  background-color: var(--accent-color);
+  transform: translateY(-1px);
+  box-shadow: 0 2px 8px var(--accent-semi-transparent);
+}
+
+.aspect-ratio-option.active {
+  background-color: var(--accent-color);
+  color: white;
+  font-weight: 500;
+  box-shadow: 0 2px 12px var(--accent-semi-transparent);
+}
+
+.aspect-ratio-dropdown-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 12px;
+  min-width: 60px;
+}
+
+.current-ratio {
+  font-size: 14px;
+  font-weight: 500;
+}
+
+.shortcut-hint {
+  display: block;
+  font-size: 13px;
+  color: rgba(255, 255, 255, 0.5);
+  margin-top: 6px;
+  font-weight: 400;
+}
+
+.electron-only {
+  background-color: #333 !important;
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.electron-only:hover {
+  transform: none !important;
+  box-shadow: none !important;
+  background-color: #333 !important;
+}

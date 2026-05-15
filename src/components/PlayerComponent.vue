@@ -51,8 +51,8 @@
         ></iframe>
         <SpinnerLoading
           v-if="iframeLoading"
+          class="player-loading-spinner"
           :text="`Загружается плеер: ${selectedPlayerInternal ? getProviderDisplayName(selectedPlayerInternal) : 'Загружается список плееров'}\nЕсли плеер не грузится, то смените плеер выше или включите VPN`"
-          style="white-space: pre-line"
         />
       </div>
 
@@ -506,6 +506,30 @@ import { parseTimingTextToSeconds, formatSecondsToTime } from '@/utils/dateUtils
 import { OBSWebSocket } from '@/utils/obsWebSocket'
 import { debugLog } from '@/utils/logger'
 import { getProviderDisplayName } from '@/utils/playerUtils'
+import {
+  applyOverlayButtonHoverStyle,
+  applyOverlayProgressBackgroundStyle,
+  applyOverlayTimingsBackgroundStyle,
+  applyOverlayTitleBackgroundStyle,
+  applyOverlayVisibilityStyle,
+  applySettingsButtonHoverStyle,
+  getControlsContainerStyle,
+  getDurationProgressMarkup,
+  getMainInfoStyle,
+  getMovieTitleStyle,
+  getMutedTextColor,
+  getObsStatusMarkup,
+  getOverlayBaseStyle,
+  getOverlayButtonStyle,
+  getOverlayPositionStyle,
+  getOverlaySettingsMarkup,
+  getSettingsModalContentStyle,
+  getSettingsModalStyle,
+  getTimingTextStyle,
+  getTimingsContentStyle,
+  getTimingsPanelStyle,
+  getVideoProgressStyle
+} from '@/utils/playerOverlayStyles'
 
 const PlayerSourceModal = defineAsyncComponent(() => import('@/components/player/PlayerSourceModal.vue'))
 
@@ -1258,72 +1282,12 @@ const showOverlaySettings = () => {
 
   const modal = iframeDoc.createElement('div')
   modal.id = 'overlay-settings-modal'
-  modal.style.cssText = `
-    position: fixed !important;
-    top: 0 !important;
-    left: 0 !important;
-    width: 100% !important;
-    height: 100% !important;
-    background: rgba(0, 0, 0, 0.8) !important;
-    display: flex !important;
-    align-items: center !important;
-    justify-content: center !important;
-    z-index: 9999 !important;
-    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif !important;
-  `
+  modal.style.cssText = getSettingsModalStyle()
 
   const modalContent = iframeDoc.createElement('div')
-  modalContent.style.cssText = `
-    background: rgba(30, 30, 30, 0.95) !important;
-    backdrop-filter: blur(20px) !important;
-    border-radius: 16px !important;
-    padding: 32px !important;
-    max-width: 400px !important;
-    width: 90% !important;
-    border: 1px solid rgba(255, 255, 255, 0.1) !important;
-    box-shadow: 0 8px 40px rgba(0, 0, 0, 0.5) !important;
-  `
+  modalContent.style.cssText = getSettingsModalContentStyle()
 
-  modalContent.innerHTML = `
-    <h3 style="color: #ff6b35; margin: 0 0 24px 0; font-size: 20px; font-weight: 600; text-align: center;">Настройки оверлея</h3>
-    
-    <div style="display: flex; flex-direction: column; gap: 16px;">
-      <label style="display: flex; align-items: center; gap: 12px; color: white; cursor: pointer; padding: 8px; border-radius: 8px; background: rgba(255, 255, 255, 0.05);">
-        <input type="checkbox" id="showTitle" ${settings.showTitle ? 'checked' : ''} style="width: 18px; height: 18px; accent-color: #ff6b35;">
-        <span style="font-size: 16px;">Показывать название фильма</span>
-      </label>
-      
-      <label style="display: flex; align-items: center; gap: 12px; color: white; cursor: pointer; padding: 8px; border-radius: 8px; background: rgba(255, 255, 255, 0.05);">
-        <input type="checkbox" id="showDuration" ${settings.showDuration2 ? 'checked' : ''} style="width: 18px; height: 18px; accent-color: #ff6b35;">
-        <span style="font-size: 16px;">Показывать продолжительность</span>
-      </label>
-      
-      <label style="display: flex; align-items: center; gap: 12px; color: white; cursor: pointer; padding: 8px; border-radius: 8px; background: rgba(255, 255, 255, 0.05);">
-        <input type="checkbox" id="showBackground" ${settings.showBackground ? 'checked' : ''} style="width: 18px; height: 18px; accent-color: #ff6b35;">
-        <span style="font-size: 16px;">Показывать затемненный фон</span>
-      </label>
-      
-      <label style="display: flex; align-items: center; gap: 12px; color: white; cursor: pointer; padding: 8px; border-radius: 8px; background: rgba(255, 255, 255, 0.05);">
-        <input type="checkbox" id="showTimingsOnMouseMove" ${settings.showTimingsOnMouseMove ? 'checked' : ''} style="width: 18px; height: 18px; accent-color: #ff6b35;">
-        <span style="font-size: 16px;">Показывать тайминги только при движении мышки</span>
-      </label>
-      
-      <label style="display: flex; align-items: center; gap: 12px; color: white; cursor: pointer; padding: 8px; border-radius: 8px; background: rgba(255, 255, 255, 0.05);">
-        <input type="checkbox" id="highlightTimings" ${settings.highlightTimings ? 'checked' : ''} style="width: 18px; height: 18px; accent-color: #ff6b35;">
-        <span style="font-size: 16px;">Подсвечивать близкие и текущие тайминги</span>
-      </label>
-
-    </div>
-    
-    <div style="display: flex; gap: 12px; margin-top: 24px; justify-content: center;">
-      <button id="saveSettings" style="background: #ff6b35; color: white; border: none; border-radius: 8px; padding: 10px 20px; cursor: pointer; font-size: 16px; font-weight: 500; transition: all 0.3s ease;">
-        Сохранить
-      </button>
-      <button id="cancelSettings" style="background: rgba(255, 255, 255, 0.1); color: rgba(255, 255, 255, 0.8); border: 1px solid rgba(255, 255, 255, 0.2); border-radius: 8px; padding: 10px 16px; cursor: pointer; font-size: 14px; transition: all 0.3s ease;">
-        Отмена
-      </button>
-    </div>
-  `
+  modalContent.innerHTML = getOverlaySettingsMarkup(settings)
   ;['click', 'mousedown', 'mouseup', 'mousemove', 'wheel', 'contextmenu'].forEach((eventType) => {
     modalContent.addEventListener(eventType, (e) => {
       e.stopPropagation()
@@ -1378,23 +1342,13 @@ const showOverlaySettings = () => {
       e.preventDefault()
       e.stopPropagation()
       e.stopImmediatePropagation()
-      if (button.id === 'saveSettings') {
-        button.style.background = '#e55a2b'
-        button.style.transform = 'translateY(-1px)'
-      } else {
-        button.style.background = 'rgba(255, 255, 255, 0.15)'
-      }
+      applySettingsButtonHoverStyle(button, true)
     })
     button.addEventListener('mouseleave', (e) => {
       e.preventDefault()
       e.stopPropagation()
       e.stopImmediatePropagation()
-      if (button.id === 'saveSettings') {
-        button.style.background = '#ff6b35'
-        button.style.transform = 'translateY(0)'
-      } else {
-        button.style.background = 'rgba(255, 255, 255, 0.1)'
-      }
+      applySettingsButtonHoverStyle(button, false)
     })
     ;['mousedown', 'mouseup', 'mousemove', 'wheel', 'contextmenu'].forEach((eventType) => {
       button.addEventListener(eventType, (e) => {
@@ -1452,198 +1406,54 @@ const createVideoOverlay = (iframeDoc, video) => {
   overlay.id = 'reyohoho-video-overlay'
 
   let applyOverlayStyles = () => {
-    overlay.style.cssText = `
-      position: absolute !important;
-      top: 0 !important;
-      left: 0 !important;
-      width: 100% !important;
-      height: 100% !important;
-      pointer-events: none !important;
-      z-index: 999999999 !important;
-      display: flex !important;
-      flex-direction: column !important;
-      justify-content: space-between !important;
-      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif !important;
-      visibility: visible !important;
-      opacity: 1 !important;
-    `
+    overlay.style.cssText = getOverlayBaseStyle()
   }
 
   const mainInfo = iframeDoc.createElement('div')
-  mainInfo.style.cssText = `
-    color: white !important;
-    padding: 20px !important;
-    text-align: left !important;
-    pointer-events: none !important;
-  `
+  mainInfo.style.cssText = getMainInfoStyle()
 
   const movieTitle = iframeDoc.createElement('div')
-  const initialTitleBackground = overlaySettings.value.showBackground
-    ? 'rgba(0, 0, 0, 0.7)'
-    : 'transparent'
-  const initialTitleBackdropFilter = overlaySettings.value.showBackground ? 'blur(10px)' : 'none'
-  const initialTitleWidth = overlaySettings.value.showBackground ? 'fit-content' : 'auto'
   const initialFontSize = overlaySettings.value.fontSize || 18
 
-  movieTitle.style.cssText = `
-    font-size: ${initialFontSize + 2}px !important;
-    font-weight: 600 !important;
-    margin-bottom: 8px !important;
-    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.8) !important;
-    line-height: 1.2 !important;
-    padding: 8px 12px !important;
-    border-radius: 6px !important;
-    display: inline-block !important;
-    color: rgba(255, 255, 255, 0.6) !important;
-    background: ${initialTitleBackground} !important;
-    backdrop-filter: ${initialTitleBackdropFilter} !important;
-    width: ${initialTitleWidth} !important;
-  `
+  movieTitle.style.cssText = getMovieTitleStyle({
+    fontSize: initialFontSize,
+    showBackground: overlaySettings.value.showBackground
+  })
 
   const videoProgress = iframeDoc.createElement('div')
-  const initialProgressBackground = overlaySettings.value.showBackground
-    ? 'rgba(0, 0, 0, 0.7)'
-    : 'transparent'
-  const initialProgressBackdropFilter = overlaySettings.value.showBackground ? 'blur(10px)' : 'none'
-  const initialProgressBorderRadius = overlaySettings.value.showBackground ? '6px' : '0'
-  const initialProgressDisplay = overlaySettings.value.showBackground ? 'inline-flex' : 'flex'
-  const initialProgressWidth = overlaySettings.value.showBackground ? 'fit-content' : 'auto'
-
-  videoProgress.style.cssText = `
-    font-size: ${initialFontSize}px !important;
-    font-weight: 500 !important;
-    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.8) !important;
-    display: ${initialProgressDisplay} !important;
-    align-items: center !important;
-    gap: 8px !important;
-    flex-wrap: wrap !important;
-    color: rgba(255, 255, 255, 0.6) !important;
-    margin-left: 12px !important;
-    background: ${initialProgressBackground} !important;
-    backdrop-filter: ${initialProgressBackdropFilter} !important;
-    border-radius: ${initialProgressBorderRadius} !important;
-    width: ${initialProgressWidth} !important;
-  `
+  videoProgress.style.cssText = getVideoProgressStyle({
+    fontSize: initialFontSize,
+    showBackground: overlaySettings.value.showBackground
+  })
 
   const timingsPanel = iframeDoc.createElement('div')
-  const initialTimingsPanelBackground = overlaySettings.value.showBackground
-    ? 'rgba(0, 0, 0, 0.7)'
-    : 'transparent'
-  const initialTimingsPanelBackdropFilter = overlaySettings.value.showBackground
-    ? 'blur(10px)'
-    : 'none'
-
-  timingsPanel.style.cssText = `
-    position: absolute !important;
-    top: 20px !important;
-    right: 110px !important;
-    background: ${initialTimingsPanelBackground} !important;
-    backdrop-filter: ${initialTimingsPanelBackdropFilter} !important;
-    border-radius: 12px !important;
-    padding: 16px !important;
-    width: fit-content !important;
-    max-width: 800px !important;
-    pointer-events: none !important;
-    display: none !important;
-    transition: opacity 0.3s ease, visibility 0.3s ease !important;
-    opacity: 0 !important;
-    visibility: hidden !important;
-  `
+  timingsPanel.style.cssText = getTimingsPanelStyle({
+    showBackground: overlaySettings.value.showBackground
+  })
 
   const timingsContent = iframeDoc.createElement('div')
-  timingsContent.style.cssText = `
-    font-size: ${initialFontSize - 4}px !important;
-    color: rgba(255, 255, 255, 0.6) !important;
-    text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.8) !important;
-    line-height: 1.4 !important;
-    word-wrap: break-word !important;
-  `
+  timingsContent.style.cssText = getTimingsContentStyle({ fontSize: initialFontSize })
 
   const controlsContainer = iframeDoc.createElement('div')
-  controlsContainer.style.cssText = `
-    position: absolute !important;
-    top: 20px !important;
-    right: 20px !important;
-    display: flex !important;
-    gap: 8px !important;
-    pointer-events: all !important;
-  `
+  controlsContainer.style.cssText = getControlsContainerStyle()
 
   const settingsBtn = iframeDoc.createElement('button')
-  settingsBtn.style.cssText = `
-    background: rgba(0, 0, 0, 0.8) !important;
-    backdrop-filter: blur(10px) !important;
-    color: white !important;
-    border: 1px solid rgba(255, 255, 255, 0.2) !important;
-    border-radius: 50% !important;
-    width: 40px !important;
-    height: 40px !important;
-    display: flex !important;
-    align-items: center !important;
-    justify-content: center !important;
-    cursor: pointer !important;
-    transition: all 0.3s ease !important;
-    font-size: 18px !important;
-  `
+  settingsBtn.style.cssText = getOverlayButtonStyle()
   settingsBtn.innerHTML = '⚙️'
   settingsBtn.title = 'Настройки оверлея'
 
   const fontDecreaseBtn = iframeDoc.createElement('button')
-  fontDecreaseBtn.style.cssText = `
-    background: rgba(0, 0, 0, 0.8) !important;
-    backdrop-filter: blur(10px) !important;
-    color: white !important;
-    border: 1px solid rgba(255, 255, 255, 0.2) !important;
-    border-radius: 50% !important;
-    width: 40px !important;
-    height: 40px !important;
-    display: flex !important;
-    align-items: center !important;
-    justify-content: center !important;
-    cursor: pointer !important;
-    transition: all 0.3s ease !important;
-    font-size: 20px !important;
-    font-weight: bold !important;
-  `
+  fontDecreaseBtn.style.cssText = getOverlayButtonStyle({ fontSize: 20, fontWeight: 'bold' })
   fontDecreaseBtn.innerHTML = 'A-'
   fontDecreaseBtn.title = 'Уменьшить шрифт'
 
   const fontIncreaseBtn = iframeDoc.createElement('button')
-  fontIncreaseBtn.style.cssText = `
-    background: rgba(0, 0, 0, 0.8) !important;
-    backdrop-filter: blur(10px) !important;
-    color: white !important;
-    border: 1px solid rgba(255, 255, 255, 0.2) !important;
-    border-radius: 50% !important;
-    width: 40px !important;
-    height: 40px !important;
-    display: flex !important;
-    align-items: center !important;
-    justify-content: center !important;
-    cursor: pointer !important;
-    transition: all 0.3s ease !important;
-    font-size: 20px !important;
-    font-weight: bold !important;
-  `
+  fontIncreaseBtn.style.cssText = getOverlayButtonStyle({ fontSize: 20, fontWeight: 'bold' })
   fontIncreaseBtn.innerHTML = 'A+'
   fontIncreaseBtn.title = 'Увеличить шрифт'
 
   const toggleBtn = iframeDoc.createElement('button')
-  toggleBtn.style.cssText = `
-    background: rgba(0, 0, 0, 0.8) !important;
-    backdrop-filter: blur(10px) !important;
-    color: white !important;
-    border: 1px solid rgba(255, 255, 255, 0.2) !important;
-    border-radius: 50% !important;
-    width: 40px !important;
-    height: 40px !important;
-    display: flex !important;
-    align-items: center !important;
-    justify-content: center !important;
-    cursor: pointer !important;
-    transition: all 0.3s ease !important;
-    font-size: 18px !important;
-  `
+  toggleBtn.style.cssText = getOverlayButtonStyle()
   toggleBtn.innerHTML = '👁️'
   toggleBtn.title = 'Отключить оверлей'
 
@@ -1690,17 +1500,13 @@ const createVideoOverlay = (iframeDoc, video) => {
       e.preventDefault()
       e.stopPropagation()
       e.stopImmediatePropagation()
-      btn.style.background = '#ff6b35'
-      btn.style.borderColor = '#ff6b35'
-      btn.style.transform = 'scale(1.1)'
+      applyOverlayButtonHoverStyle(btn, true)
     })
     btn.addEventListener('mouseleave', (e) => {
       e.preventDefault()
       e.stopPropagation()
       e.stopImmediatePropagation()
-      btn.style.background = 'rgba(0, 0, 0, 0.8)'
-      btn.style.borderColor = 'rgba(255, 255, 255, 0.2)'
-      btn.style.transform = 'scale(1)'
+      applyOverlayButtonHoverStyle(btn, false)
     })
     ;['mousedown', 'mouseup', 'mousemove', 'wheel', 'contextmenu'].forEach((eventType) => {
       btn.addEventListener(eventType, (e) => {
@@ -1733,27 +1539,23 @@ const createVideoOverlay = (iframeDoc, video) => {
   overlay.appendChild(controlsContainer)
 
   controlsContainer.style.transition = 'opacity 0.3s ease, visibility 0.3s ease'
-  controlsContainer.style.opacity = '0'
-  controlsContainer.style.visibility = 'hidden'
+  applyOverlayVisibilityStyle(controlsContainer, false)
 
   mainInfo.style.transition = 'opacity 0.3s ease'
   let hideMainInfoTimeout = null
 
   const handleMouseMove = () => {
-    controlsContainer.style.opacity = '1'
-    controlsContainer.style.visibility = 'visible'
+    applyOverlayVisibilityStyle(controlsContainer, true)
     mainInfo.style.opacity = '0'
 
     if (overlaySettings.value.showTimingsOnMouseMove && activeTimingTexts.value.length > 0) {
-      timingsPanel.style.opacity = '1'
-      timingsPanel.style.visibility = 'visible'
+      applyOverlayVisibilityStyle(timingsPanel, true)
       clearTimeout(hideTimingsTimeout)
       hideTimingsTimeout = null
 
       if (!hasActiveTimings.value) {
         hideTimingsTimeout = setTimeout(() => {
-          timingsPanel.style.opacity = '0'
-          timingsPanel.style.visibility = 'hidden'
+          applyOverlayVisibilityStyle(timingsPanel, false)
           hideTimingsTimeout = null
         }, 3000)
       }
@@ -1763,8 +1565,7 @@ const createVideoOverlay = (iframeDoc, video) => {
     clearTimeout(hideMainInfoTimeout)
 
     overlayControlsTimeout.value = setTimeout(() => {
-      controlsContainer.style.opacity = '0'
-      controlsContainer.style.visibility = 'hidden'
+      applyOverlayVisibilityStyle(controlsContainer, false)
     }, 3000)
 
     hideMainInfoTimeout = setTimeout(() => {
@@ -1775,8 +1576,7 @@ const createVideoOverlay = (iframeDoc, video) => {
   iframeDoc.addEventListener('mousemove', handleMouseMove)
 
   overlay.addEventListener('mouseenter', () => {
-    controlsContainer.style.opacity = '1'
-    controlsContainer.style.visibility = 'visible'
+    applyOverlayVisibilityStyle(controlsContainer, true)
     mainInfo.style.opacity = '0'
     clearTimeout(hideMainInfoTimeout)
   })
@@ -1784,8 +1584,7 @@ const createVideoOverlay = (iframeDoc, video) => {
   overlay.addEventListener('mouseleave', () => {
     clearTimeout(overlayControlsTimeout.value)
     clearTimeout(hideMainInfoTimeout)
-    controlsContainer.style.opacity = '0'
-    controlsContainer.style.visibility = 'hidden'
+    applyOverlayVisibilityStyle(controlsContainer, false)
     mainInfo.style.opacity = '1'
   })
 
@@ -1845,22 +1644,7 @@ const createVideoOverlay = (iframeDoc, video) => {
       (video.offsetWidth === window.screen.width && video.offsetHeight === window.screen.height)
 
     if (isFullscreen) {
-      overlay.style.cssText = `
-        position: fixed !important;
-        top: 0 !important;
-        left: 0 !important;
-        width: 100vw !important;
-        height: 100vh !important;
-        pointer-events: none !important;
-        z-index: 999999999 !important;
-        display: flex !important;
-        flex-direction: column !important;
-        justify-content: space-between !important;
-        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif !important;
-        visibility: visible !important;
-        opacity: 1 !important;
-        box-sizing: border-box !important;
-      `
+      overlay.style.cssText = getOverlayPositionStyle({ fullscreen: true })
     } else {
       const videoStyle = iframeDoc.defaultView.getComputedStyle(video)
       const containerRect = container.getBoundingClientRect()
@@ -1873,22 +1657,13 @@ const createVideoOverlay = (iframeDoc, video) => {
       const relativeTop = videoRect.top - containerRect.top + container.scrollTop
       const relativeLeft = videoRect.left - containerRect.left + container.scrollLeft
 
-      overlay.style.cssText = `
-        position: absolute !important;
-        top: ${relativeTop}px !important;
-        left: ${relativeLeft}px !important;
-        width: ${videoWidth}px !important;
-        height: ${videoHeight}px !important;
-        pointer-events: none !important;
-        z-index: 999999999 !important;
-        display: flex !important;
-        flex-direction: column !important;
-        justify-content: space-between !important;
-        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif !important;
-        visibility: visible !important;
-        opacity: 1 !important;
-        box-sizing: border-box !important;
-      `
+      overlay.style.cssText = getOverlayPositionStyle({
+        fullscreen: false,
+        top: relativeTop,
+        left: relativeLeft,
+        width: videoWidth,
+        height: videoHeight
+      })
     }
   }
 
@@ -2113,17 +1888,7 @@ const updateVideoOverlay = () => {
     const year = props.movieInfo?.year ? ` (${props.movieInfo.year})` : ''
     movieTitle.textContent = title + year
 
-    if (overlaySettings.value.showBackground) {
-      movieTitle.style.background = 'rgba(0, 0, 0, 0.7) !important'
-      movieTitle.style.backdropFilter = 'blur(10px) !important'
-      movieTitle.style.width = 'fit-content !important'
-      movieTitle.style.display = 'inline-block !important'
-    } else {
-      movieTitle.style.background = 'transparent !important'
-      movieTitle.style.backdropFilter = 'none !important'
-      movieTitle.style.width = 'auto !important'
-      movieTitle.style.display = 'inline-block !important'
-    }
+    applyOverlayTitleBackgroundStyle(movieTitle, overlaySettings.value.showBackground)
   } else {
     movieTitle.style.display = 'none'
   }
@@ -2135,11 +1900,7 @@ const updateVideoOverlay = () => {
   if (overlaySettings.value.showDuration2) {
     const currentTimeFormatted = formatSecondsToTime(currentVideoTime.value)
     const totalTimeFormatted = formatSecondsToTime(totalVideoDuration.value)
-    progressHtml = `
-      <span style="font-family: 'Courier New', monospace; color: rgba(255, 255, 255, 0.6);">${currentTimeFormatted}</span>
-      <span style="opacity: 0.6;">/</span>
-      <span style="font-family: 'Courier New', monospace; color: rgba(255, 255, 255, 0.6);">${totalTimeFormatted}</span>
-    `
+    progressHtml = getDurationProgressMarkup({ currentTimeFormatted, totalTimeFormatted })
   }
 
   if (obsSettings.value.enabled && obsSettings.value.showObsInOverlay) {
@@ -2163,33 +1924,14 @@ const updateVideoOverlay = () => {
       }
     }
 
-    const obsStatusHtml = `
-      <span style="color: ${statusColor};">
-        OBS: ${statusText}
-      </span>
-    `
+    const obsStatusHtml = getObsStatusMarkup({ statusColor, statusText })
     progressHtml = progressHtml ? `${progressHtml} ${obsStatusHtml}` : obsStatusHtml
   }
 
   if (progressHtml) {
     videoProgress.style.display = 'flex'
     videoProgress.innerHTML = progressHtml
-
-    if (overlaySettings.value.showBackground) {
-      videoProgress.style.background = 'rgba(0, 0, 0, 0.7) !important'
-      videoProgress.style.backdropFilter = 'blur(10px) !important'
-      videoProgress.style.borderRadius = '6px !important'
-      videoProgress.style.padding = '8px 12px !important'
-      videoProgress.style.width = 'fit-content !important'
-      videoProgress.style.display = 'inline-flex !important'
-    } else {
-      videoProgress.style.background = 'transparent !important'
-      videoProgress.style.backdropFilter = 'none !important'
-      videoProgress.style.borderRadius = '0 !important'
-      videoProgress.style.padding = '0 !important'
-      videoProgress.style.width = 'auto !important'
-      videoProgress.style.display = 'flex !important'
-    }
+    applyOverlayProgressBackgroundStyle(videoProgress, overlaySettings.value.showBackground)
   } else {
     videoProgress.style.display = 'none'
   }
@@ -2201,14 +1943,14 @@ const updateVideoOverlay = () => {
 
     const header = iframeDoc.createElement('span')
     header.textContent = 'Тайминги: '
-    header.style.color = 'rgba(255, 255, 255, 0.6)'
+    header.style.color = getMutedTextColor()
     timingsContent.appendChild(header)
 
     activeTimingTexts.value.forEach((timing, timingIndex) => {
       if (timingIndex > 0) {
         const separator = iframeDoc.createElement('span')
         separator.textContent = ', '
-        separator.style.color = 'rgba(255, 255, 255, 0.6)'
+        separator.style.color = getMutedTextColor()
         timingsContent.appendChild(separator)
       }
 
@@ -2216,22 +1958,19 @@ const updateVideoOverlay = () => {
         if (intervalIndex > 0) {
           const intervalSeparator = iframeDoc.createElement('span')
           intervalSeparator.textContent = ', '
-          intervalSeparator.style.color = 'rgba(255, 255, 255, 0.6)'
+          intervalSeparator.style.color = getMutedTextColor()
           timingsContent.appendChild(intervalSeparator)
         }
 
         const intervalSpan = iframeDoc.createElement('span')
         intervalSpan.textContent = interval.text
 
-        if (interval.status === 'active' && overlaySettings.value.highlightTimings) {
-          intervalSpan.style.color = '#ff4444'
-          intervalSpan.style.fontWeight = 'bold'
-        } else if (interval.status === 'upcoming' && overlaySettings.value.highlightTimings) {
-          intervalSpan.style.color = '#ff6b35'
-          intervalSpan.style.fontWeight = '500'
-        } else {
-          intervalSpan.style.color = 'rgba(255, 255, 255, 0.6)'
-        }
+        const timingStyle = getTimingTextStyle({
+          status: interval.status,
+          highlight: overlaySettings.value.highlightTimings
+        })
+        intervalSpan.style.color = timingStyle.color
+        intervalSpan.style.fontWeight = timingStyle.fontWeight
 
         timingsContent.appendChild(intervalSpan)
       })
@@ -2240,21 +1979,10 @@ const updateVideoOverlay = () => {
     timingsPanel.style.display = 'block'
 
     if (!overlaySettings.value.showTimingsOnMouseMove || hasActiveTimings.value) {
-      timingsPanel.style.opacity = '1'
-      timingsPanel.style.visibility = 'visible'
+      applyOverlayVisibilityStyle(timingsPanel, true)
     }
 
-    if (overlaySettings.value.showBackground) {
-      timingsPanel.style.background = 'rgba(0, 0, 0, 0.7) !important'
-      timingsPanel.style.backdropFilter = 'blur(10px) !important'
-      timingsPanel.style.width = 'fit-content !important'
-      timingsPanel.style.minWidth = 'auto !important'
-    } else {
-      timingsPanel.style.background = 'transparent !important'
-      timingsPanel.style.backdropFilter = 'none !important'
-      timingsPanel.style.width = 'fit-content !important'
-      timingsPanel.style.minWidth = 'auto !important'
-    }
+    applyOverlayTimingsBackgroundStyle(timingsPanel, overlaySettings.value.showBackground)
   } else {
     timingsPanel.style.display = 'none'
   }
@@ -2264,8 +1992,7 @@ const updateVideoOverlay = () => {
     hasActiveTimings.value &&
     activeTimingTexts.value.length > 0
   ) {
-    timingsPanel.style.opacity = '1'
-    timingsPanel.style.visibility = 'visible'
+    applyOverlayVisibilityStyle(timingsPanel, true)
     clearTimeout(hideTimingsTimeout)
   } else if (
     overlaySettings.value.showTimingsOnMouseMove &&
@@ -2275,8 +2002,7 @@ const updateVideoOverlay = () => {
     !hideTimingsTimeout
   ) {
     hideTimingsTimeout = setTimeout(() => {
-      timingsPanel.style.opacity = '0'
-      timingsPanel.style.visibility = 'hidden'
+      applyOverlayVisibilityStyle(timingsPanel, false)
       hideTimingsTimeout = null
     }, 3000)
   }
