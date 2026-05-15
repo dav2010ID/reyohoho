@@ -173,6 +173,7 @@ import { useHead } from '@unhead/vue'
 import SpinnerLoading from '@/components/SpinnerLoading.vue'
 import RandomMovieModal from '@/components/RandomMovieModal.vue'
 import { getMovieSeoPath } from '@/utils/movieSeo'
+import { debugLog } from '@/utils/logger'
 
 const mainStore = useMainStore()
 const authStore = useAuthStore()
@@ -264,14 +265,14 @@ const loadHomeTopMovies = async () => {
   topMoviesLoading.value = true
   try {
     topMoviesPage.value = 1
-    const requestLimit = HOME_TOP_PAGE_SIZE + 1
     const movies = await getMovies({
       activeTime: '24h',
       typeFilter: 'all',
-      limit: requestLimit
+      page: 1,
+      limit: HOME_TOP_PAGE_SIZE
     })
-    topMoviesHasMore.value = Array.isArray(movies) && movies.length > HOME_TOP_PAGE_SIZE
-    topMovies.value = Array.isArray(movies) ? movies.slice(0, HOME_TOP_PAGE_SIZE) : []
+    topMoviesHasMore.value = Array.isArray(movies) && movies.length === HOME_TOP_PAGE_SIZE
+    topMovies.value = Array.isArray(movies) ? movies : []
   } catch (error) {
     console.error('Ошибка загрузки топов для главной:', error)
     topMovies.value = []
@@ -297,20 +298,19 @@ const loadMoreHomeTopMovies = async () => {
 
   try {
     const nextPage = topMoviesPage.value + 1
-    const displayLimit = nextPage * HOME_TOP_PAGE_SIZE
-    const requestLimit = displayLimit + 1
     const movies = await getMovies({
       activeTime: '24h',
       typeFilter: 'all',
-      limit: requestLimit
+      page: nextPage,
+      limit: HOME_TOP_PAGE_SIZE
     })
-    const nextMovies = Array.isArray(movies) ? movies.slice(0, displayLimit) : []
+    const nextMovies = Array.isArray(movies) ? movies : []
 
-    topMoviesHasMore.value = Array.isArray(movies) && movies.length > displayLimit
+    topMoviesHasMore.value = Array.isArray(movies) && movies.length === HOME_TOP_PAGE_SIZE
     topMoviesPage.value = nextPage
 
-    if (nextMovies.length > topMovies.value.length) {
-      topMovies.value = nextMovies
+    if (nextMovies.length > 0) {
+      topMovies.value = [...topMovies.value, ...nextMovies]
     } else {
       topMoviesHasMore.value = false
     }
@@ -504,7 +504,7 @@ const performSearch = async () => {
           return
         }
       } catch (e) {
-        console.log('Switch to kodik', e)
+        debugLog('Switch to kodik', e)
       }
 
       router.push({ name: 'movie-info-shiki', params: { shiki_id: `shiki${searchTerm.value}` } })

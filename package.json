@@ -18,6 +18,7 @@
     "format": "prettier --write src/",
     "perf:browser": "node scripts/browser-performance-check.js",
     "test:browser-smoke": "node scripts/browser-smoke-check.js",
+    "test:infinite-scroll": "node scripts/browser-infinite-scroll-check.js",
     "profile:cards": "node scripts/browser-card-profile.js",
     "icons": "node scripts/generate-icons.js",
     "build:icons": "node scripts/generate-icons.js && node scripts/fetch-seo-data.js && node scripts/generate-seo-assets.js && vite-ssg build && node scripts/postbuild-gh-pages.js"

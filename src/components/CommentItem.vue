@@ -278,6 +278,7 @@ import { useCommentActions } from '@/composables/useCommentActions'
 import { useCommentFormatting } from '@/composables/useCommentFormatting'
 import { formatDate, formatRelativeTime } from '@/utils/dateUtils'
 import { getInitials } from '@/utils/textUtils'
+import { debugLog } from '@/utils/logger'
 
 export default {
   name: 'CommentItem',
@@ -433,7 +434,7 @@ export default {
     })
 
     const handleAvatarError = () => {
-      console.log('Avatar load error, falling back to initials')
+      debugLog('Avatar load error, falling back to initials')
       avatarUrl.value = null
     }
 

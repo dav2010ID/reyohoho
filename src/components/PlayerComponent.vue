@@ -525,6 +525,7 @@ import { useRoute, useRouter } from 'vue-router'
 import PlayerModal from '@/components/PlayerModal.vue'
 import { parseTimingTextToSeconds, formatSecondsToTime } from '@/utils/dateUtils'
 import { OBSWebSocket } from '@/utils/obsWebSocket'
+import { debugLog } from '@/utils/logger'
 
 const mainStore = useMainStore()
 const playerStore = usePlayerStore()
@@ -894,7 +895,7 @@ const initializeAudioContext = () => {
 
     return true
   } catch (e) {
-    console.log('Error initializing audio context:', e)
+    debugLog('Error initializing audio context:', e)
     return false
   }
 }
@@ -911,7 +912,7 @@ const setupVideoAudio = async (video) => {
       iframeSrc.includes('kinoserial.net') ||
       iframeSrc.includes('allarknow')
     ) {
-      console.log('Player detected as unsupported for compressor:', iframeSrc)
+      debugLog('Player detected as unsupported for compressor:', iframeSrc)
       currentVideoElement.value = video
       mediaSource.value = null
       currentCompressorState.value = false
@@ -942,11 +943,11 @@ const setupVideoAudio = async (video) => {
         mediaSource.value.connect(compressorNode.value)
         mediaSource.value.connect(bypassGainNode.value)
 
-        console.log(`Video audio setup completed (attempt with ${delay}ms delay)`)
+        debugLog(`Video audio setup completed (attempt with ${delay}ms delay)`)
         return true
       } catch (e) {
         if (e.name === 'InvalidStateError' && e.message.includes('already connected')) {
-          console.log(`MediaElementSource already connected (${delay}ms delay attempt)`)
+          debugLog(`MediaElementSource already connected (${delay}ms delay attempt)`)
           return false
         } else {
           throw e
@@ -962,7 +963,7 @@ const setupVideoAudio = async (video) => {
 
     if (await attemptConnection(800)) return true
 
-    console.log(
+    debugLog(
       'Video element has internal audio processing, compressor not available for this player'
     )
     currentVideoElement.value = video
@@ -974,7 +975,7 @@ const setupVideoAudio = async (video) => {
     }
     return false
   } catch (e) {
-    console.log('Error setting up video audio:', e)
+    debugLog('Error setting up video audio:', e)
     return false
   }
 }
@@ -996,7 +997,7 @@ const applyCompressorEffect = async (enabled) => {
 
     const audioSetupSuccess = await setupVideoAudio(video)
     if (!audioSetupSuccess || !mediaSource.value) {
-      console.log('Compressor not available for this player')
+      debugLog('Compressor not available for this player')
       return
     }
 
@@ -1008,7 +1009,7 @@ const applyCompressorEffect = async (enabled) => {
       if (isElectron.value) {
         window.electronAPI.showToast('Компрессор включён')
       }
-      console.log('Compressor enabled')
+      debugLog('Compressor enabled')
     } else if (!enabled && currentCompressorState.value) {
       gainNode.value.gain.setValueAtTime(0, audioContext.value.currentTime)
       bypassGainNode.value.gain.setValueAtTime(1, audioContext.value.currentTime)
@@ -1017,10 +1018,10 @@ const applyCompressorEffect = async (enabled) => {
       if (isElectron.value) {
         window.electronAPI.showToast('Компрессор отключён')
       }
-      console.log('Compressor disabled')
+      debugLog('Compressor disabled')
     }
   } catch (e) {
-    console.log('Compressor error:', e)
+    debugLog('Compressor error:', e)
     if (isElectron.value) {
       window.electronAPI.showToast('Ошибка при включении компрессора')
     }
@@ -1047,7 +1048,7 @@ const enableBlur = () => {
       }
     }
   } catch (error) {
-    console.log('Error enabling blur:', error)
+    debugLog('Error enabling blur:', error)
   }
 }
 
@@ -1071,7 +1072,7 @@ const disableBlur = () => {
       }
     }
   } catch (error) {
-    console.log('Error disabling blur:', error)
+    debugLog('Error disabling blur:', error)
   }
 }
 
@@ -1098,7 +1099,7 @@ const toggleBlur = () => {
         }
       }
     } catch (error) {
-      console.log('Error toggling blur:', error)
+      debugLog('Error toggling blur:', error)
     }
   } else {
     showMessageToast('Доступно только в приложении ReYohoho Desktop')
@@ -1240,7 +1241,7 @@ const startMirrorMonitoring = () => {
             }, 500)
           }
         } else if (compressorEnabled.value !== currentCompressorState.value && mediaSource.value) {
-          console.log('Compressor state mismatch, reapplying')
+          debugLog('Compressor state mismatch, reapplying')
           applyCompressorEffect(compressorEnabled.value)
         }
       }
@@ -1308,7 +1309,7 @@ const startVideoPositionMonitoring = (isDebug = false) => {
             try {
               createVideoOverlay(iframeDoc, video)
             } catch (error) {
-              console.log('Error creating overlay:', error)
+              debugLog('Error creating overlay:', error)
               overlayCreationInProgress.value = false
             }
           }
@@ -1381,7 +1382,7 @@ const startVideoPositionMonitoring = (isDebug = false) => {
           const progress = duration > 0 ? (currentTime / duration) * 100 : 0
 
           if (isDebug) {
-            console.log(
+            debugLog(
               `Video position: ${currentTime.toFixed(2)}s / ${duration.toFixed(2)}s (${progress.toFixed(1)}%)`
             )
 
@@ -1391,7 +1392,7 @@ const startVideoPositionMonitoring = (isDebug = false) => {
                   ([start, end]) => `${formatSecondsToTime(start)} - ${formatSecondsToTime(end)}`
                 )
                 .join(', ')
-              console.log(`Active blur intervals: [${activeIntervals}]`)
+              debugLog(`Active blur intervals: [${activeIntervals}]`)
             }
           }
 
@@ -1413,26 +1414,26 @@ const startVideoPositionMonitoring = (isDebug = false) => {
             if (shouldBlur && !blurApplied) {
               obsWebSocket.value?.enableBlur(obsSettings.value.selectedFilterId)
               blurApplied = true
-              console.log('OBS Blur applied at', currentTime.toFixed(2), 'seconds')
+              debugLog('OBS Blur applied at', currentTime.toFixed(2), 'seconds')
             } else if (!shouldBlur && blurApplied) {
               obsWebSocket.value?.disableBlur(obsSettings.value.selectedFilterId)
               blurApplied = false
-              console.log('OBS Blur removed at', currentTime.toFixed(2), 'seconds')
+              debugLog('OBS Blur removed at', currentTime.toFixed(2), 'seconds')
             }
           } else if (shouldBlur && !blurApplied && isElectron.value) {
             // Internal blur logic
             enableBlur()
             blurApplied = true
-            console.log('Blur applied at', currentTime.toFixed(2), 'seconds')
+            debugLog('Blur applied at', currentTime.toFixed(2), 'seconds')
           } else if (!shouldBlur && blurApplied && !obsSettings.value.enabled) {
             disableBlur()
             blurApplied = false
-            console.log('Blur removed at', currentTime.toFixed(2), 'seconds')
+            debugLog('Blur removed at', currentTime.toFixed(2), 'seconds')
           }
         }
       }
     } catch (error) {
-      console.log('Error monitoring video position:', error)
+      debugLog('Error monitoring video position:', error)
     }
   }, 100)
 }
@@ -1455,7 +1456,7 @@ const onIframeLoad = () => {
           }
         }
       } catch (error) {
-        console.log('Error creating overlay on iframe load:', error)
+        debugLog('Error creating overlay on iframe load:', error)
         overlayCreationInProgress.value = false
       }
     }, 100)
@@ -1650,7 +1651,7 @@ const cleanupAudioContext = () => {
     currentVideoElement.value = null
     currentCompressorState.value = false
   } catch (e) {
-    console.log('Error cleaning up audio context:', e)
+    debugLog('Error cleaning up audio context:', e)
   }
 }
 
@@ -1753,7 +1754,7 @@ watch(videoOverlayEnabled2, (enabled) => {
             }
           }
         } catch (error) {
-          console.log('Error creating overlay via watcher:', error)
+          debugLog('Error creating overlay via watcher:', error)
           overlayCreationInProgress.value = false
         }
       }
@@ -1816,7 +1817,7 @@ watch(
                 }
               }
             } catch (error) {
-              console.log('Error recreating overlay:', error)
+              debugLog('Error recreating overlay:', error)
             }
           }
         }, 100)
@@ -1951,7 +1952,7 @@ const toggleVideoOverlay = () => {
             }
           }
         } catch (error) {
-          console.log('Error creating overlay:', error)
+          debugLog('Error creating overlay:', error)
           overlayCreationInProgress.value = false
         }
       }
@@ -2074,7 +2075,7 @@ const exitFullscreen = () => {
       }
     }
   } catch (error) {
-    console.log('Error exiting fullscreen:', error)
+    debugLog('Error exiting fullscreen:', error)
   }
 }
 
@@ -2802,7 +2803,7 @@ const createVideoOverlay = (iframeDoc, video) => {
           }
         }
       } catch (e) {
-        console.log('Error re-adding overlay to DOM:', e)
+        debugLog('Error re-adding overlay to DOM:', e)
       }
     }
 
@@ -3163,7 +3164,7 @@ const removeVideoOverlay = () => {
 
       currentOverlayElement.value.remove()
     } catch (e) {
-      console.log('Error removing overlay:', e)
+      debugLog('Error removing overlay:', e)
     }
     currentOverlayElement.value = null
   }
@@ -3197,16 +3198,16 @@ onMounted(() => {
   window.testOBSConnection = testOBSConnection
 
   window.debugOBS = () => {
-    console.log('=== OBS Debug Info ===')
-    console.log('OBS Settings:', obsSettings.value)
-    console.log('OBS Connected:', obsConnected.value)
-    console.log('OBS Filters Found:', obsFiltersFound.value)
-    console.log('OBS WebSocket instance:', obsWebSocket.value)
+    debugLog('=== OBS Debug Info ===')
+    debugLog('OBS Settings:', obsSettings.value)
+    debugLog('OBS Connected:', obsConnected.value)
+    debugLog('OBS Filters Found:', obsFiltersFound.value)
+    debugLog('OBS WebSocket instance:', obsWebSocket.value)
 
     if (obsWebSocket.value) {
-      console.log('WebSocket state:', obsWebSocket.value.ws?.readyState)
-      console.log('Is Connected:', obsWebSocket.value.isConnected)
-      console.log('Is Authenticated:', obsWebSocket.value.isAuthenticated)
+      debugLog('WebSocket state:', obsWebSocket.value.ws?.readyState)
+      debugLog('Is Connected:', obsWebSocket.value.isConnected)
+      debugLog('Is Authenticated:', obsWebSocket.value.isAuthenticated)
     }
   }
 
@@ -3251,7 +3252,7 @@ onMounted(() => {
             }
           }
         } catch (error) {
-          console.log('Error initializing overlay on mount:', error)
+          debugLog('Error initializing overlay on mount:', error)
           overlayCreationInProgress.value = false
         }
       }

@@ -17,6 +17,9 @@ export const ignoredFailedUrlPatterns = [
 export const isIgnoredFailure = (url) =>
   ignoredFailedUrlPatterns.some((pattern) => pattern.test(url))
 
+export const isCancelledByNavigation = (request) =>
+  request.failure()?.errorText === 'net::ERR_ABORTED'
+
 export async function ensureReportsDir() {
   await fs.mkdir(reportsDir, { recursive: true })
 }
@@ -80,6 +83,7 @@ export function createCollector(page) {
 
   page.on('requestfailed', (request) => {
     const url = request.url()
+    if (isCancelledByNavigation(request)) return
     if (isIgnoredFailure(url)) return
 
     events.failedRequests.push({

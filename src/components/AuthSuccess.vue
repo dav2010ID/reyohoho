@@ -54,7 +54,6 @@ export default {
         authStore.setUser(user)
         let response = await getMyLists(USER_LIST_TYPES_ENUM.HISTORY)
         mainStore.setHistory(response)
-        console.log(`response.length: ${response.length}`)
         if (response.length !== 0) {
           loading.value = false
 
@@ -84,7 +83,6 @@ export default {
           await router.push({ path: '/' })
           router.go(0)
         }, 2000)
-        console.log(response)
       } catch (err) {
         console.error('Auth error:', err)
         error.value = err.message

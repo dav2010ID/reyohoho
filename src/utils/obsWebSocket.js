@@ -1,3 +1,5 @@
+import { debugLog } from '@/utils/logger'
+
 class OBSWebSocket {
   constructor() {
     this.ws = null
@@ -29,16 +31,16 @@ class OBSWebSocket {
   async connect(host = 'localhost', port = 4455, password = '') {
     return new Promise((resolve, reject) => {
       const url = `ws://${host}:${port}`
-      console.log(`Connecting to OBS WebSocket at ${url}`)
+      debugLog(`Connecting to OBS WebSocket at ${url}`)
       this.ws = new WebSocket(url)
 
       this.ws.onopen = async () => {
-        console.log('WebSocket connection opened')
+        debugLog('WebSocket connection opened')
         try {
           const authResponse = await this.authenticate(password)
-          console.log('Authentication response:', authResponse)
+          debugLog('Authentication response:', authResponse)
           if (authResponse.success) {
-            console.log('Successfully authenticated to OBS')
+            debugLog('Successfully authenticated to OBS')
             this.callbacks.onConnect?.()
             this.loadSourcesAndSearchFilters()
             resolve()
@@ -57,7 +59,7 @@ class OBSWebSocket {
       }
 
       this.ws.onclose = () => {
-        console.log('WebSocket connection closed')
+        debugLog('WebSocket connection closed')
         this.callbacks.onDisconnect?.()
       }
 
@@ -104,7 +106,7 @@ class OBSWebSocket {
         }
       }
 
-      console.log(`Sending OBS request: ${requestType}`, requestData)
+      debugLog(`Sending OBS request: ${requestType}`, requestData)
 
       this.pendingRequests.set(requestId, { resolve, reject })
 
@@ -134,7 +136,7 @@ class OBSWebSocket {
         this.handleEvent(message.d)
         break
       default:
-        console.log(`Unknown OBS message: op=${message.op}`)
+        debugLog(`Unknown OBS message: op=${message.op}`)
     }
   }
 
@@ -146,7 +148,7 @@ class OBSWebSocket {
   }
 
   async handleHello(data) {
-    console.log('Received OBS hello')
+    debugLog('Received OBS hello')
     this.isConnected = true
 
     const identify = {
@@ -184,7 +186,7 @@ class OBSWebSocket {
   }
 
   handleIdentified() {
-    console.log('OBS authentication successful')
+    debugLog('OBS authentication successful')
     this.isAuthenticated = true
 
     if (this.authResolve) {
@@ -196,7 +198,7 @@ class OBSWebSocket {
   handleRequestResponse(data) {
     const { requestId, requestType, requestStatus, responseData } = data
 
-    console.log(`Received response for ${requestType}:`, {
+    debugLog(`Received response for ${requestType}:`, {
       success: requestStatus.result,
       code: requestStatus.code,
       comment: requestStatus.comment
@@ -216,7 +218,7 @@ class OBSWebSocket {
     this.pendingRequests.delete(requestId)
 
     if (requestStatus.result) {
-      console.log(`Request ${requestType} successful`, responseData)
+      debugLog(`Request ${requestType} successful`, responseData)
       pendingRequest.resolve(responseData)
     } else {
       console.error(`Request ${requestType} failed:`, requestStatus.comment)
@@ -238,7 +240,7 @@ class OBSWebSocket {
         filterName: blurFilter.filterName,
         enabled: blurFilter.filterEnabled
       })
-      console.log(`Found reyohoho filter in source: ${sourceName}`)
+      debugLog(`Found reyohoho filter in source: ${sourceName}`)
     }
 
     this.checkSearchComplete()
@@ -246,20 +248,20 @@ class OBSWebSocket {
 
   checkSearchComplete() {
     setTimeout(() => {
-      console.log(`Search complete. Found ${this.foundFilters.size} reyohoho filters`)
+      debugLog(`Search complete. Found ${this.foundFilters.size} reyohoho filters`)
       this.callbacks.onFiltersFound?.(Array.from(this.foundFilters.values()))
     }, 500)
   }
 
   handleEvent(data) {
-    console.log(`OBS event: ${data.eventType}`)
+    debugLog(`OBS event: ${data.eventType}`)
   }
 
   async testConnection() {
     try {
-      console.log('Testing OBS connection...')
+      debugLog('Testing OBS connection...')
       const version = await this.sendRequest('GetVersion')
-      console.log('OBS connection test successful:', version)
+      debugLog('OBS connection test successful:', version)
       return { success: true, version }
     } catch (error) {
       console.error('OBS connection test failed:', error)
@@ -269,18 +271,18 @@ class OBSWebSocket {
 
   async loadSourcesAndSearchFilters() {
     try {
-      console.log('Loading sources and searching for filters...')
+      debugLog('Loading sources and searching for filters...')
 
       try {
         const version = await this.sendRequest('GetVersion')
-        console.log('OBS version info:', version)
+        debugLog('OBS version info:', version)
       } catch (error) {
         console.warn('Could not get OBS version:', error)
       }
 
-      console.log('Requesting scene list...')
+      debugLog('Requesting scene list...')
       const scenes = await this.sendRequest('GetSceneList')
-      console.log('Raw scenes response:', scenes)
+      debugLog('Raw scenes response:', scenes)
 
       if (!scenes || !scenes.scenes) {
         console.error('Invalid scenes response structure:', scenes)
@@ -288,11 +290,11 @@ class OBSWebSocket {
         return
       }
 
-      console.log('Found scenes:', scenes.scenes.length)
+      debugLog('Found scenes:', scenes.scenes.length)
 
-      console.log('Requesting input list...')
+      debugLog('Requesting input list...')
       const inputs = await this.sendRequest('GetInputList')
-      console.log('Raw inputs response:', inputs)
+      debugLog('Raw inputs response:', inputs)
 
       if (!inputs || !inputs.inputs) {
         console.error('Invalid inputs response structure:', inputs)
@@ -300,13 +302,13 @@ class OBSWebSocket {
         return
       }
 
-      console.log('Found inputs:', inputs.inputs.length)
+      debugLog('Found inputs:', inputs.inputs.length)
 
       this.sources.clear()
       this.filtersFound.clear()
 
       for (const scene of scenes.scenes) {
-        console.log(
+        debugLog(
           `Checking scene: ${scene.sceneName} with ${scene.sceneItems ? scene.sceneItems.length : 0} items`
         )
 
@@ -326,7 +328,7 @@ class OBSWebSocket {
       }
 
       for (const input of inputs.inputs) {
-        console.log(`Checking input: ${input.inputName}`)
+        debugLog(`Checking input: ${input.inputName}`)
         if (!this.sources.has(input.inputName)) {
           this.sources.set(input.inputName, {
             sceneName: 'Direct Input',
@@ -339,9 +341,9 @@ class OBSWebSocket {
       }
 
       const foundFilters = Array.from(this.filtersFound.values())
-      console.log('Total filters found:', foundFilters.length)
+      debugLog('Total filters found:', foundFilters.length)
       foundFilters.forEach((filter) => {
-        console.log(
+        debugLog(
           `- ${filter.sourceName}: ${filter.filterName} (${filter.enabled ? 'enabled' : 'disabled'})`
         )
       })
@@ -357,14 +359,14 @@ class OBSWebSocket {
 
   async searchFiltersInSource(sourceName, sceneName) {
     try {
-      console.log(`Searching filters in source: ${sourceName}`)
+      debugLog(`Searching filters in source: ${sourceName}`)
       const response = await this.sendRequest('GetSourceFilterList', {
         sourceName: sourceName
       })
 
-      console.log(`Source ${sourceName} has ${response.filters.length} filters`)
+      debugLog(`Source ${sourceName} has ${response.filters.length} filters`)
       for (const filter of response.filters) {
-        console.log(
+        debugLog(
           `  Filter: ${filter.filterName} (${filter.filterEnabled ? 'enabled' : 'disabled'})`
         )
 
@@ -401,7 +403,7 @@ class OBSWebSocket {
         filterEnabled: true
       })
       filter.enabled = true
-      console.log(`Enabled blur filter: ${filter.sourceName}::${filter.filterName}`)
+      debugLog(`Enabled blur filter: ${filter.sourceName}::${filter.filterName}`)
     } catch (error) {
       this.callbacks.onError?.(`Error enabling filter: ${error.message}`)
     }
@@ -426,7 +428,7 @@ class OBSWebSocket {
         filterEnabled: false
       })
       filter.enabled = false
-      console.log(`Disabled blur filter: ${filter.sourceName}::${filter.filterName}`)
+      debugLog(`Disabled blur filter: ${filter.sourceName}::${filter.filterName}`)
     } catch (error) {
       this.callbacks.onError?.(`Error disabling filter: ${error.message}`)
     }

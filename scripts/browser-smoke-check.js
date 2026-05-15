@@ -56,6 +56,30 @@ async function clickFirstMovieCard(page, sourceName) {
   }
 }
 
+async function waitForMinimumCardCount(page, expectedCount, stepName) {
+  await page.waitForFunction(
+    (count) => document.querySelectorAll('.movie-card').length >= count,
+    expectedCount,
+    { timeout: 15000 }
+  )
+
+  const actualCount = await page.locator('.movie-card').count()
+  if (actualCount < expectedCount) {
+    throw new Error(`${stepName}: expected at least ${expectedCount} movie cards, got ${actualCount}`)
+  }
+
+  return actualCount
+}
+
+async function goBackToHome(page) {
+  for (let attempt = 0; attempt < 3; attempt += 1) {
+    await page.goBack({ waitUntil: 'domcontentloaded', timeout: 60000 })
+    if (new URL(page.url()).pathname === '/') return
+  }
+
+  throw new Error(`back home: expected /, got ${page.url()}`)
+}
+
 async function main() {
   await ensureReportsDir()
 
@@ -93,11 +117,12 @@ async function main() {
     })
 
     await recordStep(steps, 'back to home', async () => {
-      await page.goBack({ waitUntil: 'networkidle', timeout: 60000 })
+      await goBackToHome(page)
       await assertNoNotFound(page, 'back home')
+      const cards = await waitForMinimumCardCount(page, 1, 'back home')
       return {
         url: page.url(),
-        cards: await page.locator('.movie-card').count()
+        cards
       }
     })
 
@@ -154,9 +179,10 @@ async function main() {
       await filter.click()
       await page.waitForLoadState('networkidle', { timeout: 60000 }).catch(() => {})
       await assertNoNotFound(page, 'top filter')
+      const cards = await waitForMinimumCardCount(page, 36, 'top filter')
       return {
         url: page.url(),
-        cards: await page.locator('.movie-card').count()
+        cards
       }
     })
 

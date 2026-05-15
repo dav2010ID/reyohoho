@@ -110,22 +110,24 @@ const resetPagination = () => {
 }
 
 const fetchMoviesPage = async (nextPage = 1) => {
-  const displayLimit = nextPage * TOP_MOVIES_PAGE_SIZE
-  const requestLimit = displayLimit + 1
   const request =
     activeTimeFilter.value === 'discussed'
-      ? getDiscussedMovies(typeFilter.value, { limit: requestLimit })
+      ? getDiscussedMovies(typeFilter.value, {
+          page: nextPage,
+          limit: TOP_MOVIES_PAGE_SIZE
+        })
       : getMovies({
           activeTime: activeTimeFilter.value,
           typeFilter: typeFilter.value,
-          limit: requestLimit
+          page: nextPage,
+          limit: TOP_MOVIES_PAGE_SIZE
         })
 
   const nextMovies = await request
-  hasMore.value = Array.isArray(nextMovies) && nextMovies.length > displayLimit
+  hasMore.value = Array.isArray(nextMovies) && nextMovies.length === TOP_MOVIES_PAGE_SIZE
   page.value = nextPage
 
-  return Array.isArray(nextMovies) ? nextMovies.slice(0, displayLimit) : []
+  return Array.isArray(nextMovies) ? nextMovies : []
 }
 
 const showMore = async () => {
@@ -137,8 +139,8 @@ const showMore = async () => {
 
   try {
     const nextMovies = await fetchMoviesPage(page.value + 1)
-    if (nextMovies.length > movies.value.length) {
-      movies.value = nextMovies
+    if (nextMovies.length > 0) {
+      movies.value = [...movies.value, ...nextMovies]
     } else {
       hasMore.value = false
     }

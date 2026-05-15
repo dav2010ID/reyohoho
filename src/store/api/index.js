@@ -1,5 +1,6 @@
 import { defineStore } from 'pinia'
 import { API_STORE_NAME } from '../constants'
+import { debugLog } from '@/utils/logger'
 
 export const useApiStore = defineStore(API_STORE_NAME, {
   state: () => ({
@@ -38,12 +39,12 @@ export const useApiStore = defineStore(API_STORE_NAME, {
 
       try {
         for (const endpoint of endpoints) {
-          console.log(`Checking health for: ${endpoint.url}`)
+          debugLog(`Checking health for: ${endpoint.url}`)
 
           const isHealthy = await this.checkEndpointHealth(endpoint.url)
 
           if (isHealthy) {
-            console.log(`Selected working API: ${endpoint.url} (${endpoint.description})`)
+            debugLog(`Selected working API: ${endpoint.url} (${endpoint.description})`)
             this.currentApiUrl = endpoint.url
             this.lastCheckedAt = Date.now()
             this.isCheckingHealth = false
@@ -69,7 +70,7 @@ export const useApiStore = defineStore(API_STORE_NAME, {
       const newHash = this.generateEndpointsHash(endpoints)
 
       if (this.endpointsHash && this.endpointsHash !== newHash) {
-        console.log('API endpoints changed')
+        debugLog('API endpoints changed')
       }
 
       this.availableEndpoints = endpoints
