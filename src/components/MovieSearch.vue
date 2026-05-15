@@ -199,6 +199,20 @@ const homeTopSentinel = ref(null)
 const HOME_TOP_PAGE_SIZE = 24
 let homeTopObserver = null
 
+const dedupeMoviesByKpId = (items = []) => {
+  const seen = new Set()
+  const result = []
+
+  for (const item of items) {
+    const kpId = String(item?.kp_id || item?.kinopoisk_id || item?.id || '').trim()
+    if (!kpId || seen.has(kpId)) continue
+    seen.add(kpId)
+    result.push(item)
+  }
+
+  return result
+}
+
 const showLayoutWarning = ref(false)
 const suggestedLayout = ref('')
 
@@ -272,7 +286,7 @@ const loadHomeTopMovies = async () => {
       limit: HOME_TOP_PAGE_SIZE
     })
     topMoviesHasMore.value = Array.isArray(movies) && movies.length === HOME_TOP_PAGE_SIZE
-    topMovies.value = Array.isArray(movies) ? movies : []
+    topMovies.value = dedupeMoviesByKpId(Array.isArray(movies) ? movies : [])
   } catch (error) {
     console.error('Ошибка загрузки топов для главной:', error)
     topMovies.value = []
@@ -304,13 +318,13 @@ const loadMoreHomeTopMovies = async () => {
       page: nextPage,
       limit: HOME_TOP_PAGE_SIZE
     })
-    const nextMovies = Array.isArray(movies) ? movies : []
+    const nextMovies = dedupeMoviesByKpId(Array.isArray(movies) ? movies : [])
 
     topMoviesHasMore.value = Array.isArray(movies) && movies.length === HOME_TOP_PAGE_SIZE
     topMoviesPage.value = nextPage
 
     if (nextMovies.length > 0) {
-      topMovies.value = [...topMovies.value, ...nextMovies]
+      topMovies.value = dedupeMoviesByKpId([...topMovies.value, ...nextMovies])
     } else {
       topMoviesHasMore.value = false
     }

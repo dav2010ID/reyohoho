@@ -104,6 +104,20 @@ const currentTypeFilters = computed(() =>
 const visibleMovies = computed(() => movies.value)
 const canShowMore = computed(() => !loading.value && hasMore.value && !errorMessage.value)
 
+const dedupeMoviesByKpId = (items = []) => {
+  const seen = new Set()
+  const result = []
+
+  for (const item of items) {
+    const kpId = String(item?.kp_id || item?.kinopoisk_id || item?.id || '').trim()
+    if (!kpId || seen.has(kpId)) continue
+    seen.add(kpId)
+    result.push(item)
+  }
+
+  return result
+}
+
 const resetPagination = () => {
   page.value = 1
   hasMore.value = true
@@ -127,7 +141,7 @@ const fetchMoviesPage = async (nextPage = 1) => {
   hasMore.value = Array.isArray(nextMovies) && nextMovies.length === TOP_MOVIES_PAGE_SIZE
   page.value = nextPage
 
-  return Array.isArray(nextMovies) ? nextMovies : []
+  return dedupeMoviesByKpId(Array.isArray(nextMovies) ? nextMovies : [])
 }
 
 const showMore = async () => {
@@ -140,7 +154,7 @@ const showMore = async () => {
   try {
     const nextMovies = await fetchMoviesPage(page.value + 1)
     if (nextMovies.length > 0) {
-      movies.value = [...movies.value, ...nextMovies]
+      movies.value = dedupeMoviesByKpId([...movies.value, ...nextMovies])
     } else {
       hasMore.value = false
     }

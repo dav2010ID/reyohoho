@@ -120,11 +120,19 @@ const getKpInfo = async (...args) => callWithProvider('getKpInfo', ...args)
 const getPlayers = async (...args) => callWithProvider('getPlayers', ...args)
 const getShikiPlayers = async (...args) => callWithProvider('getShikiPlayers', ...args)
 const shouldEnrichListSeo = import.meta.env.SSR
-// Top lists must always come from original RHServ API.
-const getMovies = async (...args) =>
-  await normalizeMovieListResponse(await (await loadProvider('rhserv')).getMovies(...args), {
-    enrichMissingSeo: shouldEnrichListSeo
-  })
+// Top lists now come from KinoBD because it exposes stable page-based pagination.
+const getMovies = async (...args) => {
+  try {
+    return await normalizeMovieListResponse(await (await loadProvider('kinobd')).getMovies(...args), {
+      enrichMissingSeo: shouldEnrichListSeo
+    })
+  } catch (error) {
+    console.warn('[movies] getMovies failed on KinoBD, fallback to RHServ', error)
+    return await normalizeMovieListResponse(await (await loadProvider('rhserv')).getMovies(...args), {
+      enrichMissingSeo: shouldEnrichListSeo
+    })
+  }
+}
 const getDiscussedMovies = async (...args) =>
   await normalizeMovieListResponse(await (await loadProvider('rhserv')).getDiscussedMovies(...args), {
     enrichMissingSeo: shouldEnrichListSeo
