@@ -349,20 +349,6 @@
             </div>
           </div>
 
-          <div v-if="selectedPlayerInternal?.iframe" class="tooltip-container" data-tooltip-container="mpv">
-            <button
-              class="mpv-btn"
-              @mouseenter="showTooltip('mpv')"
-              @mouseleave="activeTooltip = null"
-              @click="copyMpvLink"
-            >
-              <span class="material-icons">terminal</span>
-            </button>
-            <div v-show="activeTooltip === 'mpv'" class="custom-tooltip" data-tooltip="mpv">
-              Скопировать для mpv
-            </div>
-          </div>
-
           <!-- Кнопка для копирования ссылки на фильм (только в Electron) -->
           <div v-if="isElectron" class="tooltip-container" data-tooltip-container="copy_link">
             <button
@@ -621,8 +607,7 @@ const tooltipHovered = ref(false)
 let hideTimeout = null
 
 const notificationRef = ref(null)
-const { copyMpvLink, copyMovieLink } = usePlayerSharing({
-  selectedPlayerInternal,
+const { copyMovieLink } = usePlayerSharing({
   notificationRef
 })
 
@@ -1061,6 +1046,8 @@ watch(
   async (newKpId) => {
     if (newKpId && newKpId !== kp_id.value) {
       kp_id.value = newKpId
+      iframeLoading.value = true
+      selectedPlayerInternal.value = null
       resetElectronPlaybackState()
       if (currentOverlayElement.value) {
         removeVideoOverlay()
@@ -1070,10 +1057,32 @@ watch(
         videoPositionInterval.value = null
       }
       lastOverlayTimingsCount.value = 0
+      await fetchPlayers()
       if (isCentered.value) centerPlayer()
     }
   },
   { immediate: true }
+)
+
+watch(
+  () => mainStore.contentApiProvider,
+  async (newProvider, oldProvider) => {
+    if (!newProvider || newProvider === oldProvider) return
+
+    iframeLoading.value = true
+    selectedPlayerInternal.value = null
+    playerStore.clearPreferredPlayer()
+    resetElectronPlaybackState()
+    if (currentOverlayElement.value) {
+      removeVideoOverlay()
+    }
+    if (videoPositionInterval.value) {
+      clearInterval(videoPositionInterval.value)
+      videoPositionInterval.value = null
+    }
+    lastOverlayTimingsCount.value = 0
+    await fetchPlayers()
+  }
 )
 
 watch(videoOverlayEnabled2, (enabled) => {

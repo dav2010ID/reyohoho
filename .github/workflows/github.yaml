@@ -22,6 +22,9 @@ jobs:
 
       - run: corepack enable
       - run: yarn install --frozen-lockfile
+      - name: Generate weekly SEO catalog and sitemap
+        if: github.event_name == 'schedule'
+        run: yarn seo:prepare
       - run: yarn build:github
 
       - uses: actions/upload-artifact@v4

@@ -9,8 +9,8 @@
     "seo:assets": "node scripts/generate-seo-assets.js",
     "seo:prepare": "node scripts/fetch-seo-data.js && node scripts/generate-seo-assets.js",
     "postbuild:gh-pages": "node scripts/postbuild-gh-pages.js",
-    "build": "node scripts/fetch-seo-data.js && node scripts/generate-seo-assets.js && vite-ssg build && node scripts/postbuild-gh-pages.js",
-    "build:github": "cross-env VITE_BASE_URL=/reyohoho/ node scripts/fetch-seo-data.js && cross-env VITE_BASE_URL=/reyohoho/ node scripts/generate-seo-assets.js && cross-env VITE_BASE_URL=/reyohoho/ vite-ssg build --mode github && cross-env VITE_BASE_URL=/reyohoho/ node scripts/postbuild-gh-pages.js",
+    "build": "vite-ssg build && node scripts/postbuild-gh-pages.js",
+    "build:github": "cross-env VITE_BASE_URL=/reyohoho/ vite-ssg build --mode github && cross-env VITE_BASE_URL=/reyohoho/ node scripts/postbuild-gh-pages.js",
     "preview": "vite preview",
     "test:unit": "vitest",
     "lint": "eslint --ext .js,.vue src",
@@ -21,7 +21,7 @@
     "test:infinite-scroll": "node scripts/browser-infinite-scroll-check.js",
     "profile:cards": "node scripts/browser-card-profile.js",
     "icons": "node scripts/generate-icons.js",
-    "build:icons": "node scripts/generate-icons.js && node scripts/fetch-seo-data.js && node scripts/generate-seo-assets.js && vite-ssg build && node scripts/postbuild-gh-pages.js"
+    "build:icons": "node scripts/generate-icons.js && vite-ssg build && node scripts/postbuild-gh-pages.js"
   },
   "dependencies": {
     "@fortawesome/fontawesome-free": "^7.2.0",
