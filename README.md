@@ -21,7 +21,8 @@
 </p>
 
 <p align="center">
-  🖥 <a href="https://gitlab.com/dav2010id/reyohoho-desktop">Desktop App</a>
+  🖥 <a href="https://github.com/dav2010ID/reyohoho-desktop">Desktop App</a>
+  · <a href="https://github.com/dav2010ID/reyohoho-desktop/releases/latest">Download latest release</a>
 </p>
 
 <p align="center">
