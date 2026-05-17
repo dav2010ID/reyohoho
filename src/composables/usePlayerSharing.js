@@ -1,5 +1,3 @@
-import { copyText } from '@/utils/playerUtils'
-
 export function usePlayerSharing({ notificationRef }) {
   const copyMovieLink = () => {
     const movieLink = window.location.href

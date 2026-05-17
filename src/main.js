@@ -15,12 +15,20 @@ export const createApp = ViteSSG(
     useAppSetup(app, { router, isClient })
 
     if (isClient) {
+      if (import.meta.env.DEV && 'serviceWorker' in navigator) {
+        navigator.serviceWorker.getRegistrations().then((registrations) => {
+          registrations.forEach((registration) => registration.unregister())
+        })
+      }
+
       const registerServiceWorker = () => registerSW({ immediate: true })
 
-      if ('requestIdleCallback' in window) {
-        window.requestIdleCallback(registerServiceWorker, { timeout: 3000 })
-      } else {
-        window.addEventListener('load', registerServiceWorker, { once: true })
+      if (!import.meta.env.DEV) {
+        if ('requestIdleCallback' in window) {
+          window.requestIdleCallback(registerServiceWorker, { timeout: 3000 })
+        } else {
+          window.addEventListener('load', registerServiceWorker, { once: true })
+        }
       }
 
       window.addEventListener('vite:preloadError', (event) => {

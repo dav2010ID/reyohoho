@@ -62,18 +62,17 @@ export const installRouterGuards = (router, { isClient = typeof window !== 'unde
   const { startTracking } = useScrollTracking()
   let hasTrackedInitialRoute = false
 
-  router.beforeEach((to, _from, next) => {
+  router.beforeEach((to) => {
     if (to.meta?.requiresAuth) {
       const authStore = useAuthStore()
 
       if (!authStore.isAuthenticated) {
-        next({
+        return {
           name: 'login',
           query: {
             redirect: to.fullPath
           }
-        })
-        return
+        }
       }
     }
 
@@ -82,13 +81,12 @@ export const installRouterGuards = (router, { isClient = typeof window !== 'unde
       const currentSlug = String(to.params.slug || '').trim()
 
       if (entry?.slug && currentSlug !== entry.slug) {
-        next({
+        return {
           path: buildMoviePath(to.params.kp_id, entry.slug),
           query: to.query,
           hash: to.hash,
           replace: true
-        })
-        return
+        }
       }
     }
 
@@ -98,10 +96,10 @@ export const installRouterGuards = (router, { isClient = typeof window !== 'unde
     }
 
     if (to.hash) {
-      handleHashNavigation(to, next)
-    } else {
-      next()
+      return handleHashNavigation(to)
     }
+
+    return true
   })
 
   if (isClient) {

@@ -97,10 +97,20 @@
     </h1>
     <div id="app"></div>
     <script type="module" src="/src/main.js"></script>
-    <script
-      data-goatcounter="https://reyohoho.goatcounter.com/count"
-      async
-      src="%BASE_URL%goatcounter/count.v5.js"
-    ></script>
+    <script>
+      ;(() => {
+        const isLocalhost = ['localhost', '127.0.0.1', '0.0.0.0'].includes(
+          window.location.hostname
+        )
+
+        if (isLocalhost) return
+
+        const script = document.createElement('script')
+        script.dataset.goatcounter = 'https://reyohoho.goatcounter.com/count'
+        script.async = true
+        script.src = '%BASE_URL%goatcounter/count.v5.js'
+        document.body.appendChild(script)
+      })()
+    </script>
   </body>
 </html>
