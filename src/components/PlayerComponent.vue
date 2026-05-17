@@ -68,6 +68,7 @@
         v-if="theaterMode"
         class="close-theater-btn"
         :class="{ visible: closeButtonVisible }"
+        aria-label="Выйти из театрального режима"
         @click="toggleTheaterMode"
       >
         ✖
@@ -87,6 +88,7 @@
             v-if="showFavoriteTooltip"
             class="favorite-btn"
             :class="{ active: movieInfo?.lists?.isFavorite }"
+            aria-label="Управление списками"
             @mouseenter="showTooltip('favorite')"
             @mouseleave="tryHideTooltip"
             @click="toggleList(USER_LIST_TYPES_ENUM.FAVORITE)"
@@ -179,6 +181,7 @@
             <button
               class="dimming-btn"
               :class="{ active: dimmingEnabled }"
+              :aria-label="dimmingEnabled ? 'Отключить затемнение' : 'Включить затемнение'"
               @mouseenter="showTooltip('dimming')"
               @mouseleave="activeTooltip = null"
               @click="toggleDimming"
@@ -194,6 +197,7 @@
             <button
               class="blur-btn"
               :class="{ 'electron-only': !isElectron }"
+              aria-label="Блюр"
               @mouseenter="showTooltip('blur')"
               @mouseleave="activeTooltip = null"
               @click="toggleBlur"
@@ -209,6 +213,7 @@
             <button
               class="material-symbols-outlined"
               :class="{ active: compressorEnabled, 'electron-only': !isElectron }"
+              aria-label="Компрессор"
               @mouseenter="showTooltip('compressor')"
               @mouseleave="activeTooltip = null"
               @click="toggleCompressor"
@@ -228,6 +233,7 @@
             <button
               class="mirror-btn"
               :class="{ active: mirrorEnabled, 'electron-only': !isElectron }"
+              aria-label="Зеркало"
               @mouseenter="showTooltip('mirror')"
               @mouseleave="activeTooltip = null"
               @click="toggleMirror"
@@ -242,6 +248,7 @@
           <div class="tooltip-container" data-tooltip-container="theater">
             <button
               class="theater-mode-btn"
+              :aria-label="theaterMode ? 'Выйти из театрального режима' : 'Театральный режим'"
               @mouseenter="showTooltip('theater')"
               @mouseleave="activeTooltip = null"
               @click="toggleTheaterMode"
@@ -260,6 +267,7 @@
             <button
               class="pip-btn"
               :class="{ 'electron-only': !isElectron }"
+              aria-label="Картинка в картинке"
               @mouseenter="showTooltip('pip')"
               @mouseleave="activeTooltip = null"
               @click="togglePiP"
@@ -278,6 +286,7 @@
           <div class="tooltip-container" data-tooltip-container="aspect_ratio">
             <button
               class="aspect-ratio-dropdown-btn"
+              aria-label="Изменить соотношение сторон"
               @mouseenter="showTooltip('aspect_ratio')"
               @mouseleave="tryHideTooltip"
               @click="cycleAspectRatio"
@@ -310,7 +319,7 @@
             @mouseenter="showTooltip('centering')"
             @mouseleave="tryHideTooltip"
           >
-            <button class="center-btn" @click="centerPlayer">
+            <button class="center-btn" aria-label="Отцентрировать плеер" @click="centerPlayer">
               <span class="material-icons">center_focus_strong</span>
             </button>
             <div
@@ -334,6 +343,7 @@
           >
             <button
               class="app-link-btn"
+              aria-label="Открыть в приложении"
               @mouseenter="showTooltip('app_link')"
               @mouseleave="activeTooltip = null"
               @click="openAppLink"
@@ -353,6 +363,7 @@
           <div v-if="isElectron" class="tooltip-container" data-tooltip-container="copy_link">
             <button
               class="copy-link-btn"
+              aria-label="Скопировать ссылку"
               @mouseenter="showTooltip('copy_link')"
               @mouseleave="activeTooltip = null"
               @click="copyMovieLink"
@@ -372,6 +383,7 @@
             <button
               class="overlay-btn"
               :class="{ active: videoOverlayEnabled2 }"
+              :aria-label="videoOverlayEnabled2 ? 'Скрыть оверлей видео' : 'Показать оверлей видео'"
               @mouseenter="showTooltip('overlay')"
               @mouseleave="activeTooltip = null"
               @click="toggleVideoOverlay"

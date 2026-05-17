@@ -2,10 +2,16 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 10px;
-  margin: 0 auto;
+  gap: 6px;
+  margin: 8px auto 18px;
+  padding: 6px 8px;
+  width: fit-content;
+  max-width: min(100%, 920px);
   border-radius: 10px;
-  backdrop-filter: blur(10px);
+  background: rgba(20, 20, 20, 0.92);
+  border: 1px solid #333;
+  backdrop-filter: blur(8px);
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.28);
   position: relative;
   z-index: 4;
 }
@@ -21,26 +27,30 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  background-color: #444;
-  color: #fff;
-  border: none;
-  padding: 12px;
+  background-color: rgba(255, 255, 255, 0.07);
+  color: rgba(255, 255, 255, 0.82);
+  border: 1px solid rgba(255, 255, 255, 0.07);
+  padding: 6px 8px;
   font-size: 18px;
   border-radius: 8px;
   cursor: pointer;
   transition:
-    background-color 0.3s ease,
-    transform 0.2s ease,
-    box-shadow 0.3s ease;
+    background-color 0.18s ease,
+    transform 0.18s ease,
+    box-shadow 0.18s ease,
+    color 0.18s ease,
+    border-color 0.18s ease;
   z-index: 4;
-  width: 50px;
-  height: 50px;
+  width: 42px;
+  height: 42px;
 }
 
 .controls button:hover {
-  background-color: var(--accent-color);
-  transform: translateY(-3px);
-  box-shadow: 0 4px 10px var(--accent-semi-transparent);
+  background-color: rgba(255, 255, 255, 0.13);
+  color: #fff;
+  border-color: rgba(255, 255, 255, 0.16);
+  transform: translateY(-2px) scale(1.04);
+  box-shadow: 0 10px 22px rgba(0, 0, 0, 0.34);
 }
 
 .controls button:active {
@@ -53,26 +63,59 @@
   box-shadow: 0 0 10px var(--accent-semi-transparent);
 }
 
+.controls .theater-mode-btn.active {
+  background: var(--accent-transparent);
+  border-color: var(--accent-color);
+  color: #fff;
+}
+
+.controls .aspect-ratio-dropdown-btn {
+  background: rgba(255, 255, 255, 0.09);
+  border-color: rgba(255, 255, 255, 0.12);
+  color: #fff;
+}
+
+.controls .aspect-ratio-dropdown-btn:hover {
+  background: var(--accent-color);
+  box-shadow: 0 0 24px var(--accent-semi-transparent);
+}
+
+.controls .theater-mode-btn:hover {
+  background: var(--accent-color);
+  box-shadow: 0 0 24px var(--accent-semi-transparent);
+}
+
+.controls button:focus-visible {
+  outline: 2px solid #fff;
+  outline-offset: 2px;
+}
+
 .material-icons {
   font-size: 24px;
 }
 
-.aspect-ratio-dropdown {
-  min-width: fit-content;
-  width: max-content;
-  padding: 16px;
+.custom-tooltip.advanced-tooltip.aspect-ratio-dropdown {
+  min-width: 120px;
+  width: 120px;
+  padding: 6px;
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 2px;
   background-color: rgba(30, 30, 30, 0.98);
-  border-radius: 16px;
+  border: 1px solid #444;
+  border-radius: 8px;
 }
 
 .aspect-ratio-option {
-  padding: 12px 20px;
-  border-radius: 10px;
+  box-sizing: border-box;
+  min-width: 0;
+  padding: 8px 10px;
+  border-radius: 5px;
   cursor: pointer;
-  transition: all 0.2s ease;
+  transition:
+    background-color 0.18s ease,
+    color 0.18s ease,
+    box-shadow 0.18s ease;
   text-align: center;
   font-size: 14px;
   color: rgba(255, 255, 255, 0.9);
@@ -82,15 +125,14 @@
 
 .aspect-ratio-option:hover {
   background-color: var(--accent-color);
-  transform: translateY(-1px);
-  box-shadow: 0 2px 8px var(--accent-semi-transparent);
+  box-shadow: 0 0 8px var(--accent-semi-transparent);
 }
 
 .aspect-ratio-option.active {
   background-color: var(--accent-color);
   color: white;
   font-weight: 500;
-  box-shadow: 0 2px 12px var(--accent-semi-transparent);
+  box-shadow: none;
 }
 
 .aspect-ratio-dropdown-btn {
@@ -98,7 +140,8 @@
   align-items: center;
   justify-content: center;
   padding: 0 12px;
-  min-width: 60px;
+  width: auto;
+  min-width: 58px;
 }
 
 .current-ratio {
@@ -124,4 +167,24 @@
   transform: none !important;
   box-shadow: none !important;
   background-color: #333 !important;
+}
+
+@media (max-width: 600px) {
+  .controls {
+    width: calc(100% - 12px);
+    box-sizing: border-box;
+  }
+
+  .main-controls {
+    justify-content: flex-start;
+    overflow-x: auto;
+    flex-wrap: nowrap;
+    padding-bottom: 2px;
+  }
+
+  .controls button {
+    width: 42px;
+    height: 42px;
+    flex: 0 0 42px;
+  }
 }

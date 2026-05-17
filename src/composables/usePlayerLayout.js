@@ -2,11 +2,16 @@ import { computed, nextTick, ref } from 'vue'
 
 const aspectRatios = ['16:9', '12:5', '4:3']
 
+const getViewportPlayerHeight = () => {
+  if (typeof window === 'undefined') return 720
+  return window.innerHeight * (window.innerWidth < 700 ? 0.6 : 0.985)
+}
+
 export const usePlayerLayout = ({ mainStore, playerStore, containerRef, playerIframe }) => {
   const theaterMode = ref(false)
   const closeButtonVisible = ref(false)
   const theaterModeCloseButtonTimeout = ref(null)
-  const maxPlayerHeightValue = ref(window.innerHeight * 0.9)
+  const maxPlayerHeightValue = ref(getViewportPlayerHeight())
 
   const maxPlayerHeight = computed(() => `${maxPlayerHeightValue.value}px`)
   const dimmingEnabled = computed(() => mainStore.dimmingEnabled)
@@ -23,7 +28,7 @@ export const usePlayerLayout = ({ mainStore, playerStore, containerRef, playerIf
 
   const updateScaleFactor = () => {
     if (theaterMode.value || !containerRef.value) return
-    maxPlayerHeightValue.value = window.innerHeight * 0.9
+    maxPlayerHeightValue.value = getViewportPlayerHeight()
   }
 
   const containerStyle = computed(() => {

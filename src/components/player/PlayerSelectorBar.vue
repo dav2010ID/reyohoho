@@ -1,10 +1,21 @@
 <template>
   <div class="players-list">
     <span>Плеер:</span>
-    <button class="player-btn" type="button" @click="$emit('open-player-modal')">
+    <button
+      class="player-btn"
+      type="button"
+      aria-label="Выбрать плеер"
+      @click="$emit('open-player-modal')"
+    >
       {{ selectedLabel }}
     </button>
-    <button v-if="showSourceButton" class="source-btn" type="button" @click="$emit('open-source-modal')">
+    <button
+      v-if="showSourceButton"
+      class="source-btn"
+      type="button"
+      aria-label="Выбрать источник"
+      @click="$emit('open-source-modal')"
+    >
       Источник
     </button>
   </div>
@@ -28,13 +39,17 @@ defineEmits(['open-player-modal', 'open-source-modal'])
 <style scoped>
 .players-list {
   width: 100%;
-  max-width: 800px;
+  max-width: min(1120px, calc(100vw - 180px));
   display: flex;
   align-items: center;
   justify-content: center;
   gap: 10px;
   margin: auto;
   margin-bottom: 10px;
+  padding: 0;
+  border-radius: 0;
+  background: transparent;
+  border: 0;
 }
 
 .player-btn {
@@ -86,5 +101,11 @@ defineEmits(['open-player-modal', 'open-source-modal'])
 .source-btn:hover {
   background: var(--accent-color);
   border-color: var(--accent-color);
+}
+
+@media (max-width: 700px) {
+  .players-list {
+    max-width: calc(100vw - 12px);
+  }
 }
 </style>
