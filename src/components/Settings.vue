@@ -155,6 +155,24 @@
       </div>
 
       <div v-show="activeSettingsTab === 'behavior'" class="settings-group">
+        <h2>Боковая панель</h2>
+        <SliderRound v-model="sidebarAutoHide">Авто-скрытие: скрывать панель и показывать при наведении курсора</SliderRound>
+        <div class="sidebar-position-group">
+          <label>Расположение панели:</label>
+          <div class="radio-group">
+            <label class="radio">
+              <input v-model="sidebarPosition" type="radio" value="left" />
+              <span class="radio-label">Слева</span>
+            </label>
+            <label class="radio">
+              <input v-model="sidebarPosition" type="radio" value="right" />
+              <span class="radio-label">Справа</span>
+            </label>
+          </div>
+        </div>
+      </div>
+
+      <div v-show="activeSettingsTab === 'behavior'" class="settings-group">
         <h2>Комментарии</h2>
         <SliderRound v-model="isCommentsEnabled">Показывать блок комментариев</SliderRound>
         <SliderRound v-model="isAutoShowComments">Автоматически показывать комментарии</SliderRound>
@@ -299,6 +317,16 @@ const isStreamerMode = computed({
 const rememberScrollPosition = computed({
   get: () => mainStore.rememberScrollPosition,
   set: (value) => mainStore.setRememberScrollPosition(value)
+})
+
+const sidebarAutoHide = computed({
+  get: () => mainStore.sidebarAutoHide,
+  set: (value) => mainStore.setSidebarAutoHide(value)
+})
+
+const sidebarPosition = computed({
+  get: () => mainStore.sidebarPosition,
+  set: (value) => mainStore.setSidebarPosition(value)
 })
 
 const resetBackground = () => {

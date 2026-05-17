@@ -24,12 +24,18 @@ import MenuNavigation from '@/components/MenuNavigation.vue'
 import MobileHeader from '@/components/MobileHeader.vue'
 import { useMainStore } from '@/store/main'
 import { useNavbarStore } from '@/store/navbar'
-import { computed, onMounted, onUnmounted } from 'vue'
+import { computed, onMounted, onUnmounted, watch } from 'vue'
 import { isNewYearPeriod } from '@/utils/dateUtils'
 import garlandImage from '@/assets/trn-christmas-lights.webp'
 
 const store = useMainStore()
 const navbarStore = useNavbarStore()
+
+// Применяем класс sidebar-right на body при смене позиции панели
+const sidebarPosition = computed(() => store.sidebarPosition)
+watch(sidebarPosition, (pos) => {
+  document.body.classList.toggle('sidebar-right', pos === 'right')
+}, { immediate: true })
 
 const isMobile = computed(() => store.isMobile)
 

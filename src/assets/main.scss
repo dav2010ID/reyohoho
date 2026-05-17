@@ -55,6 +55,26 @@ body.no-scroll {
   height: 100%;
 }
 
+/* Панель справа — отступ переносим на правую сторону */
+body.sidebar-right {
+  padding: 0 var(--app-sidebar-collapsed-width) 0 0;
+}
+
+body.theater-mode-active {
+  padding-left: 0;
+  padding-right: 0;
+}
+
+body.theater-mode-active .side-panel {
+  opacity: 0;
+  pointer-events: none;
+  transform: translateX(-100%);
+}
+
+body.theater-mode-active .side-panel.right {
+  transform: translateX(100%);
+}
+
 button,
 select,
 input {

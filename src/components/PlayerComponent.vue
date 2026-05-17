@@ -65,13 +65,16 @@
 
       <!-- Кнопка закрытия в театральном режиме -->
       <button
-        v-if="theaterMode"
+        v-show="theaterMode"
         class="close-theater-btn"
-        :class="{ visible: closeButtonVisible }"
+        :class="{ visible: closeButtonVisible, hiding: theaterMode && !closeButtonVisible && closeButtonWasVisible }"
         aria-label="Выйти из театрального режима"
         @click="toggleTheaterMode"
       >
-        ✖
+        <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <line x1="6" y1="6" x2="18" y2="18" />
+          <line x1="18" y1="6" x2="6" y2="18" />
+        </svg>
       </button>
     </div>
 
@@ -568,6 +571,7 @@ const isElectron = computed(() => !!window.electronAPI)
 const {
   theaterMode,
   closeButtonVisible,
+  closeButtonWasVisible,
   aspectRatio,
   isCentered,
   dimmingEnabled,

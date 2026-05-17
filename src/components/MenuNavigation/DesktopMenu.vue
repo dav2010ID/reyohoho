@@ -1,5 +1,8 @@
 <template>
-  <aside ref="sidebar" :class="['side-panel', { collapsed: !isSidebarOpen }]">
+  <aside
+    ref="sidebar"
+    :class="['side-panel', { collapsed: !isSidebarOpen, 'auto-hide': sidebarAutoHide, 'auto-hide--peeked': sidebarAutoHide && isSidebarPeeked, right: sidebarPosition === 'right' }]"
+  >
     <router-link class="menu-brand" to="/" aria-label="ReYohoho">
       <img src="@/assets/icon-main-logo-150x150.png" alt="" class="menu-brand__logo" />
       <span v-show="isSidebarOpen" class="menu-brand__text">ReYohoho</span>
@@ -20,7 +23,7 @@
         :aria-label="isSidebarOpen ? 'Свернуть меню' : 'Развернуть меню'"
         @click="toggleSidebar"
       >
-        <i :class="isSidebarOpen ? 'fas fa-chevron-left' : 'fas fa-chevron-right'"></i>
+        <i :class="sidebarPosition === 'right' ? (isSidebarOpen ? 'fas fa-chevron-right' : 'fas fa-chevron-left') : (isSidebarOpen ? 'fas fa-chevron-left' : 'fas fa-chevron-right')"></i>
       </button>
     </div>
     <nav class="side-nav">
@@ -93,6 +96,7 @@
 import { ref, onMounted, onBeforeUnmount, computed, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useNavbarStore } from '@/store/navbar'
+import { useMainStore } from '@/store/main'
 import NotificationBadge from '@/components/notification/NotificationBadge.vue'
 
 const props = defineProps({
@@ -104,6 +108,54 @@ const router = useRouter()
 
 // Получаем доступ к хранилищу
 const navbarStore = useNavbarStore()
+const mainStore = useMainStore()
+
+const sidebarAutoHide = computed(() => mainStore.sidebarAutoHide)
+const sidebarPosition = computed(() => mainStore.sidebarPosition)
+
+// Флаг «приоткрытой» панели при авто-скрытии
+const isSidebarPeeked = ref(false)
+let peekLeaveTimeout = null
+
+// Зона срабатывания в пикселях от края экрана
+const PEEK_TRIGGER_ZONE = 80
+// Ширина свёрнутой панели + запас (учитываем скроллбар ~20px)
+const PEEK_HIDE_ZONE = 280
+
+const handleMouseMove = (e) => {
+  if (!sidebarAutoHide.value) return
+
+  const isRight = sidebarPosition.value === 'right'
+  const vw = window.innerWidth
+  const x = e.clientX
+
+  // Проверяем попадание в зону активации края экрана
+  const inTriggerZone = isRight
+    ? x >= vw - PEEK_TRIGGER_ZONE
+    : x <= PEEK_TRIGGER_ZONE
+
+  // Проверяем, что курсор ещё внутри панели (чтобы не скрывать сразу)
+  const inPanelZone = isRight
+    ? x >= vw - PEEK_HIDE_ZONE
+    : x <= PEEK_HIDE_ZONE
+
+  if (inTriggerZone || (isSidebarPeeked.value && inPanelZone)) {
+    // Курсор в зоне — показываем панель
+    if (peekLeaveTimeout) {
+      clearTimeout(peekLeaveTimeout)
+      peekLeaveTimeout = null
+    }
+    isSidebarPeeked.value = true
+  } else if (isSidebarPeeked.value) {
+    // Курсор вышел — скрываем с задержкой
+    if (!peekLeaveTimeout) {
+      peekLeaveTimeout = setTimeout(() => {
+        isSidebarPeeked.value = false
+        peekLeaveTimeout = null
+      }, 400)
+    }
+  }
+}
 
 // Флаг состояния боковой панели
 const isSidebarOpen = ref(false)
@@ -214,6 +266,7 @@ const updateNavigationHistory = (to) => {
 // Добавляем и удаляем обработчики событий при монтировании/размонтировании компонента
 onMounted(() => {
   document.addEventListener('click', handleClickOutside)
+  document.addEventListener('mousemove', handleMouseMove, { passive: true })
   if (route.fullPath) {
     internalNavigationHistory.value.push(route.fullPath)
   }
@@ -227,6 +280,10 @@ onBeforeUnmount(() => {
   if (tooltipTimeout) {
     clearTimeout(tooltipTimeout)
   }
+  if (peekLeaveTimeout) {
+    clearTimeout(peekLeaveTimeout)
+  }
+  document.removeEventListener('mousemove', handleMouseMove)
 })
 
 watch(() => route.fullPath, () => updateNavigationHistory(route))
@@ -566,4 +623,128 @@ a {
   max-width: 100px;
   opacity: 1;
 }
+
+/* ─── Авто-скрытие боковой панели ─── */
+.side-panel.auto-hide {
+  /* Полностью убираем влево, оставляем только тонкую полоску-индикатор */
+  transform: translateX(calc(-100% + 4px));
+  transition:
+    transform 0.35s cubic-bezier(0.4, 0, 0.2, 1),
+    width 0.3s ease,
+    box-shadow 0.35s ease;
+  box-shadow: none;
+
+  /* Тонкая светящаяся полоска, чтобы пользователь знал, где панель */
+  &::after {
+    content: '';
+    position: absolute;
+    right: 0;
+    top: 0;
+    bottom: 0;
+    width: 4px;
+    background: linear-gradient(
+      180deg,
+      transparent 0%,
+      var(--accent-color, #6c5ce7) 40%,
+      var(--accent-color, #6c5ce7) 60%,
+      transparent 100%
+    );
+    opacity: 0.5;
+    border-radius: 0 2px 2px 0;
+    transition: opacity 0.3s ease;
+  }
+}
+
+.side-panel.auto-hide.auto-hide--peeked {
+  transform: translateX(0);
+  box-shadow: 4px 0 24px rgba(0, 0, 0, 0.45);
+
+  &::after {
+    opacity: 0;
+  }
+}
+
+
+/* ─── Боковая панель справа ─── */
+.side-panel.right {
+  left: auto;
+  right: 0;
+  box-shadow: -2px 0 10px rgba(0, 0, 0, 0.1);
+
+  /* Переворачиваем стрелки border-left → border-right для nav-links */
+  .nav-links a,
+  .nav-links button,
+  .notification-link {
+    border-left: none;
+    border-right: 3px solid transparent;
+    border-radius: 12px 0 0 12px;
+  }
+
+  .nav-links a:hover,
+  .notification-link:hover {
+    border-left: none;
+    border-right: 3px solid var(--accent-color, #6c5ce7);
+    transform: translateX(-3px);
+  }
+
+  .nav-links a:active,
+  .nav-links a.router-link-active,
+  .notification-link:active,
+  .notification-link.router-link-active {
+    border-left: none;
+    border-right: 3px solid var(--accent-color, #6c5ce7);
+  }
+
+  .toggle-sidebar-btn {
+    border-left: none;
+    border-right: 3px solid transparent;
+    border-radius: 12px 0 0 12px;
+    justify-content: flex-start;
+    padding-left: 20px;
+  }
+
+  .toggle-sidebar-btn:hover {
+    border-left: none;
+    border-right-color: var(--accent-color, #6c5ce7);
+  }
+
+  .search-toggle-btn {
+    border-left: none;
+    border-right: 3px solid transparent;
+  }
+
+  .search-toggle-btn:hover,
+  .search-toggle-btn:active {
+    border-left: none;
+    border-right: 3px solid var(--accent-color, #6c5ce7);
+    transform: translateX(-3px);
+  }
+
+  .back-btn:hover {
+    transform: translateX(2px);
+  }
+}
+
+/* При авто-скрытии справа — сдвигаем вправо */
+.side-panel.right.auto-hide {
+  transform: translateX(calc(100% - 4px));
+
+  &::after {
+    left: 0;
+    right: auto;
+    border-radius: 2px 0 0 2px;
+  }
+}
+
+.side-panel.right.auto-hide.auto-hide--peeked {
+  transform: translateX(0);
+  box-shadow: -4px 0 24px rgba(0, 0, 0, 0.45);
+}
+
+/* Тултип справа */
+.side-panel.right .tooltip {
+  left: auto;
+  right: var(--app-sidebar-collapsed-width);
+}
+
 </style>

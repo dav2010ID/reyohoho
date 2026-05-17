@@ -1,6 +1,7 @@
 import { computed, nextTick, ref } from 'vue'
 
 const aspectRatios = ['16:9', '12:5', '4:3']
+const THEATER_MODE_BODY_CLASS = 'theater-mode-active'
 
 const getViewportPlayerHeight = () => {
   if (typeof window === 'undefined') return 720
@@ -10,6 +11,7 @@ const getViewportPlayerHeight = () => {
 export const usePlayerLayout = ({ mainStore, playerStore, containerRef, playerIframe }) => {
   const theaterMode = ref(false)
   const closeButtonVisible = ref(false)
+  const closeButtonWasVisible = ref(false)
   const theaterModeCloseButtonTimeout = ref(null)
   const maxPlayerHeightValue = ref(getViewportPlayerHeight())
 
@@ -72,6 +74,7 @@ export const usePlayerLayout = ({ mainStore, playerStore, containerRef, playerIf
       clearTimeout(theaterModeCloseButtonTimeout.value)
     }
 
+    closeButtonWasVisible.value = true
     closeButtonVisible.value = true
     theaterModeCloseButtonTimeout.value = setTimeout(() => {
       closeButtonVisible.value = false
@@ -85,10 +88,12 @@ export const usePlayerLayout = ({ mainStore, playerStore, containerRef, playerIf
       window.addEventListener('mousemove', showCloseButton)
       document.addEventListener('keydown', onKeyDown)
       document.body.classList.add('no-scroll')
+      document.body.classList.add(THEATER_MODE_BODY_CLASS)
     } else {
       window.removeEventListener('mousemove', showCloseButton)
       document.removeEventListener('keydown', onKeyDown)
       document.body.classList.remove('no-scroll')
+      document.body.classList.remove(THEATER_MODE_BODY_CLASS)
     }
 
     closeButtonVisible.value = theaterMode.value
@@ -131,6 +136,7 @@ export const usePlayerLayout = ({ mainStore, playerStore, containerRef, playerIf
     window.removeEventListener('mousemove', showCloseButton)
     document.removeEventListener('keydown', onKeyDown)
     document.body.classList.remove('no-scroll')
+    document.body.classList.remove(THEATER_MODE_BODY_CLASS)
 
     if (theaterModeCloseButtonTimeout.value) {
       clearTimeout(theaterModeCloseButtonTimeout.value)
@@ -141,6 +147,7 @@ export const usePlayerLayout = ({ mainStore, playerStore, containerRef, playerIf
   return {
     theaterMode,
     closeButtonVisible,
+    closeButtonWasVisible,
     aspectRatio,
     isCentered,
     dimmingEnabled,

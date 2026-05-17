@@ -19,7 +19,9 @@ export const useMainStore = defineStore(MAIN_STORE_NAME, {
     isStreamerMode: true,
     rememberScrollPosition: true,
     contentApiProvider: 'kinobox',
-    searchApiProvider: 'rhserv'
+    searchApiProvider: 'rhserv',
+    sidebarAutoHide: false,
+    sidebarPosition: 'left'
   }),
 
   actions: {
@@ -131,6 +133,14 @@ export const useMainStore = defineStore(MAIN_STORE_NAME, {
 
     setSearchApiProvider(value) {
       this.searchApiProvider = value
+    },
+
+    setSidebarAutoHide(value) {
+      this.sidebarAutoHide = value
+    },
+
+    setSidebarPosition(value) {
+      this.sidebarPosition = value
     }
   },
 
@@ -148,7 +158,9 @@ export const useMainStore = defineStore(MAIN_STORE_NAME, {
       'isStreamerMode',
       'rememberScrollPosition',
       'contentApiProvider',
-      'searchApiProvider'
+      'searchApiProvider',
+      'sidebarAutoHide',
+      'sidebarPosition'
     ],
     beforeHydrate: beforeHydrateLegacyVuex
   }
