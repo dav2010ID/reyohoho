@@ -2,7 +2,21 @@
   <div class="settings-page">
     <h1>Настройки</h1>
     <div class="settings-container">
-      <div class="settings-group">
+      <div class="settings-tabs" role="tablist" aria-label="Разделы настроек">
+        <button
+          v-for="tab in settingsTabs"
+          :key="tab.id"
+          type="button"
+          role="tab"
+          :aria-selected="activeSettingsTab === tab.id"
+          :class="{ active: activeSettingsTab === tab.id }"
+          @click="activeSettingsTab = tab.id"
+        >
+          {{ tab.label }}
+        </button>
+      </div>
+
+      <div v-show="activeSettingsTab === 'appearance'" class="settings-group">
         <h2>Фон</h2>
         <div class="radio-group">
           <label class="radio">
@@ -29,12 +43,12 @@
         </div>
       </div>
 
-      <div class="settings-group">
+      <div v-show="activeSettingsTab === 'appearance'" class="settings-group">
         <h2>Тема</h2>
         <ThemeSelector />
       </div>
 
-      <div class="settings-group">
+      <div v-show="activeSettingsTab === 'player'" class="settings-group">
         <h2>Плеер</h2>
         <SliderRound v-model="isCentered">Автоцентрирование плеера</SliderRound>
         <SliderRound v-model="isCardBorder">Окантовка вокруг карточек</SliderRound>
@@ -47,7 +61,7 @@
         >
       </div>
 
-      <div class="settings-group">
+      <div v-show="activeSettingsTab === 'appearance'" class="settings-group">
         <h2>Карточки</h2>
         <div class="card-size-group">
           <label>Размер карточек:</label>
@@ -68,12 +82,12 @@
         </div>
       </div>
 
-      <div class="settings-group">
+      <div v-show="activeSettingsTab === 'player'" class="settings-group">
         <h2>Трейлеры</h2>
         <SliderRound v-model="areTrailersActive">Активировать трейлеры</SliderRound>
       </div>
 
-      <div class="settings-group">
+      <div v-show="activeSettingsTab === 'api'" class="settings-group">
         <h2>API</h2>
         <div class="radio-group">
           <label class="radio">
@@ -113,7 +127,7 @@
         </div>
       </div>
 
-      <div class="settings-group">
+      <div v-show="activeSettingsTab === 'behavior'" class="settings-group">
         <h2>История</h2>
         <SliderRound v-model="isHistoryAllowed"> Сохранять историю просмотра</SliderRound>
         <div class="settings-actions">
@@ -130,30 +144,30 @@
         </div>
       </div>
 
-      <div class="settings-group">
+      <div v-show="activeSettingsTab === 'behavior'" class="settings-group">
         <h2>Горячие клавиши</h2>
         <SliderRound v-model="isCtrlFEnabled">Перехватывать Ctrl+F для поиска</SliderRound>
       </div>
 
-      <div class="settings-group">
+      <div v-show="activeSettingsTab === 'behavior'" class="settings-group">
         <h2>Навигация</h2>
         <SliderRound v-model="rememberScrollPosition">Запоминать позицию скролла</SliderRound>
       </div>
 
-      <div class="settings-group">
+      <div v-show="activeSettingsTab === 'behavior'" class="settings-group">
         <h2>Комментарии</h2>
         <SliderRound v-model="isCommentsEnabled">Показывать блок комментариев</SliderRound>
         <SliderRound v-model="isAutoShowComments">Автоматически показывать комментарии</SliderRound>
       </div>
 
-      <div class="settings-group">
+      <div v-show="activeSettingsTab === 'player'" class="settings-group">
         <h2>Режим стримера</h2>
         <SliderRound v-model="isStreamerMode"
           >Мигание кнопки таймингов для привлечения внимания</SliderRound
         >
       </div>
 
-      <div class="settings-group">
+      <div v-show="activeSettingsTab === 'about'" class="settings-group">
         <h2>Версия сайта</h2>
         {{ appVersion }}
       </div>
@@ -177,6 +191,14 @@ const playerStore = usePlayerStore()
 const trailerStore = useTrailerStore()
 const showModal = ref(false)
 const appVersion = ref(import.meta.env.VITE_APP_VERSION_FULL_VERSION)
+const activeSettingsTab = ref('appearance')
+const settingsTabs = [
+  { id: 'appearance', label: 'Вид' },
+  { id: 'player', label: 'Плеер' },
+  { id: 'behavior', label: 'Поведение' },
+  { id: 'api', label: 'API' },
+  { id: 'about', label: 'О сайте' }
+]
 
 const clearAllHistory = () => {
   mainStore.clearAllHistory()
@@ -328,7 +350,7 @@ h1 {
   background: #2a2a2a;
   padding: 20px;
   border-radius: 10px;
-  max-width: 500px;
+  max-width: 680px;
   width: 100%;
   box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
   border: 1px solid var(--accent-transparent);
@@ -336,6 +358,39 @@ h1 {
   flex-direction: column;
   gap: 35px;
   margin-bottom: 40px;
+}
+
+.settings-tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  padding: 6px;
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.settings-tabs button {
+  flex: 1 1 auto;
+  min-height: 38px;
+  padding: 8px 12px;
+  border: 0;
+  border-radius: 7px;
+  background: transparent;
+  color: rgba(255, 255, 255, 0.78);
+  cursor: pointer;
+  font: inherit;
+  font-weight: 600;
+}
+
+.settings-tabs button.active {
+  background: var(--accent-color);
+  color: #fff;
+}
+
+.settings-tabs button:focus-visible {
+  outline: 2px solid #fff;
+  outline-offset: 2px;
 }
 
 .setting-item {
