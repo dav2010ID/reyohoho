@@ -239,7 +239,10 @@
             >
               <i
                 class="fa-regular fa-clock"
-                :class="{ 'text-red': shouldShowRedTimings, 'text-red-blink': shouldBlinkRedTimings }"
+                :class="{
+                  'text-red': shouldShowRedTimings,
+                  'text-red-blink': shouldBlinkRedTimings
+                }"
               ></i>
               <span class="mobile-text">Тайминги</span>
             </button>
@@ -275,11 +278,15 @@
           @toggle-list="toggleList"
         />
 
-        <div class="additional-info">
+        <div id="movie-details" class="additional-info">
           <h2 class="additional-info-title">Подробнее</h2>
           <div class="info-content">
             <div v-if="moviePosterUrl" class="movie-poster-container desktop-only">
-              <a :href="movieInfo.poster_url || moviePosterUrl" target="_blank" rel="noopener noreferrer">
+              <a
+                :href="movieInfo.poster_url || moviePosterUrl"
+                target="_blank"
+                rel="noopener noreferrer"
+              >
                 <img :src="moviePosterUrl" alt="Постер фильма" class="movie-poster" />
               </a>
             </div>
@@ -362,11 +369,11 @@
           </div>
         </div>
 
-        <div v-if="clientReady && isCommentsEnabled" class="comments-section">
+        <div v-if="clientReady && isCommentsEnabled" id="movie-comments" class="comments-section">
           <Comments :key="kp_id" :movie-id="kp_id" />
         </div>
 
-        <div v-if="movieInfo.staff" class="staff-section">
+        <div v-if="movieInfo.staff" id="movie-staff" class="staff-section">
           <div class="staff-categories">
             <div v-if="getStaffByProfession('ACTOR').length" class="staff-category">
               <h3 class="additional-info-title">Актёры</h3>
@@ -932,7 +939,7 @@ import { useMainStore } from '@/store/main'
 import { useAuthStore } from '@/store/auth'
 import { useNavbarStore } from '@/store/navbar'
 import { usePlayerStore } from '@/store/player'
-import { computed, defineAsyncComponent, onMounted, onUnmounted, ref, watch } from 'vue'
+import { computed, defineAsyncComponent, onMounted, onUnmounted, ref, shallowRef, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useHead } from '@unhead/vue'
 import Notification from '@/components/notification/ToastMessage.vue'
@@ -972,8 +979,8 @@ const router = useRouter()
 const kp_id = ref(route.params.kp_id)
 const errorMessage = ref('')
 const errorCode = ref(null)
-const moviePlayerComponent = ref(null)
-const movieRatingComponent = ref(null)
+const moviePlayerComponent = shallowRef(null)
+const movieRatingComponent = shallowRef(null)
 const initialSeoEntry = getMovieSeoEntry(route.params.kp_id)
 const infoLoading = ref(!initialSeoEntry)
 const movieInfo = ref(
@@ -2310,11 +2317,12 @@ const handleFilterSelect = () => {
 <style scoped>
 .content {
   min-height: 100vh;
+  position: relative;
 }
 /* Стили для информации о фильме */
 .content-card {
   overflow: hidden;
-  padding: 20px;
+  padding: 10px 20px 28px;
   color: #e0e0e0;
 }
 
@@ -2327,7 +2335,7 @@ const handleFilterSelect = () => {
   overflow: hidden;
   flex-wrap: wrap;
   height: auto;
-  min-height: 80px;
+  min-height: 64px;
 }
 
 .content-logo {
@@ -2338,7 +2346,7 @@ const handleFilterSelect = () => {
   max-width: 100%;
   transition: all 0.3s ease;
   cursor: pointer;
-  padding: 10px 0 30px;
+  padding: 4px 0 16px;
 }
 
 .content-logo:hover {
@@ -2374,7 +2382,7 @@ const handleFilterSelect = () => {
 }
 
 .content-title {
-  font-size: 55px;
+  font-size: clamp(34px, 4vw, 58px);
   margin: 0;
   line-height: 1;
   display: flex;
@@ -2413,7 +2421,8 @@ const handleFilterSelect = () => {
 .action-buttons-group {
   display: inline-flex;
   align-items: center;
-  gap: 15px;
+  gap: 8px;
+  opacity: 0.86;
 }
 
 .action-buttons-group .mobile-text {
@@ -2456,6 +2465,7 @@ const handleFilterSelect = () => {
   border-radius: 8px;
   margin-bottom: 20px;
   font-size: 16px;
+  scroll-margin-top: 90px;
 }
 
 .additional-info-title {
@@ -2538,6 +2548,11 @@ const handleFilterSelect = () => {
   background: rgba(8, 12, 10, 0.34);
   border: 1px solid rgba(81, 207, 102, 0.16);
   box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.03);
+}
+
+.comments-section,
+.staff-section {
+  scroll-margin-top: 90px;
 }
 
 .related-movies-header {

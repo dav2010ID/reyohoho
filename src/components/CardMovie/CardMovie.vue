@@ -84,11 +84,11 @@ onMounted(() => {
   --card-bg: #141414;
   --card-border-color: transparent;
   --card-shadow: 0 10px 24px rgba(0, 0, 0, 0.28);
-  --card-hover-shadow: 0 18px 36px rgba(0, 0, 0, 0.34);
+  --card-hover-shadow: 0 14px 30px rgba(0, 0, 0, 0.32);
   --card-focus-outline: 2px solid var(--accent-color);
   --card-focus-shadow: 0 0 0 3px color-mix(in srgb, var(--accent-color) 32%, transparent);
-  --card-hover-translate: -5px;
-  --card-hover-scale: 1.02;
+  --card-hover-translate: -3px;
+  --card-hover-scale: 1.01;
   text-decoration: none;
   color: inherit;
   width: 100%;
@@ -101,9 +101,9 @@ onMounted(() => {
   flex-direction: column;
   justify-content: space-between;
   transition:
-    transform 0.3s ease,
-    box-shadow 0.3s ease,
-    border 0.3s ease;
+    transform 0.2s ease,
+    box-shadow 0.2s ease,
+    border 0.2s ease;
   box-shadow: var(--card-shadow);
   border: 1px solid var(--card-border-color);
 }

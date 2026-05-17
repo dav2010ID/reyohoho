@@ -63,6 +63,10 @@
       <div v-if="movie.type && !TYPES_ENUM[movie.type]" class="poster-type">
         {{ movie.type.replace('🎬', '') }}
       </div>
+      <div class="poster-action" aria-hidden="true">
+        <i class="fas fa-play"></i>
+        <span>Смотреть</span>
+      </div>
     </div>
   </div>
 </template>
@@ -140,6 +144,7 @@ const imageFetchPriority = computed(() => (priority ? 'high' : 'low'))
   overflow: hidden;
   border-radius: var(--movie-poster-frame-radius);
   background: var(--movie-poster-frame-bg);
+  position: relative;
 }
 
 .movie-poster-frame::after {
@@ -200,6 +205,34 @@ const imageFetchPriority = computed(() => (priority ? 'high' : 'low'))
   border-radius: 3px;
   font-size: 0.9em;
   text-transform: uppercase;
+}
+
+.poster-action {
+  position: absolute;
+  left: 50%;
+  bottom: 18px;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 9px 13px;
+  color: #fff;
+  background: rgba(0, 0, 0, 0.78);
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  border-radius: 8px;
+  font-size: 0.9em;
+  font-weight: 700;
+  opacity: 0;
+  transform: translate(-50%, 8px);
+  transition:
+    opacity 0.2s ease,
+    transform 0.2s ease;
+  pointer-events: none;
+}
+
+:deep(.movie-card:hover) .poster-action,
+:deep(.movie-card:focus-visible) .poster-action {
+  opacity: 1;
+  transform: translate(-50%, 0);
 }
 
 .rating-kp,
@@ -303,6 +336,10 @@ const imageFetchPriority = computed(() => (priority ? 'high' : 'low'))
     width: 15px;
     height: auto;
     display: inline-block;
+  }
+
+  .poster-action {
+    display: none;
   }
 
   .rating-our {

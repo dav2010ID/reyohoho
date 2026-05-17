@@ -713,7 +713,8 @@ export default {
       insertSpoiler,
       insertLink,
       insertLinkFromModal,
-      closeLinkModal
+      closeLinkModal,
+      openLogin
     }
   }
 }
