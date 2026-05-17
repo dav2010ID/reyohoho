@@ -40,9 +40,20 @@ vi.mock('./App.vue', () => ({
 describe('main includedRoutes', () => {
   beforeEach(() => {
     getPrerenderMovieSeoEntries.mockReset()
+    vi.unstubAllEnvs()
+    vi.resetModules()
   })
 
-  it('adds prerender movie routes to static paths', async () => {
+  it('returns only static paths by default', async () => {
+    const { includedRoutes } = await import('./main.js')
+    const result = await includedRoutes(['/', '/top', '/movie/:kp_id/:slug'])
+
+    expect(getPrerenderMovieSeoEntries).not.toHaveBeenCalled()
+    expect(result).toEqual(['/', '/top'])
+  })
+
+  it('adds prerender movie routes when enabled', async () => {
+    vi.stubEnv('VITE_PRERENDER_MOVIE_PAGES', 'true')
     getPrerenderMovieSeoEntries.mockReturnValue([
       { kp_id: '123', slug: 'test-slug' },
       { kp_id: '456', slug: 'another-slug' }

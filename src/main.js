@@ -7,6 +7,8 @@ import { installRouterGuards } from './router'
 import { buildMoviePath, getPrerenderMovieSeoEntries } from './utils/movieSeo'
 import App from './App.vue'
 
+const shouldPrerenderMoviePages = () => import.meta.env.VITE_PRERENDER_MOVIE_PAGES === 'true'
+
 export const createApp = ViteSSG(
   App,
   { routes, base: import.meta.env.VITE_BASE_URL || '/' },
@@ -46,6 +48,10 @@ export const createApp = ViteSSG(
 
 export const includedRoutes = async (paths) => {
   const staticPaths = paths.filter((path) => !path.includes(':'))
+  if (!shouldPrerenderMoviePages()) {
+    return staticPaths
+  }
+
   const movieSeoEntries = await getPrerenderMovieSeoEntries()
   const moviePaths = movieSeoEntries.map((movie) =>
     buildMoviePath(movie.kp_id, movie.slug)
