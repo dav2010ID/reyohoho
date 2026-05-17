@@ -9,6 +9,7 @@
                 :to="link.to"
                 :exact="link.exact"
                 class="notification-link"
+                :aria-label="link.text"
                 @click="closeNavbar"
               >
                 <NotificationBadge />
@@ -22,6 +23,7 @@
               v-bind="
                 link.to ? { to: link.to, exact: link.exact } : { href: link.href, target: '_blank' }
               "
+              :aria-label="link.text"
               @click="closeNavbar"
             >
               <template v-if="typeof link.icon === 'string' && link.icon.startsWith('fa')">
@@ -67,9 +69,11 @@ const { closeNavbar } = navbarStore
   left: 0;
   width: 250px;
   height: 100vh;
-  background: rgba(30, 30, 30, 0.97);
+  background: rgba(23, 23, 23, 0.98);
+  border-right: 1px solid rgba(255, 255, 255, 0.08);
   padding-top: 60px;
   z-index: 5;
+  box-shadow: 16px 0 40px rgba(0, 0, 0, 0.35);
 }
 
 .nav-links-wrapper {
@@ -103,6 +107,8 @@ const { closeNavbar } = navbarStore
   padding: 10px 20px;
   transition: all 0.3s ease;
   min-width: 250px;
+  min-height: 44px;
+  box-sizing: border-box;
 }
 
 .nav-links a i,
@@ -170,6 +176,7 @@ const { closeNavbar } = navbarStore
 .overlay {
   position: fixed;
   left: 0;
+  top: 0;
   width: 100vw;
   height: 100vh;
   background: rgba(0, 0, 0, 0.5);

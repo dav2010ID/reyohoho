@@ -1,5 +1,5 @@
 <template>
-  <footer :class="{ 'footer-fixed': !isAtBottom, 'footer-static': isAtBottom }">
+  <footer>
     <div class="donaters-wrapper">
       <span class="donaters-text">Спасибо топ донатерам</span>
 
@@ -101,7 +101,6 @@ import { getDons, getTwitchStream } from '@/api/movies'
 const donaters = ref([])
 const currentIndex = ref(-1)
 const currentFeaturedDonorIndex = ref(0)
-const isAtBottom = ref(false)
 const CACHE_KEY_DONATERS = 'donatersCache'
 const CACHE_KEY_TWITCH = 'twitchDataCache'
 const TWITCH_CACHE_DURATION = 5 * 60 * 1000 // 5 minutes
@@ -185,19 +184,6 @@ const currentFeaturedDonor = computed(() => {
   if (!featuredDonors.value.length) return null
   return featuredDonors.value[currentFeaturedDonorIndex.value]
 })
-
-let scrollTimeout = null
-const handleScroll = () => {
-  if (scrollTimeout) return
-  scrollTimeout = window.requestAnimationFrame(() => {
-    const scrollTop = window.pageYOffset || document.documentElement.scrollTop
-    const windowHeight = window.innerHeight
-    const documentHeight = document.documentElement.scrollHeight
-
-    isAtBottom.value = scrollTop + windowHeight >= documentHeight - 10
-    scrollTimeout = null
-  })
-}
 
 const safeGetFromStorage = (key, cacheType) => {
   try {
@@ -422,9 +408,6 @@ onMounted(async () => {
   await fetchDonaters()
   startShowingDonaters()
   startCarousel()
-  window.addEventListener('scroll', handleScroll, { passive: true })
-  handleScroll()
-
   await fetchTwitchData()
 
   twitchCheckInterval = setInterval(fetchTwitchData, TWITCH_CACHE_DURATION)
@@ -434,29 +417,18 @@ onUnmounted(() => {
   if (intervalId) clearInterval(intervalId)
   if (carouselIntervalId) clearInterval(carouselIntervalId)
   if (twitchCheckInterval) clearInterval(twitchCheckInterval)
-  if (scrollTimeout) window.cancelAnimationFrame(scrollTimeout)
-  window.removeEventListener('scroll', handleScroll)
 })
 </script>
 
 <style scoped>
 footer {
-  width: 100%;
-  background: rgba(0, 0, 0, 0.9);
-  z-index: 1000;
-  transition: all 0.3s ease;
-}
-
-.footer-fixed {
   position: fixed;
-  bottom: 0;
-  left: 0;
-}
-
-.footer-static {
-  position: absolute;
-  bottom: 0;
-  left: 0;
+  inset-inline-end: 0;
+  inset-block-end: 0;
+  inset-inline-start: var(--app-sidebar-collapsed-width);
+  background: rgba(0, 0, 0, 0.9);
+  z-index: var(--z-footer);
+  transition: all 0.3s ease;
 }
 
 .donaters-wrapper {
@@ -751,6 +723,10 @@ footer {
 }
 
 @media (max-width: 768px) {
+  footer {
+    inset-inline-start: 0;
+  }
+
   .donaters-wrapper {
     padding: 10px 15px;
     min-height: 65px;

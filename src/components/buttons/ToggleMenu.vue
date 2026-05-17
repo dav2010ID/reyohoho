@@ -1,6 +1,12 @@
 <template>
   <div class="toggle-wrapper">
-    <button class="toggle" @click="toggle">
+    <button
+      class="toggle"
+      type="button"
+      :aria-label="navbarStore.isNavbarVisible ? 'Закрыть меню' : 'Открыть меню'"
+      :aria-expanded="navbarStore.isNavbarVisible"
+      @click="toggle"
+    >
       <i
         :class="['fas', navbarStore.isNavbarVisible ? 'fa-times' : 'fa-bars', { animate: animate }]"
       ></i>

@@ -33,8 +33,8 @@ const isBlurActive = computed(() => backgroundStore.isBlurActive)
 const CACHE_KEY = 'topMoviePoster'
 
 const getLayerStyle = (index) => {
-  const brightnessFilter = backgroundType.value === 'stars' ? 'brightness(100%)' : 'brightness(20%)'
-  const blurFilter = isBlurActive.value ? 'blur(20px)' : 'blur(0px)'
+  const brightnessFilter = backgroundType.value === 'stars' ? 'brightness(76%)' : 'brightness(18%)'
+  const blurFilter = isBlurActive.value ? 'blur(1.5px)' : 'blur(0px)'
 
   return {
     backgroundImage: `url(${backgrounds.value[index]})`,
@@ -139,6 +139,14 @@ watch(backgroundType, (newType) => {
   height: 100vh;
   z-index: -1;
   overflow: hidden;
+}
+
+.background-container::after {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.16);
+  pointer-events: none;
 }
 
 .background-layer {

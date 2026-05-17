@@ -1,5 +1,9 @@
 <template>
   <aside ref="sidebar" :class="['side-panel', { collapsed: !isSidebarOpen }]">
+    <router-link class="menu-brand" to="/" aria-label="ReYohoho">
+      <img src="@/assets/icon-main-logo-150x150.png" alt="" class="menu-brand__logo" />
+      <span v-show="isSidebarOpen" class="menu-brand__text">ReYohoho</span>
+    </router-link>
     <div class="top-section">
       <button
         v-if="canGoBack"
@@ -11,7 +15,11 @@
         <i class="fas fa-arrow-left"></i>
         <span v-show="isSidebarOpen" class="back-text">Назад</span>
       </button>
-      <button class="toggle-sidebar-btn" :aria-label="isSidebarOpen ? 'Свернуть меню' : 'Развернуть меню'" @click="toggleSidebar">
+      <button
+        class="toggle-sidebar-btn"
+        :aria-label="isSidebarOpen ? 'Свернуть меню' : 'Развернуть меню'"
+        @click="toggleSidebar"
+      >
         <i :class="isSidebarOpen ? 'fas fa-chevron-left' : 'fas fa-chevron-right'"></i>
       </button>
     </div>
@@ -230,7 +238,7 @@ watch(() => route.fullPath, () => updateNavigationHistory(route))
 .side-panel {
   display: flex;
   flex-direction: column;
-  width: 250px;
+  width: 230px;
   height: 100vh;
   background: rgba(23, 23, 23, 0.98);
   position: fixed;
@@ -239,33 +247,89 @@ watch(() => route.fullPath, () => updateNavigationHistory(route))
   transition: width 0.3s ease;
   padding: 1rem 0;
   box-shadow: 2px 0 10px rgba(0, 0, 0, 0.1);
-  z-index: 5;
+  z-index: var(--z-sidebar);
   will-change: width;
 }
 .side-panel.collapsed {
-  width: 80px;
+  width: var(--app-sidebar-collapsed-width);
+}
+
+.menu-brand {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  min-height: 52px;
+  padding: 0 14px 12px;
+  color: #fff;
+  text-decoration: none;
+}
+
+.menu-brand__logo {
+  width: 34px;
+  height: 34px;
+  object-fit: contain;
+  border-radius: 10px;
+}
+
+.menu-brand__text {
+  min-width: 130px;
+  font-size: 24px;
+  line-height: 1;
+  white-space: nowrap;
+}
+
+.side-panel.collapsed .menu-brand {
+  padding-inline: 0;
 }
 
 .top-section {
   display: flex;
   flex-direction: column;
   align-items: center;
-  margin-bottom: 1rem;
+  gap: 0.45rem;
+  margin-bottom: 0.75rem;
   font-weight: 700;
   font-size: 27px;
 }
 .toggle-sidebar-btn {
-  background: none;
-  border: none;
-  color: #fff;
-  font-size: 1.2rem;
+  width: 100%;
+  min-height: 42px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: transparent;
+  border: 0;
+  border-left: 3px solid transparent;
+  border-radius: 0;
+  color: rgba(255, 255, 255, 0.8);
+  font-size: 1rem;
   cursor: pointer;
-  margin-top: 10px;
   transition: all 0.3s ease;
 }
 .toggle-sidebar-btn:hover {
+  background: rgba(255, 255, 255, 0.06);
   color: var(--accent-color, #6c5ce7);
-  transform: scale(1.1);
+  border-left-color: var(--accent-color, #6c5ce7);
+}
+
+.side-panel:not(.collapsed) .toggle-sidebar-btn {
+  width: calc(100% - 17px);
+  justify-content: flex-end;
+  padding-right: 20px;
+  border-radius: 0 12px 12px 0;
+}
+
+.side-panel.collapsed .toggle-sidebar-btn {
+  width: 42px;
+  align-self: center;
+  border-left: 0;
+  border-radius: 8px;
+}
+
+.side-panel.collapsed .toggle-sidebar-btn:hover {
+  background: rgba(255, 255, 255, 0.08);
+  border-left: 0;
 }
 
 .side-nav {
@@ -307,7 +371,7 @@ watch(() => route.fullPath, () => updateNavigationHistory(route))
   margin: 0;
   display: flex;
   flex-direction: column;
-  gap: 1rem;
+  gap: 0.55rem;
 }
 .nav-links li {
   width: 100%;
@@ -321,15 +385,18 @@ watch(() => route.fullPath, () => updateNavigationHistory(route))
   gap: 1rem;
   color: rgba(255, 255, 255, 0.8);
   text-decoration: none;
-  padding: 10px 20px;
+  padding: 10px 17px;
   transition: all 0.3s ease;
-  height: 20px;
+  min-height: 42px;
+  height: auto;
+  border-left: 3px solid transparent;
+  border-radius: 0 12px 12px 0;
 }
 
 .side-panel:not(.collapsed) .nav-links a,
 .side-panel:not(.collapsed) .nav-links button,
 .side-panel:not(.collapsed) .notification-link {
-  min-width: 250px;
+  min-width: 230px;
 }
 
 .side-panel.collapsed .nav-links a,
@@ -448,14 +515,16 @@ watch(() => route.fullPath, () => updateNavigationHistory(route))
 }
 
 .tooltip {
-  position: absolute;
+  position: fixed;
   top: 5px;
-  left: 70px;
-  background-color: #333;
+  left: var(--app-sidebar-collapsed-width);
+  background-color: rgba(35, 35, 35, 0.98);
   color: #fff;
-  padding: 5px;
-  border-radius: 4px;
+  padding: 7px 10px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 6px;
   white-space: nowrap;
+  box-shadow: 0 10px 24px rgba(0, 0, 0, 0.35);
 }
 
 a {
