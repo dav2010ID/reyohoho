@@ -87,7 +87,7 @@
                   :disabled="topMoviesLoadingMore"
                   @click="loadMoreHomeTopMovies"
                 >
-                  {{ topMoviesLoadingMore ? 'Р—Р°РіСЂСѓР¶Р°РµРј...' : 'РџРѕРєР°Р·Р°С‚СЊ РµС‰Рµ' }}
+                  {{ topMoviesLoadingMore ? 'Загружаем...' : 'Показать еще' }}
                 </button>
               </div>
             </template>
@@ -329,7 +329,7 @@ const loadMoreHomeTopMovies = async () => {
       topMoviesHasMore.value = false
     }
   } catch (error) {
-    console.error('РћС€РёР±РєР° РґРѕРіСЂСѓР·РєРё С‚РѕРїРѕРІ РґР»СЏ РіР»Р°РІРЅРѕР№:', error)
+    console.error('Ошибка догрузки топов для главной:', error)
     topMoviesHasMore.value = false
   } finally {
     topMoviesLoadingMore.value = false

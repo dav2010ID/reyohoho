@@ -15,6 +15,7 @@
     "test:unit": "vitest",
     "lint": "eslint --ext .js,.vue src",
     "lint:fix": "eslint --ext .js,.vue src --fix",
+    "check:encoding": "node scripts/check-encoding-artifacts.js",
     "format": "prettier --write src/",
     "perf:browser": "node scripts/browser-performance-check.js",
     "test:browser-smoke": "node scripts/browser-smoke-check.js",
