@@ -45,7 +45,12 @@ export const useApiStore = defineStore(API_STORE_NAME, {
 
           if (isHealthy) {
             debugLog(`Selected working API: ${endpoint.url} (${endpoint.description})`)
-            if(this.currentApiUrl !== endpoint.url) { this.currentApiUrl = endpoint.url; import('@/api/axios').then(({ resetApi }) => resetApi()); } else { this.currentApiUrl = endpoint.url; }
+            if (this.currentApiUrl !== endpoint.url) {
+              this.currentApiUrl = endpoint.url
+              import('@/api/axios').then(({ resetApi }) => resetApi())
+            } else {
+              this.currentApiUrl = endpoint.url
+            }
             this.lastCheckedAt = Date.now()
             this.isCheckingHealth = false
             return endpoint.url
@@ -53,13 +58,23 @@ export const useApiStore = defineStore(API_STORE_NAME, {
         }
 
         console.warn('No working endpoints found, using fallback')
-        if(this.currentApiUrl !== this.fallbackUrl) { this.currentApiUrl = this.fallbackUrl; import('@/api/axios').then(({ resetApi }) => resetApi()); } else { this.currentApiUrl = this.fallbackUrl; }
+        if (this.currentApiUrl !== this.fallbackUrl) {
+          this.currentApiUrl = this.fallbackUrl
+          import('@/api/axios').then(({ resetApi }) => resetApi())
+        } else {
+          this.currentApiUrl = this.fallbackUrl
+        }
         this.lastCheckedAt = Date.now()
         this.isCheckingHealth = false
         return this.fallbackUrl
       } catch (error) {
         console.error('Error selecting working endpoint:', error)
-        if(this.currentApiUrl !== this.fallbackUrl) { this.currentApiUrl = this.fallbackUrl; import('@/api/axios').then(({ resetApi }) => resetApi()); } else { this.currentApiUrl = this.fallbackUrl; }
+        if (this.currentApiUrl !== this.fallbackUrl) {
+          this.currentApiUrl = this.fallbackUrl
+          import('@/api/axios').then(({ resetApi }) => resetApi())
+        } else {
+          this.currentApiUrl = this.fallbackUrl
+        }
         this.lastCheckedAt = Date.now()
         this.isCheckingHealth = false
         return this.fallbackUrl
