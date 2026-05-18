@@ -2,7 +2,6 @@ const OVERLAY_FONT =
   "-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif"
 const PANEL_BACKGROUND = 'rgba(20, 20, 20, 0.8)'
 const PANEL_BACKDROP = 'blur(12px)'
-const PANEL_BORDER = '1px solid rgba(255, 255, 255, 0.14)'
 const ACCENT_COLOR = '#6c5ce7'
 const ACCENT_HOVER = '#5a4fcf'
 const MUTED_TEXT = 'rgba(255, 255, 255, 0.6)'
@@ -321,23 +320,23 @@ export const getVideoProgressStyle = ({ fontSize, showBackground }) => `
   width: ${showBackground ? 'fit-content' : 'auto'} !important;
 `
 
-export const getTimingsPanelStyle = ({ showBackground }) => `
+export const getTimingsPanelStyle = () => `
   position: absolute !important;
-  top: 66px !important;
-  right: 14px !important;
+  top: 50px !important;
+  right: 10px !important;
 
   box-sizing: border-box !important;
   width: auto !important;
-  min-width: ${showBackground ? '190px' : 'auto'} !important;
-  max-width: min(360px, calc(100% - 28px)) !important;
+  min-width: auto !important;
+  max-width: min(300px, calc(100% - 20px)) !important;
 
-  background: ${showBackground ? 'rgba(12, 13, 18, 0.76)' : 'transparent'} !important;
-  backdrop-filter: ${showBackground ? 'blur(14px) saturate(130%)' : 'none'} !important;
-  border: ${showBackground ? '1px solid rgba(255, 255, 255, 0.12)' : 'none'} !important;
-  border-radius: 14px !important;
-  padding: ${showBackground ? '10px 12px' : '0'} !important;
+  background: transparent !important;
+  backdrop-filter: none !important;
+  border: none !important;
+  border-radius: 0 !important;
+  padding: 0 !important;
 
-  box-shadow: ${showBackground ? '0 12px 32px rgba(0, 0, 0, 0.42)' : 'none'} !important;
+  box-shadow: none !important;
   pointer-events: none !important;
 
   display: none !important;
@@ -347,56 +346,21 @@ export const getTimingsPanelStyle = ({ showBackground }) => `
 `
 
 export const getTimingsContentStyle = ({ fontSize }) => `
-  font-size: ${Math.max(11, fontSize - 5)}px !important;
+  font-size: ${Math.max(10, fontSize - 7)}px !important;
   color: ${MUTED_TEXT} !important;
-  text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.8) !important;
-  line-height: 1.35 !important;
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.95) !important;
+  line-height: 1.25 !important;
   display: flex !important;
   flex-direction: column !important;
-  gap: 6px !important;
+  gap: 4px !important;
   min-width: 0 !important;
   overflow-wrap: anywhere !important;
-`
-
-export const getTimingsHeaderStyle = ({ fontSize }) => `
-  display: flex !important;
-  align-items: center !important;
-  justify-content: space-between !important;
-  gap: 10px !important;
-  min-width: 0 !important;
-  font-size: ${Math.max(12, fontSize - 4)}px !important;
-  line-height: 1.2 !important;
-  margin-bottom: 8px !important;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.1) !important;
-  padding-bottom: 8px !important;
-`
-
-export const getTimingsLabelStyle = () => `
-  color: rgba(255, 255, 255, 0.82) !important;
-  font-weight: 700 !important;
-  text-transform: uppercase !important;
-  letter-spacing: 0 !important;
-`
-
-export const getTimingCountBadgeStyle = () => `
-  flex: 0 0 auto !important;
-  min-width: 22px !important;
-  height: 20px !important;
-  padding: 0 7px !important;
-  border-radius: 999px !important;
-  display: inline-flex !important;
-  align-items: center !important;
-  justify-content: center !important;
-  color: white !important;
-  background: rgba(255, 255, 255, 0.12) !important;
-  border: 1px solid rgba(255, 255, 255, 0.14) !important;
-  font-weight: 700 !important;
 `
 
 export const getTimingsListStyle = () => `
   display: flex !important;
   flex-direction: column !important;
-  gap: 5px !important;
+  gap: 4px !important;
   min-width: 0 !important;
 `
 
@@ -405,36 +369,37 @@ export const getTimingChipStyle = ({ status, highlight }) => {
   const isUpcoming = status === 'upcoming' && highlight
 
   const background = isActive
-    ? 'rgba(255, 80, 80, 0.13)'
+    ? 'rgba(255, 72, 72, 0.16)'
     : isUpcoming
-      ? 'rgba(124, 108, 255, 0.14)'
-      : 'rgba(255, 255, 255, 0.055)'
-
-  const borderColor = isActive
-    ? 'rgba(255, 80, 80, 0.34)'
-    : isUpcoming
-      ? 'rgba(124, 108, 255, 0.35)'
-      : 'rgba(255, 255, 255, 0.09)'
+      ? 'rgba(255, 184, 77, 0.14)'
+      : 'transparent'
 
   const color = isActive
-    ? '#ff7b7b'
+    ? '#ff7a7a'
     : isUpcoming
-      ? '#a99cff'
-      : 'rgba(255, 255, 255, 0.72)'
+      ? '#ffd184'
+      : 'rgba(255, 255, 255, 0.56)'
+
+  const textShadow = isActive
+    ? '0 0 12px rgba(255, 72, 72, 0.55), 0 1px 3px rgba(0, 0, 0, 0.95)'
+    : isUpcoming
+      ? '0 0 12px rgba(255, 184, 77, 0.55), 0 1px 3px rgba(0, 0, 0, 0.95)'
+      : '0 1px 3px rgba(0, 0, 0, 0.95)'
 
   return `
     display: flex !important;
     align-items: center !important;
     max-width: 100% !important;
 
-    padding: 6px 9px !important;
-    border-radius: 9px !important;
+    padding: ${isActive || isUpcoming ? '3px 6px' : '0 2px'} !important;
+    border-radius: 6px !important;
 
     color: ${color} !important;
     background: ${background} !important;
-    border: 1px solid ${borderColor} !important;
+    border: none !important;
+    text-shadow: ${textShadow} !important;
 
-    font-weight: ${isActive ? 700 : 500} !important;
+    font-weight: ${isActive || isUpcoming ? 700 : 500} !important;
     white-space: normal !important;
     overflow-wrap: anywhere !important;
   `
@@ -442,33 +407,33 @@ export const getTimingChipStyle = ({ status, highlight }) => {
 
 export const getControlsContainerStyle = () => `
   position: absolute !important;
-  top: 14px !important;
-  right: 14px !important;
+  top: 10px !important;
+  right: 10px !important;
   display: flex !important;
-  gap: 6px !important;
+  gap: 4px !important;
   pointer-events: all !important;
 
-  background: rgba(12, 13, 18, 0.78) !important;
-  backdrop-filter: blur(14px) saturate(130%) !important;
-  border: 1px solid rgba(255, 255, 255, 0.12) !important;
-  border-radius: 14px !important;
-  padding: 6px !important;
+  background: rgba(12, 13, 18, 0.58) !important;
+  backdrop-filter: blur(10px) saturate(120%) !important;
+  border: 1px solid rgba(255, 255, 255, 0.08) !important;
+  border-radius: 10px !important;
+  padding: 4px !important;
 
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.45) !important;
+  box-shadow: 0 8px 22px rgba(0, 0, 0, 0.32) !important;
 `
 
-export const getOverlayButtonStyle = ({ fontSize = 15, fontWeight = '600' } = {}) => `
-  width: 32px !important;
-  height: 32px !important;
-  border-radius: 9px !important;
+export const getOverlayButtonStyle = ({ fontSize = 13, fontWeight = '600' } = {}) => `
+  width: 26px !important;
+  height: 26px !important;
+  border-radius: 7px !important;
 
   display: flex !important;
   align-items: center !important;
   justify-content: center !important;
 
-  background: rgba(255, 255, 255, 0.08) !important;
-  color: rgba(255, 255, 255, 0.92) !important;
-  border: 1px solid rgba(255, 255, 255, 0.08) !important;
+  background: rgba(255, 255, 255, 0.07) !important;
+  color: rgba(255, 255, 255, 0.82) !important;
+  border: 1px solid rgba(255, 255, 255, 0.07) !important;
 
   cursor: pointer !important;
   transition: background 0.18s ease, transform 0.18s ease, border-color 0.18s ease !important;
@@ -504,25 +469,11 @@ export const applyOverlayProgressBackgroundStyle = (element, showBackground) => 
   element.style.setProperty('display', showBackground ? 'inline-flex' : 'flex', 'important')
 }
 
-export const applyOverlayTimingsBackgroundStyle = (element, showBackground) => {
-  element.style.setProperty('background', getPanelBackground(showBackground), 'important')
-  element.style.setProperty('backdrop-filter', getPanelBackdrop(showBackground), 'important')
-  element.style.border = showBackground ? PANEL_BORDER : 'none'
-  element.style.boxShadow = showBackground ? '0 10px 30px rgba(0, 0, 0, 0.35)' : 'none'
+export const applyOverlayTimingsBackgroundStyle = (element) => {
+  element.style.setProperty('background', 'transparent', 'important')
+  element.style.setProperty('backdrop-filter', 'none', 'important')
+  element.style.border = 'none'
+  element.style.boxShadow = 'none'
   element.style.width = 'auto'
-  element.style.minWidth = showBackground ? '220px' : 'auto'
-}
-
-export const getMutedTextColor = () => MUTED_TEXT
-
-export const getTimingTextStyle = ({ status, highlight }) => {
-  if (status === 'active' && highlight) {
-    return { color: '#ff4444', fontWeight: 'bold' }
-  }
-
-  if (status === 'upcoming' && highlight) {
-    return { color: ACCENT_COLOR, fontWeight: '500' }
-  }
-
-  return { color: MUTED_TEXT, fontWeight: '' }
+  element.style.minWidth = 'auto'
 }

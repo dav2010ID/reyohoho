@@ -575,9 +575,6 @@ import {
   getSettingsModalContentStyle,
   getSettingsModalStyle,
   getTimingChipStyle,
-  getTimingCountBadgeStyle,
-  getTimingsHeaderStyle,
-  getTimingsLabelStyle,
   getTimingsListStyle,
   getTimingsContentStyle,
   getTimingsPanelStyle,
@@ -1586,12 +1583,12 @@ const createVideoOverlay = (iframeDoc, video) => {
   settingsBtn.title = 'Настройки оверлея'
 
   const fontDecreaseBtn = iframeDoc.createElement('button')
-  fontDecreaseBtn.style.cssText = getOverlayButtonStyle({ fontSize: 20, fontWeight: 'bold' })
+  fontDecreaseBtn.style.cssText = getOverlayButtonStyle({ fontSize: 15, fontWeight: '700' })
   fontDecreaseBtn.innerHTML = 'A-'
   fontDecreaseBtn.title = 'Уменьшить шрифт'
 
   const fontIncreaseBtn = iframeDoc.createElement('button')
-  fontIncreaseBtn.style.cssText = getOverlayButtonStyle({ fontSize: 20, fontWeight: 'bold' })
+  fontIncreaseBtn.style.cssText = getOverlayButtonStyle({ fontSize: 15, fontWeight: '700' })
   fontIncreaseBtn.innerHTML = 'A+'
   fontIncreaseBtn.title = 'Увеличить шрифт'
 
@@ -2083,23 +2080,6 @@ const updateVideoOverlay = () => {
     const timingsContent = timingsPanel.children[0]
     timingsContent.style.cssText = getTimingsContentStyle({ fontSize: currentFontSize })
     timingsContent.innerHTML = ''
-
-    const intervals = activeTimingTexts.value.flatMap((timing) => timing.intervals)
-
-    const header = iframeDoc.createElement('div')
-    header.style.cssText = getTimingsHeaderStyle({ fontSize: currentFontSize })
-
-    const label = iframeDoc.createElement('span')
-    label.textContent = '\u0422\u0430\u0439\u043c\u0438\u043d\u0433\u0438'
-    label.style.cssText = getTimingsLabelStyle()
-
-    const count = iframeDoc.createElement('span')
-    count.textContent = String(intervals.length)
-    count.style.cssText = getTimingCountBadgeStyle()
-
-    header.appendChild(label)
-    header.appendChild(count)
-    timingsContent.appendChild(header)
 
     const list = iframeDoc.createElement('div')
     list.style.cssText = getTimingsListStyle()
