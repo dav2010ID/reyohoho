@@ -119,8 +119,29 @@ let peekLeaveTimeout = null
 
 // Зона срабатывания в пикселях от края экрана
 const PEEK_TRIGGER_ZONE = 80
-// Ширина свёрнутой панели + запас (учитываем скроллбар ~20px)
-const PEEK_HIDE_ZONE = 280
+// Небольшой запас за реальной границей панели, чтобы она не мигала на краю.
+const PEEK_KEEP_MARGIN = 16
+
+const cancelSidebarPeekHide = () => {
+  if (peekLeaveTimeout) {
+    clearTimeout(peekLeaveTimeout)
+    peekLeaveTimeout = null
+  }
+}
+
+const hideSidebarPeek = () => {
+  cancelSidebarPeekHide()
+  isSidebarPeeked.value = false
+}
+
+const scheduleSidebarPeekHide = () => {
+  if (peekLeaveTimeout) return
+
+  peekLeaveTimeout = setTimeout(() => {
+    isSidebarPeeked.value = false
+    peekLeaveTimeout = null
+  }, 220)
+}
 
 const handleMouseMove = (e) => {
   if (!sidebarAutoHide.value) return
@@ -134,27 +155,28 @@ const handleMouseMove = (e) => {
     ? x >= vw - PEEK_TRIGGER_ZONE
     : x <= PEEK_TRIGGER_ZONE
 
-  // Проверяем, что курсор ещё внутри панели (чтобы не скрывать сразу)
-  const inPanelZone = isRight
-    ? x >= vw - PEEK_HIDE_ZONE
-    : x <= PEEK_HIDE_ZONE
+  const sidebarRect = sidebar.value?.getBoundingClientRect()
+  const inPanelZone = sidebarRect
+    ? isRight
+      ? x >= sidebarRect.left - PEEK_KEEP_MARGIN
+      : x <= sidebarRect.right + PEEK_KEEP_MARGIN
+    : false
 
   if (inTriggerZone || (isSidebarPeeked.value && inPanelZone)) {
     // Курсор в зоне — показываем панель
-    if (peekLeaveTimeout) {
-      clearTimeout(peekLeaveTimeout)
-      peekLeaveTimeout = null
-    }
+    cancelSidebarPeekHide()
     isSidebarPeeked.value = true
   } else if (isSidebarPeeked.value) {
     // Курсор вышел — скрываем с задержкой
-    if (!peekLeaveTimeout) {
-      peekLeaveTimeout = setTimeout(() => {
-        isSidebarPeeked.value = false
-        peekLeaveTimeout = null
-      }, 400)
-    }
+    scheduleSidebarPeekHide()
   }
+}
+
+const handleDocumentMouseLeave = (event) => {
+  if (!sidebarAutoHide.value) return
+  if (event.relatedTarget || event.toElement) return
+
+  hideSidebarPeek()
 }
 
 // Флаг состояния боковой панели
@@ -267,6 +289,8 @@ const updateNavigationHistory = (to) => {
 onMounted(() => {
   document.addEventListener('click', handleClickOutside)
   document.addEventListener('mousemove', handleMouseMove, { passive: true })
+  document.addEventListener('mouseleave', handleDocumentMouseLeave)
+  window.addEventListener('blur', hideSidebarPeek)
   if (route.fullPath) {
     internalNavigationHistory.value.push(route.fullPath)
   }
@@ -284,9 +308,14 @@ onBeforeUnmount(() => {
     clearTimeout(peekLeaveTimeout)
   }
   document.removeEventListener('mousemove', handleMouseMove)
+  document.removeEventListener('mouseleave', handleDocumentMouseLeave)
+  window.removeEventListener('blur', hideSidebarPeek)
 })
 
 watch(() => route.fullPath, () => updateNavigationHistory(route))
+watch(sidebarAutoHide, (enabled) => {
+  if (!enabled) hideSidebarPeek()
+})
 </script>
 
 <style lang="scss" scoped>
