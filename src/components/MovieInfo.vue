@@ -594,7 +594,7 @@
                     class="timing-card-count"
                     :title="`Авторизованный пользователь (${timing.user_timing_count} таймингов)`"
                   >
-                    (${timing.user_timing_count})
+                    {{ timing.user_timing_count }}
                   </span>
                 </span>
                 <div class="timing-card-badges">
@@ -4338,8 +4338,19 @@ const handleFilterSelect = () => {
 }
 
 .timing-card-count {
-  color: rgba(255, 255, 255, 0.4);
-  font-size: 11px;
+  min-width: 18px;
+  height: 18px;
+  padding: 0 6px;
+  border-radius: 999px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: rgba(255, 255, 255, 0.55);
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  font-size: 10px;
+  line-height: 1;
+  font-weight: 700;
 }
 
 .timing-card-badges {
