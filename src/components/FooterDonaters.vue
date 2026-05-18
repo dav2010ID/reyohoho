@@ -113,7 +113,7 @@ let memoryCache = {
   twitch: null
 }
 
-let isFetchingTwitch = false
+const isFetchingTwitch = ref(false)
 
 const featuredDonors = ref([
   {
@@ -208,7 +208,7 @@ const safeSaveToStorage = (key, value, cacheType) => {
 }
 
 const fetchTwitchData = async () => {
-  if (isFetchingTwitch) {
+  if (isFetchingTwitch.value) {
     return
   }
 
@@ -231,7 +231,7 @@ const fetchTwitchData = async () => {
 
   if (usernamesWithTwitch.length === 0) return
 
-  isFetchingTwitch = true
+  isFetchingTwitch.value = true
 
   try {
     const promises = usernamesWithTwitch.map(async (username) => {
@@ -292,7 +292,7 @@ const fetchTwitchData = async () => {
   } catch (error) {
     console.error('fetchTwitchData:', error)
   } finally {
-    isFetchingTwitch = false
+    isFetchingTwitch.value = false
   }
 }
 

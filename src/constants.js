@@ -19,6 +19,8 @@ export const USER_LIST_TYPES_ENUM = {
   RATED: 'rated'
 }
 
+export const DEFAULT_ACTIVE_TIME = '24h'
+
 export const LAZY_LOADING_CONFIG = {
   preLoad: 1.3,
   error: noPosterImage,

@@ -163,7 +163,7 @@ import FooterDonaters from '@/components/FooterDonaters.vue'
 import { MovieList } from '@/components/MovieList/'
 import { useMainStore } from '@/store/main'
 import { useAuthStore } from '@/store/auth'
-import { USER_LIST_TYPES_ENUM } from '@/constants'
+import { USER_LIST_TYPES_ENUM, DEFAULT_ACTIVE_TIME } from '@/constants'
 import { hasConsecutiveConsonants, suggestLayout, convertLayout } from '@/utils/keyboardLayout'
 import { normalizeBasePath } from '@/utils/basePath'
 import debounce from 'lodash.debounce'
@@ -280,7 +280,7 @@ const loadHomeTopMovies = async () => {
   try {
     topMoviesPage.value = 1
     const movies = await getMovies({
-      activeTime: '24h',
+      activeTime: DEFAULT_ACTIVE_TIME,
       typeFilter: 'all',
       page: 1,
       limit: HOME_TOP_PAGE_SIZE
@@ -313,7 +313,7 @@ const loadMoreHomeTopMovies = async () => {
   try {
     const nextPage = topMoviesPage.value + 1
     const movies = await getMovies({
-      activeTime: '24h',
+      activeTime: DEFAULT_ACTIVE_TIME,
       typeFilter: 'all',
       page: nextPage,
       limit: HOME_TOP_PAGE_SIZE

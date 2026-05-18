@@ -1,7 +1,7 @@
 const OVERLAY_FONT =
   "-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif"
-const PANEL_BACKGROUND = 'rgba(0, 0, 0, 0.7)'
-const PANEL_BACKDROP = 'blur(10px)'
+const PANEL_BACKGROUND = 'rgba(20, 20, 20, 0.8)'
+const PANEL_BACKDROP = 'blur(12px)'
 const PANEL_BORDER = '1px solid rgba(255, 255, 255, 0.14)'
 const ACCENT_COLOR = '#ff6b35'
 const ACCENT_HOVER = '#e55a2b'
@@ -193,18 +193,18 @@ export const getVideoProgressStyle = ({ fontSize, showBackground }) => `
 
 export const getTimingsPanelStyle = ({ showBackground }) => `
   position: absolute !important;
-  top: 18px !important;
-  right: 116px !important;
+  top: 80px !important;
+  right: 20px !important;
   box-sizing: border-box !important;
   background: ${getPanelBackground(showBackground)} !important;
   backdrop-filter: ${getPanelBackdrop(showBackground)} !important;
   border: ${showBackground ? PANEL_BORDER : 'none'} !important;
-  border-radius: 10px !important;
-  padding: ${showBackground ? '10px 12px' : '0'} !important;
+  border-radius: 12px !important;
+  padding: ${showBackground ? '12px 16px' : '0'} !important;
   width: auto !important;
   min-width: ${showBackground ? '220px' : 'auto'} !important;
-  max-width: min(560px, calc(100% - 148px)) !important;
-  box-shadow: ${showBackground ? '0 10px 30px rgba(0, 0, 0, 0.35)' : 'none'} !important;
+  max-width: min(560px, calc(100% - 40px)) !important;
+  box-shadow: ${showBackground ? '0 8px 24px rgba(0, 0, 0, 0.4)' : 'none'} !important;
   pointer-events: none !important;
   display: none !important;
   transition: opacity 0.3s ease, visibility 0.3s ease !important;
@@ -230,8 +230,11 @@ export const getTimingsHeaderStyle = ({ fontSize }) => `
   justify-content: space-between !important;
   gap: 10px !important;
   min-width: 0 !important;
-  font-size: ${Math.max(11, fontSize - 6)}px !important;
+  font-size: ${Math.max(12, fontSize - 4)}px !important;
   line-height: 1.2 !important;
+  margin-bottom: 8px !important;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1) !important;
+  padding-bottom: 8px !important;
 `
 
 export const getTimingsLabelStyle = () => `
@@ -279,17 +282,20 @@ export const getTimingChipStyle = ({ status, highlight }) => {
       : 'rgba(255, 255, 255, 0.1)'
 
   return `
-    display: block !important;
+    display: flex !important;
+    align-items: center !important;
+    gap: 8px !important;
     box-sizing: border-box !important;
     max-width: 100% !important;
-    padding: 5px 7px !important;
-    border-radius: 7px !important;
+    padding: 6px 10px !important;
+    border-radius: 8px !important;
     color: ${textStyle.color} !important;
     background: ${background} !important;
     border: 1px solid ${borderColor} !important;
-    font-weight: ${textStyle.fontWeight || 600} !important;
+    font-weight: ${textStyle.fontWeight || 500} !important;
     white-space: normal !important;
     overflow-wrap: anywhere !important;
+    transition: all 0.2s ease !important;
   `
 }
 
@@ -300,29 +306,33 @@ export const getControlsContainerStyle = () => `
   display: flex !important;
   gap: 8px !important;
   pointer-events: all !important;
+  background: rgba(20, 20, 20, 0.8) !important;
+  padding: 8px !important;
+  border-radius: 12px !important;
+  backdrop-filter: blur(12px) !important;
+  border: 1px solid rgba(255, 255, 255, 0.14) !important;
 `
 
-export const getOverlayButtonStyle = ({ fontSize = 18, fontWeight = 'normal' } = {}) => `
-  background: rgba(0, 0, 0, 0.8) !important;
-  backdrop-filter: blur(10px) !important;
+export const getOverlayButtonStyle = ({ fontSize = 16, fontWeight = 'normal' } = {}) => `
+  background: rgba(255, 255, 255, 0.1) !important;
   color: white !important;
-  border: 1px solid rgba(255, 255, 255, 0.2) !important;
-  border-radius: 50% !important;
-  width: 40px !important;
-  height: 40px !important;
+  border: 1px solid rgba(255, 255, 255, 0.05) !important;
+  border-radius: 8px !important;
+  width: 36px !important;
+  height: 36px !important;
   display: flex !important;
   align-items: center !important;
   justify-content: center !important;
   cursor: pointer !important;
-  transition: all 0.3s ease !important;
+  transition: all 0.2s ease !important;
   font-size: ${fontSize}px !important;
   font-weight: ${fontWeight} !important;
 `
 
 export const applyOverlayButtonHoverStyle = (button, hovered) => {
-  button.style.background = hovered ? ACCENT_COLOR : 'rgba(0, 0, 0, 0.8)'
-  button.style.borderColor = hovered ? ACCENT_COLOR : 'rgba(255, 255, 255, 0.2)'
-  button.style.transform = hovered ? 'scale(1.1)' : 'scale(1)'
+  button.style.background = hovered ? ACCENT_COLOR : 'rgba(255, 255, 255, 0.1)'
+  button.style.borderColor = hovered ? ACCENT_COLOR : 'rgba(255, 255, 255, 0.05)'
+  button.style.transform = hovered ? 'scale(1.05)' : 'scale(1)'
 }
 
 export const applyOverlayVisibilityStyle = (element, visible) => {
@@ -331,24 +341,24 @@ export const applyOverlayVisibilityStyle = (element, visible) => {
 }
 
 export const applyOverlayTitleBackgroundStyle = (element, showBackground) => {
-  element.style.background = `${getPanelBackground(showBackground)} !important`
-  element.style.backdropFilter = `${getPanelBackdrop(showBackground)} !important`
-  element.style.width = `${showBackground ? 'fit-content' : 'auto'} !important`
-  element.style.display = 'inline-block !important'
+  element.style.setProperty('background', getPanelBackground(showBackground), 'important')
+  element.style.setProperty('backdrop-filter', getPanelBackdrop(showBackground), 'important')
+  element.style.setProperty('width', showBackground ? 'fit-content' : 'auto', 'important')
+  element.style.setProperty('display', 'inline-block', 'important')
 }
 
 export const applyOverlayProgressBackgroundStyle = (element, showBackground) => {
-  element.style.background = `${getPanelBackground(showBackground)} !important`
-  element.style.backdropFilter = `${getPanelBackdrop(showBackground)} !important`
-  element.style.borderRadius = `${showBackground ? '6px' : '0'} !important`
-  element.style.padding = `${showBackground ? '8px 12px' : '0'} !important`
-  element.style.width = `${showBackground ? 'fit-content' : 'auto'} !important`
-  element.style.display = `${showBackground ? 'inline-flex' : 'flex'} !important`
+  element.style.setProperty('background', getPanelBackground(showBackground), 'important')
+  element.style.setProperty('backdrop-filter', getPanelBackdrop(showBackground), 'important')
+  element.style.setProperty('border-radius', showBackground ? '6px' : '0', 'important')
+  element.style.setProperty('padding', showBackground ? '8px 12px' : '0', 'important')
+  element.style.setProperty('width', showBackground ? 'fit-content' : 'auto', 'important')
+  element.style.setProperty('display', showBackground ? 'inline-flex' : 'flex', 'important')
 }
 
 export const applyOverlayTimingsBackgroundStyle = (element, showBackground) => {
-  element.style.background = `${getPanelBackground(showBackground)} !important`
-  element.style.backdropFilter = `${getPanelBackdrop(showBackground)} !important`
+  element.style.setProperty('background', getPanelBackground(showBackground), 'important')
+  element.style.setProperty('backdrop-filter', getPanelBackdrop(showBackground), 'important')
   element.style.border = showBackground ? PANEL_BORDER : 'none'
   element.style.boxShadow = showBackground ? '0 10px 30px rgba(0, 0, 0, 0.35)' : 'none'
   element.style.width = 'auto'

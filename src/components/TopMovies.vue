@@ -64,7 +64,8 @@ import { useRoute, useRouter } from 'vue-router'
 
 const movies = ref([])
 const loading = ref(false)
-const activeTimeFilter = ref('24h')
+import { DEFAULT_ACTIVE_TIME } from '@/constants'
+const activeTimeFilter = ref(DEFAULT_ACTIVE_TIME)
 const typeFilter = ref('all')
 const lastNormalTypeFilter = ref('all')
 const errorMessage = ref('')
@@ -196,7 +197,7 @@ const setupInfiniteScroll = async () => {
 }
 
 const applyRouteFilters = (query) => {
-  const nextTime = typeof query.time === 'string' && query.time ? query.time : '24h'
+  const nextTime = typeof query.time === 'string' && query.time ? query.time : DEFAULT_ACTIVE_TIME
   const nextType = typeof query.type === 'string' && query.type ? query.type : null
 
   activeTimeFilter.value = nextTime
