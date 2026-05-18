@@ -497,11 +497,24 @@ const performSearch = async () => {
       if (!/^\d+$/.test(searchTerm.value)) {
         searchTerm.value = searchTerm.value.replace(/\D/g, '')
       }
-      const response = await getKpIDfromIMDB(searchTerm.value)
+
+      let response = null
+      try {
+        response = await getKpIDfromIMDB(searchTerm.value)
+      } catch (error) {
+        if (error.response?.status === 404) {
+          errorMessage.value = 'IMDb ID не найден'
+          errorCode.value = 404
+          return
+        }
+        throw error
+      }
+
       if (response.id_kp) {
         router.push(getMovieSeoPath({ kp_id: `${response.id_kp}` }))
       } else {
-        throw new Error('Не найдено')
+        errorMessage.value = 'IMDb ID не найден'
+        errorCode.value = 404
       }
       return
     }
@@ -529,7 +542,8 @@ const performSearch = async () => {
       movies.value = response.map((movie) => ({
         ...movie,
         kp_id: movie.id.toString(),
-        rating_kp: movie.raw_data?.rating !== 'null' ? movie.raw_data?.rating : null,
+        rating_kp:
+          movie.rating_kp ?? (movie.raw_data?.rating !== 'null' ? movie.raw_data?.rating : null),
         type: movie.raw_data?.type
       }))
     }
@@ -537,7 +551,9 @@ const performSearch = async () => {
     const { message, code } = handleApiError(error)
     errorMessage.value = message
     errorCode.value = code
-    console.error('Ошибка при поиске:', error)
+    if (code !== 404) {
+      console.error('Ошибка при поиске:', error)
+    }
   } finally {
     loading.value = false
   }
@@ -963,7 +979,8 @@ h2 {
 @media (max-width: 600px) {
   .mainpage {
     padding-top: 0;
-    height: calc(100vh - 30px - 63px);
+    min-height: calc(100vh - 30px - 63px);
+    height: auto;
   }
 
   .search-container,

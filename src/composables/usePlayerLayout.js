@@ -8,12 +8,18 @@ const getViewportPlayerHeight = () => {
   return window.innerHeight * (window.innerWidth < 700 ? 0.6 : 0.985)
 }
 
+const isMobileViewport = () => {
+  if (typeof window === 'undefined') return false
+  return window.matchMedia?.('(max-width: 700px)').matches || window.innerWidth < 700
+}
+
 export const usePlayerLayout = ({ mainStore, playerStore, containerRef, playerIframe }) => {
   const theaterMode = ref(false)
   const closeButtonVisible = ref(false)
   const closeButtonWasVisible = ref(false)
   const theaterModeCloseButtonTimeout = ref(null)
   const maxPlayerHeightValue = ref(getViewportPlayerHeight())
+  const theaterFullscreenActive = ref(false)
 
   const maxPlayerHeight = computed(() => `${maxPlayerHeightValue.value}px`)
   const dimmingEnabled = computed(() => mainStore.dimmingEnabled)
@@ -82,6 +88,48 @@ export const usePlayerLayout = ({ mainStore, playerStore, containerRef, playerIf
     }, 4000)
   }
 
+  const lockMobileLandscape = async () => {
+    if (!isMobileViewport() || typeof document === 'undefined') return
+
+    try {
+      if (!document.fullscreenElement && containerRef.value?.requestFullscreen) {
+        await containerRef.value.requestFullscreen()
+        theaterFullscreenActive.value = true
+      }
+    } catch {
+      theaterFullscreenActive.value = false
+    }
+
+    try {
+      await window.screen?.orientation?.lock?.('landscape')
+    } catch {
+      // Browser support is inconsistent; theater mode should still work without orientation lock.
+    }
+  }
+
+  const unlockMobileLandscape = async () => {
+    try {
+      window.screen?.orientation?.unlock?.()
+    } catch {
+      // Some browsers expose orientation but reject unlock outside fullscreen.
+    }
+
+    if (
+      theaterFullscreenActive.value &&
+      typeof document !== 'undefined' &&
+      document.fullscreenElement &&
+      document.exitFullscreen
+    ) {
+      try {
+        await document.exitFullscreen()
+      } catch {
+        // Leaving theater mode must not depend on fullscreen API support.
+      }
+    }
+
+    theaterFullscreenActive.value = false
+  }
+
   const toggleTheaterMode = () => {
     theaterMode.value = !theaterMode.value
     if (theaterMode.value) {
@@ -89,11 +137,13 @@ export const usePlayerLayout = ({ mainStore, playerStore, containerRef, playerIf
       document.addEventListener('keydown', onKeyDown)
       document.body.classList.add('no-scroll')
       document.body.classList.add(THEATER_MODE_BODY_CLASS)
+      lockMobileLandscape()
     } else {
       window.removeEventListener('mousemove', showCloseButton)
       document.removeEventListener('keydown', onKeyDown)
       document.body.classList.remove('no-scroll')
       document.body.classList.remove(THEATER_MODE_BODY_CLASS)
+      unlockMobileLandscape()
     }
 
     closeButtonVisible.value = theaterMode.value
@@ -137,6 +187,7 @@ export const usePlayerLayout = ({ mainStore, playerStore, containerRef, playerIf
     document.removeEventListener('keydown', onKeyDown)
     document.body.classList.remove('no-scroll')
     document.body.classList.remove(THEATER_MODE_BODY_CLASS)
+    unlockMobileLandscape()
 
     if (theaterModeCloseButtonTimeout.value) {
       clearTimeout(theaterModeCloseButtonTimeout.value)

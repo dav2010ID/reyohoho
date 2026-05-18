@@ -16,6 +16,7 @@
       <div v-show="startX" class="icon-container">
         <slot name="swipe-icon">
           <TrashIcon />
+          <span>Удалить</span>
         </slot>
       </div>
     </div>
@@ -60,6 +61,7 @@ const startY = ref(0)
 const currentY = ref(0)
 const swiping = ref(false)
 const width = ref(0)
+const height = ref(0)
 const isScrolling = ref(false)
 
 const deltaX = computed(() => currentX.value - startX.value)
@@ -71,6 +73,7 @@ function onTouchStart(e) {
   if (disabled || !showDelete) return
 
   width.value = swipeElement.value?.offsetWidth ?? 0
+  height.value = swipeElement.value?.offsetHeight ?? 0
   startX.value = e.touches[0].clientX
   startY.value = e.touches[0].clientY
   currentX.value = startX.value
@@ -148,6 +151,7 @@ function resetSwipe() {
     swipeElement.value.style.transform = ''
     swipeElement.value.style.opacity = ''
   }
+  height.value = 0
 }
 </script>
 
@@ -155,33 +159,37 @@ function resetSwipe() {
 .swipe-container {
   position: relative;
   overflow: hidden;
+  border-radius: 15px;
 }
 
 .swipe-background {
   z-index: 0;
   position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
+  inset: 0;
   background-color: transparent;
   display: flex;
   align-items: center;
   justify-content: flex-start;
-  padding-left: 16px;
-  transition: background-color 0.2s ease;
-  border-radius: 10px;
+  padding: 0 18px;
+  transition:
+    background-color 0.2s ease,
+    opacity 0.2s ease;
+  border-radius: inherit;
+  min-height: v-bind('height ? `${height}px` : `100%`');
 }
 
 .swipe-background.swipe-left {
-  background-color: v-bind(backgroundSwipeColor);
+  background:
+    linear-gradient(90deg, color-mix(in srgb, v-bind(backgroundSwipeColor) 88%, #000 12%), transparent 72%),
+    v-bind(backgroundSwipeColor);
   justify-content: flex-start;
 }
 
 .swipe-background.swipe-right {
-  background-color: v-bind(backgroundSwipeColor);
+  background:
+    linear-gradient(270deg, color-mix(in srgb, v-bind(backgroundSwipeColor) 88%, #000 12%), transparent 72%),
+    v-bind(backgroundSwipeColor);
   justify-content: flex-end;
-  padding-right: 16px;
 }
 
 .swipe-wrapper {
@@ -198,14 +206,37 @@ function resetSwipe() {
 }
 
 .icon-container {
+  min-width: 82px;
+  display: inline-flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  color: #fff;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0;
+  text-shadow: 0 1px 8px rgba(0, 0, 0, 0.35);
+}
+
+.icon-container :deep(.bin) {
   width: 24px;
-  height: 24px;
+  height: 28px;
+  filter: drop-shadow(0 2px 6px rgba(0, 0, 0, 0.35));
+}
+
+.icon-container :deep(.bin path) {
+  fill: #fff;
 }
 
 @media (max-width: 620px) {
-  .swipe-background {
-    height: 200px;
+  .swipe-container {
     border-radius: 15px;
+  }
+
+  .swipe-background {
+    padding: 0 16px;
+    align-items: center;
   }
 }
 </style>

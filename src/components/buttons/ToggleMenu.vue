@@ -67,6 +67,11 @@ function toggle() {
   color: #fff;
 }
 
+.toggle[aria-expanded='true'] {
+  opacity: 0;
+  pointer-events: none;
+}
+
 .mobile-badge {
   position: absolute;
   top: 5px;

@@ -171,20 +171,44 @@
 
 @media (max-width: 600px) {
   .controls {
-    width: calc(100% - 12px);
+    width: calc(100% - 16px);
+    max-width: none;
     box-sizing: border-box;
+    margin: 6px auto 10px;
+    padding: 6px;
+    border-radius: 8px;
   }
 
   .main-controls {
-    justify-content: flex-start;
+    width: 100%;
+    justify-content: center;
     overflow-x: auto;
     flex-wrap: nowrap;
-    padding-bottom: 2px;
+    gap: 6px;
+    padding-bottom: 0;
+    scrollbar-width: none;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .main-controls::-webkit-scrollbar {
+    display: none;
   }
 
   .controls button {
-    width: 42px;
-    height: 42px;
-    flex: 0 0 42px;
+    width: 44px;
+    height: 40px;
+    flex: 0 0 44px;
+    min-width: 44px;
+    padding: 0;
+    border-radius: 7px;
+  }
+
+  .controls .aspect-ratio-dropdown-btn {
+    flex-basis: 64px;
+    min-width: 64px;
+  }
+
+  .controls .current-ratio {
+    font-size: 13px;
   }
 }

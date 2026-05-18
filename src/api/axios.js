@@ -37,7 +37,18 @@ const attachDynamicRequestState = (instance) => {
   instance.interceptors.response.use(
     (res) => res,
     (err) => {
-      console.error('Error', err)
+      const method = err.config?.method?.toUpperCase?.() || 'REQUEST'
+      const baseURL = err.config?.baseURL || instance.defaults.baseURL || ''
+      const url = err.config?.url || ''
+      const requestUrl = url.startsWith('http') ? url : `${baseURL}${url}`
+
+      console.error('[API Error]', {
+        method,
+        url: requestUrl,
+        status: err.response?.status,
+        data: err.response?.data,
+        message: err.message
+      })
       return Promise.reject(err)
     }
   )

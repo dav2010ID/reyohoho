@@ -481,22 +481,12 @@
             <h2>Сиквелы и приквелы</h2>
           </div>
           <MovieList
-            :movies-list="
-              showAllSequels ? sequelsAndPrequels : sequelsAndPrequels.slice(0, itemsPerRow)
-            "
+            :movies-list="sequelsAndPrequels"
             :loading="false"
             :is-history="false"
             variant="related"
             class="related-movies-list"
           />
-          <a
-            v-if="sequelsAndPrequels.length > itemsPerRow"
-            class="expand-circle-button"
-            :title="`${showAllSequels ? 'Скрыть' : 'Показать все'} (${sequelsAndPrequels.length})`"
-            @click="showAllSequels = !showAllSequels"
-          >
-            {{ showAllSequels ? '−' : `+${sequelsAndPrequels.length - itemsPerRow}` }}
-          </a>
         </div>
 
         <!-- Секция с похожими фильмами -->
@@ -505,20 +495,12 @@
             <h2>Похожие</h2>
           </div>
           <MovieList
-            :movies-list="showAllSimilars ? similars : similars.slice(0, itemsPerRow)"
+            :movies-list="similars"
             :loading="false"
             :is-history="false"
             variant="related"
             class="related-movies-list"
           />
-          <a
-            v-if="similars.length > itemsPerRow"
-            class="expand-circle-button"
-            :title="`${showAllSimilars ? 'Скрыть' : 'Показать все'} (${similars.length})`"
-            @click="showAllSimilars = !showAllSimilars"
-          >
-            {{ showAllSimilars ? '−' : `+${similars.length - itemsPerRow}` }}
-          </a>
         </div>
       </div>
     </div>
@@ -603,7 +585,7 @@
               }"
             >
               <div class="timing-content">
-                <div class="timing-header-row" style="display: flex; align-items: center; gap: 8px">
+                <div class="timing-header-row">
                   <div v-if="timing.status === 'pending'" class="pending-badge">На модерации</div>
                   <div v-if="timing.status === 'clean_text'" class="clean-text-badge">
                     Тайминги такого типа не модерируются, для уверенности сверяйтесь с ParentsGuide
@@ -615,10 +597,7 @@
                     <i class="fas fa-thumbs-up"></i> Рекомендуется
                   </div>
                 </div>
-                <div
-                  class="timing-actions-row"
-                  style="display: flex; align-items: center; gap: 8px; margin-top: 8px"
-                >
+                <div class="timing-actions-row">
                   <button class="nudity-info-button" @click="handleShowParse(timing)">
                     {{ showParseResult[timing.id] ? 'Скрыть парсер' : 'Показать парсер' }}
                   </button>
@@ -717,7 +696,7 @@
                 </div>
                 <div
                   v-if="showParseResult[timing.id] && Array.isArray(showParseResult[timing.id])"
-                  style="color: #fff; font-size: 13px; margin: 4px 0 0 0"
+                  class="timing-parse-result"
                 >
                   <b>Парсер:</b>
                   <span v-if="showParseResult[timing.id].length === 0">Не удалось распарсить</span>
@@ -741,17 +720,11 @@
         <div
           v-if="showGeneralParserResult && selectedTimings.size > 0"
           class="general-parser-result"
-          style="
-            margin-top: 15px;
-            padding: 15px;
-            background: rgba(255, 255, 255, 0.05);
-            border-radius: 8px;
-          "
         >
-          <h4 style="margin: 0 0 10px 0; color: #fff">
+          <h4>
             Общий парсер ({{ selectedTimings.size }} таймингов):
           </h4>
-          <div style="color: #fff; font-size: 13px">
+          <div>
             <span v-if="getGeneralParserResult().length === 0"
               >Не удалось распарсить выбранные тайминги</span
             >
@@ -767,17 +740,11 @@
         <div
           v-if="showOverlayParserResult && overlayTimings.size > 0"
           class="overlay-parser-result"
-          style="
-            margin-top: 15px;
-            padding: 15px;
-            background: rgba(255, 255, 255, 0.05);
-            border-radius: 8px;
-          "
         >
-          <h4 style="margin: 0 0 10px 0; color: #fff">
+          <h4>
             Парсер оверлея ({{ overlayTimings.size }} таймингов):
           </h4>
-          <div style="color: #fff; font-size: 13px">
+          <div>
             <span v-if="getOverlayParserResult().length === 0"
               >Не удалось распарсить выбранные тайминги</span
             >
@@ -1003,10 +970,6 @@ const clientReady = ref(false)
 
 const areTrailersActive = computed(() => trailerStore.areTrailersActive)
 const activeTrailerIndex = ref(null)
-const showAllSequels = ref(false)
-const showAllSimilars = ref(false)
-
-const itemsPerRow = ref(10)
 
 const nudityInfo = ref(null)
 const nudityInfoLoading = ref(false)
@@ -1324,17 +1287,6 @@ const sequelsAndPrequels = computed(() =>
 
 const similars = computed(() => transformMoviesData(movieInfo.value?.similars))
 
-const updateItemsPerRow = () => {
-  const containerWidth = document.querySelector('.related-movies')?.clientWidth || 0
-  const itemWidth = 140 + 20
-  const newItemsPerRow = Math.floor(containerWidth / itemWidth) || 10
-  itemsPerRow.value = Math.max(1, newItemsPerRow)
-}
-
-const onResize = () => {
-  updateItemsPerRow()
-}
-
 const onKeyDown = (event) => {
   if (event.altKey && event.keyCode === 84) {
     const playerComponent = document.querySelector('.player-container')
@@ -1496,8 +1448,6 @@ onMounted(async () => {
   await fetchMovieInfo()
   infoLoading.value = false
   document.addEventListener('keydown', onKeyDown)
-  window.addEventListener('resize', onResize)
-  setTimeout(updateItemsPerRow, 100)
   document.addEventListener('click', handleClickOutside)
   document.addEventListener('click', handleNudityPopupOutsideClick, true)
   document.addEventListener('click', handleNudityTimingsPopupOutsideClick, true)
@@ -1508,7 +1458,6 @@ onMounted(async () => {
 onUnmounted(async () => {
   navbarStore.clearHeaderContent()
   document.removeEventListener('keydown', onKeyDown)
-  window.removeEventListener('resize', onResize)
   document.removeEventListener('click', handleClickOutside)
   document.removeEventListener('click', handleNudityPopupOutsideClick, true)
   document.removeEventListener('click', handleNudityTimingsPopupOutsideClick, true)
@@ -3250,14 +3199,14 @@ const handleFilterSelect = () => {
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
-  background: rgba(0, 0, 0, 0.95);
-  border: 1px solid #333;
-  border-radius: 8px;
-  padding: 20px;
-  min-width: 900px;
-  max-width: 1500px;
+  background: rgba(14, 14, 16, 0.96);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 10px;
+  padding: 16px;
+  width: min(1180px, calc(100vw - 32px));
   z-index: 1000;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+  box-shadow: 0 18px 60px rgba(0, 0, 0, 0.55);
+  backdrop-filter: blur(14px);
 }
 
 .nudity-info-content {
@@ -3265,9 +3214,10 @@ const handleFilterSelect = () => {
   font-size: 14px;
   line-height: 1.5;
   white-space: pre-wrap;
-  margin-bottom: 15px;
-  max-height: 80vh;
+  margin-bottom: 12px;
+  max-height: min(78vh, 760px);
   overflow-y: auto;
+  padding-right: 4px;
 }
 
 .nudity-info-loading {
@@ -3286,30 +3236,36 @@ const handleFilterSelect = () => {
 
 .nudity-info-actions {
   display: flex;
-  gap: 10px;
+  gap: 8px;
   justify-content: flex-start;
   margin-top: 10px;
+  flex-wrap: wrap;
 }
 
 .nudity-info-button {
-  display: flex;
+  display: inline-flex;
   align-items: center;
-  gap: 5px;
-  padding: 8px 12px;
+  justify-content: center;
+  gap: 6px;
+  min-height: 34px;
+  padding: 7px 10px;
   background: rgba(255, 255, 255, 0.1);
-  border: none;
-  border-radius: 4px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 7px;
   color: #fff;
-  font-size: 14px;
+  font-size: 13px;
+  font-weight: 600;
   cursor: pointer;
   transition: all 0.2s ease;
   pointer-events: all;
+  line-height: 1.2;
 }
 
 .nudity-info-button:hover {
-  background: var(--accent-color);
-  transform: translateY(-2px);
-  box-shadow: 0 4px 8px var(--accent-semi-transparent);
+  background: rgba(255, 255, 255, 0.16);
+  border-color: rgba(255, 255, 255, 0.2);
+  transform: translateY(-1px);
+  box-shadow: 0 6px 14px rgba(0, 0, 0, 0.18);
 }
 
 .nudity-info-button i {
@@ -3318,9 +3274,8 @@ const handleFilterSelect = () => {
 
 @media (max-width: 600px) {
   .nudity-info-popup {
-    min-width: 300px;
-    max-width: 95vw;
-    margin: 0 10px;
+    width: calc(100vw - 16px);
+    padding: 10px;
   }
 }
 
@@ -3476,8 +3431,33 @@ const handleFilterSelect = () => {
   }
 
   .related-movies-list :deep(.grid) {
-    grid-template-columns: 1fr;
-    gap: 10px;
+    display: flex;
+    grid-template-columns: none;
+    justify-content: flex-start;
+    width: 100%;
+    gap: 12px;
+    overflow-x: auto;
+    overflow-y: hidden;
+    padding: 0 2px 8px;
+    scroll-snap-type: x proximity;
+    scrollbar-width: thin;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .related-movies-list :deep(.grid > *) {
+    flex: 0 0 156px;
+    width: 156px;
+    scroll-snap-align: start;
+  }
+
+  .related-movies-list :deep(.grid.card-size-small > *) {
+    flex-basis: 132px;
+    width: 132px;
+  }
+
+  .related-movies-list :deep(.grid.card-size-large > *) {
+    flex-basis: 172px;
+    width: 172px;
   }
 }
 
@@ -3709,24 +3689,24 @@ const handleFilterSelect = () => {
 }
 
 .timings-content {
-  border-top: 1px solid rgba(255, 255, 255, 0.1);
-  padding-top: 15px;
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+  padding-top: 12px;
   display: flex;
   flex-direction: column;
-  gap: 15px;
+  gap: 12px;
 }
 
 .timings-warning {
-  background: rgba(255, 193, 7, 0.1);
-  border: 1px solid rgba(255, 193, 7, 0.3);
+  background: rgba(255, 193, 7, 0.08);
+  border: 1px solid rgba(255, 193, 7, 0.22);
   border-radius: 8px;
-  padding: 12px;
+  padding: 10px 12px;
   display: flex;
   align-items: center;
   gap: 8px;
   color: #ffc107;
   font-weight: 500;
-  margin-bottom: 10px;
+  margin-bottom: 2px;
 }
 
 .timings-warning i {
@@ -3740,8 +3720,9 @@ const handleFilterSelect = () => {
 }
 
 .edit-button {
-  background: rgba(40, 167, 69, 0.1) !important;
-  border: 1px solid rgba(40, 167, 69, 0.3) !important;
+  background: rgba(40, 167, 69, 0.12) !important;
+  border-color: rgba(40, 167, 69, 0.28) !important;
+  color: #8ce99a;
 }
 
 .edit-button:hover {
@@ -3749,8 +3730,9 @@ const handleFilterSelect = () => {
 }
 
 .delete-button {
-  background: rgba(220, 53, 69, 0.1) !important;
-  border: 1px solid rgba(220, 53, 69, 0.3) !important;
+  background: rgba(220, 53, 69, 0.12) !important;
+  border-color: rgba(220, 53, 69, 0.28) !important;
+  color: #ff8787;
 }
 
 .delete-button:hover {
@@ -3758,8 +3740,9 @@ const handleFilterSelect = () => {
 }
 
 .report-button {
-  background: rgba(255, 193, 7, 0.1) !important;
-  border: 1px solid rgba(255, 193, 7, 0.3) !important;
+  background: rgba(255, 193, 7, 0.12) !important;
+  border-color: rgba(255, 193, 7, 0.28) !important;
+  color: #ffd43b;
 }
 
 .report-button:hover {
@@ -4292,37 +4275,46 @@ const handleFilterSelect = () => {
 .timing-entries {
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 10px;
 }
 
 .timing-entry {
-  padding: 8px;
-  background: rgba(255, 255, 255, 0.05);
-  border-radius: 4px;
+  padding: 12px;
+  background: rgba(255, 255, 255, 0.045);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 8px;
   transition: all 0.2s ease;
 }
 
+.timing-entry:hover {
+  background: rgba(255, 255, 255, 0.065);
+  border-color: rgba(255, 255, 255, 0.14);
+}
+
 .timing-entry.top-rated {
-  background: rgba(34, 197, 94, 0.08);
-  border: 1px solid rgba(34, 197, 94, 0.2);
+  background: rgba(34, 197, 94, 0.07);
+  border-color: rgba(34, 197, 94, 0.22);
 }
 
 .timing-entry.highly-rated {
-  background: rgba(34, 197, 94, 0.12);
-  border: 1px solid rgba(34, 197, 94, 0.3);
-  box-shadow: 0 0 10px rgba(34, 197, 94, 0.1);
+  background: rgba(34, 197, 94, 0.1);
+  border-color: rgba(34, 197, 94, 0.34);
+  box-shadow: 0 0 18px rgba(34, 197, 94, 0.08);
 }
 
 .timing-content {
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 10px 14px;
+  align-items: start;
 }
 
 .timing-text {
   font-family: monospace;
   color: #fff;
-  font-size: 1.1em;
+  font-size: 1.03em;
+  line-height: 1.55;
+  word-break: break-word;
 }
 
 .timing-author {
@@ -4334,18 +4326,22 @@ const handleFilterSelect = () => {
 .timing-vote-container {
   display: flex;
   align-items: center;
-  gap: 8px;
-  margin-top: 8px;
+  justify-content: flex-end;
+  gap: 6px;
+  grid-column: 2;
+  grid-row: 1 / span 3;
+  align-self: center;
+  min-width: 122px;
 }
 
 .vote-button {
   display: flex;
   align-items: center;
   gap: 4px;
-  padding: 4px 8px;
+  padding: 5px 8px;
   background: rgba(255, 255, 255, 0.05);
   border: 1px solid rgba(255, 255, 255, 0.1);
-  border-radius: 4px;
+  border-radius: 7px;
   color: rgba(255, 255, 255, 0.7);
   cursor: pointer;
   transition: all 0.2s ease;
@@ -4391,8 +4387,8 @@ const handleFilterSelect = () => {
 .vote-score {
   font-weight: 700;
   font-size: 0.9em;
-  padding: 4px 8px;
-  border-radius: 4px;
+  padding: 5px 8px;
+  border-radius: 7px;
   min-width: 30px;
   text-align: center;
 }
@@ -4423,23 +4419,25 @@ const handleFilterSelect = () => {
 }
 
 .pending-badge {
-  display: inline-block;
+  display: inline-flex;
+  align-items: center;
   background: rgba(255, 165, 0, 0.2);
   color: #ffa500;
-  padding: 2px 6px;
-  border-radius: 4px;
-  font-size: 0.8em;
-  margin-bottom: 4px;
+  padding: 3px 8px;
+  border-radius: 999px;
+  font-size: 0.78em;
+  font-weight: 700;
 }
 
 .clean-text-badge {
-  display: inline-block;
+  display: inline-flex;
+  align-items: center;
   background: rgba(255, 165, 0, 0.2);
   color: #ffa500;
-  padding: 2px 6px;
-  border-radius: 4px;
-  font-size: 0.8em;
-  margin-bottom: 4px;
+  padding: 3px 8px;
+  border-radius: 999px;
+  font-size: 0.78em;
+  font-weight: 700;
 }
 
 .top-rated-badge {
@@ -4448,10 +4446,9 @@ const handleFilterSelect = () => {
   gap: 4px;
   background: rgba(34, 197, 94, 0.2);
   color: #22c55e;
-  padding: 2px 8px;
-  border-radius: 4px;
-  font-size: 0.8em;
-  margin-bottom: 4px;
+  padding: 3px 8px;
+  border-radius: 999px;
+  font-size: 0.78em;
   font-weight: 600;
 }
 
@@ -4462,11 +4459,53 @@ const handleFilterSelect = () => {
   background: rgba(34, 197, 94, 0.3);
   color: #22c55e;
   padding: 3px 10px;
-  border-radius: 4px;
-  font-size: 0.8em;
-  margin-bottom: 4px;
+  border-radius: 999px;
+  font-size: 0.78em;
   font-weight: 700;
   box-shadow: 0 0 8px rgba(34, 197, 94, 0.2);
+}
+
+.timing-header-row {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 6px;
+  grid-column: 1;
+}
+
+.timing-actions-row {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 6px;
+  grid-column: 1;
+}
+
+.timing-hover-container {
+  grid-column: 1;
+  padding: 10px 12px;
+  background: rgba(0, 0, 0, 0.18);
+  border: 1px solid rgba(255, 255, 255, 0.07);
+  border-radius: 7px;
+}
+
+.timing-parse-result,
+.general-parser-result,
+.overlay-parser-result {
+  margin-top: 10px;
+  padding: 12px;
+  background: rgba(0, 0, 0, 0.22);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 8px;
+  color: #fff;
+  font-size: 13px;
+}
+
+.general-parser-result h4,
+.overlay-parser-result h4 {
+  margin: 0 0 8px;
+  color: #fff;
+  font-size: 14px;
 }
 
 .timing-hover-container.blurred {
@@ -4632,6 +4671,27 @@ const handleFilterSelect = () => {
 }
 
 @media (max-width: 768px) {
+  .timing-content {
+    grid-template-columns: 1fr;
+  }
+
+  .timing-header-row,
+  .timing-actions-row,
+  .timing-hover-container,
+  .timing-vote-container {
+    grid-column: 1;
+  }
+
+  .timing-vote-container {
+    grid-row: auto;
+    justify-content: flex-start;
+    min-width: 0;
+  }
+
+  .timing-actions-row .nudity-info-button {
+    flex: 1 1 140px;
+  }
+
   .modal-header-controls {
     flex-direction: column;
     align-items: stretch;
@@ -4798,13 +4858,16 @@ const handleFilterSelect = () => {
 }
 
 .overlay-button {
-  background: var(--accent-color) !important;
+  background: rgba(138, 43, 226, 0.18) !important;
+  border-color: rgba(138, 43, 226, 0.34) !important;
+  color: #d8b4fe !important;
 }
 
 .overlay-button:hover {
-  background: var(--accent-color) !important;
-  transform: translateY(-2px) !important;
-  box-shadow: 0 4px 8px var(--accent-semi-transparent) !important;
+  background: rgba(138, 43, 226, 0.28) !important;
+  border-color: rgba(138, 43, 226, 0.5) !important;
+  transform: translateY(-1px) !important;
+  box-shadow: 0 6px 14px rgba(138, 43, 226, 0.18) !important;
 }
 
 .obs-button {

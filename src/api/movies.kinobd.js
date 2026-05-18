@@ -173,6 +173,20 @@ const extractKinopoiskRating = (film) => {
   return { rating, voteCount }
 }
 
+const extractImdbRating = (film) => {
+  return film?.rating_imdb ?? film?.imdb_rating ?? film?.ratings?.imdb ?? null
+}
+
+const extractAppRating = (film) => {
+  return film?.average_rating ?? film?.rating_reyohoho ?? film?.ratings?.reyohoho ?? null
+}
+
+const toRatingNumber = (rating) => {
+  if (rating === null || rating === undefined || rating === '' || rating === 'null') return null
+  const number = Number(String(rating).replace(',', '.'))
+  return Number.isFinite(number) && number > 0 ? number : null
+}
+
 const buildLegacyMovie = (film) => {
   const kpId = film?.kinopoisk_id || film?.kp_id || film?.id || null
   const year = film?.year || film?.year_start || ''
@@ -181,6 +195,8 @@ const buildLegacyMovie = (film) => {
   const titleBase = nameRu || nameEn || 'Без названия'
   const title = year ? `${titleBase} (${year})` : titleBase
   const { rating: ratingKp, voteCount: ratingKpCount } = extractKinopoiskRating(film)
+  const ratingImdb = extractImdbRating(film)
+  const appRating = extractAppRating(film)
   const normalizedRating =
     ratingKp === null || ratingKp === undefined || ratingKp === '' ? 'null' : String(ratingKp)
   const posters = resolvePosterSetByMovie({
@@ -194,10 +210,9 @@ const buildLegacyMovie = (film) => {
     title,
     year: year ? String(year) : '',
     poster: posters.preview,
-    average_rating:
-      ratingKp === null || ratingKp === undefined || Number.isNaN(Number(ratingKp))
-        ? null
-        : Number(ratingKp),
+    rating_kp: toRatingNumber(ratingKp),
+    rating_imdb: toRatingNumber(ratingImdb),
+    average_rating: toRatingNumber(appRating),
     raw_data: {
       film_id: kpId,
       name_ru: nameRu,
@@ -209,6 +224,7 @@ const buildLegacyMovie = (film) => {
       countries: parseCountries(film),
       genres: parseGenres(film),
       rating: normalizedRating,
+      rating_imdb: ratingImdb === null || ratingImdb === undefined ? null : String(ratingImdb),
       rating_vote_count: ratingKpCount || 0,
       poster_url: posters.full,
       poster_url_preview: posters.preview

@@ -724,6 +724,7 @@ footer {
 
 @media (max-width: 768px) {
   footer {
+    position: static;
     inset-inline-start: 0;
   }
 

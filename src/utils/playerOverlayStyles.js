@@ -2,6 +2,7 @@ const OVERLAY_FONT =
   "-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif"
 const PANEL_BACKGROUND = 'rgba(0, 0, 0, 0.7)'
 const PANEL_BACKDROP = 'blur(10px)'
+const PANEL_BORDER = '1px solid rgba(255, 255, 255, 0.14)'
 const ACCENT_COLOR = '#ff6b35'
 const ACCENT_HOVER = '#e55a2b'
 const MUTED_TEXT = 'rgba(255, 255, 255, 0.6)'
@@ -192,14 +193,18 @@ export const getVideoProgressStyle = ({ fontSize, showBackground }) => `
 
 export const getTimingsPanelStyle = ({ showBackground }) => `
   position: absolute !important;
-  top: 20px !important;
-  right: 110px !important;
+  top: 18px !important;
+  right: 116px !important;
+  box-sizing: border-box !important;
   background: ${getPanelBackground(showBackground)} !important;
   backdrop-filter: ${getPanelBackdrop(showBackground)} !important;
-  border-radius: 12px !important;
-  padding: 16px !important;
-  width: fit-content !important;
-  max-width: 800px !important;
+  border: ${showBackground ? PANEL_BORDER : 'none'} !important;
+  border-radius: 10px !important;
+  padding: ${showBackground ? '10px 12px' : '0'} !important;
+  width: auto !important;
+  min-width: ${showBackground ? '220px' : 'auto'} !important;
+  max-width: min(560px, calc(100% - 148px)) !important;
+  box-shadow: ${showBackground ? '0 10px 30px rgba(0, 0, 0, 0.35)' : 'none'} !important;
   pointer-events: none !important;
   display: none !important;
   transition: opacity 0.3s ease, visibility 0.3s ease !important;
@@ -208,12 +213,85 @@ export const getTimingsPanelStyle = ({ showBackground }) => `
 `
 
 export const getTimingsContentStyle = ({ fontSize }) => `
-  font-size: ${fontSize - 4}px !important;
+  font-size: ${Math.max(11, fontSize - 5)}px !important;
   color: ${MUTED_TEXT} !important;
   text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.8) !important;
-  line-height: 1.4 !important;
-  word-wrap: break-word !important;
+  line-height: 1.35 !important;
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 6px !important;
+  min-width: 0 !important;
+  overflow-wrap: anywhere !important;
 `
+
+export const getTimingsHeaderStyle = ({ fontSize }) => `
+  display: flex !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+  gap: 10px !important;
+  min-width: 0 !important;
+  font-size: ${Math.max(11, fontSize - 6)}px !important;
+  line-height: 1.2 !important;
+`
+
+export const getTimingsLabelStyle = () => `
+  color: rgba(255, 255, 255, 0.82) !important;
+  font-weight: 700 !important;
+  text-transform: uppercase !important;
+  letter-spacing: 0 !important;
+`
+
+export const getTimingCountBadgeStyle = () => `
+  flex: 0 0 auto !important;
+  min-width: 22px !important;
+  height: 20px !important;
+  padding: 0 7px !important;
+  border-radius: 999px !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  color: white !important;
+  background: rgba(255, 255, 255, 0.12) !important;
+  border: 1px solid rgba(255, 255, 255, 0.14) !important;
+  font-weight: 700 !important;
+`
+
+export const getTimingsListStyle = () => `
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 5px !important;
+  min-width: 0 !important;
+`
+
+export const getTimingChipStyle = ({ status, highlight }) => {
+  const textStyle = getTimingTextStyle({ status, highlight })
+  const isActive = status === 'active' && highlight
+  const isUpcoming = status === 'upcoming' && highlight
+  const background = isActive
+    ? 'rgba(255, 68, 68, 0.18)'
+    : isUpcoming
+      ? 'rgba(255, 107, 53, 0.16)'
+      : 'rgba(255, 255, 255, 0.08)'
+  const borderColor = isActive
+    ? 'rgba(255, 68, 68, 0.42)'
+    : isUpcoming
+      ? 'rgba(255, 107, 53, 0.38)'
+      : 'rgba(255, 255, 255, 0.1)'
+
+  return `
+    display: block !important;
+    box-sizing: border-box !important;
+    max-width: 100% !important;
+    padding: 5px 7px !important;
+    border-radius: 7px !important;
+    color: ${textStyle.color} !important;
+    background: ${background} !important;
+    border: 1px solid ${borderColor} !important;
+    font-weight: ${textStyle.fontWeight || 600} !important;
+    white-space: normal !important;
+    overflow-wrap: anywhere !important;
+  `
+}
 
 export const getControlsContainerStyle = () => `
   position: absolute !important;
@@ -271,8 +349,10 @@ export const applyOverlayProgressBackgroundStyle = (element, showBackground) => 
 export const applyOverlayTimingsBackgroundStyle = (element, showBackground) => {
   element.style.background = `${getPanelBackground(showBackground)} !important`
   element.style.backdropFilter = `${getPanelBackdrop(showBackground)} !important`
-  element.style.width = 'fit-content !important'
-  element.style.minWidth = 'auto !important'
+  element.style.border = showBackground ? PANEL_BORDER : 'none'
+  element.style.boxShadow = showBackground ? '0 10px 30px rgba(0, 0, 0, 0.35)' : 'none'
+  element.style.width = 'auto'
+  element.style.minWidth = showBackground ? '220px' : 'auto'
 }
 
 export const getMutedTextColor = () => MUTED_TEXT

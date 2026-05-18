@@ -1,6 +1,15 @@
 <template>
   <transition name="slide">
     <nav v-if="isNavbarVisible" class="mobile-navbar" @click.stop>
+      <button
+        class="mobile-navbar__close"
+        type="button"
+        aria-label="Закрыть меню"
+        @click="closeNavbar"
+      >
+        <i class="fas fa-times"></i>
+      </button>
+
       <div class="nav-links-wrapper">
         <ul class="nav-links">
           <li v-for="link in props.links" :key="link.text">
@@ -66,30 +75,60 @@ const { closeNavbar } = navbarStore
 /* Стили для мобильного меню и оверлея */
 .mobile-navbar {
   position: fixed;
+  top: 0;
   left: 0;
-  width: 250px;
+  width: min(280px, 76vw);
   height: 100vh;
-  background: rgba(23, 23, 23, 0.98);
-  border-right: 1px solid rgba(255, 255, 255, 0.08);
-  padding-top: 60px;
-  z-index: 5;
-  box-shadow: 16px 0 40px rgba(0, 0, 0, 0.35);
+  background: linear-gradient(180deg, rgba(22, 22, 22, 0.98), rgba(15, 15, 15, 0.98));
+  border-right: 1px solid rgba(255, 255, 255, 0.1);
+  padding-top: 70px;
+  z-index: calc(var(--z-sidebar) + 1);
+  box-shadow: 18px 0 48px rgba(0, 0, 0, 0.55);
+  backdrop-filter: blur(14px);
+}
+
+.mobile-navbar__close {
+  position: absolute;
+  top: 14px;
+  left: 18px;
+  width: 42px;
+  height: 42px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: 0;
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.08);
+  color: #fff;
+  cursor: pointer;
+  font-size: 25px;
+  transition:
+    background 0.2s ease,
+    transform 0.2s ease;
+}
+
+.mobile-navbar__close:active {
+  transform: scale(0.96);
+}
+
+.mobile-navbar__close:hover {
+  background: rgba(255, 255, 255, 0.14);
 }
 
 .nav-links-wrapper {
   flex: 1;
   overflow-y: auto;
   padding-bottom: 1rem;
-  height: calc(100vh - 60px);
+  height: calc(100vh - 70px);
 }
 
 .nav-links {
   list-style: none;
-  padding: 0;
+  padding: 0 12px;
   margin: 0;
   display: flex;
   flex-direction: column;
-  gap: 1rem;
+  gap: 8px;
 }
 
 .nav-links li {
@@ -101,14 +140,16 @@ const { closeNavbar } = navbarStore
 .nav-links button {
   display: flex;
   align-items: center;
-  gap: 1rem;
-  color: rgba(255, 255, 255, 0.8);
+  gap: 16px;
+  color: rgba(255, 255, 255, 0.86);
   text-decoration: none;
-  padding: 10px 20px;
+  padding: 12px 14px;
   transition: all 0.3s ease;
-  min-width: 250px;
+  min-width: 0;
+  width: 100%;
   min-height: 44px;
   box-sizing: border-box;
+  border-radius: 8px;
 }
 
 .nav-links a i,
@@ -120,47 +161,46 @@ const { closeNavbar } = navbarStore
 }
 
 .menu-text {
-  width: 130px;
+  width: auto;
   display: inline-block;
 }
 
 .nav-links a:hover {
   background: var(--accent-transparent, rgba(108, 92, 231, 0.15));
   color: var(--accent-color, #6c5ce7);
-  border-left: 3px solid var(--accent-color, #6c5ce7);
-  transform: translateX(3px);
+  transform: translateX(2px);
 }
 
 .nav-links a:active,
 .nav-links a.router-link-active {
   background: var(--accent-transparent, rgba(108, 92, 231, 0.2));
   color: var(--accent-color, #6c5ce7);
-  border-left: 3px solid var(--accent-color, #6c5ce7);
 }
 
 .notification-link {
   display: flex;
   align-items: center;
-  gap: 1rem;
+  gap: 16px;
   color: rgba(255, 255, 255, 0.8);
   text-decoration: none;
-  padding: 10px 20px;
+  padding: 12px 14px;
   transition: all 0.3s ease;
-  min-width: 250px;
+  min-width: 0;
+  width: 100%;
+  border-radius: 8px;
+  box-sizing: border-box;
 }
 
 .notification-link:hover {
   background: var(--accent-transparent, rgba(108, 92, 231, 0.15));
   color: var(--accent-color, #6c5ce7);
-  border-left: 3px solid var(--accent-color, #6c5ce7);
-  transform: translateX(3px);
+  transform: translateX(2px);
 }
 
 .notification-link:active,
 .notification-link.router-link-active {
   background: var(--accent-transparent, rgba(108, 92, 231, 0.2));
   color: var(--accent-color, #6c5ce7);
-  border-left: 3px solid var(--accent-color, #6c5ce7);
 }
 
 .slide-enter-active,
@@ -179,8 +219,9 @@ const { closeNavbar } = navbarStore
   top: 0;
   width: 100vw;
   height: 100vh;
-  background: rgba(0, 0, 0, 0.5);
-  z-index: 4;
+  background: rgba(0, 0, 0, 0.58);
+  z-index: var(--z-sidebar);
+  backdrop-filter: blur(1px);
 }
 
 .icon-donut {

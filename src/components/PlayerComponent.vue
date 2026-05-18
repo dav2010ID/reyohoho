@@ -400,6 +400,49 @@
             </div>
           </div>
         </template>
+
+        <template v-else>
+          <button
+            v-if="kp_id"
+            class="mobile-control-btn favorite-btn"
+            :class="{ active: isInAnyList }"
+            type="button"
+            aria-label="Добавить в список"
+            @click="toggleList(USER_LIST_TYPES_ENUM.FAVORITE)"
+          >
+            <span class="material-icons">{{
+              movieInfo?.lists?.isFavorite ? 'bookmark_added' : 'bookmark_add'
+            }}</span>
+          </button>
+
+          <button
+            class="mobile-control-btn theater-mode-btn"
+            type="button"
+            aria-label="Театральный режим"
+            @click="toggleTheaterMode"
+          >
+            <span class="material-symbols-outlined">aspect_ratio</span>
+          </button>
+
+          <button
+            class="mobile-control-btn dimming-btn"
+            :class="{ active: dimmingEnabled }"
+            type="button"
+            aria-label="Затемнение"
+            @click="toggleDimming"
+          >
+            <span class="material-icons">{{ dimmingEnabled ? 'light_mode' : 'dark_mode' }}</span>
+          </button>
+
+          <button
+            class="mobile-control-btn aspect-ratio-dropdown-btn"
+            type="button"
+            aria-label="Изменить соотношение сторон"
+            @click="cycleAspectRatio"
+          >
+            <span class="current-ratio">{{ aspectRatio }}</span>
+          </button>
+        </template>
       </div>
 
       <div v-if="!isMobile && !showFavoriteTooltip && kp_id" class="desktop-list-buttons">
@@ -526,7 +569,6 @@ import {
   getDurationProgressMarkup,
   getMainInfoStyle,
   getMovieTitleStyle,
-  getMutedTextColor,
   getObsStatusMarkup,
   getOverlayBaseStyle,
   getOverlayButtonStyle,
@@ -534,7 +576,11 @@ import {
   getOverlaySettingsMarkup,
   getSettingsModalContentStyle,
   getSettingsModalStyle,
-  getTimingTextStyle,
+  getTimingChipStyle,
+  getTimingCountBadgeStyle,
+  getTimingsHeaderStyle,
+  getTimingsLabelStyle,
+  getTimingsListStyle,
   getTimingsContentStyle,
   getTimingsPanelStyle,
   getVideoProgressStyle
@@ -2036,44 +2082,43 @@ const updateVideoOverlay = () => {
 
   if (activeTimingTexts.value.length > 0) {
     const timingsContent = timingsPanel.children[0]
-    timingsContent.style.fontSize = `${currentFontSize - 4}px`
+    timingsContent.style.cssText = getTimingsContentStyle({ fontSize: currentFontSize })
     timingsContent.innerHTML = ''
 
-    const header = iframeDoc.createElement('span')
-    header.textContent = 'Тайминги: '
-    header.style.color = getMutedTextColor()
+    const intervals = activeTimingTexts.value.flatMap((timing) => timing.intervals)
+
+    const header = iframeDoc.createElement('div')
+    header.style.cssText = getTimingsHeaderStyle({ fontSize: currentFontSize })
+
+    const label = iframeDoc.createElement('span')
+    label.textContent = '\u0422\u0430\u0439\u043c\u0438\u043d\u0433\u0438'
+    label.style.cssText = getTimingsLabelStyle()
+
+    const count = iframeDoc.createElement('span')
+    count.textContent = String(intervals.length)
+    count.style.cssText = getTimingCountBadgeStyle()
+
+    header.appendChild(label)
+    header.appendChild(count)
     timingsContent.appendChild(header)
 
-    activeTimingTexts.value.forEach((timing, timingIndex) => {
-      if (timingIndex > 0) {
-        const separator = iframeDoc.createElement('span')
-        separator.textContent = ', '
-        separator.style.color = getMutedTextColor()
-        timingsContent.appendChild(separator)
-      }
+    const list = iframeDoc.createElement('div')
+    list.style.cssText = getTimingsListStyle()
 
-      timing.intervals.forEach((interval, intervalIndex) => {
-        if (intervalIndex > 0) {
-          const intervalSeparator = iframeDoc.createElement('span')
-          intervalSeparator.textContent = ', '
-          intervalSeparator.style.color = getMutedTextColor()
-          timingsContent.appendChild(intervalSeparator)
-        }
-
-        const intervalSpan = iframeDoc.createElement('span')
+    activeTimingTexts.value.forEach((timing) => {
+      timing.intervals.forEach((interval) => {
+        const intervalSpan = iframeDoc.createElement('div')
         intervalSpan.textContent = interval.text
-
-        const timingStyle = getTimingTextStyle({
+        intervalSpan.style.cssText = getTimingChipStyle({
           status: interval.status,
           highlight: overlaySettings.value.highlightTimings
         })
-        intervalSpan.style.color = timingStyle.color
-        intervalSpan.style.fontWeight = timingStyle.fontWeight
 
-        timingsContent.appendChild(intervalSpan)
+        list.appendChild(intervalSpan)
       })
     })
 
+    timingsContent.appendChild(list)
     timingsPanel.style.display = 'block'
 
     if (!overlaySettings.value.showTimingsOnMouseMove || hasActiveTimings.value) {
@@ -2170,7 +2215,6 @@ const removeVideoOverlay = () => {
 onMounted(() => {
   iframeLoading.value = true
   fetchPlayers()
-  if (isMobile.value) aspectRatio.value = '4:3'
   updateScaleFactor()
   window.addEventListener('resize', updateScaleFactor)
   window.addEventListener('resize', updateTooltipPosition)

@@ -1,5 +1,6 @@
 import { getApi } from '@/api/axios'
 import { normalizeMovieListResponse } from '@/api/movieSeoNormalizer'
+import { USER_LIST_TYPES_ENUM } from '@/constants'
 
 const apiCall = async (callFn) => {
   const api = await getApi()
@@ -23,12 +24,16 @@ const delAllFromList = async (type) => {
 
 const getMyLists = async (type) => {
   const { data } = await apiCall((api) => api.get(`/list/${type}`))
-  return await normalizeMovieListResponse(data, { enrichMissingSeo: true })
+  return await normalizeMovieListResponse(data, {
+    enrichMissingSeo: type !== USER_LIST_TYPES_ENUM.HISTORY
+  })
 }
 
 const getUserLists = async (type, userId) => {
   const { data } = await apiCall((api) => api.get(`/user-list/${userId}/${type}`))
-  return await normalizeMovieListResponse(data, { enrichMissingSeo: true })
+  return await normalizeMovieListResponse(data, {
+    enrichMissingSeo: type !== USER_LIST_TYPES_ENUM.HISTORY
+  })
 }
 
 const getListCounters = async (userId) => {

@@ -312,7 +312,7 @@ onUnmounted(disconnectInfiniteScroll)
   flex: 1;
   padding-top: 20px;
   padding-bottom: 40px;
-  max-width: calc(258px * 5);
+  width: 100%;
   margin: 0 auto;
 }
 

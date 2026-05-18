@@ -29,32 +29,29 @@
         data-test-id="delete-button"
         @click.stop.prevent="emit('remove:from-history', movie.kp_id)"
       />
-      <div
-        v-if="movie.rating_kp || movie.rating_imdb || movie.average_rating"
-        class="ratings-overlay"
-      >
+      <div v-if="hasRatings" class="ratings-overlay">
         <span
-          v-if="movie.rating || movie.average_rating"
+          v-if="displayOurRating"
           class="rating-our"
           :class="{
             'with-star': showStar,
-            [getRatingColor(movie.rating || movie.average_rating)]: true
+            [getRatingColor(displayOurRating)]: true
           }"
         >
           <img :src="appLogoUrl" alt="ReYohoho" class="rating-logo" />
-          {{ `${(movie.rating || movie.average_rating).toFixed(1).replace(/\.0$/, '')}` }}
+          {{ formatRating(displayOurRating) }}
         </span>
-        <span v-if="movie.rating_kp" class="rating-kp" :class="getRatingColor(movie.rating_kp)">
+        <span v-if="displayKpRating" class="rating-kp" :class="getRatingColor(displayKpRating)">
           <img :src="kpLogoUrl" alt="КП" class="rating-logo" />
-          {{ movie.rating_kp }}
+          {{ formatRating(displayKpRating) }}
         </span>
         <span
-          v-if="movie.rating_imdb"
+          v-if="displayImdbRating"
           class="rating-imdb"
-          :class="getRatingColor(movie.rating_imdb)"
+          :class="getRatingColor(displayImdbRating)"
         >
           <img :src="imdbLogoUrl" alt="IMDb" class="rating-logo" />
-          {{ movie.rating_imdb }}
+          {{ formatRating(displayImdbRating) }}
         </span>
       </div>
       <div v-if="movie.type && TYPES_ENUM[movie.type]" class="poster-type">
@@ -113,6 +110,24 @@ const posterSrc = computed(() => {
 })
 const imageLoading = computed(() => (priority ? 'eager' : 'lazy'))
 const imageFetchPriority = computed(() => (priority ? 'high' : 'low'))
+
+const toRatingNumber = (value) => {
+  if (value === null || value === undefined || value === '' || value === 'null') return null
+  const number = Number(String(value).replace(',', '.'))
+  return Number.isFinite(number) && number > 0 ? number : null
+}
+
+const displayOurRating = computed(() => toRatingNumber(movie.rating ?? movie.average_rating))
+const displayKpRating = computed(() =>
+  toRatingNumber(movie.rating_kp ?? movie.rating_kinopoisk ?? movie.raw_data?.rating)
+)
+const displayImdbRating = computed(() =>
+  toRatingNumber(movie.rating_imdb ?? movie.raw_data?.rating_imdb)
+)
+const hasRatings = computed(
+  () => displayOurRating.value || displayKpRating.value || displayImdbRating.value
+)
+const formatRating = (rating) => rating.toFixed(1).replace(/\.0$/, '')
 </script>
 
 <style scoped>
@@ -298,11 +313,14 @@ const imageFetchPriority = computed(() => (priority ? 'high' : 'low'))
 
 @media (max-width: 620px) {
   .ratings-overlay {
-    bottom: 3px;
+    right: 0;
+    bottom: 0;
     left: 0;
-    padding: 4px 8px;
-    font-size: 0.8em;
+    gap: 3px;
+    padding: 3px 4px;
+    font-size: 0.68em;
     border-radius: 0;
+    justify-content: space-around;
   }
 
   .movie-poster-container {
@@ -327,13 +345,21 @@ const imageFetchPriority = computed(() => (priority ? 'high' : 'low'))
   }
 
   .delete-button {
-    top: 5px;
-    left: 5px;
+    top: 4px;
+    right: 4px;
+    left: auto;
     opacity: 1;
   }
 
+  .delete-button :deep(.deleteButton) {
+    width: 30px;
+    height: 30px;
+    border-width: 1px;
+    border-radius: 7px;
+  }
+
   .rating-logo {
-    width: 15px;
+    width: 12px;
     height: auto;
     display: inline-block;
   }
@@ -343,8 +369,27 @@ const imageFetchPriority = computed(() => (priority ? 'high' : 'low'))
   }
 
   .rating-our {
+    padding: 1px 2px;
+  }
+
+  .rating-kp,
+  .rating-imdb,
+  .rating-our {
+    gap: 2px;
+    min-width: 0;
     font-size: 1em;
-    padding: 1px 4px;
+  }
+
+  .poster-type {
+    top: 4px;
+    right: auto;
+    left: 4px;
+    max-width: calc(100% - 42px);
+    padding: 2px 4px;
+    font-size: 0.62em;
+    line-height: 1.12;
+    text-align: center;
+    overflow-wrap: anywhere;
   }
 
   .rating-our.with-star::after {
