@@ -93,9 +93,7 @@ export const usePlayerLayout = ({ mainStore, playerStore, containerRef, playerIf
     }, 4000)
   }
 
-  const lockMobileLandscape = async () => {
-    if (!isMobileViewport() || typeof document === 'undefined') return
-
+  const requestTheaterFullscreen = async () => {
     try {
       if (!document.fullscreenElement && containerRef.value?.requestFullscreen) {
         await containerRef.value.requestFullscreen()
@@ -104,6 +102,10 @@ export const usePlayerLayout = ({ mainStore, playerStore, containerRef, playerIf
     } catch {
       theaterFullscreenActive.value = false
     }
+  }
+
+  const lockMobileLandscape = async () => {
+    if (!isMobileViewport() || typeof document === 'undefined') return
 
     try {
       await window.screen?.orientation?.lock?.('landscape')
@@ -112,13 +114,15 @@ export const usePlayerLayout = ({ mainStore, playerStore, containerRef, playerIf
     }
   }
 
-  const unlockMobileLandscape = async () => {
+  const unlockMobileLandscape = () => {
     try {
       window.screen?.orientation?.unlock?.()
     } catch {
       // Some browsers expose orientation but reject unlock outside fullscreen.
     }
+  }
 
+  const exitTheaterFullscreen = async () => {
     if (
       theaterFullscreenActive.value &&
       typeof document !== 'undefined' &&
@@ -135,6 +139,23 @@ export const usePlayerLayout = ({ mainStore, playerStore, containerRef, playerIf
     theaterFullscreenActive.value = false
   }
 
+  const resetTheaterModeUi = () => {
+    window.removeEventListener('mousemove', showCloseButton)
+    document.removeEventListener('keydown', onKeyDown)
+    document.removeEventListener('fullscreenchange', onFullscreenChange)
+    document.removeEventListener('webkitfullscreenchange', onFullscreenChange)
+    document.body.classList.remove('no-scroll')
+    document.body.classList.remove(THEATER_MODE_BODY_CLASS)
+    unlockMobileLandscape()
+
+    if (theaterModeCloseButtonTimeout.value) {
+      clearTimeout(theaterModeCloseButtonTimeout.value)
+      theaterModeCloseButtonTimeout.value = null
+    }
+
+    closeButtonVisible.value = false
+  }
+
   const toggleTheaterMode = () => {
     // Fix: SSR guard — window/document are not available during server-side rendering
     if (typeof window === 'undefined' || typeof document === 'undefined') return
@@ -143,24 +164,17 @@ export const usePlayerLayout = ({ mainStore, playerStore, containerRef, playerIf
     if (theaterMode.value) {
       window.addEventListener('mousemove', showCloseButton)
       document.addEventListener('keydown', onKeyDown)
+      document.addEventListener('fullscreenchange', onFullscreenChange)
+      document.addEventListener('webkitfullscreenchange', onFullscreenChange)
       document.body.classList.add('no-scroll')
       document.body.classList.add(THEATER_MODE_BODY_CLASS)
-      lockMobileLandscape()
+      requestTheaterFullscreen().then(lockMobileLandscape)
       // Fix: use showCloseButton() instead of direct assignment so any stale
       // hide-timeout from a previous theater session is cleared first.
       showCloseButton()
     } else {
-      window.removeEventListener('mousemove', showCloseButton)
-      document.removeEventListener('keydown', onKeyDown)
-      document.body.classList.remove('no-scroll')
-      document.body.classList.remove(THEATER_MODE_BODY_CLASS)
-      unlockMobileLandscape()
-      // Fix: explicitly cancel the auto-hide timeout when exiting
-      if (theaterModeCloseButtonTimeout.value) {
-        clearTimeout(theaterModeCloseButtonTimeout.value)
-        theaterModeCloseButtonTimeout.value = null
-      }
-      closeButtonVisible.value = false
+      resetTheaterModeUi()
+      exitTheaterFullscreen()
     }
 
     nextTick(() => {
@@ -185,6 +199,15 @@ export const usePlayerLayout = ({ mainStore, playerStore, containerRef, playerIf
     }
   }
 
+  function onFullscreenChange() {
+    if (!theaterMode.value || !theaterFullscreenActive.value) return
+    if (document.fullscreenElement || document.webkitFullscreenElement) return
+
+    theaterFullscreenActive.value = false
+    theaterMode.value = false
+    resetTheaterModeUi()
+  }
+
   const setAspectRatio = (ratio) => {
     aspectRatio.value = ratio
     setTimeout(() => {
@@ -199,15 +222,10 @@ export const usePlayerLayout = ({ mainStore, playerStore, containerRef, playerIf
   }
 
   const cleanupPlayerLayout = () => {
-    if (typeof window !== 'undefined') {
-      window.removeEventListener('mousemove', showCloseButton)
+    if (typeof window !== 'undefined' && typeof document !== 'undefined') {
+      resetTheaterModeUi()
     }
-    if (typeof document !== 'undefined') {
-      document.removeEventListener('keydown', onKeyDown)
-      document.body.classList.remove('no-scroll')
-      document.body.classList.remove(THEATER_MODE_BODY_CLASS)
-    }
-    unlockMobileLandscape()
+    exitTheaterFullscreen()
 
     if (theaterModeCloseButtonTimeout.value) {
       clearTimeout(theaterModeCloseButtonTimeout.value)
