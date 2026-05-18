@@ -707,11 +707,16 @@ const currentVideoTime = ref(0)
 const totalVideoDuration = ref(0)
 const activeTimingTexts = ref([])
 const hasActiveTimings = ref(false)
+const videoOverlayManuallyHidden = ref(false)
 let hideTimingsTimeout = null
 
 const currentOverlayElement = ref(null)
 const overlayControlsTimeout = ref(null)
 const overlayCreationInProgress = ref(false)
+
+const shouldRenderVideoOverlay = () => {
+  return videoOverlayEnabled2.value && (!videoOverlayManuallyHidden.value || hasActiveTimings.value)
+}
 
 // OBS WebSocket
 const obsWebSocket = ref(null)
@@ -834,7 +839,7 @@ const startVideoPositionMonitoring = (isDebug = false) => {
 
         if (
           isElectron.value &&
-          videoOverlayEnabled2.value &&
+          shouldRenderVideoOverlay() &&
           !currentOverlayElement.value &&
           !overlayCreationInProgress.value
         ) {
@@ -849,9 +854,9 @@ const startVideoPositionMonitoring = (isDebug = false) => {
           }
         }
 
-        if (isElectron.value && !videoOverlayEnabled2.value && currentOverlayElement.value) {
+        if (isElectron.value && !shouldRenderVideoOverlay() && currentOverlayElement.value) {
           setTimeout(() => {
-            if (!videoOverlayEnabled2.value && currentOverlayElement.value) {
+            if (!shouldRenderVideoOverlay() && currentOverlayElement.value) {
               removeVideoOverlay()
             }
           }, 100)
@@ -906,7 +911,23 @@ const startVideoPositionMonitoring = (isDebug = false) => {
             )
         }
 
-        if (isElectron.value && currentOverlayElement.value && videoOverlayEnabled2.value) {
+        if (
+          isElectron.value &&
+          videoOverlayEnabled2.value &&
+          videoOverlayManuallyHidden.value &&
+          hasActiveTimings.value &&
+          !currentOverlayElement.value &&
+          !overlayCreationInProgress.value
+        ) {
+          try {
+            createVideoOverlay(iframeDoc, video)
+          } catch (error) {
+            debugLog('Error recreating hidden overlay near timing:', error)
+            overlayCreationInProgress.value = false
+          }
+        }
+
+        if (isElectron.value && currentOverlayElement.value && shouldRenderVideoOverlay()) {
           updateVideoOverlay()
         }
 
@@ -1022,14 +1043,14 @@ const onIframeLoad = () => {
   startMirrorMonitoring()
   startVideoPositionMonitoring()
 
-  if (isElectron.value && videoOverlayEnabled2.value && !currentOverlayElement.value) {
+  if (isElectron.value && shouldRenderVideoOverlay() && !currentOverlayElement.value) {
     setTimeout(() => {
       try {
         const iframe = playerIframe.value
         const iframeDoc = iframe.contentDocument || iframe.contentWindow.document
         if (iframeDoc) {
           const video = iframeDoc.querySelector('video')
-          if (video) {
+          if (video && shouldRenderVideoOverlay()) {
             createVideoOverlay(iframeDoc, video)
           }
         }
@@ -1146,6 +1167,10 @@ watch(
 watch(videoOverlayEnabled2, (enabled) => {
   if (!isElectron.value) return
 
+  if (enabled) {
+    videoOverlayManuallyHidden.value = false
+  }
+
   if (enabled && !currentOverlayElement.value) {
     const checkAndCreate = () => {
       if (playerIframe.value) {
@@ -1156,7 +1181,7 @@ watch(videoOverlayEnabled2, (enabled) => {
             const video = iframeDoc.querySelector('video')
             if (video) {
               const timeSinceLoad = Date.now() - (window.iframeLoadTime || 0)
-              if (timeSinceLoad >= 100) {
+              if (timeSinceLoad >= 100 && shouldRenderVideoOverlay()) {
                 createVideoOverlay(iframeDoc, video)
               } else {
                 setTimeout(checkAndCreate, 100 - timeSinceLoad)
@@ -1171,6 +1196,7 @@ watch(videoOverlayEnabled2, (enabled) => {
     }
     checkAndCreate()
   } else if (!enabled && currentOverlayElement.value) {
+    videoOverlayManuallyHidden.value = false
     removeVideoOverlay()
   }
 })
@@ -1209,20 +1235,20 @@ watch(
 watch(
   overlaySettings,
   (newSettings, oldSettings) => {
-    if (!isElectron.value || !videoOverlayEnabled2.value) return
+    if (!isElectron.value || !shouldRenderVideoOverlay()) return
 
     if (oldSettings && newSettings.showBackground !== oldSettings.showBackground) {
       if (currentOverlayElement.value) {
         removeVideoOverlay()
 
         setTimeout(() => {
-          if (playerIframe.value && videoOverlayEnabled2.value) {
+          if (playerIframe.value && shouldRenderVideoOverlay()) {
             try {
               const iframe = playerIframe.value
               const iframeDoc = iframe.contentDocument || iframe.contentWindow.document
               if (iframeDoc) {
                 const video = iframeDoc.querySelector('video')
-                if (video) {
+                if (video && shouldRenderVideoOverlay()) {
                   createVideoOverlay(iframeDoc, video)
                 }
               }
@@ -1261,6 +1287,7 @@ const openSettings = () => {
 
 const toggleVideoOverlay = () => {
   videoOverlayEnabled2.value = !videoOverlayEnabled2.value
+  videoOverlayManuallyHidden.value = false
 
   if (!videoOverlayEnabled2.value) {
     removeVideoOverlay()
@@ -1274,7 +1301,7 @@ const toggleVideoOverlay = () => {
             const video = iframeDoc.querySelector('video')
             if (video) {
               const timeSinceLoad = Date.now() - (window.iframeLoadTime || 0)
-              if (timeSinceLoad >= 100) {
+              if (timeSinceLoad >= 100 && shouldRenderVideoOverlay()) {
                 createVideoOverlay(iframeDoc, video)
               } else {
                 setTimeout(createOverlayAfterDelay, 100 - timeSinceLoad)
@@ -1530,7 +1557,7 @@ const showOverlaySettings = () => {
 }
 
 const createVideoOverlay = (iframeDoc, video) => {
-  if (!videoOverlayEnabled2.value) {
+  if (!shouldRenderVideoOverlay()) {
     return
   }
   if (currentOverlayElement.value) {
@@ -1601,7 +1628,8 @@ const createVideoOverlay = (iframeDoc, video) => {
     e.preventDefault()
     e.stopPropagation()
     e.stopImmediatePropagation()
-    videoOverlayEnabled2.value = false
+    videoOverlayManuallyHidden.value = true
+    removeVideoOverlay()
   })
 
   settingsBtn.addEventListener('click', (e) => {
@@ -2247,7 +2275,7 @@ onMounted(() => {
     }, 1000)
   }
 
-  if (isElectron.value && videoOverlayEnabled2.value) {
+  if (isElectron.value && shouldRenderVideoOverlay()) {
     const initializeOverlay = () => {
       if (playerIframe.value && !currentOverlayElement.value) {
         try {
@@ -2257,7 +2285,7 @@ onMounted(() => {
             const video = iframeDoc.querySelector('video')
             if (video) {
               const timeSinceLoad = Date.now() - (window.iframeLoadTime || 0)
-              if (timeSinceLoad >= 100) {
+              if (timeSinceLoad >= 100 && shouldRenderVideoOverlay()) {
                 createVideoOverlay(iframeDoc, video)
               } else {
                 setTimeout(initializeOverlay, 100 - timeSinceLoad)
