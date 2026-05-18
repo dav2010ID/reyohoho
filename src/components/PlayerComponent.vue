@@ -718,6 +718,26 @@ const shouldRenderVideoOverlay = () => {
   return videoOverlayEnabled2.value && (!videoOverlayManuallyHidden.value || hasActiveTimings.value)
 }
 
+const getIframeFullscreenElement = (iframeDoc) => {
+  return (
+    iframeDoc?.fullscreenElement ||
+    iframeDoc?.webkitFullscreenElement ||
+    iframeDoc?.mozFullScreenElement ||
+    iframeDoc?.msFullscreenElement ||
+    null
+  )
+}
+
+const isIframeVideoFullscreen = (iframeDoc, video) => {
+  const fullscreenElement = getIframeFullscreenElement(iframeDoc)
+
+  return (
+    fullscreenElement === video ||
+    video?.webkitDisplayingFullscreen ||
+    (video?.offsetWidth === window.screen.width && video?.offsetHeight === window.screen.height)
+  )
+}
+
 // OBS WebSocket
 const obsWebSocket = ref(null)
 const obsConnected = ref(false)
@@ -925,6 +945,7 @@ const startVideoPositionMonitoring = (isDebug = false) => {
         ) {
           try {
             createVideoOverlay(iframeDoc, video)
+            updateVideoOverlay()
           } catch (error) {
             debugLog('Error recreating hidden overlay near timing:', error)
             overlayCreationInProgress.value = false
@@ -1772,15 +1793,15 @@ const createVideoOverlay = (iframeDoc, video) => {
   overlay._mouseHandler = handleMouseMove
 
   const findBestContainer = (videoElement) => {
-    const isFullscreen =
-      document.fullscreenElement === videoElement ||
-      document.webkitFullscreenElement === videoElement ||
-      videoElement.webkitDisplayingFullscreen ||
-      (videoElement.offsetWidth === window.screen.width &&
-        videoElement.offsetHeight === window.screen.height)
+    const fullscreenElement = getIframeFullscreenElement(iframeDoc)
+    const isFullscreen = isIframeVideoFullscreen(iframeDoc, videoElement)
 
     if (isFullscreen) {
       return iframeDoc.body || iframeDoc.documentElement
+    }
+
+    if (fullscreenElement && fullscreenElement !== videoElement) {
+      return fullscreenElement
     }
 
     let container = videoElement.parentNode
@@ -1818,14 +1839,19 @@ const createVideoOverlay = (iframeDoc, video) => {
     const video = overlay._videoElement
     const container = overlay._targetContainer
 
-    const isFullscreen =
-      document.fullscreenElement === video ||
-      document.webkitFullscreenElement === video ||
-      video.webkitDisplayingFullscreen ||
-      (video.offsetWidth === window.screen.width && video.offsetHeight === window.screen.height)
+    const fullscreenElement = getIframeFullscreenElement(iframeDoc)
+    const isFullscreen = isIframeVideoFullscreen(iframeDoc, video)
 
     if (isFullscreen) {
       overlay.style.cssText = getOverlayPositionStyle({ fullscreen: true })
+    } else if (fullscreenElement) {
+      overlay.style.cssText = getOverlayPositionStyle({
+        fullscreen: false,
+        top: 0,
+        left: 0,
+        width: fullscreenElement.clientWidth || fullscreenElement.offsetWidth || window.innerWidth,
+        height: fullscreenElement.clientHeight || fullscreenElement.offsetHeight || window.innerHeight
+      })
     } else {
       const videoStyle = iframeDoc.defaultView.getComputedStyle(video)
       const containerRect = container.getBoundingClientRect()
@@ -1877,15 +1903,15 @@ const createVideoOverlay = (iframeDoc, video) => {
           overlay._videoElement = newVideo
 
           const findBestContainer = (videoElement) => {
-            const isFullscreen =
-              document.fullscreenElement === videoElement ||
-              document.webkitFullscreenElement === videoElement ||
-              videoElement.webkitDisplayingFullscreen ||
-              (videoElement.offsetWidth === window.screen.width &&
-                videoElement.offsetHeight === window.screen.height)
+            const fullscreenElement = getIframeFullscreenElement(iframeDoc)
+            const isFullscreen = isIframeVideoFullscreen(iframeDoc, videoElement)
 
             if (isFullscreen) {
               return iframeDoc.body || iframeDoc.documentElement
+            }
+
+            if (fullscreenElement && fullscreenElement !== videoElement) {
+              return fullscreenElement
             }
 
             let container = videoElement.parentNode
@@ -1947,17 +1973,18 @@ const createVideoOverlay = (iframeDoc, video) => {
       const video = overlay._videoElement
       const videoStyle = iframeDoc.defaultView.getComputedStyle(video)
 
-      const isFullscreen =
-        document.fullscreenElement === video ||
-        document.webkitFullscreenElement === video ||
-        video.webkitDisplayingFullscreen ||
-        (video.offsetWidth === window.screen.width && video.offsetHeight === window.screen.height)
+      const fullscreenElement = getIframeFullscreenElement(iframeDoc)
+      const isFullscreen = isIframeVideoFullscreen(iframeDoc, video)
 
       let expectedWidth, expectedHeight
 
       if (isFullscreen) {
         expectedWidth = window.innerWidth
         expectedHeight = window.innerHeight
+      } else if (fullscreenElement) {
+        expectedWidth = fullscreenElement.clientWidth || fullscreenElement.offsetWidth || window.innerWidth
+        expectedHeight =
+          fullscreenElement.clientHeight || fullscreenElement.offsetHeight || window.innerHeight
       } else {
         expectedWidth = video.offsetWidth || video.clientWidth || parseFloat(videoStyle.width) || 0
         expectedHeight =
