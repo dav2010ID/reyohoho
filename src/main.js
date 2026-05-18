@@ -5,6 +5,7 @@ import { useAppSetup } from './composables/useAppSetup'
 import { routes } from './router/routes'
 import { installRouterGuards } from './router'
 import { buildMoviePath, getPrerenderMovieSeoEntries } from './utils/movieSeo'
+import { trackElectronClientDetected } from './utils/analytics'
 import App from './App.vue'
 
 const shouldPrerenderMoviePages = () => import.meta.env.VITE_PRERENDER_MOVIE_PAGES === 'true'
@@ -42,6 +43,7 @@ export const createApp = ViteSSG(
 
       const themeStore = useThemeStore()
       themeStore.initTheme()
+      trackElectronClientDetected()
     }
   }
 )

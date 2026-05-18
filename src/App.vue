@@ -30,12 +30,13 @@ import garlandImage from '@/assets/trn-christmas-lights.webp'
 
 const store = useMainStore()
 const navbarStore = useNavbarStore()
+let stopSidebarPositionWatch = null
 
 // Применяем класс sidebar-right на body при смене позиции панели
 const sidebarPosition = computed(() => store.sidebarPosition)
-watch(sidebarPosition, (pos) => {
+const applySidebarPosition = (pos) => {
   document.body.classList.toggle('sidebar-right', pos === 'right')
-}, { immediate: true })
+}
 
 const isMobile = computed(() => store.isMobile)
 
@@ -62,11 +63,16 @@ const handleKeyDown = (event) => {
 
 onMounted(() => {
   store.setIsMobile(window.innerWidth < 600)
+  stopSidebarPositionWatch = watch(sidebarPosition, applySidebarPosition, { immediate: true })
   window.addEventListener('resize', updateIsMobile)
   document.addEventListener('keydown', handleKeyDown, true)
 })
 
 onUnmounted(() => {
+  if (stopSidebarPositionWatch) {
+    stopSidebarPositionWatch()
+    stopSidebarPositionWatch = null
+  }
   window.removeEventListener('resize', updateIsMobile)
   document.removeEventListener('keydown', handleKeyDown, true)
 })

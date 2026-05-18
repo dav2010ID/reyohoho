@@ -25,7 +25,9 @@ const pickMainPersistedState = (state) => ({
   isStreamerMode: state.isStreamerMode,
   rememberScrollPosition: state.rememberScrollPosition,
   contentApiProvider: state.contentApiProvider,
-  searchApiProvider: state.searchApiProvider
+  searchApiProvider: state.searchApiProvider,
+  sidebarAutoHide: state.sidebarAutoHide,
+  sidebarPosition: state.sidebarPosition
 })
 
 describe('Базовы persist тесты для main', () => {
@@ -319,7 +321,9 @@ describe('Тесты миграций на новый способ хранен�
         isStreamerMode: true,
         rememberScrollPosition: true,
         contentApiProvider: 'kinobox',
-        searchApiProvider: 'rhserv'
+        searchApiProvider: 'rhserv',
+        sidebarAutoHide: false,
+        sidebarPosition: 'left'
       }
     }
 
