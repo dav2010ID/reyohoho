@@ -2013,8 +2013,8 @@ const updateVideoOverlay = () => {
 
   const computedStyle = iframeDoc.defaultView.getComputedStyle(overlay)
   if (computedStyle.display === 'none' || computedStyle.visibility === 'hidden') {
-    overlay.style.display = 'flex !important'
-    overlay.style.visibility = 'visible !important'
+    overlay.style.setProperty('display', 'flex', 'important')
+    overlay.style.setProperty('visibility', 'visible', 'important')
   }
 
   const currentFontSize = overlaySettings.value.fontSize || 18

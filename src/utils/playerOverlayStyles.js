@@ -46,7 +46,8 @@ export const getOverlaySettingsMarkup = (settings) => `
       display: flex !important;
       align-items: center !important;
       justify-content: space-between !important;
-      padding: 12px 16px !important;
+      padding: 0 16px !important;
+      height: 48px !important;
       border-radius: 12px !important;
       background: rgba(255, 255, 255, 0.04) !important;
       border: 1px solid rgba(255, 255, 255, 0.06) !important;
@@ -109,35 +110,34 @@ export const getOverlaySettingsMarkup = (settings) => `
       transform: translateX(20px) !important;
     }
     .settings-actions {
-      display: flex !important;
+      display: grid !important;
+      grid-template-columns: 1fr 0.7fr !important;
       gap: 12px !important;
       margin-top: 28px !important;
-      justify-content: center !important;
       font-family: ${OVERLAY_FONT};
+    }
+    .btn-save,
+    .btn-cancel {
+      height: 42px !important;
+      box-sizing: border-box !important;
+      font-family: ${OVERLAY_FONT};
+      border-radius: 10px !important;
+      cursor: pointer !important;
+      transition: all 0.2s ease !important;
     }
     .btn-save {
       background: ${ACCENT_COLOR} !important;
       color: white !important;
       border: none !important;
-      border-radius: 10px !important;
-      padding: 10px 24px !important;
-      cursor: pointer !important;
       font-size: 15px !important;
       font-weight: 600 !important;
-      transition: all 0.2s ease !important;
       box-shadow: 0 4px 12px rgba(108, 92, 231, 0.3) !important;
-      font-family: ${OVERLAY_FONT};
     }
     .btn-cancel {
       background: rgba(255, 255, 255, 0.08) !important;
       color: rgba(255, 255, 255, 0.8) !important;
       border: 1px solid rgba(255, 255, 255, 0.15) !important;
-      border-radius: 10px !important;
-      padding: 10px 20px !important;
-      cursor: pointer !important;
       font-size: 14px !important;
-      transition: all 0.2s ease !important;
-      font-family: ${OVERLAY_FONT};
     }
   </style>
 
@@ -213,14 +213,21 @@ export const getSettingsModalStyle = () => `
 `
 
 export const getSettingsModalContentStyle = () => `
-  background: rgba(18, 18, 18, 0.75) !important;
-  backdrop-filter: blur(25px) !important;
-  border-radius: 16px !important;
-  padding: 32px !important;
-  max-width: 420px !important;
-  width: 90% !important;
-  border: 1px solid rgba(255, 255, 255, 0.08) !important;
-  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.6) !important;
+  background:
+    linear-gradient(180deg, rgba(24, 24, 30, 0.92), rgba(14, 14, 18, 0.92)) !important;
+
+  backdrop-filter: blur(28px) saturate(130%) !important;
+  border-radius: 20px !important;
+
+  padding: 34px !important;
+  max-width: 460px !important;
+  width: min(92vw, 460px) !important;
+
+  border: 1px solid rgba(255, 255, 255, 0.11) !important;
+  box-shadow:
+    0 28px 90px rgba(0, 0, 0, 0.65),
+    inset 0 1px 0 rgba(255, 255, 255, 0.06) !important;
+
   box-sizing: border-box !important;
 `
 
@@ -316,23 +323,27 @@ export const getVideoProgressStyle = ({ fontSize, showBackground }) => `
 
 export const getTimingsPanelStyle = ({ showBackground }) => `
   position: absolute !important;
-  top: 80px !important;
-  right: 20px !important;
+  top: 66px !important;
+  right: 14px !important;
+
   box-sizing: border-box !important;
-  background: ${getPanelBackground(showBackground)} !important;
-  backdrop-filter: ${getPanelBackdrop(showBackground)} !important;
-  border: ${showBackground ? PANEL_BORDER : 'none'} !important;
-  border-radius: 12px !important;
-  padding: ${showBackground ? '12px 16px' : '0'} !important;
   width: auto !important;
-  min-width: ${showBackground ? '220px' : 'auto'} !important;
-  max-width: min(560px, calc(100% - 40px)) !important;
-  box-shadow: ${showBackground ? '0 8px 24px rgba(0, 0, 0, 0.4)' : 'none'} !important;
+  min-width: ${showBackground ? '190px' : 'auto'} !important;
+  max-width: min(360px, calc(100% - 28px)) !important;
+
+  background: ${showBackground ? 'rgba(12, 13, 18, 0.76)' : 'transparent'} !important;
+  backdrop-filter: ${showBackground ? 'blur(14px) saturate(130%)' : 'none'} !important;
+  border: ${showBackground ? '1px solid rgba(255, 255, 255, 0.12)' : 'none'} !important;
+  border-radius: 14px !important;
+  padding: ${showBackground ? '10px 12px' : '0'} !important;
+
+  box-shadow: ${showBackground ? '0 12px 32px rgba(0, 0, 0, 0.42)' : 'none'} !important;
   pointer-events: none !important;
+
   display: none !important;
-  transition: opacity 0.3s ease, visibility 0.3s ease !important;
   opacity: 0 !important;
   visibility: hidden !important;
+  transition: opacity 0.22s ease, visibility 0.22s ease !important;
 `
 
 export const getTimingsContentStyle = ({ fontSize }) => `
@@ -390,64 +401,78 @@ export const getTimingsListStyle = () => `
 `
 
 export const getTimingChipStyle = ({ status, highlight }) => {
-  const textStyle = getTimingTextStyle({ status, highlight })
   const isActive = status === 'active' && highlight
   const isUpcoming = status === 'upcoming' && highlight
+
   const background = isActive
-    ? 'rgba(255, 68, 68, 0.18)'
+    ? 'rgba(255, 80, 80, 0.13)'
     : isUpcoming
-      ? 'rgba(255, 107, 53, 0.16)'
-      : 'rgba(255, 255, 255, 0.08)'
+      ? 'rgba(124, 108, 255, 0.14)'
+      : 'rgba(255, 255, 255, 0.055)'
+
   const borderColor = isActive
-    ? 'rgba(255, 68, 68, 0.42)'
+    ? 'rgba(255, 80, 80, 0.34)'
     : isUpcoming
-      ? 'rgba(255, 107, 53, 0.38)'
-      : 'rgba(255, 255, 255, 0.1)'
+      ? 'rgba(124, 108, 255, 0.35)'
+      : 'rgba(255, 255, 255, 0.09)'
+
+  const color = isActive
+    ? '#ff7b7b'
+    : isUpcoming
+      ? '#a99cff'
+      : 'rgba(255, 255, 255, 0.72)'
 
   return `
     display: flex !important;
     align-items: center !important;
-    gap: 8px !important;
-    box-sizing: border-box !important;
     max-width: 100% !important;
-    padding: 6px 10px !important;
-    border-radius: 8px !important;
-    color: ${textStyle.color} !important;
+
+    padding: 6px 9px !important;
+    border-radius: 9px !important;
+
+    color: ${color} !important;
     background: ${background} !important;
     border: 1px solid ${borderColor} !important;
-    font-weight: ${textStyle.fontWeight || 500} !important;
+
+    font-weight: ${isActive ? 700 : 500} !important;
     white-space: normal !important;
     overflow-wrap: anywhere !important;
-    transition: all 0.2s ease !important;
   `
 }
 
 export const getControlsContainerStyle = () => `
   position: absolute !important;
-  top: 20px !important;
-  right: 20px !important;
+  top: 14px !important;
+  right: 14px !important;
   display: flex !important;
-  gap: 8px !important;
+  gap: 6px !important;
   pointer-events: all !important;
-  background: rgba(20, 20, 20, 0.8) !important;
-  padding: 8px !important;
-  border-radius: 12px !important;
-  backdrop-filter: blur(12px) !important;
-  border: 1px solid rgba(255, 255, 255, 0.14) !important;
+
+  background: rgba(12, 13, 18, 0.78) !important;
+  backdrop-filter: blur(14px) saturate(130%) !important;
+  border: 1px solid rgba(255, 255, 255, 0.12) !important;
+  border-radius: 14px !important;
+  padding: 6px !important;
+
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.45) !important;
 `
 
-export const getOverlayButtonStyle = ({ fontSize = 16, fontWeight = 'normal' } = {}) => `
-  background: rgba(255, 255, 255, 0.1) !important;
-  color: white !important;
-  border: 1px solid rgba(255, 255, 255, 0.05) !important;
-  border-radius: 8px !important;
-  width: 36px !important;
-  height: 36px !important;
+export const getOverlayButtonStyle = ({ fontSize = 15, fontWeight = '600' } = {}) => `
+  width: 32px !important;
+  height: 32px !important;
+  border-radius: 9px !important;
+
   display: flex !important;
   align-items: center !important;
   justify-content: center !important;
+
+  background: rgba(255, 255, 255, 0.08) !important;
+  color: rgba(255, 255, 255, 0.92) !important;
+  border: 1px solid rgba(255, 255, 255, 0.08) !important;
+
   cursor: pointer !important;
-  transition: all 0.2s ease !important;
+  transition: background 0.18s ease, transform 0.18s ease, border-color 0.18s ease !important;
+
   font-size: ${fontSize}px !important;
   font-weight: ${fontWeight} !important;
 `

@@ -575,7 +575,7 @@
             <div
               v-for="timing in sortedNudityTimings"
               :key="timing.id"
-              class="timing-entry"
+              class="timing-card"
               :class="{
                 pending: timing.status === 'pending',
                 'clean-text': timing.status === 'clean_text',
@@ -584,12 +584,22 @@
                 'highly-rated': (timing.voteScore || 0) >= 10
               }"
             >
-              <div class="timing-content">
-                <div class="timing-header-row">
+              <!-- 1.  Верхняя строка: автор + источник + статус -->
+              <div class="timing-card-header">
+                <span class="timing-card-author">
+                  <i class="fas fa-user"></i>
+                  by {{ timing.username }}
+                  <span
+                    v-if="timing.user_id && timing.user_id !== 0 && timing.user_timing_count > 0"
+                    class="timing-card-count"
+                    :title="`Авторизованный пользователь (${timing.user_timing_count} таймингов)`"
+                  >
+                    (${timing.user_timing_count})
+                  </span>
+                </span>
+                <div class="timing-card-badges">
                   <div v-if="timing.status === 'pending'" class="pending-badge">На модерации</div>
-                  <div v-if="timing.status === 'clean_text'" class="clean-text-badge">
-                    Тайминги такого типа не модерируются, для уверенности сверяйтесь с ParentsGuide
-                  </div>
+                  <div v-if="timing.status === 'clean_text'" class="clean-text-badge" title="Тайминги такого типа не модерируются, для уверенности сверяйтесь с ParentsGuide">Clean Text</div>
                   <div v-if="(timing.voteScore || 0) >= 10" class="highly-rated-badge">
                     <i class="fas fa-star"></i> Проверено сообществом
                   </div>
@@ -597,118 +607,108 @@
                     <i class="fas fa-thumbs-up"></i> Рекомендуется
                   </div>
                 </div>
-                <div class="timing-actions-row">
-                  <button class="nudity-info-button" @click="handleShowParse(timing)">
+              </div>
+
+              <!-- 2. Тело: текст тайминга / парсер -->
+              <div class="timing-card-body" :class="{ blurred: timing.status === 'pending' }">
+                <pre class="timing-card-text">{{ timing.timing_text }}</pre>
+              </div>
+
+              <!-- 3. Парсер (если открыт) -->
+              <div
+                v-if="showParseResult[timing.id] && Array.isArray(showParseResult[timing.id])"
+                class="timing-card-parser"
+              >
+                <b>Парсер:</b>
+                <span v-if="showParseResult[timing.id].length === 0">Не удалось распарсить</span>
+                <span v-else>
+                  <span v-for="(range, idx) in showParseResult[timing.id]" :key="idx">
+                    [{{ formatSecondsToTime(range[0]) }} - {{ formatSecondsToTime(range[1]) }}]{{
+                      idx < showParseResult[timing.id].length - 1 ? ', ' : ''
+                    }}
+                  </span>
+                </span>
+              </div>
+
+              <!-- 4. Низ: действия слева, голоса справа -->
+              <div class="timing-card-footer">
+                <div class="timing-card-actions">
+                  <button class="timing-btn-action" @click="handleShowParse(timing)">
                     {{ showParseResult[timing.id] ? 'Скрыть парсер' : 'Показать парсер' }}
                   </button>
 
                   <template v-if="overlayTimings.has(timing.id)">
                     <button
-                      class="nudity-info-button overlay-button"
-                      :title="'Удалить из оверлея'"
+                      class="timing-btn-action overlay-active"
+                      title="Удалить из оверлея"
                       @click="onRemoveFromOverlay(timing.id)"
                     >
                       <i class="fas fa-eye-slash"></i>
-                      <span>Удалить из оверлея</span>
+                      <span>Удалить</span>
                     </button>
                   </template>
                   <template v-else>
                     <button
-                      class="nudity-info-button overlay-button"
-                      :title="'Добавить в оверлей'"
+                      class="timing-btn-action"
+                      title="Добавить в оверлей"
                       @click="onAddToOverlay(timing.id)"
                     >
                       <i class="fas fa-eye"></i>
-                      <span>Добавить в оверлей</span>
+                      <span>Добавить</span>
                     </button>
                   </template>
 
                   <template v-if="canEditTiming(timing)">
                     <button
-                      class="nudity-info-button edit-button"
-                      :title="'Редактировать тайминг'"
+                      class="timing-btn-action edit"
+                      title="Редактировать тайминг"
                       @click="editTiming(timing)"
                     >
                       <i class="fas fa-edit"></i>
-                      <span>Редактировать</span>
                     </button>
                     <button
-                      class="nudity-info-button delete-button"
-                      :title="'Удалить тайминг'"
+                      class="timing-btn-action delete"
+                      title="Удалить тайминг"
                       @click="deleteTimingHandler(timing.id)"
                     >
                       <i class="fas fa-trash"></i>
-                      <span>Удалить</span>
                     </button>
                   </template>
 
                   <button
                     v-if="!canEditTiming(timing)"
-                    class="nudity-info-button report-button"
-                    :title="'Пожаловаться на тайминг'"
+                    class="timing-btn-action report"
+                    title="Пожаловаться на тайминг"
                     @click="reportTimingHandler(timing.id)"
                   >
                     <i class="fas fa-flag"></i>
-                    <span>Пожаловаться</span>
                   </button>
                 </div>
-                <div
-                  class="timing-hover-container"
-                  :class="{ blurred: timing.status === 'pending' }"
-                >
-                  <span class="timing-text">{{ timing.timing_text }}</span>
-                  <br />
-                  <span class="timing-author">
-                    by {{ timing.username }}
-                    <span
-                      v-if="timing.user_id && timing.user_id !== 0 && timing.user_timing_count > 0"
-                      class="timing-count"
-                      :title="`Авторизованный пользователь (${timing.user_timing_count} таймингов)`"
-                    >
-                      ({{ timing.user_timing_count }})
-                    </span>
-                  </span>
-                </div>
-                <div class="timing-vote-container">
+
+                <div class="timing-card-vote">
                   <button
-                    class="vote-button upvote-button"
+                    class="vote-btn-arrow up"
                     :class="{ active: timing.userVote === 'upvote' }"
                     :disabled="votingTimingId === timing.id"
-                    :title="'Этот тайминг полезен и точен'"
+                    title="Этот тайминг полезен и точен"
                     @click="handleVote(timing.id, 'upvote')"
                   >
                     <i class="fas fa-arrow-up"></i>
-                    <span class="vote-count">{{ timing.upvotes || 0 }}</span>
+                    <span class="vote-count-num">{{ timing.upvotes || 0 }}</span>
                   </button>
-                  <span class="vote-score" :class="getVoteScoreClass(timing.voteScore || 0)">
+                  <span class="vote-score-badge" :class="getVoteScoreClass(timing.voteScore || 0)">
                     {{ timing.voteScore || 0 }}
                   </span>
                   <button
-                    class="vote-button downvote-button"
+                    class="vote-btn-arrow down"
                     :class="{ active: timing.userVote === 'downvote' }"
                     :disabled="votingTimingId === timing.id"
-                    :title="'Этот тайминг неточен или некорректен'"
+                    title="Этот тайминг неточен или некорректен"
                     @click="handleVote(timing.id, 'downvote')"
                   >
                     <i class="fas fa-arrow-down"></i>
-                    <span class="vote-count">{{ timing.downvotes || 0 }}</span>
+                    <span class="vote-count-num">{{ timing.downvotes || 0 }}</span>
                   </button>
-                </div>
-                <div
-                  v-if="showParseResult[timing.id] && Array.isArray(showParseResult[timing.id])"
-                  class="timing-parse-result"
-                >
-                  <b>Парсер:</b>
-                  <span v-if="showParseResult[timing.id].length === 0">Не удалось распарсить</span>
-                  <span v-else>
-                    <span v-for="(range, idx) in showParseResult[timing.id]" :key="idx">
-                      [{{ formatSecondsToTime(range[0]) }}
-                      -
-                      {{ formatSecondsToTime(range[1]) }}]{{
-                        idx < showParseResult[timing.id].length - 1 ? ', ' : ''
-                      }}
-                    </span>
-                  </span>
                 </div>
               </div>
             </div>
@@ -4275,147 +4275,78 @@ const handleFilterSelect = () => {
 .timing-entries {
   display: flex;
   flex-direction: column;
-  gap: 10px;
+  gap: 12px;
 }
 
-.timing-entry {
-  padding: 12px;
-  background: rgba(255, 255, 255, 0.045);
+.timing-card {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 14px;
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.035);
   border: 1px solid rgba(255, 255, 255, 0.08);
-  border-radius: 8px;
-  transition: all 0.2s ease;
+  transition: all 0.22s ease;
 }
 
-.timing-entry:hover {
-  background: rgba(255, 255, 255, 0.065);
-  border-color: rgba(255, 255, 255, 0.14);
+.timing-card:hover {
+  background: rgba(255, 255, 255, 0.055);
+  border-color: rgba(255, 255, 255, 0.12);
 }
 
-.timing-entry.top-rated {
-  background: rgba(34, 197, 94, 0.07);
-  border-color: rgba(34, 197, 94, 0.22);
+.timing-card.top-rated {
+  background: rgba(34, 197, 94, 0.05);
+  border-color: rgba(34, 197, 94, 0.18);
 }
 
-.timing-entry.highly-rated {
-  background: rgba(34, 197, 94, 0.1);
-  border-color: rgba(34, 197, 94, 0.34);
-  box-shadow: 0 0 18px rgba(34, 197, 94, 0.08);
+.timing-card.highly-rated {
+  background: rgba(34, 197, 94, 0.08);
+  border-color: rgba(34, 197, 94, 0.26);
+  box-shadow: 0 8px 24px rgba(34, 197, 94, 0.05);
 }
 
-.timing-content {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) auto;
-  gap: 10px 14px;
-  align-items: start;
+.timing-card.pending {
+  background: rgba(255, 165, 0, 0.06);
+  border: 1px solid rgba(255, 165, 0, 0.18);
 }
 
-.timing-text {
-  font-family: monospace;
-  color: #fff;
-  font-size: 1.03em;
-  line-height: 1.55;
-  word-break: break-word;
+.timing-card.clean-text {
+  background: rgba(255, 165, 0, 0.06);
+  border: 1px solid rgba(255, 165, 0, 0.18);
 }
 
-.timing-author {
-  color: rgba(255, 255, 255, 0.7);
-  font-size: 0.85em;
-  font-style: italic;
-}
-
-.timing-vote-container {
+.timing-card-header {
   display: flex;
   align-items: center;
-  justify-content: flex-end;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.timing-card-author {
+  display: flex;
+  align-items: center;
   gap: 6px;
-  grid-column: 2;
-  grid-row: 1 / span 3;
-  align-self: center;
-  min-width: 122px;
+  font-size: 13px;
+  color: rgba(255, 255, 255, 0.7);
+  font-weight: 500;
 }
 
-.vote-button {
+.timing-card-author i {
+  color: var(--accent-light, #8a7ce8);
+  font-size: 11px;
+}
+
+.timing-card-count {
+  color: rgba(255, 255, 255, 0.4);
+  font-size: 11px;
+}
+
+.timing-card-badges {
   display: flex;
   align-items: center;
-  gap: 4px;
-  padding: 5px 8px;
-  background: rgba(255, 255, 255, 0.05);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  border-radius: 7px;
-  color: rgba(255, 255, 255, 0.7);
-  cursor: pointer;
-  transition: all 0.2s ease;
-  font-size: 0.85em;
-}
-
-.vote-button:hover:not(:disabled) {
-  background: rgba(255, 255, 255, 0.1);
-  border-color: rgba(255, 255, 255, 0.2);
-}
-
-.vote-button:disabled {
-  opacity: 0.5;
-  cursor: not-allowed;
-}
-
-.vote-button.upvote-button.active {
-  background: rgba(34, 197, 94, 0.2);
-  border-color: rgba(34, 197, 94, 0.4);
-  color: #22c55e;
-}
-
-.vote-button.upvote-button.active:hover {
-  background: rgba(34, 197, 94, 0.3);
-}
-
-.vote-button.downvote-button.active {
-  background: rgba(239, 68, 68, 0.2);
-  border-color: rgba(239, 68, 68, 0.4);
-  color: #ef4444;
-}
-
-.vote-button.downvote-button.active:hover {
-  background: rgba(239, 68, 68, 0.3);
-}
-
-.vote-count {
-  font-weight: 600;
-  min-width: 20px;
-  text-align: center;
-}
-
-.vote-score {
-  font-weight: 700;
-  font-size: 0.9em;
-  padding: 5px 8px;
-  border-radius: 7px;
-  min-width: 30px;
-  text-align: center;
-}
-
-.vote-score.positive {
-  color: #22c55e;
-  background: rgba(34, 197, 94, 0.1);
-}
-
-.vote-score.negative {
-  color: #ef4444;
-  background: rgba(239, 68, 68, 0.1);
-}
-
-.vote-score.neutral {
-  color: rgba(255, 255, 255, 0.5);
-  background: rgba(255, 255, 255, 0.05);
-}
-
-.timing-entry.pending {
-  background: rgba(255, 165, 0, 0.1);
-  border: 1px solid rgba(255, 165, 0, 0.2);
-}
-
-.timing-entry.clean-text {
-  background: rgba(255, 165, 0, 0.1);
-  border: 1px solid rgba(255, 165, 0, 0.2);
+  gap: 8px;
+  flex-wrap: wrap;
 }
 
 .pending-badge {
@@ -4465,28 +4396,40 @@ const handleFilterSelect = () => {
   box-shadow: 0 0 8px rgba(34, 197, 94, 0.2);
 }
 
-.timing-header-row {
-  display: flex;
-  align-items: center;
-  flex-wrap: wrap;
-  gap: 6px;
-  grid-column: 1;
+.timing-card-body {
+  border-radius: 10px;
+  background: rgba(0, 0, 0, 0.22);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  padding: 12px 14px;
+  min-height: 48px;
 }
 
-.timing-actions-row {
-  display: flex;
-  align-items: center;
-  flex-wrap: wrap;
-  gap: 6px;
-  grid-column: 1;
+.timing-card-body.blurred {
+  filter: blur(4px);
 }
 
-.timing-hover-container {
-  grid-column: 1;
-  padding: 10px 12px;
-  background: rgba(0, 0, 0, 0.18);
-  border: 1px solid rgba(255, 255, 255, 0.07);
-  border-radius: 7px;
+.timing-card-body.blurred:hover {
+  filter: blur(0);
+  transition: filter 0.3s ease;
+}
+
+.timing-card-text {
+  white-space: pre-wrap;
+  margin: 0;
+  color: rgba(255, 255, 255, 0.95);
+  font-family: 'Courier New', Courier, monospace;
+  font-size: 14px;
+  line-height: 1.5;
+  word-break: break-word;
+}
+
+.timing-card-parser {
+  font-size: 12px;
+  color: rgba(255, 255, 255, 0.7);
+  background: rgba(108, 92, 231, 0.08);
+  border: 1px solid rgba(108, 92, 231, 0.15);
+  border-radius: 8px;
+  padding: 8px 12px;
 }
 
 .timing-parse-result,
@@ -4508,13 +4451,137 @@ const handleFilterSelect = () => {
   font-size: 14px;
 }
 
-.timing-hover-container.blurred {
-  filter: blur(4px);
+.timing-card-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin-top: 4px;
 }
 
-.timing-hover-container.blurred:hover {
-  filter: blur(0);
-  transition: filter 0.3s ease;
+.timing-card-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.timing-btn-action {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px;
+  border-radius: 8px;
+  font-size: 12px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.18s ease;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  color: rgba(255, 255, 255, 0.8);
+}
+
+.timing-btn-action:hover {
+  background: rgba(255, 255, 255, 0.1);
+  border-color: rgba(255, 255, 255, 0.18);
+  color: #fff;
+}
+
+.timing-btn-action.overlay-active {
+  background: rgba(108, 92, 231, 0.15);
+  border-color: rgba(108, 92, 231, 0.35);
+  color: #8a7ce8;
+}
+
+.timing-btn-action.overlay-active:hover {
+  background: rgba(108, 92, 231, 0.25);
+  color: #fff;
+}
+
+.timing-btn-action.edit:hover {
+  background: rgba(116, 185, 255, 0.15);
+  border-color: rgba(116, 185, 255, 0.35);
+  color: #74b9ff;
+}
+
+.timing-btn-action.delete:hover {
+  background: rgba(225, 112, 85, 0.15);
+  border-color: rgba(225, 112, 85, 0.35);
+  color: #e17055;
+}
+
+.timing-btn-action.report:hover {
+  background: rgba(253, 203, 110, 0.12);
+  border-color: rgba(253, 203, 110, 0.35);
+  color: #fdcb6e;
+}
+
+.timing-card-vote {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  background: rgba(0, 0, 0, 0.14);
+  border-radius: 9px;
+  padding: 3px;
+  border: 1px solid rgba(255, 255, 255, 0.04);
+}
+
+.vote-btn-arrow {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 8px;
+  background: transparent;
+  border: none;
+  border-radius: 6px;
+  color: rgba(255, 255, 255, 0.6);
+  cursor: pointer;
+  transition: all 0.18s ease;
+  font-size: 11px;
+}
+
+.vote-btn-arrow:hover:not(:disabled) {
+  background: rgba(255, 255, 255, 0.06);
+  color: #fff;
+}
+
+.vote-btn-arrow:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.vote-btn-arrow.up.active {
+  background: rgba(34, 197, 94, 0.15);
+  color: #22c55e;
+}
+
+.vote-btn-arrow.down.active {
+  background: rgba(239, 68, 68, 0.15);
+  color: #ef4444;
+}
+
+.vote-count-num {
+  font-weight: 600;
+}
+
+.vote-score-badge {
+  font-weight: 700;
+  font-size: 12px;
+  min-width: 22px;
+  text-align: center;
+}
+
+.vote-score-badge.positive {
+  color: #22c55e;
+}
+
+.vote-score-badge.negative {
+  color: #ef4444;
+}
+
+.vote-score-badge.neutral {
+  color: rgba(255, 255, 255, 0.4);
 }
 
 .hint-text {
@@ -4671,25 +4738,31 @@ const handleFilterSelect = () => {
 }
 
 @media (max-width: 768px) {
-  .timing-content {
-    grid-template-columns: 1fr;
+  .timing-card {
+    padding: 12px;
+    gap: 10px;
   }
 
-  .timing-header-row,
-  .timing-actions-row,
-  .timing-hover-container,
-  .timing-vote-container {
-    grid-column: 1;
+  .timing-card-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
   }
 
-  .timing-vote-container {
-    grid-row: auto;
-    justify-content: flex-start;
-    min-width: 0;
+  .timing-card-footer {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 10px;
   }
 
-  .timing-actions-row .nudity-info-button {
-    flex: 1 1 140px;
+  .timing-card-actions {
+    justify-content: space-between;
+    width: 100%;
+  }
+
+  .timing-card-vote {
+    justify-content: center;
+    width: 100%;
   }
 
   .modal-header-controls {
