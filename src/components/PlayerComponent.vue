@@ -738,6 +738,36 @@ const isIframeVideoFullscreen = (iframeDoc, video) => {
   )
 }
 
+const applyManualHiddenOverlayState = () => {
+  const overlay = currentOverlayElement.value
+  if (!overlay || !videoOverlayManuallyHidden.value || hasActiveTimings.value) {
+    return false
+  }
+
+  const mainInfo = overlay.children[0]
+  const timingsPanel = overlay.children[1]
+  const controlsContainer = overlay.children[2]
+
+  if (mainInfo) {
+    mainInfo.style.opacity = '0'
+  }
+
+  if (timingsPanel) {
+    applyOverlayVisibilityStyle(timingsPanel, false)
+  }
+
+  if (controlsContainer) {
+    applyOverlayVisibilityStyle(controlsContainer, false)
+  }
+
+  clearTimeout(hideTimingsTimeout)
+  hideTimingsTimeout = null
+  clearTimeout(overlayControlsTimeout.value)
+  overlayControlsTimeout.value = null
+
+  return true
+}
+
 // OBS WebSocket
 const obsWebSocket = ref(null)
 const obsConnected = ref(false)
@@ -878,9 +908,9 @@ const startVideoPositionMonitoring = (isDebug = false) => {
           }
         }
 
-        if (isElectron.value && !shouldRenderVideoOverlay() && currentOverlayElement.value) {
+        if (isElectron.value && !videoOverlayEnabled2.value && currentOverlayElement.value) {
           setTimeout(() => {
-            if (!shouldRenderVideoOverlay() && currentOverlayElement.value) {
+            if (!videoOverlayEnabled2.value && currentOverlayElement.value) {
               removeVideoOverlay()
             }
           }, 100)
@@ -933,6 +963,15 @@ const startVideoPositionMonitoring = (isDebug = false) => {
             selectedTimings.some((timing) =>
               timing.intervals.some((interval) => interval.status === 'upcoming')
             )
+        }
+
+        if (
+          isElectron.value &&
+          currentOverlayElement.value &&
+          videoOverlayManuallyHidden.value &&
+          !hasActiveTimings.value
+        ) {
+          applyManualHiddenOverlayState()
         }
 
         if (
@@ -1663,7 +1702,7 @@ const createVideoOverlay = (iframeDoc, video) => {
     e.stopPropagation()
     e.stopImmediatePropagation()
     videoOverlayManuallyHidden.value = true
-    removeVideoOverlay()
+    applyManualHiddenOverlayState()
   })
 
   settingsBtn.addEventListener('click', (e) => {
@@ -1747,6 +1786,10 @@ const createVideoOverlay = (iframeDoc, video) => {
   let hideMainInfoTimeout = null
 
   const handleMouseMove = () => {
+    if (applyManualHiddenOverlayState()) {
+      return
+    }
+
     applyOverlayVisibilityStyle(controlsContainer, true)
     mainInfo.style.opacity = '0'
 
@@ -1778,6 +1821,10 @@ const createVideoOverlay = (iframeDoc, video) => {
   iframeDoc.addEventListener('mousemove', handleMouseMove)
 
   overlay.addEventListener('mouseenter', () => {
+    if (applyManualHiddenOverlayState()) {
+      return
+    }
+
     applyOverlayVisibilityStyle(controlsContainer, true)
     mainInfo.style.opacity = '0'
     clearTimeout(hideMainInfoTimeout)
