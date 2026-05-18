@@ -798,10 +798,13 @@ const startVideoPositionMonitoring = (isDebug = false) => {
   }
 
   let blurApplied = false
+  let blurAppliedWithObs = false
   let blurIntervals = []
 
   function updateBlurIntervals() {
     blurIntervals = []
+    if (overlaySettings.value.autoBlurTimings === false) return
+
     if (
       window.selectedNudityTimings &&
       Array.isArray(window.selectedNudityTimings) &&
@@ -969,20 +972,28 @@ const startVideoPositionMonitoring = (isDebug = false) => {
             if (shouldBlur && !blurApplied) {
               obsWebSocket.value?.enableBlur(obsSettings.value.selectedFilterId)
               blurApplied = true
+              blurAppliedWithObs = true
               debugLog('OBS Blur applied at', currentTime.toFixed(2), 'seconds')
             } else if (!shouldBlur && blurApplied) {
               obsWebSocket.value?.disableBlur(obsSettings.value.selectedFilterId)
               blurApplied = false
+              blurAppliedWithObs = false
               debugLog('OBS Blur removed at', currentTime.toFixed(2), 'seconds')
             }
           } else if (shouldBlur && !blurApplied && isElectron.value) {
             // Internal blur logic
             enableBlur()
             blurApplied = true
+            blurAppliedWithObs = false
             debugLog('Blur applied at', currentTime.toFixed(2), 'seconds')
-          } else if (!shouldBlur && blurApplied && !obsSettings.value.enabled) {
-            disableBlur()
+          } else if (!shouldBlur && blurApplied) {
+            if (blurAppliedWithObs) {
+              obsWebSocket.value?.disableBlur(obsSettings.value.selectedFilterId)
+            } else {
+              disableBlur()
+            }
             blurApplied = false
+            blurAppliedWithObs = false
             debugLog('Blur removed at', currentTime.toFixed(2), 'seconds')
           }
         }
@@ -1489,7 +1500,8 @@ const showOverlaySettings = () => {
       showDuration2: modalContent.querySelector('#showDuration').checked,
       showBackground: modalContent.querySelector('#showBackground').checked,
       showTimingsOnMouseMove: modalContent.querySelector('#showTimingsOnMouseMove').checked,
-      highlightTimings: modalContent.querySelector('#highlightTimings').checked
+      highlightTimings: modalContent.querySelector('#highlightTimings').checked,
+      autoBlurTimings: modalContent.querySelector('#autoBlurTimings').checked
     }
     overlaySettings.value = newSettings
     window.electronAPI?.showToast('Настройки оверлея сохранены')

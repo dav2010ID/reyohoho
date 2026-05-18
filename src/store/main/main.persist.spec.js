@@ -203,6 +203,7 @@ describe('Тесты миграций на новый способ хранен�
         showBackground: false,
         showTimingsOnMouseMove: false,
         highlightTimings: true,
+        autoBlurTimings: true,
         fontSize: 18
       },
       obsSettings: {

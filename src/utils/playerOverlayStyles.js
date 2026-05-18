@@ -172,6 +172,11 @@ export const getOverlaySettingsMarkup = (settings) => `
       <input type="checkbox" id="highlightTimings" ${settings.highlightTimings ? 'checked' : ''} class="checkbox-input">
       <div class="toggle-switch"></div>
     </label>
+    <label class="setting-row">
+      <span class="setting-text">Автоблюр в выбранных таймингах</span>
+      <input type="checkbox" id="autoBlurTimings" ${settings.autoBlurTimings !== false ? 'checked' : ''} class="checkbox-input">
+      <div class="toggle-switch"></div>
+    </label>
   </div>
 
   <div class="settings-actions">
