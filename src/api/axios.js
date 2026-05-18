@@ -104,3 +104,12 @@ export const getCurrentApiInfo = () => {
     availableEndpoints: apiStore.availableEndpoints
   }
 }
+
+/**
+ * Force-invalidate the cached axios instance (e.g. when the API endpoint changes).
+ * The next call to getApi() will create a fresh instance with the new URL.
+ */
+export const resetApi = () => {
+  apiInstance = null
+  apiInstancePromise = null
+}

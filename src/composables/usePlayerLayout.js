@@ -18,6 +18,8 @@ export const usePlayerLayout = ({ mainStore, playerStore, containerRef, playerIf
   const closeButtonVisible = ref(false)
   const closeButtonWasVisible = ref(false)
   const theaterModeCloseButtonTimeout = ref(null)
+  // Fix: store centerPlayer timeout so it can be cancelled on unmount (memory-leak fix)
+  const centerPlayerTimeout = ref(null)
   const maxPlayerHeightValue = ref(getViewportPlayerHeight())
   const theaterFullscreenActive = ref(false)
 
@@ -63,9 +65,12 @@ export const usePlayerLayout = ({ mainStore, playerStore, containerRef, playerIf
 
   const centerPlayer = () => {
     if (containerRef.value) {
-      setTimeout(() => {
+      // Fix: cancel previous pending scroll to avoid stale calls after unmount
+      if (centerPlayerTimeout.value) clearTimeout(centerPlayerTimeout.value)
+      centerPlayerTimeout.value = setTimeout(() => {
         nextTick(() => {
-          containerRef.value.scrollIntoView({
+          centerPlayerTimeout.value = null
+          containerRef.value?.scrollIntoView({
             behavior: 'smooth',
             block: 'center',
             inline: 'center'
@@ -131,6 +136,9 @@ export const usePlayerLayout = ({ mainStore, playerStore, containerRef, playerIf
   }
 
   const toggleTheaterMode = () => {
+    // Fix: SSR guard — window/document are not available during server-side rendering
+    if (typeof window === 'undefined' || typeof document === 'undefined') return
+
     theaterMode.value = !theaterMode.value
     if (theaterMode.value) {
       window.addEventListener('mousemove', showCloseButton)
@@ -138,15 +146,23 @@ export const usePlayerLayout = ({ mainStore, playerStore, containerRef, playerIf
       document.body.classList.add('no-scroll')
       document.body.classList.add(THEATER_MODE_BODY_CLASS)
       lockMobileLandscape()
+      // Fix: use showCloseButton() instead of direct assignment so any stale
+      // hide-timeout from a previous theater session is cleared first.
+      showCloseButton()
     } else {
       window.removeEventListener('mousemove', showCloseButton)
       document.removeEventListener('keydown', onKeyDown)
       document.body.classList.remove('no-scroll')
       document.body.classList.remove(THEATER_MODE_BODY_CLASS)
       unlockMobileLandscape()
+      // Fix: explicitly cancel the auto-hide timeout when exiting
+      if (theaterModeCloseButtonTimeout.value) {
+        clearTimeout(theaterModeCloseButtonTimeout.value)
+        theaterModeCloseButtonTimeout.value = null
+      }
+      closeButtonVisible.value = false
     }
 
-    closeButtonVisible.value = theaterMode.value
     nextTick(() => {
       centerPlayer()
       if (playerIframe.value) {
@@ -183,15 +199,24 @@ export const usePlayerLayout = ({ mainStore, playerStore, containerRef, playerIf
   }
 
   const cleanupPlayerLayout = () => {
-    window.removeEventListener('mousemove', showCloseButton)
-    document.removeEventListener('keydown', onKeyDown)
-    document.body.classList.remove('no-scroll')
-    document.body.classList.remove(THEATER_MODE_BODY_CLASS)
+    if (typeof window !== 'undefined') {
+      window.removeEventListener('mousemove', showCloseButton)
+    }
+    if (typeof document !== 'undefined') {
+      document.removeEventListener('keydown', onKeyDown)
+      document.body.classList.remove('no-scroll')
+      document.body.classList.remove(THEATER_MODE_BODY_CLASS)
+    }
     unlockMobileLandscape()
 
     if (theaterModeCloseButtonTimeout.value) {
       clearTimeout(theaterModeCloseButtonTimeout.value)
       theaterModeCloseButtonTimeout.value = null
+    }
+    // Fix: cancel any pending centerPlayer scroll on unmount
+    if (centerPlayerTimeout.value) {
+      clearTimeout(centerPlayerTimeout.value)
+      centerPlayerTimeout.value = null
     }
   }
 

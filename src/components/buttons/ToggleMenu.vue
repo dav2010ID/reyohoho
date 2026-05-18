@@ -68,8 +68,7 @@ function toggle() {
 }
 
 .toggle[aria-expanded='true'] {
-  opacity: 0;
-  pointer-events: none;
+  color: var(--accent-color, #ff6b35);
 }
 
 .mobile-badge {

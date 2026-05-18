@@ -163,9 +163,7 @@
                 :class="{ active: movieInfo?.lists?.isAbandoned }"
                 @click="toggleList(USER_LIST_TYPES_ENUM.ABANDONED)"
               >
-                <span class="material-icons">{{
-                  movieInfo?.lists?.isAbandoned ? 'not_interested' : 'not_interested'
-                }}</span>
+                <span class="material-icons">{{ movieInfo?.lists?.isAbandoned ? 'cancel' : 'not_interested' }}</span>
                 <span class="button-label">Брошено</span>
               </button>
             </div>
@@ -1079,7 +1077,8 @@ const handlePlayerSelect = (player) => {
   if (!player.key.toLowerCase().includes('torrents')) {
     playerStore.updatePreferredPlayer(normalizePlayerKey(player.key))
   }
-  emit('update:selectedPlayer', player)
+  // Note: emit('update:selectedPlayer') is handled by the watcher on selectedPlayerInternal
+  closePlayerModal()
 }
 
 watch(selectedPlayerInternal, (newVal) => {

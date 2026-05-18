@@ -536,10 +536,15 @@ const getMovies = async ({ activeTime = 'all', typeFilter = 'all', limit = null,
   return rows.map(buildLegacyMovie)
 }
 
-const getDiscussedMovies = async () => {
+const getDiscussedMovies = async (sortMode = 'hot') => {
   const { data } = await apiCall((api) => api.get('/api/films/top-views', { params: { page: 1 } }))
   const rows = Array.isArray(data?.data) ? data.data : []
-  return rows.map(buildLegacyMovie)
+  const result = rows.map(buildLegacyMovie)
+  // Client-side sort: 'recent' = by year descending, 'hot' = original API order (view count)
+  if (sortMode === 'recent') {
+    return result.sort((a, b) => Number(b.year || 0) - Number(a.year || 0))
+  }
+  return result
 }
 
 const getKpIDfromIMDB = async (imdbId) => {
@@ -556,7 +561,11 @@ const getKpIDfromIMDB = async (imdbId) => {
 }
 
 const getRandomMovie = async () => {
-  const { data } = await apiCall((api) => api.get('/api/films/top', { params: { page: 1, per_page: 50 } }))
+  // Fix: randomise page (1–10) so the pool is not always the same 50 films
+  const randomPage = Math.floor(Math.random() * 10) + 1
+  const { data } = await apiCall((api) =>
+    api.get('/api/films/top', { params: { page: randomPage, per_page: 20 } })
+  )
   const rows = Array.isArray(data?.data) ? data.data : []
   if (!rows.length) return { kp_id: null }
 
