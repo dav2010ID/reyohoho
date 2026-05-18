@@ -3,21 +3,21 @@ const OVERLAY_FONT =
 const PANEL_BACKGROUND = 'rgba(20, 20, 20, 0.8)'
 const PANEL_BACKDROP = 'blur(12px)'
 const PANEL_BORDER = '1px solid rgba(255, 255, 255, 0.14)'
-const ACCENT_COLOR = '#ff6b35'
-const ACCENT_HOVER = '#e55a2b'
+const ACCENT_COLOR = '#6c5ce7'
+const ACCENT_HOVER = '#5a4fcf'
 const MUTED_TEXT = 'rgba(255, 255, 255, 0.6)'
 
 export const overlayInlineStyles = {
   settingsTitle:
-    'color: #ff6b35; margin: 0 0 24px 0; font-size: 20px; font-weight: 600; text-align: center;',
+    'color: #6c5ce7; margin: 0 0 24px 0; font-size: 20px; font-weight: 600; text-align: center;',
   settingsOptions: 'display: flex; flex-direction: column; gap: 16px;',
   settingsLabel:
     'display: flex; align-items: center; gap: 12px; color: white; cursor: pointer; padding: 8px; border-radius: 8px; background: rgba(255, 255, 255, 0.05);',
-  settingsCheckbox: 'width: 18px; height: 18px; accent-color: #ff6b35;',
+  settingsCheckbox: 'width: 18px; height: 18px; accent-color: #6c5ce7;',
   settingsLabelText: 'font-size: 16px;',
   settingsActions: 'display: flex; gap: 12px; margin-top: 24px; justify-content: center;',
   settingsSaveButton:
-    'background: #ff6b35; color: white; border: none; border-radius: 8px; padding: 10px 20px; cursor: pointer; font-size: 16px; font-weight: 500; transition: all 0.3s ease;',
+    'background: #6c5ce7; color: white; border: none; border-radius: 8px; padding: 10px 20px; cursor: pointer; font-size: 16px; font-weight: 500; transition: all 0.3s ease;',
   settingsCancelButton:
     'background: rgba(255, 255, 255, 0.1); color: rgba(255, 255, 255, 0.8); border: 1px solid rgba(255, 255, 255, 0.2); border-radius: 8px; padding: 10px 16px; cursor: pointer; font-size: 14px; transition: all 0.3s ease;',
   monospaceMuted: `font-family: 'Courier New', monospace; color: ${MUTED_TEXT};`,
@@ -25,40 +25,161 @@ export const overlayInlineStyles = {
 }
 
 export const getOverlaySettingsMarkup = (settings) => `
-  <h3 style="${overlayInlineStyles.settingsTitle}">Настройки оверлея</h3>
+  <style>
+    .settings-title {
+      color: ${ACCENT_COLOR};
+      margin: 0 0 24px 0;
+      font-size: 22px;
+      font-weight: 700;
+      text-align: center;
+      letter-spacing: 0.5px;
+      text-shadow: 0 2px 4px rgba(0,0,0,0.3);
+      font-family: ${OVERLAY_FONT};
+    }
+    .settings-options {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      font-family: ${OVERLAY_FONT};
+    }
+    .setting-row {
+      display: flex !important;
+      align-items: center !important;
+      justify-content: space-between !important;
+      padding: 12px 16px !important;
+      border-radius: 12px !important;
+      background: rgba(255, 255, 255, 0.04) !important;
+      border: 1px solid rgba(255, 255, 255, 0.06) !important;
+      cursor: pointer !important;
+      transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1) !important;
+      box-sizing: border-box !important;
+    }
+    .setting-row:hover {
+      background: rgba(255, 255, 255, 0.08) !important;
+      border-color: rgba(108, 92, 231, 0.3) !important;
+      transform: translateY(-1px) !important;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15) !important;
+    }
+    .setting-row:active {
+      transform: translateY(0) !important;
+    }
+    .setting-text {
+      font-size: 14px !important;
+      color: rgba(255, 255, 255, 0.9) !important;
+      font-weight: 500 !important;
+      user-select: none !important;
+      line-height: 1.4 !important;
+      font-family: ${OVERLAY_FONT};
+    }
+    .checkbox-input {
+      position: absolute !important;
+      opacity: 0 !important;
+      width: 0 !important;
+      height: 0 !important;
+      pointer-events: none !important;
+    }
+    .toggle-switch {
+      position: relative !important;
+      width: 42px !important;
+      height: 22px !important;
+      background: rgba(255, 255, 255, 0.15) !important;
+      border-radius: 11px !important;
+      border: 1px solid rgba(255, 255, 255, 0.1) !important;
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+      flex-shrink: 0 !important;
+    }
+    .toggle-switch::before {
+      content: "" !important;
+      position: absolute !important;
+      top: 2px !important;
+      left: 2px !important;
+      width: 16px !important;
+      height: 16px !important;
+      background: #ffffff !important;
+      border-radius: 50% !important;
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.4) !important;
+    }
+    .checkbox-input:checked + .toggle-switch {
+      background: ${ACCENT_COLOR} !important;
+      border-color: ${ACCENT_COLOR} !important;
+      box-shadow: 0 0 8px rgba(108, 92, 231, 0.4) !important;
+    }
+    .checkbox-input:checked + .toggle-switch::before {
+      transform: translateX(20px) !important;
+    }
+    .settings-actions {
+      display: flex !important;
+      gap: 12px !important;
+      margin-top: 28px !important;
+      justify-content: center !important;
+      font-family: ${OVERLAY_FONT};
+    }
+    .btn-save {
+      background: ${ACCENT_COLOR} !important;
+      color: white !important;
+      border: none !important;
+      border-radius: 10px !important;
+      padding: 10px 24px !important;
+      cursor: pointer !important;
+      font-size: 15px !important;
+      font-weight: 600 !important;
+      transition: all 0.2s ease !important;
+      box-shadow: 0 4px 12px rgba(108, 92, 231, 0.3) !important;
+      font-family: ${OVERLAY_FONT};
+    }
+    .btn-cancel {
+      background: rgba(255, 255, 255, 0.08) !important;
+      color: rgba(255, 255, 255, 0.8) !important;
+      border: 1px solid rgba(255, 255, 255, 0.15) !important;
+      border-radius: 10px !important;
+      padding: 10px 20px !important;
+      cursor: pointer !important;
+      font-size: 14px !important;
+      transition: all 0.2s ease !important;
+      font-family: ${OVERLAY_FONT};
+    }
+  </style>
 
-  <div style="${overlayInlineStyles.settingsOptions}">
-    <label style="${overlayInlineStyles.settingsLabel}">
-      <input type="checkbox" id="showTitle" ${settings.showTitle ? 'checked' : ''} style="${overlayInlineStyles.settingsCheckbox}">
-      <span style="${overlayInlineStyles.settingsLabelText}">Показывать название фильма</span>
+  <h3 class="settings-title">Настройки оверлея</h3>
+
+  <div class="settings-options">
+    <label class="setting-row">
+      <span class="setting-text">Показывать название фильма</span>
+      <input type="checkbox" id="showTitle" ${settings.showTitle ? 'checked' : ''} class="checkbox-input">
+      <div class="toggle-switch"></div>
     </label>
 
-    <label style="${overlayInlineStyles.settingsLabel}">
-      <input type="checkbox" id="showDuration" ${settings.showDuration2 ? 'checked' : ''} style="${overlayInlineStyles.settingsCheckbox}">
-      <span style="${overlayInlineStyles.settingsLabelText}">Показывать продолжительность</span>
+    <label class="setting-row">
+      <span class="setting-text">Показывать продолжительность</span>
+      <input type="checkbox" id="showDuration" ${settings.showDuration2 ? 'checked' : ''} class="checkbox-input">
+      <div class="toggle-switch"></div>
     </label>
 
-    <label style="${overlayInlineStyles.settingsLabel}">
-      <input type="checkbox" id="showBackground" ${settings.showBackground ? 'checked' : ''} style="${overlayInlineStyles.settingsCheckbox}">
-      <span style="${overlayInlineStyles.settingsLabelText}">Показывать затемненный фон</span>
+    <label class="setting-row">
+      <span class="setting-text">Показывать затемненный фон</span>
+      <input type="checkbox" id="showBackground" ${settings.showBackground ? 'checked' : ''} class="checkbox-input">
+      <div class="toggle-switch"></div>
     </label>
 
-    <label style="${overlayInlineStyles.settingsLabel}">
-      <input type="checkbox" id="showTimingsOnMouseMove" ${settings.showTimingsOnMouseMove ? 'checked' : ''} style="${overlayInlineStyles.settingsCheckbox}">
-      <span style="${overlayInlineStyles.settingsLabelText}">Показывать тайминги только при движении мышки</span>
+    <label class="setting-row">
+      <span class="setting-text">Показывать тайминги только при движении мышки</span>
+      <input type="checkbox" id="showTimingsOnMouseMove" ${settings.showTimingsOnMouseMove ? 'checked' : ''} class="checkbox-input">
+      <div class="toggle-switch"></div>
     </label>
 
-    <label style="${overlayInlineStyles.settingsLabel}">
-      <input type="checkbox" id="highlightTimings" ${settings.highlightTimings ? 'checked' : ''} style="${overlayInlineStyles.settingsCheckbox}">
-      <span style="${overlayInlineStyles.settingsLabelText}">Подсвечивать близкие и текущие тайминги</span>
+    <label class="setting-row">
+      <span class="setting-text">Подсвечивать близкие и текущие тайминги</span>
+      <input type="checkbox" id="highlightTimings" ${settings.highlightTimings ? 'checked' : ''} class="checkbox-input">
+      <div class="toggle-switch"></div>
     </label>
   </div>
 
-  <div style="${overlayInlineStyles.settingsActions}">
-    <button id="saveSettings" style="${overlayInlineStyles.settingsSaveButton}">
+  <div class="settings-actions">
+    <button id="saveSettings" class="btn-save">
       Сохранить
     </button>
-    <button id="cancelSettings" style="${overlayInlineStyles.settingsCancelButton}">
+    <button id="cancelSettings" class="btn-cancel">
       Отмена
     </button>
   </div>
@@ -82,23 +203,25 @@ export const getSettingsModalStyle = () => `
   left: 0 !important;
   width: 100% !important;
   height: 100% !important;
-  background: rgba(0, 0, 0, 0.8) !important;
+  background: rgba(0, 0, 0, 0.55) !important;
   display: flex !important;
   align-items: center !important;
   justify-content: center !important;
   z-index: 9999 !important;
   font-family: ${OVERLAY_FONT} !important;
+  backdrop-filter: blur(5px) !important;
 `
 
 export const getSettingsModalContentStyle = () => `
-  background: rgba(30, 30, 30, 0.95) !important;
-  backdrop-filter: blur(20px) !important;
+  background: rgba(18, 18, 18, 0.75) !important;
+  backdrop-filter: blur(25px) !important;
   border-radius: 16px !important;
   padding: 32px !important;
-  max-width: 400px !important;
+  max-width: 420px !important;
   width: 90% !important;
-  border: 1px solid rgba(255, 255, 255, 0.1) !important;
-  box-shadow: 0 8px 40px rgba(0, 0, 0, 0.5) !important;
+  border: 1px solid rgba(255, 255, 255, 0.08) !important;
+  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.6) !important;
+  box-sizing: border-box !important;
 `
 
 export const applySettingsButtonHoverStyle = (button, hovered) => {
