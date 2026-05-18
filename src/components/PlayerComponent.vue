@@ -805,13 +805,14 @@ const startVideoPositionMonitoring = (isDebug = false) => {
     blurIntervals = []
     if (overlaySettings.value.autoBlurTimings === false) return
 
-    if (
-      window.selectedNudityTimings &&
-      Array.isArray(window.selectedNudityTimings) &&
-      props.movieInfo?.nudity_timings
-    ) {
+    const selectedTimingIds = new Set([
+      ...(Array.isArray(window.selectedNudityTimings) ? window.selectedNudityTimings : []),
+      ...(Array.isArray(window.overlayNudityTimings) ? window.overlayNudityTimings : [])
+    ].map((id) => String(id)))
+
+    if (selectedTimingIds.size > 0 && props.movieInfo?.nudity_timings) {
       for (const timing of props.movieInfo.nudity_timings) {
-        if (window.selectedNudityTimings.includes(timing.id)) {
+        if (selectedTimingIds.has(String(timing.id))) {
           const parsedRanges = parseTimingTextToSeconds(timing.timing_text)
           if (parsedRanges && parsedRanges.length > 0) {
             blurIntervals.push(...parsedRanges)
