@@ -79,7 +79,7 @@ export const useMainStore = defineStore(MAIN_STORE_NAME, {
     },
 
     removeFromHistory(kp_id) {
-      this.history = this.history.filter((movie) => movie.kp_id !== kp_id)
+      this.history = this.history.filter((movie) => String(movie.kp_id) !== String(kp_id))
     },
 
     cleanOldHistory() {

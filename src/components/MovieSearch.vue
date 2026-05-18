@@ -190,6 +190,7 @@ const errorMessage = ref('')
 const errorCode = ref(null)
 const isMobile = computed(() => mainStore.isMobile)
 const history = ref([])
+const deletedHistoryIds = ref(new Set())
 const topMovies = ref([])
 const topMoviesLoading = ref(false)
 const topMoviesLoadingMore = ref(false)
@@ -381,7 +382,9 @@ watch(
       history.value = mainStore.history
       historyLoading.value = mainStore.history.length === 0
       try {
-        const serverHistory = await getMyLists(USER_LIST_TYPES_ENUM.HISTORY)
+        const serverHistory = (await getMyLists(USER_LIST_TYPES_ENUM.HISTORY)).filter(
+          (item) => !deletedHistoryIds.value.has(String(item.kp_id))
+        )
         mainStore.setHistory(serverHistory)
         history.value = serverHistory
       } catch (error) {
@@ -414,7 +417,8 @@ watch(
 )
 
 function handleItemDeleted(deletedItemId) {
-  history.value = history.value.filter((item) => item.kp_id !== deletedItemId)
+  deletedHistoryIds.value.add(String(deletedItemId))
+  history.value = history.value.filter((item) => String(item.kp_id) !== String(deletedItemId))
 }
 
 // Установка типа поиска
@@ -564,6 +568,7 @@ const clearAllHistory = async () => {
   if (authStore.token) {
     try {
       await delAllFromList(USER_LIST_TYPES_ENUM.HISTORY)
+      deletedHistoryIds.value.clear()
       mainStore.clearAllHistory()
       history.value = []
       if (!topMovies.value.length) {

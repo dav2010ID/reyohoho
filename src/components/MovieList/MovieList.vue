@@ -90,6 +90,7 @@ const {
 
 const movieRefs = ref([])
 const activeMovieIndex = ref(null)
+const deletingIds = ref(new Set())
 
 const isCardBorder = computed(() => backgroundStore.isCardBorder)
 const isMobile = computed(() => mainStore.isMobile)
@@ -107,11 +108,18 @@ const movieUrl = (movie) => {
 
 const emit = defineEmits(['item-deleted'])
 const removeFromHistory = async (kp_id) => {
+  const normalizedId = String(kp_id)
+  if (deletingIds.value.has(normalizedId)) return
+
+  deletingIds.value.add(normalizedId)
+
   if (authStore.token) {
+    const previousHistory = [...mainStore.history]
+    mainStore.removeFromHistory(kp_id)
+    emit('item-deleted', kp_id)
+
     try {
       await delFromList(kp_id, USER_LIST_TYPES_ENUM.HISTORY)
-      mainStore.removeFromHistory(kp_id)
-      emit('item-deleted', kp_id)
     } catch (error) {
       const { code } = handleApiError(error)
       console.error('Ошибка загрузки истории:', error)
@@ -119,11 +127,16 @@ const removeFromHistory = async (kp_id) => {
         authStore.logout()
         await router.push('/login')
         router.go(0)
+      } else if (isHistory) {
+        mainStore.setHistory(previousHistory)
       }
+    } finally {
+      deletingIds.value.delete(normalizedId)
     }
   } else {
     mainStore.removeFromHistory(kp_id)
     emit('item-deleted', kp_id)
+    deletingIds.value.delete(normalizedId)
   }
 }
 
