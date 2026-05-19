@@ -279,7 +279,6 @@
         />
 
         <div id="movie-details" class="additional-info">
-          <h2 class="additional-info-title">Подробнее</h2>
           <div class="info-content">
             <div v-if="moviePosterUrl" class="movie-poster-container desktop-only">
               <a
@@ -317,21 +316,38 @@
                 </li>
                 <li
                   v-if="movieInfo.rating_mpaa || movieInfo.rating_age_limits"
-                  class="rating-boxes"
+                  :class="['rating-boxes', getAgeRatingClass(movieInfo.rating_age_limits)]"
                 >
-                  <div v-if="movieInfo.rating_mpaa" class="rating-box mpaa">
-                    <strong>MPAA</strong>
-                    <span>{{ movieInfo.rating_mpaa.toUpperCase() }}</span>
-                  </div>
-                  <div v-if="movieInfo.rating_age_limits" class="rating-box age">
-                    <strong>{{ movieInfo.rating_age_limits.replace('age', '') }}+</strong>
+                  <strong>Возраст:</strong>
+                  <div class="rating-boxes-values">
+                    <div v-if="movieInfo.rating_mpaa" class="rating-box mpaa">
+                      <strong>MPAA</strong>
+                      <span>{{ movieInfo.rating_mpaa.toUpperCase() }}</span>
+                    </div>
+                    <div
+                      v-if="movieInfo.rating_age_limits"
+                      :class="['rating-box age', getAgeRatingClass(movieInfo.rating_age_limits)]"
+                    >
+                      <strong>{{ movieInfo.rating_age_limits.replace('age', '') }}+</strong>
+                    </div>
                   </div>
                 </li>
               </ul>
-              <div class="content-info">
-                <p v-if="movieInfo.description" class="content-description-text">
-                  {{ movieInfo.description }}
-                </p>
+              <div v-if="movieInfo.description" class="content-info info-description-row">
+                <strong>Описание:</strong>
+                <div class="content-description">
+                  <p class="content-description-text">
+                    {{ visibleDescription }}<span v-if="shouldCollapseDescription && !isDescriptionExpanded">...</span>
+                  </p>
+                  <button
+                    v-if="shouldCollapseDescription"
+                    type="button"
+                    class="description-toggle"
+                    @click="isDescriptionExpanded = !isDescriptionExpanded"
+                  >
+                    {{ isDescriptionExpanded ? 'Свернуть' : 'Показать полностью' }}
+                  </button>
+                </div>
               </div>
             </div>
           </div>
@@ -967,6 +983,7 @@ const navbarStore = useNavbarStore()
 const trailerStore = useTrailerStore()
 const notificationRef = ref(null)
 const clientReady = ref(false)
+const DESCRIPTION_PREVIEW_LIMIT = 500
 
 const areTrailersActive = computed(() => trailerStore.areTrailersActive)
 const activeTrailerIndex = ref(null)
@@ -1041,6 +1058,22 @@ const isInAnyList = computed(() => {
 })
 
 const isCommentsEnabled = computed(() => mainStore.isCommentsEnabled)
+const isDescriptionExpanded = ref(false)
+const normalizedDescription = computed(() => movieInfo.value?.description?.trim() || '')
+const shouldCollapseDescription = computed(
+  () => normalizedDescription.value.length > DESCRIPTION_PREVIEW_LIMIT
+)
+const visibleDescription = computed(() => {
+  if (!shouldCollapseDescription.value || isDescriptionExpanded.value) {
+    return normalizedDescription.value
+  }
+
+  return normalizedDescription.value.slice(0, DESCRIPTION_PREVIEW_LIMIT).trimEnd()
+})
+
+watch(normalizedDescription, () => {
+  isDescriptionExpanded.value = false
+})
 
 const syncCanonicalMovieRoute = async () => {
   if (kp_id.value.startsWith('shiki') || !movieInfo.value) {
@@ -1161,6 +1194,28 @@ const formatTime = (minutes) => {
   const hours = Math.floor(minutes / 60)
   const mins = minutes % 60
   return `${hours} ч. ${mins} мин.`
+}
+
+const getAgeRatingClass = (ratingAgeLimits) => {
+  const age = Number(String(ratingAgeLimits || '').replace(/\D/g, ''))
+
+  if (!age) {
+    return 'age-rating-neutral'
+  }
+
+  if (age <= 6) {
+    return 'age-rating-soft'
+  }
+
+  if (age <= 12) {
+    return 'age-rating-caution'
+  }
+
+  if (age <= 16) {
+    return 'age-rating-mature'
+  }
+
+  return 'age-rating-adult'
 }
 
 const titleCopyTooltip = ref(false)
@@ -2267,16 +2322,17 @@ const handleFilterSelect = () => {
 .content {
   min-height: 100vh;
   position: relative;
+  --movie-page-max-width: none;
+  --movie-page-gutter: 24px;
 }
 /* Стили для информации о фильме */
 .content-card {
   overflow: hidden;
-  padding: 10px 20px 28px;
+  padding: 18px var(--movie-page-gutter) 28px;
   color: #e0e0e0;
 }
 
 .content-header {
-  height: 80px;
   width: 100%;
   display: flex;
   align-items: center;
@@ -2284,7 +2340,9 @@ const handleFilterSelect = () => {
   overflow: hidden;
   flex-wrap: wrap;
   height: auto;
-  min-height: 64px;
+  min-height: 70px;
+  margin: 0 auto;
+  max-width: var(--movie-page-max-width);
 }
 
 .content-logo {
@@ -2331,9 +2389,9 @@ const handleFilterSelect = () => {
 }
 
 .content-title {
-  font-size: clamp(34px, 4vw, 58px);
+  font-size: clamp(38px, 4.2vw, 58px);
   margin: 0;
-  line-height: 1;
+  line-height: 1.05;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -2363,8 +2421,14 @@ const handleFilterSelect = () => {
   display: flex;
   justify-content: center;
   align-items: center;
-  gap: 20px;
-  margin: 15px 0;
+  gap: 18px;
+  margin: 8px auto 24px;
+  max-width: var(--movie-page-max-width);
+}
+
+.content-card :deep(.players-list),
+.content-card :deep(.player-container) {
+  max-width: var(--movie-page-max-width) !important;
 }
 
 .action-buttons-group {
@@ -2411,10 +2475,55 @@ const handleFilterSelect = () => {
 }
 
 .additional-info {
-  border-radius: 8px;
-  margin-bottom: 20px;
+  box-sizing: border-box;
+  max-width: var(--movie-page-max-width);
+  margin: 22px auto 14px;
+  padding: 32px 34px 26px;
+  border-radius: 20px;
+  background:
+    radial-gradient(circle at 0% 0%, color-mix(in srgb, var(--accent-color) 11%, transparent), transparent 30%),
+    radial-gradient(circle at 100% 0%, color-mix(in srgb, var(--accent-color) 8%, transparent), transparent 32%),
+    radial-gradient(circle at 100% 100%, color-mix(in srgb, var(--accent-color) 6%, transparent), transparent 30%),
+    linear-gradient(90deg, rgba(4, 7, 8, 0.72), rgba(1, 3, 4, 0.88) 46%, rgba(2, 4, 5, 0.78)),
+    linear-gradient(135deg, rgba(12, 18, 21, 0.58), rgba(3, 6, 8, 0.74) 56%, rgba(2, 4, 5, 0.82));
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  box-shadow:
+    0 20px 56px rgba(0, 0, 0, 0.34),
+    0 0 28px color-mix(in srgb, var(--accent-color) 7%, transparent),
+    inset 0 1px 0 rgba(255, 255, 255, 0.08),
+    inset 0 -28px 70px rgba(0, 0, 0, 0.28);
+  backdrop-filter: blur(8px) saturate(1.08);
   font-size: 16px;
   scroll-margin-top: 90px;
+  position: relative;
+  isolation: isolate;
+  transition:
+    transform 320ms cubic-bezier(0.22, 1, 0.36, 1),
+    box-shadow 320ms cubic-bezier(0.22, 1, 0.36, 1),
+    border-color 320ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.additional-info::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  border-radius: inherit;
+  background:
+    linear-gradient(90deg, rgba(0, 0, 0, 0.28), transparent 24%, rgba(0, 0, 0, 0.2)),
+    radial-gradient(circle at 74% 42%, color-mix(in srgb, var(--accent-color) 5%, transparent), transparent 34%),
+    radial-gradient(circle at 50% 48%, rgba(0, 0, 0, 0.5), transparent 42%);
+  pointer-events: none;
+}
+
+.additional-info:hover {
+  transform: translateY(-2px) scale(1.002);
+  border-color: rgba(255, 255, 255, 0.13);
+  box-shadow:
+    0 24px 68px rgba(0, 0, 0, 0.4),
+    0 0 34px color-mix(in srgb, var(--accent-color) 11%, transparent),
+    inset 0 1px 0 rgba(255, 255, 255, 0.1),
+    inset 0 -28px 76px rgba(0, 0, 0, 0.3);
 }
 
 .additional-info-title {
@@ -2425,22 +2534,41 @@ const handleFilterSelect = () => {
 
 .info-content {
   display: flex;
-  gap: 15px;
+  gap: clamp(38px, 4.2vw, 76px);
   align-items: flex-start;
 }
 
 .movie-poster-container {
   flex-shrink: 0;
-  width: 200px;
-  border-radius: 12px;
+  width: clamp(250px, 15.5vw, 330px);
+  border-radius: 16px;
   overflow: hidden;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
-  transition: transform 0.2s ease;
+  box-shadow:
+    0 18px 34px rgba(0, 0, 0, 0.42),
+    0 0 28px color-mix(in srgb, var(--accent-color) 16%, transparent);
+  transition:
+    transform 320ms cubic-bezier(0.22, 1, 0.36, 1),
+    box-shadow 320ms cubic-bezier(0.22, 1, 0.36, 1),
+    filter 320ms cubic-bezier(0.22, 1, 0.36, 1);
+  position: relative;
+}
+
+.movie-poster-container::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.16);
+  background: linear-gradient(160deg, rgba(255, 255, 255, 0.12), transparent 28%);
+  pointer-events: none;
 }
 
 .movie-poster-container:hover {
-  transform: scale(1.02);
-  box-shadow: 0 6px 20px var(--accent-semi-transparent);
+  transform: translateY(-2px) scale(1.015);
+  filter: saturate(1.04);
+  box-shadow:
+    0 22px 44px rgba(0, 0, 0, 0.46),
+    0 0 36px color-mix(in srgb, var(--accent-color) 22%, transparent);
 }
 
 .movie-poster {
@@ -2452,28 +2580,98 @@ const handleFilterSelect = () => {
 .details-container {
   flex: 1;
   min-width: 0;
+  padding-top: 10px;
+  max-width: 1040px;
 }
 
 .info-list {
   list-style: none;
   padding: 0;
   margin: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0;
 }
 
 .info-list li {
-  margin-bottom: 8px;
+  display: inline-grid;
+  grid-template-columns: 240px minmax(0, 1fr);
+  gap: 48px;
+  align-items: baseline;
+  width: fit-content;
+  max-width: min(100%, 860px);
+  margin: 0;
+  line-height: 1.45;
+  padding: 7px 0;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.03);
+}
+
+.info-list strong,
+.info-description-row strong {
+  color: rgba(255, 255, 255, 0.74);
+  font-weight: 500;
+  letter-spacing: 0;
 }
 
 .content-info {
   font-size: 16px;
-  line-height: 1.6;
-  color: #ccc;
-  margin-top: 20px;
+  line-height: 1.65;
+  color: rgba(255, 255, 255, 0.88);
+  margin-top: 24px;
+  max-width: 1280px;
+}
+
+.info-description-row {
+  display: inline-grid;
+  grid-template-columns: 240px minmax(520px, 980px);
+  gap: 48px;
+  align-items: start;
+  width: fit-content;
+  max-width: min(100%, 1268px);
+  padding-top: 8px;
+}
+
+.content-description {
+  max-width: min(100%, 980px);
 }
 
 .content-description-text {
   margin: 0;
   white-space: pre-wrap;
+  max-width: 100%;
+  color: rgba(255, 255, 255, 0.88);
+  line-height: 1.68;
+}
+
+.description-toggle {
+  margin-top: 12px;
+  padding: 6px 12px;
+  border-radius: 999px;
+  border: 1px solid color-mix(in srgb, var(--accent-color) 28%, rgba(255, 255, 255, 0.12));
+  background: color-mix(in srgb, var(--accent-color) 12%, rgba(255, 255, 255, 0.06));
+  color: rgba(255, 255, 255, 0.86);
+  font: inherit;
+  font-size: 13px;
+  line-height: 1;
+  cursor: pointer;
+  box-shadow:
+    0 0 14px color-mix(in srgb, var(--accent-color) 8%, transparent),
+    inset 0 1px 0 rgba(255, 255, 255, 0.06);
+  transition:
+    transform 260ms cubic-bezier(0.22, 1, 0.36, 1),
+    border-color 260ms cubic-bezier(0.22, 1, 0.36, 1),
+    background 260ms cubic-bezier(0.22, 1, 0.36, 1),
+    box-shadow 260ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.description-toggle:hover {
+  transform: translateY(-1px);
+  border-color: color-mix(in srgb, var(--accent-color) 44%, rgba(255, 255, 255, 0.14));
+  background: color-mix(in srgb, var(--accent-color) 18%, rgba(255, 255, 255, 0.07));
+  box-shadow:
+    0 0 18px color-mix(in srgb, var(--accent-color) 12%, transparent),
+    inset 0 1px 0 rgba(255, 255, 255, 0.08);
 }
 
 .error-message {
@@ -2490,18 +2688,67 @@ const handleFilterSelect = () => {
 
 /* Стили для секций с похожими фильмами */
 .related-movies {
-  margin-top: 30px;
-  padding: 18px 18px 12px;
-  border-radius: 18px;
+  box-sizing: border-box;
+  max-width: var(--movie-page-max-width);
+  min-height: 340px;
+  margin: 24px auto 0;
+  padding: 24px 26px 20px;
+  border-radius: 20px;
   position: relative;
-  background: rgba(8, 12, 10, 0.34);
-  border: 1px solid rgba(81, 207, 102, 0.16);
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.03);
+  background:
+    radial-gradient(circle at 0% 0%, color-mix(in srgb, var(--accent-color) 8%, transparent), transparent 28%),
+    radial-gradient(circle at 100% 100%, color-mix(in srgb, var(--accent-color) 5%, transparent), transparent 30%),
+    radial-gradient(circle at 50% 45%, rgba(0, 0, 0, 0.42), transparent 44%),
+    linear-gradient(90deg, rgba(4, 7, 8, 0.7), rgba(1, 3, 4, 0.86) 48%, rgba(2, 4, 5, 0.76)),
+    linear-gradient(135deg, rgba(12, 18, 21, 0.52), rgba(3, 6, 8, 0.68));
+  border: 1px solid color-mix(in srgb, var(--accent-color) 18%, transparent);
+  box-shadow:
+    0 18px 52px rgba(0, 0, 0, 0.32),
+    inset 0 1px 0 rgba(255, 255, 255, 0.03),
+    inset 0 -28px 70px rgba(0, 0, 0, 0.24),
+    0 0 24px color-mix(in srgb, var(--accent-color) 6%, transparent);
+  backdrop-filter: blur(8px) saturate(1.06);
+  overflow: hidden;
+  transition:
+    border-color 320ms cubic-bezier(0.22, 1, 0.36, 1),
+    box-shadow 320ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.related-movies:hover {
+  border-color: color-mix(in srgb, var(--accent-color) 28%, transparent);
+  box-shadow:
+    0 20px 58px rgba(0, 0, 0, 0.36),
+    inset 0 1px 0 rgba(255, 255, 255, 0.04),
+    inset 0 -28px 70px rgba(0, 0, 0, 0.26),
+    0 0 34px color-mix(in srgb, var(--accent-color) 10%, transparent);
 }
 
 .comments-section,
 .staff-section {
+  box-sizing: border-box;
+  max-width: var(--movie-page-max-width);
+  margin: 14px auto 0;
   scroll-margin-top: 90px;
+}
+
+.comments-section :deep(.comments-section) {
+  padding: 0;
+}
+
+.comments-section :deep(.spoiler-warning) {
+  margin: 0;
+  padding: 26px 28px;
+  border-radius: 20px;
+  background:
+    radial-gradient(circle at 50% 0%, color-mix(in srgb, var(--accent-color) 7%, transparent), transparent 28%),
+    radial-gradient(circle at 50% 50%, rgba(0, 0, 0, 0.28), transparent 42%),
+    linear-gradient(135deg, rgba(28, 28, 30, 0.9), rgba(25, 25, 27, 0.84));
+  border-color: color-mix(in srgb, var(--accent-color) 16%, rgba(255, 255, 255, 0.08));
+  box-shadow:
+    0 18px 52px rgba(0, 0, 0, 0.3),
+    inset 0 1px 0 rgba(255, 255, 255, 0.05),
+    0 0 24px color-mix(in srgb, var(--accent-color) 6%, transparent);
+  backdrop-filter: blur(8px) saturate(1.04);
 }
 
 .related-movies-header {
@@ -2526,8 +2773,8 @@ const handleFilterSelect = () => {
   width: 10px;
   height: 10px;
   border-radius: 999px;
-  background: #51cf66;
-  box-shadow: 0 0 10px rgba(81, 207, 102, 0.45);
+  background: var(--accent-color);
+  box-shadow: 0 0 10px color-mix(in srgb, var(--accent-color) 55%, transparent);
 }
 
 /* Подсказка */
@@ -2543,8 +2790,12 @@ const handleFilterSelect = () => {
 }
 
 @media (max-width: 600px) {
+  .content {
+    --movie-page-gutter: 2px;
+  }
+
   .content-card {
-    padding: 0 2px;
+    padding: 0 var(--movie-page-gutter) 16px;
   }
 
   .content-header,
@@ -2613,6 +2864,26 @@ const handleFilterSelect = () => {
   .info-content {
     flex-direction: column;
     align-items: center;
+  }
+
+  .additional-info {
+    margin-top: 14px;
+    padding: 16px 12px;
+    font-size: 16px;
+  }
+
+  .info-list li,
+  .info-description-row {
+    grid-template-columns: 1fr;
+    gap: 4px;
+  }
+
+  .movie-poster-container {
+    width: min(100%, 280px);
+  }
+
+  .content-info {
+    font-size: 16px;
   }
 
   .content-title-container {
@@ -3503,18 +3774,46 @@ const handleFilterSelect = () => {
 }
 
 .rating-boxes {
+  display: grid !important;
+  grid-template-columns: 240px minmax(0, 1fr) !important;
+  gap: 48px;
+  margin: 0;
+}
+
+.rating-boxes > strong {
+  transition: color 280ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.rating-boxes.age-rating-soft > strong {
+  color: color-mix(in srgb, var(--accent-color) 68%, rgba(220, 255, 230, 0.78));
+}
+
+.rating-boxes.age-rating-caution > strong {
+  color: rgba(255, 214, 139, 0.84);
+}
+
+.rating-boxes.age-rating-mature > strong {
+  color: rgba(255, 170, 116, 0.84);
+}
+
+.rating-boxes.age-rating-adult > strong {
+  color: rgba(255, 126, 126, 0.86);
+}
+
+.rating-boxes-values {
   display: flex;
   gap: 10px;
-  margin: 10px 0;
+  align-items: center;
 }
 
 .rating-box {
   display: inline-flex;
   align-items: center;
-  padding: 4px 8px;
-  border-radius: 4px;
+  padding: 5px 9px;
+  border-radius: 7px;
   font-weight: bold;
   gap: 5px;
+  line-height: 1;
 }
 
 .rating-box.mpaa {
@@ -3527,8 +3826,48 @@ const handleFilterSelect = () => {
 }
 
 .rating-box.age {
-  background: rgba(255, 0, 0, 0.1);
-  border: 1px solid rgba(255, 0, 0, 0.3);
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  box-shadow:
+    0 0 12px rgba(255, 255, 255, 0.06),
+    inset 0 1px 0 rgba(255, 255, 255, 0.06);
+  transition:
+    background 280ms cubic-bezier(0.4, 0, 0.2, 1),
+    border-color 280ms cubic-bezier(0.4, 0, 0.2, 1),
+    box-shadow 280ms cubic-bezier(0.4, 0, 0.2, 1),
+    color 280ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.rating-box.age-rating-soft {
+  background: color-mix(in srgb, var(--accent-color) 18%, rgba(18, 72, 38, 0.2));
+  border-color: color-mix(in srgb, var(--accent-color) 38%, rgba(255, 255, 255, 0.12));
+  box-shadow:
+    0 0 14px color-mix(in srgb, var(--accent-color) 14%, transparent),
+    inset 0 1px 0 rgba(255, 255, 255, 0.06);
+}
+
+.rating-box.age-rating-caution {
+  background: rgba(128, 90, 22, 0.24);
+  border-color: rgba(255, 194, 85, 0.34);
+  box-shadow:
+    0 0 14px rgba(255, 182, 64, 0.12),
+    inset 0 1px 0 rgba(255, 255, 255, 0.06);
+}
+
+.rating-box.age-rating-mature {
+  background: rgba(132, 58, 22, 0.25);
+  border-color: rgba(255, 132, 76, 0.35);
+  box-shadow:
+    0 0 14px rgba(255, 112, 52, 0.13),
+    inset 0 1px 0 rgba(255, 255, 255, 0.06);
+}
+
+.rating-box.age-rating-adult {
+  background: rgba(124, 23, 23, 0.28);
+  border-color: rgba(255, 66, 66, 0.34);
+  box-shadow:
+    0 0 14px rgba(255, 42, 42, 0.12),
+    inset 0 1px 0 rgba(255, 255, 255, 0.06);
 }
 
 .rating-box strong {
@@ -3542,7 +3881,9 @@ const handleFilterSelect = () => {
 
 @media (max-width: 600px) {
   .rating-boxes {
+    grid-template-columns: 1fr !important;
     flex-wrap: wrap;
+    gap: 4px;
   }
 
   .rating-box {
@@ -3592,18 +3933,18 @@ const handleFilterSelect = () => {
 }
 
 .acknowledgment-header {
-  background: rgba(145, 70, 255, 0.15);
+  background: color-mix(in srgb, var(--accent-color) 14%, transparent);
   padding: 10px 15px;
   display: flex;
   align-items: center;
   gap: 8px;
   font-weight: 500;
   color: #fff;
-  border-bottom: 1px solid rgba(145, 70, 255, 0.2);
+  border-bottom: 1px solid color-mix(in srgb, var(--accent-color) 20%, transparent);
 }
 
 .acknowledgment-header i {
-  color: #ff66ab;
+  color: var(--accent-color);
 }
 
 .acknowledgment-content {
@@ -3633,7 +3974,7 @@ const handleFilterSelect = () => {
   display: flex;
   align-items: center;
   gap: 8px;
-  color: #9146ff;
+  color: var(--accent-color);
   font-weight: 500;
 }
 
@@ -3945,18 +4286,18 @@ const handleFilterSelect = () => {
 }
 
 .acknowledgment-header {
-  background: rgba(145, 70, 255, 0.15);
+  background: color-mix(in srgb, var(--accent-color) 14%, transparent);
   padding: 10px 15px;
   display: flex;
   align-items: center;
   gap: 8px;
   font-weight: 500;
   color: #fff;
-  border-bottom: 1px solid rgba(145, 70, 255, 0.2);
+  border-bottom: 1px solid color-mix(in srgb, var(--accent-color) 20%, transparent);
 }
 
 .acknowledgment-header i {
-  color: #ff66ab;
+  color: var(--accent-color);
 }
 
 .acknowledgment-content {
@@ -4437,8 +4778,8 @@ const handleFilterSelect = () => {
 .timing-card-parser {
   font-size: 12px;
   color: rgba(255, 255, 255, 0.7);
-  background: rgba(108, 92, 231, 0.08);
-  border: 1px solid rgba(108, 92, 231, 0.15);
+  background: color-mix(in srgb, var(--accent-color) 8%, transparent);
+  border: 1px solid color-mix(in srgb, var(--accent-color) 16%, transparent);
   border-radius: 8px;
   padding: 8px 12px;
 }
@@ -4500,13 +4841,13 @@ const handleFilterSelect = () => {
 }
 
 .timing-btn-action.overlay-active {
-  background: rgba(108, 92, 231, 0.15);
-  border-color: rgba(108, 92, 231, 0.35);
-  color: #8a7ce8;
+  background: color-mix(in srgb, var(--accent-color) 16%, transparent);
+  border-color: color-mix(in srgb, var(--accent-color) 36%, transparent);
+  color: var(--accent-light);
 }
 
 .timing-btn-action.overlay-active:hover {
-  background: rgba(108, 92, 231, 0.25);
+  background: color-mix(in srgb, var(--accent-color) 26%, transparent);
   color: #fff;
 }
 
@@ -4942,16 +5283,16 @@ const handleFilterSelect = () => {
 }
 
 .overlay-button {
-  background: rgba(138, 43, 226, 0.18) !important;
-  border-color: rgba(138, 43, 226, 0.34) !important;
-  color: #d8b4fe !important;
+  background: color-mix(in srgb, var(--accent-color) 18%, transparent) !important;
+  border-color: color-mix(in srgb, var(--accent-color) 34%, transparent) !important;
+  color: var(--accent-light) !important;
 }
 
 .overlay-button:hover {
-  background: rgba(138, 43, 226, 0.28) !important;
-  border-color: rgba(138, 43, 226, 0.5) !important;
+  background: color-mix(in srgb, var(--accent-color) 28%, transparent) !important;
+  border-color: color-mix(in srgb, var(--accent-color) 50%, transparent) !important;
   transform: translateY(-1px) !important;
-  box-shadow: 0 6px 14px rgba(138, 43, 226, 0.18) !important;
+  box-shadow: 0 6px 14px color-mix(in srgb, var(--accent-color) 18%, transparent) !important;
 }
 
 .obs-button {
@@ -5110,12 +5451,12 @@ const handleFilterSelect = () => {
 }
 
 .connect-btn {
-  background: linear-gradient(135deg, #9c27b0, #7b1fa2);
+  background: linear-gradient(135deg, var(--accent-color), var(--accent-dark));
   color: white;
 }
 
 .connect-btn:hover:not(:disabled) {
-  background: linear-gradient(135deg, #8e24aa, #6a1b9a);
+  background: linear-gradient(135deg, var(--accent-hover), var(--accent-dark));
   transform: translateY(-1px);
 }
 
@@ -5368,8 +5709,8 @@ const handleFilterSelect = () => {
   align-items: center;
   gap: 10px;
   padding: 12px;
-  background: rgba(33, 150, 243, 0.1);
-  border: 1px solid rgba(33, 150, 243, 0.3);
+  background: color-mix(in srgb, var(--accent-color) 10%, transparent);
+  border: 1px solid color-mix(in srgb, var(--accent-color) 30%, transparent);
   border-radius: 8px;
   color: rgba(255, 255, 255, 0.8);
   margin-bottom: 15px;
@@ -5377,7 +5718,7 @@ const handleFilterSelect = () => {
 }
 
 .note-info i {
-  color: #2196f3;
+  color: var(--accent-color);
   font-size: 1.2em;
 }
 

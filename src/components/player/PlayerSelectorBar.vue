@@ -39,33 +39,33 @@ defineEmits(['open-player-modal', 'open-source-modal'])
 <style scoped>
 .players-list {
   width: 100%;
-  max-width: min(1120px, calc(100vw - 180px));
+  max-width: none;
   display: flex;
   align-items: center;
   justify-content: center;
   gap: 10px;
-  margin: auto;
-  margin-bottom: 10px;
+  margin: 10px auto 18px;
   padding: 0;
   border-radius: 0;
   background: transparent;
   border: 0;
+  box-sizing: border-box;
 }
 
 .player-btn {
   display: flex;
   align-items: center;
   justify-content: left;
-  background: #3a3a3a;
+  background: rgba(48, 48, 48, 0.92);
   color: #fff;
-  border: 2px solid #505050;
+  border: 1px solid rgba(255, 255, 255, 0.18);
   border-radius: 5px;
   padding: 10px;
   font-weight: 600;
   cursor: pointer;
   transition: all 0.2s ease-in-out;
   width: 100%;
-  max-width: 800px;
+  max-width: 440px;
   text-align: left;
   font-size: 16px;
 }
@@ -106,6 +106,11 @@ defineEmits(['open-player-modal', 'open-source-modal'])
 @media (max-width: 700px) {
   .players-list {
     max-width: calc(100vw - 12px);
+    margin-bottom: 10px;
+  }
+
+  .player-btn {
+    max-width: none;
   }
 }
 </style>

@@ -1215,7 +1215,7 @@ export default {
 }
 
 :deep(.spoiler-text.revealed a) {
-  color: #4a90e2 !important;
+  color: var(--accent-color) !important;
   text-decoration: none !important;
   border-bottom: 1px solid transparent !important;
   transition:
@@ -1225,17 +1225,17 @@ export default {
 }
 
 :deep(.spoiler-text.revealed a:hover) {
-  color: #66a3e0 !important;
-  border-bottom-color: #66a3e0 !important;
+  color: var(--accent-hover) !important;
+  border-bottom-color: var(--accent-hover) !important;
 }
 
 :deep(.spoiler-text.revealed a:visited) {
-  color: #8a7ca8 !important;
+  color: var(--accent-light) !important;
 }
 
 :deep(.spoiler-text.revealed a:visited:hover) {
-  color: #a393c2 !important;
-  border-bottom-color: #a393c2 !important;
+  color: var(--accent-hover) !important;
+  border-bottom-color: var(--accent-hover) !important;
 }
 
 .spoiler-button {

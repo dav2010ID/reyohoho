@@ -134,7 +134,6 @@ onUnmounted(() => {
 }
 
 :root {
-  --accent-color: #6c5ce7;
   --text-color: #2d3436;
   --error-color: #e17055;
   --success-color: var(--accent-color);

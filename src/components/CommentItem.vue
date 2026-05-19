@@ -923,7 +923,7 @@ export default {
 }
 
 .username-link:hover {
-  color: #4a90e2;
+  color: var(--accent-color);
 }
 
 .hidden-comment-warning {
@@ -1188,25 +1188,25 @@ export default {
 }
 
 :deep(.comment-link) {
-  color: #4a90e2;
+  color: var(--accent-color);
   text-decoration: none;
   transition: color 0.2s ease;
   border-bottom: 1px solid transparent;
 }
 
 :deep(.comment-link:hover) {
-  color: #66a3e0;
-  border-bottom-color: #66a3e0;
+  color: var(--accent-hover);
+  border-bottom-color: var(--accent-hover);
   text-decoration: none;
 }
 
 :deep(.comment-link:visited) {
-  color: #8a7ca8;
+  color: var(--accent-light);
 }
 
 :deep(.comment-link:visited:hover) {
-  color: #a393c2;
-  border-bottom-color: #a393c2;
+  color: var(--accent-hover);
+  border-bottom-color: var(--accent-hover);
 }
 
 @media (max-width: 768px) {

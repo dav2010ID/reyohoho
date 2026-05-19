@@ -446,7 +446,7 @@ footer {
   font-size: 14px;
   font-weight: 600;
   color: var(--accent-color);
-  text-shadow: 0 0 10px rgba(145, 70, 255, 0.5);
+  text-shadow: 0 0 10px color-mix(in srgb, var(--accent-color) 50%, transparent);
   white-space: nowrap;
   letter-spacing: 0.3px;
 }
@@ -840,4 +840,3 @@ footer {
   }
 }
 </style>
-

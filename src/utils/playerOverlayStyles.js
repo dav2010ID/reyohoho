@@ -2,21 +2,22 @@ const OVERLAY_FONT =
   "-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif"
 const PANEL_BACKGROUND = 'rgba(20, 20, 20, 0.8)'
 const PANEL_BACKDROP = 'blur(12px)'
-const ACCENT_COLOR = '#6c5ce7'
-const ACCENT_HOVER = '#5a4fcf'
+const ACCENT_COLOR = 'var(--accent-color, #6c5ce7)'
+const ACCENT_HOVER = 'var(--accent-hover, #5a4fcf)'
+const ACCENT_GLOW = 'color-mix(in srgb, var(--accent-color, #6c5ce7) 36%, transparent)'
 const MUTED_TEXT = 'rgba(255, 255, 255, 0.6)'
 
 export const overlayInlineStyles = {
   settingsTitle:
-    'color: #6c5ce7; margin: 0 0 24px 0; font-size: 20px; font-weight: 600; text-align: center;',
+    'color: var(--accent-color, #6c5ce7); margin: 0 0 24px 0; font-size: 20px; font-weight: 600; text-align: center;',
   settingsOptions: 'display: flex; flex-direction: column; gap: 16px;',
   settingsLabel:
     'display: flex; align-items: center; gap: 12px; color: white; cursor: pointer; padding: 8px; border-radius: 8px; background: rgba(255, 255, 255, 0.05);',
-  settingsCheckbox: 'width: 18px; height: 18px; accent-color: #6c5ce7;',
+  settingsCheckbox: 'width: 18px; height: 18px; accent-color: var(--accent-color, #6c5ce7);',
   settingsLabelText: 'font-size: 16px;',
   settingsActions: 'display: flex; gap: 12px; margin-top: 24px; justify-content: center;',
   settingsSaveButton:
-    'background: #6c5ce7; color: white; border: none; border-radius: 8px; padding: 10px 20px; cursor: pointer; font-size: 16px; font-weight: 500; transition: all 0.3s ease;',
+    'background: var(--accent-color, #6c5ce7); color: white; border: none; border-radius: 8px; padding: 10px 20px; cursor: pointer; font-size: 16px; font-weight: 500; transition: all 0.3s ease;',
   settingsCancelButton:
     'background: rgba(255, 255, 255, 0.1); color: rgba(255, 255, 255, 0.8); border: 1px solid rgba(255, 255, 255, 0.2); border-radius: 8px; padding: 10px 16px; cursor: pointer; font-size: 14px; transition: all 0.3s ease;',
   monospaceMuted: `font-family: 'Courier New', monospace; color: ${MUTED_TEXT};`,
@@ -56,7 +57,7 @@ export const getOverlaySettingsMarkup = (settings) => `
     }
     .setting-row:hover {
       background: rgba(255, 255, 255, 0.08) !important;
-      border-color: rgba(108, 92, 231, 0.3) !important;
+      border-color: color-mix(in srgb, var(--accent-color, #6c5ce7) 42%, transparent) !important;
       transform: translateY(-1px) !important;
       box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15) !important;
     }
@@ -103,7 +104,7 @@ export const getOverlaySettingsMarkup = (settings) => `
     .checkbox-input:checked + .toggle-switch {
       background: ${ACCENT_COLOR} !important;
       border-color: ${ACCENT_COLOR} !important;
-      box-shadow: 0 0 8px rgba(108, 92, 231, 0.4) !important;
+      box-shadow: 0 0 8px ${ACCENT_GLOW} !important;
     }
     .checkbox-input:checked + .toggle-switch::before {
       transform: translateX(20px) !important;
@@ -130,7 +131,7 @@ export const getOverlaySettingsMarkup = (settings) => `
       border: none !important;
       font-size: 15px !important;
       font-weight: 600 !important;
-      box-shadow: 0 4px 12px rgba(108, 92, 231, 0.3) !important;
+      box-shadow: 0 4px 12px ${ACCENT_GLOW} !important;
     }
     .btn-cancel {
       background: rgba(255, 255, 255, 0.08) !important;

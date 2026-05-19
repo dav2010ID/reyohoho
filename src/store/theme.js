@@ -102,9 +102,13 @@ export const useThemeStore = defineStore('theme', {
       root.style.setProperty('--accent-color', currentColor.value)
       root.style.setProperty('--accent-hover', currentColor.hover)
 
+      const accentRgb = this.hexToRgb(currentColor.value)
       const lighterShade = this.lightenColor(currentColor.value, 20)
       const darkerShade = this.darkenColor(currentColor.value, 20)
 
+      if (accentRgb) {
+        root.style.setProperty('--accent-color-rgb', `${accentRgb.r}, ${accentRgb.g}, ${accentRgb.b}`)
+      }
       root.style.setProperty('--accent-light', lighterShade)
       root.style.setProperty('--accent-dark', darkerShade)
       root.style.setProperty('--accent-transparent', `${currentColor.value}30`)

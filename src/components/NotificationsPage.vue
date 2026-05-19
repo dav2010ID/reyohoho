@@ -266,8 +266,6 @@ async function deleteNotification(notificationId) {
 
 :root {
   --bg-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  --accent-color: #6c5ce7;
-  --accent-hover: #5a4fcf;
   --secondary-color: #74b9ff;
   --secondary-hover: #0984e3;
   --text-color: #2d3436;

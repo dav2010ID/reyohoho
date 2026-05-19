@@ -46,21 +46,31 @@
 }
 
 .controls button:hover {
-  background-color: rgba(255, 255, 255, 0.13);
+  background-color: color-mix(in srgb, var(--accent-color) 32%, rgba(255, 255, 255, 0.08));
   color: #fff;
-  border-color: rgba(255, 255, 255, 0.16);
+  border-color: color-mix(in srgb, var(--accent-color) 58%, rgba(255, 255, 255, 0.14));
   transform: translateY(-2px) scale(1.04);
-  box-shadow: 0 10px 22px rgba(0, 0, 0, 0.34);
+  box-shadow:
+    0 10px 22px rgba(0, 0, 0, 0.34),
+    0 0 20px color-mix(in srgb, var(--accent-color) 24%, transparent);
 }
 
 .controls button:active {
-  transform: translateY(0);
-  box-shadow: none;
+  background-color: color-mix(in srgb, var(--accent-color) 42%, rgba(255, 255, 255, 0.08));
+  border-color: color-mix(in srgb, var(--accent-color) 70%, rgba(255, 255, 255, 0.16));
+  transform: translateY(0) scale(0.98);
+  box-shadow:
+    0 0 10px color-mix(in srgb, var(--accent-color) 18%, transparent),
+    inset 0 1px 0 rgba(255, 255, 255, 0.08);
 }
 
 .controls button.active {
-  background-color: var(--accent-color);
-  box-shadow: 0 0 10px var(--accent-semi-transparent);
+  background-color: color-mix(in srgb, var(--accent-color) 48%, rgba(255, 255, 255, 0.08));
+  border-color: color-mix(in srgb, var(--accent-color) 76%, rgba(255, 255, 255, 0.16));
+  color: #fff;
+  box-shadow:
+    0 0 18px color-mix(in srgb, var(--accent-color) 26%, transparent),
+    inset 0 1px 0 rgba(255, 255, 255, 0.1);
 }
 
 .controls .theater-mode-btn.active {
@@ -76,17 +86,21 @@
 }
 
 .controls .aspect-ratio-dropdown-btn:hover {
-  background: var(--accent-color);
-  box-shadow: 0 0 24px var(--accent-semi-transparent);
+  background: color-mix(in srgb, var(--accent-color) 32%, rgba(255, 255, 255, 0.08));
+  box-shadow:
+    0 10px 22px rgba(0, 0, 0, 0.34),
+    0 0 20px color-mix(in srgb, var(--accent-color) 24%, transparent);
 }
 
 .controls .theater-mode-btn:hover {
-  background: var(--accent-color);
-  box-shadow: 0 0 24px var(--accent-semi-transparent);
+  background: color-mix(in srgb, var(--accent-color) 32%, rgba(255, 255, 255, 0.08));
+  box-shadow:
+    0 10px 22px rgba(0, 0, 0, 0.34),
+    0 0 20px color-mix(in srgb, var(--accent-color) 24%, transparent);
 }
 
 .controls button:focus-visible {
-  outline: 2px solid #fff;
+  outline: 2px solid color-mix(in srgb, var(--accent-color) 72%, #fff);
   outline-offset: 2px;
 }
 
@@ -158,15 +172,20 @@
 }
 
 .electron-only {
-  background-color: #333 !important;
-  opacity: 0.6;
-  cursor: not-allowed;
+  background-color: rgba(255, 255, 255, 0.06) !important;
+  border-color: rgba(255, 255, 255, 0.07) !important;
+  opacity: 0.68;
+  cursor: pointer;
 }
 
 .electron-only:hover {
-  transform: none !important;
-  box-shadow: none !important;
-  background-color: #333 !important;
+  background-color: color-mix(in srgb, var(--accent-color) 26%, rgba(255, 255, 255, 0.08)) !important;
+  border-color: color-mix(in srgb, var(--accent-color) 48%, rgba(255, 255, 255, 0.12)) !important;
+  opacity: 0.9;
+  transform: translateY(-2px) scale(1.04) !important;
+  box-shadow:
+    0 10px 22px rgba(0, 0, 0, 0.34),
+    0 0 18px color-mix(in srgb, var(--accent-color) 18%, transparent) !important;
 }
 
 @media (max-width: 600px) {

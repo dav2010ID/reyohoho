@@ -2,7 +2,7 @@ import { computed, ref } from 'vue'
 import { showMessageToast } from '@/helpers/ui'
 import { debugLog } from '@/utils/logger'
 
-const DESKTOP_APP_URL = 'https://t.me/ReYohoho/126'
+const DESKTOP_APP_URL = 'https://github.com/dav2010ID/reyohoho-desktop'
 const DESKTOP_ONLY_MESSAGE = 'Доступно только в приложении ReYohoho Desktop'
 
 export const usePlayerElectronControls = ({ isElectron, playerStore, playerIframe, kpId }) => {

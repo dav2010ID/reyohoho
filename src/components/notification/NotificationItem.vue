@@ -403,8 +403,6 @@ const toggleSpoiler = (event) => {
 }
 
 :root {
-  --accent-color: #6c5ce7;
-  --accent-hover: #5a4fcf;
   --secondary-color: #74b9ff;
   --secondary-hover: #0984e3;
   --text-color: #2d3436;
