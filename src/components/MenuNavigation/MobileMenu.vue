@@ -79,12 +79,12 @@ const { closeNavbar } = navbarStore
   left: 0;
   width: min(280px, 76vw);
   height: 100vh;
-  background: linear-gradient(180deg, rgba(22, 22, 22, 0.98), rgba(15, 15, 15, 0.98));
-  border-right: 1px solid rgba(255, 255, 255, 0.1);
+  background: #171717;
+  border-right: 1px solid rgba(255, 255, 255, 0.08);
   padding-top: 70px;
   z-index: calc(var(--z-sidebar) + 1);
-  box-shadow: 18px 0 48px rgba(0, 0, 0, 0.55);
-  backdrop-filter: blur(14px);
+  box-shadow: 18px 0 40px rgba(0, 0, 0, 0.5);
+  overflow: hidden;
 }
 
 .mobile-navbar__close {
@@ -98,13 +98,16 @@ const { closeNavbar } = navbarStore
   justify-content: center;
   border: 0;
   border-radius: 8px;
-  background: rgba(255, 255, 255, 0.08);
+  background: rgba(255, 255, 255, 0.07);
+  border: 1px solid rgba(255, 255, 255, 0.08);
   color: #fff;
   cursor: pointer;
   font-size: 25px;
   transition:
-    background 0.2s ease,
-    transform 0.2s ease;
+    background 0.24s cubic-bezier(0.22, 1, 0.36, 1),
+    border-color 0.24s cubic-bezier(0.22, 1, 0.36, 1),
+    box-shadow 0.24s cubic-bezier(0.22, 1, 0.36, 1),
+    transform 0.24s cubic-bezier(0.22, 1, 0.36, 1);
 }
 
 .mobile-navbar__close:active {
@@ -112,7 +115,9 @@ const { closeNavbar } = navbarStore
 }
 
 .mobile-navbar__close:hover {
-  background: rgba(255, 255, 255, 0.14);
+  background: var(--accent-transparent, rgba(108, 92, 231, 0.15));
+  border-color: color-mix(in srgb, var(--accent-color) 32%, rgba(255, 255, 255, 0.1));
+  box-shadow: none;
 }
 
 .nav-links-wrapper {
@@ -128,7 +133,7 @@ const { closeNavbar } = navbarStore
   margin: 0;
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 7px;
 }
 
 .nav-links li {
@@ -144,7 +149,7 @@ const { closeNavbar } = navbarStore
   color: rgba(255, 255, 255, 0.86);
   text-decoration: none;
   padding: 12px 14px;
-  transition: all 0.3s ease;
+  transition: all 0.25s ease;
   min-width: 0;
   width: 100%;
   min-height: 44px;
@@ -184,7 +189,7 @@ const { closeNavbar } = navbarStore
   color: rgba(255, 255, 255, 0.8);
   text-decoration: none;
   padding: 12px 14px;
-  transition: all 0.3s ease;
+  transition: all 0.25s ease;
   min-width: 0;
   width: 100%;
   border-radius: 8px;
@@ -219,9 +224,8 @@ const { closeNavbar } = navbarStore
   top: 0;
   width: 100vw;
   height: 100vh;
-  background: rgba(0, 0, 0, 0.58);
+  background: rgba(0, 0, 0, 0.64);
   z-index: var(--z-sidebar);
-  backdrop-filter: blur(1px);
 }
 
 .icon-donut {

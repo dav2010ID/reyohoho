@@ -279,6 +279,20 @@
         />
 
         <div id="movie-details" class="additional-info">
+          <div class="mobile-movie-summary">
+            <h2 class="mobile-movie-title">{{ movieInfo.title }}</h2>
+            <div class="mobile-movie-chips">
+              <span v-for="chip in mobileSummaryChips" :key="chip" class="mobile-summary-chip">
+                {{ chip }}
+              </span>
+              <span
+                v-if="movieInfo.rating_age_limits"
+                :class="['mobile-age-chip', getAgeRatingClass(movieInfo.rating_age_limits)]"
+              >
+                {{ getAgeRatingLabel(movieInfo.rating_age_limits) }}
+              </span>
+            </div>
+          </div>
           <div class="info-content">
             <div v-if="moviePosterUrl" class="movie-poster-container desktop-only">
               <a
@@ -291,28 +305,46 @@
             </div>
             <div class="details-container">
               <ul class="info-list">
-                <li v-if="movieInfo.type && TYPES_ENUM[movieInfo.type]">
-                  <strong>Тип:</strong> {{ TYPES_ENUM[movieInfo.type] }}
+                <li v-if="movieInfo.type && TYPES_ENUM[movieInfo.type]" class="info-row-type">
+                  <strong>Тип:</strong>
+                  <span class="info-value">{{ TYPES_ENUM[movieInfo.type] }}</span>
                 </li>
-                <li v-if="movieInfo.year"><strong>Год выпуска:</strong> {{ movieInfo.year }}</li>
-                <li v-if="movieInfo.title"><strong>Название:</strong> {{ movieInfo.title }}</li>
+                <li v-if="movieInfo.year" class="info-row-year">
+                  <strong>Год выпуска:</strong>
+                  <span class="info-value">{{ movieInfo.year }}</span>
+                </li>
+                <li v-if="movieInfo.title" class="info-row-title">
+                  <strong>Название:</strong>
+                  <span class="info-value">{{ movieInfo.title }}</span>
+                </li>
                 <li v-if="movieInfo.name_original">
-                  <strong>Оригинальное название:</strong> {{ movieInfo.name_original }}
+                  <strong>Оригинальное название:</strong>
+                  <span class="info-value">{{ movieInfo.name_original }}</span>
                 </li>
-                <li v-if="movieInfo.slogan"><strong>Слоган:</strong> {{ movieInfo.slogan }}</li>
+                <li v-if="movieInfo.slogan">
+                  <strong>Слоган:</strong>
+                  <span class="info-value">{{ movieInfo.slogan }}</span>
+                </li>
                 <li v-if="movieInfo.production_companies">
-                  <strong>Продакшн:</strong> {{ movieInfo.production_companies }}
+                  <strong>Продакшн:</strong>
+                  <span class="info-value">{{ movieInfo.production_companies }}</span>
                 </li>
-                <li v-if="movieInfo.countries?.length">
+                <li v-if="movieInfo.countries?.length" class="info-row-countries">
                   <strong>Страна производства:</strong>
-                  {{ movieInfo.countries.map((item) => item.country).join(', ') }}
+                  <span class="info-value">{{ countryNames.join(', ') }}</span>
                 </li>
-                <li v-if="movieInfo.genres?.length">
+                <li v-if="movieInfo.genres?.length" class="info-row-genres">
                   <strong>Жанры:</strong>
-                  {{ movieInfo.genres.map((item) => item.genre).join(', ') }}
+                  <span class="info-value desktop-genres-text">{{ genreNames.join(', ') }}</span>
+                  <div class="mobile-genre-chips">
+                    <span v-for="genre in genreNames" :key="genre" class="mobile-genre-chip">
+                      {{ genre }}
+                    </span>
+                  </div>
                 </li>
                 <li v-if="movieInfo.film_length">
-                  <strong>Продолжительность:</strong> {{ formatTime(movieInfo.film_length) }}
+                  <strong>Продолжительность:</strong>
+                  <span class="info-value">{{ formatTime(movieInfo.film_length) }}</span>
                 </li>
                 <li
                   v-if="movieInfo.rating_mpaa || movieInfo.rating_age_limits"
@@ -1059,6 +1091,19 @@ const isInAnyList = computed(() => {
 
 const isCommentsEnabled = computed(() => mainStore.isCommentsEnabled)
 const isDescriptionExpanded = ref(false)
+const countryNames = computed(() => (movieInfo.value?.countries || []).map((item) => item.country).filter(Boolean))
+const genreNames = computed(() => (movieInfo.value?.genres || []).map((item) => item.genre).filter(Boolean))
+const mobileSummaryChips = computed(() => {
+  const chips = []
+  const typeLabel = movieInfo.value?.type ? TYPES_ENUM[movieInfo.value.type] : ''
+
+  if (movieInfo.value?.year) chips.push(String(movieInfo.value.year))
+  if (typeLabel) chips.push(typeLabel)
+  if (countryNames.value[0]) chips.push(countryNames.value[0])
+  if (genreNames.value[0]) chips.push(genreNames.value[0])
+
+  return chips
+})
 const normalizedDescription = computed(() => movieInfo.value?.description?.trim() || '')
 const shouldCollapseDescription = computed(
   () => normalizedDescription.value.length > DESCRIPTION_PREVIEW_LIMIT
@@ -1216,6 +1261,11 @@ const getAgeRatingClass = (ratingAgeLimits) => {
   }
 
   return 'age-rating-adult'
+}
+
+const getAgeRatingLabel = (ratingAgeLimits) => {
+  const age = String(ratingAgeLimits || '').replace(/\D/g, '')
+  return age ? `${age}+` : String(ratingAgeLimits || '')
 }
 
 const titleCopyTooltip = ref(false)
@@ -2532,6 +2582,11 @@ const handleFilterSelect = () => {
   color: #fff;
 }
 
+.mobile-movie-summary,
+.mobile-genre-chips {
+  display: none;
+}
+
 .info-content {
   display: flex;
   gap: clamp(38px, 4.2vw, 76px);
@@ -2612,6 +2667,10 @@ const handleFilterSelect = () => {
   color: rgba(255, 255, 255, 0.74);
   font-weight: 500;
   letter-spacing: 0;
+}
+
+.info-value {
+  color: rgba(255, 255, 255, 0.9);
 }
 
 .content-info {
@@ -2863,27 +2922,185 @@ const handleFilterSelect = () => {
 
   .info-content {
     flex-direction: column;
-    align-items: center;
+    align-items: stretch;
+    gap: 14px;
   }
 
   .additional-info {
     margin-top: 14px;
-    padding: 16px 12px;
+    padding: 18px;
+    border-radius: 20px;
+    background:
+      radial-gradient(circle at 0% 0%, color-mix(in srgb, var(--accent-color) 5%, transparent), transparent 32%),
+      radial-gradient(circle at 100% 0%, rgba(30, 170, 210, 0.05), transparent 34%),
+      linear-gradient(180deg, rgba(3, 7, 8, 0.86), rgba(0, 2, 3, 0.94) 52%, rgba(0, 1, 2, 0.9));
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    box-shadow:
+      0 18px 42px rgba(0, 0, 0, 0.34),
+      0 0 18px rgba(38, 180, 210, 0.04),
+      inset 0 1px 0 rgba(255, 255, 255, 0.06),
+      inset 0 -24px 64px rgba(0, 0, 0, 0.34);
     font-size: 16px;
+  }
+
+  .additional-info::before {
+    background:
+      radial-gradient(circle at 50% 42%, rgba(0, 0, 0, 0.58), transparent 44%),
+      linear-gradient(90deg, rgba(0, 0, 0, 0.18), transparent 28%, rgba(0, 0, 0, 0.22));
+  }
+
+  .additional-info:hover {
+    transform: none;
+  }
+
+  .mobile-movie-summary {
+    display: block;
+    padding-bottom: 14px;
+    margin-bottom: 14px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.055);
+  }
+
+  .mobile-movie-title {
+    margin: 0 0 10px;
+    color: rgba(255, 255, 255, 0.94);
+    font-size: clamp(22px, 6vw, 26px);
+    line-height: 1.12;
+    font-weight: 700;
+    letter-spacing: 0;
+  }
+
+  .mobile-movie-chips,
+  .mobile-genre-chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 7px;
+  }
+
+  .mobile-summary-chip,
+  .mobile-genre-chip,
+  .mobile-age-chip {
+    display: inline-flex;
+    align-items: center;
+    min-height: 26px;
+    padding: 4px 9px;
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.055);
+    border: 1px solid rgba(255, 255, 255, 0.075);
+    color: rgba(255, 255, 255, 0.82);
+    font-size: 13px;
+    line-height: 1;
+    font-weight: 600;
+  }
+
+  .mobile-age-chip {
+    background: rgba(124, 23, 23, 0.22);
+    border-color: rgba(255, 66, 66, 0.3);
+    color: rgba(255, 210, 210, 0.9);
+  }
+
+  .mobile-age-chip.age-rating-soft {
+    background: color-mix(in srgb, var(--accent-color) 12%, rgba(255, 255, 255, 0.045));
+    border-color: color-mix(in srgb, var(--accent-color) 26%, rgba(255, 255, 255, 0.08));
+    color: rgba(255, 255, 255, 0.86);
+  }
+
+  .details-container {
+    width: 100%;
+    max-width: none;
+    padding-top: 0;
+  }
+
+  .info-list {
+    width: 100%;
+    align-items: stretch;
   }
 
   .info-list li,
   .info-description-row {
+    grid-template-columns: minmax(86px, 34%) minmax(0, 1fr);
+    gap: 12px;
+    width: 100%;
+    max-width: none;
+    padding: 6px 0;
+    border-bottom-color: rgba(255, 255, 255, 0.018);
+  }
+
+  .info-list li {
+    display: grid;
+  }
+
+  .info-list .info-row-title {
+    display: none;
+  }
+
+  .info-list .rating-boxes {
+    display: none !important;
+  }
+
+  .info-list .info-row-genres {
     grid-template-columns: 1fr;
-    gap: 4px;
+    gap: 9px;
+    padding-top: 12px;
+    margin-top: 4px;
+    border-top: 1px solid rgba(255, 255, 255, 0.055);
+  }
+
+  .info-list strong,
+  .info-description-row strong {
+    line-height: 1.35;
+    color: rgba(255, 255, 255, 0.65);
+    font-size: 13px;
+    font-weight: 600;
+  }
+
+  .info-value {
+    min-width: 0;
+    color: rgba(255, 255, 255, 0.92);
+    font-size: 15px;
+    line-height: 1.35;
+    text-align: right;
+  }
+
+  .desktop-genres-text {
+    display: none;
+  }
+
+  .info-description-row {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 10px;
+    margin-top: 14px;
+    padding-top: 14px;
+    border-top: 1px solid rgba(255, 255, 255, 0.055);
+    border-bottom: 0;
+  }
+
+  .info-description-row strong {
+    color: rgba(255, 255, 255, 0.78);
+    font-size: 15px;
+  }
+
+  .content-description {
+    width: 100%;
+    max-width: none;
+  }
+
+  .content-description-text {
+    color: rgba(255, 255, 255, 0.82);
+    line-height: 1.6;
   }
 
   .movie-poster-container {
-    width: min(100%, 280px);
+    width: min(44vw, 158px);
+    align-self: center;
+    border-radius: 12px;
+    box-shadow: 0 12px 24px rgba(0, 0, 0, 0.36);
   }
 
   .content-info {
-    font-size: 16px;
+    font-size: 15px;
+    width: 100%;
+    max-width: none;
   }
 
   .content-title-container {
@@ -3735,7 +3952,7 @@ const handleFilterSelect = () => {
 @media (max-width: 768px) {
   .info-content {
     flex-direction: column;
-    align-items: flex-start;
+    align-items: stretch;
   }
 
   .desktop-only {

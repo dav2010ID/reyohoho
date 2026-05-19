@@ -326,16 +326,21 @@ watch(sidebarAutoHide, (enabled) => {
   flex-direction: column;
   width: 230px;
   height: 100vh;
-  background: rgba(23, 23, 23, 0.98);
+  background: #171717;
   position: fixed;
   top: 0;
   left: 0;
-  transition: width 0.3s ease;
+  transition:
+    width 0.32s cubic-bezier(0.22, 1, 0.36, 1),
+    box-shadow 0.32s cubic-bezier(0.22, 1, 0.36, 1);
   padding: 1rem 0;
-  box-shadow: 2px 0 10px rgba(0, 0, 0, 0.1);
+  border-right: 1px solid rgba(255, 255, 255, 0.08);
+  box-shadow: 2px 0 12px rgba(0, 0, 0, 0.28);
   z-index: var(--z-sidebar);
-  will-change: width;
+  will-change: width, transform;
+  overflow: hidden;
 }
+
 .side-panel.collapsed {
   width: var(--app-sidebar-collapsed-width);
 }
@@ -349,6 +354,7 @@ watch(sidebarAutoHide, (enabled) => {
   padding: 0 14px 12px;
   color: #fff;
   text-decoration: none;
+  position: relative;
 }
 
 .menu-brand__logo {
@@ -363,6 +369,7 @@ watch(sidebarAutoHide, (enabled) => {
   font-size: 24px;
   line-height: 1;
   white-space: nowrap;
+  text-shadow: none;
 }
 
 .side-panel.collapsed .menu-brand {
@@ -388,15 +395,21 @@ watch(sidebarAutoHide, (enabled) => {
   border: 0;
   border-left: 3px solid transparent;
   border-radius: 0;
-  color: rgba(255, 255, 255, 0.8);
+  color: rgba(255, 255, 255, 0.78);
   font-size: 1rem;
   cursor: pointer;
-  transition: all 0.3s ease;
+  transition:
+    background 0.28s cubic-bezier(0.22, 1, 0.36, 1),
+    border-color 0.28s cubic-bezier(0.22, 1, 0.36, 1),
+    color 0.28s cubic-bezier(0.22, 1, 0.36, 1),
+    transform 0.28s cubic-bezier(0.22, 1, 0.36, 1),
+    box-shadow 0.28s cubic-bezier(0.22, 1, 0.36, 1);
 }
 .toggle-sidebar-btn:hover {
-  background: rgba(255, 255, 255, 0.06);
+  background: var(--accent-transparent, rgba(108, 92, 231, 0.15));
   color: var(--accent-color, #6c5ce7);
   border-left-color: var(--accent-color, #6c5ce7);
+  box-shadow: none;
 }
 
 .side-panel:not(.collapsed) .toggle-sidebar-btn {
@@ -414,7 +427,7 @@ watch(sidebarAutoHide, (enabled) => {
 }
 
 .side-panel.collapsed .toggle-sidebar-btn:hover {
-  background: rgba(255, 255, 255, 0.08);
+  background: var(--accent-transparent, rgba(108, 92, 231, 0.15));
   border-left: 0;
 }
 
@@ -457,7 +470,7 @@ watch(sidebarAutoHide, (enabled) => {
   margin: 0;
   display: flex;
   flex-direction: column;
-  gap: 0.55rem;
+  gap: 0.45rem;
 }
 .nav-links li {
   width: 100%;
@@ -472,7 +485,7 @@ watch(sidebarAutoHide, (enabled) => {
   color: rgba(255, 255, 255, 0.8);
   text-decoration: none;
   padding: 10px 17px;
-  transition: all 0.3s ease;
+  transition: all 0.25s ease;
   min-height: 42px;
   height: auto;
   border-left: 3px solid transparent;
@@ -544,6 +557,7 @@ watch(sidebarAutoHide, (enabled) => {
 }
 
 .nav-links a:hover,
+.nav-links button:hover,
 .notification-link:hover {
   background: var(--accent-transparent, rgba(108, 92, 231, 0.15));
   color: var(--accent-color, #6c5ce7);
@@ -553,6 +567,7 @@ watch(sidebarAutoHide, (enabled) => {
 
 .nav-links a:active,
 .nav-links a.router-link-active,
+.nav-links button:active,
 .notification-link:active,
 .notification-link.router-link-active {
   background: var(--accent-transparent, rgba(108, 92, 231, 0.2));
@@ -604,13 +619,13 @@ watch(sidebarAutoHide, (enabled) => {
   position: fixed;
   top: 5px;
   left: var(--app-sidebar-collapsed-width);
-  background-color: rgba(35, 35, 35, 0.98);
+  background: rgba(35, 35, 35, 0.98);
   color: #fff;
-  padding: 7px 10px;
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  border-radius: 6px;
+  padding: 8px 11px;
+  border: 1px solid color-mix(in srgb, var(--accent-color) 22%, rgba(255, 255, 255, 0.08));
+  border-radius: 9px;
   white-space: nowrap;
-  box-shadow: 0 10px 24px rgba(0, 0, 0, 0.35);
+  box-shadow: 0 10px 24px rgba(0, 0, 0, 0.38);
 }
 
 a {
@@ -636,6 +651,7 @@ a {
   color: var(--accent-color, #6c5ce7);
   background: var(--accent-transparent, rgba(108, 92, 231, 0.15));
   transform: translateX(-2px);
+  box-shadow: none;
 }
 
 .back-text {
@@ -698,7 +714,10 @@ a {
 .side-panel.right {
   left: auto;
   right: 0;
-  box-shadow: -2px 0 10px rgba(0, 0, 0, 0.1);
+  border-right: 0;
+  border-left: 1px solid rgba(255, 255, 255, 0.08);
+  box-shadow:
+    -2px 0 12px rgba(0, 0, 0, 0.28);
 
   /* Переворачиваем стрелки border-left → border-right для nav-links */
   .nav-links a,
@@ -710,6 +729,7 @@ a {
   }
 
   .nav-links a:hover,
+  .nav-links button:hover,
   .notification-link:hover {
     border-left: none;
     border-right: 3px solid var(--accent-color, #6c5ce7);
@@ -718,6 +738,7 @@ a {
 
   .nav-links a:active,
   .nav-links a.router-link-active,
+  .nav-links button:active,
   .notification-link:active,
   .notification-link.router-link-active {
     border-left: none;
