@@ -228,8 +228,52 @@ const apiSearch = async (...args) => {
   const rhserv = await loadProvider('rhserv')
   return await normalizeMovieListResponse(await rhserv.apiSearch(...args))
 }
+
+const hasKpInfo = (movieInfo) => {
+  if (!movieInfo || typeof movieInfo !== 'object') return false
+  return Boolean(
+    movieInfo.kinopoisk_id ||
+      movieInfo.id_kp ||
+      movieInfo.name_ru ||
+      movieInfo.name_original ||
+      movieInfo.description
+  )
+}
+
+const getKpInfoWithFallback = async (...args) => {
+  const [kpId] = args
+  const order = [
+    CONTENT_PROVIDERS.RHSERV,
+    CONTENT_PROVIDERS.KINOBOX,
+    CONTENT_PROVIDERS.KINOBD
+  ]
+  let lastError = null
+
+  for (const provider of order) {
+    try {
+      const providerApi = await loadProvider(provider)
+      if (typeof providerApi.getKpInfo !== 'function') continue
+
+      const movieInfo = await providerApi.getKpInfo(...args)
+      if (hasKpInfo(movieInfo)) {
+        if (provider !== CONTENT_PROVIDERS.RHSERV) {
+          console.warn(`[movies] getKpInfo fallback used: ${provider}`, { kp_id: kpId })
+        }
+        return movieInfo
+      }
+
+      console.warn(`[movies] getKpInfo returned empty result on ${provider}`, { kp_id: kpId })
+    } catch (error) {
+      lastError = error
+      console.warn(`[movies] getKpInfo failed on ${provider}`, error)
+    }
+  }
+
+  if (lastError) throw lastError
+  return null
+}
 const getShikiInfo = async (...args) => callWithProvider('getShikiInfo', ...args)
-const getKpInfo = async (...args) => callWithProvider('getKpInfo', ...args)
+const getKpInfo = async (...args) => getKpInfoWithFallback(...args)
 const getPlayers = async (...args) => getPlayersWithFallback(...args)
 const getShikiPlayers = async (...args) => callWithProvider('getShikiPlayers', ...args)
 const shouldEnrichListSeo = import.meta.env.SSR
