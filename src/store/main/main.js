@@ -1,7 +1,7 @@
 import noPosterImage from '@/assets/image-no-poster.gif'
 import { defineStore } from 'pinia'
 import { MAIN_STORE_NAME } from '../constants'
-import { beforeHydrateLegacyVuex } from '../utils'
+import { beforeHydrateMainStore } from '../utils'
 import { resolvePosterByMovie } from '@/utils/mediaUtils'
 
 export const useMainStore = defineStore(MAIN_STORE_NAME, {
@@ -161,6 +161,6 @@ export const useMainStore = defineStore(MAIN_STORE_NAME, {
       'sidebarAutoHide',
       'sidebarPosition'
     ],
-    beforeHydrate: beforeHydrateLegacyVuex
+    beforeHydrate: beforeHydrateMainStore
   }
 })

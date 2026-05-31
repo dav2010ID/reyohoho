@@ -11,6 +11,7 @@ import {
   PLAYER_STORE_NAME
 } from '../constants'
 import { usePlayerStore } from '../player'
+import { CONTENT_PROVIDER_DDBB_DEFAULT_MIGRATION_KEY } from '../utils'
 import { useMainStore } from './main'
 
 const pickMainPersistedState = (state) => ({
@@ -37,6 +38,7 @@ describe('Базовы persist тесты для main', () => {
   beforeEach(() => {
     vi.clearAllMocks()
     vi.resetAllMocks()
+    window.localStorage.clear()
 
     vi.spyOn(window.localStorage.__proto__, 'setItem')
     vi.spyOn(window.localStorage.__proto__, 'getItem')
@@ -52,6 +54,7 @@ describe('Базовы persist тесты для main', () => {
   afterEach(() => {
     app = null
     pinia = null
+    window.localStorage.clear()
   })
 
   it('Сохраняет изменения state в localStorage (проверка работы плагина)', async () => {
@@ -89,6 +92,25 @@ describe('Базовы persist тесты для main', () => {
     expect(window.localStorage.getItem(MAIN_STORE_NAME)).toEqual(
       JSON.stringify(pickMainPersistedState(store.$state))
     )
+  })
+
+  it('Один раз переводит старый Kinobox provider на DDBB', () => {
+    window.localStorage.setItem(MAIN_STORE_NAME, JSON.stringify({ contentApiProvider: 'kinobox' }))
+
+    const store = useMainStore()
+
+    expect(store.contentApiProvider).toBe('ddbb')
+    expect(window.localStorage.getItem(CONTENT_PROVIDER_DDBB_DEFAULT_MIGRATION_KEY)).toBe('done')
+    expect(JSON.parse(window.localStorage.getItem(MAIN_STORE_NAME)).contentApiProvider).toBe('ddbb')
+  })
+
+  it('Не перезаписывает Kinobox после выполненной миграции', () => {
+    window.localStorage.setItem(CONTENT_PROVIDER_DDBB_DEFAULT_MIGRATION_KEY, 'done')
+    window.localStorage.setItem(MAIN_STORE_NAME, JSON.stringify({ contentApiProvider: 'kinobox' }))
+
+    const store = useMainStore()
+
+    expect(store.contentApiProvider).toBe('kinobox')
   })
 })
 
@@ -223,6 +245,7 @@ describe('Тесты миграций на новый способ хранен�
   beforeEach(() => {
     vi.clearAllMocks()
     vi.resetAllMocks()
+    window.localStorage.clear()
 
     window.localStorage.setItem(LEGACY_STORE_KEY, JSON.stringify(OLD_LOCAL_STORAGE_DATA))
 
@@ -241,7 +264,7 @@ describe('Тесты миграций на новый способ хранен�
     app = null
     pinia = null
 
-    window.localStorage.setItem(LEGACY_STORE_KEY, null)
+    window.localStorage.clear()
   })
 
   it('Проверяем, что pinia получает данные из старого ключа localStorage', async () => {

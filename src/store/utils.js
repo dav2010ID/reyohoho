@@ -1,4 +1,8 @@
-import { LEGACY_STORE_KEY, LEGACY_STORE_KEY_BACKUP } from './constants'
+import { LEGACY_STORE_KEY, LEGACY_STORE_KEY_BACKUP, MAIN_STORE_NAME } from './constants'
+
+export const CONTENT_PROVIDER_DDBB_DEFAULT_MIGRATION_KEY = 'main:contentApiProviderDefault:ddbb:v1'
+
+const LEGACY_PLAYER_PROVIDERS_TO_DDBB = new Set(['kinobox', 'rhserv'])
 
 export function beforeHydrateLegacyVuex(ctx) {
   if (typeof window === 'undefined' || !window.localStorage) return
@@ -48,4 +52,35 @@ export function beforeHydrateLegacyVuex(ctx) {
 
     if (legacyBackup) localStorage.setItem(LEGACY_STORE_KEY, JSON.stringify(legacyBackup))
   }
+}
+
+function migrateMainContentProviderDefault(ctx) {
+  if (typeof window === 'undefined' || !window.localStorage) return
+  if (ctx.store.$id !== MAIN_STORE_NAME) return
+  if (localStorage.getItem(CONTENT_PROVIDER_DDBB_DEFAULT_MIGRATION_KEY) === 'done') return
+
+  const raw = localStorage.getItem(MAIN_STORE_NAME)
+  if (!raw) {
+    localStorage.setItem(CONTENT_PROVIDER_DDBB_DEFAULT_MIGRATION_KEY, 'done')
+    return
+  }
+
+  try {
+    const persistedMain = JSON.parse(raw)
+    const provider = String(persistedMain?.contentApiProvider || '').toLowerCase()
+
+    if (LEGACY_PLAYER_PROVIDERS_TO_DDBB.has(provider)) {
+      persistedMain.contentApiProvider = 'ddbb'
+      localStorage.setItem(MAIN_STORE_NAME, JSON.stringify(persistedMain))
+    }
+
+    localStorage.setItem(CONTENT_PROVIDER_DDBB_DEFAULT_MIGRATION_KEY, 'done')
+  } catch (err) {
+    console.error('Ошибка миграции дефолтного провайдера плееров:', err)
+  }
+}
+
+export function beforeHydrateMainStore(ctx) {
+  beforeHydrateLegacyVuex(ctx)
+  migrateMainContentProviderDefault(ctx)
 }
