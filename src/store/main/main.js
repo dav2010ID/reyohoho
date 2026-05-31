@@ -18,7 +18,7 @@ export const useMainStore = defineStore(MAIN_STORE_NAME, {
     cardSize: 'medium',
     isStreamerMode: true,
     rememberScrollPosition: true,
-    contentApiProvider: 'kinobox',
+    contentApiProvider: 'ddbb',
     searchApiProvider: 'rhserv',
     sidebarAutoHide: false,
     sidebarPosition: 'left'
@@ -129,7 +129,7 @@ export const useMainStore = defineStore(MAIN_STORE_NAME, {
       const provider = aliases[normalizedProvider] || normalizedProvider
       this.contentApiProvider = ['rhserv', 'kinobd', 'kinobox', 'ddbb'].includes(provider)
         ? provider
-        : 'kinobox'
+        : 'ddbb'
     },
 
     setSearchApiProvider(value) {

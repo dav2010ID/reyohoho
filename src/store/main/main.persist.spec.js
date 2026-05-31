@@ -321,7 +321,7 @@ describe('Тесты миграций на новый способ хранен�
         cardSize: 'medium',
         isStreamerMode: true,
         rememberScrollPosition: true,
-        contentApiProvider: 'kinobox',
+        contentApiProvider: 'ddbb',
         searchApiProvider: 'rhserv',
         sidebarAutoHide: false,
         sidebarPosition: 'left'

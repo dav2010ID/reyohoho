@@ -111,12 +111,12 @@
           </label>
           <label class="radio">
             <input v-model="contentApiProvider" type="radio" value="ddbb" />
-            <span class="radio-label">DDBB (players)</span>
+            <span class="radio-label">DDBB (players, по умолчанию)</span>
           </label>
         </div>
         <p class="api-note">
-          RHServ: полный функционал (комментарии, тайминги, рейтинги). KinoBD:
-          поиск/карточки/плееры. Kinobox и DDBB используются для плееров. Неподдерживаемые функции
+          RHServ: полный функционал (комментарии, тайминги, рейтинги). DDBB используется первым для
+          плееров, Kinobox и KinoBD остаются резервными источниками. Неподдерживаемые функции
           автоматически идут через RHServ.
         </p>
         <h4 class="api-subtitle">API для поиска</h4>

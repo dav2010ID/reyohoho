@@ -46,9 +46,9 @@ const loadProvider = async (provider) => {
 const getCurrentProvider = () => {
   try {
     const mainStore = useMainStore()
-    return mainStore.contentApiProvider || CONTENT_PROVIDERS.KINOBOX
+    return mainStore.contentApiProvider || CONTENT_PROVIDERS.DDBB
   } catch {
-    return CONTENT_PROVIDERS.KINOBOX
+    return CONTENT_PROVIDERS.DDBB
   }
 }
 
@@ -110,8 +110,8 @@ const getPlayersWithFallback = async (...args) => {
   const startedAt = Date.now()
   const [contentId] = args
   const supportedPlayersProviders = [
-    CONTENT_PROVIDERS.KINOBOX,
     CONTENT_PROVIDERS.DDBB,
+    CONTENT_PROVIDERS.KINOBOX,
     CONTENT_PROVIDERS.KINOBD
   ]
   const order = [
