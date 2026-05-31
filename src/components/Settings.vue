@@ -98,10 +98,6 @@
         <h3>API</h3>
         <div class="radio-group">
           <label class="radio">
-            <input v-model="contentApiProvider" type="radio" value="rhserv" />
-            <span class="radio-label">RHServ (original API)</span>
-          </label>
-          <label class="radio">
             <input v-model="contentApiProvider" type="radio" value="kinobd" />
             <span class="radio-label">KinoBD (search/cards/players)</span>
           </label>
@@ -115,9 +111,8 @@
           </label>
         </div>
         <p class="api-note">
-          RHServ: полный функционал (комментарии, тайминги, рейтинги). DDBB используется первым для
-          плееров, Kinobox и KinoBD остаются резервными источниками. Неподдерживаемые функции
-          автоматически идут через RHServ.
+          DDBB используется первым для плееров, Kinobox и KinoBD остаются резервными источниками.
+          Комментарии, тайминги, рейтинги и другие backend-функции продолжают работать через RHServ.
         </p>
         <h4 class="api-subtitle">API для поиска</h4>
         <div class="radio-group">

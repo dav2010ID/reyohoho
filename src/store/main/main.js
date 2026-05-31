@@ -127,9 +127,7 @@ export const useMainStore = defineStore(MAIN_STORE_NAME, {
         kinodb: 'kinobd'
       }
       const provider = aliases[normalizedProvider] || normalizedProvider
-      this.contentApiProvider = ['rhserv', 'kinobd', 'kinobox', 'ddbb'].includes(provider)
-        ? provider
-        : 'ddbb'
+      this.contentApiProvider = ['kinobd', 'kinobox', 'ddbb'].includes(provider) ? provider : 'ddbb'
     },
 
     setSearchApiProvider(value) {

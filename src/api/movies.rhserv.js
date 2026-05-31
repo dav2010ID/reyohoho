@@ -36,20 +36,6 @@ const getKpInfo = async (kpId) => {
   return data
 }
 
-const getPlayers = async (kpId) => {
-  const { data } = await apiCall((api) =>
-    api.post(
-      '/cache',
-      new URLSearchParams({
-        kinopoisk: kpId,
-        type: 'movie'
-      }),
-      { headers: { 'Content-Type': 'application/x-www-form-urlencoded' } }
-    )
-  )
-  return data
-}
-
 const getShikiPlayers = async (shikiId) => {
   const { data } = await apiCall((api) =>
     api.post(
@@ -252,7 +238,6 @@ export {
   apiSearch,
   getShikiInfo,
   getKpInfo,
-  getPlayers,
   getShikiPlayers,
   getMovies,
   getDiscussedMovies,
