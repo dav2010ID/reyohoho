@@ -115,7 +115,6 @@ const showGarland = computed(() => isNewYearPeriod())
 /* Стиль для страницы с учетом мобильного хедера */
 .router-view-container {
   padding-top: 0; /* По умолчанию без отступа */
-  padding-bottom: var(--app-footer-bottom-space);
 }
 
 /* Отступ сверху для мобильного хедера */

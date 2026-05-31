@@ -71,16 +71,17 @@
           <div v-if="historyLoading" class="loading-container">
             <SpinnerLoading />
           </div>
-          <div
-            v-else-if="history.length === 0"
-            class="empty-history"
-          >
+          <div v-else-if="history.length === 0" class="empty-history">
             <template v-if="topMovies.length > 0">
               <p>Здесь пока пусто</p>
               <h2>Популярное сейчас</h2>
               <MovieList :movies-list="topMovies" :is-history="false" :loading="false" />
               <div v-if="canLoadMoreTopMovies" class="home-load-more">
-                <div ref="homeTopSentinel" class="home-load-more__sentinel" aria-hidden="true"></div>
+                <div
+                  ref="homeTopSentinel"
+                  class="home-load-more__sentinel"
+                  aria-hidden="true"
+                ></div>
                 <button
                   class="home-load-more__button"
                   type="button"
@@ -132,8 +133,6 @@
         </div>
       </div>
     </div>
-    <FooterDonaters />
-
     <RandomMovieModal
       :is-open="showRandomModal"
       :movie="randomMovie"
@@ -159,7 +158,6 @@ import { getMyLists, delAllFromList } from '@/api/user'
 import BaseModal from '@/components/BaseModal.vue'
 import DeleteButton from '@/components/buttons/DeleteButton.vue'
 import ErrorMessage from '@/components/ErrorMessage.vue'
-import FooterDonaters from '@/components/FooterDonaters.vue'
 import { MovieList } from '@/components/MovieList/'
 import { useMainStore } from '@/store/main'
 import { useAuthStore } from '@/store/auth'
