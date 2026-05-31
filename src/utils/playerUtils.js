@@ -3,6 +3,7 @@ export function cleanPlayerName(name) {
     .replace(/KODIK>/, 'Kodik - ')
     .replace(/VEOVEO>/, 'VeoVeo - ')
     .replace(/KINOBOX>/, '')
+    .replace(/DDBB>/, '')
     .trim()
 }
 
@@ -20,7 +21,10 @@ export function getProviderName(player) {
   if (!segments.length) return ''
 
   const root = segments[0].toUpperCase()
-  if ((root === 'KINOBOX' || root === 'KINOBD' || root === 'RHSERV') && segments[1]) {
+  if (
+    (root === 'KINOBOX' || root === 'DDBB' || root === 'KINOBD' || root === 'RHSERV') &&
+    segments[1]
+  ) {
     return cleanPlayerName(segments[1])
   }
 

@@ -157,4 +157,10 @@ describe('Тесты хранилища main', () => {
     store.setHistoryAllowed(false)
     expect(store.isHistoryAllowed).toBe(false)
   })
+
+  it('Разрешает выбрать DDBB как провайдер плееров', () => {
+    const store = useMainStore()
+    store.setContentApiProvider('ddbb')
+    expect(store.contentApiProvider).toBe('ddbb')
+  })
 })

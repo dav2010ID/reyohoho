@@ -56,7 +56,8 @@ export const useMainStore = defineStore(MAIN_STORE_NAME, {
           slug: movie.slug || this.history[existingMovieIndex].slug || '',
           year: movie.year || this.history[existingMovieIndex].year || '',
           type: movie.type || this.history[existingMovieIndex].type || '',
-          poster: resolvePosterByMovie(movie) || this.history[existingMovieIndex].poster || noPosterImage,
+          poster:
+            resolvePosterByMovie(movie) || this.history[existingMovieIndex].poster || noPosterImage,
           addedAt: new Date().toISOString()
         }
 
@@ -126,7 +127,7 @@ export const useMainStore = defineStore(MAIN_STORE_NAME, {
         kinodb: 'kinobd'
       }
       const provider = aliases[normalizedProvider] || normalizedProvider
-      this.contentApiProvider = ['rhserv', 'kinobd', 'kinobox'].includes(provider)
+      this.contentApiProvider = ['rhserv', 'kinobd', 'kinobox', 'ddbb'].includes(provider)
         ? provider
         : 'kinobox'
     },

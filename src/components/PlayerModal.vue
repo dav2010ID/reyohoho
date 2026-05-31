@@ -11,7 +11,10 @@
 
       <ul class="players-list">
         <template v-if="!activeGroup">
-          <li v-for="item in mixedPlayersList" :key="item.type === 'player' ? item.data.key : item.name">
+          <li
+            v-for="item in mixedPlayersList"
+            :key="item.type === 'player' ? item.data.key : item.name"
+          >
             <button
               v-if="item.type === 'player'"
               :class="['player-item', { active: isSelected(item.data) }]"
@@ -76,7 +79,7 @@ const activeGroup = ref(null)
 const mixedPlayersList = computed(() => {
   const result = []
   const seenGroups = new Set()
-  
+
   for (const player of props.players) {
     if (isVeoVeo(player)) {
       if (!seenGroups.has('veoveo')) {
@@ -92,11 +95,9 @@ const mixedPlayersList = computed(() => {
       result.push({ type: 'player', data: player })
     }
   }
-  
+
   return result
 })
-
-
 
 const isVeoVeo = (player) => player.name.toUpperCase().includes('VEOVEO')
 const isKodik = (player) => player.name.toUpperCase().includes('KODIK')
@@ -106,6 +107,7 @@ const cleanName = (name) =>
     .replace(/VEOVEO>/, '')
     .replace(/KODIK>/, '')
     .replace(/KINOBOX>/, '')
+    .replace(/DDBB>/, '')
     .trim()
 
 const getProviderName = (player) => {
@@ -122,7 +124,10 @@ const getProviderName = (player) => {
   if (!segments.length) return ''
 
   const root = segments[0].toUpperCase()
-  if ((root === 'KINOBOX' || root === 'KINOBD' || root === 'RHSERV') && segments[1]) {
+  if (
+    (root === 'KINOBOX' || root === 'DDBB' || root === 'KINOBD' || root === 'RHSERV') &&
+    segments[1]
+  ) {
     return cleanName(segments[1])
   }
 

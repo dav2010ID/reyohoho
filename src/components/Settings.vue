@@ -102,10 +102,15 @@
             <input v-model="contentApiProvider" type="radio" value="kinobox" />
             <span class="radio-label">Kinobox (players)</span>
           </label>
+          <label class="radio">
+            <input v-model="contentApiProvider" type="radio" value="ddbb" />
+            <span class="radio-label">DDBB (players)</span>
+          </label>
         </div>
         <p class="api-note">
-          RHServ: полный функционал (комментарии, тайминги, рейтинги). KinoBD: поиск/карточки/плееры.
-          Неподдерживаемые функции автоматически идут через RHServ.
+          RHServ: полный функционал (комментарии, тайминги, рейтинги). KinoBD:
+          поиск/карточки/плееры. Kinobox и DDBB используются для плееров. Неподдерживаемые функции
+          автоматически идут через RHServ.
         </p>
         <h3 class="api-subtitle">API для поиска</h3>
         <div class="radio-group">
@@ -156,7 +161,9 @@
 
       <div v-show="activeSettingsTab === 'behavior'" class="settings-group">
         <h2>Боковая панель</h2>
-        <SliderRound v-model="sidebarAutoHide">Авто-скрытие: скрывать панель и показывать при наведении курсора</SliderRound>
+        <SliderRound v-model="sidebarAutoHide"
+          >Авто-скрытие: скрывать панель и показывать при наведении курсора</SliderRound
+        >
         <div class="sidebar-position-group">
           <label>Расположение панели:</label>
           <div class="radio-group">
@@ -272,7 +279,6 @@ const areTrailersActive = computed({
     }
   }
 })
-
 
 const contentApiProvider = computed({
   get: () => mainStore.contentApiProvider,

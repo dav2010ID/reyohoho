@@ -5,7 +5,8 @@ import { trackAnalyticsEvent } from '@/utils/analytics'
 const CONTENT_PROVIDERS = {
   RHSERV: 'rhserv',
   KINOBD: 'kinobd',
-  KINOBOX: 'kinobox'
+  KINOBOX: 'kinobox',
+  DDBB: 'ddbb'
 }
 
 const KINOBD_SUPPORTED_METHODS = new Set([
@@ -17,18 +18,21 @@ const KINOBD_SUPPORTED_METHODS = new Set([
   'getRandomMovie'
 ])
 const KINOBOX_SUPPORTED_METHODS = new Set(['getPlayers'])
+const DDBB_SUPPORTED_METHODS = new Set(['getPlayers'])
 const PLAYER_PROVIDER_TIMEOUT_MS = 15000
 
 const providers = {
   rhserv: null,
   kinobd: null,
-  kinobox: null
+  kinobox: null,
+  ddbb: null
 }
 
 const providerImporters = {
   rhserv: () => import('@/api/movies.rhserv'),
   kinobd: () => import('@/api/movies.kinobd'),
-  kinobox: () => import('@/api/movies.kinobox')
+  kinobox: () => import('@/api/movies.kinobox'),
+  ddbb: () => import('@/api/movies.ddbb')
 }
 
 const loadProvider = async (provider) => {
@@ -105,10 +109,15 @@ const getPlayersWithFallback = async (...args) => {
   const provider = getCurrentProvider()
   const startedAt = Date.now()
   const [contentId] = args
-  const order =
-    provider === CONTENT_PROVIDERS.KINOBD
-      ? [CONTENT_PROVIDERS.KINOBD, CONTENT_PROVIDERS.KINOBOX]
-      : [CONTENT_PROVIDERS.KINOBOX, CONTENT_PROVIDERS.KINOBD]
+  const supportedPlayersProviders = [
+    CONTENT_PROVIDERS.KINOBOX,
+    CONTENT_PROVIDERS.DDBB,
+    CONTENT_PROVIDERS.KINOBD
+  ]
+  const order = [
+    provider,
+    ...supportedPlayersProviders.filter((currentProvider) => currentProvider !== provider)
+  ].filter((currentProvider) => supportedPlayersProviders.includes(currentProvider))
 
   let lastError = null
 
@@ -196,6 +205,37 @@ const callWithProvider = async (methodName, ...args) => {
     }
   }
 
+  if (provider === CONTENT_PROVIDERS.DDBB && DDBB_SUPPORTED_METHODS.has(methodName)) {
+    try {
+      const ddbb = await loadProvider('ddbb')
+      return await ddbb[methodName](...args)
+    } catch (error) {
+      console.warn(
+        `[movies] ${methodName} failed on DDBB, fallback to Kinobox/KinoBD/RHServ`,
+        error
+      )
+      try {
+        const kinobox = await loadProvider('kinobox')
+        return await kinobox[methodName](...args)
+      } catch (fallbackError) {
+        console.warn(
+          `[movies] ${methodName} failed on Kinobox, fallback to KinoBD/RHServ`,
+          fallbackError
+        )
+        if (KINOBD_SUPPORTED_METHODS.has(methodName)) {
+          try {
+            const kinobd = await loadProvider('kinobd')
+            return await kinobd[methodName](...args)
+          } catch (kinobdError) {
+            console.warn(`[movies] ${methodName} failed on KinoBD, fallback to RHServ`, kinobdError)
+          }
+        }
+        const rhserv = await loadProvider('rhserv')
+        return await rhserv[methodName](...args)
+      }
+    }
+  }
+
   if (provider === CONTENT_PROVIDERS.KINOBD && KINOBD_SUPPORTED_METHODS.has(methodName)) {
     try {
       const kinobd = await loadProvider('kinobd')
@@ -233,20 +273,16 @@ const hasKpInfo = (movieInfo) => {
   if (!movieInfo || typeof movieInfo !== 'object') return false
   return Boolean(
     movieInfo.kinopoisk_id ||
-      movieInfo.id_kp ||
-      movieInfo.name_ru ||
-      movieInfo.name_original ||
-      movieInfo.description
+    movieInfo.id_kp ||
+    movieInfo.name_ru ||
+    movieInfo.name_original ||
+    movieInfo.description
   )
 }
 
 const getKpInfoWithFallback = async (...args) => {
   const [kpId] = args
-  const order = [
-    CONTENT_PROVIDERS.RHSERV,
-    CONTENT_PROVIDERS.KINOBOX,
-    CONTENT_PROVIDERS.KINOBD
-  ]
+  const order = [CONTENT_PROVIDERS.RHSERV, CONTENT_PROVIDERS.KINOBOX, CONTENT_PROVIDERS.KINOBD]
   let lastError = null
 
   for (const provider of order) {
@@ -280,20 +316,29 @@ const shouldEnrichListSeo = import.meta.env.SSR
 // Top lists now come from KinoBD because it exposes stable page-based pagination.
 const getMovies = async (...args) => {
   try {
-    return await normalizeMovieListResponse(await (await loadProvider('kinobd')).getMovies(...args), {
-      enrichMissingSeo: shouldEnrichListSeo
-    })
+    return await normalizeMovieListResponse(
+      await (await loadProvider('kinobd')).getMovies(...args),
+      {
+        enrichMissingSeo: shouldEnrichListSeo
+      }
+    )
   } catch (error) {
     console.warn('[movies] getMovies failed on KinoBD, fallback to RHServ', error)
-    return await normalizeMovieListResponse(await (await loadProvider('rhserv')).getMovies(...args), {
-      enrichMissingSeo: shouldEnrichListSeo
-    })
+    return await normalizeMovieListResponse(
+      await (await loadProvider('rhserv')).getMovies(...args),
+      {
+        enrichMissingSeo: shouldEnrichListSeo
+      }
+    )
   }
 }
 const getDiscussedMovies = async (...args) =>
-  await normalizeMovieListResponse(await (await loadProvider('rhserv')).getDiscussedMovies(...args), {
-    enrichMissingSeo: shouldEnrichListSeo
-  })
+  await normalizeMovieListResponse(
+    await (await loadProvider('rhserv')).getDiscussedMovies(...args),
+    {
+      enrichMissingSeo: shouldEnrichListSeo
+    }
+  )
 const getDons = async (...args) => callWithProvider('getDons', ...args)
 const getKpIDfromIMDB = async (...args) => callWithProvider('getKpIDfromIMDB', ...args)
 const getNudityInfoFromIMDB = async (...args) => callWithProvider('getNudityInfoFromIMDB', ...args)
@@ -309,8 +354,10 @@ const submitTiming = async (...args) => callWithProvider('submitTiming', ...args
 const updateTiming = async (...args) => callWithProvider('updateTiming', ...args)
 const deleteTiming = async (...args) => callWithProvider('deleteTiming', ...args)
 const reportTiming = async (...args) => callWithProvider('reportTiming', ...args)
-const getTopTimingSubmitters = async (...args) => callWithProvider('getTopTimingSubmitters', ...args)
-const getAllTimingSubmissions = async (...args) => callWithProvider('getAllTimingSubmissions', ...args)
+const getTopTimingSubmitters = async (...args) =>
+  callWithProvider('getTopTimingSubmitters', ...args)
+const getAllTimingSubmissions = async (...args) =>
+  callWithProvider('getAllTimingSubmissions', ...args)
 const getRandomMovie = async (...args) => callWithProvider('getRandomMovie', ...args)
 const approveTiming = async (...args) => callWithProvider('approveTiming', ...args)
 const rejectTiming = async (...args) => callWithProvider('rejectTiming', ...args)
@@ -362,18 +409,23 @@ export {
 }
 
 export const toggleErrorSimulation = (enabled) => {
-  return Promise.all([loadProvider('rhserv'), loadProvider('kinobd'), loadProvider('kinobox')]).then(
-    ([rhserv, kinobd, kinobox]) => {
-      if (typeof rhserv.toggleErrorSimulation === 'function') {
-        rhserv.toggleErrorSimulation(enabled)
-      }
-      if (typeof kinobd.toggleErrorSimulation === 'function') {
-        kinobd.toggleErrorSimulation(enabled)
-      }
-      if (typeof kinobox.toggleErrorSimulation === 'function') {
-        kinobox.toggleErrorSimulation(enabled)
-      }
+  return Promise.all([
+    loadProvider('rhserv'),
+    loadProvider('kinobd'),
+    loadProvider('kinobox'),
+    loadProvider('ddbb')
+  ]).then(([rhserv, kinobd, kinobox, ddbb]) => {
+    if (typeof rhserv.toggleErrorSimulation === 'function') {
+      rhserv.toggleErrorSimulation(enabled)
     }
-  )
+    if (typeof kinobd.toggleErrorSimulation === 'function') {
+      kinobd.toggleErrorSimulation(enabled)
+    }
+    if (typeof kinobox.toggleErrorSimulation === 'function') {
+      kinobox.toggleErrorSimulation(enabled)
+    }
+    if (typeof ddbb.toggleErrorSimulation === 'function') {
+      ddbb.toggleErrorSimulation(enabled)
+    }
+  })
 }
-
