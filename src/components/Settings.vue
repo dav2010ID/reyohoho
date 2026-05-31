@@ -2,7 +2,7 @@
   <div class="settings-page">
     <h1>Настройки</h1>
     <div class="settings-container">
-      <div class="settings-tabs" role="tablist" aria-label="Разделы настроек">
+      <nav class="settings-tabs" role="tablist" aria-label="Разделы настроек">
         <button
           v-for="tab in settingsTabs"
           :key="tab.id"
@@ -12,12 +12,19 @@
           :class="{ active: activeSettingsTab === tab.id }"
           @click="activeSettingsTab = tab.id"
         >
-          {{ tab.label }}
+          <span class="settings-tab__label">{{ tab.label }}</span>
+          <span class="settings-tab__description">{{ tab.description }}</span>
         </button>
-      </div>
+      </nav>
+
+      <header class="settings-section-header">
+        <p>Раздел настроек</p>
+        <h2>{{ activeSettingsSection.label }}</h2>
+        <span>{{ activeSettingsSection.description }}</span>
+      </header>
 
       <div v-show="activeSettingsTab === 'appearance'" class="settings-group">
-        <h2>Фон</h2>
+        <h3>Фон</h3>
         <div class="radio-group">
           <label class="radio">
             <input v-model="backgroundType" type="radio" value="dynamic" />
@@ -44,12 +51,12 @@
       </div>
 
       <div v-show="activeSettingsTab === 'appearance'" class="settings-group">
-        <h2>Тема</h2>
+        <h3>Тема</h3>
         <ThemeSelector />
       </div>
 
       <div v-show="activeSettingsTab === 'player'" class="settings-group">
-        <h2>Плеер</h2>
+        <h3>Плеер</h3>
         <SliderRound v-model="isCentered">Автоцентрирование плеера</SliderRound>
         <SliderRound v-model="isCardBorder">Окантовка вокруг карточек</SliderRound>
         <SliderRound v-model="isCardHoverDisabled"
@@ -62,7 +69,7 @@
       </div>
 
       <div v-show="activeSettingsTab === 'appearance'" class="settings-group">
-        <h2>Карточки</h2>
+        <h3>Карточки</h3>
         <div class="card-size-group">
           <label>Размер карточек:</label>
           <div class="radio-group">
@@ -83,12 +90,12 @@
       </div>
 
       <div v-show="activeSettingsTab === 'player'" class="settings-group">
-        <h2>Трейлеры</h2>
+        <h3>Трейлеры</h3>
         <SliderRound v-model="areTrailersActive">Активировать трейлеры</SliderRound>
       </div>
 
       <div v-show="activeSettingsTab === 'api'" class="settings-group">
-        <h2>API</h2>
+        <h3>API</h3>
         <div class="radio-group">
           <label class="radio">
             <input v-model="contentApiProvider" type="radio" value="rhserv" />
@@ -112,7 +119,7 @@
           поиск/карточки/плееры. Kinobox и DDBB используются для плееров. Неподдерживаемые функции
           автоматически идут через RHServ.
         </p>
-        <h3 class="api-subtitle">API для поиска</h3>
+        <h4 class="api-subtitle">API для поиска</h4>
         <div class="radio-group">
           <label class="radio">
             <input v-model="searchApiProvider" type="radio" value="rhserv" />
@@ -133,7 +140,7 @@
       </div>
 
       <div v-show="activeSettingsTab === 'behavior'" class="settings-group">
-        <h2>История</h2>
+        <h3>История</h3>
         <SliderRound v-model="isHistoryAllowed"> Сохранять историю просмотра</SliderRound>
         <div class="settings-actions">
           <button class="reset-button" @click="showModal = true">
@@ -150,17 +157,17 @@
       </div>
 
       <div v-show="activeSettingsTab === 'behavior'" class="settings-group">
-        <h2>Горячие клавиши</h2>
+        <h3>Горячие клавиши</h3>
         <SliderRound v-model="isCtrlFEnabled">Перехватывать Ctrl+F для поиска</SliderRound>
       </div>
 
       <div v-show="activeSettingsTab === 'behavior'" class="settings-group">
-        <h2>Навигация</h2>
+        <h3>Навигация</h3>
         <SliderRound v-model="rememberScrollPosition">Запоминать позицию скролла</SliderRound>
       </div>
 
       <div v-show="activeSettingsTab === 'behavior'" class="settings-group">
-        <h2>Боковая панель</h2>
+        <h3>Боковая панель</h3>
         <SliderRound v-model="sidebarAutoHide"
           >Авто-скрытие: скрывать панель и показывать при наведении курсора</SliderRound
         >
@@ -180,20 +187,20 @@
       </div>
 
       <div v-show="activeSettingsTab === 'behavior'" class="settings-group">
-        <h2>Комментарии</h2>
+        <h3>Комментарии</h3>
         <SliderRound v-model="isCommentsEnabled">Показывать блок комментариев</SliderRound>
         <SliderRound v-model="isAutoShowComments">Автоматически показывать комментарии</SliderRound>
       </div>
 
       <div v-show="activeSettingsTab === 'player'" class="settings-group">
-        <h2>Режим стримера</h2>
+        <h3>Режим стримера</h3>
         <SliderRound v-model="isStreamerMode"
           >Мигание кнопки таймингов для привлечения внимания</SliderRound
         >
       </div>
 
       <div v-show="activeSettingsTab === 'about'" class="settings-group">
-        <h2>Версия сайта</h2>
+        <h3>Версия сайта</h3>
         {{ appVersion }}
       </div>
     </div>
@@ -218,12 +225,15 @@ const showModal = ref(false)
 const appVersion = ref(import.meta.env.VITE_APP_VERSION_FULL_VERSION)
 const activeSettingsTab = ref('appearance')
 const settingsTabs = [
-  { id: 'appearance', label: 'Вид' },
-  { id: 'player', label: 'Плеер' },
-  { id: 'behavior', label: 'Поведение' },
-  { id: 'api', label: 'API' },
-  { id: 'about', label: 'О сайте' }
+  { id: 'appearance', label: 'Вид', description: 'Фон, тема и карточки' },
+  { id: 'player', label: 'Плеер', description: 'Плеер, трейлеры и режим стримера' },
+  { id: 'behavior', label: 'Поведение', description: 'История, навигация и комментарии' },
+  { id: 'api', label: 'API', description: 'Источники данных и плееров' },
+  { id: 'about', label: 'О сайте', description: 'Версия приложения' }
 ]
+const activeSettingsSection = computed(
+  () => settingsTabs.find((tab) => tab.id === activeSettingsTab.value) || settingsTabs[0]
+)
 
 const clearAllHistory = () => {
   mainStore.clearAllHistory()
@@ -384,19 +394,19 @@ h1 {
   background: #2a2a2a;
   padding: 20px;
   border-radius: 10px;
-  max-width: 680px;
+  max-width: 860px;
   width: 100%;
   box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
   border: 1px solid var(--accent-transparent);
   display: flex;
   flex-direction: column;
-  gap: 35px;
+  gap: 18px;
   margin-bottom: 40px;
 }
 
 .settings-tabs {
-  display: flex;
-  flex-wrap: wrap;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(145px, 1fr));
   gap: 8px;
   padding: 6px;
   border-radius: 10px;
@@ -405,9 +415,8 @@ h1 {
 }
 
 .settings-tabs button {
-  flex: 1 1 auto;
-  min-height: 38px;
-  padding: 8px 12px;
+  min-height: 68px;
+  padding: 10px 12px;
   border: 0;
   border-radius: 7px;
   background: transparent;
@@ -415,6 +424,7 @@ h1 {
   cursor: pointer;
   font: inherit;
   font-weight: 600;
+  text-align: left;
 }
 
 .settings-tabs button.active {
@@ -427,13 +437,49 @@ h1 {
   outline-offset: 2px;
 }
 
+.settings-tab__label,
+.settings-tab__description {
+  display: block;
+}
+
+.settings-tab__description {
+  margin-top: 4px;
+  color: rgba(255, 255, 255, 0.58);
+  font-size: 12px;
+  font-weight: 400;
+  line-height: 1.25;
+}
+
+.settings-tabs button.active .settings-tab__description {
+  color: rgba(255, 255, 255, 0.82);
+}
+
+.settings-section-header {
+  padding: 4px 2px 10px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.settings-section-header p,
+.settings-section-header span {
+  margin: 0;
+  color: rgba(255, 255, 255, 0.68);
+  font-size: 13px;
+}
+
+.settings-section-header h2 {
+  margin: 4px 0;
+  color: #fff;
+  font-size: 22px;
+  font-weight: 600;
+}
+
 .setting-item {
   display: flex;
   align-items: center;
   gap: 10px;
 }
 
-h2 {
+h3 {
   font-size: 16px;
   margin-bottom: 10px;
   margin: 0;
@@ -502,5 +548,15 @@ h2 {
   margin: 6px 0 0;
   font-size: 14px;
   font-weight: 600;
+}
+
+@media (max-width: 640px) {
+  .settings-container {
+    padding: 14px;
+  }
+
+  .settings-tabs {
+    grid-template-columns: 1fr;
+  }
 }
 </style>
