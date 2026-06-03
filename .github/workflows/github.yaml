@@ -43,7 +43,7 @@ jobs:
       - name: Build site
         run: yarn build:github
         env:
-          VITE_PRERENDER_MOVIE_PAGES: ${{ github.event_name == 'schedule' && 'true' || 'false' }}
+          VITE_PRERENDER_MOVIE_PAGES: 'true'
 
       - uses: actions/upload-artifact@v4
         with:
