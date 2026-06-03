@@ -140,6 +140,9 @@ export default defineConfig(({ mode }) => {
           }
         }
       }
+    },
+    ssgOptions: {
+      dirStyle: 'nested'
     }
   }
 })
