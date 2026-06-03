@@ -60,7 +60,6 @@ export const createRouterOptions = () => ({
 
 export const installRouterGuards = (router, { isClient = typeof window !== 'undefined' } = {}) => {
   const { startTracking } = useScrollTracking()
-  let hasTrackedInitialRoute = false
 
   router.beforeEach((to) => {
     if (to.meta?.requiresAuth) {
@@ -104,11 +103,6 @@ export const installRouterGuards = (router, { isClient = typeof window !== 'unde
 
   if (isClient) {
     router.afterEach((to) => {
-      if (!hasTrackedInitialRoute) {
-        hasTrackedInitialRoute = true
-        return
-      }
-
       trackGoatCounterPageView(to)
     })
   }

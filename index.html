@@ -105,6 +105,9 @@
 
         if (isLocalhost) return
 
+        window.goatcounter = window.goatcounter || {}
+        window.goatcounter.no_onload = true
+
         const script = document.createElement('script')
         script.dataset.goatcounter = 'https://reyohoho.goatcounter.com/count'
         script.async = true
