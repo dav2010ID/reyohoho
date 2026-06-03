@@ -8,6 +8,9 @@ on:
     - cron: '0 3 * * 1'
   workflow_dispatch:
 
+permissions:
+  contents: write
+
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -25,6 +28,18 @@ jobs:
       - name: Generate weekly SEO catalog and sitemap
         if: github.event_name == 'schedule'
         run: yarn seo:prepare
+      - name: Commit weekly SEO updates
+        if: github.event_name == 'schedule'
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add src/data/movies.json public/sitemap.xml public/robots.txt
+          if git diff --cached --quiet; then
+            echo "No SEO changes to commit"
+          else
+            git commit -m "chore: update weekly SEO assets [skip ci]"
+            git push
+          fi
       - name: Build site
         run: yarn build:github
         env:
