@@ -2476,8 +2476,7 @@ const handleFilterSelect = () => {
   max-width: var(--movie-page-max-width);
 }
 
-.content-card :deep(.players-list),
-.content-card :deep(.player-container) {
+.content-card :deep(.players-list) {
   max-width: var(--movie-page-max-width) !important;
 }
 
