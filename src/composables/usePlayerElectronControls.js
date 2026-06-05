@@ -31,6 +31,48 @@ export const usePlayerElectronControls = ({ isElectron, playerStore, playerIfram
     window.open(DESKTOP_APP_URL, '_blank')
   }
 
+  const showElectronToast = (message) => {
+    if (isElectron.value) {
+      window.electronAPI?.showToast?.(message)
+    }
+  }
+
+  const getIframeDocument = () => {
+    const iframe = playerIframe.value
+    if (!iframe) return null
+
+    try {
+      return iframe.contentDocument || iframe.contentWindow?.document || null
+    } catch {
+      return null
+    }
+  }
+
+  const getVideoElements = () => {
+    const iframeDoc = getIframeDocument()
+    return iframeDoc ? Array.from(iframeDoc.querySelectorAll('video')) : []
+  }
+
+  const getPlayerEffectTargets = () => {
+    const videos = getVideoElements()
+    if (videos.length > 0) return videos
+
+    return playerIframe.value ? [playerIframe.value] : []
+  }
+
+  const hasBlurFilter = (target) => target.style.filter.includes('blur')
+
+  const hasMirrorTransform = (target) => target.style.transform.includes('scaleX(-1)')
+
+  const setMirrorTransform = (target, enabled) => {
+    target.style.transform = enabled ? 'scaleX(-1)' : ''
+    target.style.transformOrigin = enabled ? 'center center' : ''
+  }
+
+  const notifyCompressorUnavailable = () => {
+    showElectronToast('Компрессор не поддерживается этим плеером')
+  }
+
   const initializeAudioContext = () => {
     try {
       if (!audioContext.value) {
@@ -80,9 +122,7 @@ export const usePlayerElectronControls = ({ isElectron, playerStore, playerIfram
         mediaSource.value = null
         currentCompressorState.value = false
 
-        if (isElectron.value) {
-          window.electronAPI.showToast('Компрессор не поддерживается этим плеером')
-        }
+        notifyCompressorUnavailable()
         return false
       }
 
@@ -127,9 +167,7 @@ export const usePlayerElectronControls = ({ isElectron, playerStore, playerIfram
       mediaSource.value = null
       currentCompressorState.value = false
 
-      if (isElectron.value) {
-        window.electronAPI.showToast('Компрессор не поддерживается этим плеером')
-      }
+      notifyCompressorUnavailable()
       return false
     } catch (error) {
       debugLog('Error setting up video audio:', error)
@@ -138,24 +176,29 @@ export const usePlayerElectronControls = ({ isElectron, playerStore, playerIfram
   }
 
   const applyCompressorEffect = async (enabled) => {
-    if (!playerIframe.value) return
+    if (!playerIframe.value) return false
 
     try {
-      const iframe = playerIframe.value
-      const iframeDoc = iframe.contentDocument || iframe.contentWindow.document
-      if (!iframeDoc) return
+      const iframeDoc = getIframeDocument()
+      if (!iframeDoc) {
+        if (enabled) notifyCompressorUnavailable()
+        return false
+      }
 
       const videos = iframeDoc.querySelectorAll('video')
-      if (videos.length === 0) return
+      if (videos.length === 0) {
+        if (enabled) notifyCompressorUnavailable()
+        return false
+      }
 
       const video = videos[0]
 
-      if (!initializeAudioContext()) return
+      if (!initializeAudioContext()) return false
 
       const audioSetupSuccess = await setupVideoAudio(video)
       if (!audioSetupSuccess || !mediaSource.value) {
         debugLog('Compressor not available for this player')
-        return
+        return false
       }
 
       if (enabled && !currentCompressorState.value) {
@@ -163,25 +206,22 @@ export const usePlayerElectronControls = ({ isElectron, playerStore, playerIfram
         bypassGainNode.value.gain.setValueAtTime(0, audioContext.value.currentTime)
         currentCompressorState.value = true
 
-        if (isElectron.value) {
-          window.electronAPI.showToast('Компрессор включён')
-        }
+        showElectronToast('Компрессор включён')
         debugLog('Compressor enabled')
       } else if (!enabled && currentCompressorState.value) {
         gainNode.value.gain.setValueAtTime(0, audioContext.value.currentTime)
         bypassGainNode.value.gain.setValueAtTime(1, audioContext.value.currentTime)
         currentCompressorState.value = false
 
-        if (isElectron.value) {
-          window.electronAPI.showToast('Компрессор отключён')
-        }
+        showElectronToast('Компрессор отключён')
         debugLog('Compressor disabled')
       }
+
+      return true
     } catch (error) {
       debugLog('Compressor error:', error)
-      if (isElectron.value) {
-        window.electronAPI.showToast('Ошибка при включении компрессора')
-      }
+      showElectronToast('Ошибка при включении компрессора')
+      return false
     }
   }
 
@@ -190,12 +230,16 @@ export const usePlayerElectronControls = ({ isElectron, playerStore, playerIfram
 
     try {
       const iframe = playerIframe.value
-      const iframeDoc = iframe.contentDocument || iframe.contentWindow.document
-      if (!iframeDoc) return
+      const videos = getVideoElements()
+      const targets = videos.length > 0 ? videos : [iframe]
 
-      const videos = iframeDoc.querySelectorAll('video')
-      const target = videos.length > 0 ? videos[0] : iframe
-      target.style.filter = enabled ? 'blur(50px)' : ''
+      if (videos.length > 0) {
+        iframe.style.filter = ''
+      }
+
+      targets.forEach((target) => {
+        target.style.filter = enabled ? 'blur(50px)' : ''
+      })
     } catch (error) {
       debugLog(`Error ${enabled ? 'enabling' : 'disabling'} blur:`, error)
     }
@@ -213,51 +257,59 @@ export const usePlayerElectronControls = ({ isElectron, playerStore, playerIfram
 
     try {
       const iframe = playerIframe.value
-      const iframeDoc = iframe.contentDocument || iframe.contentWindow.document
-      if (!iframeDoc) return
+      const target = getPlayerEffectTargets()[0]
+      if (!target) return
 
-      const videos = iframeDoc.querySelectorAll('video')
-      const target = videos.length > 0 ? videos[0] : iframe
-      target.style.filter = target.style.filter.includes('blur') ? '' : 'blur(50px)'
+      const isActive =
+        getPlayerEffectTargets().some((target) => hasBlurFilter(target)) ||
+        (iframe && target !== iframe && hasBlurFilter(iframe))
+
+      setBlur(!isActive)
     } catch (error) {
       debugLog('Error toggling blur:', error)
     }
   }
 
-  const applyMirrorEffect = (enabled) => {
-    if (!playerIframe.value) return
+  const applyMirrorEffect = (enabled, { notify = true } = {}) => {
+    if (!playerIframe.value) return false
 
     try {
       const iframe = playerIframe.value
-      const iframeDoc = iframe.contentDocument || iframe.contentWindow.document
-      if (!iframeDoc) return
+      const videos = getVideoElements()
+      const targets = videos.length > 0 ? videos : [iframe]
+      if (targets.length === 0) return false
 
-      const videos = iframeDoc.querySelectorAll('video')
       if (videos.length > 0) {
-        videos.forEach((video) => {
-          video.style.transform = enabled ? 'scaleX(-1)' : 'scaleX(1)'
-        })
-
-        currentMirrorState.value = enabled
-
-        if (isElectron.value) {
-          const message = enabled ? 'Зеркало включено' : 'Зеркало отключено'
-          window.electronAPI.showToast(message)
-        }
+        setMirrorTransform(iframe, false)
       }
+
+      targets.forEach((target) => setMirrorTransform(target, enabled))
+      currentMirrorState.value = enabled
+
+      if (notify) {
+        const message = enabled ? 'Зеркало включено' : 'Зеркало отключено'
+        showElectronToast(message)
+      }
+
+      return true
     } catch {
-      // ignore
+      return false
     }
   }
 
-  const toggleCompressor = () => {
+  const toggleCompressor = async () => {
     if (!isElectron.value) {
       showDesktopOnlyMessage()
       return
     }
 
-    compressorEnabled.value = !compressorEnabled.value
-    applyCompressorEffect(compressorEnabled.value)
+    const nextEnabled = !compressorEnabled.value
+    compressorEnabled.value = nextEnabled
+
+    const applied = await applyCompressorEffect(nextEnabled)
+    if (nextEnabled && !applied) {
+      compressorEnabled.value = false
+    }
   }
 
   const toggleMirror = () => {
@@ -279,24 +331,21 @@ export const usePlayerElectronControls = ({ isElectron, playerStore, playerIfram
       if (!playerIframe.value) return
 
       try {
-        const iframe = playerIframe.value
-        const iframeDoc = iframe.contentDocument || iframe.contentWindow.document
-        if (!iframeDoc) return
+        const targets = getPlayerEffectTargets()
+        if (targets.length === 0) return
 
-        const videos = iframeDoc.querySelectorAll('video')
+        const iframe = playerIframe.value
+        const isCurrentlyMirrored =
+          targets.some((target) => hasMirrorTransform(target)) ||
+          (iframe && !targets.includes(iframe) && hasMirrorTransform(iframe))
+
+        if (mirrorEnabled.value !== isCurrentlyMirrored) {
+          applyMirrorEffect(mirrorEnabled.value, { notify: false })
+        }
+
+        const videos = getVideoElements()
         if (videos.length > 0) {
           const video = videos[0]
-
-          const transform = video.style.transform
-          const isCurrentlyMirrored = transform === 'scaleX(-1)'
-
-          if (mirrorEnabled.value && !isCurrentlyMirrored) {
-            video.style.transform = 'scaleX(-1)'
-            currentMirrorState.value = true
-          } else if (!mirrorEnabled.value && isCurrentlyMirrored) {
-            video.style.transform = 'scaleX(1)'
-            currentMirrorState.value = false
-          }
 
           if (currentVideoElement.value !== video) {
             currentVideoElement.value = null
