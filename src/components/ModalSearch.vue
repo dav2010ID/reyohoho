@@ -282,30 +282,31 @@ watch(searchTerm, () => {
   display: flex;
   justify-content: center;
   align-items: center;
-  z-index: 5;
+  z-index: 30;
 
   &__content {
     position: relative;
     display: flex;
     flex-direction: column;
+    box-sizing: border-box;
     background: rgba(30, 30, 30, 0.96);
     padding: 20px;
     border-radius: 8px;
-    max-width: 80%;
-    width: 100%;
+    width: min(800px, calc(100vw - 32px));
     max-height: 90vh;
     box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
 
     @media screen and (max-width: 600px) {
-      max-width: 400px;
+      width: calc(100vw - 24px);
+      padding: 14px;
     }
 
     @media (min-width: 768px) {
-      max-width: 600px;
+      width: min(600px, calc(100vw - 32px));
     }
 
     @media (min-width: 1200px) {
-      max-width: 800px;
+      width: min(800px, calc(100vw - 32px));
     }
   }
 
@@ -332,16 +333,18 @@ watch(searchTerm, () => {
 
   .movie {
     display: flex;
-    align-items: center;
+    align-items: flex-start;
     justify-content: flex-start;
-    padding: 10px 16px;
+    padding: 10px 14px;
     gap: 12px;
     cursor: pointer;
     text-decoration: none;
     color: #fff;
-    border-radius: 10px;
+    border-radius: 8px;
     outline: none;
-    margin: 2px;
+    margin: 2px 4px 8px 0;
+    min-height: 68px;
+    box-sizing: border-box;
 
     &:hover {
       background: rgba(34, 34, 34, 0.98);
@@ -354,6 +357,16 @@ watch(searchTerm, () => {
 
     &__poster {
       width: 32px;
+      height: 48px;
+      flex: 0 0 32px;
+      object-fit: cover;
+      border-radius: 3px;
+      background: rgba(255, 255, 255, 0.08);
+    }
+
+    &__info {
+      min-width: 0;
+      padding-top: 2px;
     }
 
     &__title {
@@ -362,12 +375,15 @@ watch(searchTerm, () => {
       font-weight: 500;
       padding: 0;
       margin: 0;
+      overflow-wrap: anywhere;
     }
 
     &__meta {
       display: flex;
+      flex-wrap: wrap;
       gap: 7px;
       margin-top: 3px;
+      line-height: 18px;
     }
 
     &__rating {
