@@ -605,6 +605,10 @@ const containerRef = ref(null)
 const PLAYER_IFRAME_LOAD_TIMEOUT_MS = 20000
 let iframeLoadStartedAt = 0
 let iframeLoadTimeout = null
+let videoErrorTrackingObserver = null
+let iframeVideoTrackingLoadId = 0
+const trackedVideoErrorElements = new WeakSet()
+const reportedVideoErrorSignatures = new WeakMap()
 
 const isMobile = computed(() => mainStore.isMobile)
 const isElectron = computed(() => !!window.electronAPI)
@@ -1074,6 +1078,126 @@ const getPlayerAnalyticsPayload = () => ({
   source: mainStore.contentApiProvider
 })
 
+const clearVideoErrorTracking = () => {
+  if (!videoErrorTrackingObserver) return
+  videoErrorTrackingObserver.disconnect()
+  videoErrorTrackingObserver = null
+}
+
+const resolveIframeSrc = (src) => {
+  try {
+    return new URL(src || '', window.location.href).href
+  } catch {
+    return src || ''
+  }
+}
+
+const isExpectedIframeSrc = (iframe, iframeSrc) => {
+  if (!iframe || !iframeSrc || !iframe.src || iframe.src === 'about:blank') return false
+  return resolveIframeSrc(iframe.src) === resolveIframeSrc(iframeSrc)
+}
+
+const getVideoErrorSignature = (video) => {
+  const errorCode = video?.error?.code || ''
+  const errorMessage = video?.error?.message || ''
+  const videoSource = video?.currentSrc || video?.src || ''
+  return [videoSource, errorCode, errorMessage].join('|')
+}
+
+const trackVideoElementError = (video, loadId) => {
+  if (loadId !== iframeVideoTrackingLoadId) return
+
+  const signature = getVideoErrorSignature(video)
+  if (reportedVideoErrorSignatures.get(video) === signature) return
+  reportedVideoErrorSignatures.set(video, signature)
+
+  const mediaError = video?.error
+  trackAnalyticsEvent('player_iframe_error', {
+    ...getPlayerAnalyticsPayload(),
+    error_target: 'video',
+    status: 'error',
+    duration_ms: iframeLoadStartedAt ? Date.now() - iframeLoadStartedAt : 0,
+    video_error_code: mediaError?.code || null,
+    video_error_message: mediaError?.message || '',
+    video_ready_state: video?.readyState ?? null,
+    video_network_state: video?.networkState ?? null
+  })
+}
+
+const trackVideoElementForErrors = (video, loadId) => {
+  if (loadId !== iframeVideoTrackingLoadId) return
+
+  if (!trackedVideoErrorElements.has(video)) {
+    trackedVideoErrorElements.add(video)
+    video.addEventListener('error', () => trackVideoElementError(video, loadId))
+  }
+
+  if (video.error) {
+    trackVideoElementError(video, loadId)
+  }
+}
+
+const trackVideoErrorsInNode = (node, loadId) => {
+  if (!node || loadId !== iframeVideoTrackingLoadId) return
+
+  if (node.nodeType === 1 && node.matches?.('video')) {
+    trackVideoElementForErrors(node, loadId)
+  }
+
+  if (node.nodeType === 1 || node.nodeType === 11) {
+    node.querySelectorAll?.('video')?.forEach((video) => {
+      trackVideoElementForErrors(video, loadId)
+    })
+  }
+}
+
+const trackIframeDocVideoErrors = (iframeDoc, loadId) => {
+  iframeDoc?.querySelectorAll?.('video')?.forEach((video) => {
+    trackVideoElementForErrors(video, loadId)
+  })
+}
+
+const startIframeVideoErrorTracking = (loadId) => {
+  if (loadId !== iframeVideoTrackingLoadId) return
+
+  clearVideoErrorTracking()
+
+  try {
+    const iframe = playerIframe.value
+    const iframeSrc = selectedPlayerInternal.value?.iframe || ''
+    if (!iframe || !isExpectedIframeSrc(iframe, iframeSrc)) return
+
+    const iframeDoc = iframe.contentDocument || iframe.contentWindow?.document
+    if (!iframeDoc || loadId !== iframeVideoTrackingLoadId) return
+
+    trackIframeDocVideoErrors(iframeDoc, loadId)
+
+    const observeTarget = iframeDoc.body || iframeDoc.documentElement
+    const MutationObserverCtor = iframe.contentWindow?.MutationObserver || window.MutationObserver
+    if (!observeTarget || !MutationObserverCtor) return
+
+    videoErrorTrackingObserver = new MutationObserverCtor((mutations) => {
+      if (loadId !== iframeVideoTrackingLoadId) return
+      mutations.forEach((mutation) => {
+        mutation.addedNodes?.forEach((node) => {
+          trackVideoErrorsInNode(node, loadId)
+        })
+      })
+    })
+    videoErrorTrackingObserver.observe(observeTarget, {
+      childList: true,
+      subtree: true
+    })
+  } catch (error) {
+    debugLog('Unable to track iframe video errors:', error)
+  }
+}
+
+const stopCurrentVideoErrorTracking = () => {
+  iframeVideoTrackingLoadId += 1
+  clearVideoErrorTracking()
+}
+
 const clearIframeLoadTimeout = () => {
   if (!iframeLoadTimeout) return
   clearTimeout(iframeLoadTimeout)
@@ -1104,8 +1228,14 @@ const scheduleIframeLoadTimeout = () => {
 }
 
 const onIframeLoad = () => {
+  const iframe = playerIframe.value
+  const iframeSrc = selectedPlayerInternal.value?.iframe || ''
+  if (!isExpectedIframeSrc(iframe, iframeSrc)) return
+
+  const loadId = ++iframeVideoTrackingLoadId
   iframeLoading.value = false
   clearIframeLoadTimeout()
+  startIframeVideoErrorTracking(loadId)
   trackAnalyticsEvent('player_iframe_load', {
     ...getPlayerAnalyticsPayload(),
     status: 'success',
@@ -1137,9 +1267,11 @@ const onIframeLoad = () => {
 const onIframeError = () => {
   iframeLoading.value = false
   clearIframeLoadTimeout()
+  stopCurrentVideoErrorTracking()
 
   const payload = {
     ...getPlayerAnalyticsPayload(),
+    error_target: 'iframe',
     status: 'error',
     duration_ms: iframeLoadStartedAt ? Date.now() - iframeLoadStartedAt : 0
   }
@@ -1172,6 +1304,7 @@ const handlePlayerSelect = (player) => {
 }
 
 watch(selectedPlayerInternal, (newVal) => {
+  stopCurrentVideoErrorTracking()
   if (newVal) {
     iframeLoading.value = true
     scheduleIframeLoadTimeout()
@@ -2394,6 +2527,7 @@ onBeforeUnmount(() => {
   window.removeEventListener('resize', updateScaleFactor)
   window.removeEventListener('resize', updateTooltipPosition)
   clearIframeLoadTimeout()
+  stopCurrentVideoErrorTracking()
   cleanupPlayerLayout()
 
   if (videoPositionInterval.value) {
