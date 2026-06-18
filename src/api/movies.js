@@ -256,21 +256,42 @@ const callWithProvider = async (methodName, ...args) => {
 }
 
 const apiSearch = async (...args) => {
-  const provider = getCurrentSearchProvider()
+  const configuredProvider = getCurrentSearchProvider()
+  const supportedSearchProviders = [
+    CONTENT_PROVIDERS.RHSERV,
+    CONTENT_PROVIDERS.KINOBD,
+    CONTENT_PROVIDERS.KINOBOX
+  ]
+  const order = [
+    configuredProvider,
+    ...supportedSearchProviders.filter((provider) => provider !== configuredProvider)
+  ].filter((provider) => supportedSearchProviders.includes(provider))
+  let lastError = null
 
-  if (provider === CONTENT_PROVIDERS.KINOBD) {
+  for (const provider of order) {
     try {
-      const kinobd = await loadProvider('kinobd')
-      return await normalizeMovieListResponse(await kinobd.apiSearch(...args))
+      const providerApi = await loadProvider(provider)
+      if (typeof providerApi.apiSearch !== 'function') continue
+
+      const results = await normalizeMovieListResponse(await providerApi.apiSearch(...args))
+      if (Array.isArray(results) && results.length > 0) {
+        if (provider !== configuredProvider) {
+          console.warn(`[movies] apiSearch fallback used: ${provider}`)
+        }
+        return results
+      }
+
+      console.warn(`[movies] apiSearch returned no results on ${provider}`)
     } catch (error) {
-      console.warn('[movies] apiSearch failed on KinoBD, fallback to RHServ', error)
-      const rhserv = await loadProvider('rhserv')
-      return await normalizeMovieListResponse(await rhserv.apiSearch(...args))
+      lastError = error
+      console.warn(`[movies] apiSearch failed on ${provider}`, error)
     }
   }
 
-  const rhserv = await loadProvider('rhserv')
-  return await normalizeMovieListResponse(await rhserv.apiSearch(...args))
+  if (lastError) {
+    console.warn('[movies] apiSearch fallback exhausted; returning empty results', lastError)
+  }
+  return []
 }
 
 const hasKpInfo = (movieInfo) => {

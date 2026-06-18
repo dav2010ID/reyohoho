@@ -81,13 +81,21 @@ const normalizeStaff = (crew = []) => {
 const normalizeKinoboxMovie = (movie, kpId) => {
   if (!movie || typeof movie !== 'object') return null
 
+  const resolvedKpId =
+    Number(kpId) ||
+    Number(movie?.kinopoiskId) ||
+    Number(movie?.kinopoisk_id) ||
+    Number(movie?.id) ||
+    null
   const ratingKinopoisk = movie?.rating?.kinopoisk || {}
   const ratingImdb = movie?.rating?.imdb || {}
   const trailer = movie?.trailer
   const trailerVideoUrl = trailer?.videoUrl || ''
 
   return {
-    kinopoisk_id: Number(kpId) || movie?.id || null,
+    id: resolvedKpId,
+    kp_id: resolvedKpId,
+    kinopoisk_id: resolvedKpId,
     imdb_id: null,
     name_ru: movie?.title?.russian || '',
     name_en: '',
@@ -153,8 +161,35 @@ const normalizeKinoboxMovie = (movie, kpId) => {
       isWatching: false,
       isRated: false
     },
+    rating_kp: toNumberOrNull(ratingKinopoisk.value),
+    raw_data: {
+      ...movie,
+      rating: toNumberOrNull(ratingKinopoisk.value),
+      type: toLegacyType(movie?.type)
+    },
     source: 'kinobox'
   }
+}
+
+const normalizeKinoboxSearchResponse = (data) => {
+  const candidates = [
+    data,
+    data?.data,
+    data?.movies,
+    data?.results,
+    data?.data?.movies,
+    data?.data?.results
+  ]
+  const rows = candidates.find(Array.isArray) || []
+
+  return rows
+    .map((movie) =>
+      normalizeKinoboxMovie(
+        movie,
+        movie?.kinopoiskId || movie?.kinopoisk_id || movie?.kinopoisk || movie?.id
+      )
+    )
+    .filter((movie) => movie?.id)
 }
 
 const toPlayersMap = (providers = [], { type = null, translationId = null } = {}) => {
@@ -244,7 +279,27 @@ const getKpInfo = async (kpId) => {
   return normalizeKinoboxMovie(movie, kpId)
 }
 
-export { getKpInfo, getPlayers, getPlayersRaw }
+const apiSearch = async (searchTerm) => {
+  const { data } = await apiCall((client) =>
+    client.get('/api/movies/search/', {
+      params: {
+        query: String(searchTerm),
+        ts: Math.floor(Date.now() / 1000)
+      }
+    })
+  )
+
+  return normalizeKinoboxSearchResponse(data)
+}
+
+export {
+  apiSearch,
+  getKpInfo,
+  getPlayers,
+  getPlayersRaw,
+  normalizeKinoboxMovie,
+  normalizeKinoboxSearchResponse
+}
 
 export const toggleErrorSimulation = (enabled) => {
   isErrorSimulationEnabled = enabled
