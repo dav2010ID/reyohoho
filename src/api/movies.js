@@ -6,7 +6,8 @@ const CONTENT_PROVIDERS = {
   RHSERV: 'rhserv',
   KINOBD: 'kinobd',
   KINOBOX: 'kinobox',
-  DDBB: 'ddbb'
+  DDBB: 'ddbb',
+  DDBB_LIVE: 'ddbb_live'
 }
 
 const KINOBD_SUPPORTED_METHODS = new Set([
@@ -25,14 +26,16 @@ const providers = {
   rhserv: null,
   kinobd: null,
   kinobox: null,
-  ddbb: null
+  ddbb: null,
+  ddbb_live: null
 }
 
 const providerImporters = {
   rhserv: () => import('@/api/movies.rhserv'),
   kinobd: () => import('@/api/movies.kinobd'),
   kinobox: () => import('@/api/movies.kinobox'),
-  ddbb: () => import('@/api/movies.ddbb')
+  ddbb: () => import('@/api/movies.ddbb'),
+  ddbb_live: () => import('@/api/movies.ddbb-live')
 }
 
 const loadProvider = async (provider) => {
@@ -111,6 +114,7 @@ const getPlayersWithFallback = async (...args) => {
   const [contentId] = args
   const supportedPlayersProviders = [
     CONTENT_PROVIDERS.DDBB,
+    CONTENT_PROVIDERS.DDBB_LIVE,
     CONTENT_PROVIDERS.KINOBOX,
     CONTENT_PROVIDERS.KINOBD
   ]
@@ -413,8 +417,9 @@ export const toggleErrorSimulation = (enabled) => {
     loadProvider('rhserv'),
     loadProvider('kinobd'),
     loadProvider('kinobox'),
-    loadProvider('ddbb')
-  ]).then(([rhserv, kinobd, kinobox, ddbb]) => {
+    loadProvider('ddbb'),
+    loadProvider('ddbb_live')
+  ]).then(([rhserv, kinobd, kinobox, ddbb, ddbbLive]) => {
     if (typeof rhserv.toggleErrorSimulation === 'function') {
       rhserv.toggleErrorSimulation(enabled)
     }
@@ -426,6 +431,9 @@ export const toggleErrorSimulation = (enabled) => {
     }
     if (typeof ddbb.toggleErrorSimulation === 'function') {
       ddbb.toggleErrorSimulation(enabled)
+    }
+    if (typeof ddbbLive.toggleErrorSimulation === 'function') {
+      ddbbLive.toggleErrorSimulation(enabled)
     }
   })
 }
