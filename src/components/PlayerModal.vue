@@ -107,6 +107,7 @@ const cleanName = (name) =>
     .replace(/VEOVEO>/, '')
     .replace(/KODIK>/, '')
     .replace(/KINOBOX>/, '')
+    .replace(/DDBB LIVE>/, '')
     .replace(/DDBB>/, '')
     .trim()
 
@@ -125,7 +126,11 @@ const getProviderName = (player) => {
 
   const root = segments[0].toUpperCase()
   if (
-    (root === 'KINOBOX' || root === 'DDBB' || root === 'KINOBD' || root === 'RHSERV') &&
+    (root === 'KINOBOX' ||
+      root === 'DDBB' ||
+      root === 'DDBB LIVE' ||
+      root === 'KINOBD' ||
+      root === 'RHSERV') &&
     segments[1]
   ) {
     return cleanName(segments[1])

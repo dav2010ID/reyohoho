@@ -109,9 +109,13 @@
             <input v-model="contentApiProvider" type="radio" value="ddbb" />
             <span class="radio-label">DDBB (players, по умолчанию)</span>
           </label>
+          <label class="radio">
+            <input v-model="contentApiProvider" type="radio" value="ddbb_live" />
+            <span class="radio-label">DDBB Live (players)</span>
+          </label>
         </div>
         <p class="api-note">
-          DDBB используется первым для плееров, Kinobox и KinoBD остаются резервными источниками.
+          DDBB используется первым для плееров, DDBB Live — вторым. Kinobox и KinoBD остаются следующими резервными источниками.
           Комментарии, тайминги, рейтинги и другие backend-функции продолжают работать через RHServ.
         </p>
         <h4 class="api-subtitle">API для поиска</h4>

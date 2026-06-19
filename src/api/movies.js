@@ -6,7 +6,8 @@ const CONTENT_PROVIDERS = {
   RHSERV: 'rhserv',
   KINOBD: 'kinobd',
   KINOBOX: 'kinobox',
-  DDBB: 'ddbb'
+  DDBB: 'ddbb',
+  DDBB_LIVE: 'ddbb_live'
 }
 
 const KINOBD_SUPPORTED_METHODS = new Set([
@@ -25,14 +26,16 @@ const providers = {
   rhserv: null,
   kinobd: null,
   kinobox: null,
-  ddbb: null
+  ddbb: null,
+  ddbb_live: null
 }
 
 const providerImporters = {
   rhserv: () => import('@/api/movies.rhserv'),
   kinobd: () => import('@/api/movies.kinobd'),
   kinobox: () => import('@/api/movies.kinobox'),
-  ddbb: () => import('@/api/movies.ddbb')
+  ddbb: () => import('@/api/movies.ddbb'),
+  ddbb_live: () => import('@/api/movies.ddbb-live')
 }
 
 const loadProvider = async (provider) => {
@@ -111,6 +114,7 @@ const getPlayersWithFallback = async (...args) => {
   const [contentId] = args
   const supportedPlayersProviders = [
     CONTENT_PROVIDERS.DDBB,
+    CONTENT_PROVIDERS.DDBB_LIVE,
     CONTENT_PROVIDERS.KINOBOX,
     CONTENT_PROVIDERS.KINOBD
   ]
@@ -252,21 +256,42 @@ const callWithProvider = async (methodName, ...args) => {
 }
 
 const apiSearch = async (...args) => {
-  const provider = getCurrentSearchProvider()
+  const configuredProvider = getCurrentSearchProvider()
+  const supportedSearchProviders = [
+    CONTENT_PROVIDERS.RHSERV,
+    CONTENT_PROVIDERS.KINOBD,
+    CONTENT_PROVIDERS.KINOBOX
+  ]
+  const order = [
+    configuredProvider,
+    ...supportedSearchProviders.filter((provider) => provider !== configuredProvider)
+  ].filter((provider) => supportedSearchProviders.includes(provider))
+  let lastError = null
 
-  if (provider === CONTENT_PROVIDERS.KINOBD) {
+  for (const provider of order) {
     try {
-      const kinobd = await loadProvider('kinobd')
-      return await normalizeMovieListResponse(await kinobd.apiSearch(...args))
+      const providerApi = await loadProvider(provider)
+      if (typeof providerApi.apiSearch !== 'function') continue
+
+      const results = await normalizeMovieListResponse(await providerApi.apiSearch(...args))
+      if (Array.isArray(results) && results.length > 0) {
+        if (provider !== configuredProvider) {
+          console.warn(`[movies] apiSearch fallback used: ${provider}`)
+        }
+        return results
+      }
+
+      console.warn(`[movies] apiSearch returned no results on ${provider}`)
     } catch (error) {
-      console.warn('[movies] apiSearch failed on KinoBD, fallback to RHServ', error)
-      const rhserv = await loadProvider('rhserv')
-      return await normalizeMovieListResponse(await rhserv.apiSearch(...args))
+      lastError = error
+      console.warn(`[movies] apiSearch failed on ${provider}`, error)
     }
   }
 
-  const rhserv = await loadProvider('rhserv')
-  return await normalizeMovieListResponse(await rhserv.apiSearch(...args))
+  if (lastError) {
+    console.warn('[movies] apiSearch fallback exhausted; returning empty results', lastError)
+  }
+  return []
 }
 
 const hasKpInfo = (movieInfo) => {
@@ -413,8 +438,9 @@ export const toggleErrorSimulation = (enabled) => {
     loadProvider('rhserv'),
     loadProvider('kinobd'),
     loadProvider('kinobox'),
-    loadProvider('ddbb')
-  ]).then(([rhserv, kinobd, kinobox, ddbb]) => {
+    loadProvider('ddbb'),
+    loadProvider('ddbb_live')
+  ]).then(([rhserv, kinobd, kinobox, ddbb, ddbbLive]) => {
     if (typeof rhserv.toggleErrorSimulation === 'function') {
       rhserv.toggleErrorSimulation(enabled)
     }
@@ -426,6 +452,9 @@ export const toggleErrorSimulation = (enabled) => {
     }
     if (typeof ddbb.toggleErrorSimulation === 'function') {
       ddbb.toggleErrorSimulation(enabled)
+    }
+    if (typeof ddbbLive.toggleErrorSimulation === 'function') {
+      ddbbLive.toggleErrorSimulation(enabled)
     }
   })
 }

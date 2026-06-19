@@ -35,7 +35,10 @@ const ensureUniqueKey = (obj, baseKey) => {
 
 const normalizePlayerType = (value) => String(value || 'Player').trim()
 
-const toPlayersMap = (providers = [], { type = null, translationId = null } = {}) => {
+const toPlayersMap = (
+  providers = [],
+  { type = null, translationId = null, source = 'ddbb', sourceLabel = 'DDBB' } = {}
+) => {
   const players = {}
   const selectedType = type ? String(type).toLowerCase() : null
   const selectedTranslationId =
@@ -49,7 +52,7 @@ const toPlayersMap = (providers = [], { type = null, translationId = null } = {}
     }
 
     const providerBaseIframe = provider?.iframeUrl || ''
-    const providerLabel = `DDBB>${providerType}`
+    const providerLabel = `${sourceLabel}>${providerType}`
 
     if (providerBaseIframe) {
       const key = ensureUniqueKey(players, providerLabel)
@@ -59,7 +62,7 @@ const toPlayersMap = (providers = [], { type = null, translationId = null } = {}
         iframe: providerBaseIframe,
         quality: '',
         warning: false,
-        source: 'ddbb',
+        source,
         raw_data: provider
       }
     }
@@ -81,7 +84,7 @@ const toPlayersMap = (providers = [], { type = null, translationId = null } = {}
         iframe,
         quality: translation?.quality || '',
         warning: false,
-        source: 'ddbb',
+        source,
         raw_data: translation,
         provider: providerType
       }
@@ -109,7 +112,7 @@ const getPlayers = async (kpId, options = {}) => {
   return toPlayersMap(providers, options)
 }
 
-export { getPlayers, getPlayersRaw }
+export { getPlayers, getPlayersRaw, toPlayersMap }
 
 export const toggleErrorSimulation = (enabled) => {
   isErrorSimulationEnabled = enabled

@@ -163,4 +163,10 @@ describe('Тесты хранилища main', () => {
     store.setContentApiProvider('ddbb')
     expect(store.contentApiProvider).toBe('ddbb')
   })
+
+  it('Разрешает выбрать DDBB Live как провайдер плееров', () => {
+    const store = useMainStore()
+    store.setContentApiProvider('ddbb_live')
+    expect(store.contentApiProvider).toBe('ddbb_live')
+  })
 })
