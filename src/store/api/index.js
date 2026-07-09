@@ -2,6 +2,11 @@ import { defineStore } from 'pinia'
 import { API_STORE_NAME } from '../constants'
 import { debugLog } from '@/utils/logger'
 
+export const LOCAL_API_URL = (import.meta.env.VITE_LOCAL_API_URL || 'http://localhost:8000').replace(
+  /\/$/,
+  ''
+)
+
 export const useApiStore = defineStore(API_STORE_NAME, {
   state: () => ({
     currentApiUrl: null,
@@ -9,15 +14,17 @@ export const useApiStore = defineStore(API_STORE_NAME, {
     lastCheckedAt: null,
     isCheckingHealth: false,
     fallbackUrl: import.meta.env.VITE_APP_API_URL,
-    endpointsHash: null
+    endpointsHash: null,
+    backendMode: 'auto',
+    localApiUrl: LOCAL_API_URL,
+    localApiHealthy: null
   }),
 
   actions: {
     async checkEndpointHealth(url) {
+      const controller = new AbortController()
+      const timeoutId = setTimeout(() => controller.abort(), 5000)
       try {
-        const controller = new AbortController()
-        const timeoutId = setTimeout(() => controller.abort(), 5000)
-
         const response = await fetch(`${url}/health`, {
           method: 'GET',
           signal: controller.signal,
@@ -26,15 +33,20 @@ export const useApiStore = defineStore(API_STORE_NAME, {
           }
         })
 
-        clearTimeout(timeoutId)
         return response.ok
       } catch (error) {
         console.warn(`Health check failed for ${url}:`, error.message)
         return false
+      } finally {
+        clearTimeout(timeoutId)
       }
     },
 
     async selectWorkingEndpoint(endpoints) {
+      if (this.backendMode === 'local') {
+        return await this.selectLocalEndpoint()
+      }
+
       this.isCheckingHealth = true
 
       try {
@@ -81,6 +93,34 @@ export const useApiStore = defineStore(API_STORE_NAME, {
       }
     },
 
+    async selectLocalEndpoint() {
+      this.isCheckingHealth = true
+      this.localApiHealthy = await this.checkEndpointHealth(this.localApiUrl)
+      this.setCurrentApiUrl(this.localApiUrl)
+      this.lastCheckedAt = Date.now()
+      this.isCheckingHealth = false
+      return this.localApiUrl
+    },
+
+    async setBackendMode(mode) {
+      if (!['auto', 'local'].includes(mode)) return
+      this.backendMode = mode
+
+      if (mode === 'local') {
+        return await this.selectLocalEndpoint()
+      }
+
+      this.localApiHealthy = null
+      return await this.selectWorkingEndpoint(this.availableEndpoints)
+    },
+
+    async recheckSelectedEndpoint() {
+      if (this.backendMode === 'local') {
+        return await this.selectLocalEndpoint()
+      }
+      return await this.selectWorkingEndpoint(this.availableEndpoints)
+    },
+
     setAvailableEndpoints(endpoints) {
       const newHash = this.generateEndpointsHash(endpoints)
 
@@ -113,6 +153,9 @@ export const useApiStore = defineStore(API_STORE_NAME, {
     },
 
     getCurrentApiDescription() {
+      if (this.backendMode === 'local') {
+        return 'Локальный backend'
+      }
       if (!this.currentApiUrl || !this.availableEndpoints.length) {
         return 'Fallback API'
       }
@@ -131,6 +174,12 @@ export const useApiStore = defineStore(API_STORE_NAME, {
 
   persist: {
     key: API_STORE_NAME,
-    pick: ['currentApiUrl', 'availableEndpoints', 'lastCheckedAt', 'endpointsHash']
+    pick: [
+      'currentApiUrl',
+      'availableEndpoints',
+      'lastCheckedAt',
+      'endpointsHash',
+      'backendMode'
+    ]
   }
 })

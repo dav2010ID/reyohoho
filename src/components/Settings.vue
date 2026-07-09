@@ -96,7 +96,37 @@
 
       <div v-show="activeSettingsTab === 'api'" class="settings-group">
         <h3>API</h3>
+        <h4 class="api-subtitle">Backend приложения</h4>
         <div class="radio-group">
+          <label class="radio">
+            <input v-model="backendMode" type="radio" value="auto" />
+            <span class="radio-label">Автоматический RHServ</span>
+          </label>
+          <label class="radio">
+            <input v-model="backendMode" type="radio" value="local" />
+            <span class="radio-label">Локальный backend (localhost:8000)</span>
+          </label>
+        </div>
+        <p class="api-note backend-status" :class="backendStatusClass">
+          {{ backendStatusText }} · {{ apiStore.currentApiUrl || localApiUrl }}
+        </p>
+        <div class="settings-actions">
+          <button
+            type="button"
+            class="reset-button"
+            :disabled="apiStore.isCheckingHealth"
+            @click="checkSelectedBackend"
+          >
+            <i class="fa-solid fa-rotate"></i>
+            {{ apiStore.isCheckingHealth ? 'Проверка…' : 'Проверить backend' }}
+          </button>
+        </div>
+        <h4 class="api-subtitle">Источники контента</h4>
+        <div class="radio-group">
+          <label class="radio">
+            <input v-model="contentApiProvider" type="radio" value="local" />
+            <span class="radio-label">Локальный backend (search/cards/players)</span>
+          </label>
           <label class="radio">
             <input v-model="contentApiProvider" type="radio" value="kinobd" />
             <span class="radio-label">KinoBD (search/cards/players)</span>
@@ -115,11 +145,15 @@
           </label>
         </div>
         <p class="api-note">
-          DDBB используется первым для плееров, DDBB Live — вторым. Kinobox и KinoBD остаются следующими резервными источниками.
-          Комментарии, тайминги, рейтинги и другие backend-функции продолжают работать через RHServ.
+          Выбранный источник используется первым. Для локального backend внешние провайдеры остаются резервными.
+          Комментарии, тайминги, рейтинги и другие backend-функции идут через выбранный backend.
         </p>
         <h4 class="api-subtitle">API для поиска</h4>
         <div class="radio-group">
+          <label class="radio">
+            <input v-model="searchApiProvider" type="radio" value="local" />
+            <span class="radio-label">Локальный backend</span>
+          </label>
           <label class="radio">
             <input v-model="searchApiProvider" type="radio" value="rhserv" />
             <span class="radio-label">RHServ (по умолчанию)</span>
@@ -213,6 +247,7 @@ import { useBackgroundStore } from '@/store/background'
 import { useMainStore } from '@/store/main'
 import { usePlayerStore } from '@/store/player'
 import { useTrailerStore } from '@/store/trailer'
+import { LOCAL_API_URL, useApiStore } from '@/store/api'
 import { computed, ref, watch } from 'vue'
 import BaseModal from './BaseModal.vue'
 
@@ -220,6 +255,7 @@ const mainStore = useMainStore()
 const backgroundStore = useBackgroundStore()
 const playerStore = usePlayerStore()
 const trailerStore = useTrailerStore()
+const apiStore = useApiStore()
 const showModal = ref(false)
 const appVersion = ref(import.meta.env.VITE_APP_VERSION_FULL_VERSION)
 const activeSettingsTab = ref('appearance')
@@ -233,6 +269,27 @@ const settingsTabs = [
 const activeSettingsSection = computed(
   () => settingsTabs.find((tab) => tab.id === activeSettingsTab.value) || settingsTabs[0]
 )
+const localApiUrl = LOCAL_API_URL
+
+const backendMode = computed({
+  get: () => apiStore.backendMode,
+  set: (value) => void apiStore.setBackendMode(value)
+})
+
+const backendStatusText = computed(() => {
+  if (apiStore.isCheckingHealth) return 'Проверяется'
+  if (apiStore.backendMode !== 'local') return 'Автоматический выбор активен'
+  if (apiStore.localApiHealthy === true) return 'Локальный backend доступен'
+  if (apiStore.localApiHealthy === false) return 'Локальный backend недоступен'
+  return 'Локальный backend ещё не проверен'
+})
+
+const backendStatusClass = computed(() => ({
+  'backend-status--ok': apiStore.backendMode === 'local' && apiStore.localApiHealthy === true,
+  'backend-status--error': apiStore.backendMode === 'local' && apiStore.localApiHealthy === false
+}))
+
+const checkSelectedBackend = () => apiStore.recheckSelectedEndpoint()
 
 const clearAllHistory = () => {
   mainStore.clearAllHistory()
@@ -521,6 +578,11 @@ h3 {
   background: var(--accent-hover);
 }
 
+.reset-button:disabled {
+  cursor: wait;
+  opacity: 0.65;
+}
+
 .radio input:checked {
   accent-color: var(--accent-color);
 }
@@ -547,6 +609,18 @@ h3 {
   margin: 6px 0 0;
   font-size: 14px;
   font-weight: 600;
+}
+
+.backend-status {
+  overflow-wrap: anywhere;
+}
+
+.backend-status--ok {
+  color: #78d69c;
+}
+
+.backend-status--error {
+  color: #ff8b8b;
 }
 
 @media (max-width: 640px) {

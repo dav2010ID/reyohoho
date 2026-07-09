@@ -127,7 +127,7 @@ export const useMainStore = defineStore(MAIN_STORE_NAME, {
         kinodb: 'kinobd'
       }
       const provider = aliases[normalizedProvider] || normalizedProvider
-      this.contentApiProvider = ['kinobd', 'kinobox', 'ddbb', 'ddbb_live'].includes(provider)
+      this.contentApiProvider = ['kinobd', 'kinobox', 'ddbb', 'ddbb_live', 'local'].includes(provider)
         ? provider
         : 'ddbb'
     },

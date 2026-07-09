@@ -528,15 +528,16 @@ const performSearch = async () => {
 
       try {
         const response = await getKpIDfromSHIKI(searchTerm.value)
-        if (response.id_kp) {
-          router.push(getMovieSeoPath({ kp_id: `${response.id_kp}` }))
+        const kpId = response?.id_kp || response?.kinopoisk_id
+        if (kpId) {
+          router.push(getMovieSeoPath({ kp_id: `${kpId}` }))
           return
         }
       } catch (e) {
         debugLog('Switch to kodik', e)
       }
 
-      router.push({ name: 'movie-info-shiki', params: { shiki_id: `shiki${searchTerm.value}` } })
+      router.push({ name: 'movie-info-shiki', params: { shiki_id: searchTerm.value } })
       return
     }
     if (searchType.value === 'title') {
