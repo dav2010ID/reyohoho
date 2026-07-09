@@ -103,6 +103,7 @@ const handleResize = () => updateScroll()
 const availableVideos = ref([])
 
 const checkVideoAvailability = async (videoId) => {
+  if (!videoId || videoId === 'undefined') return false
   try {
     const response = await fetch(`https://img.youtube.com/vi/${videoId}/0.jpg`)
     return response.ok
