@@ -204,6 +204,13 @@
               class="rating-link"
             >
               <img src="/src/assets/icon-shikimori.svg" alt="Shiki" class="rating-logo" />
+              <span
+                v-if="movieInfo.rating_shikimori"
+                class="rating-value"
+                :class="getRatingColor(movieInfo.rating_shikimori)"
+              >
+                {{ movieInfo.rating_shikimori }}
+              </span>
               <img
                 src="/src/assets/icon-external-link.png"
                 alt="Внешняя ссылка"
@@ -343,8 +350,20 @@
                   </div>
                 </li>
                 <li v-if="movieInfo.film_length">
-                  <strong>Продолжительность:</strong>
+                  <strong>{{ movieInfo.serial ? 'Время серии:' : 'Продолжительность:' }}</strong>
                   <span class="info-value">{{ formatTime(movieInfo.film_length) }}</span>
+                </li>
+                <li v-if="movieInfo.seasons_count">
+                  <strong>Сезонов:</strong>
+                  <span class="info-value">{{ movieInfo.seasons_count }}</span>
+                </li>
+                <li v-if="movieInfo.episodes_count">
+                  <strong>Эпизодов:</strong>
+                  <span class="info-value">{{ movieInfo.episodes_count }}</span>
+                </li>
+                <li v-if="productionStatusLabel">
+                  <strong>Статус:</strong>
+                  <span class="info-value">{{ productionStatusLabel }}</span>
                 </li>
                 <li
                   v-if="movieInfo.rating_mpaa || movieInfo.rating_age_limits"
@@ -385,6 +404,32 @@
           </div>
         </div>
 
+        <div v-if="sequelsAndPrequels.length" class="related-movies">
+          <div class="related-movies-header">
+            <h2>Сиквелы и приквелы</h2>
+          </div>
+          <MovieList
+            :movies-list="sequelsAndPrequels"
+            :loading="false"
+            :is-history="false"
+            variant="related"
+            class="related-movies-list"
+          />
+        </div>
+
+        <div v-if="similars.length" class="related-movies">
+          <div class="related-movies-header">
+            <h2>Похожие</h2>
+          </div>
+          <MovieList
+            :movies-list="similars"
+            :loading="false"
+            :is-history="false"
+            variant="related"
+            class="related-movies-list"
+          />
+        </div>
+
         <div v-if="movieNote && authStore.token" class="movie-note-display">
           <div class="movie-note-header">
             <div class="movie-note-title">
@@ -421,8 +466,9 @@
           <Comments :key="kp_id" :movie-id="kp_id" />
         </div>
 
-        <div v-if="movieInfo.staff" id="movie-staff" class="staff-section">
-          <div class="staff-categories">
+        <Teleport defer to="#movie-staff-end">
+          <div v-if="movieInfo.staff" id="movie-staff" class="staff-section">
+            <div class="staff-categories">
             <div v-if="getStaffByProfession('ACTOR').length" class="staff-category">
               <h3 class="additional-info-title">Актёры</h3>
               <div class="staff-list">
@@ -512,8 +558,9 @@
                 </div>
               </div>
             </div>
+            </div>
           </div>
-        </div>
+        </Teleport>
 
         <div v-if="videos.length && areTrailersActive" class="yt-video-container">
           <TrailerCarousel
@@ -523,33 +570,8 @@
           />
         </div>
 
-        <!-- Секция с сиквелами и приквелами -->
-        <div v-if="sequelsAndPrequels.length" class="related-movies">
-          <div class="related-movies-header">
-            <h2>Сиквелы и приквелы</h2>
-          </div>
-          <MovieList
-            :movies-list="sequelsAndPrequels"
-            :loading="false"
-            :is-history="false"
-            variant="related"
-            class="related-movies-list"
-          />
-        </div>
+        <div id="movie-staff-end"></div>
 
-        <!-- Секция с похожими фильмами -->
-        <div v-if="similars.length" class="related-movies">
-          <div class="related-movies-header">
-            <h2>Похожие</h2>
-          </div>
-          <MovieList
-            :movies-list="similars"
-            :loading="false"
-            :is-history="false"
-            variant="related"
-            class="related-movies-list"
-          />
-        </div>
       </div>
     </div>
   </div>
@@ -1093,6 +1115,19 @@ const isCommentsEnabled = computed(() => mainStore.isCommentsEnabled)
 const isDescriptionExpanded = ref(false)
 const countryNames = computed(() => (movieInfo.value?.countries || []).map((item) => item.country).filter(Boolean))
 const genreNames = computed(() => (movieInfo.value?.genres || []).map((item) => item.genre).filter(Boolean))
+const productionStatusLabel = computed(() => {
+  const labels = {
+    ANNOUNCED: 'Анонсирован',
+    PRE_PRODUCTION: 'Подготовка к производству',
+    FILMING: 'Съёмки',
+    POST_PRODUCTION: 'Постпродакшн',
+    ONGOING: 'Выходит',
+    RELEASED: 'Вышел',
+    COMPLETED: 'Завершён'
+  }
+  const status = movieInfo.value?.production_status
+  return status ? labels[status] || status : ''
+})
 const mobileSummaryChips = computed(() => {
   const chips = []
   const typeLabel = movieInfo.value?.type ? TYPES_ENUM[movieInfo.value.type] : ''
@@ -1366,7 +1401,7 @@ const fetchMovieInfo = async (updateHistory = true) => {
       if (authStore.token) {
         mainStore.addToHistory({ ...movieToSave })
         try {
-          await addToList(movieToSave.kp_id, USER_LIST_TYPES_ENUM.HISTORY)
+          await addToList(movieToSave.kp_id, USER_LIST_TYPES_ENUM.HISTORY, movieInfo.value)
         } catch (error) {
           console.error('Ошибка при добавлении в историю:', error)
         }
@@ -1503,7 +1538,7 @@ const toggleList = async (type) => {
       await delFromList(kp_id.value, type)
       notificationRef.value.showNotification(`Удалено из ${listNames[type]}`)
     } else {
-      await addToList(kp_id.value, type)
+      await addToList(kp_id.value, type, movieInfo.value)
       notificationRef.value.showNotification(`Добавлено в ${listNames[type]}`)
     }
     await fetchMovieInfo(false)

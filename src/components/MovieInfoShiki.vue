@@ -198,6 +198,13 @@
               class="rating-link"
             >
               <img src="/src/assets/icon-shikimori.svg" alt="Shiki" class="rating-logo" />
+              <span
+                v-if="movieInfo.rating_shikimori"
+                class="rating-value"
+                :class="getRatingColor(movieInfo.rating_shikimori)"
+              >
+                {{ movieInfo.rating_shikimori }}
+              </span>
               <img
                 src="/src/assets/icon-external-link.png"
                 alt="Внешняя ссылка"
