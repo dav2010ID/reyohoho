@@ -1,0 +1,4 @@
+-r requirements.txt
+pytest>=9
+pytest-asyncio>=1.0
+sanic-testing>=24.6
