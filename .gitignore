@@ -36,3 +36,10 @@ reports-lighthouse*.json
 # Python
 __pycache__/
 *.py[cod]
+.pytest_cache/
+.ruff_cache/
+backend/.env
+backend/*.db
+
+# Local profiling output
+kp_info2_*.json

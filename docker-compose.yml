@@ -1,5 +1,36 @@
 version: '3.8'
 services:
+  postgres:
+    image: postgres:17-alpine
+    environment:
+      POSTGRES_DB: reyohoho
+      POSTGRES_USER: reyohoho
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-reyohoho-dev}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U reyohoho -d reyohoho"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  backend:
+    build:
+      context: .
+      dockerfile: backend/Dockerfile
+    ports:
+      - "8000:8000"
+    environment:
+      DATABASE_URL: postgresql+asyncpg://reyohoho:${POSTGRES_PASSWORD:-reyohoho-dev}@postgres:5432/reyohoho
+      JWT_SECRET: ${JWT_SECRET:-development-only-change-me-at-least-32-bytes}
+      ALLOWED_ORIGINS: ${ALLOWED_ORIGINS:-http://localhost:5173}
+      TELEGRAM_BOT_USERNAME: ${TELEGRAM_BOT_USERNAME:-}
+      TELEGRAM_WEBHOOK_SECRET: ${TELEGRAM_WEBHOOK_SECRET:-}
+    depends_on:
+      postgres:
+        condition: service_healthy
+    restart: unless-stopped
+
   reyohoho:
     build: .
     image: reyohoho:latest
@@ -10,3 +41,6 @@ services:
       - HOST=0.0.0.0
     working_dir: /app
     restart: unless-stopped
+
+volumes:
+  postgres_data:
