@@ -1,0 +1,10 @@
+mutation NotificationPreviewMarkViewedBatch($feedbackTokens: [String!]!) {
+  notificationPreview {
+    markViewedBatch(input: { feedbackTokens: $feedbackTokens }) {
+      status
+      error {
+        message
+      }
+    }
+  }
+}

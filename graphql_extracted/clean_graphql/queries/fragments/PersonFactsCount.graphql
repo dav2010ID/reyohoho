@@ -1,0 +1,7 @@
+fragment PersonFactsCount on Person {
+  factsCount: trivias(limit: 0) {
+    total
+    __typename
+  }
+  __typename
+}

@@ -1,0 +1,23 @@
+query ListsMediaPosts(
+  $offset: Int
+  $limit: Int
+  $filter: PostFilterCriteriaInput!
+) {
+  posts(offset: $offset, limit: $limit, filter: $filter) {
+    items {
+      id
+      title
+      commentsCount
+      publishedAt
+      commentable
+      type
+      thumbImage {
+        avatarsUrl
+        fallbackUrl
+        __typename
+      }
+      __typename
+    }
+    __typename
+  }
+}

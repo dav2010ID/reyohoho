@@ -1,0 +1,29 @@
+query TrailerMeta($contentId: String!) {
+  content(contentId: $contentId) {
+    __typename
+    ... on Trailer {
+      movie {
+        restriction {
+          __typename
+          ...restrictionFragment
+        }
+      }
+    }
+    ... on Clip {
+      referenceMovie {
+        restriction {
+          __typename
+          ...restrictionFragment
+        }
+      }
+    }
+    ... on OttTrailer {
+      ageRestriction
+    }
+  }
+}
+
+fragment restrictionFragment on Restriction {
+  age
+  mpaa
+}

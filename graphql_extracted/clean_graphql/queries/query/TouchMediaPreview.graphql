@@ -1,0 +1,44 @@
+query TouchMediaPreview(
+  $popularPostsOffset: Int
+  $popularPostsLimit: Int
+  $todayMainPostsOffset: Int
+  $todayMainPostsLimit: Int
+) {
+  popularPosts(offset: $popularPostsOffset, limit: $popularPostsLimit) {
+    items {
+      ...TodayMainPost
+      __typename
+    }
+    __typename
+  }
+  todayMainPosts(offset: $todayMainPostsOffset, limit: $todayMainPostsLimit) {
+    items {
+      ...TodayMainPost
+      __typename
+    }
+    __typename
+  }
+}
+
+fragment TodayMainPost on Post {
+  title
+  type
+  id
+  commentsCount
+  commentable
+  slug
+  badge {
+    label
+    url
+    __typename
+  }
+  rubric {
+    title
+    __typename
+  }
+  thumbImage {
+    avatarsUrl
+    __typename
+  }
+  __typename
+}

@@ -1,0 +1,7 @@
+fragment MovieCriticReviewsCount on Movie {
+  criticReviewsCount: criticReviews(limit: 0) {
+    total
+    __typename
+  }
+  __typename
+}

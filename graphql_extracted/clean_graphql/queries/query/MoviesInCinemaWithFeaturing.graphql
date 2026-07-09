@@ -1,0 +1,124 @@
+query MoviesInCinemaWithFeaturing(
+  $cinemaOffset: Int!
+  $cinemaLimit: Int!
+  $regionId: Int!
+  $platform: FeaturingPlatform!
+) {
+  moviesInCinema(
+    offset: $cinemaOffset
+    limit: $cinemaLimit
+    criteria: { regionId: $regionId, fallbackRegionId: 213 }
+  ) {
+    items {
+      isTicketsAvailableForRegion
+      movie {
+        ...MovieInCinema
+        __typename
+      }
+      __typename
+    }
+    total
+    __typename
+  }
+  featuring {
+    movieInCinemaFeaturing(platform: $platform) {
+      items {
+        __typename
+        movie {
+          ...MovieIsTicketsAvailable
+          ...MovieInCinema
+          __typename
+        }
+        position
+        ... on VideoMovieFeaturingItem {
+          trailerInfo {
+            cast
+            logoImage {
+              avatarsUrl
+              __typename
+            }
+            screenshotImage {
+              avatarsUrl
+              __typename
+            }
+            __typename
+          }
+          trailer {
+            id
+            __typename
+          }
+          __typename
+        }
+      }
+      __typename
+    }
+    __typename
+  }
+}
+
+fragment RatingValue on RatingValue {
+  value
+  isActive
+  count
+  __typename
+}
+
+fragment TicketOptionPurchasable on Movie {
+  ticketOption {
+    purchasable
+    __typename
+  }
+  __typename
+}
+
+fragment MovieInCinema on Movie {
+  id
+  poster {
+    avatarsUrl
+    __typename
+  }
+  title {
+    original
+    russian
+    __typename
+  }
+  ... on Film {
+    productionYear
+    __typename
+  }
+  ... on TvSeries {
+    productionYear
+    __typename
+  }
+  ... on MiniSeries {
+    productionYear
+    __typename
+  }
+  ... on Video {
+    productionYear
+    __typename
+  }
+  ... on TvShow {
+    productionYear
+    __typename
+  }
+  genres {
+    id
+    name
+    slug
+    __typename
+  }
+  rating {
+    kinopoisk {
+      ...RatingValue
+      __typename
+    }
+    __typename
+  }
+  __typename
+}
+
+fragment MovieIsTicketsAvailable on Movie {
+  ...TicketOptionPurchasable
+  __typename
+}

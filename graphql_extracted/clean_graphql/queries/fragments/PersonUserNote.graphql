@@ -1,0 +1,11 @@
+fragment PersonUserNote on Person {
+  userData {
+    note {
+      value
+      makeDate
+      __typename
+    }
+    __typename
+  }
+  __typename
+}

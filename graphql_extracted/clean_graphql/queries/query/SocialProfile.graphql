@@ -1,0 +1,293 @@
+query SocialProfile(
+  $socialAlias: UserSocialAliasInput!
+  $moviesOffset: Int!
+  $moviesLimit: Int!
+  $recommendationLimit: Int!
+  $includeIsCurrentUserSubscribed: Boolean!
+  $includeSimilarity: Boolean!
+  $includeVerification: Boolean!
+  $includePersonInfo: Boolean!
+  $includeBackground: Boolean!
+  $includeRecomendation: Boolean!
+) {
+  userProfileBySocialAlias(socialAlias: $socialAlias) {
+    id {
+      puid
+    }
+    subscriptionInfo {
+      hasSubscription
+    }
+    social {
+      __typename
+      ...socialInfoWithSubscriptionInfoFragment
+      ...socialProfileBackgroundFragment @include(if: $includeBackground)
+      isSubscriptionRequestSentTo
+      about {
+        defaultValue {
+          value
+        }
+      }
+      subscribers(limit: 0) {
+        total
+      }
+      subscriptions(limit: 0) {
+        total
+      }
+      similarityWithCurrent @include(if: $includeSimilarity) {
+        percentValue
+        format
+      }
+      person @include(if: $includePersonInfo) {
+        __typename
+        ...personSummaryWithCareerRolesFragment
+      }
+    }
+    recommendations @include(if: $includeRecomendation) {
+      __typename
+      ...recommendationsFragment
+    }
+    userData {
+      __typename
+      ...ratedOrWatchedMoviesFragment
+      ...plannedToWatchMoviesFragment
+    }
+  }
+}
+
+fragment imageFragment on Image {
+  avatarsUrl
+  fallbackUrl
+}
+
+fragment socialInfoWithSubscriptionInfoFragment on UserSocialInfo {
+  alias {
+    defaultValue {
+      value
+      source
+    }
+  }
+  name {
+    defaultValue {
+      value
+    }
+  }
+  avatar {
+    defaultValue {
+      value {
+        __typename
+        ...imageFragment
+      }
+    }
+  }
+  publicStatus
+  url
+  badges @include(if: $includeVerification) {
+    verified {
+      id
+      title
+      description
+      icons {
+        format
+        image {
+          __typename
+          ...imageFragment
+        }
+      }
+    }
+  }
+  isSubscribedTo
+}
+
+fragment socialProfileBackgroundFragment on UserSocialInfo {
+  background {
+    __typename
+    ... on PreparedProfileBackground {
+      id
+    }
+    image {
+      __typename
+      ...imageFragment
+    }
+  }
+}
+
+fragment personNameFragment on Person {
+  name
+  originalName
+}
+
+fragment incompleteDateFragment on IncompleteDate {
+  date
+  accuracy
+}
+
+fragment personMovieCrewRoleFragment on MovieCrewRole {
+  slug
+  title {
+    russian
+  }
+}
+
+fragment personSummaryWithCareerRolesFragment on Person {
+  __typename
+  id
+  ...personNameFragment
+  gender
+  poster {
+    __typename
+    ...imageFragment
+  }
+  age
+  height
+  dateOfBirth {
+    __typename
+    ...incompleteDateFragment
+  }
+  dateOfDeath {
+    __typename
+    ...incompleteDateFragment
+  }
+  published
+  roles(isCareer: true) {
+    items {
+      role {
+        __typename
+        ...personMovieCrewRoleFragment
+      }
+    }
+  }
+}
+
+fragment recommendationsFragment on Recommendations {
+  userSocialSubscriptions(limit: $recommendationLimit) {
+    items {
+      user {
+        id {
+          puid
+        }
+        subscriptionInfo {
+          hasSubscription
+        }
+        social {
+          __typename
+          isSubscriptionRequestSentTo
+          ...socialInfoWithSubscriptionInfoFragment
+        }
+      }
+    }
+  }
+}
+
+fragment titleFragment on Title {
+  localized
+  original
+}
+
+fragment baseMoviePostersFragment on MoviePosters {
+  vertical(override: OTT_WHEN_EXISTS) {
+    __typename
+    ...imageFragment
+  }
+  verticalWithRightholderLogo {
+    __typename
+    ...imageFragment
+  }
+  horizontal {
+    __typename
+    ...imageFragment
+  }
+  horizontalWithRightholderLogo {
+    __typename
+    ...imageFragment
+  }
+}
+
+fragment movieIntroPostersFragment on MoviePosters {
+  verticalIntro {
+    __typename
+    ...imageFragment
+  }
+  verticalIntroWithRightholderLogo {
+    __typename
+    ...imageFragment
+  }
+  horizontalIntro {
+    __typename
+    ...imageFragment
+  }
+  horizontalIntroWithRightholderLogo {
+    __typename
+    ...imageFragment
+  }
+}
+
+fragment moviePostersFragment on MoviePosters {
+  __typename
+  ...baseMoviePostersFragment
+  ...movieIntroPostersFragment
+}
+
+fragment ratedOrWatchedMoviesFragment on UserData {
+  movieReactions(
+    includeTypes: [VOTE, WATCHED]
+    offset: $moviesOffset
+    limit: $moviesLimit
+  ) {
+    offset
+    limit
+    total
+    items {
+      movie {
+        id
+        contentId
+        title {
+          __typename
+          ...titleFragment
+        }
+        gallery {
+          posters {
+            __typename
+            ...moviePostersFragment
+          }
+        }
+      }
+      reactions(includeTypes: [VOTE, WATCHED]) {
+        __typename
+        ... on Vote {
+          value
+          votedAt
+        }
+        ... on Watched {
+          watched
+          updatedAt
+        }
+      }
+    }
+  }
+}
+
+fragment plannedToWatchMoviesFragment on UserData {
+  plannedToWatch {
+    movies(offset: $moviesOffset, limit: $moviesLimit) {
+      offset
+      limit
+      total
+      items {
+        movie {
+          id
+          contentId
+          title {
+            __typename
+            ...titleFragment
+          }
+          gallery {
+            posters {
+              __typename
+              ...moviePostersFragment
+            }
+          }
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,252 @@
+query MovieSeriesStructureByContentId(
+  $contentId: String!
+  $isOnlyOnline: Boolean!
+  $initialEpisodeId: Long!
+  $initialEpisodeContentId: String!
+  $includeInitialEpisodeById: Boolean!
+  $includeInitialEpisodeByContentId: Boolean!
+  $includeInitialNextEpisode: Boolean!
+  $purchaseOptionsContext: BillingFeatureClientContextInput!
+  $includeMoviePurchaseOptions: Boolean!
+  $includeTrialCutInfo: Boolean!
+  $includeEstEarlyAccess: Boolean!
+) {
+  movieByContentUuid(contentUuid: $contentId) {
+    __typename
+    ...movieSeriesStructureFragment
+    ...movieSeriesNextEpisodeOffsetWithSeasonFragment
+      @include(if: $includeInitialNextEpisode)
+  }
+  initialEpisodeById: episode(id: $initialEpisodeId)
+    @include(if: $includeInitialEpisodeById) {
+    __typename
+    ...movieSeriesEpisodeOffsetWithSeasonFragment
+  }
+  initialEpisodeByContentId: episodeByContentId(
+    contentId: $initialEpisodeContentId
+  ) @include(if: $includeInitialEpisodeByContentId) {
+    __typename
+    ...movieSeriesEpisodeOffsetWithSeasonFragment
+  }
+}
+
+fragment restrictionFragment on Restriction {
+  age
+  mpaa
+}
+
+fragment titleFragment on Title {
+  localized
+  original
+}
+
+fragment imageFragment on Image {
+  avatarsUrl
+  fallbackUrl
+}
+
+fragment movieCoversFragment on MovieCovers {
+  vertical {
+    __typename
+    ...imageFragment
+  }
+  horizontal {
+    __typename
+    ...imageFragment
+  }
+  square {
+    __typename
+    ...imageFragment
+  }
+}
+
+fragment estEarlyAccessImagesFragment on Series {
+  gallery {
+    covers {
+      __typename
+      ...movieCoversFragment
+    }
+    logos {
+      horizontal {
+        __typename
+        ...imageFragment
+      }
+    }
+  }
+}
+
+fragment watchingRejectionFragment on WatchingRejection {
+  details
+  reason
+}
+
+fragment movieViewOptionPurchasedSubscriptionFragment on ViewOption {
+  purchasedSubscriptionTextId
+  purchasedSubscriptionName
+}
+
+fragment availabilityAnnounceFragment on AvailabilityAnnounce {
+  announcePromise
+  availabilityDate
+  type
+}
+
+fragment movieContentPackageFragment on ContentPackage {
+  billingFeatureName
+}
+
+fragment currencyFragment on Currency {
+  symbol
+  currencyCode
+}
+
+fragment moneyAmountFragment on MoneyAmount {
+  amount
+  currency {
+    __typename
+    ...currencyFragment
+  }
+}
+
+fragment movieViewOptionTrialCutInfoFragment on TrialCutInfo {
+  texts {
+    title
+    subTitle
+    buttonText
+  }
+  token
+  type
+}
+
+fragment movieViewOptionSummaryFragment on ViewOption {
+  __typename
+  type
+  purchasabilityStatus
+  isWatchableOnDeviceInCurrentRegion: isWatchable(
+    filter: { anyDevice: false, anyRegion: false }
+  )
+  buttonText
+  ...movieViewOptionPurchasedSubscriptionFragment
+  availabilityAnnounce {
+    __typename
+    ...availabilityAnnounceFragment
+  }
+  contentPackageToBuy {
+    __typename
+    ...movieContentPackageFragment
+  }
+  contentPackageToUnfreeze {
+    __typename
+    ...movieContentPackageFragment
+  }
+  transactionalPrice {
+    __typename
+    ...moneyAmountFragment
+  }
+  transactionalMinimumPrice {
+    __typename
+    ...moneyAmountFragment
+  }
+  priceWithTotalDiscount {
+    __typename
+    ...moneyAmountFragment
+  }
+  optionMonetizationModels
+  watchabilityStatus
+  watchabilityExpirationTime
+  promotionActionType
+  downloadabilityStatus
+  purchaseOptions(clientContext: $purchaseOptionsContext)
+    @include(if: $includeMoviePurchaseOptions) {
+    billingFeatureNames
+    target
+  }
+  trialCutInfo @include(if: $includeTrialCutInfo) {
+    __typename
+    ...movieViewOptionTrialCutInfoFragment
+  }
+  purchaseOptionCustomProperties @include(if: $includeMoviePurchaseOptions)
+}
+
+fragment movieSeriesStructureViewOptionFragment on ViewOption {
+  __typename
+  downloadRejectionReason {
+    __typename
+    ...watchingRejectionFragment
+  }
+  ...movieViewOptionSummaryFragment
+}
+
+fragment movieSeriesStructureFragment on Series {
+  __typename
+  id
+  contentId
+  restriction {
+    __typename
+    ...restrictionFragment
+  }
+  title {
+    __typename
+    ...titleFragment
+  }
+  editorAnnotation
+  gallery {
+    covers {
+      horizontal {
+        __typename
+        ...imageFragment
+      }
+    }
+    logos {
+      rightholderForCoverRecommendedTheme
+    }
+  }
+  ...estEarlyAccessImagesFragment @include(if: $includeEstEarlyAccess)
+  viewOption {
+    __typename
+    ...movieSeriesStructureViewOptionFragment
+  }
+  seasons(isOnlyOnline: $isOnlyOnline, offset: 0, limit: 1000) {
+    offset
+    limit
+    total
+    items {
+      id
+      contentId
+      episodes(isOnlyOnline: $isOnlyOnline, offset: 0, limit: 0) {
+        total
+      }
+      episodeGroupings(filter: { onlyOnline: $isOnlyOnline }) {
+        from
+        offset
+        to
+      }
+      number
+    }
+  }
+}
+
+fragment movieSeriesEpisodeOffsetWithSeasonFragment on Episode {
+  id
+  contentId
+  number
+  season {
+    number
+    offsetInSeries(filter: { onlyOnline: $isOnlyOnline })
+  }
+  offsetInSeason(filter: { onlyOnline: $isOnlyOnline })
+}
+
+fragment movieSeriesNextEpisodeOffsetWithSeasonFragment on Series {
+  ott {
+    __typename
+    ... on Ott_AbstractSeries {
+      nextEpisode {
+        episode {
+          __typename
+          ...movieSeriesEpisodeOffsetWithSeasonFragment
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,19 @@
+mutation AddMovieToFolder($movieId: Long!, $folderId: Long!) {
+  movie {
+    folder {
+      item {
+        add(input: { movieId: $movieId, folderTypeId: $folderId }) {
+          status
+          error {
+            message
+            __typename
+          }
+          __typename
+        }
+        __typename
+      }
+      __typename
+    }
+    __typename
+  }
+}

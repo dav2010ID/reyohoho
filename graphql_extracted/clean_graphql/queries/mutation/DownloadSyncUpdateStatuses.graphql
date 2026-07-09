@@ -1,0 +1,12 @@
+mutation DownloadSyncUpdateStatuses($input: DownloadsStatusUpdateInputInput!) {
+  userProfile {
+    downloads {
+      update(input: $input) {
+        status
+        error {
+          message
+        }
+      }
+    }
+  }
+}

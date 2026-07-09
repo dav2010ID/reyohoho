@@ -1,0 +1,42 @@
+query MovieTrailersWithOrder(
+  $movieId: Long!
+  $trailersLimit: Int = 10
+  $orderBy: TrailerOrderBy = MAKE_DATE_DESC
+) {
+  movie(id: $movieId) {
+    id
+    title {
+      ...MovieTitle
+      __typename
+    }
+    trailers(limit: $trailersLimit, orderBy: $orderBy) {
+      items {
+        ...TrailerItem
+        __typename
+      }
+      total
+      __typename
+    }
+    __typename
+  }
+}
+
+fragment MovieTitle on Title {
+  russian
+  original
+  __typename
+}
+
+fragment TrailerItem on Trailer {
+  id
+  title
+  preview {
+    avatarsUrl
+    fallbackUrl
+    __typename
+  }
+  duration
+  createdAt
+  isEmbedded
+  __typename
+}

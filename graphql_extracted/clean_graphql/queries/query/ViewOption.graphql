@@ -1,0 +1,148 @@
+query ViewOption(
+  $movieId: Long!
+  $purchaseOptionsContext: BillingFeatureClientContextInput!
+  $includeMoviePurchaseOptions: Boolean!
+) {
+  movie(id: $movieId) {
+    __typename
+    viewOption {
+      __typename
+      ...viewOptionDetailedFragment
+    }
+  }
+}
+
+fragment viewOptionDetailedFragment on ViewOption {
+  __typename
+  ...movieViewOptionSummaryFragment
+  purchaseRejectionReason {
+    __typename
+    ...watchingRejection
+  }
+  watchingRejectionReason {
+    __typename
+    ...watchingRejection
+  }
+  downloadRejectionReason {
+    __typename
+    ...watchingRejection
+  }
+  watchPeriod {
+    __typename
+    ...movieWatchPeriodFragment
+  }
+  texts {
+    __typename
+    ...viewOptionsTextFragment
+  }
+  descriptionText
+  mainPromotionAbsoluteAmount {
+    __typename
+    ...moneyAmountFragment
+  }
+  mastercardPromotionAbsoluteAmount {
+    __typename
+    ...moneyAmountFragment
+  }
+  purchaseOptions(clientContext: $purchaseOptionsContext)
+    @include(if: $includeMoviePurchaseOptions) {
+    __typename
+    billingFeatureNames
+    target
+  }
+  purchaseOptionCustomProperties @include(if: $includeMoviePurchaseOptions)
+}
+
+fragment movieViewOptionSummaryFragment on ViewOption {
+  __typename
+  ...baseMovieViewOptionSummaryFragment
+}
+
+fragment watchingRejection on WatchingRejection {
+  __typename
+  details
+  reason
+}
+
+fragment movieWatchPeriodFragment on WatchPeriod {
+  __typename
+  timeToExpire
+  watchPeriodStatus
+}
+
+fragment viewOptionsTextFragment on ViewOptionText {
+  __typename
+  disclaimer
+}
+
+fragment moneyAmountFragment on MoneyAmount {
+  __typename
+  amount
+  currency {
+    __typename
+    ...currencyFragment
+  }
+}
+
+fragment currencyFragment on Currency {
+  __typename
+  symbol
+  currencyCode
+}
+
+fragment baseMovieViewOptionSummaryFragment on ViewOption {
+  __typename
+  type
+  purchasabilityStatus
+  isWatchableOnDeviceInCurrentRegion: isWatchable(
+    filter: { anyDevice: false, anyRegion: false }
+  )
+  buttonText
+  ...movieViewOptionPurchasedSubscriptionFragment
+  availabilityAnnounce {
+    __typename
+    ...availabilityAnnounceFragment
+  }
+  contentPackageToBuy {
+    __typename
+    ...movieContentPackageFragment
+  }
+  contentPackageToUnfreeze {
+    __typename
+    ...movieContentPackageFragment
+  }
+  transactionalPrice {
+    __typename
+    ...moneyAmountFragment
+  }
+  transactionalMinimumPrice {
+    __typename
+    ...moneyAmountFragment
+  }
+  priceWithTotalDiscount {
+    __typename
+    ...moneyAmountFragment
+  }
+  optionMonetizationModels
+  watchabilityStatus
+  promotionActionType
+  downloadabilityStatus
+}
+
+fragment movieViewOptionPurchasedSubscriptionFragment on ViewOption {
+  __typename
+  purchasedSubscriptionTextId
+  purchasedSubscriptionName
+}
+
+fragment availabilityAnnounceFragment on AvailabilityAnnounce {
+  __typename
+  announcePromise
+  availabilityDate
+  type
+}
+
+fragment movieContentPackageFragment on ContentPackage {
+  __typename
+  billingFeatureName
+}

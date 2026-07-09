@@ -1,0 +1,16 @@
+mutation UserAdultRemindPinCode {
+  userProfile {
+    pinCode {
+      remind {
+        error {
+          message
+        }
+        status
+        contacts {
+          email
+          phone
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,35 @@
+query DeepDiveActorsAvailability(
+  $contentId: String!
+  $query: ActorsRecognitionStatusQueryInput!
+) {
+  content(contentId: $contentId) {
+    __typename
+    ... on Movie {
+      ottMovie: ott {
+        __typename
+        ... on Ott_AbstractVideo {
+          recognition {
+            __typename
+            ...deepDiveActorsAvailabilityFragment
+          }
+        }
+      }
+    }
+    ... on Episode {
+      ottEpisode: ott {
+        recognition {
+          __typename
+          ...deepDiveActorsAvailabilityFragment
+        }
+      }
+    }
+  }
+}
+
+fragment deepDiveActorsAvailabilityFragment on Recognition {
+  actors {
+    status(query: $query) {
+      exists
+    }
+  }
+}

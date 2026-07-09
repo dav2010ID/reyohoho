@@ -1,0 +1,150 @@
+query MoviePreviewCard(
+  $movieId: Long!
+  $actorsLimit: Int!
+  $withUserData: Boolean = false
+) {
+  movie(id: $movieId) {
+    id
+    contentId
+    title {
+      russian
+      original
+      __typename
+    }
+    ... on Film {
+      productionYear
+      isShortFilm
+      ratingLists {
+        top250 {
+          ...MovieRatingListsItem
+          __typename
+        }
+        __typename
+      }
+      __typename
+    }
+    ... on TvSeries {
+      releaseYears {
+        start
+        end
+        __typename
+      }
+      __typename
+    }
+    ... on MiniSeries {
+      releaseYears {
+        start
+        end
+        __typename
+      }
+      __typename
+    }
+    ... on TvShow {
+      releaseYears {
+        start
+        end
+        __typename
+      }
+      __typename
+    }
+    ... on Video {
+      productionYear
+      __typename
+    }
+    ...MovieIsTicketsAvailable
+    viewOption {
+      buttonText
+      originalButtonText
+      isAvailableOnline: isWatchable(
+        filter: { anyDevice: false, anyRegion: false }
+      )
+      purchasabilityStatus
+      promotionIcons {
+        avatarsUrl
+        fallbackUrl
+        __typename
+      }
+      type
+      rightholderLogoUrlForPoster
+      __typename
+    }
+    actors: members(limit: $actorsLimit, role: [ACTOR, CAMEO, UNCREDITED]) {
+      items {
+        person {
+          id
+          name
+          originalName
+          __typename
+        }
+        __typename
+      }
+      total
+      __typename
+    }
+    directors: members(role: DIRECTOR, limit: 4) {
+      items {
+        person {
+          id
+          name
+          originalName
+          __typename
+        }
+        __typename
+      }
+      __typename
+    }
+    rating {
+      kinopoisk {
+        ...RatingValue
+        __typename
+      }
+      __typename
+    }
+    poster {
+      avatarsUrl
+      fallbackUrl
+      __typename
+    }
+    ...MoviePreviewUserData @include(if: $withUserData)
+    __typename
+  }
+}
+
+fragment TicketOptionPurchasable on Movie {
+  ticketOption {
+    purchasable
+    __typename
+  }
+  __typename
+}
+
+fragment MovieRatingListsItem on MovieInList {
+  movieListSlug
+  position
+  __typename
+}
+
+fragment MovieIsTicketsAvailable on Movie {
+  ...TicketOptionPurchasable
+  __typename
+}
+
+fragment RatingValue on RatingValue {
+  value
+  isActive
+  count
+  __typename
+}
+
+fragment MoviePreviewUserData on Movie {
+  userData {
+    voting {
+      value
+      votedAt
+      __typename
+    }
+    isPlannedToWatch
+    __typename
+  }
+  __typename
+}

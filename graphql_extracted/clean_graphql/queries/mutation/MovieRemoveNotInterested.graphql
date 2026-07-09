@@ -1,0 +1,16 @@
+mutation MovieRemoveNotInterested($movieId: Long!) {
+  movie {
+    notInterested {
+      remove(input: { movieId: $movieId }) {
+        error {
+          message
+          __typename
+        }
+        status
+        __typename
+      }
+      __typename
+    }
+    __typename
+  }
+}

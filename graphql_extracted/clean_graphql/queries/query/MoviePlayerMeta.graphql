@@ -1,0 +1,136 @@
+query MoviePlayerMeta(
+  $contentId: String!
+  $includeLogo: Boolean!
+  $includeMyShowsComments: Boolean!
+) {
+  content(contentId: $contentId) {
+    __typename
+    ... on Movie {
+      __typename
+      ...moviePlayerMetaBaseFragment
+      ott {
+        __typename
+        ... on Ott_AbstractVideo {
+          hasSmokingScenes
+        }
+      }
+    }
+    ... on Episode {
+      __typename
+      ...moviePlayerEpisodeMetaFragment
+      tvSeries {
+        __typename
+        ...moviePlayerMetaBaseFragment
+      }
+    }
+    ... on Series {
+      __typename
+      ...moviePlayerMetaBaseFragment
+      ott {
+        __typename
+        ... on Ott_AbstractSeries {
+          nextEpisode {
+            __typename
+            ... on OttNextEpisode {
+              episode {
+                __typename
+                ... on Episode {
+                  __typename
+                  ...moviePlayerEpisodeMetaFragment
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}
+
+fragment titleFragment on Title {
+  localized
+  original
+}
+
+fragment imageFragment on Image {
+  avatarsUrl
+  fallbackUrl
+}
+
+fragment imageWithSizeFragment on Image {
+  __typename
+  ...imageFragment
+  origSize {
+    width
+    height
+  }
+}
+
+fragment restrictionFragment on Restriction {
+  age
+  mpaa
+}
+
+fragment myShowsCommentsFragment on MyShowsComments {
+  __typename
+  url
+  count
+  rawCount
+}
+
+fragment movieCommentsFragment on Movie {
+  myShowsComments @include(if: $includeMyShowsComments) {
+    __typename
+    ...myShowsCommentsFragment
+  }
+}
+
+fragment moviePlayerMetaBaseFragment on Movie {
+  __typename
+  contentId
+  title {
+    __typename
+    ...titleFragment
+  }
+  editorAnnotation
+  gallery @include(if: $includeLogo) {
+    logos {
+      horizontal {
+        __typename
+        ...imageWithSizeFragment
+      }
+    }
+  }
+  restriction {
+    __typename
+    ...restrictionFragment
+  }
+  ...movieCommentsFragment
+}
+
+fragment episodeCommentsFragment on Episode {
+  myShowsComments @include(if: $includeMyShowsComments) {
+    __typename
+    ...myShowsCommentsFragment
+  }
+}
+
+fragment moviePlayerEpisodeMetaFragment on Episode {
+  __typename
+  contentId
+  number
+  season {
+    number
+  }
+  title {
+    __typename
+    ...titleFragment
+  }
+  ottEpisode: ott {
+    __typename
+    ... on OttEpisode {
+      hasSmokingScenes
+    }
+  }
+  ...episodeCommentsFragment
+}

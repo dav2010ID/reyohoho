@@ -1,0 +1,11 @@
+fragment IsMovieWatchableOnOtt on Movie {
+  viewOption {
+    isWatchable(filter: { anyDevice: true, anyRegion: false })
+    availabilityAnnounce {
+      type
+      __typename
+    }
+    __typename
+  }
+  __typename
+}

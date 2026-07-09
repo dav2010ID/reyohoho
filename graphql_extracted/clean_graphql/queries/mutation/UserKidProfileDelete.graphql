@@ -1,0 +1,12 @@
+mutation UserKidProfileDelete($puid: Long!) {
+  userProfile {
+    userKidSubProfile {
+      delete(puid: $puid) {
+        error {
+          message
+        }
+        status
+      }
+    }
+  }
+}

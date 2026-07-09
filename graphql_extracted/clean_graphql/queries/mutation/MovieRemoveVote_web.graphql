@@ -1,0 +1,16 @@
+mutation MovieRemoveVote($movieId: Long!) {
+  movie {
+    vote {
+      remove(input: { movieId: $movieId }) {
+        error {
+          message
+          __typename
+        }
+        status
+        __typename
+      }
+      __typename
+    }
+    __typename
+  }
+}

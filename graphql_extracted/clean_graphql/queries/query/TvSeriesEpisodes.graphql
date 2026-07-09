@@ -1,0 +1,59 @@
+query TvSeriesEpisodes($tvSeriesId: Long!, $episodesLimit: Int = 10) {
+  tvSeries(id: $tvSeriesId) {
+    id
+    episodesCount
+    futureEpisodes: episodes(
+      released: false
+      limit: $episodesLimit
+      orderBy: SEASON_NUMBER_EPISODE_NUMBER_ASC
+    ) {
+      items {
+        id
+        number
+        releaseDate {
+          accuracy
+          date
+          __typename
+        }
+        season {
+          number
+          __typename
+        }
+        title {
+          russian
+          original
+          __typename
+        }
+        __typename
+      }
+      __typename
+    }
+    releasedEpisodes: episodes(
+      released: true
+      limit: $episodesLimit
+      orderBy: SEASON_NUMBER_EPISODE_NUMBER_DESC
+    ) {
+      items {
+        id
+        number
+        releaseDate {
+          accuracy
+          date
+          __typename
+        }
+        season {
+          number
+          __typename
+        }
+        title {
+          russian
+          original
+          __typename
+        }
+        __typename
+      }
+      __typename
+    }
+    __typename
+  }
+}

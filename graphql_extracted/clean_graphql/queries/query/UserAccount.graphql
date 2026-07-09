@@ -1,0 +1,173 @@
+query UserAccount(
+  $includeSocialData: Boolean!
+  $includeVerification: Boolean!
+  $includeAbout: Boolean!
+  $includeBackground: Boolean!
+) {
+  userProfile {
+    __typename
+    ...userProfileCommonFragment
+    ... on UserProfile {
+      __typename
+      ...userProfileFragment
+      family {
+        __typename
+        ...userFamilyFragment
+      }
+    }
+    ... on UserChildProfile {
+      __typename
+      ...userChildProfileFragment
+      family {
+        __typename
+        ...userFamilyFragment
+      }
+    }
+  }
+}
+
+fragment imageFragment on Image {
+  avatarsUrl
+  fallbackUrl
+}
+
+fragment userProfileCommonFragment on UserProfileInterface {
+  id {
+    puid
+    kpId
+    ottId
+  }
+  avatar {
+    __typename
+    ...imageFragment
+  }
+  subscriptionInfo {
+    hasSubscription
+  }
+}
+
+fragment socialInfoFragment on UserSocialInfo {
+  alias {
+    defaultValue {
+      value
+      source
+    }
+  }
+  name {
+    defaultValue {
+      value
+    }
+  }
+  avatar {
+    defaultValue {
+      value {
+        __typename
+        ...imageFragment
+      }
+    }
+  }
+  publicStatus
+  url
+  badges @include(if: $includeVerification) {
+    verified {
+      id
+      title
+      description
+      icons {
+        format
+        image {
+          __typename
+          ...imageFragment
+        }
+      }
+    }
+  }
+}
+
+fragment socialProfileBackgroundFragment on UserSocialInfo {
+  background {
+    __typename
+    ... on PreparedProfileBackground {
+      id
+    }
+    image {
+      __typename
+      ...imageFragment
+    }
+  }
+}
+
+fragment userProfileFragment on UserProfile {
+  displayName
+  firstName
+  lastName
+  login
+  email
+  passportEmail
+  publicId
+  pinCode {
+    enabled
+    initialized
+  }
+  social {
+    __typename
+    ...socialInfoFragment @include(if: $includeSocialData)
+    ...socialProfileBackgroundFragment @include(if: $includeBackground)
+    about @include(if: $includeAbout) {
+      defaultValue {
+        value
+      }
+    }
+    badges {
+      golden
+    }
+  }
+}
+
+fragment userKidProfileFragment on UserKidSubProfile {
+  displayName
+  birthday
+  gender
+  restrictions {
+    parentalControlVideo {
+      streamUrl
+    }
+    ageRestriction
+    parentalControlEnabled
+  }
+}
+
+fragment userChildProfileFragment on UserChildProfile {
+  displayName
+  firstName
+  lastName
+  login
+  email
+  passportEmail
+  publicId
+  restrictions {
+    ageRestriction
+  }
+}
+
+fragment userFamilyFragment on FamilyInfo {
+  canCreateKid
+  familyAdmin
+  canInviteUser
+  members(
+    filter: { types: [USER_KID_SUB_PROFILE, USER_PROFILE, CHILD_USER_PROFILE] }
+  ) {
+    __typename
+    ...userProfileCommonFragment
+    ...userKidProfileFragment
+    ... on UserProfile {
+      __typename
+      ...userProfileFragment
+      family {
+        familyAdmin
+        canInviteUser
+      }
+    }
+    ...userChildProfileFragment
+  }
+}

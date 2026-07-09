@@ -1,0 +1,382 @@
+query CompositeOfferDetails(
+  $tariffId: OfferNameScalar
+  $optionsIds: [OfferNameScalar!]!
+  $offerFor: OfferNameScalar
+  $language: LanguageISO639Scalar!
+  $target: String
+  $storeOffersData: StoreOffersDataV2Input
+  $experimentFlags: [String!]
+  $checkSilentInvoiceAvailability: Boolean!
+  $skipPaymentMethodsGroups: Boolean!
+  $additionalOffers: CheckoutAdditionalOffersInput
+) {
+  compositeOfferCheckoutInfo(
+    input: {
+      compositeOffer: {
+        tariffOffer: $tariffId
+        serviceOffers: $optionsIds
+        offerFor: $offerFor
+      }
+      language: $language
+      target: $target
+      storeOffersDataV2: $storeOffersData
+      checkSilentInvoiceAvailability: $checkSilentInvoiceAvailability
+      experimentFlags: $experimentFlags
+      checkoutAdditionalOffers: $additionalOffers
+    }
+  ) {
+    __typename
+    ...compositeOfferDetails
+    checkoutAdditionalOffers {
+      eventSessionId
+      offers {
+        __typename
+        ...additionalOffer
+      }
+      passedUpsaleSteps
+      title
+      offerSwitchToggle {
+        text
+        badgeText
+      }
+    }
+    paymentMethods @skip(if: $skipPaymentMethodsGroups) {
+      groups {
+        groupTitle
+        groupButtons
+      }
+      mainPaymentMethodId
+      pos
+      trustServiceToken
+      paymentButtons {
+        __typename
+        ... on NewCardPaymentButton {
+          __typename
+          ...paymentMethod
+        }
+        ... on NewSbpPaymentButton {
+          __typename
+          ...paymentMethod
+        }
+        ... on CardPaymentButton {
+          __typename
+          ...paymentMethod
+          bankName
+        }
+        ... on SbpPaymentButton {
+          __typename
+          ...paymentMethod
+        }
+        ... on NewYBPaymentButton {
+          __typename
+          ...paymentMethod
+          widgetOpenCardUrls {
+            lightTheme
+            darkTheme
+            widgetPollingParameters {
+              initStartMessageTimeoutMillis
+              loadMessageTimeoutMillis
+            }
+          }
+        }
+      }
+      promoBadges {
+        __typename
+        ...paymentPromoBadge
+      }
+      promoLegalInfo {
+        legalText {
+          __typename
+          ...richText
+        }
+      }
+    }
+  }
+}
+
+fragment backgroundTv on BackgroundTv {
+  backgroundColor
+  backgroundGradientsTv {
+    angle
+    colors {
+      a
+      hex
+      location
+    }
+    relativeCenter {
+      x
+      y
+    }
+    relativeRadius {
+      x
+      y
+    }
+    type
+  }
+}
+
+fragment storePurchaseInfo on StorePurchaseInfo {
+  googleOfferReplaceParams {
+    purchaseToken
+    strategy
+  }
+}
+
+fragment tariffOfferDetails on TariffOfferPurchase {
+  title
+  text
+  description
+  additionText
+  payload
+  image
+  offerName
+  tariff {
+    name
+  }
+  backgroundTv {
+    __typename
+    ...backgroundTv
+  }
+  storePurchaseInfo {
+    __typename
+    ...storePurchaseInfo
+  }
+}
+
+fragment optionOfferDetails on OptionOfferPurchase {
+  title
+  text
+  description
+  additionText
+  payload
+  image
+  offerName
+  option {
+    name
+  }
+  backgroundTv {
+    __typename
+    ...backgroundTv
+  }
+}
+
+fragment legalInfo on LegalInfo {
+  text
+  items {
+    type
+    key
+    data {
+      text
+      link
+    }
+  }
+}
+
+fragment offerPrice on Price {
+  currency
+  amount
+}
+
+fragment compositeOfferDetails on CompositeOfferPurchase {
+  tariffOffer {
+    __typename
+    ...tariffOfferDetails
+  }
+  optionOffers {
+    __typename
+    ...optionOfferDetails
+  }
+  legalInfo {
+    __typename
+    ...legalInfo
+  }
+  paymentText {
+    firstPaymentText
+    nextPaymentsText
+  }
+  successScreen {
+    title
+    message
+  }
+  invoices {
+    totalPrice {
+      __typename
+      ...offerPrice
+    }
+    timestamp
+    maxPoints {
+      __typename
+      ...offerPrice
+    }
+  }
+  silentInvoiceAvailable
+}
+
+fragment additionalOffer on CheckoutAdditionalOffer {
+  additionalText
+  benefits {
+    text
+  }
+  disclaimer
+  iconImages
+  isAvailable
+  isSelected
+  offerName
+  offersBatchId
+  offersToReplace
+  positionId
+  text
+  title
+  upsaleStep
+  upsaleType
+  offerSwitchToggle {
+    text
+    badgeText
+  }
+}
+
+fragment colorFields on CheckoutColor {
+  __typename
+  ... on CheckoutRgbaColor {
+    rgba
+  }
+  ... on CheckoutDesignColor {
+    name
+    fallback {
+      rgba
+    }
+  }
+  ... on CheckoutLinearGradientColor {
+    angle
+    colors {
+      color {
+        rgba
+      }
+      location
+    }
+  }
+  ... on CheckoutRadialGradientColor {
+    angle
+    relativeCenter {
+      x
+      y
+    }
+    relativeRadius {
+      x
+      y
+    }
+    colors {
+      color {
+        rgba
+      }
+      location
+    }
+  }
+}
+
+fragment richTextItem on CheckoutTitleItem {
+  __typename
+  altText
+  key
+  ... on CheckoutTitleColorItem {
+    text
+    color {
+      light {
+        __typename
+        ...colorFields
+      }
+      dark {
+        __typename
+        ...colorFields
+      }
+    }
+  }
+  ... on CheckoutTitleHighlightItem {
+    text
+  }
+  ... on CheckoutTitleIconItem {
+    image {
+      light {
+        url
+      }
+      dark {
+        url
+      }
+    }
+  }
+  ... on CheckoutTitleLinkItem {
+    text
+    url
+  }
+  ... on CheckoutTitleStrikeItem {
+    text
+  }
+}
+
+fragment richText on CheckoutTitle {
+  text
+  items {
+    __typename
+    ...richTextItem
+  }
+}
+
+fragment paymentButtonAsset on PaymentButtonAsset {
+  badgeText {
+    __typename
+    ...richText
+  }
+  subtitleText {
+    __typename
+    ...richText
+  }
+}
+
+fragment paymentMethod on PaymentButton {
+  id
+  title
+  lightTheme {
+    backgroundColor
+    iconUrl
+    textColor
+  }
+  darkTheme {
+    backgroundColor
+    iconUrl
+    textColor
+  }
+  asset {
+    __typename
+    ...paymentButtonAsset
+  }
+}
+
+fragment paymentPromoBadge on PaymentPromoBadge {
+  benefitTitle {
+    __typename
+    ...richText
+  }
+  additionalTitle {
+    __typename
+    ...richText
+  }
+  iconImage {
+    light {
+      url
+    }
+    dark {
+      url
+    }
+  }
+  backgroundColor {
+    light {
+      __typename
+      ...colorFields
+    }
+    dark {
+      __typename
+      ...colorFields
+    }
+  }
+  paymentMethodId
+}

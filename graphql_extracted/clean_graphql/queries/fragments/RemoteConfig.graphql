@@ -1,0 +1,11 @@
+fragment RemoteConfig on Query {
+  remoteConfig(
+    namespace: $namespace
+    groups: $groups
+    parameterValues: $parameterValues
+  ) {
+    configs
+    __typename
+  }
+  __typename
+}

@@ -1,0 +1,20 @@
+query SocialSummary {
+  userProfile {
+    userData {
+      movieReactions(includeTypes: [VOTE, WATCHED], limit: 0) {
+        total
+      }
+    }
+    social {
+      subscribers(limit: 0) {
+        total
+      }
+      subscriptions(limit: 0) {
+        total
+      }
+      subscribersRequests(limit: 0) {
+        hasNewRequests
+      }
+    }
+  }
+}

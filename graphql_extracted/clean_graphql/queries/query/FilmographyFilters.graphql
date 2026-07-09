@@ -1,0 +1,48 @@
+query FilmographyFilters(
+  $personId: Long!
+  $isCareer: Boolean = false
+  $rolesLimit: Int = 10
+  $genresLimit: Int = 10
+) {
+  roles: person(id: $personId) {
+    id
+    roles(isCareer: $isCareer, limit: $rolesLimit) {
+      items {
+        movies {
+          total
+          __typename
+        }
+        role {
+          slug
+          title {
+            russian
+            english
+            __typename
+          }
+          __typename
+        }
+        __typename
+      }
+      __typename
+    }
+    __typename
+  }
+  genres: genres(limit: $genresLimit) {
+    items {
+      id
+      name
+      slug
+      __typename
+    }
+    __typename
+  }
+  years: person(id: $personId) {
+    id
+    filmographyYears {
+      start
+      end
+      __typename
+    }
+    __typename
+  }
+}

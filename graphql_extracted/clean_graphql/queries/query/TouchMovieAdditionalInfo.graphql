@@ -1,0 +1,146 @@
+query TouchMovieAdditionalInfo($movieId: Long!) {
+  movie(id: $movieId) {
+    id
+    restriction {
+      age
+      mpaa
+      __typename
+    }
+    boxOffice {
+      budget {
+        amount
+        currency {
+          symbol
+          __typename
+        }
+        __typename
+      }
+      rusBox {
+        amount
+        currency {
+          symbol
+          __typename
+        }
+        __typename
+      }
+      usaBox {
+        amount
+        currency {
+          symbol
+          __typename
+        }
+        __typename
+      }
+      worldBox {
+        amount
+        currency {
+          symbol
+          __typename
+        }
+        __typename
+      }
+      marketing {
+        amount
+        currency {
+          symbol
+          __typename
+        }
+        __typename
+      }
+      __typename
+    }
+    distribution {
+      rusRelease: releases(
+        types: [CINEMA]
+        rerelease: false
+        countryId: 2
+        limit: 1
+      ) {
+        ...releasesInfoFragment
+        __typename
+      }
+      digitalRelease: releases(types: [DIGITAL], limit: 1) {
+        ...releasesInfoFragment
+        __typename
+      }
+      reRelease: releases(
+        types: [CINEMA]
+        rerelease: true
+        countryId: 2
+        limit: 1
+      ) {
+        ...releasesInfoFragment
+        __typename
+      }
+      originals: releases(original: true, types: [DIGITAL], limit: 1) {
+        ...OriginalsFragment
+        __typename
+      }
+      __typename
+    }
+    releases {
+      date
+      releasers {
+        id
+        name
+        __typename
+      }
+      type
+      __typename
+    }
+    premieres(limit: 0) {
+      total
+      __typename
+    }
+    worldPremiere {
+      incompleteDate {
+        accuracy
+        date
+        __typename
+      }
+      __typename
+    }
+    tagline
+    __typename
+  }
+}
+
+fragment releasesInfoFragment on PagingList_Release {
+  items {
+    date {
+      accuracy
+      date
+      __typename
+    }
+    companies {
+      id
+      slugId
+      slug
+      displayName
+      __typename
+    }
+    __typename
+  }
+  __typename
+}
+
+fragment OriginalsFragment on PagingList_Release {
+  items {
+    companies {
+      displayName
+      id
+      originalsMovieList {
+        id
+        url
+        movies(supportedItemTypes: [MOVIE_LIST_ITEM], limit: 0) {
+          total
+          __typename
+        }
+        __typename
+      }
+      __typename
+    }
+    __typename
+  }
+  __typename
+}

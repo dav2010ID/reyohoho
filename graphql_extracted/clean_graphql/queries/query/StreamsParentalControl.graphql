@@ -1,0 +1,13 @@
+query StreamsParentalControl {
+  userProfile {
+    __typename
+    ... on UserKidSubProfile {
+      restrictions {
+        parentalControlEnabled
+        parentalControlVideo {
+          streamUrl
+        }
+      }
+    }
+  }
+}

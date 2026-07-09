@@ -1,0 +1,100 @@
+query MovieMobileDetailsFriendsReactions(
+  $movieId: Long!
+  $offset: Int!
+  $limit: Int!
+  $includeVerification: Boolean!
+) {
+  movie(id: $movieId) {
+    userData {
+      friendsMovieReactions(
+        limit: $limit
+        offset: $offset
+        includeTypes: [VOTE, WATCHED, WATCHING_SERIES, PLANNED_TO_WATCH]
+        orderBy: SOCIAL_ARGUMENT_STRONGEST_FIRST
+      ) {
+        offset
+        limit
+        total
+        items {
+          user {
+            __typename
+            ... on UserProfile {
+              login
+            }
+            id {
+              puid
+            }
+            displayName
+            social {
+              __typename
+              ...socialInfoFragment
+            }
+            subscriptionInfo {
+              hasSubscription
+            }
+          }
+          reactions(
+            includeTypes: [VOTE, WATCHED, WATCHING_SERIES, PLANNED_TO_WATCH]
+          ) {
+            __typename
+            ... on Vote {
+              value
+            }
+            ... on PlannedToWatch {
+              plannedToWatch
+            }
+            ... on WatchingSeries {
+              watchingSeries
+            }
+            ... on Watched {
+              watched
+            }
+          }
+        }
+      }
+    }
+  }
+}
+
+fragment imageFragment on Image {
+  avatarsUrl
+  fallbackUrl
+}
+
+fragment socialInfoFragment on UserSocialInfo {
+  alias {
+    defaultValue {
+      value
+      source
+    }
+  }
+  name {
+    defaultValue {
+      value
+    }
+  }
+  avatar {
+    defaultValue {
+      value {
+        __typename
+        ...imageFragment
+      }
+    }
+  }
+  publicStatus
+  url
+  badges @include(if: $includeVerification) {
+    verified {
+      id
+      title
+      description
+      icons {
+        format
+        image {
+          __typename
+          ...imageFragment
+        }
+      }
+    }
+  }
+}

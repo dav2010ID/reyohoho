@@ -1,0 +1,21 @@
+fragment MovieUserFolders on Movie {
+  userData {
+    userFolders(offset: 0, limit: 20) {
+      items {
+        ...Folder
+        __typename
+      }
+      __typename
+    }
+    isFavorite
+    __typename
+  }
+  __typename
+}
+
+fragment Folder on Folder {
+  id
+  name
+  public
+  __typename
+}

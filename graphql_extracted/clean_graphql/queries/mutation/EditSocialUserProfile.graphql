@@ -1,0 +1,21 @@
+mutation EditSocialUserProfile($input: setSocialInput!) {
+  userProfile {
+    social {
+      set(input: $input) {
+        aliasErrors {
+          message
+          __typename
+        }
+        nameErrors {
+          message
+          __typename
+        }
+        status
+        message
+        __typename
+      }
+      __typename
+    }
+    __typename
+  }
+}

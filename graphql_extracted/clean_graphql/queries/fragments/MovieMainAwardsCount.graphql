@@ -1,0 +1,7 @@
+fragment MovieMainAwardsCount on Movie {
+  mainAwardsCount: awards(isMain: true, limit: 0) {
+    total
+    __typename
+  }
+  __typename
+}

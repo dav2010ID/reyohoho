@@ -1,0 +1,266 @@
+query FilmographyItems(
+  $personId: Long!
+  $roleSlugs: [String]
+  $genre: Int = null
+  $year: YearsRangeInput = null
+  $orderBy: FilmographyItemOrderBy = YEAR_DESC
+  $itemsLimit: Int = 10
+  $itemsOffset: Int = 0
+  $participationsLimit: Int = 10
+  $withUserData: Boolean = false
+) {
+  person(id: $personId) {
+    id
+    filmographyRelations(
+      roleSlugs: $roleSlugs
+      limit: $itemsLimit
+      offset: $itemsOffset
+      genre: $genre
+      year: $year
+      orderBy: $orderBy
+    ) {
+      items {
+        movie {
+          id
+          contentId
+          title {
+            russian
+            original
+            __typename
+          }
+          genres {
+            id
+            name
+            __typename
+          }
+          ...MoviePosterGallery
+          rating {
+            kinopoisk {
+              ...RatingValue
+              __typename
+            }
+            __typename
+          }
+          countries {
+            id
+            name
+            __typename
+          }
+          viewOption {
+            buttonText
+            originalButtonText
+            promotionIcons {
+              avatarsUrl
+              fallbackUrl
+              __typename
+            }
+            isAvailableOnline: isWatchable(
+              filter: { anyDevice: false, anyRegion: false }
+            )
+            purchasabilityStatus
+            type
+            rightholderLogoUrlForPoster
+            __typename
+          }
+          ...MovieIsTicketsAvailable
+          ... on Film {
+            productionYear
+            isShortFilm
+            ratingLists {
+              top250 {
+                ...MovieRatingListsItem
+                __typename
+              }
+              __typename
+            }
+            __typename
+          }
+          ... on TvSeries {
+            releaseYears {
+              start
+              end
+              __typename
+            }
+            ratingLists {
+              top250 {
+                ...MovieRatingListsItem
+                __typename
+              }
+              __typename
+            }
+            __typename
+          }
+          ... on MiniSeries {
+            releaseYears {
+              start
+              end
+              __typename
+            }
+            __typename
+          }
+          ... on TvShow {
+            releaseYears {
+              start
+              end
+              __typename
+            }
+            __typename
+          }
+          ... on Video {
+            productionYear
+            isShortFilm
+            __typename
+          }
+          ...FilmographyItemUserData @include(if: $withUserData)
+          __typename
+        }
+        participations(limit: $participationsLimit) {
+          items {
+            notice
+            role {
+              title {
+                russian
+                english
+                __typename
+              }
+              slug
+              __typename
+            }
+            ... on CastMovieParticipation {
+              name
+              __typename
+            }
+            ... on StaffMovieParticipation {
+              relatedCast {
+                name
+                person {
+                  id
+                  name
+                  originalName
+                  url
+                  __typename
+                }
+                __typename
+              }
+              __typename
+            }
+            __typename
+          }
+          __typename
+        }
+        salaries {
+          items {
+            amount
+            currency {
+              symbol
+              __typename
+            }
+            note
+            __typename
+          }
+          __typename
+        }
+        __typename
+      }
+      limit
+      offset
+      total
+      __typename
+    }
+    __typename
+  }
+}
+
+fragment TicketOptionPurchasable on Movie {
+  ticketOption {
+    purchasable
+    __typename
+  }
+  __typename
+}
+
+fragment Folder on Folder {
+  id
+  name
+  public
+  __typename
+}
+
+fragment MovieUserFolders on Movie {
+  userData {
+    userFolders(offset: 0, limit: 20) {
+      items {
+        ...Folder
+        __typename
+      }
+      __typename
+    }
+    isFavorite
+    __typename
+  }
+  __typename
+}
+
+fragment MoviePosterGallery on Movie {
+  gallery {
+    posters {
+      vertical {
+        avatarsUrl
+        __typename
+      }
+      __typename
+    }
+    logos {
+      rightholderForPoster {
+        avatarsUrl
+        __typename
+      }
+      __typename
+    }
+    __typename
+  }
+  __typename
+}
+
+fragment RatingValue on RatingValue {
+  value
+  isActive
+  count
+  __typename
+}
+
+fragment MovieIsTicketsAvailable on Movie {
+  ...TicketOptionPurchasable
+  __typename
+}
+
+fragment MovieRatingListsItem on MovieInList {
+  movieListSlug
+  position
+  __typename
+}
+
+fragment FilmographyItemUserData on Movie {
+  userData {
+    watchStatuses {
+      notInterested {
+        value
+        __typename
+      }
+      watched {
+        value
+        __typename
+      }
+      __typename
+    }
+    voting {
+      value
+      votedAt
+      __typename
+    }
+    isPlannedToWatch
+    __typename
+  }
+  ...MovieUserFolders
+  __typename
+}

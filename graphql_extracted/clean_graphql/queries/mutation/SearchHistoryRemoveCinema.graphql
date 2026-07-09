@@ -1,0 +1,19 @@
+mutation SearchHistoryRemoveCinema($cinemaId: Long!) {
+  emptyPrefixSuggest {
+    history {
+      remove {
+        cinema(input: { id: $cinemaId }) {
+          __typename
+          ...searchHistoryMutationResult
+        }
+      }
+    }
+  }
+}
+
+fragment searchHistoryMutationResult on EmptyPrefixSuggestHistoryPayload {
+  status
+  error {
+    message
+  }
+}

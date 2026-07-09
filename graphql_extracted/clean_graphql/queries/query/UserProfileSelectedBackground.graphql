@@ -1,0 +1,19 @@
+query UserProfileSelectedBackground($socialAlias: String!) {
+  userProfileBySocialAlias(socialAlias: { socialAlias: $socialAlias }) {
+    social {
+      background {
+        image {
+          avatarsUrl
+          __typename
+        }
+        ... on PreparedProfileBackground {
+          id
+          __typename
+        }
+        __typename
+      }
+      __typename
+    }
+    __typename
+  }
+}

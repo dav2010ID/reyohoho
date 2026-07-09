@@ -1,0 +1,77 @@
+query ViewOption($movieId: Long!) {
+  movie(id: $movieId) {
+    id
+    contentId
+    viewOption {
+      ...ViewOption
+      __typename
+    }
+    __typename
+  }
+}
+
+fragment AvailabilityAnnounce on AvailabilityAnnounce {
+  availabilityDate
+  groupPeriodType
+  type
+  announcePromise
+  __typename
+}
+
+fragment ViewOption on ViewOption {
+  type
+  purchasabilityStatus
+  buttonText
+  originalButtonText
+  descriptionText
+  promotionActionType
+  texts {
+    disclaimer
+    __typename
+  }
+  rightholderLogoUrlForPoster
+  posterWithRightholderLogo
+  isAvailableOnline: isWatchable(filter: { anyDevice: false, anyRegion: false })
+  isWatchable(filter: { anyDevice: true, anyRegion: false })
+  watchabilityStatus
+  promotionIcons {
+    avatarsUrl
+    fallbackUrl
+    __typename
+  }
+  contentPackageToBuy {
+    billingFeatureName
+    __typename
+  }
+  mainPromotionAbsoluteAmount {
+    amount
+    __typename
+  }
+  mastercardPromotionAbsoluteAmount {
+    amount
+    __typename
+  }
+  optionMonetizationModels
+  priceWithTotalDiscount {
+    amount
+    currency {
+      displayName
+      __typename
+    }
+    __typename
+  }
+  transactionalMinimumPrice {
+    amount
+    __typename
+  }
+  transactionalPrice {
+    amount
+    __typename
+  }
+  availabilityAnnounce {
+    ...AvailabilityAnnounce
+    __typename
+  }
+  purchaseOptionCustomProperties
+  __typename
+}

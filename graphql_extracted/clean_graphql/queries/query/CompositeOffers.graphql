@@ -1,0 +1,118 @@
+query CompositeOffers(
+  $target: String!
+  $features: [String]!
+  $checkSilentInvoiceAvailability: Boolean!
+) {
+  subscriptionCompositeOffers(
+    features: $features
+    target: $target
+    checkSilentInvoiceAvailability: $checkSilentInvoiceAvailability
+  ) {
+    ...SubscriptionCompositeOffers
+    __typename
+  }
+}
+
+fragment CompositeOffersPlan on OfferPlanUnion {
+  __typename
+  ... on TrialUntilPlan {
+    until
+    __typename
+  }
+  ... on IntroUntilPlan {
+    until
+    __typename
+  }
+  ... on TrialPlan {
+    period
+    __typename
+  }
+  ... on IntroPlan {
+    period
+    __typename
+  }
+}
+
+fragment CompositeOffer on PlusCompositeOffer {
+  asset {
+    subscriptionName
+    __typename
+  }
+  positionId
+  structureType
+  silentInvoiceAvailable
+  forActiveOffers {
+    ... on PlusOptionOffer {
+      name
+      __typename
+    }
+    ... on PlusTariffOffer {
+      name
+      __typename
+    }
+    __typename
+  }
+  optionOffers {
+    commonPeriod
+    text
+    additionText
+    name
+    option {
+      name
+      __typename
+    }
+    plans {
+      ...CompositeOffersPlan
+      __typename
+    }
+    __typename
+  }
+  tariffOffer {
+    commonPeriod
+    text
+    additionText
+    name
+    tariff {
+      name
+      __typename
+    }
+    plans {
+      ...CompositeOffersPlan
+      __typename
+    }
+    __typename
+  }
+  invoices {
+    timestamp
+    totalPrice {
+      amount
+      currency
+      __typename
+    }
+    __typename
+  }
+  __typename
+}
+
+fragment CustomPayload on OttCompositeOfferCustomPayload {
+  overridedText
+  overridedAdditionalText
+  __typename
+}
+
+fragment SubscriptionCompositeOffers on SubscriptionCompositeOffers {
+  batchPositionId
+  eventSessionId
+  offers {
+    compositeOffer {
+      ...CompositeOffer
+      __typename
+    }
+    customPayload {
+      ...CustomPayload
+      __typename
+    }
+    __typename
+  }
+  __typename
+}

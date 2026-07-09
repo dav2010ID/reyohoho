@@ -1,0 +1,14 @@
+query MovieDetailsMobileUserVotingByOttId($contentUuid: String!) {
+  movieByContentUuid(contentUuid: $contentUuid) {
+    __typename
+    ...movieDetailsMobileUserVotingFragment
+  }
+}
+
+fragment movieDetailsMobileUserVotingFragment on Movie {
+  userData {
+    voting {
+      value
+    }
+  }
+}

@@ -1,0 +1,16 @@
+mutation SportCompetitionAddFavourite($competitionId: String!) {
+  sport {
+    competition {
+      like {
+        add(
+          input: { competitionId: $competitionId, source: COMPETITION_SHOWCASE }
+        ) {
+          status
+          error {
+            message
+          }
+        }
+      }
+    }
+  }
+}

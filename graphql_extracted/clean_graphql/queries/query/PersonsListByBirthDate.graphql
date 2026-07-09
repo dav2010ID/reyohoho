@@ -1,0 +1,75 @@
+query PersonsListByBirthDate(
+  $personsOffset: Int!
+  $personsLimit: Int!
+  $isCareerRoles: Boolean!
+  $rolesLimit: Int!
+  $birthDate: MonthDayInput!
+) {
+  personsByBirthDate(
+    offset: $personsOffset
+    limit: $personsLimit
+    birthDate: $birthDate
+  ) {
+    offset
+    limit
+    total
+    items {
+      person {
+        __typename
+        ...personSummaryFragment
+        roles(isCareer: $isCareerRoles, limit: $rolesLimit) {
+          items {
+            role {
+              __typename
+              ...personMovieCrewRoleFragment
+            }
+          }
+        }
+      }
+    }
+  }
+}
+
+fragment personNameFragment on Person {
+  name
+  originalName
+}
+
+fragment imageFragment on Image {
+  avatarsUrl
+  fallbackUrl
+}
+
+fragment incompleteDateFragment on IncompleteDate {
+  date
+  accuracy
+}
+
+fragment personSummaryFragment on Person {
+  __typename
+  id
+  ...personNameFragment
+  gender
+  poster {
+    __typename
+    ...imageFragment
+  }
+  age
+  height
+  dateOfBirth {
+    __typename
+    ...incompleteDateFragment
+  }
+  dateOfDeath {
+    __typename
+    ...incompleteDateFragment
+  }
+  published
+}
+
+fragment personMovieCrewRoleFragment on MovieCrewRole {
+  slug
+  title {
+    russian
+  }
+}

@@ -1,0 +1,36 @@
+query ContentBrandsNavigation($layout: ContentBrandsNavigationLayout) {
+  contentBrandsNavigation(layout: $layout) {
+    items {
+      contentBrand {
+        id
+        name
+        gallery {
+          logos {
+            dynamicWidth: dynamic {
+              __typename
+              ...imageFragment
+            }
+          }
+        }
+      }
+      title
+      destinations {
+        __typename
+        ... on ContentBrandNavigationShowcaseDestination {
+          id
+        }
+        ... on ContentBrandNavigationListDestination {
+          id
+        }
+        ... on ContentBrandNavigationUrlDestination {
+          url
+        }
+      }
+    }
+  }
+}
+
+fragment imageFragment on Image {
+  avatarsUrl
+  fallbackUrl
+}

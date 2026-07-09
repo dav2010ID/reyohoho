@@ -1,0 +1,20 @@
+query SocialUserProfileSubscribe($socialAlias: String!) {
+  userProfileBySocialAlias(socialAlias: { socialAlias: $socialAlias }) {
+    ...SocialUserProfileId
+    social {
+      isSubscribedTo
+      __typename
+    }
+    __typename
+  }
+}
+
+fragment SocialUserProfileId on UserProfileInterface {
+  id {
+    kpId
+    ottId
+    puid
+    __typename
+  }
+  __typename
+}

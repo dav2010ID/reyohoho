@@ -1,0 +1,1212 @@
+[
+  {
+    "parent": "Movie",
+    "field": "ott",
+    "kept": "Ott_AbstractVideo",
+    "discarded": "Ott",
+    "evidence": "FoldersMobileFavoriteMovies"
+  },
+  {
+    "parent": "Movie",
+    "field": "members",
+    "argument": "role",
+    "kept": "[MovieCrewRoleSlug!]!",
+    "discarded": "[UnknownInput]",
+    "evidence": "MovieDetails"
+  },
+  {
+    "parent": "Movie",
+    "field": "members",
+    "argument": "role",
+    "kept": "[MovieCrewRoleSlug!]!",
+    "discarded": "[UnknownInput]",
+    "evidence": "MovieDetails"
+  },
+  {
+    "parent": "Movie",
+    "field": "ott",
+    "kept": "Ott_AbstractVideo",
+    "discarded": "Ott_AbstractSeries",
+    "evidence": "MovieDetails"
+  },
+  {
+    "parent": "Movie",
+    "field": "members",
+    "argument": "role",
+    "kept": "[MovieCrewRoleSlug!]!",
+    "discarded": "[UnknownInput]",
+    "evidence": "MovieDetailsMobileMainCrewMembers"
+  },
+  {
+    "parent": "Movie",
+    "field": "members",
+    "argument": "role",
+    "kept": "[MovieCrewRoleSlug!]!",
+    "discarded": "[UnknownInput]",
+    "evidence": "MovieDetailsMobileMainCrewMembers"
+  },
+  {
+    "parent": "Movie",
+    "field": "members",
+    "argument": "role",
+    "kept": "[MovieCrewRoleSlug!]!",
+    "discarded": "[UnknownInput]",
+    "evidence": "MovieDetailsMobileMainCrewMembers"
+  },
+  {
+    "parent": "Movie",
+    "field": "members",
+    "argument": "role",
+    "kept": "[MovieCrewRoleSlug!]!",
+    "discarded": "[UnknownInput]",
+    "evidence": "MovieDetailsMobileMainCrewMembers"
+  },
+  {
+    "parent": "Movie",
+    "field": "members",
+    "argument": "role",
+    "kept": "[MovieCrewRoleSlug!]!",
+    "discarded": "[UnknownInput]",
+    "evidence": "MovieDetailsMobileMainCrewMembers"
+  },
+  {
+    "parent": "Movie",
+    "field": "members",
+    "argument": "role",
+    "kept": "[MovieCrewRoleSlug!]!",
+    "discarded": "[UnknownInput]",
+    "evidence": "MovieDetailsMobileMainCrewMembers"
+  },
+  {
+    "parent": "Movie",
+    "field": "members",
+    "argument": "role",
+    "kept": "[MovieCrewRoleSlug!]!",
+    "discarded": "[UnknownInput]",
+    "evidence": "MovieDetailsMobileMainCrewMembers"
+  },
+  {
+    "parent": "Movie",
+    "field": "relatedMovies",
+    "argument": "type",
+    "kept": "[RelatedMovieType!]!",
+    "discarded": "[UnknownInput]",
+    "evidence": "MovieDetailsMobileMainRelatedMovies"
+  },
+  {
+    "parent": "Movie_ott",
+    "field": "preview",
+    "kept": "OttPreview_AbstractVideo",
+    "discarded": "Movie_ott_preview",
+    "evidence": "MovieDetailsMobileOttMetadata"
+  },
+  {
+    "parent": "Ott_AbstractSeries",
+    "field": "nextEpisode",
+    "kept": "Ott_AbstractSeries_nextEpisode",
+    "discarded": "OttNextEpisode",
+    "evidence": "MoviePlayerMeta"
+  },
+  {
+    "parent": "Query",
+    "field": "movieByContentUuid",
+    "kept": "Movie",
+    "discarded": "Series",
+    "evidence": "MovieSeriesStructureByContentId"
+  },
+  {
+    "parent": "ViewOption",
+    "field": "purchaseOptions",
+    "argument": "clientContext",
+    "kept": "BillingFeatureClientContextInput!",
+    "discarded": "UnknownInput",
+    "evidence": "PaymentMoviePurchaseOption"
+  },
+  {
+    "parent": "Query_person",
+    "field": "filmographyRelations",
+    "argument": "roleSlugs",
+    "kept": "[String]",
+    "discarded": "[String!]",
+    "evidence": "PersonMoviesByRole"
+  },
+  {
+    "parent": "Movie",
+    "field": "ott",
+    "kept": "Ott_AbstractVideo",
+    "discarded": "Ott",
+    "evidence": "SearchMobileShowcase"
+  },
+  {
+    "parent": "Ott",
+    "field": "preview",
+    "kept": "Ott_preview",
+    "discarded": "OttPreview_AbstractVideo",
+    "evidence": "SearchMobileShowcase"
+  },
+  {
+    "parent": "SessionPagingList_SelectionItem",
+    "field": "items",
+    "kept": "[CinemaMovieSelectionItem]",
+    "discarded": "[SelectionItem]",
+    "evidence": "ShowcaseData"
+  },
+  {
+    "parent": "SessionPagingList_SelectionItem",
+    "field": "items",
+    "kept": "[CinemaMovieSelectionItem]",
+    "discarded": "[SelectionItem]",
+    "evidence": "ShowcaseData"
+  },
+  {
+    "parent": "SessionPagingList_SelectionItem",
+    "field": "items",
+    "kept": "[CinemaMovieSelectionItem]",
+    "discarded": "[SelectionItem]",
+    "evidence": "ShowcaseData"
+  },
+  {
+    "parent": "SessionPagingList_SelectionItem",
+    "field": "items",
+    "kept": "[CinemaMovieSelectionItem]",
+    "discarded": "[SelectionItem]",
+    "evidence": "ShowcaseData"
+  },
+  {
+    "parent": "SessionPagingList_SelectionItem",
+    "field": "items",
+    "kept": "[CinemaMovieSelectionItem]",
+    "discarded": "[SelectionItem]",
+    "evidence": "ShowcaseData"
+  },
+  {
+    "parent": "SessionPagingList_SelectionItem",
+    "field": "items",
+    "kept": "[CinemaMovieSelectionItem]",
+    "discarded": "[SelectionItem]",
+    "evidence": "ShowcaseData"
+  },
+  {
+    "parent": "SessionPagingList_SelectionItem",
+    "field": "items",
+    "kept": "[CinemaMovieSelectionItem]",
+    "discarded": "[SelectionItem]",
+    "evidence": "ShowcaseData"
+  },
+  {
+    "parent": "SessionPagingList_SelectionItem",
+    "field": "items",
+    "kept": "[CinemaMovieSelectionItem]",
+    "discarded": "[SelectionItem]",
+    "evidence": "ShowcaseData"
+  },
+  {
+    "parent": "SessionPagingList_SelectionItem",
+    "field": "items",
+    "kept": "[CinemaMovieSelectionItem]",
+    "discarded": "[SelectionItem]",
+    "evidence": "ShowcaseData"
+  },
+  {
+    "parent": "SessionPagingList_SelectionItem",
+    "field": "items",
+    "kept": "[CinemaMovieSelectionItem]",
+    "discarded": "[SelectionItem]",
+    "evidence": "ShowcaseData"
+  },
+  {
+    "parent": "SessionPagingList_SelectionItem",
+    "field": "items",
+    "kept": "[CinemaMovieSelectionItem]",
+    "discarded": "[SelectionItem]",
+    "evidence": "ShowcaseData"
+  },
+  {
+    "parent": "SessionPagingList_SelectionItem",
+    "field": "items",
+    "kept": "[CinemaMovieSelectionItem]",
+    "discarded": "[SelectionItem]",
+    "evidence": "ShowcaseData"
+  },
+  {
+    "parent": "SessionPagingList_SelectionItem",
+    "field": "items",
+    "kept": "[CinemaMovieSelectionItem]",
+    "discarded": "[SelectionItem]",
+    "evidence": "ShowcaseData"
+  },
+  {
+    "parent": "SessionPagingList_SelectionItem",
+    "field": "items",
+    "kept": "[CinemaMovieSelectionItem]",
+    "discarded": "[TvChannelProgramSelectionItem]",
+    "evidence": "ShowcaseData"
+  },
+  {
+    "parent": "Ott",
+    "field": "preview",
+    "kept": "Ott_preview",
+    "discarded": "OttPreview_AbstractVideo",
+    "evidence": "ShowcaseData"
+  },
+  {
+    "parent": "SportEventSelectionItem",
+    "field": "sportEvent",
+    "kept": "SportEventSelectionItem_sportEvent",
+    "discarded": "SportTeamsEvent",
+    "evidence": "ShowcaseData"
+  },
+  {
+    "parent": "SessionPagingList_SelectionItem",
+    "field": "items",
+    "kept": "[CinemaMovieSelectionItem]",
+    "discarded": "[SportEventSelectionItem]",
+    "evidence": "ShowcaseData"
+  },
+  {
+    "parent": "SportEventSelectionItem",
+    "field": "sportEvent",
+    "kept": "SportEventSelectionItem_sportEvent",
+    "discarded": "SportTeamsEvent",
+    "evidence": "ShowcaseData"
+  },
+  {
+    "parent": "SessionPagingList_SelectionItem",
+    "field": "items",
+    "kept": "[CinemaMovieSelectionItem]",
+    "discarded": "[SelectionItem]",
+    "evidence": "ShowcaseData"
+  },
+  {
+    "parent": "SessionPagingList_SelectionItem",
+    "field": "items",
+    "kept": "[CinemaMovieSelectionItem]",
+    "discarded": "[PremiereVideoSelectionItem]",
+    "evidence": "ShowcaseData"
+  },
+  {
+    "parent": "SessionPagingList_SelectionItem",
+    "field": "items",
+    "kept": "[CinemaMovieSelectionItem]",
+    "discarded": "[SelectionItem]",
+    "evidence": "ShowcaseData"
+  },
+  {
+    "parent": "SessionPagingList_SelectionItem",
+    "field": "items",
+    "kept": "[CinemaMovieSelectionItem]",
+    "discarded": "[SelectionItem]",
+    "evidence": "ShowcaseData"
+  },
+  {
+    "parent": "SessionPagingList_SelectionItem",
+    "field": "items",
+    "kept": "[CinemaMovieSelectionItem]",
+    "discarded": "[SelectionItem]",
+    "evidence": "ShowcaseData"
+  },
+  {
+    "parent": "SessionPagingList_SelectionItem",
+    "field": "items",
+    "kept": "[CinemaMovieSelectionItem]",
+    "discarded": "[SelectionItem]",
+    "evidence": "ShowcaseData"
+  },
+  {
+    "parent": "SessionPagingList_SelectionItem",
+    "field": "items",
+    "kept": "[CinemaMovieSelectionItem]",
+    "discarded": "[SelectionItem]",
+    "evidence": "ShowcaseData"
+  },
+  {
+    "parent": "SessionPagingList_SelectionItem",
+    "field": "items",
+    "kept": "[CinemaMovieSelectionItem]",
+    "discarded": "[SelectionItem]",
+    "evidence": "ShowcaseData"
+  },
+  {
+    "parent": "SessionPagingList_SelectionItem",
+    "field": "items",
+    "kept": "[CinemaMovieSelectionItem]",
+    "discarded": "[SelectionItem]",
+    "evidence": "ShowcaseData"
+  },
+  {
+    "parent": "SessionPagingList_SelectionItem",
+    "field": "items",
+    "kept": "[CinemaMovieSelectionItem]",
+    "discarded": "[SelectionItem]",
+    "evidence": "ShowcaseData"
+  },
+  {
+    "parent": "SessionPagingList_SelectionItem",
+    "field": "items",
+    "kept": "[CinemaMovieSelectionItem]",
+    "discarded": "[SelectionItem]",
+    "evidence": "ShowcaseData"
+  },
+  {
+    "parent": "SessionPagingList_SelectionItem",
+    "field": "items",
+    "kept": "[CinemaMovieSelectionItem]",
+    "discarded": "[SelectionItem]",
+    "evidence": "SportCompetitionData"
+  },
+  {
+    "parent": "SessionPagingList_SelectionItem",
+    "field": "items",
+    "kept": "[CinemaMovieSelectionItem]",
+    "discarded": "[SportTeamSelectionItem]",
+    "evidence": "SportCompetitionData"
+  },
+  {
+    "parent": "SessionPagingList_SelectionItem",
+    "field": "items",
+    "kept": "[CinemaMovieSelectionItem]",
+    "discarded": "[NotificationSelectionItem]",
+    "evidence": "SportCompetitionData"
+  },
+  {
+    "parent": "SessionPagingList_SelectionItem",
+    "field": "items",
+    "kept": "[CinemaMovieSelectionItem]",
+    "discarded": "[NotificationSelectionItem]",
+    "evidence": "SportEventData"
+  },
+  {
+    "parent": "Query",
+    "field": "sportSelection",
+    "kept": "AbstractSelection",
+    "discarded": "ShowcaseItem",
+    "evidence": "SportEventShowcaseSelection"
+  },
+  {
+    "parent": "SessionPagingList_SelectionItem",
+    "field": "items",
+    "kept": "[CinemaMovieSelectionItem]",
+    "discarded": "[SelectionItem]",
+    "evidence": "SportShowcaseData"
+  },
+  {
+    "parent": "SessionPagingList_SelectionItem",
+    "field": "items",
+    "kept": "[CinemaMovieSelectionItem]",
+    "discarded": "[SportCompetitionSelectionItem]",
+    "evidence": "SportShowcaseData"
+  },
+  {
+    "parent": "SessionPagingList_SelectionItem",
+    "field": "items",
+    "kept": "[CinemaMovieSelectionItem]",
+    "discarded": "[TvChannelSelectionItem]",
+    "evidence": "SportShowcaseData"
+  },
+  {
+    "parent": "SessionPagingList_SelectionItem",
+    "field": "items",
+    "kept": "[CinemaMovieSelectionItem]",
+    "discarded": "[MatchCentreSelectionItem]",
+    "evidence": "SportShowcaseData"
+  },
+  {
+    "parent": "SessionPagingList_SelectionItem",
+    "field": "items",
+    "kept": "[CinemaMovieSelectionItem]",
+    "discarded": "[NotificationSelectionItem]",
+    "evidence": "SportShowcaseData"
+  },
+  {
+    "parent": "SessionPagingList_SelectionItem",
+    "field": "items",
+    "kept": "[CinemaMovieSelectionItem]",
+    "discarded": "[SelectionItem]",
+    "evidence": "SportTeamData"
+  },
+  {
+    "parent": "SessionPagingList_SelectionItem",
+    "field": "items",
+    "kept": "[CinemaMovieSelectionItem]",
+    "discarded": "[NotificationSelectionItem]",
+    "evidence": "SportTeamData"
+  },
+  {
+    "parent": "Query",
+    "field": "content",
+    "kept": "TvChannel",
+    "discarded": "Catchup",
+    "evidence": "StreamsCatchup"
+  },
+  {
+    "parent": "Catchup",
+    "field": "referenceContent",
+    "kept": "Film",
+    "discarded": "VideoInterface",
+    "evidence": "StreamsCatchup"
+  },
+  {
+    "parent": "Movie",
+    "field": "ott",
+    "kept": "Ott_AbstractVideo",
+    "discarded": "Ott",
+    "evidence": "StreamsDownloadableStreams"
+  },
+  {
+    "parent": "Catchup",
+    "field": "referenceContent",
+    "kept": "Film",
+    "discarded": "VideoInterface",
+    "evidence": "StreamsImages"
+  },
+  {
+    "parent": "Ott_AbstractSeries",
+    "field": "nextEpisode",
+    "kept": "Ott_AbstractSeries_nextEpisode",
+    "discarded": "OttNextEpisode",
+    "evidence": "StreamsOnlineStreams"
+  },
+  {
+    "parent": "Ott_AbstractSeries",
+    "field": "nextEpisode",
+    "kept": "Ott_AbstractSeries_nextEpisode",
+    "discarded": "OttNextEpisode",
+    "evidence": "StreamsOnlineStreamsV2"
+  },
+  {
+    "parent": "Query",
+    "field": "userProfile",
+    "kept": "UserProfile",
+    "discarded": "UserKidSubProfile",
+    "evidence": "StreamsParentalControl"
+  },
+  {
+    "parent": "Query",
+    "field": "content",
+    "kept": "TvChannel",
+    "discarded": "Catchup",
+    "evidence": "TelevisionCatchupMeta"
+  },
+  {
+    "parent": "Catchup",
+    "field": "referenceContent",
+    "kept": "Film",
+    "discarded": "Movie",
+    "evidence": "TelevisionCatchupMeta"
+  },
+  {
+    "parent": "Movie",
+    "field": "ott",
+    "kept": "Ott_AbstractVideo",
+    "discarded": "Ott_AbstractSeries",
+    "evidence": "UserDependentDataMovieDetails"
+  },
+  {
+    "parent": "Query",
+    "field": "movie",
+    "kept": "Movie",
+    "discarded": "Series",
+    "evidence": "VerticalSeries"
+  },
+  {
+    "parent": "Query",
+    "field": "content",
+    "kept": "TvChannel",
+    "discarded": "Episode",
+    "evidence": "VerticalSeriesEpisodeMeta"
+  },
+  {
+    "parent": "Query",
+    "field": "content",
+    "kept": "TvChannel",
+    "discarded": "Content",
+    "evidence": "VerticalSeriesStream"
+  },
+  {
+    "parent": "SessionPagingList_SelectionItem",
+    "field": "items",
+    "kept": "[CinemaMovieSelectionItem]",
+    "discarded": "[SelectionItem]",
+    "evidence": "VideoFeed"
+  },
+  {
+    "parent": "Ott_AbstractVideo",
+    "field": "preview",
+    "kept": "OttPreview_AbstractVideo",
+    "discarded": "Ott_AbstractVideo_preview",
+    "evidence": "FilmBaseInfo"
+  },
+  {
+    "parent": "ExternalPartnerOption",
+    "field": "action",
+    "kept": "ExternalPartnerOption_action!",
+    "discarded": "BillingFeaturePurchaseAction",
+    "evidence": "FilmBaseInfo"
+  },
+  {
+    "parent": "Movie",
+    "field": "members",
+    "argument": "role",
+    "kept": "[MovieCrewRoleSlug!]!",
+    "discarded": "[UnknownInput]",
+    "evidence": "FilmBaseInfo"
+  },
+  {
+    "parent": "Movie",
+    "field": "members",
+    "argument": "role",
+    "kept": "[MovieCrewRoleSlug!]!",
+    "discarded": "UnknownInput",
+    "evidence": "FilmBaseInfo"
+  },
+  {
+    "parent": "Movie",
+    "field": "members",
+    "argument": "role",
+    "kept": "[MovieCrewRoleSlug!]!",
+    "discarded": "UnknownInput",
+    "evidence": "FilmBaseInfo"
+  },
+  {
+    "parent": "Movie",
+    "field": "members",
+    "argument": "role",
+    "kept": "[MovieCrewRoleSlug!]!",
+    "discarded": "UnknownInput",
+    "evidence": "FilmBaseInfo"
+  },
+  {
+    "parent": "Movie",
+    "field": "members",
+    "argument": "role",
+    "kept": "[MovieCrewRoleSlug!]!",
+    "discarded": "UnknownInput",
+    "evidence": "FilmBaseInfo"
+  },
+  {
+    "parent": "Movie",
+    "field": "members",
+    "argument": "role",
+    "kept": "[MovieCrewRoleSlug!]!",
+    "discarded": "UnknownInput",
+    "evidence": "FilmBaseInfo"
+  },
+  {
+    "parent": "Movie",
+    "field": "members",
+    "argument": "role",
+    "kept": "[MovieCrewRoleSlug!]!",
+    "discarded": "UnknownInput",
+    "evidence": "FilmBaseInfo"
+  },
+  {
+    "parent": "Movie",
+    "field": "members",
+    "argument": "role",
+    "kept": "[MovieCrewRoleSlug!]!",
+    "discarded": "[UnknownInput]",
+    "evidence": "FilmBaseInfo"
+  },
+  {
+    "parent": "Movie",
+    "field": "members",
+    "argument": "role",
+    "kept": "[MovieCrewRoleSlug!]!",
+    "discarded": "UnknownInput",
+    "evidence": "FilmBaseInfo"
+  },
+  {
+    "parent": "Movie",
+    "field": "relatedMovies",
+    "argument": "type",
+    "kept": "[RelatedMovieType!]!",
+    "discarded": "[UnknownInput]",
+    "evidence": "FilmBaseInfo"
+  },
+  {
+    "parent": "Movie_ott",
+    "field": "preview",
+    "kept": "OttPreview_AbstractVideo",
+    "discarded": "Movie_ott_preview",
+    "evidence": "FilmBaseInfo"
+  },
+  {
+    "parent": "Query",
+    "field": "posts",
+    "argument": "filter",
+    "kept": "PostFilterCriteriaInput!",
+    "discarded": "UnknownInput",
+    "evidence": "MediaPreview"
+  },
+  {
+    "parent": "Query_movie",
+    "field": "members",
+    "argument": "role",
+    "kept": "[MovieCrewRoleSlug!]!",
+    "discarded": "[UnknownInput]",
+    "evidence": "MoviePreviewCard"
+  },
+  {
+    "parent": "Query_movie",
+    "field": "members",
+    "argument": "role",
+    "kept": "[MovieCrewRoleSlug!]!",
+    "discarded": "UnknownInput",
+    "evidence": "MoviePreviewCard"
+  },
+  {
+    "parent": "Query_movie",
+    "field": "relatedMovies",
+    "argument": "type",
+    "kept": "[RelatedMovieType!]!",
+    "discarded": "[UnknownInput]",
+    "evidence": "MovieRelatedMovies"
+  },
+  {
+    "parent": "Query_movie",
+    "field": "userReviews",
+    "argument": "types",
+    "kept": "[UserReviewType!]!",
+    "discarded": "[UnknownInput]",
+    "evidence": "MovieUsersReviews"
+  },
+  {
+    "parent": "Query_movie",
+    "field": "userReviews",
+    "argument": "types",
+    "kept": "[UserReviewType!]!",
+    "discarded": "[UnknownInput]",
+    "evidence": "MovieUsersReviews"
+  },
+  {
+    "parent": "Query_movie",
+    "field": "userReviews",
+    "argument": "types",
+    "kept": "[UserReviewType!]!",
+    "discarded": "[UnknownInput]",
+    "evidence": "MovieUsersReviews"
+  },
+  {
+    "parent": "Query",
+    "field": "notificationsByConsumer",
+    "argument": "filters",
+    "kept": "[NotificationFilterInput!]!",
+    "discarded": "[UnknownInput]",
+    "evidence": "NotificationsByConsumer"
+  },
+  {
+    "parent": "Query",
+    "field": "userProfileBySocialAlias",
+    "kept": "UserProfile",
+    "discarded": "UserProfileInterface",
+    "evidence": "SocialUserProfileBySocialAlias"
+  },
+  {
+    "parent": "Query",
+    "field": "userProfileBySocialAlias",
+    "argument": "socialAlias",
+    "kept": "UserSocialAliasInput!",
+    "discarded": "UnknownInput",
+    "evidence": "SocialUserProfileBySocialAlias"
+  },
+  {
+    "parent": "Query",
+    "field": "userProfile",
+    "kept": "UserProfile",
+    "discarded": "UserProfileInterface",
+    "evidence": "SocialUserProfileBySocialAlias"
+  },
+  {
+    "parent": "Query",
+    "field": "userProfileBySocialAlias",
+    "kept": "UserProfile",
+    "discarded": "UserProfileInterface",
+    "evidence": "SocialUserProfileSubscribe"
+  },
+  {
+    "parent": "Query",
+    "field": "userProfileBySocialAlias",
+    "argument": "socialAlias",
+    "kept": "UserSocialAliasInput!",
+    "discarded": "UnknownInput",
+    "evidence": "SocialUserProfileSubscribe"
+  },
+  {
+    "parent": "Query",
+    "field": "userProfileBySocialAlias",
+    "kept": "UserProfile",
+    "discarded": "UserProfileInterface",
+    "evidence": "SocialUserProfileSubscribersRequests"
+  },
+  {
+    "parent": "Query",
+    "field": "userProfileBySocialAlias",
+    "argument": "socialAlias",
+    "kept": "UserSocialAliasInput!",
+    "discarded": "UnknownInput",
+    "evidence": "SocialUserProfileSubscribersRequests"
+  },
+  {
+    "parent": "Query",
+    "field": "userProfileBySocialAlias",
+    "kept": "UserProfile",
+    "discarded": "UserProfileInterface",
+    "evidence": "SocialUserProfileWithPerson"
+  },
+  {
+    "parent": "Query",
+    "field": "userProfileBySocialAlias",
+    "argument": "socialAlias",
+    "kept": "UserSocialAliasInput!",
+    "discarded": "UnknownInput",
+    "evidence": "SocialUserProfileWithPerson"
+  },
+  {
+    "parent": "Movie",
+    "field": "members",
+    "argument": "role",
+    "kept": "[MovieCrewRoleSlug!]!",
+    "discarded": "[UnknownInput]",
+    "evidence": "SuggestSearchTop"
+  },
+  {
+    "parent": "Movie",
+    "field": "members",
+    "argument": "role",
+    "kept": "[MovieCrewRoleSlug!]!",
+    "discarded": "[UnknownInput]",
+    "evidence": "SuggestSearchTop"
+  },
+  {
+    "parent": "Movie",
+    "field": "members",
+    "argument": "role",
+    "kept": "[MovieCrewRoleSlug!]!",
+    "discarded": "[UnknownInput]",
+    "evidence": "TouchFilmBaseInfo"
+  },
+  {
+    "parent": "Movie",
+    "field": "members",
+    "argument": "role",
+    "kept": "[MovieCrewRoleSlug!]!",
+    "discarded": "UnknownInput",
+    "evidence": "TouchFilmBaseInfo"
+  },
+  {
+    "parent": "Movie",
+    "field": "members",
+    "argument": "role",
+    "kept": "[MovieCrewRoleSlug!]!",
+    "discarded": "UnknownInput",
+    "evidence": "TouchFilmBaseInfo"
+  },
+  {
+    "parent": "Movie",
+    "field": "members",
+    "argument": "role",
+    "kept": "[MovieCrewRoleSlug!]!",
+    "discarded": "[UnknownInput]",
+    "evidence": "TouchFilmBaseInfo"
+  },
+  {
+    "parent": "Movie",
+    "field": "members",
+    "argument": "role",
+    "kept": "[MovieCrewRoleSlug!]!",
+    "discarded": "[UnknownInput]",
+    "evidence": "TouchFilmBaseInfo"
+  },
+  {
+    "parent": "Movie",
+    "field": "relatedMovies",
+    "argument": "type",
+    "kept": "[RelatedMovieType!]!",
+    "discarded": "[UnknownInput]",
+    "evidence": "TouchFilmBaseInfo"
+  },
+  {
+    "parent": "Movie",
+    "field": "relatedMovies",
+    "argument": "type",
+    "kept": "[RelatedMovieType!]!",
+    "discarded": "[UnknownInput]",
+    "evidence": "TouchFilmBaseInfo"
+  },
+  {
+    "parent": "Movie",
+    "field": "images",
+    "argument": "types",
+    "kept": "[MovieImageType!]",
+    "discarded": "[UnknownInput]",
+    "evidence": "TouchFilmBaseInfo"
+  },
+  {
+    "parent": "Query",
+    "field": "webPage",
+    "argument": "platform",
+    "kept": "WebClientPlatform",
+    "discarded": "UnknownInput",
+    "evidence": "TouchFilmBaseInfo"
+  },
+  {
+    "parent": "Query_movie",
+    "field": "members",
+    "argument": "role",
+    "kept": "[MovieCrewRoleSlug!]!",
+    "discarded": "[UnknownInput]",
+    "evidence": "TouchMovieActors"
+  },
+  {
+    "parent": "Query_movie",
+    "field": "members",
+    "argument": "role",
+    "kept": "[MovieCrewRoleSlug!]!",
+    "discarded": "[UnknownInput]",
+    "evidence": "TouchMovieCreators"
+  },
+  {
+    "parent": "Query_movie",
+    "field": "members",
+    "argument": "role",
+    "kept": "[MovieCrewRoleSlug!]!",
+    "discarded": "[UnknownInput]",
+    "evidence": "TouchMovieCreators"
+  },
+  {
+    "parent": "Query_movie",
+    "field": "members",
+    "argument": "role",
+    "kept": "[MovieCrewRoleSlug!]!",
+    "discarded": "[UnknownInput]",
+    "evidence": "TouchMovieCreators"
+  },
+  {
+    "parent": "Query_movie",
+    "field": "members",
+    "argument": "role",
+    "kept": "[MovieCrewRoleSlug!]!",
+    "discarded": "[UnknownInput]",
+    "evidence": "TouchMovieCreators"
+  },
+  {
+    "parent": "Query_movie",
+    "field": "members",
+    "argument": "role",
+    "kept": "[MovieCrewRoleSlug!]!",
+    "discarded": "[UnknownInput]",
+    "evidence": "TouchMovieCreators"
+  },
+  {
+    "parent": "Query_movie",
+    "field": "userReviews",
+    "argument": "types",
+    "kept": "[UserReviewType!]!",
+    "discarded": "[UnknownInput]",
+    "evidence": "TouchMovieRating"
+  },
+  {
+    "parent": "Query_movie",
+    "field": "userReviews",
+    "argument": "types",
+    "kept": "[UserReviewType!]!",
+    "discarded": "[UnknownInput]",
+    "evidence": "TouchMovieRating"
+  },
+  {
+    "parent": "Query_movie",
+    "field": "relatedMovies",
+    "argument": "type",
+    "kept": "[RelatedMovieType!]!",
+    "discarded": "[UnknownInput]",
+    "evidence": "TouchMovieSequelsPrequels"
+  },
+  {
+    "parent": "Ott_AbstractSeries",
+    "field": "preview",
+    "kept": "OttPreview",
+    "discarded": "OttPreview_AbstractSeries",
+    "evidence": "TouchTvSeriesBaseInfo"
+  },
+  {
+    "parent": "Query",
+    "field": "webPage",
+    "argument": "platform",
+    "kept": "WebClientPlatform",
+    "discarded": "UnknownInput",
+    "evidence": "TouchTvSeriesBaseInfo"
+  },
+  {
+    "parent": "Query",
+    "field": "webPage",
+    "argument": "platform",
+    "kept": "WebClientPlatform",
+    "discarded": "UnknownInput",
+    "evidence": "TvSeriesBaseInfo"
+  },
+  {
+    "parent": "Query",
+    "field": "userProfile",
+    "kept": "UserProfile",
+    "discarded": "UserProfileInterface",
+    "evidence": "UserMovieFolders"
+  },
+  {
+    "parent": "Query",
+    "field": "userProfile",
+    "kept": "UserProfile",
+    "discarded": "UserProfileInterface",
+    "evidence": "UserPersonFolders"
+  },
+  {
+    "parent": "Query",
+    "field": "userProfile",
+    "kept": "UserProfile",
+    "discarded": "UserProfileInterface",
+    "evidence": "UserProfileBackgrounds"
+  },
+  {
+    "parent": "Query",
+    "field": "userProfileBySocialAlias",
+    "argument": "socialAlias",
+    "kept": "UserSocialAliasInput!",
+    "discarded": "UnknownInput",
+    "evidence": "UserProfileSelectedBackground"
+  },
+  {
+    "parent": "Query",
+    "field": "userProfileBySocialAlias",
+    "kept": "UserProfile",
+    "discarded": "UserProfileInterface",
+    "evidence": "UserReactionMovies"
+  },
+  {
+    "parent": "Query",
+    "field": "userProfileBySocialAlias",
+    "argument": "socialAlias",
+    "kept": "UserSocialAliasInput!",
+    "discarded": "UnknownInput",
+    "evidence": "UserReactionMovies"
+  },
+  {
+    "parent": "Query",
+    "field": "userProfileBySocialAlias",
+    "kept": "UserProfile",
+    "discarded": "UserProfileInterface",
+    "evidence": "UserReactionMoviesPage"
+  },
+  {
+    "parent": "Query",
+    "field": "userProfileBySocialAlias",
+    "argument": "socialAlias",
+    "kept": "UserSocialAliasInput!",
+    "discarded": "UnknownInput",
+    "evidence": "UserReactionMoviesPage"
+  },
+  {
+    "parent": "Query",
+    "field": "userProfileBySocialAlias",
+    "argument": "socialAlias",
+    "kept": "UserSocialAliasInput!",
+    "discarded": "UnknownInput",
+    "evidence": "UserReactionMoviesStat"
+  },
+  {
+    "parent": "Mutation_userProfile_social_subscriptions_requests",
+    "field": "accept",
+    "argument": "input",
+    "kept": "SocialSubscriptionRequestInput!",
+    "discarded": "UnknownInput",
+    "evidence": "AcceptSubscribeRequest"
+  },
+  {
+    "parent": "Mutation_userProfile_social_subscriptions_requests",
+    "field": "reject",
+    "argument": "input",
+    "kept": "SocialSubscriptionRequestInput!",
+    "discarded": "UnknownInput",
+    "evidence": "RejectSubscribeRequest"
+  },
+  {
+    "parent": "Mutation_userProfile_social",
+    "field": "setPreparedBackground",
+    "argument": "input",
+    "kept": "SetProfilePreparedBackgroundInput!",
+    "discarded": "UnknownInput",
+    "evidence": "SetUserProfileBackground"
+  },
+  {
+    "parent": "Mutation_userProfile_social_subscriptions",
+    "field": "subscribe",
+    "argument": "input",
+    "kept": "AddSocialSubscriptionInput!",
+    "discarded": "UnknownInput",
+    "evidence": "SubscribeToUser"
+  },
+  {
+    "parent": "Mutation_userProfile_social_subscriptions",
+    "field": "unsubscribeFromMe",
+    "argument": "input",
+    "kept": "RemoveSocialSubscriptionFromMeInput!",
+    "discarded": "UnknownInput",
+    "evidence": "UnsubscribeFromMe"
+  },
+  {
+    "parent": "Mutation_userProfile_social_subscriptions",
+    "field": "unsubscribe",
+    "argument": "input",
+    "kept": "RemoveSocialSubscriptionInput!",
+    "discarded": "UnknownInput",
+    "evidence": "UnsubscribeFromUser"
+  },
+  {
+    "parent": "Ott_AbstractVideo",
+    "field": "preview",
+    "kept": "OttPreview_AbstractVideo",
+    "discarded": "Ott_AbstractVideo_preview",
+    "evidence": "FilmBaseInfo"
+  },
+  {
+    "parent": "Movie",
+    "field": "members",
+    "argument": "role",
+    "kept": "[MovieCrewRoleSlug!]!",
+    "discarded": "[UnknownInput]",
+    "evidence": "FilmBaseInfo"
+  },
+  {
+    "parent": "Movie",
+    "field": "members",
+    "argument": "role",
+    "kept": "[MovieCrewRoleSlug!]!",
+    "discarded": "UnknownInput",
+    "evidence": "FilmBaseInfo"
+  },
+  {
+    "parent": "Movie",
+    "field": "members",
+    "argument": "role",
+    "kept": "[MovieCrewRoleSlug!]!",
+    "discarded": "UnknownInput",
+    "evidence": "FilmBaseInfo"
+  },
+  {
+    "parent": "Movie",
+    "field": "members",
+    "argument": "role",
+    "kept": "[MovieCrewRoleSlug!]!",
+    "discarded": "UnknownInput",
+    "evidence": "FilmBaseInfo"
+  },
+  {
+    "parent": "Movie",
+    "field": "members",
+    "argument": "role",
+    "kept": "[MovieCrewRoleSlug!]!",
+    "discarded": "UnknownInput",
+    "evidence": "FilmBaseInfo"
+  },
+  {
+    "parent": "Movie",
+    "field": "members",
+    "argument": "role",
+    "kept": "[MovieCrewRoleSlug!]!",
+    "discarded": "UnknownInput",
+    "evidence": "FilmBaseInfo"
+  },
+  {
+    "parent": "Movie",
+    "field": "members",
+    "argument": "role",
+    "kept": "[MovieCrewRoleSlug!]!",
+    "discarded": "UnknownInput",
+    "evidence": "FilmBaseInfo"
+  },
+  {
+    "parent": "Movie",
+    "field": "members",
+    "argument": "role",
+    "kept": "[MovieCrewRoleSlug!]!",
+    "discarded": "[UnknownInput]",
+    "evidence": "FilmBaseInfo"
+  },
+  {
+    "parent": "Movie",
+    "field": "members",
+    "argument": "role",
+    "kept": "[MovieCrewRoleSlug!]!",
+    "discarded": "UnknownInput",
+    "evidence": "FilmBaseInfo"
+  },
+  {
+    "parent": "Movie",
+    "field": "relatedMovies",
+    "argument": "type",
+    "kept": "[RelatedMovieType!]!",
+    "discarded": "[UnknownInput]",
+    "evidence": "FilmBaseInfo"
+  },
+  {
+    "parent": "Query",
+    "field": "webPage",
+    "argument": "platform",
+    "kept": "WebClientPlatform",
+    "discarded": "UnknownInput",
+    "evidence": "FilmBaseInfo"
+  },
+  {
+    "parent": "Movie",
+    "field": "members",
+    "argument": "role",
+    "kept": "[MovieCrewRoleSlug!]!",
+    "discarded": "[UnknownInput]",
+    "evidence": "FilmPage"
+  },
+  {
+    "parent": "Movie",
+    "field": "members",
+    "argument": "role",
+    "kept": "[MovieCrewRoleSlug!]!",
+    "discarded": "UnknownInput",
+    "evidence": "FilmPage"
+  },
+  {
+    "parent": "Movie",
+    "field": "ott",
+    "kept": "Ott_AbstractVideo",
+    "discarded": "Ott_AbstractSeries",
+    "evidence": "FilmPage"
+  },
+  {
+    "parent": "Query_movie",
+    "field": "trailers",
+    "argument": "orderBy",
+    "kept": "TrailerOrderBy",
+    "discarded": "UnknownInput",
+    "evidence": "MovieDetails"
+  },
+  {
+    "parent": "Query_movie",
+    "field": "trivias",
+    "argument": "type",
+    "kept": "TriviaType!",
+    "discarded": "UnknownInput",
+    "evidence": "MovieDetails"
+  },
+  {
+    "parent": "Query_movie",
+    "field": "trivias",
+    "argument": "type",
+    "kept": "TriviaType!",
+    "discarded": "UnknownInput",
+    "evidence": "MovieDetails"
+  },
+  {
+    "parent": "Query",
+    "field": "webPage",
+    "argument": "platform",
+    "kept": "WebClientPlatform",
+    "discarded": "UnknownInput",
+    "evidence": "TvSeriesBaseInfo"
+  }
+]

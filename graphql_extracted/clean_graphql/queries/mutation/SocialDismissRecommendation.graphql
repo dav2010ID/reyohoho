@@ -1,0 +1,16 @@
+mutation SocialDismissRecommendation(
+  $input: DismissSocialSubscriptionRecommendationInput!
+) {
+  userProfile {
+    social {
+      subscriptions {
+        dismissRecommendation(input: $input) {
+          status
+          error {
+            message
+          }
+        }
+      }
+    }
+  }
+}

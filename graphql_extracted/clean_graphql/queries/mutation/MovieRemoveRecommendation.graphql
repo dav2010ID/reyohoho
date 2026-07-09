@@ -1,0 +1,16 @@
+mutation MovieRemoveRecommendation($movieId: Long!) {
+  movie {
+    recommendation {
+      remove(movieId: $movieId) {
+        error {
+          message
+          __typename
+        }
+        status
+        __typename
+      }
+      __typename
+    }
+    __typename
+  }
+}

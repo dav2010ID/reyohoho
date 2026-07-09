@@ -1,0 +1,32 @@
+query MovieMobileDetailsTrailers($movieId: Long!, $offset: Int!, $limit: Int!) {
+  movie(id: $movieId) {
+    trailers(offset: $offset, limit: $limit, orderBy: IS_MAIN_MAKE_DATE_DESC) {
+      offset
+      limit
+      total
+      items {
+        __typename
+        ...trailerWithDurationFragment
+      }
+    }
+  }
+}
+
+fragment imageFragment on Image {
+  avatarsUrl
+  fallbackUrl
+}
+
+fragment trailerWithDurationFragment on Trailer {
+  contentUuid
+  duration
+  id
+  isMain
+  preview {
+    __typename
+    ...imageFragment
+  }
+  streamUrl
+  title
+  createdAt
+}

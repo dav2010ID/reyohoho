@@ -1,0 +1,134 @@
+query MovieDetailsMobileMainReviews(
+  $movieId: Long!
+  $limit: Int!
+  $includeMovieUserData: Boolean!
+  $userTypes: [UserReviewType!]! = [POSITIVE, NEGATIVE, NEUTRAL]
+  $criticTypes: [CriticReviewType!]! = [POSITIVE, NEGATIVE]
+  $offset: Int! = 0
+) {
+  movie(id: $movieId) {
+    __typename
+    ...movieDetailsMobileReviewsTotalMetaFragment
+    ...movieDetailsMobileUsersReviewsFragment
+    ...movieDetailsMobileCriticsReviewsFragment
+  }
+}
+
+fragment movieDetailsMobileReviewsTotalMetaFragment on Movie {
+  reviews {
+    user {
+      positive: items(types: [POSITIVE]) {
+        total
+      }
+      neutral: items(types: [NEUTRAL]) {
+        total
+      }
+      negative: items(types: [NEGATIVE]) {
+        total
+      }
+    }
+    critic {
+      positive: items(types: [POSITIVE]) {
+        total
+      }
+      negative: items(types: [NEGATIVE]) {
+        total
+      }
+    }
+  }
+}
+
+fragment imageFragment on Image {
+  avatarsUrl
+  fallbackUrl
+}
+
+fragment movieUserReviewFragment on UserReview {
+  id
+  title
+  text
+  createdAt
+  type
+  author {
+    id
+    login
+    avatar {
+      __typename
+      ...imageFragment
+    }
+  }
+  votes {
+    positiveCount
+    negativeCount
+  }
+  userData @include(if: $includeMovieUserData) {
+    __typename
+    ... on UserReviewUserData {
+      voting
+    }
+  }
+}
+
+fragment movieDetailsMobileUsersReviewsFragment on Movie {
+  reviews {
+    user {
+      items(
+        types: $userTypes
+        offset: $offset
+        limit: $limit
+        orderBy: TOP_USEFULNESS_THEN_CREATED_AT_DESC
+      ) {
+        offset
+        limit
+        total
+        items {
+          __typename
+          ...movieUserReviewFragment
+        }
+      }
+    }
+  }
+}
+
+fragment movieCriticReviewFragment on CriticReview {
+  id
+  text
+  textDate
+  type
+  author {
+    id
+    firstName
+    lastName
+  }
+  source {
+    id
+    title
+    icon {
+      __typename
+      ...imageFragment
+    }
+  }
+  sourceUrl
+  commentsCount
+}
+
+fragment movieDetailsMobileCriticsReviewsFragment on Movie {
+  reviews {
+    critic {
+      items(
+        types: $criticTypes
+        offset: $offset
+        limit: $limit
+        orderBy: TEXT_DATE_DESC
+      ) {
+        offset
+        limit
+        total
+        items {
+          __typename
+          ...movieCriticReviewFragment
+        }
+      }
+    }
+  }
+}

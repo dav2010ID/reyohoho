@@ -1,0 +1,228 @@
+query PanelSections(
+  $ids: [ID!]!
+  $lightTargetingInput: TargetingInput!
+  $darkTargetingInput: TargetingInput!
+  $weightType: SHORTCUT_WEIGHT_TYPE
+) {
+  sections: sections(ids: $ids) {
+    __typename
+    ...sectionFragment
+  }
+  darkSections: sections(ids: $ids) {
+    __typename
+    ...darkSectionFragment
+  }
+}
+
+fragment hexColorFragment on HexColor {
+  a
+  hex
+}
+
+fragment gradientFragment on Gradient {
+  __typename
+  colors {
+    hexColor {
+      __typename
+      ...hexColorFragment
+    }
+    location
+  }
+  ... on LinearGradient {
+    angle
+  }
+  ... on RadialGradient {
+    relativeCenter {
+      x
+      y
+    }
+    relativeRadius {
+      x
+      y
+    }
+  }
+}
+
+fragment colorFragment on Colors {
+  value {
+    __typename
+    ... on GradientColor {
+      gradient {
+        __typename
+        ...gradientFragment
+      }
+    }
+    ... on HexColor {
+      __typename
+      ...hexColorFragment
+    }
+  }
+}
+
+fragment actionFragment on Action {
+  text
+  textColor
+  textColors {
+    __typename
+    ...colorFragment
+  }
+  backgroundColor
+  backgroundColors {
+    __typename
+    ...colorFragment
+  }
+  url
+  deeplink
+  actionType
+}
+
+fragment attributedTextItemFragment on AttributedTextItem {
+  __typename
+  ... on TextProperties {
+    name
+    text
+  }
+}
+
+fragment textIconFragment on AttributedTextItem {
+  __typename
+  ... on TextIconProperties {
+    id
+    url
+    fallbackText
+  }
+}
+
+fragment styledTextFragment on AttributedTextItem {
+  __typename
+  ... on StyledTextProperties {
+    id
+    text
+    textColor {
+      __typename
+      ...colorFragment
+    }
+    isBold
+    isItalic
+  }
+}
+
+fragment attributedTextFragment on AttributedText {
+  items {
+    __typename
+    ...attributedTextItemFragment
+    ...textIconFragment
+    ...styledTextFragment
+  }
+}
+
+fragment overlayFragment on Overlay {
+  text
+  textColor
+  textColors {
+    __typename
+    ...colorFragment
+  }
+  shape
+  imageUrl
+  background {
+    color
+  }
+  attributedText {
+    __typename
+    ...attributedTextFragment
+  }
+}
+
+fragment shortcutFragment on Shortcut {
+  __typename
+  id
+  name
+  actions {
+    __typename
+    ...actionFragment
+  }
+  iconUrl
+  title
+  subtitle
+  textStyle {
+    color
+  }
+  background {
+    color
+    colors {
+      __typename
+      ...colorFragment
+    }
+    imageUrl
+  }
+  commonOverlays {
+    __typename
+    ...overlayFragment
+  }
+  additionalData
+}
+
+fragment sectionFragment on Section {
+  id
+  name
+  viewType
+  shortcuts(targeting: $lightTargetingInput, weightType: $weightType) {
+    __typename
+    ...shortcutFragment
+  }
+  hasHeavyShortcuts(targeting: $lightTargetingInput)
+}
+
+fragment darkOverlayFragment on Overlay {
+  text
+  textColor
+  textColors {
+    __typename
+    ...colorFragment
+  }
+  shape
+  imageUrl
+  background {
+    color
+  }
+  attributedText {
+    __typename
+    ...attributedTextFragment
+  }
+}
+
+fragment darkShortcutFragment on Shortcut {
+  id
+  name
+  iconUrl
+  actions {
+    __typename
+    ...actionFragment
+  }
+  textStyle {
+    color
+  }
+  background {
+    color
+    colors {
+      __typename
+      ...colorFragment
+    }
+    imageUrl
+  }
+  commonOverlays {
+    __typename
+    ...darkOverlayFragment
+  }
+  additionalData
+}
+
+fragment darkSectionFragment on Section {
+  shortcuts(targeting: $darkTargetingInput) {
+    __typename
+    ...darkShortcutFragment
+  }
+  id
+  viewType
+}

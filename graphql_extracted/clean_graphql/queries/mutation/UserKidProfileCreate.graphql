@@ -1,0 +1,32 @@
+mutation UserKidProfileCreate(
+  $name: String!
+  $avatarUrl: String!
+  $birthday: LocalDate
+  $gender: Gender
+  $ageRestriction: AgeRestriction!
+) {
+  userProfile {
+    userKidSubProfile {
+      create(
+        input: {
+          avatarUrl: $avatarUrl
+          birthday: $birthday
+          displayName: $name
+          gender: $gender
+          restrictions: { ageRestriction: $ageRestriction }
+        }
+      ) {
+        error {
+          message
+        }
+        status
+        userKidSubProfile {
+          id {
+            puid
+            ottId
+          }
+        }
+      }
+    }
+  }
+}

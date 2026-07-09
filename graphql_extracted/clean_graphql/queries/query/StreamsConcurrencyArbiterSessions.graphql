@@ -1,0 +1,9 @@
+query StreamsConcurrencyArbiterSessions($config: Json!) {
+  userProfile {
+    concurrencyArbiter(config: $config) {
+      concurrentWatchSessions {
+        id
+      }
+    }
+  }
+}

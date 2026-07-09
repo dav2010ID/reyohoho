@@ -1,0 +1,85 @@
+mutation CreateSilentInvoice(
+  $eventSessionId: String!
+  $tariffId: OfferNameScalar
+  $optionsIds: [OfferNameScalar!]!
+  $offerFor: OfferNameScalar
+  $language: TRANSITION_LANGUAGE!
+  $origin: String!
+  $returnPath: URLScalar!
+  $source: String!
+  $target: String!
+  $templateTag: TEMPLATE_TAG!
+  $developerPayload: String!
+  $offersPositionId: String!
+  $offersBatchId: String!
+  $externalCallerPayload: String!
+  $experimentFlags: [String!]
+) {
+  invoice {
+    externalCreate(
+      eventSessionId: $eventSessionId
+      req: {
+        offersPositionId: $offersPositionId
+        offersBatchId: $offersBatchId
+        compositeOffer: {
+          tariffOffer: $tariffId
+          serviceOffers: $optionsIds
+          offerFor: $offerFor
+        }
+        developerPayload: $developerPayload
+        language: $language
+        origin: $origin
+        returnPath: $returnPath
+        source: $source
+        target: $target
+        templateTag: $templateTag
+        silent: true
+        externalCallerPayload: $externalCallerPayload
+        oneClickRequested: true
+        experimentFlags: $experimentFlags
+      }
+    ) {
+      __typename
+      ...invoice
+    }
+  }
+}
+
+fragment invoicePrice on Price {
+  currency
+  amount
+}
+
+fragment invoicePayment on Payment {
+  id
+  respCode
+  respDesc
+  status
+}
+
+fragment invoice on Invoice {
+  id
+  invoiceStatus
+  form
+  paymentMethodId
+  paidAmount {
+    __typename
+    ...invoicePrice
+  }
+  payment {
+    __typename
+    ...invoicePayment
+  }
+  totalAmount {
+    __typename
+    ...invoicePrice
+  }
+  invoicePollingParams {
+    retryDelayMillis
+    timeoutMillis
+  }
+  widgetQrCodeParams {
+    widgetUrl
+    underlineText
+  }
+}

@@ -1,0 +1,13 @@
+mutation ReportPlaqueSeen(
+  $targetingInput: TargetingInput!
+  $plaqueId: String!
+  $context: String
+) {
+  plaqueSeen(
+    input: {
+      plaqueId: $plaqueId
+      context: $context
+      targeting: $targetingInput
+    }
+  )
+}

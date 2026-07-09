@@ -1,0 +1,18 @@
+mutation FoldersSetMovieInFavoriteFolder($movieId: Long!, $isAdded: Boolean!) {
+  movie {
+    favorite {
+      set(input: { movieId: $movieId }) @include(if: $isAdded) {
+        error {
+          message
+        }
+        status
+      }
+      remove(input: { movieId: $movieId }) @skip(if: $isAdded) {
+        error {
+          message
+        }
+        status
+      }
+    }
+  }
+}

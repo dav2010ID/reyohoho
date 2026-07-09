@@ -1,0 +1,472 @@
+query SportCompetitionData(
+  $competitionId: String!
+  $showcaseId: String!
+  $showcaseOffset: Int! = 0
+  $showcaseLimit: Int!
+  $selectionOffset: Int! = 0
+  $selectionLimit: Int!
+  $friendsSelectionLimit: Int!
+  $friendsReactionsLimit: Int!
+  $includeUserData: Boolean!
+  $purchaseOptionsContext: BillingFeatureClientContextInput!
+  $includeMoviePurchaseOptions: Boolean!
+  $includeTrialCutInfo: Boolean!
+  $includeDeepDiveFlag: Boolean! = true
+  $includeSportReactions: Boolean!
+  $includeFriendsSelection: Boolean!
+  $includeVerification: Boolean!
+  $includeNotificationsSelection: Boolean!
+  $filter: SportShowcaseFilterInput
+) {
+  clientInfo {
+    __typename
+    ...showcaseClientInfoFragment
+  }
+  competition(id: $competitionId) {
+    __typename
+    ...sportCompetitionMetaFragment
+  }
+  sportShowcase(id: $showcaseId, filter: $filter) {
+    __typename
+    ...sportCompetitionShowcaseFragment
+  }
+}
+
+fragment showcaseClientInfoFragment on ClientInfo {
+  time {
+    currentTimeUtc
+  }
+}
+
+fragment imageFragment on Image {
+  avatarsUrl
+  fallbackUrl
+}
+
+fragment socialInfoFragment on UserSocialInfo {
+  alias {
+    defaultValue {
+      value
+      source
+    }
+  }
+  name {
+    defaultValue {
+      value
+    }
+  }
+  avatar {
+    defaultValue {
+      value {
+        __typename
+        ...imageFragment
+      }
+    }
+  }
+  publicStatus
+  url
+  badges @include(if: $includeVerification) {
+    verified {
+      id
+      title
+      description
+      icons {
+        format
+        image {
+          __typename
+          ...imageFragment
+        }
+      }
+    }
+  }
+}
+
+fragment friendSportReactionFragment on UserSportReactions {
+  user {
+    id {
+      puid
+    }
+    social {
+      __typename
+      ...socialInfoFragment
+    }
+  }
+  reactions(includeTypes: [FOLLOW]) {
+    __typename
+    ... on Follow {
+      follow
+    }
+  }
+}
+
+fragment sportCompetitionMetaFragment on Competition {
+  id
+  name
+  shortName
+  sportType {
+    id
+    name
+  }
+  likesCount
+  userData @include(if: $includeUserData) {
+    __typename
+    ... on SportCompetitionUserData {
+      isFavourite
+    }
+  }
+  gallery {
+    backgrounds {
+      accentRight {
+        __typename
+        ...imageFragment
+      }
+      accentRightSquare {
+        __typename
+        ...imageFragment
+      }
+    }
+    logos {
+      main {
+        __typename
+        ...imageFragment
+      }
+    }
+  }
+  friendsSportReactions(
+    includeTypes: [FOLLOW]
+    limit: $friendsReactionsLimit
+    offset: 0
+  ) @include(if: $includeSportReactions) {
+    total
+    items {
+      __typename
+      ...friendSportReactionFragment
+    }
+  }
+}
+
+fragment sportBrandingFragment on style {
+  __typename
+  ... on CoverAndLogoStyle {
+    title
+    comment
+    cover {
+      __typename
+      ...imageFragment
+    }
+    squareCover {
+      __typename
+      ...imageFragment
+    }
+    logo {
+      __typename
+      ...imageFragment
+    }
+  }
+  ... on ShieldAndTextStyle {
+    icon {
+      __typename
+      ...imageFragment
+    }
+    text
+    textColor
+  }
+}
+
+fragment sportShowcaseSelectionPagingMetaFragment on SessionPagingList_SelectionItem {
+  offset
+  limit
+  hasMore
+}
+
+fragment movieContentPackageFragment on ContentPackage {
+  billingFeatureName
+}
+
+fragment sportViewOptionFragment on ViewOption {
+  type
+  purchasabilityStatus
+  contentPackageToBuy {
+    __typename
+    ...movieContentPackageFragment
+  }
+  contentPackageToUnfreeze {
+    __typename
+    ...movieContentPackageFragment
+  }
+  purchaseOptions(clientContext: $purchaseOptionsContext)
+    @include(if: $includeMoviePurchaseOptions) {
+    billingFeatureNames
+    target
+  }
+  trialCutInfo @include(if: $includeTrialCutInfo) {
+    texts {
+      title
+      subTitle
+      buttonText
+    }
+    token
+    type
+  }
+  purchaseOptionCustomProperties @include(if: $includeMoviePurchaseOptions)
+}
+
+fragment sportHighlightSelectionItemFragment on SportHighlightSelectionItem {
+  highlight {
+    id
+    title
+    comment
+    duration
+    gallery {
+      covers {
+        horizontal {
+          __typename
+          ...imageFragment
+        }
+      }
+      posters {
+        horizontal {
+          __typename
+          ...imageFragment
+        }
+        vertical {
+          __typename
+          ...imageFragment
+        }
+      }
+    }
+    viewOption {
+      __typename
+      ...sportViewOptionFragment
+    }
+  }
+}
+
+fragment sportEventSelectionItemTeamFragment on SportTeam {
+  id
+  name
+  gallery {
+    logos {
+      main {
+        __typename
+        ...imageFragment
+      }
+    }
+  }
+}
+
+fragment sportEventSelectionItemFragment on SportEventSelectionItem {
+  sportEvent {
+    __typename
+    id
+    sportEventId
+    title
+    comment
+    startTime
+    endTime
+    expirationTime
+    deepDiveAvailable @include(if: $includeDeepDiveFlag)
+    description
+    gallery {
+      posters {
+        accentRightWithLogo {
+          __typename
+          ...imageFragment
+        }
+        announceHorizontal {
+          __typename
+          ...imageFragment
+        }
+        liveHorizontal {
+          __typename
+          ...imageFragment
+        }
+        recordHorizontal {
+          __typename
+          ...imageFragment
+        }
+      }
+    }
+    competition {
+      id
+      shortName
+      sportType {
+        name
+      }
+    }
+    liveMeta {
+      __typename
+      ... on SportEventLiveMeta {
+        stage
+      }
+      ... on SportTeamsEventLiveMeta {
+        stage
+        firstTeamScore {
+          result
+        }
+        secondTeamScore {
+          result
+        }
+      }
+    }
+    viewOption {
+      __typename
+      ...sportViewOptionFragment
+    }
+    ... on SportTeamsEvent {
+      firstTeam {
+        __typename
+        ...sportEventSelectionItemTeamFragment
+      }
+      secondTeam {
+        __typename
+        ...sportEventSelectionItemTeamFragment
+      }
+    }
+  }
+}
+
+fragment showcaseEditorialSelectionItemFragment on SelectionItem {
+  __typename
+  ... on EditorialFeatureSelectionItem {
+    description
+    entityId
+    entityKpId
+    entityType
+    entityName
+    itemType
+    imageSizeType
+    image {
+      __typename
+      ...imageFragment
+    }
+  }
+}
+
+fragment sportTeamSelectionItemFragment on SportTeamSelectionItem {
+  sportTeam {
+    id
+    name
+    gallery {
+      logos {
+        main {
+          __typename
+          ...imageFragment
+        }
+      }
+    }
+    userData {
+      isFavourite
+    }
+  }
+}
+
+fragment sportNotificationSelectionItemFragment on NotificationSelectionItem {
+  notification {
+    notificationPayloadId
+    payload
+    templateId
+    feedbackToken
+  }
+}
+
+fragment sportCompetitionShowcaseSelectionFragment on AbstractSelection {
+  __typename
+  ... on SportSelection {
+    id
+    title
+    showTitle
+    comment
+    style {
+      __typename
+      ...sportBrandingFragment
+    }
+    content(offset: $selectionOffset, limit: $selectionLimit) {
+      __typename
+      ...sportShowcaseSelectionPagingMetaFragment
+      items {
+        __typename
+        ...sportHighlightSelectionItemFragment
+        ...sportEventSelectionItemFragment
+      }
+    }
+  }
+  ... on EditorialFeatureSelection {
+    id
+    title
+    showTitle
+    comment
+    content(offset: $selectionOffset, limit: $selectionLimit) {
+      __typename
+      ...sportShowcaseSelectionPagingMetaFragment
+      items {
+        __typename
+        ...showcaseEditorialSelectionItemFragment
+      }
+    }
+  }
+  ... on SportTeamsSelection {
+    id
+    title
+    showTitle
+    comment
+    content(offset: $selectionOffset, limit: $selectionLimit) {
+      __typename
+      ...sportShowcaseSelectionPagingMetaFragment
+      items {
+        __typename
+        ...sportTeamSelectionItemFragment
+      }
+    }
+  }
+  ... on NotificationsSelection @include(if: $includeNotificationsSelection) {
+    id
+    title
+    showTitle
+    content(offset: $selectionOffset, limit: $selectionLimit) {
+      __typename
+      ...sportShowcaseSelectionPagingMetaFragment
+      items {
+        __typename
+        ...sportNotificationSelectionItemFragment
+      }
+    }
+  }
+}
+
+fragment sportFriendsSelectionFragment on Node {
+  __typename
+  ... on SportFriendsSelection {
+    id
+    title
+    showTitle
+    comment
+    friendsSportReactions(
+      offset: $selectionOffset
+      limit: $friendsSelectionLimit
+      includeTypes: [FOLLOW]
+    ) {
+      limit
+      offset
+      total
+      items {
+        __typename
+        ...friendSportReactionFragment
+      }
+    }
+  }
+}
+
+fragment sportCompetitionShowcaseFragment on AbstractShowcase {
+  id
+  content(offset: $showcaseOffset, limit: $showcaseLimit) {
+    offset
+    limit
+    hasMore
+    items {
+      __typename
+      ...sportCompetitionShowcaseSelectionFragment
+      ...sportFriendsSelectionFragment @include(if: $includeFriendsSelection)
+    }
+  }
+}

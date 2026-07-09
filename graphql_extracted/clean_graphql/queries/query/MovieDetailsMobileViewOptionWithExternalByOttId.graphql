@@ -1,0 +1,195 @@
+query MovieDetailsMobileViewOptionWithExternalByOttId(
+  $contentUuid: String!
+  $includeExternalViewOptions: Boolean!
+  $includeTrialCutInfo: Boolean!
+  $includeContentBrandUserData: Boolean!
+) {
+  movieByContentUuid(contentUuid: $contentUuid) {
+    __typename
+    ...movieDetailsMobileViewOptionWithExternalFragment
+  }
+  clientInfo {
+    time {
+      currentTimeUtc
+    }
+  }
+}
+
+fragment availabilityAnnounceFragment on AvailabilityAnnounce {
+  announcePromise
+  availabilityDate
+  type
+}
+
+fragment movieContentPackageFragment on ContentPackage {
+  billingFeatureName
+}
+
+fragment movieViewOptionTrialCutInfoFragment on TrialCutInfo {
+  texts {
+    title
+    subTitle
+    buttonText
+  }
+  token
+  type
+}
+
+fragment movieWatchPeriodFragment on WatchPeriod {
+  timeToExpire
+  watchPeriodStatus
+}
+
+fragment watchingRejectionFragment on WatchingRejection {
+  details
+  reason
+}
+
+fragment movieDetailsMobileViewOptionFragment on Movie {
+  viewOption {
+    type
+    purchasabilityStatus
+    isWatchableOnDeviceInCurrentRegion: isWatchable(
+      filter: { anyDevice: false, anyRegion: false }
+    )
+    availabilityAnnounce {
+      __typename
+      ...availabilityAnnounceFragment
+    }
+    contentPackageToUnfreeze {
+      __typename
+      ...movieContentPackageFragment
+    }
+    watchabilityStatus
+    watchabilityExpirationTime
+    downloadabilityStatus
+    trialCutInfo @include(if: $includeTrialCutInfo) {
+      __typename
+      ...movieViewOptionTrialCutInfoFragment
+    }
+    purchaseOptionCustomProperties
+    texts {
+      disclaimer
+    }
+    watchPeriod {
+      __typename
+      ...movieWatchPeriodFragment
+    }
+    watchingRejectionReason {
+      __typename
+      ...watchingRejectionFragment
+    }
+  }
+}
+
+fragment imageFragment on Image {
+  avatarsUrl
+  fallbackUrl
+}
+
+fragment externalViewOptionContentBrandFragment on ContentBrand {
+  id
+  name
+  colors {
+    main
+  }
+  gallery {
+    logos {
+      colored {
+        __typename
+        ...imageFragment
+      }
+      centeredMain {
+        __typename
+        ...imageFragment
+      }
+      dynamic {
+        __typename
+        ...imageFragment
+      }
+      square {
+        __typename
+        ...imageFragment
+      }
+      gradient {
+        __typename
+        ...imageFragment
+      }
+    }
+  }
+  userData @include(if: $includeContentBrandUserData) {
+    isLiked
+  }
+}
+
+fragment incompleteDateFragment on IncompleteDate {
+  date
+  accuracy
+}
+
+fragment payOfferFragment on PayOffer {
+  button {
+    badge {
+      text
+      icon {
+        __typename
+        ...imageFragment
+      }
+    }
+    disclaimer {
+      text
+      link
+    }
+  }
+  selectorLink
+}
+
+fragment movieExternalViewOptionFragment on ExternalViewOption {
+  __typename
+  ... on ExternalBaseOption {
+    contentBrand {
+      __typename
+      ...externalViewOptionContentBrandFragment
+    }
+    externalUrl
+  }
+  ... on ExternalPartnerOption {
+    contentBrand {
+      __typename
+      ...externalViewOptionContentBrandFragment
+    }
+    externalUrl
+    action {
+      __typename
+      ... on WatchAction {
+        __typename
+      }
+      ... on BillingFeaturePurchaseAction {
+        purchaseOptionCustomProperties
+      }
+    }
+  }
+  ... on TicketOption {
+    purchasable
+    releaseAnnounce {
+      available
+      releaseDate {
+        __typename
+        ...incompleteDateFragment
+      }
+    }
+    payOffer {
+      __typename
+      ...payOfferFragment
+    }
+  }
+}
+
+fragment movieDetailsMobileViewOptionWithExternalFragment on Movie {
+  __typename
+  ...movieDetailsMobileViewOptionFragment
+  externalViewOptions @include(if: $includeExternalViewOptions) {
+    __typename
+    ...movieExternalViewOptionFragment
+  }
+}

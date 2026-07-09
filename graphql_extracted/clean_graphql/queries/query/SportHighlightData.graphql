@@ -1,0 +1,58 @@
+query SportHighlightData(
+  $sportHighlightId: String!
+  $purchaseOptionsContext: BillingFeatureClientContextInput!
+  $includeMoviePurchaseOptions: Boolean!
+  $includeTrialCutInfo: Boolean!
+) {
+  clientInfo {
+    time {
+      currentTimeUtc
+    }
+  }
+  highlight(id: $sportHighlightId) {
+    __typename
+    ...sportHighlightDataFragment
+  }
+}
+
+fragment movieContentPackageFragment on ContentPackage {
+  billingFeatureName
+}
+
+fragment sportViewOptionFragment on ViewOption {
+  type
+  purchasabilityStatus
+  contentPackageToBuy {
+    __typename
+    ...movieContentPackageFragment
+  }
+  contentPackageToUnfreeze {
+    __typename
+    ...movieContentPackageFragment
+  }
+  purchaseOptions(clientContext: $purchaseOptionsContext)
+    @include(if: $includeMoviePurchaseOptions) {
+    billingFeatureNames
+    target
+  }
+  trialCutInfo @include(if: $includeTrialCutInfo) {
+    texts {
+      title
+      subTitle
+      buttonText
+    }
+    token
+    type
+  }
+  purchaseOptionCustomProperties @include(if: $includeMoviePurchaseOptions)
+}
+
+fragment sportHighlightDataFragment on SportHighlight {
+  id
+  title
+  comment
+  viewOption {
+    __typename
+    ...sportViewOptionFragment
+  }
+}

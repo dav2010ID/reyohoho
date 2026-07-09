@@ -1,0 +1,165 @@
+query FoldersMobileList(
+  $includeSystemFolders: Boolean!
+  $includePersonFolders: Boolean!
+  $movieFoldersOffset: Int!
+  $movieFoldersLimit: Int!
+  $personFoldersLimit: Int!
+) {
+  userProfile {
+    __typename
+    ...foldersMobileListFragment
+  }
+}
+
+fragment imageFragment on Image {
+  avatarsUrl
+  fallbackUrl
+}
+
+fragment baseMoviePostersFragment on MoviePosters {
+  vertical(override: OTT_WHEN_EXISTS) {
+    __typename
+    ...imageFragment
+  }
+  verticalWithRightholderLogo {
+    __typename
+    ...imageFragment
+  }
+  horizontal {
+    __typename
+    ...imageFragment
+  }
+  horizontalWithRightholderLogo {
+    __typename
+    ...imageFragment
+  }
+}
+
+fragment movieIntroPostersFragment on MoviePosters {
+  verticalIntro {
+    __typename
+    ...imageFragment
+  }
+  verticalIntroWithRightholderLogo {
+    __typename
+    ...imageFragment
+  }
+  horizontalIntro {
+    __typename
+    ...imageFragment
+  }
+  horizontalIntroWithRightholderLogo {
+    __typename
+    ...imageFragment
+  }
+}
+
+fragment moviePostersFragment on MoviePosters {
+  __typename
+  ...baseMoviePostersFragment
+  ...movieIntroPostersFragment
+}
+
+fragment favoriteMobileMoviesFragment on FavoriteMovies {
+  public
+  movies(limit: 3) {
+    limit
+    total
+    items {
+      movie {
+        gallery {
+          posters {
+            __typename
+            ...moviePostersFragment
+          }
+        }
+      }
+    }
+  }
+}
+
+fragment movieFolderFragment on Folder {
+  id
+  name
+  public
+}
+
+fragment foldersMobileListFragment on UserProfile {
+  userData {
+    favorite @include(if: $includeSystemFolders) {
+      __typename
+      ...favoriteMobileMoviesFragment
+    }
+    note @include(if: $includeSystemFolders) {
+      public
+      movies(limit: 3) {
+        limit
+        total
+        items {
+          movie {
+            gallery {
+              posters {
+                __typename
+                ...moviePostersFragment
+              }
+            }
+          }
+        }
+      }
+    }
+    movieReactions(includeTypes: [VOTE, WATCHED], limit: 3)
+      @include(if: $includeSystemFolders) {
+      limit
+      total
+      items {
+        movie {
+          gallery {
+            posters {
+              __typename
+              ...moviePostersFragment
+            }
+          }
+        }
+      }
+    }
+    movieFolders(offset: $movieFoldersOffset, limit: $movieFoldersLimit) {
+      offset
+      limit
+      total
+      items {
+        __typename
+        ...movieFolderFragment
+        movies(limit: 3) {
+          total
+          items {
+            movie {
+              gallery {
+                posters {
+                  __typename
+                  ...moviePostersFragment
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+    personFolders(limit: $personFoldersLimit)
+      @include(if: $includePersonFolders) {
+      limit
+      total
+      items {
+        persons(limit: 3) {
+          items {
+            person {
+              poster {
+                __typename
+                ...imageFragment
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,10 @@
+mutation NotificationMarkViewed($feedbackToken: String!) {
+  notification {
+    markViewed(input: { feedbackToken: $feedbackToken }) {
+      status
+      error {
+        message
+      }
+    }
+  }
+}

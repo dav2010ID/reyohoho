@@ -1,0 +1,50 @@
+query MovieDetailsMobileOttMetadata($movieId: Long!) {
+  movie(id: $movieId) {
+    __typename
+    ...movieDetailsMobileOttMetadataFragment
+  }
+}
+
+fragment movieStreamsAudioMetaFragment on AudioMeta {
+  audioChannelsNumber
+  audioGroupId
+  forAdult
+  language
+  languageName
+  quality
+  qualityName
+  studio
+  type
+  visibleByDefault
+}
+
+fragment movieStreamsSubtitleMetaFragment on SubtitleMeta {
+  forAdult
+  language
+  languageName
+  studio
+  type
+  visibleByDefault
+}
+
+fragment movieDetailsMobileOttMetadataFragment on Movie {
+  ott {
+    preview {
+      availableMetadata(filter: { isSupportedByClient: true }) {
+        audioMeta {
+          __typename
+          ...movieStreamsAudioMetaFragment
+        }
+        subtitleMeta {
+          __typename
+          ...movieStreamsSubtitleMetaFragment
+        }
+      }
+      features(filter: { layout: OTT_TITLE_CARD }) {
+        alias
+        displayName
+        group
+      }
+    }
+  }
+}

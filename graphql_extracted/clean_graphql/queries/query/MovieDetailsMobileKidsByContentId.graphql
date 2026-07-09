@@ -1,0 +1,334 @@
+query MovieDetailsMobileKidsByContentId(
+  $contentId: String!
+  $includePlannedToWatchRating: Boolean! = false
+  $purchaseOptionsContext: BillingFeatureClientContextInput!
+  $includeMoviePurchaseOptions: Boolean! = false
+  $includeTrialCutInfo: Boolean! = false
+  $includeEstEarlyAccess: Boolean! = false
+) {
+  movieByContentUuid(contentUuid: $contentId) {
+    __typename
+    ...movieDetailsMobileKidsFragment
+  }
+}
+
+fragment titleFragment on Title {
+  localized
+  original
+}
+
+fragment genreFragment on Genre {
+  id
+  name
+}
+
+fragment countryFragment on Country {
+  id
+  name
+}
+
+fragment movieYearsFragment on Movie {
+  __typename
+  ... on VideoInterface {
+    productionYear(override: OTT_WHEN_EXISTS)
+  }
+  ... on Series {
+    fallbackYear: productionYear
+    releaseYears {
+      start
+      end
+    }
+  }
+}
+
+fragment ratingValueFragment on RatingValue {
+  isActive
+  count
+  value(precision: 1)
+}
+
+fragment ratingFragment on Rating {
+  kinopoisk {
+    __typename
+    ...ratingValueFragment
+  }
+  plannedToWatch @include(if: $includePlannedToWatchRating) {
+    __typename
+    ...ratingValueFragment
+  }
+}
+
+fragment restrictionFragment on Restriction {
+  age
+  mpaa
+}
+
+fragment imageFragment on Image {
+  avatarsUrl
+  fallbackUrl
+}
+
+fragment baseMoviePostersFragment on MoviePosters {
+  vertical(override: OTT_WHEN_EXISTS) {
+    __typename
+    ...imageFragment
+  }
+  verticalWithRightholderLogo {
+    __typename
+    ...imageFragment
+  }
+  horizontal {
+    __typename
+    ...imageFragment
+  }
+  horizontalWithRightholderLogo {
+    __typename
+    ...imageFragment
+  }
+}
+
+fragment movieIntroPostersFragment on MoviePosters {
+  verticalIntro {
+    __typename
+    ...imageFragment
+  }
+  verticalIntroWithRightholderLogo {
+    __typename
+    ...imageFragment
+  }
+  horizontalIntro {
+    __typename
+    ...imageFragment
+  }
+  horizontalIntroWithRightholderLogo {
+    __typename
+    ...imageFragment
+  }
+}
+
+fragment moviePostersFragment on MoviePosters {
+  __typename
+  ...baseMoviePostersFragment
+  ...movieIntroPostersFragment
+}
+
+fragment ottTrailerFragment on OttTrailer {
+  contentGroupUuid
+  main
+  promo
+  streamUrl
+}
+
+fragment currencyFragment on Currency {
+  symbol
+  currencyCode
+}
+
+fragment moneyAmountFragment on MoneyAmount {
+  amount
+  currency {
+    __typename
+    ...currencyFragment
+  }
+}
+
+fragment availabilityAnnounceFragment on AvailabilityAnnounce {
+  announcePromise
+  availabilityDate
+  type
+}
+
+fragment estEarlyAccessViewOptionFragment on Episode {
+  viewOption {
+    watchabilityStatus
+    purchasabilityStatus
+    optionMonetizationModels
+    transactionalPrice {
+      __typename
+      ...moneyAmountFragment
+    }
+    availabilityAnnounce {
+      __typename
+      ...availabilityAnnounceFragment
+    }
+  }
+}
+
+fragment movieOttAbstractNextEpisodeFragment on Ott_AbstractSeries {
+  nextEpisode {
+    fallback
+    episode {
+      __typename
+      contentId
+      number
+      season {
+        number
+      }
+      title {
+        __typename
+        ...titleFragment
+      }
+      ott {
+        editorAnnotation
+      }
+      ...estEarlyAccessViewOptionFragment @include(if: $includeEstEarlyAccess)
+    }
+  }
+}
+
+fragment movieOttNextEpisodeFragment on Series {
+  ott {
+    __typename
+    ...movieOttAbstractNextEpisodeFragment
+  }
+}
+
+fragment movieDurationFragment on Movie {
+  ott {
+    preview {
+      __typename
+      ... on OttPreview_AbstractVideo {
+        duration
+      }
+    }
+  }
+}
+
+fragment movieViewOptionPurchasedSubscriptionFragment on ViewOption {
+  purchasedSubscriptionTextId
+  purchasedSubscriptionName
+}
+
+fragment movieContentPackageFragment on ContentPackage {
+  billingFeatureName
+}
+
+fragment movieViewOptionTrialCutInfoFragment on TrialCutInfo {
+  texts {
+    title
+    subTitle
+    buttonText
+  }
+  token
+  type
+}
+
+fragment movieViewOptionSummaryFragment on ViewOption {
+  __typename
+  type
+  purchasabilityStatus
+  isWatchableOnDeviceInCurrentRegion: isWatchable(
+    filter: { anyDevice: false, anyRegion: false }
+  )
+  buttonText
+  ...movieViewOptionPurchasedSubscriptionFragment
+  availabilityAnnounce {
+    __typename
+    ...availabilityAnnounceFragment
+  }
+  contentPackageToBuy {
+    __typename
+    ...movieContentPackageFragment
+  }
+  contentPackageToUnfreeze {
+    __typename
+    ...movieContentPackageFragment
+  }
+  transactionalPrice {
+    __typename
+    ...moneyAmountFragment
+  }
+  transactionalMinimumPrice {
+    __typename
+    ...moneyAmountFragment
+  }
+  priceWithTotalDiscount {
+    __typename
+    ...moneyAmountFragment
+  }
+  optionMonetizationModels
+  watchabilityStatus
+  watchabilityExpirationTime
+  promotionActionType
+  downloadabilityStatus
+  purchaseOptions(clientContext: $purchaseOptionsContext)
+    @include(if: $includeMoviePurchaseOptions) {
+    billingFeatureNames
+    target
+  }
+  trialCutInfo @include(if: $includeTrialCutInfo) {
+    __typename
+    ...movieViewOptionTrialCutInfoFragment
+  }
+  purchaseOptionCustomProperties @include(if: $includeMoviePurchaseOptions)
+}
+
+fragment movieWatchPeriodFragment on WatchPeriod {
+  timeToExpire
+  watchPeriodStatus
+}
+
+fragment movieDetailsMobileKidsViewOptionFragment on ViewOption {
+  __typename
+  ...movieViewOptionSummaryFragment
+  texts {
+    disclaimer
+  }
+  watchPeriod {
+    __typename
+    ...movieWatchPeriodFragment
+  }
+}
+
+fragment movieDetailsMobileKidsFragment on Movie {
+  __typename
+  id
+  contentId
+  title {
+    __typename
+    ...titleFragment
+  }
+  editorAnnotation
+  genres {
+    __typename
+    ...genreFragment
+  }
+  countries {
+    __typename
+    ...countryFragment
+  }
+  ...movieYearsFragment
+  rating {
+    __typename
+    ...ratingFragment
+  }
+  restriction {
+    __typename
+    ...restrictionFragment
+  }
+  gallery {
+    posters {
+      __typename
+      ...moviePostersFragment
+    }
+  }
+  ottTrailers: ott {
+    trailers(limit: 10) {
+      items {
+        __typename
+        ...ottTrailerFragment
+      }
+    }
+  }
+  ...movieOttNextEpisodeFragment
+  ...movieDurationFragment
+  ... on Series {
+    seasonsTotal: seasons(isOnlyOnline: false, offset: 0, limit: 0) {
+      total
+    }
+  }
+  viewOption {
+    __typename
+    ...movieDetailsMobileKidsViewOptionFragment
+  }
+}

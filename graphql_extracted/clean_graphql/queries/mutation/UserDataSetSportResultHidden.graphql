@@ -1,0 +1,12 @@
+mutation UserDataSetSportResultHidden($value: Boolean!) {
+  userProfile {
+    sportContentSettings {
+      setResultHidden(input: { value: $value }) {
+        error {
+          message
+        }
+        status
+      }
+    }
+  }
+}

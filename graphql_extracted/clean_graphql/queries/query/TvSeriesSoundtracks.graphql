@@ -1,0 +1,22 @@
+query TvSeriesSoundtracks($tvSeriesId: Long!, $soundtrackLimit: Int = 10) {
+  tvSeries(id: $tvSeriesId) {
+    id
+    soundtrack(limit: $soundtrackLimit) {
+      items {
+        __typename
+        ... on YaMusicSoundtrackAlbum {
+          id
+          __typename
+        }
+        ... on YaMusicSoundtrackPlaylist {
+          id
+          username
+          __typename
+        }
+      }
+      total
+      __typename
+    }
+    __typename
+  }
+}

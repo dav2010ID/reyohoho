@@ -1,0 +1,14 @@
+mutation SportEventUserVote($userVote: UserVote!, $sportEventId: String!) {
+  sport {
+    event {
+      vote {
+        add(input: { userVote: $userVote, sportEventId: $sportEventId }) {
+          status
+          error {
+            message
+          }
+        }
+      }
+    }
+  }
+}

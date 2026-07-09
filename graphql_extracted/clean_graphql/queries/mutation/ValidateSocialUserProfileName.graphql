@@ -1,0 +1,16 @@
+mutation ValidateSocialUserProfileName($name: String!) {
+  userProfile {
+    social {
+      validateSocialName(input: { socialName: $name }) {
+        errors {
+          message
+          __typename
+        }
+        status
+        __typename
+      }
+      __typename
+    }
+    __typename
+  }
+}

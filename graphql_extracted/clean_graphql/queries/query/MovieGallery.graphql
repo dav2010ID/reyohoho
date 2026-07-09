@@ -1,0 +1,63 @@
+query MovieGallery($id: Long!, $limit: Int) {
+  movie(id: $id) {
+    id
+    images(types: [STILL, POSTER, WALLPAPER], limit: $limit) {
+      items {
+        image {
+          avatarsUrl
+          origSize {
+            width
+            height
+            __typename
+          }
+          __typename
+        }
+        __typename
+      }
+      total
+      __typename
+    }
+    ...MovieImagesStats
+    __typename
+  }
+}
+
+fragment MovieImagesStats on Movie {
+  concepts: images(types: [CONCEPT], limit: 0) {
+    total
+    __typename
+  }
+  covers: images(types: [COVER], limit: 0) {
+    total
+    __typename
+  }
+  fanarts: images(types: [FAN_ART], limit: 0) {
+    total
+    __typename
+  }
+  posters: images(types: [POSTER], limit: 0) {
+    total
+    __typename
+  }
+  promos: images(types: [PROMO], limit: 0) {
+    total
+    __typename
+  }
+  screenshots: images(types: [SCREENSHOT], limit: 0) {
+    total
+    __typename
+  }
+  shootings: images(types: [SHOOTING], limit: 0) {
+    total
+    __typename
+  }
+  stills: images(types: [STILL], limit: 0) {
+    total
+    __typename
+  }
+  wallpapers: images(types: [WALLPAPER], limit: 0) {
+    total
+    __typename
+  }
+  __typename
+}

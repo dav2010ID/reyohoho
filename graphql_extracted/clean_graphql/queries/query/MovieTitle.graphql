@@ -1,0 +1,15 @@
+query MovieTitle($movieId: Long!) {
+  movie(id: $movieId) {
+    __typename
+    title {
+      __typename
+      ...titleFragment
+    }
+  }
+}
+
+fragment titleFragment on Title {
+  __typename
+  localized
+  original
+}

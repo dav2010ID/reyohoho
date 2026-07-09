@@ -1,0 +1,26 @@
+mutation FoldersSetPersonInFolder(
+  $folderTypeId: Long!
+  $personId: Long!
+  $isAdded: Boolean!
+) {
+  person {
+    folder {
+      item {
+        add(input: { folderTypeId: $folderTypeId, personId: $personId })
+          @include(if: $isAdded) {
+          error {
+            message
+          }
+          status
+        }
+        remove(input: { folderTypeId: $folderTypeId, personId: $personId })
+          @skip(if: $isAdded) {
+          error {
+            message
+          }
+          status
+        }
+      }
+    }
+  }
+}

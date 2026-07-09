@@ -1,0 +1,14 @@
+mutation SportTeamRemoveFavourite($teamId: String!) {
+  sport {
+    team {
+      like {
+        remove(input: { teamId: $teamId, source: TEAM_SHOWCASE }) {
+          status
+          error {
+            message
+          }
+        }
+      }
+    }
+  }
+}

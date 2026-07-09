@@ -1,0 +1,47 @@
+query PersonImageCollection(
+  $personId: Long!
+  $limit: Int!
+  $offset: Int!
+  $types: [PersonImageType]!
+) {
+  person(id: $personId) {
+    __typename
+    images(limit: $limit, offset: $offset, types: $types) {
+      __typename
+      ...personImagesCollectionFragment
+    }
+    name
+    originalName
+  }
+}
+
+fragment personImagesCollectionFragment on PagingList_PersonImage {
+  __typename
+  total
+  offset
+  limit
+  items {
+    __typename
+    ...personImageFragment
+  }
+}
+
+fragment personImageFragment on PersonImage {
+  __typename
+  type
+  image {
+    __typename
+    ...imageFragment
+    origSize {
+      __typename
+      width
+      height
+    }
+  }
+}
+
+fragment imageFragment on Image {
+  __typename
+  avatarsUrl
+  fallbackUrl
+}

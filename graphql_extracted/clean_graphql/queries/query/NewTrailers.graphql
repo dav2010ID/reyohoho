@@ -1,0 +1,74 @@
+query NewTrailers($offset: Int = 0, $limit: Int = 15) {
+  newTrailers(offset: $offset, limit: $limit) {
+    offset
+    limit
+    total
+    items {
+      ...NewTrailer
+      __typename
+    }
+    __typename
+  }
+}
+
+fragment NewTrailerMovie on Movie {
+  id
+  title {
+    original
+    russian
+    __typename
+  }
+  genres {
+    id
+    name
+    __typename
+  }
+  ... on Film {
+    productionYear
+    __typename
+  }
+  ... on TvSeries {
+    releaseYears {
+      start
+      end
+      __typename
+    }
+    __typename
+  }
+  ... on MiniSeries {
+    releaseYears {
+      start
+      end
+      __typename
+    }
+    __typename
+  }
+  ... on Video {
+    productionYear
+    __typename
+  }
+  ... on TvShow {
+    releaseYears {
+      start
+      end
+      __typename
+    }
+    __typename
+  }
+  __typename
+}
+
+fragment NewTrailer on Trailer {
+  id
+  duration
+  isEmbedded
+  preview {
+    avatarsUrl
+    __typename
+  }
+  movie {
+    ...NewTrailerMovie
+    __typename
+  }
+  __typename
+}

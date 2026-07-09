@@ -1,0 +1,25 @@
+query TouchPersonAwards($personId: Long!) {
+  person(id: $personId) {
+    id
+    mainAward: awards(isMain: true, limit: 1) {
+      items {
+        nomination {
+          award {
+            title
+            slug
+            __typename
+          }
+          __typename
+        }
+        __typename
+      }
+      total
+      __typename
+    }
+    mainAwardWins: awards(isMain: true, isWin: true, limit: 0) {
+      total
+      __typename
+    }
+    __typename
+  }
+}

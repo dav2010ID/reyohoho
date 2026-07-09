@@ -1,0 +1,119 @@
+query MovieDetailsMobileExternalViewOptions(
+  $movieId: Long!
+  $includeContentBrandUserData: Boolean!
+) {
+  movie(id: $movieId) {
+    externalViewOptions {
+      __typename
+      ...movieExternalViewOptionFragment
+    }
+  }
+  clientInfo {
+    time {
+      currentTimeUtc
+    }
+  }
+}
+
+fragment imageFragment on Image {
+  avatarsUrl
+  fallbackUrl
+}
+
+fragment externalViewOptionContentBrandFragment on ContentBrand {
+  id
+  name
+  colors {
+    main
+  }
+  gallery {
+    logos {
+      colored {
+        __typename
+        ...imageFragment
+      }
+      centeredMain {
+        __typename
+        ...imageFragment
+      }
+      dynamic {
+        __typename
+        ...imageFragment
+      }
+      square {
+        __typename
+        ...imageFragment
+      }
+      gradient {
+        __typename
+        ...imageFragment
+      }
+    }
+  }
+  userData @include(if: $includeContentBrandUserData) {
+    isLiked
+  }
+}
+
+fragment incompleteDateFragment on IncompleteDate {
+  date
+  accuracy
+}
+
+fragment payOfferFragment on PayOffer {
+  button {
+    badge {
+      text
+      icon {
+        __typename
+        ...imageFragment
+      }
+    }
+    disclaimer {
+      text
+      link
+    }
+  }
+  selectorLink
+}
+
+fragment movieExternalViewOptionFragment on ExternalViewOption {
+  __typename
+  ... on ExternalBaseOption {
+    contentBrand {
+      __typename
+      ...externalViewOptionContentBrandFragment
+    }
+    externalUrl
+  }
+  ... on ExternalPartnerOption {
+    contentBrand {
+      __typename
+      ...externalViewOptionContentBrandFragment
+    }
+    externalUrl
+    action {
+      __typename
+      ... on WatchAction {
+        __typename
+      }
+      ... on BillingFeaturePurchaseAction {
+        purchaseOptionCustomProperties
+      }
+    }
+  }
+  ... on TicketOption {
+    purchasable
+    releaseAnnounce {
+      available
+      releaseDate {
+        __typename
+        ...incompleteDateFragment
+      }
+    }
+    payOffer {
+      __typename
+      ...payOfferFragment
+    }
+  }
+}

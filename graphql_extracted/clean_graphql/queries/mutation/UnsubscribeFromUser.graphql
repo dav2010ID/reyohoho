@@ -1,0 +1,19 @@
+mutation UnsubscribeFromUser($puid: Long!) {
+  userProfile {
+    social {
+      subscriptions {
+        unsubscribe(input: { targetUserPuid: $puid }) {
+          error {
+            message
+            __typename
+          }
+          status
+          __typename
+        }
+        __typename
+      }
+      __typename
+    }
+    __typename
+  }
+}

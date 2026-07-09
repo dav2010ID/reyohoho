@@ -1,0 +1,23 @@
+mutation NotificationSubmitFeedback(
+  $actionId: String!
+  $feedbackToken: String!
+  $payload: JsonObject
+) {
+  notification {
+    submitFeedback(
+      input: {
+        actionId: $actionId
+        feedbackToken: $feedbackToken
+        payload: $payload
+      }
+    ) {
+      status
+      error {
+        message
+        __typename
+      }
+      __typename
+    }
+    __typename
+  }
+}

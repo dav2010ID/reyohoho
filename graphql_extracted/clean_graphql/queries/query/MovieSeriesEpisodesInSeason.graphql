@@ -1,0 +1,140 @@
+query MovieSeriesEpisodesInSeason(
+  $seasonId: Long!
+  $isOnlyOnline: Boolean!
+  $offset: Int!
+  $limit: Int!
+  $includeUserData: Boolean!
+  $includeMyShowsComments: Boolean!
+  $includeEstEarlyAccess: Boolean!
+) {
+  season(id: $seasonId) {
+    __typename
+    ...movieSeriesEpisodesInSeasonPageFragment
+  }
+}
+
+fragment imageFragment on Image {
+  avatarsUrl
+  fallbackUrl
+}
+
+fragment movieSeriesStructureEpisodeViewOptionFragment on EpisodeViewOption {
+  availabilityEndDate
+  availabilityStatus
+  disabled
+  watchabilityStatus
+}
+
+fragment movieSeriesStructureOttEpisodeFragment on OttEpisode {
+  duration
+  editorAnnotation
+  plannedAvailabilityDate
+  released
+  timing @include(if: $includeUserData) {
+    current
+  }
+  viewOption {
+    __typename
+    ...movieSeriesStructureEpisodeViewOptionFragment
+  }
+}
+
+fragment currencyFragment on Currency {
+  symbol
+  currencyCode
+}
+
+fragment moneyAmountFragment on MoneyAmount {
+  amount
+  currency {
+    __typename
+    ...currencyFragment
+  }
+}
+
+fragment availabilityAnnounceFragment on AvailabilityAnnounce {
+  announcePromise
+  availabilityDate
+  type
+}
+
+fragment estEarlyAccessViewOptionFragment on Episode {
+  viewOption {
+    watchabilityStatus
+    purchasabilityStatus
+    optionMonetizationModels
+    transactionalPrice {
+      __typename
+      ...moneyAmountFragment
+    }
+    availabilityAnnounce {
+      __typename
+      ...availabilityAnnounceFragment
+    }
+  }
+}
+
+fragment incompleteDateFragment on IncompleteDate {
+  date
+  accuracy
+}
+
+fragment titleFragment on Title {
+  localized
+  original
+}
+
+fragment myShowsCommentsFragment on MyShowsComments {
+  __typename
+  url
+  count
+  rawCount
+}
+
+fragment episodeCommentsFragment on Episode {
+  myShowsComments @include(if: $includeMyShowsComments) {
+    __typename
+    ...myShowsCommentsFragment
+  }
+}
+
+fragment movieSeriesStructureEpisodeFragment on Episode {
+  __typename
+  id
+  contentId
+  cover {
+    __typename
+    ...imageFragment
+  }
+  number
+  ott {
+    __typename
+    ...movieSeriesStructureOttEpisodeFragment
+  }
+  ...estEarlyAccessViewOptionFragment @include(if: $includeEstEarlyAccess)
+  releaseDate {
+    __typename
+    ...incompleteDateFragment
+  }
+  season {
+    number
+  }
+  synopsis(override: OTT_WHEN_EXISTS)
+  title {
+    __typename
+    ...titleFragment
+  }
+  ...episodeCommentsFragment
+}
+
+fragment movieSeriesEpisodesInSeasonPageFragment on Season {
+  episodes(isOnlyOnline: $isOnlyOnline, offset: $offset, limit: $limit) {
+    offset
+    limit
+    total
+    items {
+      __typename
+      ...movieSeriesStructureEpisodeFragment
+    }
+  }
+}

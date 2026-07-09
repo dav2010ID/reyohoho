@@ -1,0 +1,21 @@
+query UserReactionMoviesStat(
+  $isAuthorized: Boolean!
+  $socialAlias: String!
+  $includeTypes: [ReactionType!]!
+  $filters: FilterValuesInput
+) {
+  userProfileBySocialAlias(socialAlias: { socialAlias: $socialAlias }) {
+    userData {
+      movieReactions(includeTypes: $includeTypes, filters: $filters) {
+        total
+        userData @include(if: $isAuthorized) {
+          watchedCount
+          __typename
+        }
+        __typename
+      }
+      __typename
+    }
+    __typename
+  }
+}

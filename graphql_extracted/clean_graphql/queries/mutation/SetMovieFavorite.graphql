@@ -1,0 +1,16 @@
+mutation SetMovieFavorite($movieId: Long!) {
+  movie {
+    favorite {
+      set(input: { movieId: $movieId }) {
+        status
+        error {
+          message
+          __typename
+        }
+        __typename
+      }
+      __typename
+    }
+    __typename
+  }
+}

@@ -1,0 +1,15 @@
+mutation SocialProfileUnsubscribe($input: RemoveSocialSubscriptionInput!) {
+  userProfile {
+    social {
+      subscriptions {
+        unsubscribe(input: $input) {
+          status
+          actionTarget
+          error {
+            message
+          }
+        }
+      }
+    }
+  }
+}

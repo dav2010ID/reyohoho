@@ -1,0 +1,185 @@
+query TouchMovieRating($movieId: Long!, $withUserData: Boolean!) {
+  movie(id: $movieId) {
+    id
+    title {
+      russian
+      original
+      __typename
+    }
+    poster {
+      avatarsUrl
+      fallbackUrl
+      __typename
+    }
+    ... on Film {
+      ratingLists {
+        top250 {
+          ...MovieRatingListsItem
+          __typename
+        }
+        __typename
+      }
+      __typename
+    }
+    ... on TvSeries {
+      ratingLists {
+        top250 {
+          ...MovieRatingListsItem
+          __typename
+        }
+        __typename
+      }
+      __typename
+    }
+    ... on TvShow {
+      ratingLists {
+        top250 {
+          ...MovieRatingListsItem
+          __typename
+        }
+        __typename
+      }
+      __typename
+    }
+    ... on MiniSeries {
+      ratingLists {
+        top250 {
+          ...MovieRatingListsItem
+          __typename
+        }
+        __typename
+      }
+      __typename
+    }
+    genres {
+      id
+      name
+      slug
+      __typename
+    }
+    rating {
+      imdb {
+        ...RatingValue
+        __typename
+      }
+      kinopoisk {
+        ...RatingValue
+        __typename
+      }
+      russianCritics {
+        ...RatingValue
+        __typename
+      }
+      worldwideCritics {
+        value
+        percent
+        count
+        isActive
+        positiveCount
+        negativeCount
+        __typename
+      }
+      reviewCount {
+        ...RatingValue
+        __typename
+      }
+      positiveReviewRate {
+        value
+        __typename
+      }
+      plannedToWatch {
+        ...RatingValue
+        __typename
+      }
+      __typename
+    }
+    usersReviewsPositive: userReviews(types: [POSITIVE], limit: 0) {
+      total
+      __typename
+    }
+    usersReviewsNeutral: userReviews(types: [NEUTRAL], limit: 0) {
+      total
+      __typename
+    }
+    ...MovieUserData @include(if: $withUserData)
+    __typename
+  }
+}
+
+fragment PurchaseMetadata on MovieUserData {
+  purchaseMetadata(includeWaiting: true) {
+    id
+    watchPeriod {
+      watchPeriodStatus
+      __typename
+    }
+    __typename
+  }
+  __typename
+}
+
+fragment Folder on Folder {
+  id
+  name
+  public
+  __typename
+}
+
+fragment MovieUserFolders on Movie {
+  userData {
+    userFolders(offset: 0, limit: 20) {
+      items {
+        ...Folder
+        __typename
+      }
+      __typename
+    }
+    isFavorite
+    __typename
+  }
+  __typename
+}
+
+fragment MovieRatingListsItem on MovieInList {
+  movieListSlug
+  position
+  __typename
+}
+
+fragment RatingValue on RatingValue {
+  value
+  isActive
+  count
+  __typename
+}
+
+fragment MovieUserData on Movie {
+  userData {
+    voting {
+      value
+      votedAt
+      __typename
+    }
+    note {
+      value
+      makeDate
+      __typename
+    }
+    watchStatuses {
+      notInterested {
+        value
+        __typename
+      }
+      watched {
+        value
+        __typename
+      }
+      __typename
+    }
+    isPlannedToWatch
+    ...PurchaseMetadata
+    __typename
+  }
+  ...MovieUserFolders
+  __typename
+}

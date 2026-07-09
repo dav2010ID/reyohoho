@@ -1,0 +1,84 @@
+query MovieWatchability($id: Long!, $isAuthorized: Boolean!) {
+  movie(id: $id) {
+    id
+    ...MovieIsTicketsAvailable
+    externalViewOptions {
+      ...ExternalViewOptions
+      __typename
+    }
+    __typename
+  }
+}
+
+fragment TicketOptionPurchasable on Movie {
+  ticketOption {
+    purchasable
+    __typename
+  }
+  __typename
+}
+
+fragment ExternalViewOptionContentBrand on ContentBrand {
+  id
+  name
+  gallery {
+    logos {
+      colored {
+        avatarsUrl
+        __typename
+      }
+      square {
+        avatarsUrl
+        __typename
+      }
+      __typename
+    }
+    __typename
+  }
+  colors {
+    main
+    __typename
+  }
+  userData @include(if: $isAuthorized) {
+    isLiked
+    __typename
+  }
+  __typename
+}
+
+fragment ExternalViewOptionAction on ExternalPartnerOption {
+  action {
+    ... on BillingFeaturePurchaseAction {
+      purchaseOptionCustomProperties
+      __typename
+    }
+    __typename
+  }
+  __typename
+}
+
+fragment MovieIsTicketsAvailable on Movie {
+  ...TicketOptionPurchasable
+  __typename
+}
+
+fragment ExternalViewOptions on ExternalViewOption {
+  ... on ExternalPartnerOption {
+    contentBrand {
+      ...ExternalViewOptionContentBrand
+      __typename
+    }
+    ...ExternalViewOptionAction
+    externalUrl
+    __typename
+  }
+  ... on ExternalBaseOption {
+    contentBrand {
+      ...ExternalViewOptionContentBrand
+      __typename
+    }
+    externalUrl
+    __typename
+  }
+  __typename
+}

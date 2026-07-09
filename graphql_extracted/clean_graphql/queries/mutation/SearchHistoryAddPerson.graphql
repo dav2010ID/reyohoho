@@ -1,0 +1,19 @@
+mutation SearchHistoryAddPerson($personId: Long!) {
+  emptyPrefixSuggest {
+    history {
+      add {
+        person(input: { id: $personId }) {
+          __typename
+          ...searchHistoryMutationResult
+        }
+      }
+    }
+  }
+}
+
+fragment searchHistoryMutationResult on EmptyPrefixSuggestHistoryPayload {
+  status
+  error {
+    message
+  }
+}

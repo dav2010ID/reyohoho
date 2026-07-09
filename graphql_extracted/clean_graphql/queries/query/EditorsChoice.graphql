@@ -1,0 +1,20 @@
+query EditorsChoice {
+  editorsChoicePosts {
+    title
+    posts {
+      ...EditorsChoicePost
+      __typename
+    }
+    __typename
+  }
+}
+
+fragment EditorsChoicePost on EditorsChoicePost {
+  title
+  url
+  cover {
+    avatarsUrl
+    __typename
+  }
+  __typename
+}

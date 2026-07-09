@@ -1,0 +1,4 @@
+fragment TvSeriesEdisodesCount on TvSeries {
+  episodesCount
+  __typename
+}

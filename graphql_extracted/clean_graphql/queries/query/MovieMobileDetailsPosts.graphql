@@ -1,0 +1,33 @@
+query MovieMobileDetailsPosts($movieId: Long!, $offset: Int!, $limit: Int!) {
+  movie(id: $movieId) {
+    post(offset: $offset, limit: $limit) {
+      offset
+      limit
+      total
+      items {
+        __typename
+        ...editorialPostFragment
+      }
+    }
+  }
+}
+
+fragment imageFragment on Image {
+  avatarsUrl
+  fallbackUrl
+}
+
+fragment editorialPostFragment on Post {
+  id
+  title
+  coverImage {
+    __typename
+    ...imageFragment
+  }
+  thumbImage {
+    __typename
+    ...imageFragment
+  }
+  published
+  publishedAt
+}

@@ -1,0 +1,16 @@
+query EncyclopediaGenres($offset: Int!, $limit: Int!) {
+  genres(offset: $offset, limit: $limit) {
+    offset
+    limit
+    total
+    items {
+      __typename
+      ...genreFragment
+    }
+  }
+}
+
+fragment genreFragment on Genre {
+  id
+  name
+}

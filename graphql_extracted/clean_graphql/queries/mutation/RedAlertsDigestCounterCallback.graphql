@@ -1,0 +1,21 @@
+mutation RedAlertsDigestCounterCallback(
+  $alertKind: ALERT_KIND
+  $appVersion: String
+  $callbackType: ALERTS_DIGEST_COUNTER_CALLBACK_TYPE!
+  $client: String
+  $platform: PLATFORM!
+  $sdkVersion: String
+  $service: String!
+) {
+  alertsDigestCounterCallback(
+    input: {
+      alertKind: $alertKind
+      appVersion: $appVersion
+      callbackType: $callbackType
+      client: $client
+      platform: $platform
+      sdkVersion: $sdkVersion
+      service: $service
+    }
+  )
+}

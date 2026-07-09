@@ -1,0 +1,200 @@
+query ContinueWatching($id: String!, $showcaseId: String!, $limit: Int!) {
+  selection(id: $id, showcaseId: $showcaseId) {
+    ... on ContinueWatchingEmbeddedSelection {
+      content(offset: 0, limit: $limit) {
+        items {
+          ...ContinueWatchingSelectionItem
+          __typename
+        }
+        __typename
+      }
+      __typename
+    }
+    __typename
+  }
+}
+
+fragment ContinueWatchingMovieOtt on Ott_AbstractVideo {
+  preview {
+    ... on OttPreview_AbstractVideo {
+      duration
+      timing {
+        current
+        __typename
+      }
+      __typename
+    }
+    __typename
+  }
+  __typename
+}
+
+fragment Title on Title {
+  localized
+  original
+  __typename
+}
+
+fragment WatchPeriod on WatchPeriod {
+  timeToExpire
+  watchPeriodStatus
+  __typename
+}
+
+fragment ContinueWatchingMovieViewOption on ViewOption {
+  type
+  purchasabilityStatus
+  optionMonetizationModels
+  watchPeriod {
+    ...WatchPeriod
+    __typename
+  }
+  __typename
+}
+
+fragment ContinueWatchingMovie on Movie {
+  id
+  contentId
+  title {
+    ...Title
+    __typename
+  }
+  gallery {
+    covers {
+      horizontal {
+        avatarsUrl
+        __typename
+      }
+      __typename
+    }
+    __typename
+  }
+  viewOption {
+    ...ContinueWatchingMovieViewOption
+    __typename
+  }
+  __typename
+}
+
+fragment ContinueWatchingSelectionFilmEntity on Film {
+  ott {
+    ...ContinueWatchingMovieOtt
+    __typename
+  }
+  ...ContinueWatchingMovie
+  __typename
+}
+
+fragment ContinueWatchingSelectionVideoEntity on Video {
+  ott {
+    ...ContinueWatchingMovieOtt
+    __typename
+  }
+  ...ContinueWatchingMovie
+  __typename
+}
+
+fragment ContinueWatchingEpisodeOtt on OttEpisode {
+  duration
+  timing {
+    current
+    __typename
+  }
+  viewOption {
+    availabilityEndDate
+    availabilityStatus
+    __typename
+  }
+  __typename
+}
+
+fragment MoneyAmount on MoneyAmount {
+  amount
+  currency {
+    currencyCode
+    symbol
+    __typename
+  }
+  __typename
+}
+
+fragment EpisodeMonetizationViewOption on ViewOption {
+  type
+  optionMonetizationModels
+  purchasabilityStatus
+  availabilityAnnounce {
+    availabilityDate
+    type
+    groupPeriodType
+    announcePromise
+    __typename
+  }
+  transactionalPrice {
+    ...MoneyAmount
+    __typename
+  }
+  transactionalMinimumPrice {
+    ...MoneyAmount
+    __typename
+  }
+  priceWithTotalDiscount {
+    ...MoneyAmount
+    __typename
+  }
+  __typename
+}
+
+fragment ContinueWatchingEpisode on Episode {
+  contentId
+  number
+  season {
+    contentId
+    number
+    __typename
+  }
+  title {
+    ...Title
+    __typename
+  }
+  cover {
+    avatarsUrl
+    __typename
+  }
+  viewOption {
+    ...EpisodeMonetizationViewOption
+    __typename
+  }
+  __typename
+}
+
+fragment ContinueWatchingSelectionEpisodeEntity on Episode {
+  tvSeries {
+    ...ContinueWatchingMovie
+    __typename
+  }
+  ott {
+    ...ContinueWatchingEpisodeOtt
+    __typename
+  }
+  ...ContinueWatchingEpisode
+  __typename
+}
+
+fragment ContinueWatchingSelectionItem on ContinueWatchingSelectionItem {
+  entity {
+    ... on Film {
+      ...ContinueWatchingSelectionFilmEntity
+      __typename
+    }
+    ... on Video {
+      ...ContinueWatchingSelectionVideoEntity
+      __typename
+    }
+    ... on Episode {
+      ...ContinueWatchingSelectionEpisodeEntity
+      __typename
+    }
+    __typename
+  }
+  __typename
+}

@@ -1,0 +1,12 @@
+query NotificationsByConsumer($filters: [NotificationFilterInput!]!) {
+  notificationsByConsumer(filters: $filters) {
+    consumer
+    communicationId
+    items {
+      notificationPayloadId
+      payload
+      templateId
+      feedbackToken
+    }
+  }
+}

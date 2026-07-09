@@ -1,0 +1,14 @@
+query MovieDetailsMobileUserVoting($movieId: Long!) {
+  movie(id: $movieId) {
+    __typename
+    ...movieDetailsMobileUserVotingFragment
+  }
+}
+
+fragment movieDetailsMobileUserVotingFragment on Movie {
+  userData {
+    voting {
+      value
+    }
+  }
+}

@@ -1,0 +1,38 @@
+query MovieDetailsMobileMainTrivias(
+  $movieId: Long!
+  $factsLimit: Int!
+  $blooperLimit: Int!
+) {
+  movie(id: $movieId) {
+    __typename
+    ...movieDetailsMobileMainTriviasFragment
+  }
+}
+
+fragment mediaTriviaFragment on Trivia {
+  id
+  text
+  isSpoiler
+  type
+}
+
+fragment movieDetailsMobileMainTriviasFragment on Movie {
+  factsTrivias: trivias(type: FACT, limit: $factsLimit) {
+    offset
+    limit
+    total
+    items {
+      __typename
+      ...mediaTriviaFragment
+    }
+  }
+  blooperTrivias: trivias(type: BLOOPER, limit: $blooperLimit) {
+    offset
+    limit
+    total
+    items {
+      __typename
+      ...mediaTriviaFragment
+    }
+  }
+}

@@ -1,0 +1,101 @@
+query MovieSummaryUserDataByContentId(
+  $contentId: String!
+  $includeMovieUserVote: Boolean!
+  $includeMovieUserFolders: Boolean!
+  $includeMovieUserWatched: Boolean!
+  $includeMovieUserNotInterested: Boolean!
+  $includeMovieRating: Boolean!
+  $includePlannedToWatchRating: Boolean!
+) {
+  movieByContentUuid(contentUuid: $contentId) {
+    __typename
+    rating @include(if: $includeMovieRating) {
+      __typename
+      ...ratingFragment
+    }
+    ...movieSummaryUserDataFragment
+  }
+}
+
+fragment ratingValueFragment on RatingValue {
+  isActive
+  count
+  value(precision: 1)
+}
+
+fragment ratingFragment on Rating {
+  kinopoisk {
+    __typename
+    ...ratingValueFragment
+  }
+  plannedToWatch @include(if: $includePlannedToWatchRating) {
+    __typename
+    ...ratingValueFragment
+  }
+}
+
+fragment voteFragment on Vote {
+  value
+}
+
+fragment movieUserVoteFragment on MovieUserData {
+  voting {
+    __typename
+    ...voteFragment
+  }
+}
+
+fragment movieFolderFragment on Folder {
+  id
+  name
+  public
+}
+
+fragment movieUserFoldersFragment on MovieUserData {
+  userFolders {
+    items {
+      __typename
+      ...movieFolderFragment
+    }
+    total
+  }
+}
+
+fragment movieUserWatchedFragment on MovieUserData {
+  watchStatuses {
+    watched {
+      value
+    }
+  }
+}
+
+fragment movieUserNotInterestedFragment on MovieUserData {
+  watchStatuses {
+    notInterested {
+      value
+    }
+  }
+}
+
+fragment movieSummaryUserDataFragment on Movie {
+  movieUserVote: userData @include(if: $includeMovieUserVote) {
+    __typename
+    ...movieUserVoteFragment
+  }
+  movieUserPlannedToWatch: userData @include(if: $includePlannedToWatchRating) {
+    isPlannedToWatch
+  }
+  movieUserFolders: userData @include(if: $includeMovieUserFolders) {
+    __typename
+    ...movieUserFoldersFragment
+  }
+  movieUserWatched: userData @include(if: $includeMovieUserWatched) {
+    __typename
+    ...movieUserWatchedFragment
+  }
+  movieUserNotInterested: userData
+    @include(if: $includeMovieUserNotInterested) {
+    __typename
+    ...movieUserNotInterestedFragment
+  }
+}

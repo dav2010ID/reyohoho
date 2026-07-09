@@ -1,0 +1,62 @@
+query SearchCinemas(
+  $keyword: String!
+  $offset: Int!
+  $limit: Int!
+  $regionId: Int
+  $latitude: String
+  $longitude: String
+  $includeCinemaUserData: Boolean!
+) {
+  search(keyword: $keyword) {
+    cinemas(
+      offset: $offset
+      limit: $limit
+      regionID: $regionId
+      latitude: $latitude
+      longitude: $longitude
+    ) {
+      offset
+      limit
+      total
+      items {
+        cinema {
+          __typename
+          ...cinemaSummaryFragment
+        }
+      }
+    }
+  }
+}
+
+fragment cityFragment on City {
+  geoId
+  id
+  name
+}
+
+fragment locationFragment on Location {
+  latitude
+  longitude
+}
+
+fragment cinemaUserDataFragment on CinemaUserData {
+  isFavorite
+}
+
+fragment cinemaSummaryFragment on Cinema {
+  id
+  cinemaTitle: title
+  city {
+    __typename
+    ...cityFragment
+  }
+  address
+  location {
+    __typename
+    ...locationFragment
+  }
+  cinemaUserData: userData @include(if: $includeCinemaUserData) {
+    __typename
+    ...cinemaUserDataFragment
+  }
+}

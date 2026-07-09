@@ -1,0 +1,613 @@
+query UserDependentDataMovieDetails(
+  $movieId: Long!
+  $isAppendUserData: Boolean!
+  $isInternationalUserData: Boolean!
+  $friendsVotesLimit: Int!
+  $friendsVotesOffset: Int! = 0
+  $userReviewsLimit: Int!
+  $isInternational: Boolean!
+  $purchaseOptionsContext: BillingFeatureClientContextInput!
+  $includeMoviePurchaseOptions: Boolean!
+  $includeEmotion: Boolean!
+  $includeExternalViewOptions: Boolean!
+  $includeSocialArgument: Boolean!
+  $includeVerification: Boolean!
+  $includeEstEarlyAccess: Boolean!
+) {
+  movie(id: $movieId) {
+    __typename
+    contentId
+    title {
+      __typename
+      ...titleFragment
+    }
+    userData @include(if: $isAppendUserData) {
+      __typename
+      ...movieFullUserDataFragment
+    }
+    ticketOption @skip(if: $isInternational) {
+      __typename
+      purchasable
+    }
+    viewOption {
+      __typename
+      ...viewOptionDetailedFragment
+    }
+    externalViewOptions @include(if: $includeExternalViewOptions) {
+      __typename
+      ...movieExternalViewOptionFragment
+    }
+    ...movieUserDependentNextEpisodeFragment
+    ...userReviewsFragment @skip(if: $isInternational)
+  }
+}
+
+fragment movieUserDependentNextEpisodeFragment on Movie {
+  __typename
+  ott {
+    __typename
+    ...movieOttNextEpisodeFragment
+  }
+}
+
+fragment userReviewsFragment on Movie {
+  __typename
+  userReviews(
+    limit: $userReviewsLimit
+    orderBy: TOP_USEFULNESS_THEN_CREATED_AT_DESC
+  ) {
+    __typename
+    total
+    items {
+      __typename
+      ...userReviewFragment
+    }
+  }
+}
+
+fragment movieOttNextEpisodeFragment on Ott_AbstractSeries {
+  __typename
+  nextEpisode @include(if: $isAppendUserData) {
+    __typename
+    episode {
+      __typename
+      contentId
+      number
+      season {
+        __typename
+        number
+      }
+      ...estEarlyAccessViewOptionFragment @include(if: $includeEstEarlyAccess)
+    }
+  }
+}
+
+fragment estEarlyAccessViewOptionFragment on Episode {
+  __typename
+  viewOption {
+    __typename
+    watchabilityStatus
+    purchasabilityStatus
+    optionMonetizationModels
+    transactionalPrice {
+      __typename
+      ...moneyAmountFragment
+    }
+    availabilityAnnounce {
+      __typename
+      ...availabilityAnnounceFragment
+    }
+  }
+}
+
+fragment moneyAmountFragment on MoneyAmount {
+  __typename
+  amount
+  currency {
+    __typename
+    ...currencyFragment
+  }
+}
+
+fragment currencyFragment on Currency {
+  __typename
+  symbol
+  currencyCode
+}
+
+fragment availabilityAnnounceFragment on AvailabilityAnnounce {
+  __typename
+  announcePromise
+  availabilityDate
+  type
+}
+
+fragment userReviewFragment on UserReview {
+  __typename
+  id
+  text
+  title
+  createdAt
+  author {
+    __typename
+    id
+    avatar {
+      __typename
+      ...imageFragment
+    }
+    login
+  }
+  type
+  votes {
+    __typename
+    positiveCount
+    negativeCount
+  }
+  userData @include(if: $isAppendUserData) {
+    __typename
+    ... on UserReviewUserData {
+      voting
+    }
+  }
+}
+
+fragment imageFragment on Image {
+  __typename
+  avatarsUrl
+  fallbackUrl
+}
+
+fragment titleFragment on Title {
+  __typename
+  localized
+  original
+}
+
+fragment movieFullUserDataFragment on MovieUserData {
+  __typename
+  ...movieUserDataFragment
+  ...socialArgumentFragment @include(if: $includeSocialArgument)
+  ...socialFriendsReactionsFragment @include(if: $includeSocialArgument)
+  ...deprecatedSocialFriendsVotingFragment @skip(if: $includeSocialArgument)
+  voteReactions: friendsMovieReactions(includeTypes: [VOTE])
+    @skip(if: $isInternationalUserData) {
+    __typename
+    statistics {
+      __typename
+      byReaction {
+        __typename
+        ... on VoteStatistic {
+          average
+        }
+      }
+    }
+  }
+}
+
+fragment movieUserDataFragment on MovieUserData {
+  __typename
+  isPlannedToWatch
+  folders @skip(if: $isInternationalUserData) {
+    __typename
+    ...folderFragment
+  }
+  voting @skip(if: $isInternationalUserData) {
+    __typename
+    ...voteFragment
+  }
+  watchStatuses {
+    __typename
+    ...watchStatusesFragment
+  }
+  emotion @include(if: $includeEmotion) {
+    __typename
+    ...emotionFragment
+  }
+}
+
+fragment socialArgumentFragment on MovieUserData {
+  __typename
+  socialArgument {
+    __typename
+    total
+    items {
+      __typename
+      ...socialUserFragment
+      reactions(includeTypes: [WATCHING_SERIES, VOTE, PLANNED_TO_WATCH]) {
+        __typename
+        ...socialMovieReactionFragment
+      }
+    }
+  }
+}
+
+fragment socialFriendsReactionsFragment on MovieUserData {
+  __typename
+  friendsMovieReactions(
+    limit: $friendsVotesLimit
+    offset: $friendsVotesOffset
+    includeTypes: [WATCHING_SERIES, VOTE, PLANNED_TO_WATCH, WATCHED]
+  ) {
+    __typename
+    limit
+    offset
+    total
+    items {
+      __typename
+      ...socialUserFragment
+      reactions(
+        includeTypes: [WATCHING_SERIES, VOTE, PLANNED_TO_WATCH, WATCHED]
+      ) {
+        __typename
+        ...socialMovieReactionFragment
+      }
+    }
+  }
+}
+
+fragment deprecatedSocialFriendsVotingFragment on MovieUserData {
+  __typename
+  friendsVoting(limit: $friendsVotesLimit, offset: $friendsVotesOffset) {
+    __typename
+    limit
+    offset
+    total
+    items {
+      __typename
+      ...movieFriendVoteFragment
+    }
+  }
+}
+
+fragment folderFragment on Folder {
+  __typename
+  id
+  name
+}
+
+fragment voteFragment on Vote {
+  __typename
+  value
+}
+
+fragment watchStatusesFragment on WatchStatuses {
+  __typename
+  notInterested {
+    __typename
+    value
+  }
+  watched {
+    __typename
+    value
+  }
+}
+
+fragment emotionFragment on Emotion {
+  __typename
+  value
+}
+
+fragment socialUserFragment on UserMovieReactions {
+  __typename
+  user {
+    __typename
+    id {
+      __typename
+      puid
+    }
+    subscriptionInfo {
+      __typename
+      hasSubscription
+    }
+    social {
+      __typename
+      ...socialInfoFragment
+    }
+  }
+}
+
+fragment socialInfoFragment on UserSocialInfo {
+  __typename
+  alias {
+    __typename
+    defaultValue {
+      __typename
+      value
+      source
+    }
+  }
+  name {
+    __typename
+    defaultValue {
+      __typename
+      value
+    }
+  }
+  avatar {
+    __typename
+    defaultValue {
+      __typename
+      value {
+        __typename
+        ...imageFragment
+      }
+    }
+  }
+  publicStatus
+  url
+  badges @include(if: $includeVerification) {
+    __typename
+    verified {
+      __typename
+      id
+      title
+      description
+      icons {
+        __typename
+        format
+        image {
+          __typename
+          ...imageFragment
+        }
+      }
+    }
+  }
+}
+
+fragment socialMovieReactionFragment on UserMovieReaction {
+  __typename
+  ... on Vote {
+    value
+  }
+  ... on PlannedToWatch {
+    plannedToWatch
+  }
+  ... on WatchingSeries {
+    watchingSeries
+  }
+  ... on Watched {
+    watched
+  }
+}
+
+fragment movieFriendVoteFragment on FriendVote_Friend {
+  __typename
+  attitude
+  friend {
+    __typename
+    userProfile {
+      __typename
+      ... on UserProfile {
+        login
+      }
+      id {
+        __typename
+        puid
+      }
+      gender
+      displayName
+      avatar {
+        __typename
+        ...imageFragment
+      }
+      social {
+        __typename
+        ...socialInfoFragment
+      }
+      subscriptionInfo {
+        __typename
+        hasSubscription
+      }
+    }
+  }
+  vote {
+    __typename
+    ...voteFragment
+  }
+}
+
+fragment viewOptionDetailedFragment on ViewOption {
+  __typename
+  ...movieViewOptionSummaryFragment
+  purchaseRejectionReason {
+    __typename
+    ...watchingRejection
+  }
+  watchingRejectionReason {
+    __typename
+    ...watchingRejection
+  }
+  downloadRejectionReason {
+    __typename
+    ...watchingRejection
+  }
+  watchPeriod {
+    __typename
+    ...movieWatchPeriodFragment
+  }
+  texts {
+    __typename
+    ...viewOptionsTextFragment
+  }
+  descriptionText
+  mainPromotionAbsoluteAmount {
+    __typename
+    ...moneyAmountFragment
+  }
+  mastercardPromotionAbsoluteAmount {
+    __typename
+    ...moneyAmountFragment
+  }
+  purchaseOptions(clientContext: $purchaseOptionsContext)
+    @include(if: $includeMoviePurchaseOptions) {
+    __typename
+    billingFeatureNames
+    target
+  }
+  purchaseOptionCustomProperties @include(if: $includeMoviePurchaseOptions)
+}
+
+fragment movieViewOptionSummaryFragment on ViewOption {
+  __typename
+  ...baseMovieViewOptionSummaryFragment
+}
+
+fragment watchingRejection on WatchingRejection {
+  __typename
+  details
+  reason
+}
+
+fragment movieWatchPeriodFragment on WatchPeriod {
+  __typename
+  timeToExpire
+  watchPeriodStatus
+}
+
+fragment viewOptionsTextFragment on ViewOptionText {
+  __typename
+  disclaimer
+}
+
+fragment baseMovieViewOptionSummaryFragment on ViewOption {
+  __typename
+  type
+  purchasabilityStatus
+  isWatchableOnDeviceInCurrentRegion: isWatchable(
+    filter: { anyDevice: false, anyRegion: false }
+  )
+  buttonText
+  ...movieViewOptionPurchasedSubscriptionFragment
+  availabilityAnnounce {
+    __typename
+    ...availabilityAnnounceFragment
+  }
+  contentPackageToBuy {
+    __typename
+    ...movieContentPackageFragment
+  }
+  contentPackageToUnfreeze {
+    __typename
+    ...movieContentPackageFragment
+  }
+  transactionalPrice {
+    __typename
+    ...moneyAmountFragment
+  }
+  transactionalMinimumPrice {
+    __typename
+    ...moneyAmountFragment
+  }
+  priceWithTotalDiscount {
+    __typename
+    ...moneyAmountFragment
+  }
+  optionMonetizationModels
+  watchabilityStatus
+  promotionActionType
+  downloadabilityStatus
+}
+
+fragment movieViewOptionPurchasedSubscriptionFragment on ViewOption {
+  __typename
+  purchasedSubscriptionTextId
+  purchasedSubscriptionName
+}
+
+fragment movieContentPackageFragment on ContentPackage {
+  __typename
+  billingFeatureName
+}
+
+fragment movieExternalViewOptionFragment on ExternalViewOption {
+  __typename
+  ... on ExternalBaseOption {
+    contentBrand {
+      __typename
+      ...externalViewOptionContentBrandFragment
+    }
+    externalUrl
+  }
+  ... on ExternalPartnerOption {
+    contentBrand {
+      __typename
+      ...externalViewOptionContentBrandFragment
+    }
+    externalUrl
+    action {
+      __typename
+      ... on WatchAction {
+        __typename
+      }
+      ... on BillingFeaturePurchaseAction {
+        purchaseOptionCustomProperties
+      }
+    }
+  }
+  ... on TicketOption {
+    purchasable
+    releaseAnnounce {
+      __typename
+      available
+      releaseDate {
+        __typename
+        ...incompleteDateFragment
+      }
+    }
+    payOffer {
+      __typename
+      ...payOfferFragment
+    }
+  }
+}
+
+fragment externalViewOptionContentBrandFragment on ContentBrand {
+  __typename
+  id
+  userData @include(if: $isAppendUserData) {
+    __typename
+    isLiked
+  }
+  name
+  colors {
+    __typename
+    main
+  }
+  gallery {
+    __typename
+    logos {
+      __typename
+      colored {
+        __typename
+        ...imageFragment
+      }
+    }
+  }
+}
+
+fragment payOfferFragment on PayOffer {
+  __typename
+  button {
+    __typename
+    badge {
+      __typename
+      text
+      icon {
+        __typename
+        ...imageFragment
+      }
+    }
+    disclaimer {
+      __typename
+      text
+      link
+    }
+  }
+  selectorLink
+}
+
+fragment incompleteDateFragment on IncompleteDate {
+  __typename
+  date
+  accuracy
+}

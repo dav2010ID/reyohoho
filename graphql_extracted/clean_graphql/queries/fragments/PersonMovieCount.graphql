@@ -1,0 +1,7 @@
+fragment PersonMovieCount on Person {
+  movieCount: filmographyRelations(limit: 0) {
+    total
+    __typename
+  }
+  __typename
+}

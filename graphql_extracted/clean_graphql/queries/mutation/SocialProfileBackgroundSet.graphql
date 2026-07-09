@@ -1,0 +1,20 @@
+mutation SocialProfileBackgroundSet(
+  $input: SetProfilePreparedBackgroundInput!
+) {
+  userProfile {
+    social {
+      setPreparedBackground(input: $input) {
+        __typename
+        ...socialProfileBackgroundMutationPayloadFragment
+      }
+    }
+  }
+}
+
+fragment socialProfileBackgroundMutationPayloadFragment on UserSocialBackgroundMutationPayload {
+  status
+  errors {
+    __typename
+    message
+  }
+}

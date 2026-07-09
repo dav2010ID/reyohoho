@@ -1,0 +1,16 @@
+mutation ValidateSocialUserProfileAlias($alias: String!) {
+  userProfile {
+    social {
+      validateSocialAlias(input: { socialAlias: $alias }) {
+        errors {
+          message
+          __typename
+        }
+        status
+        __typename
+      }
+      __typename
+    }
+    __typename
+  }
+}

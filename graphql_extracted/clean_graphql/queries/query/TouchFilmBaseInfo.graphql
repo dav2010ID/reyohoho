@@ -1,0 +1,801 @@
+query TouchFilmBaseInfo(
+  $filmId: Long!
+  $isAuthorized: Boolean!
+  $actorsLimit: Int
+) {
+  film(id: $filmId) {
+    id
+    contentId
+    shortDescription
+    synopsis
+    ...MovieRatingLists
+    ...MovieTitleAndContentId
+    productionYear
+    genres {
+      id
+      name
+      slug
+      __typename
+    }
+    ...MovieCinemaAnnounce
+    ott {
+      ... on Ott_AbstractVideo {
+        ...OttWithSkippableFragments
+        __typename
+      }
+      promoTrailers: trailers(onlyPromo: true, limit: 1) {
+        items {
+          streamUrl
+          __typename
+        }
+        __typename
+      }
+      __typename
+    }
+    editorAnnotation
+    countries {
+      id
+      name
+      __typename
+    }
+    restriction {
+      age
+      mpaa
+      __typename
+    }
+    mainTrailer {
+      id
+      title
+      preview {
+        avatarsUrl
+        fallbackUrl
+        __typename
+      }
+      createdAt
+      isEmbedded
+      __typename
+    }
+    viewOption {
+      ...ViewOption
+      __typename
+    }
+    externalViewOptions {
+      ...ExternalViewOptions
+      __typename
+    }
+    actors: members(limit: $actorsLimit, role: [ACTOR, CAMEO, UNCREDITED]) {
+      items {
+        person {
+          id
+          name
+          originalName
+          __typename
+        }
+        __typename
+      }
+      total
+      __typename
+    }
+    directors: members(role: DIRECTOR, limit: 4) {
+      items {
+        person {
+          id
+          name
+          __typename
+        }
+        __typename
+      }
+      __typename
+    }
+    producers: members(role: PRODUCER, limit: 4) {
+      items {
+        person {
+          id
+          name
+          __typename
+        }
+        __typename
+      }
+      __typename
+    }
+    ...MoviePoster
+    ...MovieCover
+    movieLogo {
+      image {
+        avatarsUrl
+        __typename
+      }
+      width
+      height
+      __typename
+    }
+    licenseCoverSmall: licenseCover(
+      filter: { formFactor: S, theme: LIGHT }
+      limit: 1
+    ) {
+      items {
+        image {
+          avatarsUrl
+          __typename
+        }
+        __typename
+      }
+      __typename
+    }
+    rating {
+      kinopoisk {
+        ...RatingValue
+        __typename
+      }
+      plannedToWatch {
+        ...RatingValue
+        __typename
+      }
+      __typename
+    }
+    duration
+    userReviews(limit: 0) {
+      total
+      __typename
+    }
+    filmMainAward: awards(isMain: true, limit: 15) {
+      items {
+        nomination {
+          award {
+            title
+            slug
+            year
+            __typename
+          }
+          __typename
+        }
+        win
+        __typename
+      }
+      __typename
+    }
+    ...MovieSeoFullInfo
+    ...MovieUserData @include(if: $isAuthorized)
+    ...MovieFactsCount
+    ...MovieBloopersCount
+    ...MovieUsersReviewsCount
+    ...MovieMediaPostsCount
+    ...MovieTrailersCount
+    ...MovieCriticReviewsCount
+    ...MovieSimilarMoviesCount
+    ...MovieActorsCount
+    ...MovieCreatorsCount
+    ...MovieSequelsPrequelsCount
+    ...MovieMainAwardsCount
+    ...MovieRelatedMoviesCount
+    ...MovieImagesCount
+    ...MovieOriginalMoviesCount
+    ...IsMovieWatchableOnOtt
+    __typename
+  }
+  tvSeries(id: $filmId) {
+    id
+    __typename
+  }
+  webPage(platform: TOUCH) {
+    kpFilmPage(filmId: $filmId) {
+      htmlMeta {
+        ...OgImage
+        __typename
+      }
+      __typename
+    }
+    __typename
+  }
+}
+
+fragment MovieRatingListsItem on MovieInList {
+  movieListSlug
+  position
+  __typename
+}
+
+fragment MovieTitleOption on Movie {
+  title {
+    russian
+    original
+    __typename
+  }
+  __typename
+}
+
+fragment TicketOptionPurchasable on Movie {
+  ticketOption {
+    purchasable
+    __typename
+  }
+  __typename
+}
+
+fragment MovieIsTicketsAvailable on Movie {
+  ...TicketOptionPurchasable
+  __typename
+}
+
+fragment TicketOptionReleaseAnnounce on Movie {
+  ticketOption {
+    releaseAnnounce {
+      available
+      releaseDate {
+        accuracy
+        date
+        __typename
+      }
+      __typename
+    }
+    __typename
+  }
+  __typename
+}
+
+fragment SkippableFragment on SkippableFragment {
+  startTime
+  endTime
+  type
+  __typename
+}
+
+fragment AvailabilityAnnounce on AvailabilityAnnounce {
+  availabilityDate
+  groupPeriodType
+  type
+  announcePromise
+  __typename
+}
+
+fragment ExternalViewOptionContentBrand on ContentBrand {
+  id
+  name
+  gallery {
+    logos {
+      colored {
+        avatarsUrl
+        __typename
+      }
+      square {
+        avatarsUrl
+        __typename
+      }
+      __typename
+    }
+    __typename
+  }
+  colors {
+    main
+    __typename
+  }
+  userData @include(if: $isAuthorized) {
+    isLiked
+    __typename
+  }
+  __typename
+}
+
+fragment ExternalViewOptionAction on ExternalPartnerOption {
+  action {
+    ... on BillingFeaturePurchaseAction {
+      purchaseOptionCustomProperties
+      __typename
+    }
+    __typename
+  }
+  __typename
+}
+
+fragment ShortImage on Image {
+  avatarsUrl
+  fallbackUrl
+  __typename
+}
+
+fragment MovieMarketingVerticalPoster on Movie {
+  gallery {
+    posters {
+      marketingVertical: vertical(override: MARKETING_WHEN_EXISTS) {
+        ...ShortImage
+        __typename
+      }
+      __typename
+    }
+    __typename
+  }
+  __typename
+}
+
+fragment MovieKpVerticalPoster on Movie {
+  gallery {
+    posters {
+      kpVertical: vertical {
+        ...ShortImage
+        __typename
+      }
+      __typename
+    }
+    __typename
+  }
+  __typename
+}
+
+fragment VideoInterface on VideoInterface {
+  duration
+  kpProductionYear: productionYear(override: DISABLED)
+  ottProductionYear: productionYear(override: OTT_WHEN_EXISTS)
+  __typename
+}
+
+fragment MovieSeoInfo on Movie {
+  id
+  title {
+    localized
+    original
+    __typename
+  }
+  shortDescription
+  synopsis
+  genres {
+    id
+    name
+    slug
+    __typename
+  }
+  countries {
+    id
+    name
+    __typename
+  }
+  viewOption {
+    isAvailableOnline: isWatchable(
+      filter: { anyDevice: false, anyRegion: false }
+    )
+    availabilityAnnounce {
+      __typename
+    }
+    __typename
+  }
+  watchabilityCount: watchability(limit: 0) {
+    total
+    __typename
+  }
+  ott {
+    preview {
+      features(filter: { layout: OTT_TITLE_CARD, onlyClientSupported: true }) {
+        alias
+        __typename
+      }
+      __typename
+    }
+    __typename
+  }
+  ... on Film {
+    ...VideoInterface
+    __typename
+  }
+  ... on Video {
+    ...VideoInterface
+    __typename
+  }
+  ... on Series {
+    releaseYears {
+      start
+      end
+      __typename
+    }
+    seasonsAll: seasons(limit: 0) {
+      total
+      __typename
+    }
+    seasonsOnline: seasons(limit: 0, isOnlyOnline: true) {
+      total
+      __typename
+    }
+    __typename
+  }
+  __typename
+}
+
+fragment PurchaseMetadata on MovieUserData {
+  purchaseMetadata(includeWaiting: true) {
+    id
+    watchPeriod {
+      watchPeriodStatus
+      __typename
+    }
+    __typename
+  }
+  __typename
+}
+
+fragment Folder on Folder {
+  id
+  name
+  public
+  __typename
+}
+
+fragment MovieUserFolders on Movie {
+  userData {
+    userFolders(offset: 0, limit: 20) {
+      items {
+        ...Folder
+        __typename
+      }
+      __typename
+    }
+    isFavorite
+    __typename
+  }
+  __typename
+}
+
+fragment OriginalsFragment on PagingList_Release {
+  items {
+    companies {
+      displayName
+      id
+      originalsMovieList {
+        id
+        url
+        movies(supportedItemTypes: [MOVIE_LIST_ITEM], limit: 0) {
+          total
+          __typename
+        }
+        __typename
+      }
+      __typename
+    }
+    __typename
+  }
+  __typename
+}
+
+fragment MovieRatingLists on Movie {
+  ratingLists {
+    top10 {
+      ...MovieRatingListsItem
+      __typename
+    }
+    top250 {
+      ...MovieRatingListsItem
+      __typename
+    }
+    __typename
+  }
+  __typename
+}
+
+fragment MovieTitleAndContentId on Movie {
+  ...MovieTitleOption
+  contentId
+  __typename
+}
+
+fragment MovieCinemaAnnounce on Movie {
+  ...MovieIsTicketsAvailable
+  ...TicketOptionReleaseAnnounce
+  __typename
+}
+
+fragment OttWithSkippableFragments on Ott_AbstractVideo {
+  skippableFragments {
+    ...SkippableFragment
+    __typename
+  }
+  __typename
+}
+
+fragment ViewOption on ViewOption {
+  type
+  purchasabilityStatus
+  buttonText
+  originalButtonText
+  descriptionText
+  promotionActionType
+  texts {
+    disclaimer
+    __typename
+  }
+  rightholderLogoUrlForPoster
+  posterWithRightholderLogo
+  isAvailableOnline: isWatchable(filter: { anyDevice: false, anyRegion: false })
+  isWatchable(filter: { anyDevice: true, anyRegion: false })
+  watchabilityStatus
+  promotionIcons {
+    avatarsUrl
+    fallbackUrl
+    __typename
+  }
+  contentPackageToBuy {
+    billingFeatureName
+    __typename
+  }
+  mainPromotionAbsoluteAmount {
+    amount
+    __typename
+  }
+  mastercardPromotionAbsoluteAmount {
+    amount
+    __typename
+  }
+  optionMonetizationModels
+  priceWithTotalDiscount {
+    amount
+    currency {
+      displayName
+      __typename
+    }
+    __typename
+  }
+  transactionalMinimumPrice {
+    amount
+    __typename
+  }
+  transactionalPrice {
+    amount
+    __typename
+  }
+  availabilityAnnounce {
+    ...AvailabilityAnnounce
+    __typename
+  }
+  purchaseOptionCustomProperties
+  __typename
+}
+
+fragment ExternalViewOptions on ExternalViewOption {
+  ... on ExternalPartnerOption {
+    contentBrand {
+      ...ExternalViewOptionContentBrand
+      __typename
+    }
+    ...ExternalViewOptionAction
+    externalUrl
+    __typename
+  }
+  ... on ExternalBaseOption {
+    contentBrand {
+      ...ExternalViewOptionContentBrand
+      __typename
+    }
+    externalUrl
+    __typename
+  }
+  __typename
+}
+
+fragment MoviePoster on Movie {
+  ...MovieMarketingVerticalPoster
+  ...MovieKpVerticalPoster
+  __typename
+}
+
+fragment MovieCover on Movie {
+  gallery {
+    covers {
+      square {
+        ...ShortImage
+        __typename
+      }
+      horizontal {
+        ...ShortImage
+        __typename
+      }
+      __typename
+    }
+    __typename
+  }
+  __typename
+}
+
+fragment RatingValue on RatingValue {
+  value
+  isActive
+  count
+  __typename
+}
+
+fragment MovieSeoFullInfo on Movie {
+  ...MovieSeoInfo
+  distribution {
+    originals: releases(original: true, types: [DIGITAL], limit: 1) {
+      items {
+        companies {
+          id
+          __typename
+        }
+        __typename
+      }
+      __typename
+    }
+    __typename
+  }
+  __typename
+}
+
+fragment MovieUserData on Movie {
+  userData {
+    voting {
+      value
+      votedAt
+      __typename
+    }
+    note {
+      value
+      makeDate
+      __typename
+    }
+    watchStatuses {
+      notInterested {
+        value
+        __typename
+      }
+      watched {
+        value
+        __typename
+      }
+      __typename
+    }
+    isPlannedToWatch
+    ...PurchaseMetadata
+    __typename
+  }
+  ...MovieUserFolders
+  __typename
+}
+
+fragment MovieFactsCount on Movie {
+  factsCount: trivias(type: FACT, limit: 0) {
+    total
+    __typename
+  }
+  __typename
+}
+
+fragment MovieBloopersCount on Movie {
+  bloopersCount: trivias(type: BLOOPER, limit: 0) {
+    total
+    __typename
+  }
+  __typename
+}
+
+fragment MovieUsersReviewsCount on Movie {
+  usersReviewsCount: userReviews(limit: 0) {
+    total
+    __typename
+  }
+  __typename
+}
+
+fragment MovieMediaPostsCount on Movie {
+  mediaPostsCount: post(limit: 0) {
+    total
+    __typename
+  }
+  __typename
+}
+
+fragment MovieTrailersCount on Movie {
+  trailersCount: trailers(limit: 0) {
+    total
+    __typename
+  }
+  __typename
+}
+
+fragment MovieCriticReviewsCount on Movie {
+  criticReviewsCount: criticReviews(limit: 0) {
+    total
+    __typename
+  }
+  __typename
+}
+
+fragment MovieSimilarMoviesCount on Movie {
+  similarMoviesCount: userRecommendations(limit: 0) {
+    total
+    __typename
+  }
+  __typename
+}
+
+fragment MovieActorsCount on Movie {
+  actorsCount: members(limit: 0, role: [ACTOR, CAMEO, UNCREDITED]) {
+    total
+    __typename
+  }
+  __typename
+}
+
+fragment MovieCreatorsCount on Movie {
+  creatorsCount: members(
+    limit: 0
+    role: [DIRECTOR, WRITER, PRODUCER, COMPOSER, OPERATOR, DESIGN, ART]
+  ) {
+    total
+    __typename
+  }
+  __typename
+}
+
+fragment MovieSequelsPrequelsCount on Movie {
+  sequelsPrequelsCount: relatedMovies(limit: 0, type: [BEFORE, AFTER, REMAKE]) {
+    total
+    __typename
+  }
+  __typename
+}
+
+fragment MovieMainAwardsCount on Movie {
+  mainAwardsCount: awards(isMain: true, limit: 0) {
+    total
+    __typename
+  }
+  __typename
+}
+
+fragment MovieRelatedMoviesCount on Movie {
+  relatedMoviesCount: relatedMovies(
+    limit: 0
+    type: [
+      VERSION
+      SPOOFS
+      SPOOFED
+      SPIN_OFF
+      REFERENCES
+      REFERENCES_IN
+      EDITED_INTO
+      EDITED_FROM
+    ]
+  ) {
+    total
+    __typename
+  }
+  __typename
+}
+
+fragment MovieImagesCount on Movie {
+  imagesCount: images(types: [STILL, POSTER, WALLPAPER], limit: 0) {
+    total
+    __typename
+  }
+  __typename
+}
+
+fragment MovieOriginalMoviesCount on Movie {
+  distribution {
+    releases(original: true, types: [DIGITAL], limit: 1) {
+      ...OriginalsFragment
+      __typename
+    }
+    __typename
+  }
+  __typename
+}
+
+fragment IsMovieWatchableOnOtt on Movie {
+  viewOption {
+    isWatchable(filter: { anyDevice: true, anyRegion: false })
+    availabilityAnnounce {
+      type
+      __typename
+    }
+    __typename
+  }
+  __typename
+}
+
+fragment OgImage on HtmlMeta {
+  openGraph {
+    image {
+      avatarsUrl
+      __typename
+    }
+    __typename
+  }
+  __typename
+}

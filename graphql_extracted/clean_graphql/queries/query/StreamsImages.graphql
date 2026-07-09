@@ -1,0 +1,78 @@
+query StreamsImages($contentId: String!) {
+  content(contentId: $contentId) {
+    __typename
+    ... on Movie {
+      movieGallery: gallery {
+        posters {
+          __typename
+          ...baseMoviePostersFragment
+        }
+        covers {
+          horizontal {
+            __typename
+            ...imageFragment
+          }
+        }
+      }
+    }
+    ... on Episode {
+      tvSeries {
+        gallery {
+          posters {
+            __typename
+            ...baseMoviePostersFragment
+          }
+        }
+      }
+      cover {
+        __typename
+        ...imageFragment
+      }
+    }
+    ... on Catchup {
+      referenceContent {
+        __typename
+        ... on VideoInterface {
+          gallery {
+            posters {
+              __typename
+              ...baseMoviePostersFragment
+            }
+          }
+        }
+      }
+      catchupGallery: gallery {
+        covers {
+          horizontal {
+            __typename
+            ...imageFragment
+          }
+        }
+      }
+    }
+  }
+}
+
+fragment imageFragment on Image {
+  avatarsUrl
+  fallbackUrl
+}
+
+fragment baseMoviePostersFragment on MoviePosters {
+  vertical(override: OTT_WHEN_EXISTS) {
+    __typename
+    ...imageFragment
+  }
+  verticalWithRightholderLogo {
+    __typename
+    ...imageFragment
+  }
+  horizontal {
+    __typename
+    ...imageFragment
+  }
+  horizontalWithRightholderLogo {
+    __typename
+    ...imageFragment
+  }
+}

@@ -1,0 +1,23 @@
+query PersonTrivia($personId: Long!, $offset: Int!, $limit: Int!) {
+  person(id: $personId) {
+    __typename
+    trivias(offset: $offset, limit: $limit) {
+      __typename
+      offset
+      limit
+      total
+      items {
+        __typename
+        ...triviaFragment
+      }
+    }
+  }
+}
+
+fragment triviaFragment on Trivia {
+  __typename
+  id
+  isSpoiler
+  text
+  type
+}

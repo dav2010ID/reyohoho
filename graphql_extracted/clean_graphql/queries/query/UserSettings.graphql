@@ -1,0 +1,46 @@
+query UserSettings(
+  $includeSportSettings: Boolean!
+  $includeGeoSettings: Boolean!
+  $includeDeviceSettings: Boolean!
+) {
+  userProfile {
+    __typename
+    localisation {
+      languages {
+        preferredWatchingLanguage {
+          code
+          title
+        }
+        availableWatchingLanguages {
+          code
+          title
+        }
+      }
+    }
+    devices @include(if: $includeDeviceSettings) {
+      items(relation: OWN) {
+        deviceId
+      }
+      restrictions {
+        maxDevices
+      }
+    }
+    ... on UserProfile {
+      sportContentSettings @include(if: $includeSportSettings) {
+        resultHidden
+      }
+    }
+  }
+  geo @include(if: $includeGeoSettings) {
+    rewrite {
+      availableRegions {
+        id
+        title
+      }
+      region {
+        id
+        title
+      }
+    }
+  }
+}

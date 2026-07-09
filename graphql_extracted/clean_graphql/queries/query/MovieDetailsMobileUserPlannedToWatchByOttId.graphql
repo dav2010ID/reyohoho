@@ -1,0 +1,12 @@
+query MovieDetailsMobileUserPlannedToWatchByOttId($contentUuid: String!) {
+  movieByContentUuid(contentUuid: $contentUuid) {
+    __typename
+    ...movieDetailsMobileUserPlannedToWatchFragment
+  }
+}
+
+fragment movieDetailsMobileUserPlannedToWatchFragment on Movie {
+  userData {
+    isPlannedToWatch
+  }
+}

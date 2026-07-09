@@ -1,0 +1,20 @@
+query MovieListCategories(
+  $offset: Int
+  $limit: Int
+  $orderBy: MovieListCategoryOrderBy
+  $filter: MovieListCategoryFilterInput
+) {
+  movieListCategories(
+    offset: $offset
+    limit: $limit
+    orderBy: $orderBy
+    filter: $filter
+  ) {
+    items {
+      id
+      name
+      __typename
+    }
+    __typename
+  }
+}

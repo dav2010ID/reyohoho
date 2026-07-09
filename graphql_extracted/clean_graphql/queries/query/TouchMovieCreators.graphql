@@ -1,0 +1,65 @@
+query TouchMovieCreators(
+  $movieId: Long!
+  $directorsLimit: Int
+  $writersLimit: Int
+  $producersLimit: Int
+  $composersLimit: Int
+  $designersLimit: Int
+) {
+  movie(id: $movieId) {
+    id
+    directors: members(limit: $directorsLimit, role: [DIRECTOR]) {
+      items {
+        ...MovieCrewMember
+        __typename
+      }
+      __typename
+    }
+    writers: members(limit: $writersLimit, role: [WRITER]) {
+      items {
+        ...MovieCrewMember
+        __typename
+      }
+      __typename
+    }
+    producers: members(limit: $producersLimit, role: [PRODUCER]) {
+      items {
+        ...MovieCrewMember
+        __typename
+      }
+      __typename
+    }
+    composers: members(limit: $composersLimit, role: [COMPOSER]) {
+      items {
+        ...MovieCrewMember
+        __typename
+      }
+      __typename
+    }
+    designers: members(limit: $designersLimit, role: [OPERATOR, DESIGN, ART]) {
+      items {
+        ...MovieCrewMember
+        __typename
+      }
+      __typename
+    }
+    __typename
+  }
+}
+
+fragment MovieCrewMember on FilmCrewMember {
+  person {
+    id
+    name
+    originalName
+    poster {
+      avatarsUrl
+      fallbackUrl
+      __typename
+    }
+    __typename
+  }
+  details
+  role
+  __typename
+}

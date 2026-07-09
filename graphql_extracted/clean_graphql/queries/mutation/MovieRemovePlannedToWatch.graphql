@@ -1,0 +1,16 @@
+mutation MovieRemovePlannedToWatch($movieId: Long!) {
+  movie {
+    plannedToWatch {
+      remove(input: { movieId: $movieId }) {
+        status
+        error {
+          message
+          __typename
+        }
+        __typename
+      }
+      __typename
+    }
+    __typename
+  }
+}

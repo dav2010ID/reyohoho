@@ -1,0 +1,12 @@
+mutation MovieSetVote($movieId: Long!, $rate: Int!) {
+  movie {
+    vote {
+      set(input: { movieId: $movieId, rate: $rate }) {
+        status
+        error {
+          message
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,7 @@
+fragment PersonMediaPostsCount on Person {
+  mediaPostsCount: post(limit: 0) {
+    total
+    __typename
+  }
+  __typename
+}

@@ -1,0 +1,86 @@
+query SportReactionsByTeamId(
+  $teamId: String!
+  $friendsSportReactionsLimit: Int!
+  $friendsSportReactionsOffset: Int!
+  $includeVerification: Boolean!
+) {
+  team(id: $teamId) {
+    friendsSportReactions(
+      includeTypes: [FOLLOW]
+      limit: $friendsSportReactionsLimit
+      offset: $friendsSportReactionsOffset
+    ) {
+      limit
+      offset
+      total
+      items {
+        __typename
+        ...sportReactionsUserInfoFragment
+      }
+    }
+  }
+}
+
+fragment imageFragment on Image {
+  avatarsUrl
+  fallbackUrl
+}
+
+fragment socialInfoFragment on UserSocialInfo {
+  alias {
+    defaultValue {
+      value
+      source
+    }
+  }
+  name {
+    defaultValue {
+      value
+    }
+  }
+  avatar {
+    defaultValue {
+      value {
+        __typename
+        ...imageFragment
+      }
+    }
+  }
+  publicStatus
+  url
+  badges @include(if: $includeVerification) {
+    verified {
+      id
+      title
+      description
+      icons {
+        format
+        image {
+          __typename
+          ...imageFragment
+        }
+      }
+    }
+  }
+}
+
+fragment sportReactionsUserInfoFragment on UserSportReactions {
+  user {
+    subscriptionInfo {
+      hasSubscription
+    }
+    id {
+      puid
+    }
+    social {
+      __typename
+      ...socialInfoFragment
+    }
+  }
+  reactions(includeTypes: [FOLLOW]) {
+    __typename
+    ... on Follow {
+      follow
+    }
+  }
+}

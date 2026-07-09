@@ -1,0 +1,9 @@
+query ScriptNonce {
+  _local @client {
+    adfox {
+      scriptNonce
+      __typename
+    }
+    __typename
+  }
+}

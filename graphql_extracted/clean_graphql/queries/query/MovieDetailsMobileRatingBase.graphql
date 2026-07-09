@@ -1,0 +1,28 @@
+query MovieDetailsMobileRatingBase(
+  $movieId: Long!
+  $includePlannedToWatch: Boolean!
+) {
+  movie(id: $movieId) {
+    __typename
+    ...movieDetailsMobileRatingBaseFragment
+  }
+}
+
+fragment ratingValueFragment on RatingValue {
+  isActive
+  count
+  value(precision: 1)
+}
+
+fragment movieDetailsMobileRatingBaseFragment on Movie {
+  rating {
+    kinopoisk {
+      __typename
+      ...ratingValueFragment
+    }
+    plannedToWatch @include(if: $includePlannedToWatch) {
+      __typename
+      ...ratingValueFragment
+    }
+  }
+}

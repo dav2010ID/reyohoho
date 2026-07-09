@@ -1,0 +1,25 @@
+query EncyclopediaTodayMainPosts($postsOffset: Int!, $postsLimit: Int!) {
+  todayMainPosts(offset: $postsOffset, limit: $postsLimit) {
+    offset
+    limit
+    total
+    items {
+      id
+      title
+      publishedAt
+      coverImage {
+        __typename
+        ...imageFragment
+      }
+      thumbImage {
+        __typename
+        ...imageFragment
+      }
+    }
+  }
+}
+
+fragment imageFragment on Image {
+  avatarsUrl
+  fallbackUrl
+}

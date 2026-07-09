@@ -1,0 +1,12 @@
+query GeoContentAvailability {
+  ott {
+    contentAvailability {
+      geo {
+        availabilityStatus
+        __typename
+      }
+      __typename
+    }
+    __typename
+  }
+}

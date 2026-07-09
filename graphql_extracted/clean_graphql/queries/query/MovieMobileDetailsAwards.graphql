@@ -1,0 +1,75 @@
+query MovieMobileDetailsAwards($movieId: Long!, $offset: Int!, $limit: Int!) {
+  movie(id: $movieId) {
+    awards(
+      offset: $offset
+      limit: $limit
+      orderBy: AWARD_POSITION_YEAR_DESC_WIN_FIRST_NOMINATION_COUNT_DESC
+    ) {
+      offset
+      limit
+      total
+      items {
+        win
+        image {
+          __typename
+          ...imageFragment
+        }
+        nomination {
+          __typename
+          ...awardNominationFragment
+        }
+        persons(offset: 0, limit: 10) {
+          items {
+            __typename
+            ...personSummaryFragment
+          }
+        }
+      }
+    }
+  }
+}
+
+fragment imageFragment on Image {
+  avatarsUrl
+  fallbackUrl
+}
+
+fragment awardNominationFragment on AwardNomination {
+  title
+  award {
+    title
+    year
+  }
+}
+
+fragment personNameFragment on Person {
+  name
+  originalName
+}
+
+fragment incompleteDateFragment on IncompleteDate {
+  date
+  accuracy
+}
+
+fragment personSummaryFragment on Person {
+  __typename
+  id
+  ...personNameFragment
+  gender
+  poster {
+    __typename
+    ...imageFragment
+  }
+  age
+  height
+  dateOfBirth {
+    __typename
+    ...incompleteDateFragment
+  }
+  dateOfDeath {
+    __typename
+    ...incompleteDateFragment
+  }
+  published
+}

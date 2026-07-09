@@ -1,0 +1,950 @@
+{
+  "kinopoisk_id": 301,
+  "imdb_id": null,
+  "name_ru": "Матрица",
+  "name_en": "The Matrix",
+  "name_original": "The Matrix",
+  "poster_url": "https://avatars.mds.yandex.net/get-kinopoisk-image/4774061/cf1970bc-3f08-4e0e-a095-2fb57c3aa7c6/orig",
+  "poster_url_preview": "https://avatars.mds.yandex.net/get-kinopoisk-image/4774061/cf1970bc-3f08-4e0e-a095-2fb57c3aa7c6/300x450",
+  "reviews_count": 318,
+  "rating_good_review": 89.0,
+  "rating_good_review_vote_count": 263,
+  "rating_kinopoisk": 8.5,
+  "rating_kinopoisk_vote_count": 802589,
+  "rating_imdb": 8.7,
+  "rating_imdb_vote_count": 2200000,
+  "rating_film_critics": 7.9,
+  "rating_film_critics_vote_count": 209,
+  "rating_await": null,
+  "rating_await_count": 0,
+  "rating_rf_critics": 60.0,
+  "rating_rf_critics_vote_count": 5,
+  "year": 1999,
+  "film_length": 136,
+  "is_tickets_available": false,
+  "production_status": null,
+  "type": "FILM",
+  "has_imax": false,
+  "has_3_d": false,
+  "countries": [
+    {
+      "country": "США"
+    },
+    {
+      "country": "Австралия"
+    }
+  ],
+  "genres": [
+    {
+      "genre": "фантастика"
+    },
+    {
+      "genre": "боевик"
+    }
+  ],
+  "start_year": null,
+  "end_year": null,
+  "cover_url": "https://avatars.mds.yandex.net/get-ott/2419418/2a0000017c27e0e090b55381c1b06e5c5b0b/orig",
+  "logo_url": "https://avatars.mds.yandex.net/get-ott/1648503/2a00000170a5418408119bc802b53a03007b/orig",
+  "web_url": "https://www.kinopoisk.ru/film/301/",
+  "slogan": "Добро пожаловать в реальный мир",
+  "description": "Жизнь Томаса Андерсона разделена на две части: днём он — самый обычный офисный работник, получающий нагоняи от начальства, а ночью превращается в хакера по имени Нео, и нет места в сети, куда он бы не смог проникнуть. Но однажды всё меняется. Томас узнаёт ужасающую правду о реальности.",
+  "short_description": "Хакер Нео узнает, что его мир — виртуальный. Выдающийся экшен, доказавший, что зрелищное кино может быть умным",
+  "editor_annotation": null,
+  "rating_mpaa": "r",
+  "rating_age_limits": "age18",
+  "last_sync": "2026-06-21T22:17:33.946185+00:00",
+  "serial": false,
+  "short_film": false,
+  "completed": false,
+  "sequels_and_prequels": [
+    {
+      "film_id": 63744,
+      "name_ru": "Аниматрица: Второе возрождение – Часть 1",
+      "name_en": "The Second Renaissance Part I",
+      "name_original": "The Second Renaissance Part I",
+      "poster_url": "https://avatars.mds.yandex.net/get-kinopoisk-image/1599028/fe4bd7c6-c344-4b51-a19a-a1541960f965/orig",
+      "poster_url_preview": "https://avatars.mds.yandex.net/get-kinopoisk-image/1599028/fe4bd7c6-c344-4b51-a19a-a1541960f965/300x450",
+      "relation_type": "SEQUEL"
+    },
+    {
+      "film_id": 8407,
+      "name_ru": "Аниматрица: Последний полет Осириса",
+      "name_en": "Final Flight of the Osiris",
+      "name_original": "Final Flight of the Osiris",
+      "poster_url": "https://avatars.mds.yandex.net/get-kinopoisk-image/1600647/6b03721c-f98c-415e-8c59-1933ec84e810/orig",
+      "poster_url_preview": "https://avatars.mds.yandex.net/get-kinopoisk-image/1600647/6b03721c-f98c-415e-8c59-1933ec84e810/300x450",
+      "relation_type": "SEQUEL"
+    },
+    {
+      "film_id": 63745,
+      "name_ru": "Аниматрица: Второе возрождение – Часть 2",
+      "name_en": "The Second Renaissance Part II",
+      "name_original": "The Second Renaissance Part II",
+      "poster_url": "https://avatars.mds.yandex.net/get-kinopoisk-image/1599028/85639052-8fda-4b41-ab6d-b573d2b17cdd/orig",
+      "poster_url_preview": "https://avatars.mds.yandex.net/get-kinopoisk-image/1599028/85639052-8fda-4b41-ab6d-b573d2b17cdd/300x450",
+      "relation_type": "SEQUEL"
+    },
+    {
+      "film_id": 299,
+      "name_ru": "Матрица: Перезагрузка",
+      "name_en": "The Matrix Reloaded",
+      "name_original": "The Matrix Reloaded",
+      "poster_url": "https://avatars.mds.yandex.net/get-kinopoisk-image/4774061/a53d1c75-4d1a-4c86-a936-65b2a724345c/orig",
+      "poster_url_preview": "https://avatars.mds.yandex.net/get-kinopoisk-image/4774061/a53d1c75-4d1a-4c86-a936-65b2a724345c/300x450",
+      "relation_type": "SEQUEL"
+    },
+    {
+      "film_id": 316,
+      "name_ru": "Матрица: Революция",
+      "name_en": "The Matrix Revolutions",
+      "name_original": "The Matrix Revolutions",
+      "poster_url": "https://avatars.mds.yandex.net/get-kinopoisk-image/1900788/37fc55e7-dfc7-406f-a187-17ef49f65b6f/orig",
+      "poster_url_preview": "https://avatars.mds.yandex.net/get-kinopoisk-image/1900788/37fc55e7-dfc7-406f-a187-17ef49f65b6f/300x450",
+      "relation_type": "SEQUEL"
+    },
+    {
+      "film_id": 1294123,
+      "name_ru": "Матрица: Воскрешение",
+      "name_en": "The Matrix Resurrections",
+      "name_original": "The Matrix Resurrections",
+      "poster_url": "https://avatars.mds.yandex.net/get-kinopoisk-image/1898899/f71f55b2-0a74-4a9e-b9a2-7369eccbb3a3/orig",
+      "poster_url_preview": "https://avatars.mds.yandex.net/get-kinopoisk-image/1898899/f71f55b2-0a74-4a9e-b9a2-7369eccbb3a3/300x450",
+      "relation_type": "SEQUEL"
+    }
+  ],
+  "similars": [
+    {
+      "film_id": 447301,
+      "name_ru": "Начало",
+      "name_en": "Inception",
+      "name_original": "Inception",
+      "poster_url": "https://avatars.mds.yandex.net/get-ott/1534341/2a00000178c5fc30eb0fcc2f4dfab2c0169d/orig",
+      "poster_url_preview": "https://avatars.mds.yandex.net/get-ott/1534341/2a00000178c5fc30eb0fcc2f4dfab2c0169d/300x450",
+      "relation_type": "SIMILAR"
+    },
+    {
+      "film_id": 309,
+      "name_ru": "Эквилибриум",
+      "name_en": "Equilibrium",
+      "name_original": "Equilibrium",
+      "poster_url": "https://avatars.mds.yandex.net/get-ott/374297/2a00000198a2c8cdde9edae8756b98392b3d/orig",
+      "poster_url_preview": "https://avatars.mds.yandex.net/get-ott/374297/2a00000198a2c8cdde9edae8756b98392b3d/300x450",
+      "relation_type": "SIMILAR"
+    },
+    {
+      "film_id": 1086,
+      "name_ru": "Тринадцатый этаж",
+      "name_en": "The Thirteenth Floor",
+      "name_original": "The Thirteenth Floor",
+      "poster_url": "https://avatars.mds.yandex.net/get-ott/224348/2a000001628b0fd89a81b86896bafff8f3d7/orig",
+      "poster_url_preview": "https://avatars.mds.yandex.net/get-ott/224348/2a000001628b0fd89a81b86896bafff8f3d7/300x450",
+      "relation_type": "SIMILAR"
+    },
+    {
+      "film_id": 4739,
+      "name_ru": "Тёмный город",
+      "name_en": "Dark City",
+      "name_original": "Dark City",
+      "poster_url": "https://avatars.mds.yandex.net/get-kinopoisk-image/1599028/cfcc9481-8653-4341-99fb-43d65850b6bb/orig",
+      "poster_url_preview": "https://avatars.mds.yandex.net/get-kinopoisk-image/1599028/cfcc9481-8653-4341-99fb-43d65850b6bb/300x450",
+      "relation_type": "SIMILAR"
+    },
+    {
+      "film_id": 470185,
+      "name_ru": "Обливион",
+      "name_en": "Oblivion",
+      "name_original": "Oblivion",
+      "poster_url": "https://avatars.mds.yandex.net/get-ott/1652588/2a0000016fd8054aede9b3a4a1cce4d2bd56/orig",
+      "poster_url_preview": "https://avatars.mds.yandex.net/get-ott/1652588/2a0000016fd8054aede9b3a4a1cce4d2bd56/300x450",
+      "relation_type": "SIMILAR"
+    },
+    {
+      "film_id": 450765,
+      "name_ru": "Меняющие реальность",
+      "name_en": "The Adjustment Bureau",
+      "name_original": "The Adjustment Bureau",
+      "poster_url": "https://avatars.mds.yandex.net/get-ott/2419418/2a00000176afbf3c9c0623437888f09afcbc/orig",
+      "poster_url_preview": "https://avatars.mds.yandex.net/get-ott/2419418/2a00000176afbf3c9c0623437888f09afcbc/300x450",
+      "relation_type": "SIMILAR"
+    },
+    {
+      "film_id": 399959,
+      "name_ru": "Трон: Наследие",
+      "name_en": "Tron: Legacy",
+      "name_original": "Tron: Legacy",
+      "poster_url": "https://avatars.mds.yandex.net/get-ott/223007/2a0000016939cd2d8b799bdb4ab433cb97f7/orig",
+      "poster_url_preview": "https://avatars.mds.yandex.net/get-ott/223007/2a0000016939cd2d8b799bdb4ab433cb97f7/300x450",
+      "relation_type": "SIMILAR"
+    },
+    {
+      "film_id": 397671,
+      "name_ru": "Суррогаты",
+      "name_en": "Surrogates",
+      "name_original": "Surrogates",
+      "poster_url": "https://avatars.mds.yandex.net/get-ott/2419418/2a000001781b5f178ca7b1bc292bdbf86367/orig",
+      "poster_url_preview": "https://avatars.mds.yandex.net/get-ott/2419418/2a000001781b5f178ca7b1bc292bdbf86367/300x450",
+      "relation_type": "SIMILAR"
+    },
+    {
+      "film_id": 464484,
+      "name_ru": "Облачный атлас",
+      "name_en": "Cloud Atlas",
+      "name_original": "Cloud Atlas",
+      "poster_url": "https://avatars.mds.yandex.net/get-ott/1531675/2a0000018e572ee644a4a1034ac4cd8b28c9/orig",
+      "poster_url_preview": "https://avatars.mds.yandex.net/get-ott/1531675/2a0000018e572ee644a4a1034ac4cd8b28c9/300x450",
+      "relation_type": "SIMILAR"
+    },
+    {
+      "film_id": 444,
+      "name_ru": "Терминатор 2: Судный день",
+      "name_en": "Terminator 2: Judgment Day",
+      "name_original": "Terminator 2: Judgment Day",
+      "poster_url": "https://avatars.mds.yandex.net/get-ott/2385704/2a00000171792bce76151187549cdf5ae868/orig",
+      "poster_url_preview": "https://avatars.mds.yandex.net/get-ott/2385704/2a00000171792bce76151187549cdf5ae868/300x450",
+      "relation_type": "SIMILAR"
+    },
+    {
+      "film_id": 81291,
+      "name_ru": "Остров",
+      "name_en": "The Island",
+      "name_original": "The Island",
+      "poster_url": "https://avatars.mds.yandex.net/get-ott/239697/2a00000169dea056ecd331734561b3888779/orig",
+      "poster_url_preview": "https://avatars.mds.yandex.net/get-ott/239697/2a00000169dea056ecd331734561b3888779/300x450",
+      "relation_type": "SIMILAR"
+    },
+    {
+      "film_id": 760326,
+      "name_ru": "Люси",
+      "name_en": "Lucy",
+      "name_original": "Lucy",
+      "poster_url": "https://avatars.mds.yandex.net/get-ott/223007/2a00000170154ef6b5936eb3e449e15995e1/orig",
+      "poster_url_preview": "https://avatars.mds.yandex.net/get-ott/223007/2a00000170154ef6b5936eb3e449e15995e1/300x450",
+      "relation_type": "SIMILAR"
+    },
+    {
+      "film_id": 17463,
+      "name_ru": "Трон",
+      "name_en": "Tron",
+      "name_original": "Tron",
+      "poster_url": "https://avatars.mds.yandex.net/get-ott/200035/2a000001789148fd2804b22ecb950036fef4/orig",
+      "poster_url_preview": "https://avatars.mds.yandex.net/get-ott/200035/2a000001789148fd2804b22ecb950036fef4/300x450",
+      "relation_type": "SIMILAR"
+    },
+    {
+      "film_id": 8228,
+      "name_ru": "Призрак в доспехах",
+      "name_en": "Koukaku Kidoutai",
+      "name_original": "Koukaku Kidoutai",
+      "poster_url": "https://avatars.mds.yandex.net/get-ott/374297/2a00000198c2b67bf5673f83baf37bd3eea1/orig",
+      "poster_url_preview": "https://avatars.mds.yandex.net/get-ott/374297/2a00000198c2b67bf5673f83baf37bd3eea1/300x450",
+      "relation_type": "SIMILAR"
+    },
+    {
+      "film_id": 409600,
+      "name_ru": "Доктор Стрэндж",
+      "name_en": "Doctor Strange",
+      "name_original": "Doctor Strange",
+      "poster_url": "https://avatars.mds.yandex.net/get-ott/1534341/2a0000017dbe654e9e5f437b56507bcaaafd/orig",
+      "poster_url_preview": "https://avatars.mds.yandex.net/get-ott/1534341/2a0000017dbe654e9e5f437b56507bcaaafd/300x450",
+      "relation_type": "SIMILAR"
+    },
+    {
+      "film_id": 259876,
+      "name_ru": "Особо опасен",
+      "name_en": "Wanted",
+      "name_original": "Wanted",
+      "poster_url": "https://avatars.mds.yandex.net/get-ott/239697/2a000001612cdaaa60d169fbb1f68b8a47cc/orig",
+      "poster_url_preview": "https://avatars.mds.yandex.net/get-ott/239697/2a000001612cdaaa60d169fbb1f68b8a47cc/300x450",
+      "relation_type": "SIMILAR"
+    },
+    {
+      "film_id": 3800,
+      "name_ru": "Джонни Мнемоник",
+      "name_en": "Johnny Mnemonic",
+      "name_original": "Johnny Mnemonic",
+      "poster_url": "https://avatars.mds.yandex.net/get-ott/374297/2a0000019aba475333d64011e4d3596bd3ac/orig",
+      "poster_url_preview": "https://avatars.mds.yandex.net/get-ott/374297/2a0000019aba475333d64011e4d3596bd3ac/300x450",
+      "relation_type": "SIMILAR"
+    },
+    {
+      "film_id": 325797,
+      "name_ru": "Аниматрица",
+      "name_en": "The Animatrix",
+      "name_original": "The Animatrix",
+      "poster_url": "https://avatars.mds.yandex.net/get-ott/1534341/2a00000169be7a736cdbd3db05efba5ee296/orig",
+      "poster_url_preview": "https://avatars.mds.yandex.net/get-ott/1534341/2a00000169be7a736cdbd3db05efba5ee296/300x450",
+      "relation_type": "SIMILAR"
+    },
+    {
+      "film_id": 35545,
+      "name_ru": "Нирвана",
+      "name_en": "Nirvana",
+      "name_original": "Nirvana",
+      "poster_url": "https://avatars.mds.yandex.net/get-kinopoisk-image/1704946/e10bd0fd-a508-40a2-a5ae-0ec53375e091/orig",
+      "poster_url_preview": "https://avatars.mds.yandex.net/get-kinopoisk-image/1704946/e10bd0fd-a508-40a2-a5ae-0ec53375e091/300x450",
+      "relation_type": "SIMILAR"
+    },
+    {
+      "film_id": 180577,
+      "name_ru": "Девять",
+      "name_en": "9",
+      "name_original": "9",
+      "poster_url": "https://avatars.mds.yandex.net/get-ott/239697/2a000001616b86f9ac676afaa267ba5740c3/orig",
+      "poster_url_preview": "https://avatars.mds.yandex.net/get-ott/239697/2a000001616b86f9ac676afaa267ba5740c3/300x450",
+      "relation_type": "SIMILAR"
+    }
+  ],
+  "videos": [
+    {
+      "url": "https://strm.yandex.ru/vod/vh-kp-converted/vod-content/4cd8cff5157dfcec8f4bd35ce2e5a404/17834040x1762493049xac9ac72f-0fd4-4112-8145-befad59a8b5a/kaltura/hls_clear_sdr_hd_avc_aac_72c045e9610555e9b3e1d2ce9f459872/x/ysign1=2cee5308993de5645cf48f230c82c1e58e1148a10797e3f7a8ec4fbf49755372,abcID=1358,from=ott-kp,pfx,prpo=900,sfx,ts=6a3b05fd/master.m3u8?ottsessionid=7490569387204ead8677095d36496e8d&packager=1",
+      "name": "Трейлер к 20-летию фильма (дублированный)",
+      "site": "KINOPOISK",
+      "type": "TRAILER",
+      "duration": 89,
+      "preview_url": "https://avatars.mds.yandex.net/get-kino-vod-films-gallery/33804/74db3f1d742c998d9b09ba87265405c1/orig"
+    },
+    {
+      "url": "https://strm.yandex.ru/vod/vh-kp-converted/vod-content/49dca7403ea71c0392a36499fde85c80/17834040x1762556472xc7e67c16-a5c9-4051-aec3-f4b37a7f7af6/kaltura/hls_clear_sdr_hd_avc_aac_8af978b6a532b24a9561fbee963e2856/x/ysign1=fc864913bc99f122cfe1bc836551e65a3a918801d555e50b61974b82c3083ecd,abcID=1358,from=ott-kp,pfx,prpo=900,sfx,ts=6a3b05fd/master.m3u8?ottsessionid=7490569387204ead8677095d36496e8d&packager=1",
+      "name": "Видеоэссе: Как «Матрица» стала культовым фильмом",
+      "site": "KINOPOISK",
+      "type": "TRAILER",
+      "duration": 872,
+      "preview_url": "https://avatars.mds.yandex.net/get-kino-vod-films-gallery/1668876/f94cb28af327eb556a03f230cf7110ef/orig"
+    },
+    {
+      "url": "https://strm.yandex.ru/vod/vh-kp-converted/vod-content/4529cbdd63affa2ab0a773f6c2f44cdf/17834040x1762556471xc3033d8c-5ada-4f9d-b65e-34e4d5dcbeea/kaltura/hls_clear_sdr_hd_avc_aac_a6f9ae83d55e638b60e6ed693ca97fc0/x/ysign1=651fb7d5e3dfe37f341c1ca2947a0cb92cc4746950172f9ef1004476511b632f,abcID=1358,from=ott-kp,pfx,prpo=900,sfx,ts=6a3b05fd/master.m3u8?ottsessionid=7490569387204ead8677095d36496e8d&packager=1",
+      "name": "Трейлер к 20-летию фильма",
+      "site": "KINOPOISK",
+      "type": "TRAILER",
+      "duration": 81,
+      "preview_url": "https://avatars.mds.yandex.net/get-kino-vod-films-gallery/27707/7ebfe292d27f25eede4e917be79005bc/orig"
+    },
+    {
+      "url": "https://strm.yandex.ru/vh-kp-converted/ott-content/397451420-44d71a1cfe0dce55aa31b56da3c8bf25/ysign1=80a9905eabc57ead1c9626bb092871d4ac6063513c14936998984edc59064dd7,abcID=1358,from=ott-kp,pfx,sfx,ts=6a3b05fd/master.m3u8?ottsessionid=7490569387204ead8677095d36496e8d&packager=1",
+      "name": "Русский ТВ-ролик",
+      "site": "KINOPOISK",
+      "type": "TRAILER",
+      "duration": 45,
+      "preview_url": "https://avatars.mds.yandex.net/get-kino-vod-films-gallery/33804/f4446f51300d5321a78147749c52ca88/orig"
+    },
+    {
+      "url": "https://strm.yandex.ru/vh-kp-converted/ott-content/391652753-416af305f5dd434f912986f69591dc42/ysign1=ed7cef933d51686fd33d0f4093ab990afbd5599ef4c5e20ee0c813441a9c1282,abcID=1358,from=ott-kp,pfx,sfx,ts=6a3b05fd/master.m3u8?ottsessionid=7490569387204ead8677095d36496e8d&packager=1",
+      "name": "ТВ-ролик №10",
+      "site": "KINOPOISK",
+      "type": "TRAILER",
+      "duration": 30,
+      "preview_url": "https://avatars.mds.yandex.net/get-kino-vod-films-gallery/1668876/016ad325788cc1b6ebce9ac975332b99/orig"
+    },
+    {
+      "url": "https://strm.yandex.ru/vh-kp-converted/ott-content/391652865-49ed406536f9ec3790d25ab5c83b3c75/ysign1=b3cfdf415786a70c404481bb4572c1ec2356f6d9e9e24702a62959888e8324c4,abcID=1358,from=ott-kp,pfx,sfx,ts=6a3b05fd/master.m3u8?ottsessionid=7490569387204ead8677095d36496e8d&packager=1",
+      "name": "ТВ-ролик №9",
+      "site": "KINOPOISK",
+      "type": "TRAILER",
+      "duration": 31,
+      "preview_url": "https://avatars.mds.yandex.net/get-kino-vod-films-gallery/33804/1c65c64bb0abc4e5c0e7afa387bb31db/orig"
+    },
+    {
+      "url": "https://strm.yandex.ru/vh-kp-converted/ott-content/392172211-474d1c0e9b24f4809971c53e505680c5/ysign1=d8396eb67a2a821278735fcbd260e8a6965d01a0cb050feb239ba206886d7299,abcID=1358,from=ott-kp,pfx,sfx,ts=6a3b05fd/master.m3u8?ottsessionid=7490569387204ead8677095d36496e8d&packager=1",
+      "name": "Музыкальный клип",
+      "site": "KINOPOISK",
+      "type": "TRAILER",
+      "duration": 192,
+      "preview_url": "https://avatars.mds.yandex.net/get-kino-vod-films-gallery/34144/53a6bc5f4c7fcd35289cc66b571417e1/orig"
+    },
+    {
+      "url": "https://strm.yandex.ru/vh-kp-converted/vod-content/41337b4e70a16205a7f14bf2fc5a8245/17617488x1759418827xd479ed5a-7e38-4f49-b509-1a39caec455b/hls-v3/ysign1=6b39f88fd4db831d47d356bb1ed16bf8a556802480c0b0bdf0d6dcfdacd4b566,abcID=1358,from=ott-kp,pfx,sfx,ts=6a3b05fd/master_sdr_sd_avc_aac.m3u8?ottsessionid=7490569387204ead8677095d36496e8d&packager=1",
+      "name": "Трейлер (русский язык)",
+      "site": "KINOPOISK",
+      "type": "TRAILER",
+      "duration": 153,
+      "preview_url": "https://avatars.mds.yandex.net/get-kino-vod-films-gallery/177294/dc486596027f598f189f531a05e041d0/orig"
+    },
+    {
+      "url": "https://strm.yandex.ru/vh-kp-converted/ott-content/401531449-4a601cc2e238bf10ab791441645a4e65/ysign1=1983a74d2d173aee8c684259586aaa6ece82395a8c3a3113e2e2503f06913406,abcID=1358,from=ott-kp,pfx,sfx,ts=6a3b05fd/master.m3u8?ottsessionid=7490569387204ead8677095d36496e8d&packager=1",
+      "name": "ТВ-ролик №8",
+      "site": "KINOPOISK",
+      "type": "TRAILER",
+      "duration": 17,
+      "preview_url": "https://avatars.mds.yandex.net/get-kino-vod-films-gallery/28788/8f7d8a41a53d21303a0fc230892e7a00/orig"
+    },
+    {
+      "url": "https://strm.yandex.ru/vh-kp-converted/ott-content/401531456-44710f53621dce2d897c7f1f7e14c7df/ysign1=827dc372aade25c3ccf3a267cc71ed12e687ed3325c2abb58892d26f95693b6a,abcID=1358,from=ott-kp,pfx,sfx,ts=6a3b05fd/master.m3u8?ottsessionid=7490569387204ead8677095d36496e8d&packager=1",
+      "name": "ТВ-ролик №7",
+      "site": "KINOPOISK",
+      "type": "TRAILER",
+      "duration": 32,
+      "preview_url": "https://avatars.mds.yandex.net/get-kino-vod-films-gallery/1668876/60212247cfb4d8d18f7aaf10d349fc29/orig"
+    },
+    {
+      "url": "https://strm.yandex.ru/vh-kp-converted/ott-content/401531464-41b976468880e28ebf2310c8a1d4eae5/ysign1=47c4745381da96e648ab662b93e237b8680a0196d06fd25c7dbb52c4efaeef3a,abcID=1358,from=ott-kp,pfx,sfx,ts=6a3b05fd/master.m3u8?ottsessionid=7490569387204ead8677095d36496e8d&packager=1",
+      "name": "ТВ-ролик №6",
+      "site": "KINOPOISK",
+      "type": "TRAILER",
+      "duration": 32,
+      "preview_url": "https://avatars.mds.yandex.net/get-kino-vod-films-gallery/28788/3504ccc8c81005df7be186f269a9e3ba/orig"
+    },
+    {
+      "url": "https://strm.yandex.ru/vh-kp-converted/ott-content/401531476-4709bc1529ed52cab26b2bffd3e6bc70/ysign1=c68ec8f7f6298545ed3dd82fcf0091d16f525f467fbdddc4fe5adef85d5cb4db,abcID=1358,from=ott-kp,pfx,sfx,ts=6a3b05fd/master.m3u8?ottsessionid=7490569387204ead8677095d36496e8d&packager=1",
+      "name": "ТВ-ролик №5",
+      "site": "KINOPOISK",
+      "type": "TRAILER",
+      "duration": 32,
+      "preview_url": "https://avatars.mds.yandex.net/get-kino-vod-films-gallery/33804/e1b1ed427ee4d4bc385304eb9b48165a/orig"
+    },
+    {
+      "url": "https://strm.yandex.ru/vh-kp-converted/ott-content/401531477-4de951dda598a677b5cda0fd45a6fcad/ysign1=b9c9353c9adba749cc86f1c81ed849576baf60f2252f2a7838526e9d7d473737,abcID=1358,from=ott-kp,pfx,sfx,ts=6a3b05fd/master.m3u8?ottsessionid=7490569387204ead8677095d36496e8d&packager=1",
+      "name": "ТВ-ролик №4",
+      "site": "KINOPOISK",
+      "type": "TRAILER",
+      "duration": 17,
+      "preview_url": "https://avatars.mds.yandex.net/get-kino-vod-films-gallery/28788/f9c0e1b7ddb74b0e030551f44a321625/orig"
+    },
+    {
+      "url": "https://strm.yandex.ru/vh-kp-converted/ott-content/401531478-43b04ef439e4b85391971d3d3cc90d16/ysign1=993851648e7606fa04a84d42aa92265334ae7c195f9619d7c9872dc8ee565562,abcID=1358,from=ott-kp,pfx,sfx,ts=6a3b05fd/master.m3u8?ottsessionid=7490569387204ead8677095d36496e8d&packager=1",
+      "name": "ТВ-ролик №3",
+      "site": "KINOPOISK",
+      "type": "TRAILER",
+      "duration": 17,
+      "preview_url": "https://avatars.mds.yandex.net/get-kino-vod-films-gallery/177294/4d49ac97539f0c41e1d59430caf8027f/orig"
+    },
+    {
+      "url": "https://strm.yandex.ru/vh-kp-converted/ott-content/401531484-4c8fdddbbb3db632ad348d30223b5328/ysign1=2889bfa4b37498f9adbd08bad56a1444c65cce20382b32aa9b1a7766578a29cd,abcID=1358,from=ott-kp,pfx,sfx,ts=6a3b05fd/master.m3u8?ottsessionid=7490569387204ead8677095d36496e8d&packager=1",
+      "name": "ТВ-ролик №2",
+      "site": "KINOPOISK",
+      "type": "TRAILER",
+      "duration": 17,
+      "preview_url": "https://avatars.mds.yandex.net/get-kino-vod-films-gallery/28788/665bf3fe6fcdeebb5295976b06225121/orig"
+    },
+    {
+      "url": "https://strm.yandex.ru/vh-kp-converted/ott-content/401531512-4fd933af231f997aae685d86cfb666eb/ysign1=e84478ef5c13e2b2459cd0a8eca28ec1de27151ca1bd7185a147e56e0c41b08b,abcID=1358,from=ott-kp,pfx,sfx,ts=6a3b05fd/master.m3u8?ottsessionid=7490569387204ead8677095d36496e8d&packager=1",
+      "name": "ТВ-ролик №1",
+      "site": "KINOPOISK",
+      "type": "TRAILER",
+      "duration": 32,
+      "preview_url": "https://avatars.mds.yandex.net/get-kino-vod-films-gallery/34144/aaa07d30ba3dc4979ed5faff5bc7e718/orig"
+    },
+    {
+      "url": "https://strm.yandex.ru/vh-kp-converted/ott-content/563295026-4e7b8843b8a2bdb98cfa271c08e9d69a/ysign1=6be061467209a77bc8f93434145601510d5f167862b1c42d11c6cfc495bbe89a,abcID=1358,from=ott-kp,pfx,sfx,ts=6a3b05fd/master.m3u8?ottsessionid=7490569387204ead8677095d36496e8d&packager=1",
+      "name": "Трейлер (русские субтитры)",
+      "site": "KINOPOISK",
+      "type": "TRAILER",
+      "duration": 147,
+      "preview_url": "https://avatars.mds.yandex.net/get-kino-vod-films-gallery/1668876/3413402a53c2eb07a14a1121b6c9d7b3/orig"
+    },
+    {
+      "url": "https://strm.yandex.ru/vh-kp-converted/ott-content/390568360-4454331991831eb3a0492a9064caf565/ysign1=dd62802a055824edd6fe201a1bf91d8780fba31584cc46c49d3472c23a58ea62,abcID=1358,from=ott-kp,pfx,sfx,ts=6a3b05fd/master.m3u8?ottsessionid=7490569387204ead8677095d36496e8d&packager=1",
+      "name": "DVD-трейлер",
+      "site": "KINOPOISK",
+      "type": "TRAILER",
+      "duration": 130,
+      "preview_url": "https://avatars.mds.yandex.net/get-kino-vod-films-gallery/1668876/4ff18590a72e892f5905e36a3b05da5b/orig"
+    },
+    {
+      "url": "https://strm.yandex.ru/vh-kp-converted/ott-content/401531516-41fde92b9c96e2cbb8c9224eaaaef481/ysign1=1424f6ad83bb7ce338b1b56386ba16cfa52d8dd4d030fbdd79a4362e0df8f0c7,abcID=1358,from=ott-kp,pfx,sfx,ts=6a3b05fd/master.m3u8?ottsessionid=7490569387204ead8677095d36496e8d&packager=1",
+      "name": "Тизер",
+      "site": "KINOPOISK",
+      "type": "TRAILER",
+      "duration": 59,
+      "preview_url": "https://avatars.mds.yandex.net/get-kino-vod-films-gallery/69336/27f84ed63817298c8e44c2ff3b8e8f7a/orig"
+    }
+  ],
+  "staff": [
+    {
+      "staff_id": 7836,
+      "name_ru": "Киану Ривз",
+      "name_en": "Keanu Reeves",
+      "description": "Neo",
+      "poster_url": "https://avatars.mds.yandex.net/get-kinopoisk-image/10671298/ab4697b5-dc63-4168-84fc-9d6481408219/orig",
+      "profession_text": "Актер",
+      "profession_key": "ACTOR"
+    },
+    {
+      "staff_id": 9838,
+      "name_ru": "Лоренс Фишбёрн",
+      "name_en": "Laurence Fishburne",
+      "description": "Morpheus",
+      "poster_url": "https://avatars.mds.yandex.net/get-kinopoisk-image/1777765/4f4385bc-99d2-4e85-9977-aa89361c19a5/orig",
+      "profession_text": "Актер",
+      "profession_key": "ACTOR"
+    },
+    {
+      "staff_id": 6226,
+      "name_ru": "Кэрри-Энн Мосс",
+      "name_en": "Carrie-Anne Moss",
+      "description": "Trinity",
+      "poster_url": "https://avatars.mds.yandex.net/get-kinopoisk-image/10768063/25eb8aac-7d47-4082-8b46-f2fdae4163bb/orig",
+      "profession_text": "Актриса",
+      "profession_key": "ACTOR"
+    },
+    {
+      "staff_id": 1491,
+      "name_ru": "Хьюго Уивинг",
+      "name_en": "Hugo Weaving",
+      "description": "Agent Smith",
+      "poster_url": "https://avatars.mds.yandex.net/get-kinopoisk-image/1629390/2d6ac88c-6a41-4a0a-ab7f-b6d2211f1381/orig",
+      "profession_text": "Актер",
+      "profession_key": "ACTOR"
+    },
+    {
+      "staff_id": 23331,
+      "name_ru": "Глория Фостер",
+      "name_en": "Gloria Foster",
+      "description": "Oracle",
+      "poster_url": "https://avatars.mds.yandex.net/get-kinopoisk-image/1773646/5bdd5563-1577-4cef-8b54-07297dab220a/orig",
+      "profession_text": "Актриса",
+      "profession_key": "ACTOR"
+    },
+    {
+      "staff_id": 9030,
+      "name_ru": "Джо Пантольяно",
+      "name_en": "Joe Pantoliano",
+      "description": "Cypher",
+      "poster_url": "https://avatars.mds.yandex.net/get-kinopoisk-image/4303601/d907be5f-7420-43d1-9a64-bb9c3f77c630/orig",
+      "profession_text": "Актер",
+      "profession_key": "ACTOR"
+    },
+    {
+      "staff_id": 23332,
+      "name_ru": "Маркус Чонг",
+      "name_en": "Marcus Chong",
+      "description": "Tank",
+      "poster_url": "https://avatars.mds.yandex.net/get-kinopoisk-image/1600647/a7e3f34f-9f14-494f-9c6d-d4f0b319ee9c/orig",
+      "profession_text": "Актер",
+      "profession_key": "ACTOR"
+    },
+    {
+      "staff_id": 23333,
+      "name_ru": "Джулиан Араханга",
+      "name_en": "Julian Arahanga",
+      "description": "Apoc",
+      "poster_url": "https://avatars.mds.yandex.net/get-kinopoisk-image/1777765/11c6ca98-8100-4259-ab3a-eba5764f8757/orig",
+      "profession_text": "Актер",
+      "profession_key": "ACTOR"
+    },
+    {
+      "staff_id": 23334,
+      "name_ru": "Мэтт Доран",
+      "name_en": "Matt Doran",
+      "description": "Mouse",
+      "poster_url": "https://avatars.mds.yandex.net/get-kinopoisk-image/1704946/df41ff6c-73c5-4e53-be95-ab2a4fcb60f6/orig",
+      "profession_text": "Актер",
+      "profession_key": "ACTOR"
+    },
+    {
+      "staff_id": 23335,
+      "name_ru": "Белинда МакКлори",
+      "name_en": "Belinda McClory",
+      "description": "Switch",
+      "poster_url": "https://avatars.mds.yandex.net/get-kinopoisk-image/1600647/95ccea96-7aba-4326-9c5d-e123ad7be940/orig",
+      "profession_text": "Актриса",
+      "profession_key": "ACTOR"
+    },
+    {
+      "staff_id": 23336,
+      "name_ru": "Энтони Рэй Паркер",
+      "name_en": "Anthony Ray Parker",
+      "description": "Dozer",
+      "poster_url": "https://avatars.mds.yandex.net/get-kinopoisk-image/1704946/4ff94178-3274-44a8-b99c-efc6d6ec9c9b/orig",
+      "profession_text": "Актер",
+      "profession_key": "ACTOR"
+    },
+    {
+      "staff_id": 21711,
+      "name_ru": "Пол Годдард",
+      "name_en": "Paul Goddard",
+      "description": "Agent Brown",
+      "poster_url": "https://avatars.mds.yandex.net/get-kinopoisk-image/1599028/4695297d-6b0e-49df-8f28-bd5fa4994e00/orig",
+      "profession_text": "Актер",
+      "profession_key": "ACTOR"
+    },
+    {
+      "staff_id": 10311,
+      "name_ru": "Роберт Тейлор",
+      "name_en": "Robert Taylor",
+      "description": "Agent Jones",
+      "poster_url": "https://avatars.mds.yandex.net/get-kinopoisk-image/1599028/1337f744-63d8-4166-a85b-02ad9bdffb99/orig",
+      "profession_text": "Актер",
+      "profession_key": "ACTOR"
+    },
+    {
+      "staff_id": 23337,
+      "name_ru": "Дэвид Эстон",
+      "name_en": "David Aston",
+      "description": "Rhineheart",
+      "poster_url": "https://avatars.mds.yandex.net/get-kinopoisk-image/6201401/e2be6d54-f54b-4a81-941c-8f4146ddd2b9/orig",
+      "profession_text": "Актер",
+      "profession_key": "ACTOR"
+    },
+    {
+      "staff_id": 23338,
+      "name_ru": "Марк Грэй",
+      "name_en": "Marc Gray",
+      "description": "Choi (в титрах: Marc Gray)",
+      "poster_url": "https://avatars.mds.yandex.net/get-kinopoisk-image/1704946/a5f77e8a-7b0a-4c4f-a135-df08e4007f03/orig",
+      "profession_text": "Актер",
+      "profession_key": "ACTOR"
+    },
+    {
+      "staff_id": 23339,
+      "name_ru": "Ада Никодему",
+      "name_en": "Ada Nicodemou",
+      "description": "Dujour (White Rabbit Girl)",
+      "poster_url": "https://avatars.mds.yandex.net/get-kinopoisk-image/1777765/052e5f4f-a141-4e0f-b627-ae3e99ad570d/orig",
+      "profession_text": "Актриса",
+      "profession_key": "ACTOR"
+    },
+    {
+      "staff_id": 23340,
+      "name_ru": "Дени Гордон",
+      "name_en": "Deni Gordon",
+      "description": "Priestess",
+      "poster_url": null,
+      "profession_text": "Актер",
+      "profession_key": "ACTOR"
+    },
+    {
+      "staff_id": 23341,
+      "name_ru": "Роуэн Уитт",
+      "name_en": "Rowan Witt",
+      "description": "Spoon Boy",
+      "poster_url": "https://avatars.mds.yandex.net/get-kinopoisk-image/1704946/a53031d0-bfcf-4639-adb2-9f1bc2fd79a9/orig",
+      "profession_text": "Актер",
+      "profession_key": "ACTOR"
+    },
+    {
+      "staff_id": 23342,
+      "name_ru": "Эленор Уитт",
+      "name_en": "Eleanor Witt",
+      "description": "Potential (в титрах: Elenor Witt)",
+      "poster_url": null,
+      "profession_text": "Актриса",
+      "profession_key": "ACTOR"
+    },
+    {
+      "staff_id": 23343,
+      "name_ru": "Тамара Браун",
+      "name_en": "Tamara Brown",
+      "description": "Potential",
+      "poster_url": "https://avatars.mds.yandex.net/get-kinopoisk-image/1900788/7102edc8-1c8d-4b5e-a378-1dda4e1d8865/orig",
+      "profession_text": "Актриса",
+      "profession_key": "ACTOR"
+    },
+    {
+      "staff_id": 23344,
+      "name_ru": "Яная Пендер",
+      "name_en": "Janaya Pender",
+      "description": "Potential",
+      "poster_url": null,
+      "profession_text": "Актриса",
+      "profession_key": "ACTOR"
+    },
+    {
+      "staff_id": 23345,
+      "name_ru": "Эдрин Уайт",
+      "name_en": "Adryn White",
+      "description": "Potential",
+      "poster_url": null,
+      "profession_text": "Актер",
+      "profession_key": "ACTOR"
+    },
+    {
+      "staff_id": 23346,
+      "name_ru": "Натали Тдзен",
+      "name_en": "Natalie Tjen",
+      "description": "Potential",
+      "poster_url": null,
+      "profession_text": "Актер",
+      "profession_key": "ACTOR"
+    },
+    {
+      "staff_id": 11219,
+      "name_ru": "Билл Янг",
+      "name_en": "Bill Young",
+      "description": "Lieutenant",
+      "poster_url": "https://avatars.mds.yandex.net/get-kinopoisk-image/1777765/1c63b2e3-2cdb-4539-acb5-aca877a26a83/orig",
+      "profession_text": "Актер",
+      "profession_key": "ACTOR"
+    },
+    {
+      "staff_id": 23347,
+      "name_ru": "Дэвид О’Коннор",
+      "name_en": "David O'Connor",
+      "description": "FedEx Man",
+      "poster_url": null,
+      "profession_text": "Актер",
+      "profession_key": "ACTOR"
+    },
+    {
+      "staff_id": 23348,
+      "name_ru": "Джереми Болл",
+      "name_en": "Jeremy Ball",
+      "description": "Businessman",
+      "poster_url": null,
+      "profession_text": "Актер",
+      "profession_key": "ACTOR"
+    },
+    {
+      "staff_id": 23349,
+      "name_ru": "Фиона Джонсон",
+      "name_en": "Fiona Johnson",
+      "description": "Woman in Red",
+      "poster_url": "https://avatars.mds.yandex.net/get-kinopoisk-image/1629390/9e347da8-f494-4da4-8db1-cedea29e073b/orig",
+      "profession_text": "Актриса",
+      "profession_key": "ACTOR"
+    },
+    {
+      "staff_id": 23350,
+      "name_ru": "Гарри Лоуренс",
+      "name_en": "Harry Lawrence",
+      "description": "Old Man",
+      "poster_url": "https://avatars.mds.yandex.net/get-kinopoisk-image/1773646/5b2ae938-fcf5-4d93-abd5-76ac314a8211/orig",
+      "profession_text": "Актер",
+      "profession_key": "ACTOR"
+    },
+    {
+      "staff_id": 23351,
+      "name_ru": "Стив Додд",
+      "name_en": "Steve Dodd",
+      "description": "Blind Man",
+      "poster_url": "https://avatars.mds.yandex.net/get-kinopoisk-image/1704946/af3f857f-ceeb-4aaf-a4c4-e453a3fdd7c1/orig",
+      "profession_text": "Актер",
+      "profession_key": "ACTOR"
+    },
+    {
+      "staff_id": 23352,
+      "name_ru": "Люк Куинтон",
+      "name_en": "Luke Quinton",
+      "description": "Security Guard",
+      "poster_url": "https://avatars.mds.yandex.net/get-kinopoisk-image/1600647/566651bb-b49b-4684-9070-6a9139f5a57e/orig",
+      "profession_text": "Актер",
+      "profession_key": "ACTOR"
+    },
+    {
+      "staff_id": 23330,
+      "name_ru": "Лана Вачовски",
+      "name_en": "Lana Wachowski",
+      "description": "в титрах: The Wachowski Brothers",
+      "poster_url": "https://avatars.mds.yandex.net/get-kinopoisk-image/1600647/9ae9aebb-2951-4bd1-9124-de8a6e992fcf/orig",
+      "profession_text": "Режиссер",
+      "profession_key": "DIRECTOR"
+    },
+    {
+      "staff_id": 23329,
+      "name_ru": "Лилли Вачовски",
+      "name_en": "Lilly Wachowski",
+      "description": "в титрах: The Wachowski Brothers",
+      "poster_url": "https://avatars.mds.yandex.net/get-kinopoisk-image/1600647/abe105d3-de18-47d0-a9c0-5ecdf905d1a5/orig",
+      "profession_text": "Режиссер",
+      "profession_key": "DIRECTOR"
+    },
+    {
+      "staff_id": 1790,
+      "name_ru": "Джоэл Силвер",
+      "name_en": "Joel Silver",
+      "description": null,
+      "poster_url": "https://avatars.mds.yandex.net/get-kinopoisk-image/1704946/b162b8b3-dfad-4f1d-9f51-c49f9510e81d/orig",
+      "profession_text": "Продюсер",
+      "profession_key": "PRODUCER"
+    },
+    {
+      "staff_id": 712,
+      "name_ru": "Брюс Берман",
+      "name_en": "Bruce Berman",
+      "description": "исполнительный продюсер",
+      "poster_url": "https://avatars.mds.yandex.net/get-kinopoisk-image/1599028/31790046-6d32-4df2-b0a3-b47b4c190542/orig",
+      "profession_text": "Продюсер",
+      "profession_key": "PRODUCER"
+    },
+    {
+      "staff_id": 1787,
+      "name_ru": "Дэн Краччиоло",
+      "name_en": "Dan Cracchiolo",
+      "description": "сопродюсер",
+      "poster_url": "https://avatars.mds.yandex.net/get-kinopoisk-image/1773646/9de291cc-8168-4bcb-8078-25c524ef44c3/orig",
+      "profession_text": "Продюсер",
+      "profession_key": "PRODUCER"
+    },
+    {
+      "staff_id": 23359,
+      "name_ru": "Кэрол Хьюз",
+      "name_en": "Carol Hughes",
+      "description": "ассоциированный продюсер",
+      "poster_url": null,
+      "profession_text": "Продюсер",
+      "profession_key": "PRODUCER"
+    },
+    {
+      "staff_id": 8525,
+      "name_ru": "Эндрю Мэйсон",
+      "name_en": "Andrew Mason",
+      "description": "исполнительный продюсер",
+      "poster_url": "https://avatars.mds.yandex.net/get-kinopoisk-image/1777765/a12ef8a4-9b46-4dd9-9f48-516a036067d9/orig",
+      "profession_text": "Продюсер",
+      "profession_key": "PRODUCER"
+    },
+    {
+      "staff_id": 23360,
+      "name_ru": "Ричард Мириш",
+      "name_en": "Richard Mirisch",
+      "description": "ассоциированный продюсер",
+      "poster_url": null,
+      "profession_text": "Продюсер",
+      "profession_key": "PRODUCER"
+    },
+    {
+      "staff_id": 23361,
+      "name_ru": "Барри М. Осборн",
+      "name_en": "Barrie M. Osborne",
+      "description": "исполнительный продюсер",
+      "poster_url": "https://avatars.mds.yandex.net/get-kinopoisk-image/1599028/586eb5d9-083d-4ed9-b17e-b8b1771ee4ba/orig",
+      "profession_text": "Продюсер",
+      "profession_key": "PRODUCER"
+    },
+    {
+      "staff_id": 9679,
+      "name_ru": "Эрвин Стофф",
+      "name_en": "Erwin Stoff",
+      "description": "исполнительный продюсер",
+      "poster_url": "https://avatars.mds.yandex.net/get-kinopoisk-image/1777765/6efdbf39-bf90-42fa-a94c-4550918b26d3/orig",
+      "profession_text": "Продюсер",
+      "profession_key": "PRODUCER"
+    },
+    {
+      "staff_id": 23330,
+      "name_ru": "Лана Вачовски",
+      "name_en": "Lana Wachowski",
+      "description": "исполнительный продюсер",
+      "poster_url": "https://avatars.mds.yandex.net/get-kinopoisk-image/1600647/9ae9aebb-2951-4bd1-9124-de8a6e992fcf/orig",
+      "profession_text": "Продюсер",
+      "profession_key": "PRODUCER"
+    },
+    {
+      "staff_id": 23329,
+      "name_ru": "Лилли Вачовски",
+      "name_en": "Lilly Wachowski",
+      "description": "исполнительный продюсер",
+      "poster_url": "https://avatars.mds.yandex.net/get-kinopoisk-image/1600647/abe105d3-de18-47d0-a9c0-5ecdf905d1a5/orig",
+      "profession_text": "Продюсер",
+      "profession_key": "PRODUCER"
+    },
+    {
+      "staff_id": 23329,
+      "name_ru": "Лилли Вачовски",
+      "name_en": "Lilly Wachowski",
+      "description": "в титрах: The Wachowski Brothers",
+      "poster_url": "https://avatars.mds.yandex.net/get-kinopoisk-image/1600647/abe105d3-de18-47d0-a9c0-5ecdf905d1a5/orig",
+      "profession_text": "Сценарист",
+      "profession_key": "WRITER"
+    },
+    {
+      "staff_id": 23330,
+      "name_ru": "Лана Вачовски",
+      "name_en": "Lana Wachowski",
+      "description": "в титрах: The Wachowski Brothers",
+      "poster_url": "https://avatars.mds.yandex.net/get-kinopoisk-image/1600647/9ae9aebb-2951-4bd1-9124-de8a6e992fcf/orig",
+      "profession_text": "Сценарист",
+      "profession_key": "WRITER"
+    },
+    {
+      "staff_id": 278101,
+      "name_ru": "Билл Поуп",
+      "name_en": "Bill Pope",
+      "description": null,
+      "poster_url": "https://avatars.mds.yandex.net/get-kinopoisk-image/1600647/eb52929a-0e91-4572-a9ab-7cde239a5a9e/orig",
+      "profession_text": "Оператор",
+      "profession_key": "OPERATOR"
+    },
+    {
+      "staff_id": 477776,
+      "name_ru": "Дон Дэвис",
+      "name_en": "Don Davis",
+      "description": null,
+      "poster_url": "https://avatars.mds.yandex.net/get-kinopoisk-image/1777765/0d95c867-1d3d-4243-ae19-fba7c1df759a/orig",
+      "profession_text": "Композитор",
+      "profession_key": "COMPOSER"
+    },
+    {
+      "staff_id": 1268948,
+      "name_ru": "Оуэн Патерсон",
+      "name_en": "Owen Paterson",
+      "description": null,
+      "poster_url": "https://avatars.mds.yandex.net/get-kinopoisk-image/1773646/bdf42d15-25a3-40e9-baff-d00942b6ea2d/orig",
+      "profession_text": "Художник-постановщик",
+      "profession_key": "PRODUCTION_DESIGNER"
+    },
+    {
+      "staff_id": 1987225,
+      "name_ru": "Хью Бэйтап",
+      "name_en": "Hugh Bateup",
+      "description": null,
+      "poster_url": "https://avatars.mds.yandex.net/get-kinopoisk-image/6201401/769b8fc9-a246-43ea-bcc4-8ee11cacca6d/orig",
+      "profession_text": "Художник",
+      "profession_key": "ART"
+    },
+    {
+      "staff_id": 1988843,
+      "name_ru": "Мишель Макгэхи",
+      "name_en": "Michelle McGahey",
+      "description": null,
+      "poster_url": null,
+      "profession_text": "Художник",
+      "profession_key": "ART"
+    },
+    {
+      "staff_id": 1268945,
+      "name_ru": "Ким Барретт",
+      "name_en": "Kym Barrett",
+      "description": null,
+      "poster_url": null,
+      "profession_text": "Художник по костюмам",
+      "profession_key": "COSTUMER"
+    },
+    {
+      "staff_id": 2009105,
+      "name_ru": "Лиза Бреннан",
+      "name_en": "Lisa Brennan",
+      "description": "в титрах: Lisa 'Blitz' Brennan",
+      "poster_url": null,
+      "profession_text": "Художник по декорациям",
+      "profession_key": "DECORATOR"
+    },
+    {
+      "staff_id": 1988611,
+      "name_ru": "Тим Феррье",
+      "name_en": "Tim Ferrier",
+      "description": null,
+      "poster_url": null,
+      "profession_text": "Художник по декорациям",
+      "profession_key": "DECORATOR"
+    },
+    {
+      "staff_id": 1653659,
+      "name_ru": "Марта МакЭлрой",
+      "name_en": "Marta McElroy",
+      "description": null,
+      "poster_url": null,
+      "profession_text": "Художник по декорациям",
+      "profession_key": "DECORATOR"
+    },
+    {
+      "staff_id": 310065,
+      "name_ru": "Зак Стэнберг",
+      "name_en": "Zach Staenberg",
+      "description": null,
+      "poster_url": "https://avatars.mds.yandex.net/get-kinopoisk-image/1777765/03da0bc5-60af-4ba8-b8df-dbedd469625f/orig",
+      "profession_text": "Монтажер",
+      "profession_key": "EDITOR"
+    }
+  ],
+  "nudity_timings": [],
+  "lists": {
+    "isFavorite": false,
+    "isHistory": false,
+    "isLater": false,
+    "isCompleted": false,
+    "isAbandoned": false,
+    "isWatching": false,
+    "isRated": false
+  }
+}

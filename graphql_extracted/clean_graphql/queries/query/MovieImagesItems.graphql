@@ -1,0 +1,34 @@
+query MovieImagesItems(
+  $id: Long!
+  $type: MovieImageType!
+  $offset: Int
+  $limit: Int
+) {
+  movie(id: $id) {
+    id
+    ...MovieImages
+    __typename
+  }
+}
+
+fragment MovieImages on Movie {
+  images(types: [$type], offset: $offset, limit: $limit) {
+    items {
+      id
+      type
+      image {
+        avatarsUrl
+        origSize {
+          width
+          height
+          __typename
+        }
+        __typename
+      }
+      __typename
+    }
+    total
+    __typename
+  }
+  __typename
+}

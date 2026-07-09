@@ -1,0 +1,66 @@
+query MovieCollectionCategory(
+  $categoryId: Int!
+  $limit: Int!
+  $offset: Int!
+  $includeMovieListMetaTotal: Boolean!
+) {
+  movieListCategory(id: $categoryId) {
+    __typename
+    ...movieListCategoryFragment
+    movieLists(limit: $limit, offset: $offset) {
+      limit
+      offset
+      total
+      items {
+        __typename
+        ...movieListMetaWithLegacyFiltersFragment
+      }
+    }
+  }
+}
+
+fragment movieListCategoryFragment on MovieListCategory {
+  id
+  name
+}
+
+fragment imageFragment on Image {
+  avatarsUrl
+  fallbackUrl
+}
+
+fragment movieListMetaBaseFragment on MovieListMeta {
+  id
+  autoList
+  name
+  description
+  url
+  cover {
+    __typename
+    ...imageFragment
+  }
+  moviesCount: movies(offset: 0, limit: 0)
+    @include(if: $includeMovieListMetaTotal) {
+    total
+  }
+}
+
+fragment movieListMetaWithLegacyFiltersFragment on MovieListMeta {
+  __typename
+  ...movieListMetaBaseFragment
+  filterQuery {
+    countryId
+    excludeViewed
+    genreId
+    onlyHighRated
+    onlyReleased
+    onlyTop
+    origin
+    type
+    viewOption
+    years {
+      start
+      end
+    }
+  }
+}

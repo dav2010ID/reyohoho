@@ -1,0 +1,18 @@
+mutation MovieSetNotInterested($movieId: Long!, $notInterested: Boolean!) {
+  movie {
+    notInterested {
+      set(input: { movieId: $movieId }) @include(if: $notInterested) {
+        status
+        error {
+          message
+        }
+      }
+      remove(input: { movieId: $movieId }) @skip(if: $notInterested) {
+        status
+        error {
+          message
+        }
+      }
+    }
+  }
+}

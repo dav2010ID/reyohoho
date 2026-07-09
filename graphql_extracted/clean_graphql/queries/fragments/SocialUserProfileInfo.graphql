@@ -1,0 +1,90 @@
+fragment SocialUserProfileInfo on UserProfileInterface {
+  ...SocialUserProfileShortInfo
+  social {
+    about {
+      defaultValue {
+        source
+        value
+        __typename
+      }
+      __typename
+    }
+    __typename
+  }
+  __typename
+}
+
+fragment SocialUserProfileId on UserProfileInterface {
+  id {
+    kpId
+    ottId
+    puid
+    __typename
+  }
+  __typename
+}
+
+fragment SocialUserBadges on UserSocialInfo {
+  badges {
+    verified {
+      id
+      title
+      description
+      icons {
+        image {
+          avatarsUrl
+          __typename
+        }
+        format
+        __typename
+      }
+      __typename
+    }
+    __typename
+  }
+  __typename
+}
+
+fragment SocialUserProfileShortInfo on UserProfileInterface {
+  ...SocialUserProfileId
+  subscriptionInfo {
+    hasSubscription
+    __typename
+  }
+  social {
+    publicStatus
+    url
+    avatar {
+      defaultValue {
+        value {
+          avatarsUrl
+          fallbackUrl
+          __typename
+        }
+        __typename
+      }
+      __typename
+    }
+    name {
+      defaultValue {
+        source
+        value
+        __typename
+      }
+      __typename
+    }
+    alias {
+      defaultValue {
+        source
+        value
+        __typename
+      }
+      __typename
+    }
+    isSubscribedTo @include(if: $isAuthorized)
+    isSubscriptionRequestSentTo @include(if: $isAuthorized)
+    ...SocialUserBadges
+    __typename
+  }
+  __typename
+}

@@ -1,0 +1,13 @@
+mutation SocialSetAvatar($file: Upload!) {
+  userProfile {
+    social {
+      setAvatar(avatarFile: $file) {
+        status
+        errors {
+          __typename
+          message
+        }
+      }
+    }
+  }
+}

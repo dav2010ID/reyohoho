@@ -1,0 +1,2 @@
+schema: ./clean_graphql/schema.graphql
+documents: ./clean_graphql/queries/**/*.graphql

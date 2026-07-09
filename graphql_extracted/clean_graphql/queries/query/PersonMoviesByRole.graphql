@@ -1,0 +1,295 @@
+query PersonMoviesByRole(
+  $personId: Long!
+  $offset: Int
+  $limit: Int
+  $roleId: String!
+  $isAppendUserData: Boolean!
+  $isInternationalUserData: Boolean!
+  $includeEmotion: Boolean!
+) {
+  person(id: $personId) {
+    __typename
+    filmographyRelations(
+      roleSlugs: [$roleId]
+      offset: $offset
+      limit: $limit
+      orderBy: YEAR_DESC
+    ) {
+      __typename
+      total
+      offset
+      limit
+      items {
+        __typename
+        participations(limit: 1) {
+          __typename
+          total
+          items {
+            __typename
+            ... on CastMovieParticipation {
+              name
+              notice
+              role {
+                __typename
+                ...personRoleFragment
+              }
+            }
+            ... on StaffMovieParticipation {
+              relatedCast {
+                __typename
+                name
+              }
+              notice
+              role {
+                __typename
+                ...personRoleFragment
+              }
+            }
+          }
+        }
+        movie {
+          __typename
+          ...movieSummaryOttFragment
+        }
+      }
+    }
+  }
+}
+
+fragment movieSummaryOttFragment on Movie {
+  __typename
+  ...movieYearsFragment
+  id
+  contentId
+  gallery {
+    __typename
+    posters {
+      __typename
+      ...moviePostersFragment
+    }
+  }
+  genres {
+    __typename
+    ...genreFragment
+  }
+  userData @include(if: $isAppendUserData) {
+    __typename
+    ...movieUserDataFragment
+  }
+  countries {
+    __typename
+    ...countryFragment
+  }
+  rating {
+    __typename
+    ...ratingFragment
+  }
+  title {
+    __typename
+    ...titleFragment
+  }
+  viewOption {
+    __typename
+    ...movieViewOptionSummaryFragment
+  }
+}
+
+fragment movieYearsFragment on Movie {
+  __typename
+  ... on VideoInterface {
+    productionYear(override: OTT_WHEN_EXISTS)
+  }
+  ... on Series {
+    fallbackYear: productionYear
+    releaseYears {
+      __typename
+      start
+      end
+    }
+  }
+}
+
+fragment genreFragment on Genre {
+  __typename
+  name
+}
+
+fragment movieUserDataFragment on MovieUserData {
+  __typename
+  isPlannedToWatch
+  folders @skip(if: $isInternationalUserData) {
+    __typename
+    ...folderFragment
+  }
+  voting @skip(if: $isInternationalUserData) {
+    __typename
+    ...voteFragment
+  }
+  watchStatuses {
+    __typename
+    ...watchStatusesFragment
+  }
+  emotion @include(if: $includeEmotion) {
+    __typename
+    ...emotionFragment
+  }
+}
+
+fragment folderFragment on Folder {
+  __typename
+  id
+  name
+}
+
+fragment voteFragment on Vote {
+  __typename
+  value
+}
+
+fragment watchStatusesFragment on WatchStatuses {
+  __typename
+  notInterested {
+    __typename
+    value
+  }
+  watched {
+    __typename
+    value
+  }
+}
+
+fragment emotionFragment on Emotion {
+  __typename
+  value
+}
+
+fragment countryFragment on Country {
+  __typename
+  id
+  name
+}
+
+fragment ratingFragment on Rating {
+  __typename
+  kinopoisk {
+    __typename
+    ...ratingValueFragment
+  }
+}
+
+fragment ratingValueFragment on RatingValue {
+  __typename
+  isActive
+  count
+  value(precision: 1)
+}
+
+fragment titleFragment on Title {
+  __typename
+  localized
+  original
+}
+
+fragment movieViewOptionSummaryFragment on ViewOption {
+  __typename
+  ...baseMovieViewOptionSummaryFragment
+}
+
+fragment baseMovieViewOptionSummaryFragment on ViewOption {
+  __typename
+  type
+  purchasabilityStatus
+  isWatchableOnDeviceInCurrentRegion: isWatchable(
+    filter: { anyDevice: false, anyRegion: false }
+  )
+  buttonText
+  ...movieViewOptionPurchasedSubscriptionFragment
+  availabilityAnnounce {
+    __typename
+    ...availabilityAnnounceFragment
+  }
+  contentPackageToBuy {
+    __typename
+    ...movieContentPackageFragment
+  }
+  contentPackageToUnfreeze {
+    __typename
+    ...movieContentPackageFragment
+  }
+  transactionalPrice {
+    __typename
+    ...moneyAmountFragment
+  }
+  transactionalMinimumPrice {
+    __typename
+    ...moneyAmountFragment
+  }
+  priceWithTotalDiscount {
+    __typename
+    ...moneyAmountFragment
+  }
+  optionMonetizationModels
+  watchabilityStatus
+  promotionActionType
+  downloadabilityStatus
+}
+
+fragment movieViewOptionPurchasedSubscriptionFragment on ViewOption {
+  __typename
+  purchasedSubscriptionTextId
+  purchasedSubscriptionName
+}
+
+fragment availabilityAnnounceFragment on AvailabilityAnnounce {
+  __typename
+  announcePromise
+  availabilityDate
+  type
+}
+
+fragment movieContentPackageFragment on ContentPackage {
+  __typename
+  billingFeatureName
+}
+
+fragment moneyAmountFragment on MoneyAmount {
+  __typename
+  amount
+  currency {
+    __typename
+    ...currencyFragment
+  }
+}
+
+fragment currencyFragment on Currency {
+  __typename
+  symbol
+  currencyCode
+}
+
+fragment moviePostersFragment on MoviePosters {
+  __typename
+  vertical(override: OTT_WHEN_EXISTS) {
+    __typename
+    ...imageFragment
+  }
+  verticalWithRightholderLogo {
+    __typename
+    ...imageFragment
+  }
+}
+
+fragment imageFragment on Image {
+  __typename
+  avatarsUrl
+  fallbackUrl
+}
+
+fragment personRoleFragment on MovieCrewRole {
+  __typename
+  slug
+  title {
+    __typename
+    russian
+  }
+}

@@ -1,0 +1,7 @@
+fragment MovieImagesCount on Movie {
+  imagesCount: images(types: [STILL, POSTER, WALLPAPER], limit: 0) {
+    total
+    __typename
+  }
+  __typename
+}

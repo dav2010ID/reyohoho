@@ -1,0 +1,126 @@
+query TouchMovieSequelsPrequels(
+  $movieId: Long!
+  $relatedMoviesLimit: Int
+  $withUserData: Boolean = false
+) {
+  movie(id: $movieId) {
+    id
+    sequelsPrequels: relatedMovies(
+      limit: $relatedMoviesLimit
+      type: [BEFORE, AFTER, REMAKE]
+      orderBy: PREMIERE_DATE_ASC
+    ) {
+      total
+      limit
+      offset
+      items {
+        relationType
+        movie {
+          id
+          title {
+            russian
+            original
+            __typename
+          }
+          countries {
+            id
+            name
+            __typename
+          }
+          poster {
+            avatarsUrl
+            fallbackUrl
+            __typename
+          }
+          genres {
+            id
+            name
+            slug
+            __typename
+          }
+          rating {
+            kinopoisk {
+              ...RatingValue
+              __typename
+            }
+            __typename
+          }
+          viewOption {
+            buttonText
+            isAvailableOnline: isWatchable(
+              filter: { anyDevice: false, anyRegion: false }
+            )
+            purchasabilityStatus
+            contentPackageToBuy {
+              billingFeatureName
+              __typename
+            }
+            subscriptionBadge {
+              image {
+                avatarsUrl
+                __typename
+              }
+              __typename
+            }
+            type
+            posterWithRightholderLogo
+            __typename
+          }
+          userData @include(if: $withUserData) {
+            watchStatuses {
+              watched {
+                value
+                __typename
+              }
+              __typename
+            }
+            __typename
+          }
+          ... on Film {
+            productionYear
+            __typename
+          }
+          ... on Video {
+            productionYear
+            __typename
+          }
+          ... on TvSeries {
+            releaseYears {
+              start
+              end
+              __typename
+            }
+            __typename
+          }
+          ... on TvShow {
+            releaseYears {
+              start
+              end
+              __typename
+            }
+            __typename
+          }
+          ... on MiniSeries {
+            releaseYears {
+              start
+              end
+              __typename
+            }
+            __typename
+          }
+          __typename
+        }
+        __typename
+      }
+      __typename
+    }
+    __typename
+  }
+}
+
+fragment RatingValue on RatingValue {
+  value
+  isActive
+  count
+  __typename
+}

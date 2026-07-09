@@ -1,0 +1,68 @@
+query StreamsDownloadableStreamsDrmConfigs(
+  $contentId: String!
+  $downloadId: String
+) {
+  content(contentId: $contentId) {
+    __typename
+    ... on Movie {
+      __typename
+      ...streamsMovieDownloadableStreamsDrmConfigsFragment
+    }
+    ... on Episode {
+      __typename
+      ...streamsEpisodeDownloadableStreamsDrmConfigsFragment
+    }
+  }
+}
+
+fragment streamsDrmMetaFragment on StreamMeta {
+  drmConfig {
+    drmServers {
+      certificateUrl
+      name
+      processSPCPath
+      provisioningUrl
+      url
+    }
+    headers
+    requestParams
+  }
+}
+
+fragment streamsDownloadableStreamDrmConfigItemFragment on Stream {
+  drmType
+  streamType
+  uri
+  videoDescriptorName
+  streamMeta {
+    __typename
+    ...streamsDrmMetaFragment
+  }
+}
+
+fragment streamsMovieDownloadableStreamsDrmConfigsFragment on Movie {
+  ott {
+    __typename
+    ... on Ott_AbstractVideo {
+      downloadableStreams(downloadId: $downloadId) {
+        downloadLicenseId
+        streams {
+          __typename
+          ...streamsDownloadableStreamDrmConfigItemFragment
+        }
+      }
+    }
+  }
+}
+
+fragment streamsEpisodeDownloadableStreamsDrmConfigsFragment on Episode {
+  ottEpisode: ott {
+    downloadableStreams(downloadId: $downloadId) {
+      downloadLicenseId
+      streams {
+        __typename
+        ...streamsDownloadableStreamDrmConfigItemFragment
+      }
+    }
+  }
+}

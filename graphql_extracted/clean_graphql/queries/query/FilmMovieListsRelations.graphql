@@ -1,0 +1,54 @@
+query FilmMovieListsRelations(
+  $filmId: Long!
+  $movieListsRelationsLimit: Int = 10
+  $movieListsRelationsOffset: Int = 0
+) {
+  film(id: $filmId) {
+    id
+    movieListsRelationsPaginatedList: movieLists(
+      limit: $movieListsRelationsLimit
+      offset: $movieListsRelationsOffset
+    ) {
+      items {
+        ...MovieListsBlockItemData
+        __typename
+      }
+      limit
+      offset
+      total
+      __typename
+    }
+    __typename
+  }
+}
+
+fragment MovieListsBlockItemData on MovieListRelation {
+  movieList {
+    slug
+    name
+    movies(limit: 0, offset: 0) {
+      total
+      __typename
+    }
+    cover {
+      avatarsUrl
+      __typename
+    }
+    currentFilters {
+      booleanFilterValues {
+        filterId
+        value
+        __typename
+      }
+      singleSelectFilterValues {
+        filterId
+        value
+        __typename
+      }
+      __typename
+    }
+    __typename
+  }
+  position
+  __typename
+}

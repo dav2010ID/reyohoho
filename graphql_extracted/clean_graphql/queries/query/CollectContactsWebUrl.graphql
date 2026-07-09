@@ -1,0 +1,17 @@
+query CollectContactsWebUrl(
+  $language: LanguageISO639Scalar!
+  $serviceName: String!
+  $theme: String!
+) {
+  collectUserContacts(
+    input: {
+      language: $language
+      widgetServiceName: $serviceName
+      theme: $theme
+    }
+  ) {
+    webViewUrl
+    skipText
+    alreadyCollected
+  }
+}

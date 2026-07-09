@@ -1,0 +1,60 @@
+query MovieAvailableMeta($movieId: Long!) {
+  movie(id: $movieId) {
+    id
+    ott {
+      preview {
+        ...OttPreviewAvailableMetaData
+        ...OttPreviewFeatures
+        __typename
+      }
+      __typename
+    }
+    ...IsMovieWatchableOnOtt
+    __typename
+  }
+}
+
+fragment OttPreviewAvailableMetaData on OttPreview {
+  availableMetadata(filter: { isSupportedByClient: false }) {
+    audio
+    audioMeta {
+      languageName
+      qualityName
+      studio
+      type
+      forAdult
+      __typename
+    }
+    subtitles
+    subtitleMeta {
+      languageName
+      type
+      studio
+      forAdult
+      __typename
+    }
+    __typename
+  }
+  __typename
+}
+
+fragment OttPreviewFeatures on OttPreview {
+  features(filter: { layout: OTT_TITLE_CARD, onlyClientSupported: true }) {
+    alias
+    group
+    __typename
+  }
+  __typename
+}
+
+fragment IsMovieWatchableOnOtt on Movie {
+  viewOption {
+    isWatchable(filter: { anyDevice: true, anyRegion: false })
+    availabilityAnnounce {
+      type
+      __typename
+    }
+    __typename
+  }
+  __typename
+}

@@ -1,0 +1,19 @@
+mutation UserKidProfileUpdateParentalControl(
+  $puid: Long!
+  $isEnabled: Boolean!
+  $videoId: String
+) {
+  userProfile {
+    userKidSubProfile {
+      updateParentalControl(
+        puid: $puid
+        input: { enabled: $isEnabled, videoId: $videoId }
+      ) {
+        error {
+          message
+        }
+        status
+      }
+    }
+  }
+}

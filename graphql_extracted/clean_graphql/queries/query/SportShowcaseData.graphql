@@ -1,0 +1,679 @@
+query SportShowcaseData(
+  $showcaseId: String!
+  $showcaseOffset: Int!
+  $showcaseLimit: Int!
+  $selectionOffset: Int! = 0
+  $selectionLimit: Int!
+  $includeUserData: Boolean!
+  $purchaseOptionsContext: BillingFeatureClientContextInput!
+  $includeMoviePurchaseOptions: Boolean!
+  $includeTrialCutInfo: Boolean!
+  $includeDeepDiveFlag: Boolean! = true
+  $includeMixedSelection: Boolean!
+  $includeNotificationsSelection: Boolean!
+  $filter: SportShowcaseFilterInput
+  $includeSportWatchingUsersTotalCount: Boolean!
+  $includeSportWatchingFriends: Boolean!
+) {
+  clientInfo {
+    __typename
+    ... on ClientInfo {
+      time {
+        currentDate
+      }
+    }
+  }
+  sportShowcase(id: $showcaseId, filter: $filter) {
+    id
+    content(offset: $showcaseOffset, limit: $showcaseLimit) {
+      offset
+      limit
+      hasMore
+      items {
+        __typename
+        ...sportShowcaseSelectionFragment
+      }
+    }
+  }
+}
+
+fragment sportShowcaseSelectionPagingMetaFragment on SessionPagingList_SelectionItem {
+  offset
+  limit
+  hasMore
+}
+
+fragment imageFragment on Image {
+  avatarsUrl
+  fallbackUrl
+}
+
+fragment movieContentPackageFragment on ContentPackage {
+  billingFeatureName
+}
+
+fragment sportViewOptionFragment on ViewOption {
+  type
+  purchasabilityStatus
+  contentPackageToBuy {
+    __typename
+    ...movieContentPackageFragment
+  }
+  contentPackageToUnfreeze {
+    __typename
+    ...movieContentPackageFragment
+  }
+  purchaseOptions(clientContext: $purchaseOptionsContext)
+    @include(if: $includeMoviePurchaseOptions) {
+    billingFeatureNames
+    target
+  }
+  trialCutInfo @include(if: $includeTrialCutInfo) {
+    texts {
+      title
+      subTitle
+      buttonText
+    }
+    token
+    type
+  }
+  purchaseOptionCustomProperties @include(if: $includeMoviePurchaseOptions)
+}
+
+fragment sportPromoSelectionItemTeamFragment on SportTeam {
+  id
+  name
+  gallery {
+    logos {
+      main {
+        __typename
+        ...imageFragment
+      }
+    }
+  }
+}
+
+fragment sportWatchingFriendFragment on UserProfileInterface {
+  id {
+    puid
+  }
+  social {
+    alias {
+      defaultValue {
+        value
+        source
+      }
+    }
+    name {
+      defaultValue {
+        value
+      }
+    }
+    avatar {
+      defaultValue {
+        value {
+          __typename
+          ...imageFragment
+        }
+      }
+    }
+  }
+}
+
+fragment sportWatchingSocialArgumentFragment on AbstractSportEvent {
+  watchingSportSocialArgument {
+    usersTotalCount @include(if: $includeSportWatchingUsersTotalCount)
+    socialSubscriptionsWatching(limit: 3, offset: 0)
+      @include(if: $includeSportWatchingFriends) {
+      total
+      items {
+        __typename
+        ...sportWatchingFriendFragment
+      }
+    }
+  }
+}
+
+fragment sportBrandingFragment on style {
+  __typename
+  ... on CoverAndLogoStyle {
+    title
+    comment
+    cover {
+      __typename
+      ...imageFragment
+    }
+    squareCover {
+      __typename
+      ...imageFragment
+    }
+    logo {
+      __typename
+      ...imageFragment
+    }
+  }
+  ... on ShieldAndTextStyle {
+    icon {
+      __typename
+      ...imageFragment
+    }
+    text
+    textColor
+  }
+}
+
+fragment sportShowcasePromoSelectionEventItemFragment on SportEventSelectionItem {
+  __typename
+  ... on SportEventSelectionItem {
+    sportEvent {
+      __typename
+      id
+      sportEventId
+      title
+      comment
+      matchStartTime
+      startTime
+      expirationTime
+      endTime
+      deepDiveAvailable @include(if: $includeDeepDiveFlag)
+      gallery {
+        covers {
+          accentRightSquare {
+            __typename
+            ...imageFragment
+          }
+          accentRight {
+            __typename
+            ...imageFragment
+          }
+        }
+        posters {
+          accentRightHorizontal {
+            __typename
+            ...imageFragment
+          }
+        }
+      }
+      competition {
+        id
+        name
+        shortName
+        sportType {
+          name
+        }
+      }
+      viewOption {
+        __typename
+        ...sportViewOptionFragment
+      }
+      userData @include(if: $includeUserData) {
+        isSubscribedToNotification
+      }
+      liveMeta {
+        __typename
+        ... on SportEventLiveMeta {
+          stage
+        }
+        ... on SportTeamsEventLiveMeta {
+          stage
+          firstTeamScore {
+            result
+          }
+          secondTeamScore {
+            result
+          }
+        }
+      }
+      ... on SportTeamsEvent {
+        firstTeam {
+          __typename
+          ...sportPromoSelectionItemTeamFragment
+        }
+        secondTeam {
+          __typename
+          ...sportPromoSelectionItemTeamFragment
+        }
+      }
+      ...sportWatchingSocialArgumentFragment
+    }
+    style {
+      __typename
+      ...sportBrandingFragment
+    }
+  }
+}
+
+fragment sportShowcasePromoSelectionHighlightItemFragment on SportHighlightSelectionItem {
+  highlight {
+    id
+    title
+    comment
+    description
+    gallery {
+      logos {
+        horizontal {
+          __typename
+          ...imageFragment
+        }
+      }
+      posters {
+        squareWithoutLogo {
+          __typename
+          ...imageFragment
+        }
+        horizontalWithoutLogo {
+          __typename
+          ...imageFragment
+        }
+      }
+    }
+    viewOption {
+      __typename
+      ...sportViewOptionFragment
+    }
+  }
+}
+
+fragment sportHighlightSelectionItemFragment on SportHighlightSelectionItem {
+  highlight {
+    id
+    title
+    comment
+    duration
+    gallery {
+      covers {
+        horizontal {
+          __typename
+          ...imageFragment
+        }
+      }
+      posters {
+        horizontal {
+          __typename
+          ...imageFragment
+        }
+        vertical {
+          __typename
+          ...imageFragment
+        }
+      }
+    }
+    viewOption {
+      __typename
+      ...sportViewOptionFragment
+    }
+  }
+}
+
+fragment sportEventSelectionItemTeamFragment on SportTeam {
+  id
+  name
+  gallery {
+    logos {
+      main {
+        __typename
+        ...imageFragment
+      }
+    }
+  }
+}
+
+fragment sportEventSelectionItemFragment on SportEventSelectionItem {
+  sportEvent {
+    __typename
+    id
+    sportEventId
+    title
+    comment
+    startTime
+    endTime
+    expirationTime
+    deepDiveAvailable @include(if: $includeDeepDiveFlag)
+    description
+    gallery {
+      posters {
+        accentRightWithLogo {
+          __typename
+          ...imageFragment
+        }
+        announceHorizontal {
+          __typename
+          ...imageFragment
+        }
+        liveHorizontal {
+          __typename
+          ...imageFragment
+        }
+        recordHorizontal {
+          __typename
+          ...imageFragment
+        }
+      }
+    }
+    competition {
+      id
+      shortName
+      sportType {
+        name
+      }
+    }
+    liveMeta {
+      __typename
+      ... on SportEventLiveMeta {
+        stage
+      }
+      ... on SportTeamsEventLiveMeta {
+        stage
+        firstTeamScore {
+          result
+        }
+        secondTeamScore {
+          result
+        }
+      }
+    }
+    viewOption {
+      __typename
+      ...sportViewOptionFragment
+    }
+    ... on SportTeamsEvent {
+      firstTeam {
+        __typename
+        ...sportEventSelectionItemTeamFragment
+      }
+      secondTeam {
+        __typename
+        ...sportEventSelectionItemTeamFragment
+      }
+    }
+  }
+}
+
+fragment showcaseEditorialSelectionItemFragment on SelectionItem {
+  __typename
+  ... on EditorialFeatureSelectionItem {
+    description
+    entityId
+    entityKpId
+    entityType
+    entityName
+    itemType
+    imageSizeType
+    image {
+      __typename
+      ...imageFragment
+    }
+  }
+}
+
+fragment sportCompetitionSelectionItemFragment on SportCompetitionSelectionItem {
+  competition {
+    id
+    name
+    shortName
+    userData @include(if: $includeUserData) {
+      isFavourite
+    }
+    cleanCover {
+      __typename
+      ...imageFragment
+    }
+    cover {
+      __typename
+      ...imageFragment
+    }
+    logo {
+      __typename
+      ...imageFragment
+    }
+    sportType {
+      id
+      name
+    }
+  }
+}
+
+fragment televisionChannelSummaryFragment on TvChannel {
+  contentId
+  title
+  gallery {
+    logos {
+      main {
+        __typename
+        ...imageFragment
+      }
+      loader {
+        __typename
+        ...imageFragment
+      }
+    }
+    covers {
+      horizontal {
+        __typename
+        ...imageFragment
+      }
+      preview {
+        __typename
+        ...imageFragment
+      }
+      paywall {
+        __typename
+        ...imageFragment
+      }
+    }
+  }
+  ageRestriction
+}
+
+fragment televisionProgramFragment on TvProgram {
+  id
+  title
+  startTime
+  endTime
+  image {
+    __typename
+    ...imageFragment
+  }
+  ageRestriction
+  episodeTitle
+  typeName
+  catchupContentId
+}
+
+fragment sportShowcaseChannelItemFragment on TvChannelSelectionItem {
+  tvChannel {
+    __typename
+    ...televisionChannelSummaryFragment
+    viewOption {
+      __typename
+      ...sportViewOptionFragment
+    }
+    tvPrograms {
+      __typename
+      ...televisionProgramFragment
+    }
+  }
+}
+
+fragment sportMatchCentreSelectionItemTeamFragment on SportTeam {
+  id
+  name
+  gallery {
+    logos {
+      main {
+        __typename
+        ...imageFragment
+      }
+    }
+  }
+}
+
+fragment sportMatchCentreSelectionItemFragment on MatchCentreSelectionItem {
+  sportEvent {
+    __typename
+    id
+    sportEventId
+    title
+    description
+    deepDiveAvailable
+    startTime
+    endTime
+    competition {
+      id
+      name
+      shortName
+      sportType {
+        name
+      }
+      gallery {
+        logos {
+          main {
+            __typename
+            ...imageFragment
+          }
+        }
+      }
+    }
+    liveMeta {
+      __typename
+      ... on SportEventLiveMeta {
+        stage
+      }
+      ... on SportTeamsEventLiveMeta {
+        stage
+        firstTeamScore {
+          result
+        }
+        secondTeamScore {
+          result
+        }
+      }
+    }
+    viewOption {
+      __typename
+      ...sportViewOptionFragment
+    }
+    ... on SportTeamsEvent {
+      firstTeam {
+        __typename
+        ...sportMatchCentreSelectionItemTeamFragment
+      }
+      secondTeam {
+        __typename
+        ...sportMatchCentreSelectionItemTeamFragment
+      }
+    }
+  }
+  style {
+    __typename
+    ...sportBrandingFragment
+  }
+}
+
+fragment sportNotificationSelectionItemFragment on NotificationSelectionItem {
+  notification {
+    notificationPayloadId
+    payload
+    templateId
+    feedbackToken
+  }
+}
+
+fragment sportShowcaseSelectionFragment on AbstractSelection {
+  __typename
+  id
+  title
+  showTitle
+  comment
+  ... on SportPromoSelection {
+    content(offset: $selectionOffset, limit: $selectionLimit) {
+      __typename
+      ...sportShowcaseSelectionPagingMetaFragment
+      items {
+        __typename
+        ...sportShowcasePromoSelectionEventItemFragment
+        ...sportShowcasePromoSelectionHighlightItemFragment
+      }
+    }
+  }
+  ... on SportSelection {
+    style {
+      __typename
+      ...sportBrandingFragment
+    }
+    content(offset: $selectionOffset, limit: $selectionLimit) {
+      __typename
+      ...sportShowcaseSelectionPagingMetaFragment
+      items {
+        __typename
+        ...sportHighlightSelectionItemFragment
+        ...sportEventSelectionItemFragment
+      }
+    }
+  }
+  ... on SportMixedSelection @include(if: $includeMixedSelection) {
+    style {
+      __typename
+      ...sportBrandingFragment
+    }
+    content(offset: $selectionOffset, limit: $selectionLimit) {
+      __typename
+      ...sportShowcaseSelectionPagingMetaFragment
+      items {
+        __typename
+        ...sportHighlightSelectionItemFragment
+        ...sportEventSelectionItemFragment
+      }
+    }
+  }
+  ... on EditorialFeatureSelection {
+    content(offset: $selectionOffset, limit: $selectionLimit) {
+      __typename
+      ...sportShowcaseSelectionPagingMetaFragment
+      items {
+        __typename
+        ...showcaseEditorialSelectionItemFragment
+      }
+    }
+  }
+  ... on SportCompetitionsSelection {
+    content(offset: $selectionOffset, limit: $selectionLimit) {
+      __typename
+      ...sportShowcaseSelectionPagingMetaFragment
+      items {
+        __typename
+        ...sportCompetitionSelectionItemFragment
+      }
+    }
+  }
+  ... on ChannelsSelection {
+    content(offset: $selectionOffset, limit: $selectionLimit) {
+      __typename
+      ...sportShowcaseSelectionPagingMetaFragment
+      items {
+        __typename
+        ...sportShowcaseChannelItemFragment
+      }
+    }
+  }
+  ... on MatchCentreSelection {
+    content(offset: $selectionOffset, limit: $selectionLimit) {
+      __typename
+      ...sportShowcaseSelectionPagingMetaFragment
+      items {
+        __typename
+        ...sportMatchCentreSelectionItemFragment
+      }
+    }
+  }
+  ... on NotificationsSelection @include(if: $includeNotificationsSelection) {
+    content(offset: $selectionOffset, limit: $selectionLimit) {
+      __typename
+      ...sportShowcaseSelectionPagingMetaFragment
+      items {
+        __typename
+        ...sportNotificationSelectionItemFragment
+      }
+    }
+  }
+}

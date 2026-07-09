@@ -1,0 +1,7 @@
+fragment MovieTrailersCount on Movie {
+  trailersCount: trailers(limit: 0) {
+    total
+    __typename
+  }
+  __typename
+}

@@ -1,0 +1,15 @@
+mutation RemoveUserProfileBackground {
+  userProfile {
+    social {
+      removeBackground {
+        status
+        errors {
+          __typename
+        }
+        __typename
+      }
+      __typename
+    }
+    __typename
+  }
+}

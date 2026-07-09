@@ -1,0 +1,18 @@
+mutation SocialProfileBackgroundDelete {
+  userProfile {
+    social {
+      removeBackground {
+        __typename
+        ...socialProfileBackgroundMutationPayloadFragment
+      }
+    }
+  }
+}
+
+fragment socialProfileBackgroundMutationPayloadFragment on UserSocialBackgroundMutationPayload {
+  status
+  errors {
+    __typename
+    message
+  }
+}

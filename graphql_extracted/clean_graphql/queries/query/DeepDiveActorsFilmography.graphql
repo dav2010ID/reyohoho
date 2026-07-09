@@ -1,0 +1,41 @@
+query DeepDiveActorsFilmography($personId: Long!) {
+  person(id: $personId) {
+    id
+    gender
+    moviesWithActorRole: filmographyRelations(
+      offset: 0
+      limit: 15
+      roleSlugs: ["ACTOR"]
+      isOnline: true
+    ) {
+      items {
+        movie {
+          title {
+            __typename
+            ...titleFragment
+          }
+        }
+      }
+    }
+    moviesWithDirectorRole: filmographyRelations(
+      offset: 0
+      limit: 15
+      roleSlugs: ["DIRECTOR"]
+      isOnline: true
+    ) {
+      items {
+        movie {
+          title {
+            __typename
+            ...titleFragment
+          }
+        }
+      }
+    }
+  }
+}
+
+fragment titleFragment on Title {
+  localized
+  original
+}

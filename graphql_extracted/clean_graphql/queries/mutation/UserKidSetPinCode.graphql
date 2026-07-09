@@ -1,0 +1,14 @@
+mutation UserKidSetPinCode($input: KidsPinCodeEnableInput!) {
+  userProfile {
+    userKidSubProfile {
+      pinCode {
+        enable(input: $input) {
+          status
+          error {
+            message
+          }
+        }
+      }
+    }
+  }
+}

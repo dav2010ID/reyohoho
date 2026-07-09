@@ -1,0 +1,561 @@
+query SearchSuggest(
+  $keyword: String!
+  $types: [SearchItemType!]!
+  $isOnlyOnline: Boolean!
+  $onlySearchable: Boolean!
+  $limit: Int!
+  $regionId: Int
+  $latitude: String
+  $longitude: String
+  $includeMovieTops: Boolean!
+  $includeMovieRating: Boolean!
+  $includeSeriesSeasonsCount: Boolean!
+  $includeFilmDuration: Boolean!
+  $includeMovieHorizontalCover: Boolean!
+  $includeMovieHorizontalLogo: Boolean!
+  $includeMovieRightholderForPoster: Boolean!
+  $includeMovieUserVote: Boolean!
+  $includeMovieUserPlannedToWatch: Boolean!
+  $includeMovieUserFolders: Boolean!
+  $includeMovieUserWatched: Boolean!
+  $includeMovieUserNotInterested: Boolean!
+  $includeCinemaUserData: Boolean!
+  $includeMovieListMetaTotal: Boolean!
+  $includeMovieContentFeatures: Boolean!
+  $includeMovieOnlyClientSupportedContentFeatures: Boolean
+  $includeMovieViewOption: Boolean!
+  $includeMovieTop250: Boolean!
+  $includePlannedToWatchRating: Boolean! = false
+  $purchaseOptionsContext: BillingFeatureClientContextInput!
+  $includeMoviePurchaseOptions: Boolean!
+  $onlyAvailableMeMovies: Boolean!
+  $includeTrialCutInfo: Boolean!
+  $includeTicketOption: Boolean!
+  $includeMovieReleaseDate: Boolean!
+) {
+  suggest(keyword: $keyword) {
+    global(
+      types: $types
+      isOnline: $isOnlyOnline
+      offset: 0
+      limit: $limit
+      regionID: $regionId
+      latitude: $latitude
+      longitude: $longitude
+      onlySearchable: $onlySearchable
+      onlyAvailableMe: $onlyAvailableMeMovies
+    ) {
+      offset
+      limit
+      total
+      items {
+        global {
+          __typename
+          ...movieSummaryFragment
+          ...personSummaryFragment
+          ...cinemaSummaryFragment
+          ...movieListMetaBaseFragment
+        }
+      }
+    }
+  }
+}
+
+fragment movieYearsFragment on Movie {
+  __typename
+  ... on VideoInterface {
+    productionYear(override: OTT_WHEN_EXISTS)
+  }
+  ... on Series {
+    fallbackYear: productionYear
+    releaseYears {
+      start
+      end
+    }
+  }
+}
+
+fragment movieTopsFragment on Movie {
+  ratingLists {
+    top10 {
+      position
+      movieListSlug
+    }
+    top250 @include(if: $includeMovieTop250) {
+      position
+      movieListSlug
+    }
+  }
+}
+
+fragment imageFragment on Image {
+  avatarsUrl
+  fallbackUrl
+}
+
+fragment baseMoviePostersFragment on MoviePosters {
+  vertical(override: OTT_WHEN_EXISTS) {
+    __typename
+    ...imageFragment
+  }
+  verticalWithRightholderLogo {
+    __typename
+    ...imageFragment
+  }
+  horizontal {
+    __typename
+    ...imageFragment
+  }
+  horizontalWithRightholderLogo {
+    __typename
+    ...imageFragment
+  }
+}
+
+fragment movieIntroPostersFragment on MoviePosters {
+  verticalIntro {
+    __typename
+    ...imageFragment
+  }
+  verticalIntroWithRightholderLogo {
+    __typename
+    ...imageFragment
+  }
+  horizontalIntro {
+    __typename
+    ...imageFragment
+  }
+  horizontalIntroWithRightholderLogo {
+    __typename
+    ...imageFragment
+  }
+}
+
+fragment moviePostersFragment on MoviePosters {
+  __typename
+  ...baseMoviePostersFragment
+  ...movieIntroPostersFragment
+}
+
+fragment imageWithSizeFragment on Image {
+  __typename
+  ...imageFragment
+  origSize {
+    width
+    height
+  }
+}
+
+fragment titleFragment on Title {
+  localized
+  original
+}
+
+fragment genreFragment on Genre {
+  id
+  name
+}
+
+fragment countryFragment on Country {
+  id
+  name
+}
+
+fragment ratingValueFragment on RatingValue {
+  isActive
+  count
+  value(precision: 1)
+}
+
+fragment ratingFragment on Rating {
+  kinopoisk {
+    __typename
+    ...ratingValueFragment
+  }
+  plannedToWatch @include(if: $includePlannedToWatchRating) {
+    __typename
+    ...ratingValueFragment
+  }
+}
+
+fragment movieViewOptionPurchasedSubscriptionFragment on ViewOption {
+  purchasedSubscriptionTextId
+  purchasedSubscriptionName
+}
+
+fragment availabilityAnnounceFragment on AvailabilityAnnounce {
+  announcePromise
+  availabilityDate
+  type
+}
+
+fragment movieContentPackageFragment on ContentPackage {
+  billingFeatureName
+}
+
+fragment currencyFragment on Currency {
+  symbol
+  currencyCode
+}
+
+fragment moneyAmountFragment on MoneyAmount {
+  amount
+  currency {
+    __typename
+    ...currencyFragment
+  }
+}
+
+fragment movieViewOptionTrialCutInfoFragment on TrialCutInfo {
+  texts {
+    title
+    subTitle
+    buttonText
+  }
+  token
+  type
+}
+
+fragment movieViewOptionSummaryFragment on ViewOption {
+  __typename
+  type
+  purchasabilityStatus
+  isWatchableOnDeviceInCurrentRegion: isWatchable(
+    filter: { anyDevice: false, anyRegion: false }
+  )
+  buttonText
+  ...movieViewOptionPurchasedSubscriptionFragment
+  availabilityAnnounce {
+    __typename
+    ...availabilityAnnounceFragment
+  }
+  contentPackageToBuy {
+    __typename
+    ...movieContentPackageFragment
+  }
+  contentPackageToUnfreeze {
+    __typename
+    ...movieContentPackageFragment
+  }
+  transactionalPrice {
+    __typename
+    ...moneyAmountFragment
+  }
+  transactionalMinimumPrice {
+    __typename
+    ...moneyAmountFragment
+  }
+  priceWithTotalDiscount {
+    __typename
+    ...moneyAmountFragment
+  }
+  optionMonetizationModels
+  watchabilityStatus
+  watchabilityExpirationTime
+  promotionActionType
+  downloadabilityStatus
+  purchaseOptions(clientContext: $purchaseOptionsContext)
+    @include(if: $includeMoviePurchaseOptions) {
+    billingFeatureNames
+    target
+  }
+  trialCutInfo @include(if: $includeTrialCutInfo) {
+    __typename
+    ...movieViewOptionTrialCutInfoFragment
+  }
+  purchaseOptionCustomProperties @include(if: $includeMoviePurchaseOptions)
+}
+
+fragment restrictionFragment on Restriction {
+  age
+  mpaa
+}
+
+fragment incompleteDateFragment on IncompleteDate {
+  date
+  accuracy
+}
+
+fragment voteFragment on Vote {
+  value
+}
+
+fragment movieUserVoteFragment on MovieUserData {
+  voting {
+    __typename
+    ...voteFragment
+  }
+}
+
+fragment movieFolderFragment on Folder {
+  id
+  name
+  public
+}
+
+fragment movieUserFoldersFragment on MovieUserData {
+  userFolders {
+    items {
+      __typename
+      ...movieFolderFragment
+    }
+    total
+  }
+}
+
+fragment movieUserWatchedFragment on MovieUserData {
+  watchStatuses {
+    watched {
+      value
+    }
+  }
+}
+
+fragment movieUserNotInterestedFragment on MovieUserData {
+  watchStatuses {
+    notInterested {
+      value
+    }
+  }
+}
+
+fragment movieContentFeaturesFragment on Ott {
+  preview {
+    features(
+      filter: {
+        layout: OTT_TITLE_CARD
+        onlyClientSupported: $includeMovieOnlyClientSupportedContentFeatures
+      }
+    ) {
+      group
+      alias
+      displayName
+    }
+  }
+}
+
+fragment payOfferFragment on PayOffer {
+  button {
+    badge {
+      text
+      icon {
+        __typename
+        ...imageFragment
+      }
+    }
+    disclaimer {
+      text
+      link
+    }
+  }
+  selectorLink
+}
+
+fragment movieTicketOptionFragment on Movie {
+  ticketOption {
+    purchasable
+    releaseAnnounce {
+      available
+      releaseDate {
+        __typename
+        ...incompleteDateFragment
+      }
+    }
+    payOffer {
+      __typename
+      ...payOfferFragment
+    }
+  }
+}
+
+fragment movieDurationFragment on Movie {
+  ott {
+    preview {
+      __typename
+      ... on OttPreview_AbstractVideo {
+        duration
+      }
+    }
+  }
+}
+
+fragment movieSummaryFragment on Movie {
+  __typename
+  id
+  contentId
+  url
+  ...movieYearsFragment
+  ...movieTopsFragment @include(if: $includeMovieTops)
+  gallery {
+    posters {
+      __typename
+      ...moviePostersFragment
+    }
+    logos @include(if: $includeMovieRightholderForPoster) {
+      rightholderForPoster {
+        __typename
+        ...imageFragment
+      }
+    }
+    logos @include(if: $includeMovieHorizontalLogo) {
+      horizontal {
+        __typename
+        ...imageWithSizeFragment
+      }
+    }
+    covers @include(if: $includeMovieHorizontalCover) {
+      horizontal {
+        __typename
+        ...imageFragment
+      }
+    }
+  }
+  title {
+    __typename
+    ...titleFragment
+  }
+  genres {
+    __typename
+    ...genreFragment
+  }
+  countries {
+    __typename
+    ...countryFragment
+  }
+  rating @include(if: $includeMovieRating) {
+    __typename
+    ...ratingFragment
+  }
+  viewOption @include(if: $includeMovieViewOption) {
+    __typename
+    ...movieViewOptionSummaryFragment
+  }
+  restriction {
+    __typename
+    ...restrictionFragment
+  }
+  distribution @include(if: $includeMovieReleaseDate) {
+    worldPremiere {
+      incompleteDate {
+        __typename
+        ...incompleteDateFragment
+      }
+    }
+    releases(limit: 1) {
+      items {
+        date {
+          __typename
+          ...incompleteDateFragment
+        }
+      }
+    }
+  }
+  movieUserVote: userData @include(if: $includeMovieUserVote) {
+    __typename
+    ...movieUserVoteFragment
+  }
+  movieUserPlannedToWatch: userData
+    @include(if: $includeMovieUserPlannedToWatch) {
+    isPlannedToWatch
+  }
+  movieUserFolders: userData @include(if: $includeMovieUserFolders) {
+    __typename
+    ...movieUserFoldersFragment
+  }
+  movieUserWatched: userData @include(if: $includeMovieUserWatched) {
+    __typename
+    ...movieUserWatchedFragment
+  }
+  movieUserNotInterested: userData
+    @include(if: $includeMovieUserNotInterested) {
+    __typename
+    ...movieUserNotInterestedFragment
+  }
+  movieContentFeatures: ott @include(if: $includeMovieContentFeatures) {
+    __typename
+    ...movieContentFeaturesFragment
+  }
+  ... on Series @include(if: $includeSeriesSeasonsCount) {
+    seasonsCount: seasons(offset: 0, limit: 0) {
+      total
+    }
+  }
+  ...movieTicketOptionFragment @include(if: $includeTicketOption)
+  ...movieDurationFragment @include(if: $includeFilmDuration)
+}
+
+fragment personNameFragment on Person {
+  name
+  originalName
+}
+
+fragment personSummaryFragment on Person {
+  __typename
+  id
+  ...personNameFragment
+  gender
+  poster {
+    __typename
+    ...imageFragment
+  }
+  age
+  height
+  dateOfBirth {
+    __typename
+    ...incompleteDateFragment
+  }
+  dateOfDeath {
+    __typename
+    ...incompleteDateFragment
+  }
+  published
+}
+
+fragment cityFragment on City {
+  geoId
+  id
+  name
+}
+
+fragment locationFragment on Location {
+  latitude
+  longitude
+}
+
+fragment cinemaUserDataFragment on CinemaUserData {
+  isFavorite
+}
+
+fragment cinemaSummaryFragment on Cinema {
+  id
+  cinemaTitle: title
+  city {
+    __typename
+    ...cityFragment
+  }
+  address
+  location {
+    __typename
+    ...locationFragment
+  }
+  cinemaUserData: userData @include(if: $includeCinemaUserData) {
+    __typename
+    ...cinemaUserDataFragment
+  }
+}
+
+fragment movieListMetaBaseFragment on MovieListMeta {
+  id
+  autoList
+  name
+  description
+  url
+  cover {
+    __typename
+    ...imageFragment
+  }
+  moviesCount: movies(offset: 0, limit: 0)
+    @include(if: $includeMovieListMetaTotal) {
+    total
+  }
+}

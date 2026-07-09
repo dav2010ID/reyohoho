@@ -1,0 +1,47 @@
+mutation StartInvoice($id: ID!) {
+  invoice {
+    externalStart(id: $id) {
+      __typename
+      ...invoice
+    }
+  }
+}
+
+fragment invoicePrice on Price {
+  currency
+  amount
+}
+
+fragment invoicePayment on Payment {
+  id
+  respCode
+  respDesc
+  status
+}
+
+fragment invoice on Invoice {
+  id
+  invoiceStatus
+  form
+  paymentMethodId
+  paidAmount {
+    __typename
+    ...invoicePrice
+  }
+  payment {
+    __typename
+    ...invoicePayment
+  }
+  totalAmount {
+    __typename
+    ...invoicePrice
+  }
+  invoicePollingParams {
+    retryDelayMillis
+    timeoutMillis
+  }
+  widgetQrCodeParams {
+    widgetUrl
+    underlineText
+  }
+}

@@ -1,0 +1,13 @@
+query FilmKinopoiskRating($filmId: Long!) {
+  film(id: $filmId) {
+    id
+    rating {
+      kinopoisk {
+        isActive
+        __typename
+      }
+      __typename
+    }
+    __typename
+  }
+}

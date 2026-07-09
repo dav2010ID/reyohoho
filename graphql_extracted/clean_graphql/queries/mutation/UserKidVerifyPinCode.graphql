@@ -1,0 +1,20 @@
+mutation UserKidVerifyPinCode($input: KidsPinCodeVerifyInput!) {
+  userProfile {
+    userKidSubProfile {
+      pinCode {
+        verify(input: $input) {
+          error {
+            __typename
+            message
+            ... on UnverifiedKidsPinCodeError {
+              pinCodeUpdatedBy {
+                displayName
+              }
+            }
+          }
+          status
+        }
+      }
+    }
+  }
+}

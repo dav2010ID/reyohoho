@@ -1,0 +1,17 @@
+query MovieListStat(
+  $slug: String!
+  $filters: FilterValuesInput
+  $withUserData: Boolean!
+) {
+  movieListBySlug(slug: $slug, filters: $filters) {
+    movies {
+      total
+      __typename
+    }
+    userData @include(if: $withUserData) {
+      watched
+      __typename
+    }
+    __typename
+  }
+}

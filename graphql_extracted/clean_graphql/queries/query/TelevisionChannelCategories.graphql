@@ -1,0 +1,24 @@
+query TelevisionChannelCategories {
+  tvChannelCategories {
+    __typename
+    ...televisionChannelCategoryFragment
+  }
+}
+
+fragment imageFragment on Image {
+  avatarsUrl
+  fallbackUrl
+}
+
+fragment televisionChannelCategoryFragment on TvChannelCategory {
+  id
+  title
+  gallery {
+    logos {
+      main {
+        __typename
+        ...imageFragment
+      }
+    }
+  }
+}

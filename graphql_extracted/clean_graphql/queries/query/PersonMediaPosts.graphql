@@ -1,0 +1,24 @@
+query PersonMediaPosts($personId: Long!, $mediaPostsLimit: Int = 10) {
+  person(id: $personId) {
+    id
+    mediaPosts: post(limit: $mediaPostsLimit) {
+      items {
+        id
+        title
+        commentsCount
+        publishedAt
+        commentable
+        type
+        thumbImage {
+          avatarsUrl
+          fallbackUrl
+          __typename
+        }
+        __typename
+      }
+      total
+      __typename
+    }
+    __typename
+  }
+}

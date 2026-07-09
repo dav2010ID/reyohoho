@@ -1,0 +1,23 @@
+query PurchaseMetadata($contendUuid: String!) {
+  movieByContentUuid(contentUuid: $contendUuid) {
+    id
+    contentId
+    userData {
+      ...PurchaseMetadata
+      __typename
+    }
+    __typename
+  }
+}
+
+fragment PurchaseMetadata on MovieUserData {
+  purchaseMetadata(includeWaiting: true) {
+    id
+    watchPeriod {
+      watchPeriodStatus
+      __typename
+    }
+    __typename
+  }
+  __typename
+}

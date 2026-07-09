@@ -1,0 +1,52 @@
+query SearchPersons($keyword: String!, $offset: Int!, $limit: Int!) {
+  search(keyword: $keyword) {
+    persons(offset: $offset, limit: $limit) {
+      offset
+      limit
+      total
+      items {
+        person {
+          __typename
+          ...personSummaryFragment
+        }
+      }
+    }
+  }
+}
+
+fragment personNameFragment on Person {
+  name
+  originalName
+}
+
+fragment imageFragment on Image {
+  avatarsUrl
+  fallbackUrl
+}
+
+fragment incompleteDateFragment on IncompleteDate {
+  date
+  accuracy
+}
+
+fragment personSummaryFragment on Person {
+  __typename
+  id
+  ...personNameFragment
+  gender
+  poster {
+    __typename
+    ...imageFragment
+  }
+  age
+  height
+  dateOfBirth {
+    __typename
+    ...incompleteDateFragment
+  }
+  dateOfDeath {
+    __typename
+    ...incompleteDateFragment
+  }
+  published
+}

@@ -1,0 +1,18 @@
+mutation SocialProfileSubscriptionRequestReject(
+  $input: SocialSubscriptionRequestInput!
+) {
+  userProfile {
+    social {
+      subscriptions {
+        requests {
+          reject(input: $input) {
+            status
+            error {
+              message
+            }
+          }
+        }
+      }
+    }
+  }
+}

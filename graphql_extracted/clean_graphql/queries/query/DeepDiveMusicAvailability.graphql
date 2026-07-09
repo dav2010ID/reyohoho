@@ -1,0 +1,35 @@
+query DeepDiveMusicAvailability(
+  $contentId: String!
+  $query: MusicRecognitionStatusQueryInput!
+) {
+  content(contentId: $contentId) {
+    __typename
+    ... on Movie {
+      ottMovie: ott {
+        __typename
+        ... on Ott_AbstractVideo {
+          recognition {
+            __typename
+            ...deepDiveMusicAvailabilityFragment
+          }
+        }
+      }
+    }
+    ... on Episode {
+      ottEpisode: ott {
+        recognition {
+          __typename
+          ...deepDiveMusicAvailabilityFragment
+        }
+      }
+    }
+  }
+}
+
+fragment deepDiveMusicAvailabilityFragment on Recognition {
+  music {
+    status(query: $query) {
+      exists
+    }
+  }
+}

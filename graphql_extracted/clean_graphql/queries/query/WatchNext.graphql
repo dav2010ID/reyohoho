@@ -1,0 +1,94 @@
+query WatchNext($watchedContentId: String!, $supportedTypes: [WatchNextType]) {
+  watchNext(
+    watchedContentId: $watchedContentId
+    supportedTypes: $supportedTypes
+  ) {
+    __typename
+    ... on WatchNext {
+      __typename
+      autoStart
+      items {
+        entity {
+          __typename
+          ...watchNextEntityFragment
+        }
+      }
+    }
+    ... on FranchiseWatchNext {
+      __typename
+      autoStart
+      items {
+        entity {
+          __typename
+          ...watchNextEntityFragment
+        }
+      }
+    }
+  }
+}
+
+fragment titleFragment on Title {
+  localized
+  original
+}
+
+fragment imageFragment on Image {
+  avatarsUrl
+  fallbackUrl
+}
+
+fragment baseMoviePostersFragment on MoviePosters {
+  vertical(override: OTT_WHEN_EXISTS) {
+    __typename
+    ...imageFragment
+  }
+  verticalWithRightholderLogo {
+    __typename
+    ...imageFragment
+  }
+  horizontal {
+    __typename
+    ...imageFragment
+  }
+  horizontalWithRightholderLogo {
+    __typename
+    ...imageFragment
+  }
+}
+
+fragment watchNextMovieFragment on Movie {
+  id
+  contentId
+  shortDescription
+  title {
+    __typename
+    ...titleFragment
+  }
+  gallery {
+    posters {
+      __typename
+      ...baseMoviePostersFragment
+    }
+  }
+}
+
+fragment watchNextEpisodeFragment on Episode {
+  id
+  contentId
+  tvSeries {
+    __typename
+    ...watchNextMovieFragment
+  }
+}
+
+fragment watchNextEntityFragment on WatchNextItemEntity {
+  __typename
+  ... on Episode {
+    __typename
+    ...watchNextEpisodeFragment
+  }
+  ... on Film {
+    __typename
+    ...watchNextMovieFragment
+  }
+}

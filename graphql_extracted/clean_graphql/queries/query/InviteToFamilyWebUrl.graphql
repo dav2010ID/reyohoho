@@ -1,0 +1,9 @@
+query InviteToFamilyWebUrl($language: LanguageISO639Scalar!) {
+  familyInvite(input: { language: $language }) {
+    webViewInvite {
+      webViewUrl
+      skipText
+    }
+    inviteCancellationReason
+  }
+}

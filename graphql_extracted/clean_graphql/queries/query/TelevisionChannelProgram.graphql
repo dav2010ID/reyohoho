@@ -1,0 +1,38 @@
+query TelevisionChannelProgram(
+  $contentId: String!
+  $programsDurationInPast: Duration
+  $programsDuration: Duration
+) {
+  content(contentId: $contentId) {
+    __typename
+    ... on TvChannel {
+      tvPrograms(
+        durationInPast: $programsDurationInPast
+        duration: $programsDuration
+      ) {
+        __typename
+        ...televisionProgramFragment
+      }
+    }
+  }
+}
+
+fragment imageFragment on Image {
+  avatarsUrl
+  fallbackUrl
+}
+
+fragment televisionProgramFragment on TvProgram {
+  id
+  title
+  startTime
+  endTime
+  image {
+    __typename
+    ...imageFragment
+  }
+  ageRestriction
+  episodeTitle
+  typeName
+  catchupContentId
+}

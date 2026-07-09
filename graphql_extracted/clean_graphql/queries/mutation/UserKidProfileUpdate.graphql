@@ -1,0 +1,28 @@
+mutation UserKidProfileUpdate(
+  $puid: Long!
+  $name: String!
+  $avatarUrl: String!
+  $birthday: LocalDate
+  $gender: Gender
+  $ageRestriction: AgeRestriction!
+) {
+  userProfile {
+    userKidSubProfile {
+      update(
+        puid: $puid
+        input: {
+          avatarUrl: $avatarUrl
+          birthday: $birthday
+          displayName: $name
+          gender: $gender
+          restrictions: { ageRestriction: $ageRestriction }
+        }
+      ) {
+        error {
+          message
+        }
+        status
+      }
+    }
+  }
+}

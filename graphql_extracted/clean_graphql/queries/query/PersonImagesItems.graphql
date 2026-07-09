@@ -1,0 +1,34 @@
+query PersonImagesItems(
+  $id: Long!
+  $type: PersonImageType!
+  $offset: Int
+  $limit: Int
+) {
+  person(id: $id) {
+    id
+    ...PersonImages
+    __typename
+  }
+}
+
+fragment PersonImages on Person {
+  images(types: [$type], offset: $offset, limit: $limit) {
+    items {
+      id
+      type
+      image {
+        avatarsUrl
+        origSize {
+          width
+          height
+          __typename
+        }
+        __typename
+      }
+      __typename
+    }
+    total
+    __typename
+  }
+  __typename
+}

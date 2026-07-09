@@ -1,0 +1,100 @@
+query StreamsTVChannelAdvertisementsData(
+  $contentId: String!
+  $includeStartingChannelData: Boolean!
+  $includeDataByContentId: Boolean!
+  $scheduleDuration: Duration!
+  $includeTvis: Boolean!
+  $extraCount: Int
+) {
+  dataByContentId: content(contentId: $contentId)
+    @include(if: $includeDataByContentId) {
+    __typename
+    ...streamsTvAdvertisementsDataFragment
+  }
+  startingChannelData: userProfile @include(if: $includeStartingChannelData) {
+    userData {
+      startingTvChannel {
+        __typename
+        ...streamsTvAdvertisementsDataFragment
+      }
+    }
+  }
+  clientInfo {
+    time {
+      currentTimeUtc
+    }
+  }
+}
+
+fragment streamsAdvertisementItem on TvAdvertisementItem {
+  __typename
+  ... on TvSdkAdvertisementItem {
+    data {
+      params
+      type
+      vendorClientId
+    }
+  }
+  ... on TvUrlAdvertisementItem {
+    url
+  }
+}
+
+fragment streamsAdvertisementDataFragment on AdvertisementData {
+  preroll {
+    interval
+    maxTotalDuration
+    permitted
+    maxDuration
+    skipAvailable
+    items {
+      __typename
+      ...streamsAdvertisementItem
+    }
+  }
+  midroll {
+    afterSeekDelay
+    maxDuration
+    skipAvailable
+    items {
+      __typename
+      ...streamsAdvertisementItem
+    }
+  }
+  pauseroll {
+    maxDuration
+    skipAvailable
+    items {
+      __typename
+      ...streamsAdvertisementItem
+    }
+  }
+}
+
+fragment streamsTvAdvertisementsDataFragment on TvChannel {
+  contentId
+  advertisement {
+    __typename
+    ...streamsAdvertisementDataFragment
+  }
+  tvPrograms(duration: $scheduleDuration, extraCount: $extraCount) {
+    id
+    advertisement {
+      __typename
+      ...streamsAdvertisementDataFragment
+    }
+    startTime
+    endTime
+    tvis @include(if: $includeTvis) {
+      url
+    }
+  }
+  socialDemography {
+    url
+    token
+    parameterMapping
+  }
+  tvis @include(if: $includeTvis) {
+    url
+  }
+}

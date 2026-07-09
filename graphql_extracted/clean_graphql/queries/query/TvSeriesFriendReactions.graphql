@@ -1,0 +1,139 @@
+query TvSeriesFriendReactions(
+  $tvSeriesId: Long!
+  $isAuthorized: Boolean!
+  $friendReactionsLimit: Int!
+  $friendReactionsOffset: Int!
+  $friendReactionsIncludeTypes: [ReactionType!]!
+) {
+  tvSeries(id: $tvSeriesId) {
+    id
+    contentId
+    userData @include(if: $isAuthorized) {
+      ...MovieUserDataReactions
+      __typename
+    }
+    __typename
+  }
+}
+
+fragment SocialUserProfileId on UserProfileInterface {
+  id {
+    kpId
+    ottId
+    puid
+    __typename
+  }
+  __typename
+}
+
+fragment SocialUserBadges on UserSocialInfo {
+  badges {
+    verified {
+      id
+      title
+      description
+      icons {
+        image {
+          avatarsUrl
+          __typename
+        }
+        format
+        __typename
+      }
+      __typename
+    }
+    __typename
+  }
+  __typename
+}
+
+fragment SocialUserPreview on UserProfileInterface {
+  ...SocialUserProfileId
+  social {
+    url
+    avatar {
+      defaultValue {
+        value {
+          avatarsUrl
+          fallbackUrl
+          __typename
+        }
+        __typename
+      }
+      __typename
+    }
+    name {
+      defaultValue {
+        value
+        __typename
+      }
+      __typename
+    }
+    alias {
+      defaultValue {
+        source
+        value
+        __typename
+      }
+      __typename
+    }
+    isSubscribedTo @include(if: $isAuthorized)
+    ...SocialUserBadges
+    __typename
+  }
+  __typename
+}
+
+fragment MovieUserDataReactions on MovieUserData {
+  friendsMovieReactions(
+    limit: $friendReactionsLimit
+    offset: $friendReactionsOffset
+    includeTypes: $friendReactionsIncludeTypes
+  ) {
+    items {
+      user {
+        ...SocialUserPreview
+        subscriptionInfo {
+          hasSubscription
+          __typename
+        }
+        __typename
+      }
+      reactions(includeTypes: $friendReactionsIncludeTypes) {
+        ... on Vote {
+          value
+          __typename
+        }
+        ... on Watched {
+          watched
+          __typename
+        }
+        ... on WatchingSeries {
+          watchingSeries
+          __typename
+        }
+        ... on PlannedToWatch {
+          plannedToWatch
+          __typename
+        }
+        __typename
+      }
+      __typename
+    }
+    statistics {
+      byReaction {
+        ... on VoteStatistic {
+          average
+          __typename
+        }
+        __typename
+      }
+      __typename
+    }
+    total
+    limit
+    offset
+    __typename
+  }
+  __typename
+}

@@ -1,0 +1,46 @@
+query TelevisionCatchupMeta($contentId: String!) {
+  content(contentId: $contentId) {
+    __typename
+    ... on Catchup {
+      ageRestriction
+      contentId
+      referenceContent {
+        __typename
+        ... on Movie {
+          id
+        }
+      }
+      originalTitle
+      title
+      hasSmokingScenes
+      tvChannel {
+        isNeedToHidePrograms
+        catchupAvailable
+        ageRestriction
+        contentId
+        gallery {
+          logos {
+            main {
+              __typename
+              ...imageFragment
+            }
+          }
+        }
+        title
+      }
+      viewOption {
+        watchabilityExpirationTime
+      }
+    }
+  }
+  clientInfo {
+    time {
+      currentTimeUtc
+    }
+  }
+}
+
+fragment imageFragment on Image {
+  avatarsUrl
+  fallbackUrl
+}

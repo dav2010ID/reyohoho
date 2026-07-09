@@ -1,0 +1,18 @@
+query MovieSoundtracks($movieId: Long!, $soundtrackLimit: Int = 1) {
+  movie(id: $movieId) {
+    id
+    soundtrack(limit: $soundtrackLimit) {
+      items {
+        __typename
+        ... on YaMusicSoundtrackAlbum {
+          id
+        }
+        ... on YaMusicSoundtrackPlaylist {
+          kindId: id
+          username
+        }
+      }
+      total
+    }
+  }
+}

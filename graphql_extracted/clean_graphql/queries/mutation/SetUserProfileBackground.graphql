@@ -1,0 +1,15 @@
+mutation SetUserProfileBackground($backgroundId: Long!) {
+  userProfile {
+    social {
+      setPreparedBackground(input: { backgroundId: $backgroundId }) {
+        status
+        errors {
+          __typename
+        }
+        __typename
+      }
+      __typename
+    }
+    __typename
+  }
+}

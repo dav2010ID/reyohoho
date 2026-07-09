@@ -1,0 +1,16 @@
+query UserSubscriptionProlongationStatusQuery($prolongationId: String!) {
+  userProfile {
+    __typename
+    ... on UserProfile {
+      prolongation(id: $prolongationId) {
+        __typename
+        ...userSubscriptionProlongationFragment
+      }
+    }
+  }
+}
+
+fragment userSubscriptionProlongationFragment on Prolongation {
+  errorCode
+  status
+}

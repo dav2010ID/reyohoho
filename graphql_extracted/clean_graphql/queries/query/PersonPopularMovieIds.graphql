@@ -1,0 +1,16 @@
+query PersonPopularMovieIds($personId: Long!) {
+  person(id: $personId) {
+    id
+    popularMovies {
+      items {
+        movie {
+          id
+          __typename
+        }
+        __typename
+      }
+      __typename
+    }
+    __typename
+  }
+}

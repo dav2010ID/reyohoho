@@ -1,0 +1,41 @@
+query SearchMovieCollections(
+  $keyword: String!
+  $offset: Int!
+  $limit: Int!
+  $includeMovieListMetaTotal: Boolean!
+) {
+  search(keyword: $keyword) {
+    movieLists(offset: $offset, limit: $limit) {
+      offset
+      limit
+      total
+      items {
+        movieList {
+          __typename
+          ...movieListMetaBaseFragment
+        }
+      }
+    }
+  }
+}
+
+fragment imageFragment on Image {
+  avatarsUrl
+  fallbackUrl
+}
+
+fragment movieListMetaBaseFragment on MovieListMeta {
+  id
+  autoList
+  name
+  description
+  url
+  cover {
+    __typename
+    ...imageFragment
+  }
+  moviesCount: movies(offset: 0, limit: 0)
+    @include(if: $includeMovieListMetaTotal) {
+    total
+  }
+}

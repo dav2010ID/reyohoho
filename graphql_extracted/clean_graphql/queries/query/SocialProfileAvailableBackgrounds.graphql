@@ -1,0 +1,23 @@
+query SocialProfileAvailableBackgrounds($limit: Int!, $offset: Int!) {
+  userProfile {
+    social {
+      preparedBackgrounds(limit: $limit, offset: $offset) {
+        offset
+        limit
+        total
+        items {
+          id
+          image {
+            __typename
+            ...imageFragment
+          }
+        }
+      }
+    }
+  }
+}
+
+fragment imageFragment on Image {
+  avatarsUrl
+  fallbackUrl
+}

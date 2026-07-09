@@ -1,0 +1,174 @@
+query MovieDetailsMobileMainCrewMembers(
+  $movieId: Long!
+  $actorsRoles: [MovieCrewRoleSlug!]!
+  $actorsLimit: Int!
+  $includeCreators: Boolean!
+  $creatorsEachRoleLimit: Int!
+  $creatorsOtherRoles: [MovieCrewRoleSlug!]!
+) {
+  movie(id: $movieId) {
+    __typename
+    ...movieDetailsMobileMainActorsFragment
+    ...movieDetailsMobileMainCreatorsFragment @include(if: $includeCreators)
+  }
+}
+
+fragment personNameFragment on Person {
+  name
+  originalName
+}
+
+fragment imageFragment on Image {
+  avatarsUrl
+  fallbackUrl
+}
+
+fragment incompleteDateFragment on IncompleteDate {
+  date
+  accuracy
+}
+
+fragment personSummaryFragment on Person {
+  __typename
+  id
+  ...personNameFragment
+  gender
+  poster {
+    __typename
+    ...imageFragment
+  }
+  age
+  height
+  dateOfBirth {
+    __typename
+    ...incompleteDateFragment
+  }
+  dateOfDeath {
+    __typename
+    ...incompleteDateFragment
+  }
+  published
+}
+
+fragment movieCrewMemberRoleMetaFragment on FilmCrewMember {
+  roleInfo {
+    title {
+      russian
+    }
+    slug
+  }
+  roleDetails: details
+}
+
+fragment movieDetailsMobileCrewMemberFragment on FilmCrewMember {
+  __typename
+  person {
+    __typename
+    ...personSummaryFragment
+  }
+  ...movieCrewMemberRoleMetaFragment
+}
+
+fragment movieDetailsMobileMainActorsFragment on Movie {
+  actors: members(
+    role: $actorsRoles
+    limit: $actorsLimit
+    orderBy: BY_ROLE_POSITION_BY_CREW_PRIORITY
+  ) {
+    offset
+    limit
+    total
+    items {
+      __typename
+      ...movieDetailsMobileCrewMemberFragment
+    }
+  }
+}
+
+fragment titleFragment on Title {
+  localized
+  original
+}
+
+fragment movieDetailsMobileCreatorMemberBestMovieFragment on PersonBestMovie {
+  movie {
+    id
+    contentId
+    title {
+      __typename
+      ...titleFragment
+    }
+  }
+}
+
+fragment movieDetailsMobileCreatorMemberFragment on FilmCrewMember {
+  __typename
+  person {
+    __typename
+    ...personSummaryFragment
+    bestFilms: bestMovies(type: FILM) {
+      items {
+        __typename
+        ...movieDetailsMobileCreatorMemberBestMovieFragment
+      }
+    }
+    bestSeries: bestMovies(type: SERIES) {
+      items {
+        __typename
+        ...movieDetailsMobileCreatorMemberBestMovieFragment
+      }
+    }
+  }
+  ...movieCrewMemberRoleMetaFragment
+}
+
+fragment movieDetailsMobileMainCreatorsFragment on Movie {
+  directors: members(role: [DIRECTOR], limit: $creatorsEachRoleLimit) {
+    items {
+      __typename
+      ...movieDetailsMobileCreatorMemberFragment
+    }
+  }
+  producers: members(role: [PRODUCER], limit: $creatorsEachRoleLimit) {
+    items {
+      __typename
+      ...movieDetailsMobileCreatorMemberFragment
+    }
+  }
+  writers: members(role: [WRITER], limit: $creatorsEachRoleLimit) {
+    items {
+      __typename
+      ...movieDetailsMobileCreatorMemberFragment
+    }
+  }
+  operators: members(role: [OPERATOR], limit: $creatorsEachRoleLimit) {
+    items {
+      __typename
+      ...movieDetailsMobileCreatorMemberFragment
+    }
+  }
+  composers: members(role: [COMPOSER], limit: $creatorsEachRoleLimit) {
+    items {
+      __typename
+      ...movieDetailsMobileCreatorMemberFragment
+    }
+  }
+  design: members(role: [DESIGN], limit: $creatorsEachRoleLimit) {
+    items {
+      __typename
+      ...movieDetailsMobileCreatorMemberFragment
+    }
+  }
+  editors: members(role: [EDITOR], limit: $creatorsEachRoleLimit) {
+    items {
+      __typename
+      ...movieDetailsMobileCreatorMemberFragment
+    }
+  }
+  others: members(role: $creatorsOtherRoles, limit: $creatorsEachRoleLimit) {
+    items {
+      __typename
+      ...movieDetailsMobileCreatorMemberFragment
+    }
+  }
+}

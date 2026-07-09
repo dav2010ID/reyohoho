@@ -1,0 +1,3674 @@
+[
+  {
+    "name": "BaseUserProfile",
+    "type": "fragments",
+    "source": "web",
+    "sourcePath": "graphql_extracted/web_graphql/operations/fragment/Fragments_4.graphql",
+    "path": "queries/fragments/BaseUserProfile.graphql",
+    "sha256": "c9cfc90e7d669aa431bdc8c5a2a9787c5f262e53144b05c72702c14bfb8d8a3f"
+  },
+  {
+    "name": "IsMovieWatchableOnOtt",
+    "type": "fragments",
+    "source": "web",
+    "sourcePath": "graphql_extracted/web_graphql/operations/fragment/Fragments_18.graphql",
+    "path": "queries/fragments/IsMovieWatchableOnOtt.graphql",
+    "sha256": "45d3465f19ecca9e66c537d1b2d38ba99ef682fba04f0057e8318fb97b958944"
+  },
+  {
+    "name": "MovieActorsCount",
+    "type": "fragments",
+    "source": "web",
+    "sourcePath": "graphql_extracted/web_graphql/operations/fragment/Fragments_26.graphql",
+    "path": "queries/fragments/MovieActorsCount.graphql",
+    "sha256": "2c89e2351776a98ae226242a05c5c6d77af9b0c378585436b55114f80920a39e"
+  },
+  {
+    "name": "MovieBloopersCount",
+    "type": "fragments",
+    "source": "web",
+    "sourcePath": "graphql_extracted/web_graphql/operations/fragment/Fragments_20.graphql",
+    "path": "queries/fragments/MovieBloopersCount.graphql",
+    "sha256": "373c6d347f6b8a69e9bad55600ad0878a1cb2ed9af00a923d9651f07b5c544e3"
+  },
+  {
+    "name": "MovieCreatorsCount",
+    "type": "fragments",
+    "source": "web",
+    "sourcePath": "graphql_extracted/web_graphql/operations/fragment/Fragments_27.graphql",
+    "path": "queries/fragments/MovieCreatorsCount.graphql",
+    "sha256": "41cc3b658e0a610ff83680eafeb91861c9d5a4f467c95655d94b6863b5641d94"
+  },
+  {
+    "name": "MovieCriticReviewsCount",
+    "type": "fragments",
+    "source": "web",
+    "sourcePath": "graphql_extracted/web_graphql/operations/fragment/Fragments_25.graphql",
+    "path": "queries/fragments/MovieCriticReviewsCount.graphql",
+    "sha256": "356c789bf98e693a5a04b1374358dcc6d0e303291448510ea633bf85747f3b99"
+  },
+  {
+    "name": "MovieFactsCount",
+    "type": "fragments",
+    "source": "web",
+    "sourcePath": "graphql_extracted/web_graphql/operations/fragment/Fragments_19.graphql",
+    "path": "queries/fragments/MovieFactsCount.graphql",
+    "sha256": "ea100fb510f316dda682114d9604401ff22ea0eca5bc9c761fb63e63f54cfb3b"
+  },
+  {
+    "name": "MovieImagesCount",
+    "type": "fragments",
+    "source": "web",
+    "sourcePath": "graphql_extracted/web_graphql/operations/fragment/Fragments_31.graphql",
+    "path": "queries/fragments/MovieImagesCount.graphql",
+    "sha256": "6dba449a616e272d815b00d01a9acaaa8456d505d4d9d9bb29494999d2932164"
+  },
+  {
+    "name": "MovieIsTicketsAvailable",
+    "type": "fragments",
+    "source": "web",
+    "sourcePath": "graphql_extracted/web_graphql/operations/fragment/Fragments_33.graphql",
+    "path": "queries/fragments/MovieIsTicketsAvailable.graphql",
+    "sha256": "408c5c6f2a1199b9f678b9f0ce111f064a39c7786681555631a8a4678a1024cc"
+  },
+  {
+    "name": "MovieMainAwardsCount",
+    "type": "fragments",
+    "source": "web",
+    "sourcePath": "graphql_extracted/web_graphql/operations/fragment/Fragments_29.graphql",
+    "path": "queries/fragments/MovieMainAwardsCount.graphql",
+    "sha256": "bd76a847451ce772b9f2b625d849fe246c30b15b232f7a0c114d6eb6ce811fd6"
+  },
+  {
+    "name": "MovieMediaPostsCount",
+    "type": "fragments",
+    "source": "web",
+    "sourcePath": "graphql_extracted/web_graphql/operations/fragment/Fragments_23.graphql",
+    "path": "queries/fragments/MovieMediaPostsCount.graphql",
+    "sha256": "28e9bdcd6b686a627acc8e84cd2f09f1426bd3ed97ceb67b701da9ec29dea1d0"
+  },
+  {
+    "name": "MovieOriginalMoviesCount",
+    "type": "fragments",
+    "source": "web",
+    "sourcePath": "graphql_extracted/web_graphql/operations/fragment/Fragments_32.graphql",
+    "path": "queries/fragments/MovieOriginalMoviesCount.graphql",
+    "sha256": "5a896e525eef5fdf753aea0c8479ba2797f202c2de4d070f24cd4f369ccf38b2"
+  },
+  {
+    "name": "MovieRelatedMoviesCount",
+    "type": "fragments",
+    "source": "web",
+    "sourcePath": "graphql_extracted/web_graphql/operations/fragment/Fragments_30.graphql",
+    "path": "queries/fragments/MovieRelatedMoviesCount.graphql",
+    "sha256": "2459934459f1710b90e83fb6224339dd7a9b284e4c56a1ba605332e9c8035e0a"
+  },
+  {
+    "name": "MovieSequelsPrequelsCount",
+    "type": "fragments",
+    "source": "web",
+    "sourcePath": "graphql_extracted/web_graphql/operations/fragment/Fragments_28.graphql",
+    "path": "queries/fragments/MovieSequelsPrequelsCount.graphql",
+    "sha256": "230313a4b0eb24106fc47e81d689b87abe65241a53afdccc9997f50699593e09"
+  },
+  {
+    "name": "MovieSimilarMoviesCount",
+    "type": "fragments",
+    "source": "web",
+    "sourcePath": "graphql_extracted/web_graphql/operations/fragment/Fragments_22.graphql",
+    "path": "queries/fragments/MovieSimilarMoviesCount.graphql",
+    "sha256": "d59ea80d63595cc1458719900601c53e956085cbba914bb67f64cbf01f18138b"
+  },
+  {
+    "name": "MovieTitleAndContentId",
+    "type": "fragments",
+    "source": "web",
+    "sourcePath": "graphql_extracted/web_graphql/operations/fragment/Fragments_34.graphql",
+    "path": "queries/fragments/MovieTitleAndContentId.graphql",
+    "sha256": "86f7242e39cb91b2dcaf877b0437a640babf9b97f149bb21908118a8cc51b531"
+  },
+  {
+    "name": "MovieTrailersCount",
+    "type": "fragments",
+    "source": "web",
+    "sourcePath": "graphql_extracted/web_graphql/operations/fragment/Fragments_24.graphql",
+    "path": "queries/fragments/MovieTrailersCount.graphql",
+    "sha256": "fbc8a0119f7382ae45b8451738b830e6fb46c18de8f5520962f8eb458f36336c"
+  },
+  {
+    "name": "MovieUserFolders",
+    "type": "fragments",
+    "source": "web",
+    "sourcePath": "graphql_extracted/web_graphql/operations/fragment/Fragments_5.graphql",
+    "path": "queries/fragments/MovieUserFolders.graphql",
+    "sha256": "9d3a3db4d81b263953348a49924f99389a43e05bf9badd9d3a16481d27980cbf"
+  },
+  {
+    "name": "MovieUsersReviewsCount",
+    "type": "fragments",
+    "source": "web",
+    "sourcePath": "graphql_extracted/web_graphql/operations/fragment/Fragments_21.graphql",
+    "path": "queries/fragments/MovieUsersReviewsCount.graphql",
+    "sha256": "e05daa2d84295a4ad302a47b39355ef89e6bd59eb5b75b2396ca1b9133d04140"
+  },
+  {
+    "name": "PersonDataCount",
+    "type": "fragments",
+    "source": "web",
+    "sourcePath": "graphql_extracted/web_graphql/operations/fragment/Fragments_14.graphql",
+    "path": "queries/fragments/PersonDataCount.graphql",
+    "sha256": "0e683001366a232e43cc7d3e3f7dd37305a61b788fdd0142c5efdf696972f841"
+  },
+  {
+    "name": "PersonFactsCount",
+    "type": "fragments",
+    "source": "web",
+    "sourcePath": "graphql_extracted/web_graphql/operations/fragment/Fragments_11.graphql",
+    "path": "queries/fragments/PersonFactsCount.graphql",
+    "sha256": "775e2ee8ab0cbe6f20fdff7db25663709e30b7e37e1b518e45c9fe815bf7f9fe"
+  },
+  {
+    "name": "PersonImagesCount",
+    "type": "fragments",
+    "source": "web",
+    "sourcePath": "graphql_extracted/web_graphql/operations/fragment/Fragments_9.graphql",
+    "path": "queries/fragments/PersonImagesCount.graphql",
+    "sha256": "2aee33ca9f71e0955e521aa9ef2003145b1177d4fddfc1b1a940d0bf34a73963"
+  },
+  {
+    "name": "PersonMainAwardsCount",
+    "type": "fragments",
+    "source": "web",
+    "sourcePath": "graphql_extracted/web_graphql/operations/fragment/Fragments_8.graphql",
+    "path": "queries/fragments/PersonMainAwardsCount.graphql",
+    "sha256": "164099765ef38fc6fa06cd53b7e276656c8ddb59d503092f704679e277ce09cd"
+  },
+  {
+    "name": "PersonMediaPostsCount",
+    "type": "fragments",
+    "source": "web",
+    "sourcePath": "graphql_extracted/web_graphql/operations/fragment/Fragments_10.graphql",
+    "path": "queries/fragments/PersonMediaPostsCount.graphql",
+    "sha256": "ddc4beb72673f25ddcdb065611918406d194a1b876eaa644578eb0be0d207a6e"
+  },
+  {
+    "name": "PersonMovieCount",
+    "type": "fragments",
+    "source": "web",
+    "sourcePath": "graphql_extracted/web_graphql/operations/fragment/Fragments_13.graphql",
+    "path": "queries/fragments/PersonMovieCount.graphql",
+    "sha256": "9401b8aaf7d9052c55aa1c5c90efa0377ddfd9c203371c9d459dc1fe3771f43a"
+  },
+  {
+    "name": "PersonName",
+    "type": "fragments",
+    "source": "web",
+    "sourcePath": "graphql_extracted/web_graphql/operations/fragment/Fragments_15.graphql",
+    "path": "queries/fragments/PersonName.graphql",
+    "sha256": "02b6c45329888aacffed309cc6ab0ed7b849b4db80b8d1e021d4cdd20f7aeaae"
+  },
+  {
+    "name": "PersonOnlineFilmsCount",
+    "type": "fragments",
+    "source": "web",
+    "sourcePath": "graphql_extracted/web_graphql/operations/fragment/Fragments_12.graphql",
+    "path": "queries/fragments/PersonOnlineFilmsCount.graphql",
+    "sha256": "dd7f32bcdec9630934bb04e4defa8ee8bc995708e7f73e153fba4637de756acc"
+  },
+  {
+    "name": "PersonPoster",
+    "type": "fragments",
+    "source": "web",
+    "sourcePath": "graphql_extracted/web_graphql/operations/fragment/Fragments_16.graphql",
+    "path": "queries/fragments/PersonPoster.graphql",
+    "sha256": "928ac143d0810d777c771aaa4490ce5cc21265797623191d50578e662bcdc846"
+  },
+  {
+    "name": "PersonUserNote",
+    "type": "fragments",
+    "source": "web",
+    "sourcePath": "graphql_extracted/web_graphql/operations/fragment/Fragments_17.graphql",
+    "path": "queries/fragments/PersonUserNote.graphql",
+    "sha256": "3334306611964fc0f3b9ae6e75e651c54ce6645ad268dcc4ca41157d878241ee"
+  },
+  {
+    "name": "RemoteConfig",
+    "type": "fragments",
+    "source": "web",
+    "sourcePath": "graphql_extracted/web_graphql/operations/fragment/Fragments_2.graphql",
+    "path": "queries/fragments/RemoteConfig.graphql",
+    "sha256": "3844b6ba72ad57b5bd25478fb154a64d83912d6fb2f50effd90d269f4a19ad86"
+  },
+  {
+    "name": "SocialUserProfile",
+    "type": "fragments",
+    "source": "web",
+    "sourcePath": "graphql_extracted/web_graphql/operations/fragment/Fragments_7.graphql",
+    "path": "queries/fragments/SocialUserProfile.graphql",
+    "sha256": "3655c5788ed706187a758b5ca220be857828f9a92849a405080ae639d234c3a3"
+  },
+  {
+    "name": "SocialUserProfileInfo",
+    "type": "fragments",
+    "source": "web",
+    "sourcePath": "graphql_extracted/web_graphql/operations/fragment/Fragments_35.graphql",
+    "path": "queries/fragments/SocialUserProfileInfo.graphql",
+    "sha256": "6accff164b9745d0d589004e6c3b04e6514d9227a835f1c98ac45af6a363d54c"
+  },
+  {
+    "name": "SocialUserProfileShortInfo",
+    "type": "fragments",
+    "source": "web",
+    "sourcePath": "graphql_extracted/web_graphql/operations/fragment/Fragments_3.graphql",
+    "path": "queries/fragments/SocialUserProfileShortInfo.graphql",
+    "sha256": "60c71c10db3151eb6ae8e0a72866c8ced21fe72168ba9c532690f66d5fd13437"
+  },
+  {
+    "name": "SubscriptionPurchaseOptionsByContentId",
+    "type": "fragments",
+    "source": "web",
+    "sourcePath": "graphql_extracted/web_graphql/operations/fragment/Fragments.graphql",
+    "path": "queries/fragments/SubscriptionPurchaseOptionsByContentId.graphql",
+    "sha256": "9458dddc31978d43d820003fc2330bee126ceb662fa8b1c3e85f3544d1510338"
+  },
+  {
+    "name": "TvSeriesEdisodesCount",
+    "type": "fragments",
+    "source": "web",
+    "sourcePath": "graphql_extracted/web_graphql/operations/fragment/Fragments_6.graphql",
+    "path": "queries/fragments/TvSeriesEdisodesCount.graphql",
+    "sha256": "3e8fd95cacface0aeeaced4eb46e20ee22992ae568f7ad308a3d3753e0798e0b"
+  },
+  {
+    "name": "AcceptSubscribeRequest",
+    "type": "mutation",
+    "source": "web",
+    "sourcePath": "graphql_extracted/web_graphql/operations/mutation/AcceptSubscribeRequest.graphql",
+    "path": "queries/mutation/AcceptSubscribeRequest.graphql",
+    "sha256": "d40e9167b679ef2fa5129f34abdf817b243a679fd356c32965d61e1bfd303b29"
+  },
+  {
+    "name": "AddMovieToFolder",
+    "type": "mutation",
+    "source": "web",
+    "sourcePath": "graphql_extracted/web_graphql/operations/mutation/AddMovieToFolder.graphql",
+    "path": "queries/mutation/AddMovieToFolder.graphql",
+    "sha256": "0b660d5793bfd7b9cbc968d62dfa54872e83f5181496c2d838253241b3c03b54"
+  },
+  {
+    "name": "AddPersonToFolder",
+    "type": "mutation",
+    "source": "web",
+    "sourcePath": "graphql_extracted/web_graphql/operations/mutation/AddPersonToFolder.graphql",
+    "path": "queries/mutation/AddPersonToFolder.graphql",
+    "sha256": "1610e779fa3fc2bb9773c8d480d10264eb5b346c3d57bb596b434d574bfd774e"
+  },
+  {
+    "name": "AddSuggestHistoryMovie",
+    "type": "mutation",
+    "source": "web",
+    "sourcePath": "graphql_extracted/web_graphql/operations/mutation/AddSuggestHistoryMovie.graphql",
+    "path": "queries/mutation/AddSuggestHistoryMovie.graphql",
+    "sha256": "f1f4720ab1663117f2a28670de459d93400c2653528c39f68d7245376a4fce9d"
+  },
+  {
+    "name": "AddSuggestHistoryMovieList",
+    "type": "mutation",
+    "source": "web",
+    "sourcePath": "graphql_extracted/web_graphql/operations/mutation/AddSuggestHistoryMovieList.graphql",
+    "path": "queries/mutation/AddSuggestHistoryMovieList.graphql",
+    "sha256": "317d94da2ee97c37270a2aa59339f4198b1297cce724d4ca9d413ca087474c92"
+  },
+  {
+    "name": "AddSuggestHistoryPerson",
+    "type": "mutation",
+    "source": "web",
+    "sourcePath": "graphql_extracted/web_graphql/operations/mutation/AddSuggestHistoryPerson.graphql",
+    "path": "queries/mutation/AddSuggestHistoryPerson.graphql",
+    "sha256": "6f0fa50e83f64be8c9c3a5a03ca37b2ba4f9efc2c85035ad0c47d53756fb4f63"
+  },
+  {
+    "name": "ChangeMailingAdsAgreementStatus",
+    "type": "mutation",
+    "source": "apk",
+    "sourcePath": "graphql_extracted/operations/mutation/001_ChangeMailingAdsAgreementStatus.graphql",
+    "path": "queries/mutation/ChangeMailingAdsAgreementStatus.graphql",
+    "sha256": "a1383109ca9accbd54b3633dbe8bcbc9d44746eb8314a7206e4e0181c3504be9"
+  },
+  {
+    "name": "ContentBrandSetLikeMutation",
+    "type": "mutation",
+    "source": "apk",
+    "sourcePath": "graphql_extracted/operations/mutation/002_ContentBrandSetLikeMutation.graphql",
+    "path": "queries/mutation/ContentBrandSetLikeMutation.graphql",
+    "sha256": "0d5c8ce55ddb15202d3af293454ec911cd486ec64f7bd30007c01c66d8cf30a7"
+  },
+  {
+    "name": "CreateInvoice",
+    "type": "mutation",
+    "source": "apk",
+    "sourcePath": "graphql_extracted/operations/mutation/003_CreateInvoice.graphql",
+    "path": "queries/mutation/CreateInvoice.graphql",
+    "sha256": "307c3a9ae28d81eb7b1458f22ddd0aa86d6aa0814dc648d91cf04d1595700faf"
+  },
+  {
+    "name": "CreateSilentInvoice",
+    "type": "mutation",
+    "source": "apk",
+    "sourcePath": "graphql_extracted/operations/mutation/004_CreateSilentInvoice.graphql",
+    "path": "queries/mutation/CreateSilentInvoice.graphql",
+    "sha256": "7ae0925d48e1088bbf3ec9f9e9d20cb2f92555a386b872a9955f2e74415a2a82"
+  },
+  {
+    "name": "DeviceBind",
+    "type": "mutation",
+    "source": "apk",
+    "sourcePath": "graphql_extracted/operations/mutation/005_DeviceBind.graphql",
+    "path": "queries/mutation/DeviceBind.graphql",
+    "sha256": "a290e6b6466e564d104cd1ca9955c6a3e06a300e096983f6728b68aac26a06ea"
+  },
+  {
+    "name": "DeviceUnbind",
+    "type": "mutation",
+    "source": "apk",
+    "sourcePath": "graphql_extracted/operations/mutation/006_DeviceUnbind.graphql",
+    "path": "queries/mutation/DeviceUnbind.graphql",
+    "sha256": "f8a8648de63163966be6a8c6334417bed8fb4ed49a79ecbc95ad9bc9c8875b55"
+  },
+  {
+    "name": "DownloadSyncUpdateStatuses",
+    "type": "mutation",
+    "source": "apk",
+    "sourcePath": "graphql_extracted/operations/mutation/007_DownloadSyncUpdateStatuses.graphql",
+    "path": "queries/mutation/DownloadSyncUpdateStatuses.graphql",
+    "sha256": "785a79e18a6db448e3aa2dc9d2ee491942f35b050a7fb8dab95c9c123f657075"
+  },
+  {
+    "name": "EditSocialUserProfile",
+    "type": "mutation",
+    "source": "web",
+    "sourcePath": "graphql_extracted/web_graphql/operations/mutation/EditSocialUserProfile.graphql",
+    "path": "queries/mutation/EditSocialUserProfile.graphql",
+    "sha256": "458d35f9c8d4cdeff5d0ac27d439f218e4edd0a241f66593ad5e121d5535fbba"
+  },
+  {
+    "name": "FoldersSetMovieInFavoriteFolder",
+    "type": "mutation",
+    "source": "apk",
+    "sourcePath": "graphql_extracted/operations/mutation/008_FoldersSetMovieInFavoriteFolder.graphql",
+    "path": "queries/mutation/FoldersSetMovieInFavoriteFolder.graphql",
+    "sha256": "1cc91e59a410c50181a1f37670ee1456dd721c349163b62b7e875c47913233f5"
+  },
+  {
+    "name": "FoldersSetMovieInFolder",
+    "type": "mutation",
+    "source": "apk",
+    "sourcePath": "graphql_extracted/operations/mutation/009_FoldersSetMovieInFolder.graphql",
+    "path": "queries/mutation/FoldersSetMovieInFolder.graphql",
+    "sha256": "c5ffa747996cf8bb59ae30d4042f5ae4128480cd84be271842ea6234a8f36c08"
+  },
+  {
+    "name": "FoldersSetMovieInPlannedToWatchFolder",
+    "type": "mutation",
+    "source": "apk",
+    "sourcePath": "graphql_extracted/operations/mutation/010_FoldersSetMovieInPlannedToWatchFolder.graphql",
+    "path": "queries/mutation/FoldersSetMovieInPlannedToWatchFolder.graphql",
+    "sha256": "d6ec5b3ca503d67803762da4a318b94d878ec8ddd467ca57d19a31588f471fc6"
+  },
+  {
+    "name": "FoldersSetPersonInFolder",
+    "type": "mutation",
+    "source": "apk",
+    "sourcePath": "graphql_extracted/operations/mutation/011_FoldersSetPersonInFolder.graphql",
+    "path": "queries/mutation/FoldersSetPersonInFolder.graphql",
+    "sha256": "5f384d9629f4f3e4e5d66f1f7a2ccdfacf454db2d042a9c74cafc268592d9806"
+  },
+  {
+    "name": "InviteToFamily",
+    "type": "mutation",
+    "source": "apk",
+    "sourcePath": "graphql_extracted/operations/mutation/012_InviteToFamily.graphql",
+    "path": "queries/mutation/InviteToFamily.graphql",
+    "sha256": "4c73d4ef5cd83936c28dec22116d613c74c3f7256ab95848c7ddac4858265ae5"
+  },
+  {
+    "name": "MovieDiscardRemoveRecommendation",
+    "type": "mutation",
+    "source": "web",
+    "sourcePath": "graphql_extracted/web_graphql/operations/mutation/MovieDiscardRemoveRecommendation.graphql",
+    "path": "queries/mutation/MovieDiscardRemoveRecommendation.graphql",
+    "sha256": "2c08492c609bc22be297528eb8e9866d82ffc35e13d032ad30ff77b325299984"
+  },
+  {
+    "name": "MovieRemoveNotInterested",
+    "type": "mutation",
+    "source": "web",
+    "sourcePath": "graphql_extracted/web_graphql/operations/mutation/MovieRemoveNotInterested.graphql",
+    "path": "queries/mutation/MovieRemoveNotInterested.graphql",
+    "sha256": "e84ce8ca453ffb7ae59e51c8b3e86a827cb1dd1377cc9fb152f767f76fbfaf86"
+  },
+  {
+    "name": "MovieRemovePlannedToWatch",
+    "type": "mutation",
+    "source": "web",
+    "sourcePath": "graphql_extracted/web_graphql/operations/mutation/MovieRemovePlannedToWatch.graphql",
+    "path": "queries/mutation/MovieRemovePlannedToWatch.graphql",
+    "sha256": "d3e3924db1a8f4fd730ae9e09cb57ec2ff5ed328f35a69e48497c011058e763f"
+  },
+  {
+    "name": "MovieRemoveRecommendation",
+    "type": "mutation",
+    "source": "web",
+    "sourcePath": "graphql_extracted/web_graphql/operations/mutation/MovieRemoveRecommendation.graphql",
+    "path": "queries/mutation/MovieRemoveRecommendation.graphql",
+    "sha256": "8c78f003f99f7d977ce2073f031c1908df60d79d31c6680a9298c25aa5ec8588"
+  },
+  {
+    "name": "MovieRemoveVote",
+    "type": "mutation",
+    "source": "apk",
+    "sourcePath": "graphql_extracted/operations/mutation/013_MovieRemoveVote.graphql",
+    "path": "queries/mutation/MovieRemoveVote.graphql",
+    "sha256": "0ca25977f05dc5db4c7b23fa209df40f98820a67b5e0058fe692a94dd8ece8ee"
+  },
+  {
+    "name": "MovieRemoveVote",
+    "type": "mutation",
+    "source": "web",
+    "sourcePath": "graphql_extracted/web_graphql/operations/mutation/MovieRemoveVote.graphql",
+    "path": "queries/mutation/MovieRemoveVote_web.graphql",
+    "sha256": "c3e032971cb7713a5c847eb0bbf43eb5007d78134bb98a29ba64522a0294e64d"
+  },
+  {
+    "name": "MovieRemoveWatched",
+    "type": "mutation",
+    "source": "web",
+    "sourcePath": "graphql_extracted/web_graphql/operations/mutation/MovieRemoveWatched.graphql",
+    "path": "queries/mutation/MovieRemoveWatched.graphql",
+    "sha256": "bf76aa67183801ab31041290ce60f48aaf3a5dca05b272f47367c959eb4363d4"
+  },
+  {
+    "name": "MovieSetNotInterested",
+    "type": "mutation",
+    "source": "apk",
+    "sourcePath": "graphql_extracted/operations/mutation/014_MovieSetNotInterested.graphql",
+    "path": "queries/mutation/MovieSetNotInterested.graphql",
+    "sha256": "88e01f310ad2ea8bad6feb44431fa50fb771bd782394d4c981ecc837c547ad5a"
+  },
+  {
+    "name": "MovieSetNotInterested",
+    "type": "mutation",
+    "source": "web",
+    "sourcePath": "graphql_extracted/web_graphql/operations/mutation/MovieSetNotInterested.graphql",
+    "path": "queries/mutation/MovieSetNotInterested_web.graphql",
+    "sha256": "9f5cbd3bfe2667350c5a45f2bc3262b5febc2993336b9164f718a5cfbc6eb6dc"
+  },
+  {
+    "name": "MovieSetPlannedToWatch",
+    "type": "mutation",
+    "source": "apk",
+    "sourcePath": "graphql_extracted/operations/mutation/015_MovieSetPlannedToWatch.graphql",
+    "path": "queries/mutation/MovieSetPlannedToWatch.graphql",
+    "sha256": "3078234b033357b26620295934ae8917499d93797ac1d59c18ebe99819fc93cd"
+  },
+  {
+    "name": "MovieSetPlannedToWatch",
+    "type": "mutation",
+    "source": "web",
+    "sourcePath": "graphql_extracted/web_graphql/operations/mutation/MovieSetPlannedToWatch.graphql",
+    "path": "queries/mutation/MovieSetPlannedToWatch_web.graphql",
+    "sha256": "9dfd9789c0643f42f224c2fc40a3f32f0ba4d9c548a26c7bbe524657333ae025"
+  },
+  {
+    "name": "MovieSetVote",
+    "type": "mutation",
+    "source": "apk",
+    "sourcePath": "graphql_extracted/operations/mutation/016_MovieSetVote.graphql",
+    "path": "queries/mutation/MovieSetVote.graphql",
+    "sha256": "76dd7449addff4c2b2eff2d80205f1425a1f1c246dd3be15efda8277364f80c2"
+  },
+  {
+    "name": "MovieSetVote",
+    "type": "mutation",
+    "source": "web",
+    "sourcePath": "graphql_extracted/web_graphql/operations/mutation/MovieSetVote.graphql",
+    "path": "queries/mutation/MovieSetVote_web.graphql",
+    "sha256": "7eac42626a0255e2ad80ec93a21eef8c66e6444a352847a26c00661c43c66cdb"
+  },
+  {
+    "name": "MovieSetWatched",
+    "type": "mutation",
+    "source": "apk",
+    "sourcePath": "graphql_extracted/operations/mutation/017_MovieSetWatched.graphql",
+    "path": "queries/mutation/MovieSetWatched.graphql",
+    "sha256": "a72f7b996bcbe167b9e5c368fccf6c26fa31250c59199f35891e9ef0a79cfb19"
+  },
+  {
+    "name": "MovieSetWatched",
+    "type": "mutation",
+    "source": "web",
+    "sourcePath": "graphql_extracted/web_graphql/operations/mutation/MovieSetWatched.graphql",
+    "path": "queries/mutation/MovieSetWatched_web.graphql",
+    "sha256": "d9e45e9274ee56dc51521b44fa3a70268b6746dd5a2aeadd4b11dc43c24a9beb"
+  },
+  {
+    "name": "MovieUserReviewDownvote",
+    "type": "mutation",
+    "source": "apk",
+    "sourcePath": "graphql_extracted/operations/mutation/018_MovieUserReviewDownvote.graphql",
+    "path": "queries/mutation/MovieUserReviewDownvote.graphql",
+    "sha256": "cc1bb849e886b0894a1ad642ee54b80cb5be1b2772009553a00028e521fcdd87"
+  },
+  {
+    "name": "MovieUserReviewRemoveVote",
+    "type": "mutation",
+    "source": "apk",
+    "sourcePath": "graphql_extracted/operations/mutation/019_MovieUserReviewRemoveVote.graphql",
+    "path": "queries/mutation/MovieUserReviewRemoveVote.graphql",
+    "sha256": "c9b39096ddca411514259222c8aa37c2640626676071479cbd4b7438b21396a2"
+  },
+  {
+    "name": "MovieUserReviewUpvote",
+    "type": "mutation",
+    "source": "apk",
+    "sourcePath": "graphql_extracted/operations/mutation/020_MovieUserReviewUpvote.graphql",
+    "path": "queries/mutation/MovieUserReviewUpvote.graphql",
+    "sha256": "871e975f372006d780eb6437b94e00131000fedea6694b744f6575a7c3802add"
+  },
+  {
+    "name": "NotificationMarkViewed",
+    "type": "mutation",
+    "source": "apk",
+    "sourcePath": "graphql_extracted/operations/mutation/021_NotificationMarkViewed.graphql",
+    "path": "queries/mutation/NotificationMarkViewed.graphql",
+    "sha256": "7ba46f681a3c6f28c10e97dcf6bd45a2dc7e4ccc2a8631c70f260c1d83c9e275"
+  },
+  {
+    "name": "NotificationMarkViewed",
+    "type": "mutation",
+    "source": "web",
+    "sourcePath": "graphql_extracted/web_graphql/operations/mutation/NotificationMarkViewed.graphql",
+    "path": "queries/mutation/NotificationMarkViewed_web.graphql",
+    "sha256": "ee665e8d928221952d755588b7337b81ab54a246fd1f6e2d982e65a41318b591"
+  },
+  {
+    "name": "NotificationPreviewMarkViewedBatch",
+    "type": "mutation",
+    "source": "apk",
+    "sourcePath": "graphql_extracted/operations/mutation/022_NotificationPreviewMarkViewedBatch.graphql",
+    "path": "queries/mutation/NotificationPreviewMarkViewedBatch.graphql",
+    "sha256": "03656f4ad6a39f4dc56d875e52bec7bdc7f80ed544a6fc710b9d5824a0156c7b"
+  },
+  {
+    "name": "NotificationSubmitFeedback",
+    "type": "mutation",
+    "source": "apk",
+    "sourcePath": "graphql_extracted/operations/mutation/023_NotificationSubmitFeedback.graphql",
+    "path": "queries/mutation/NotificationSubmitFeedback.graphql",
+    "sha256": "a0e78a66dd606dba75cbd362f2a81c76b3f061f37d8b74e4f0d9e00ff40dfaed"
+  },
+  {
+    "name": "NotificationSubmitFeedback",
+    "type": "mutation",
+    "source": "web",
+    "sourcePath": "graphql_extracted/web_graphql/operations/mutation/NotificationSubmitFeedback.graphql",
+    "path": "queries/mutation/NotificationSubmitFeedback_web.graphql",
+    "sha256": "be92616030ff1bb1266a9d8c88e503b3698679b72ff92267273a3afa73333d79"
+  },
+  {
+    "name": "RedAlertCallback",
+    "type": "mutation",
+    "source": "apk",
+    "sourcePath": "graphql_extracted/operations/mutation/024_RedAlertCallback.graphql",
+    "path": "queries/mutation/RedAlertCallback.graphql",
+    "sha256": "56ef09d2e1b86aafedd918296a52466903703aa4cb25284805844d4039d6ca10"
+  },
+  {
+    "name": "RedAlertsDigestCounterCallback",
+    "type": "mutation",
+    "source": "apk",
+    "sourcePath": "graphql_extracted/operations/mutation/025_RedAlertsDigestCounterCallback.graphql",
+    "path": "queries/mutation/RedAlertsDigestCounterCallback.graphql",
+    "sha256": "da84fcf2cba6e5da82f3e9587ac39a2d2feeec9e63d90c753af4ac4d532194ac"
+  },
+  {
+    "name": "RejectSubscribeRequest",
+    "type": "mutation",
+    "source": "web",
+    "sourcePath": "graphql_extracted/web_graphql/operations/mutation/RejectSubscribeRequest.graphql",
+    "path": "queries/mutation/RejectSubscribeRequest.graphql",
+    "sha256": "a96736f2d77c64d1755920c92fda30e8353c1c93d1c2c0f592e51f4ba3befc66"
+  },
+  {
+    "name": "RemoveContentBrandLikeMutation",
+    "type": "mutation",
+    "source": "web",
+    "sourcePath": "graphql_extracted/web_graphql/operations/mutation/RemoveContentBrandLikeMutation.graphql",
+    "path": "queries/mutation/RemoveContentBrandLikeMutation.graphql",
+    "sha256": "a08736907a47fb2cc92148d4a85d466a3fb78c2a218f5a1759cb8c709020aad0"
+  },
+  {
+    "name": "RemoveMovieFavorite",
+    "type": "mutation",
+    "source": "web",
+    "sourcePath": "graphql_extracted/web_graphql/operations/mutation/RemoveMovieFavorite.graphql",
+    "path": "queries/mutation/RemoveMovieFavorite.graphql",
+    "sha256": "f390783bd0d0f566c14257af6a4028b814c95b36ee7af7bc7ed545a3c31c4527"
+  },
+  {
+    "name": "RemoveMovieFromFolder",
+    "type": "mutation",
+    "source": "web",
+    "sourcePath": "graphql_extracted/web_graphql/operations/mutation/RemoveMovieFromFolder.graphql",
+    "path": "queries/mutation/RemoveMovieFromFolder.graphql",
+    "sha256": "064e9e03c214e734a380aed98446c9358c5035cf29db5bac3cf1a7f01778560f"
+  },
+  {
+    "name": "RemovePersonFromFolder",
+    "type": "mutation",
+    "source": "web",
+    "sourcePath": "graphql_extracted/web_graphql/operations/mutation/RemovePersonFromFolder.graphql",
+    "path": "queries/mutation/RemovePersonFromFolder.graphql",
+    "sha256": "8b1f4bed2f7b3b53c1478c67e87d4bd2349fdf212ec27801322a7ae1170c5958"
+  },
+  {
+    "name": "RemoveUserProfileBackground",
+    "type": "mutation",
+    "source": "web",
+    "sourcePath": "graphql_extracted/web_graphql/operations/mutation/RemoveUserProfileBackground.graphql",
+    "path": "queries/mutation/RemoveUserProfileBackground.graphql",
+    "sha256": "1e7a8ac7d4b0a8af29178f7fb9b0eb73b1a587a030ae02e36aa6124d616abf7b"
+  },
+  {
+    "name": "ReportPlaqueClicked",
+    "type": "mutation",
+    "source": "apk",
+    "sourcePath": "graphql_extracted/operations/mutation/026_ReportPlaqueClicked.graphql",
+    "path": "queries/mutation/ReportPlaqueClicked.graphql",
+    "sha256": "1276f81a7c322435cbebab2c5eb91aad06273f0cbf781821b27b44de506e5011"
+  },
+  {
+    "name": "ReportPlaqueSeen",
+    "type": "mutation",
+    "source": "apk",
+    "sourcePath": "graphql_extracted/operations/mutation/027_ReportPlaqueSeen.graphql",
+    "path": "queries/mutation/ReportPlaqueSeen.graphql",
+    "sha256": "b89d2156685fc43d8f2836b25a638531a3b030d90e3deefde4e8fe40414713c2"
+  },
+  {
+    "name": "SearchHistoryAddCinema",
+    "type": "mutation",
+    "source": "apk",
+    "sourcePath": "graphql_extracted/operations/mutation/028_SearchHistoryAddCinema.graphql",
+    "path": "queries/mutation/SearchHistoryAddCinema.graphql",
+    "sha256": "e50aa7b32a4060f1d2ef8d1bd2aed239efe375ae4fdd7119ae5818f2a26b7207"
+  },
+  {
+    "name": "SearchHistoryAddMovie",
+    "type": "mutation",
+    "source": "apk",
+    "sourcePath": "graphql_extracted/operations/mutation/029_SearchHistoryAddMovie.graphql",
+    "path": "queries/mutation/SearchHistoryAddMovie.graphql",
+    "sha256": "7917651f79182d2492a729b1d77092e616bc0312abedb7ca80fcbd8e05797f76"
+  },
+  {
+    "name": "SearchHistoryAddMovieCollection",
+    "type": "mutation",
+    "source": "apk",
+    "sourcePath": "graphql_extracted/operations/mutation/030_SearchHistoryAddMovieCollection.graphql",
+    "path": "queries/mutation/SearchHistoryAddMovieCollection.graphql",
+    "sha256": "d4ed986ba7d120cbe1781a3aa82ca5ddddb2bf78a97c198dcd776495f16b36ef"
+  },
+  {
+    "name": "SearchHistoryAddPerson",
+    "type": "mutation",
+    "source": "apk",
+    "sourcePath": "graphql_extracted/operations/mutation/031_SearchHistoryAddPerson.graphql",
+    "path": "queries/mutation/SearchHistoryAddPerson.graphql",
+    "sha256": "63c96596879d28e1f5b4b484adf051f9c1990f50139d7f4b3ee03beed152e3ce"
+  },
+  {
+    "name": "SearchHistoryAddSearchRequest",
+    "type": "mutation",
+    "source": "apk",
+    "sourcePath": "graphql_extracted/operations/mutation/032_SearchHistoryAddSearchRequest.graphql",
+    "path": "queries/mutation/SearchHistoryAddSearchRequest.graphql",
+    "sha256": "0e227cf48b0d2ab00bda697ebe97c8e4f087c6394520badd46b233bcd9ed46ee"
+  },
+  {
+    "name": "SearchHistoryRemoveCinema",
+    "type": "mutation",
+    "source": "apk",
+    "sourcePath": "graphql_extracted/operations/mutation/033_SearchHistoryRemoveCinema.graphql",
+    "path": "queries/mutation/SearchHistoryRemoveCinema.graphql",
+    "sha256": "e6351d2b5944c0b9ccc8e8279a9c91237b2b7eca8c699671bfa8513dbcc5065c"
+  },
+  {
+    "name": "SearchHistoryRemoveMovie",
+    "type": "mutation",
+    "source": "apk",
+    "sourcePath": "graphql_extracted/operations/mutation/034_SearchHistoryRemoveMovie.graphql",
+    "path": "queries/mutation/SearchHistoryRemoveMovie.graphql",
+    "sha256": "f8a41d3fb75ea604c1938c1d800d51297c8ddea78f761f7e208d4a025b40b3ad"
+  },
+  {
+    "name": "SearchHistoryRemoveMovieCollection",
+    "type": "mutation",
+    "source": "apk",
+    "sourcePath": "graphql_extracted/operations/mutation/035_SearchHistoryRemoveMovieCollection.graphql",
+    "path": "queries/mutation/SearchHistoryRemoveMovieCollection.graphql",
+    "sha256": "764686a3d328728c1b36951b6306ebd6a184fe783ce5bfd6b649dd40ce12bef6"
+  },
+  {
+    "name": "SearchHistoryRemovePerson",
+    "type": "mutation",
+    "source": "apk",
+    "sourcePath": "graphql_extracted/operations/mutation/036_SearchHistoryRemovePerson.graphql",
+    "path": "queries/mutation/SearchHistoryRemovePerson.graphql",
+    "sha256": "04a8d122ed456bd50cff0d86f54900bd313977780c123eeb3135d6b1f8e2f432"
+  },
+  {
+    "name": "SearchHistoryRemoveSearchRequest",
+    "type": "mutation",
+    "source": "apk",
+    "sourcePath": "graphql_extracted/operations/mutation/037_SearchHistoryRemoveSearchRequest.graphql",
+    "path": "queries/mutation/SearchHistoryRemoveSearchRequest.graphql",
+    "sha256": "144c124010d2619d26652ff7d30cb1f7d335cf886dbdb165bec37357ddbb1d8b"
+  },
+  {
+    "name": "SetContentBrandLikeMutation",
+    "type": "mutation",
+    "source": "web",
+    "sourcePath": "graphql_extracted/web_graphql/operations/mutation/SetContentBrandLikeMutation.graphql",
+    "path": "queries/mutation/SetContentBrandLikeMutation.graphql",
+    "sha256": "f7b61283a133779d50ce2856e21c3def095f750234791cf07740e72efe329341"
+  },
+  {
+    "name": "SetMovieFavorite",
+    "type": "mutation",
+    "source": "web",
+    "sourcePath": "graphql_extracted/web_graphql/operations/mutation/SetMovieFavorite.graphql",
+    "path": "queries/mutation/SetMovieFavorite.graphql",
+    "sha256": "b59e5008c5b10ee1ee243c20d73711c0f58ba828a9516adaf25d3d9a5e562a6e"
+  },
+  {
+    "name": "SetPreferredWatchingLanguage",
+    "type": "mutation",
+    "source": "apk",
+    "sourcePath": "graphql_extracted/operations/mutation/038_SetPreferredWatchingLanguage.graphql",
+    "path": "queries/mutation/SetPreferredWatchingLanguage.graphql",
+    "sha256": "024eb5b62bee6f31064d1191484c4d31bffdcd6f32fd475b270e84dd9be1cb0a"
+  },
+  {
+    "name": "SetUserProfileBackground",
+    "type": "mutation",
+    "source": "web",
+    "sourcePath": "graphql_extracted/web_graphql/operations/mutation/SetUserProfileBackground.graphql",
+    "path": "queries/mutation/SetUserProfileBackground.graphql",
+    "sha256": "6ff91030e12753f521991c652ced635df39f5e3af38a4c8722c4f6775cbad292"
+  },
+  {
+    "name": "ShowcaseRemoveContinueWatchingMovie",
+    "type": "mutation",
+    "source": "apk",
+    "sourcePath": "graphql_extracted/operations/mutation/039_ShowcaseRemoveContinueWatchingMovie.graphql",
+    "path": "queries/mutation/ShowcaseRemoveContinueWatchingMovie.graphql",
+    "sha256": "1a363d9de830cb5ab95b4b64bccb372b33e6367d61c81c920edcbf81aaf28cb9"
+  },
+  {
+    "name": "SocialDismissRecommendation",
+    "type": "mutation",
+    "source": "apk",
+    "sourcePath": "graphql_extracted/operations/mutation/040_SocialDismissRecommendation.graphql",
+    "path": "queries/mutation/SocialDismissRecommendation.graphql",
+    "sha256": "436ed07780840e644bd2982a6b36a36a54d78f8fcc6961aa8ac0adbdfe6a5d60"
+  },
+  {
+    "name": "SocialProfileBackgroundDelete",
+    "type": "mutation",
+    "source": "apk",
+    "sourcePath": "graphql_extracted/operations/mutation/041_SocialProfileBackgroundDelete.graphql",
+    "path": "queries/mutation/SocialProfileBackgroundDelete.graphql",
+    "sha256": "d0db4bcc20f8348054bbcb0c422c84d2e9e83de2fdd2ef5245ece780ee842440"
+  },
+  {
+    "name": "SocialProfileBackgroundSet",
+    "type": "mutation",
+    "source": "apk",
+    "sourcePath": "graphql_extracted/operations/mutation/042_SocialProfileBackgroundSet.graphql",
+    "path": "queries/mutation/SocialProfileBackgroundSet.graphql",
+    "sha256": "6db35b04679a827d4c540ead494af00d3ebd7a00f84c88a84f53e3bae5e20acd"
+  },
+  {
+    "name": "SocialProfileSubscribe",
+    "type": "mutation",
+    "source": "apk",
+    "sourcePath": "graphql_extracted/operations/mutation/043_SocialProfileSubscribe.graphql",
+    "path": "queries/mutation/SocialProfileSubscribe.graphql",
+    "sha256": "1e0ba1b435b55831342a387257d8609852de4ab0b62f917188039ca4b473ea27"
+  },
+  {
+    "name": "SocialProfileSubscriptionRequestAccept",
+    "type": "mutation",
+    "source": "apk",
+    "sourcePath": "graphql_extracted/operations/mutation/044_SocialProfileSubscriptionRequestAccept.graphql",
+    "path": "queries/mutation/SocialProfileSubscriptionRequestAccept.graphql",
+    "sha256": "1608e1c9b1ac3e455ca34d5d1ed522532751893613fbfc44170edc2bd959bcd3"
+  },
+  {
+    "name": "SocialProfileSubscriptionRequestReject",
+    "type": "mutation",
+    "source": "apk",
+    "sourcePath": "graphql_extracted/operations/mutation/045_SocialProfileSubscriptionRequestReject.graphql",
+    "path": "queries/mutation/SocialProfileSubscriptionRequestReject.graphql",
+    "sha256": "38e81ead00e64fafbfe6bb0d90e7a2d376a3ca84c5c605f5e6760343b6a548b2"
+  },
+  {
+    "name": "SocialProfileUnsubscribe",
+    "type": "mutation",
+    "source": "apk",
+    "sourcePath": "graphql_extracted/operations/mutation/046_SocialProfileUnsubscribe.graphql",
+    "path": "queries/mutation/SocialProfileUnsubscribe.graphql",
+    "sha256": "8f2f2e78a9d718191187588e491d130011df4c6cc9d7e7cbe8e6e628e332e9e3"
+  },
+  {
+    "name": "SocialProfileUnsubscribeFromMe",
+    "type": "mutation",
+    "source": "apk",
+    "sourcePath": "graphql_extracted/operations/mutation/047_SocialProfileUnsubscribeFromMe.graphql",
+    "path": "queries/mutation/SocialProfileUnsubscribeFromMe.graphql",
+    "sha256": "acd66b3e31cbcceedfc0abfe8406f1f3709772f4c7e8f928816ee798dec40fb4"
+  },
+  {
+    "name": "SocialSetAvatar",
+    "type": "mutation",
+    "source": "apk",
+    "sourcePath": "graphql_extracted/operations/mutation/048_SocialSetAvatar.graphql",
+    "path": "queries/mutation/SocialSetAvatar.graphql",
+    "sha256": "dde01e2d97154a9e36b680bb5f8d9f6557b3e3ea77bc38a71a57f1e51ac3dd3d"
+  },
+  {
+    "name": "SocialSetSocialData",
+    "type": "mutation",
+    "source": "apk",
+    "sourcePath": "graphql_extracted/operations/mutation/049_SocialSetSocialData.graphql",
+    "path": "queries/mutation/SocialSetSocialData.graphql",
+    "sha256": "85fba4acefa1e26f6ebf29fccfe11b973b31ddfa991354a76f9dcd40e90be9e3"
+  },
+  {
+    "name": "SportCompetitionAddFavourite",
+    "type": "mutation",
+    "source": "apk",
+    "sourcePath": "graphql_extracted/operations/mutation/050_SportCompetitionAddFavourite.graphql",
+    "path": "queries/mutation/SportCompetitionAddFavourite.graphql",
+    "sha256": "c8c4fd80a36b2635e30ca4c4f4b16941371801d4c4ee09c46e1595ec02796024"
+  },
+  {
+    "name": "SportCompetitionRemoveFavourite",
+    "type": "mutation",
+    "source": "apk",
+    "sourcePath": "graphql_extracted/operations/mutation/051_SportCompetitionRemoveFavourite.graphql",
+    "path": "queries/mutation/SportCompetitionRemoveFavourite.graphql",
+    "sha256": "cb7ff14932f12b8bb4d30a110e5d0fec6f5f84fcca75493dc1f9f9b68b70da94"
+  },
+  {
+    "name": "SportEventUserVote",
+    "type": "mutation",
+    "source": "apk",
+    "sourcePath": "graphql_extracted/operations/mutation/052_SportEventUserVote.graphql",
+    "path": "queries/mutation/SportEventUserVote.graphql",
+    "sha256": "a65e8c2e5aca6eda1e47a8e7f1e524cbd07f18046e11c8502d2813f7912894a9"
+  },
+  {
+    "name": "SportTeamAddFavourite",
+    "type": "mutation",
+    "source": "apk",
+    "sourcePath": "graphql_extracted/operations/mutation/053_SportTeamAddFavourite.graphql",
+    "path": "queries/mutation/SportTeamAddFavourite.graphql",
+    "sha256": "85148df8133f7f28fe0bf1e6d91cbb3566d57beb418cb783b73075317fefed9f"
+  },
+  {
+    "name": "SportTeamRemoveFavourite",
+    "type": "mutation",
+    "source": "apk",
+    "sourcePath": "graphql_extracted/operations/mutation/054_SportTeamRemoveFavourite.graphql",
+    "path": "queries/mutation/SportTeamRemoveFavourite.graphql",
+    "sha256": "84c9173cfa0103c45d6d8b35a33481426c940f37f858fb80a8ea70d3d1c6db97"
+  },
+  {
+    "name": "StartInvoice",
+    "type": "mutation",
+    "source": "apk",
+    "sourcePath": "graphql_extracted/operations/mutation/055_StartInvoice.graphql",
+    "path": "queries/mutation/StartInvoice.graphql",
+    "sha256": "27b00013d6d251e1d65eaae424f77ba7a5b5e5190f81982d8c76d430916a06ff"
+  },
+  {
+    "name": "StreamsWatchParamsUpdate",
+    "type": "mutation",
+    "source": "apk",
+    "sourcePath": "graphql_extracted/operations/mutation/056_StreamsWatchParamsUpdate.graphql",
+    "path": "queries/mutation/StreamsWatchParamsUpdate.graphql",
+    "sha256": "e0b3e9105e0606cacf02ec8cf2e58fc8db2622c8de66bbdad55444aef4467153"
+  },
+  {
+    "name": "SubscribeToUser",
+    "type": "mutation",
+    "source": "web",
+    "sourcePath": "graphql_extracted/web_graphql/operations/mutation/SubscribeToUser.graphql",
+    "path": "queries/mutation/SubscribeToUser.graphql",
+    "sha256": "cd63316e8a7fe6c3fa71bad016b1d103195690162823acb80e94607e2a9a8925"
+  },
+  {
+    "name": "TelevisionSaveLastSeenChannel",
+    "type": "mutation",
+    "source": "apk",
+    "sourcePath": "graphql_extracted/operations/mutation/057_TelevisionSaveLastSeenChannel.graphql",
+    "path": "queries/mutation/TelevisionSaveLastSeenChannel.graphql",
+    "sha256": "8c70966dedab58a06257445da0d3c11df6662dc61855cee043653751429f9989"
+  },
+  {
+    "name": "TrialCut",
+    "type": "mutation",
+    "source": "apk",
+    "sourcePath": "graphql_extracted/operations/mutation/058_TrialCut.graphql",
+    "path": "queries/mutation/TrialCut.graphql",
+    "sha256": "886c56ed4cd176fa559d36e17501f8ccf7f3b5da44b51de802b04f058eac48ce"
+  },
+  {
+    "name": "UnsubscribeFromMe",
+    "type": "mutation",
+    "source": "web",
+    "sourcePath": "graphql_extracted/web_graphql/operations/mutation/UnsubscribeFromMe.graphql",
+    "path": "queries/mutation/UnsubscribeFromMe.graphql",
+    "sha256": "0ae11a74a3c476752edec23c800a97a7e88cad1b561ad875d7626c71b9d0ca70"
+  },
+  {
+    "name": "UnsubscribeFromUser",
+    "type": "mutation",
+    "source": "web",
+    "sourcePath": "graphql_extracted/web_graphql/operations/mutation/UnsubscribeFromUser.graphql",
+    "path": "queries/mutation/UnsubscribeFromUser.graphql",
+    "sha256": "cd61fff7bc5147eafe5349c3de5671bfe58b9ff3db6c0653f648e9927bd675bf"
+  },
+  {
+    "name": "UserAdultDisablePinCode",
+    "type": "mutation",
+    "source": "apk",
+    "sourcePath": "graphql_extracted/operations/mutation/059_UserAdultDisablePinCode.graphql",
+    "path": "queries/mutation/UserAdultDisablePinCode.graphql",
+    "sha256": "8e85187dcb77c8fa2049c09587722af1614d758e84733e337d503c7686e53e95"
+  },
+  {
+    "name": "UserAdultRemindPinCode",
+    "type": "mutation",
+    "source": "apk",
+    "sourcePath": "graphql_extracted/operations/mutation/060_UserAdultRemindPinCode.graphql",
+    "path": "queries/mutation/UserAdultRemindPinCode.graphql",
+    "sha256": "752030f30a194294af09dc53cf841275098effc565b71cf2238323bbefb850ce"
+  },
+  {
+    "name": "UserAdultSetPinCode",
+    "type": "mutation",
+    "source": "apk",
+    "sourcePath": "graphql_extracted/operations/mutation/061_UserAdultSetPinCode.graphql",
+    "path": "queries/mutation/UserAdultSetPinCode.graphql",
+    "sha256": "7b3806c64cb3980970124b752164b55b218496fc17cc77d8f8e452ec175bcbee"
+  },
+  {
+    "name": "UserAdultVerifyPinCode",
+    "type": "mutation",
+    "source": "apk",
+    "sourcePath": "graphql_extracted/operations/mutation/062_UserAdultVerifyPinCode.graphql",
+    "path": "queries/mutation/UserAdultVerifyPinCode.graphql",
+    "sha256": "906ba8eb4d7b3b6ee63b9594627ea6ab946082b4f79e94dd68cc7e68defe0e77"
+  },
+  {
+    "name": "UserAuthorize",
+    "type": "mutation",
+    "source": "apk",
+    "sourcePath": "graphql_extracted/operations/mutation/063_UserAuthorize.graphql",
+    "path": "queries/mutation/UserAuthorize.graphql",
+    "sha256": "407dd51434679f4d4d51dd063f95e9ae34dba5395f1a93bcdb4f18242a2c4eba"
+  },
+  {
+    "name": "UserDataSetSportResultHidden",
+    "type": "mutation",
+    "source": "apk",
+    "sourcePath": "graphql_extracted/operations/mutation/064_UserDataSetSportResultHidden.graphql",
+    "path": "queries/mutation/UserDataSetSportResultHidden.graphql",
+    "sha256": "63db0ad7c776e0321263c1fb99171dab51594082dc3d85e58544b11ccf9a7ffc"
+  },
+  {
+    "name": "UserKidDisablePinCode",
+    "type": "mutation",
+    "source": "apk",
+    "sourcePath": "graphql_extracted/operations/mutation/065_UserKidDisablePinCode.graphql",
+    "path": "queries/mutation/UserKidDisablePinCode.graphql",
+    "sha256": "a6c6d913f56a952d8d22211c67f1872af437d7bc93cf3e838cf307dcf9680078"
+  },
+  {
+    "name": "UserKidProfileCreate",
+    "type": "mutation",
+    "source": "apk",
+    "sourcePath": "graphql_extracted/operations/mutation/066_UserKidProfileCreate.graphql",
+    "path": "queries/mutation/UserKidProfileCreate.graphql",
+    "sha256": "8296d48450e48302b733f1614cfc14c297476f3384c493ba434021fa2fab47b7"
+  },
+  {
+    "name": "UserKidProfileDelete",
+    "type": "mutation",
+    "source": "apk",
+    "sourcePath": "graphql_extracted/operations/mutation/067_UserKidProfileDelete.graphql",
+    "path": "queries/mutation/UserKidProfileDelete.graphql",
+    "sha256": "dd34554e1ffb8f5b338ac2ed52d9d6d8ac0230ee4e771dfa4339d07c6668c79b"
+  },
+  {
+    "name": "UserKidProfileUpdate",
+    "type": "mutation",
+    "source": "apk",
+    "sourcePath": "graphql_extracted/operations/mutation/068_UserKidProfileUpdate.graphql",
+    "path": "queries/mutation/UserKidProfileUpdate.graphql",
+    "sha256": "87ac221567626a2009b023196a81ff074864638503c68d9c7fb6a9524b15fe2c"
+  },
+  {
+    "name": "UserKidProfileUpdateParentalControl",
+    "type": "mutation",
+    "source": "apk",
+    "sourcePath": "graphql_extracted/operations/mutation/069_UserKidProfileUpdateParentalControl.graphql",
+    "path": "queries/mutation/UserKidProfileUpdateParentalControl.graphql",
+    "sha256": "9379cf902f9f1392fd7b1e67cb2d2e184044b1358d10ea5355dde8095486bc60"
+  },
+  {
+    "name": "UserKidRemindPinCode",
+    "type": "mutation",
+    "source": "apk",
+    "sourcePath": "graphql_extracted/operations/mutation/070_UserKidRemindPinCode.graphql",
+    "path": "queries/mutation/UserKidRemindPinCode.graphql",
+    "sha256": "4f6a5713424e6397efa0261095dd7456126e5f593bc9c5f3a5046a309d068665"
+  },
+  {
+    "name": "UserKidSetPinCode",
+    "type": "mutation",
+    "source": "apk",
+    "sourcePath": "graphql_extracted/operations/mutation/071_UserKidSetPinCode.graphql",
+    "path": "queries/mutation/UserKidSetPinCode.graphql",
+    "sha256": "11ddc7decd83a18b40559a101f3b1d01f0b49c1a356164618aa98ce95976e64b"
+  },
+  {
+    "name": "UserKidVerifyPinCode",
+    "type": "mutation",
+    "source": "apk",
+    "sourcePath": "graphql_extracted/operations/mutation/072_UserKidVerifyPinCode.graphql",
+    "path": "queries/mutation/UserKidVerifyPinCode.graphql",
+    "sha256": "04b026d39d220f5da05d1b9892cd2a5defc0bc336ce0af22a5a8d2f3bb8f1445"
+  },
+  {
+    "name": "UserSubscriptionRunProlongation",
+    "type": "mutation",
+    "source": "apk",
+    "sourcePath": "graphql_extracted/operations/mutation/073_UserSubscriptionRunProlongation.graphql",
+    "path": "queries/mutation/UserSubscriptionRunProlongation.graphql",
+    "sha256": "abf474b1b99974bea0caf9975c2b0c1a29ec2076350620a899c210270a69682a"
+  },
+  {
+    "name": "ValidateSocialUserProfileAlias",
+    "type": "mutation",
+    "source": "web",
+    "sourcePath": "graphql_extracted/web_graphql/operations/mutation/ValidateSocialUserProfileAlias.graphql",
+    "path": "queries/mutation/ValidateSocialUserProfileAlias.graphql",
+    "sha256": "80f8da3e7b00323f91e925d8f9ce2d8d9b7b54dc113392ca80bb16b35735efaf"
+  },
+  {
+    "name": "ValidateSocialUserProfileName",
+    "type": "mutation",
+    "source": "web",
+    "sourcePath": "graphql_extracted/web_graphql/operations/mutation/ValidateSocialUserProfileName.graphql",
+    "path": "queries/mutation/ValidateSocialUserProfileName.graphql",
+    "sha256": "b5813400d1339bf79d8992d1fc9bf48cc99ea8f04975f38aacf94f3db25b47ba"
+  },
+  {
+    "name": "YandexMusicAddTrack",
+    "type": "mutation",
+    "source": "apk",
+    "sourcePath": "graphql_extracted/operations/mutation/074_YandexMusicAddTrack.graphql",
+    "path": "queries/mutation/YandexMusicAddTrack.graphql",
+    "sha256": "8d314ce7494e79d099af89429f0b0322fef28b7cf8a0f8eed36fa9728ae3ba4d"
+  },
+  {
+    "name": "YandexMusicRemoveTrack",
+    "type": "mutation",
+    "source": "apk",
+    "sourcePath": "graphql_extracted/operations/mutation/075_YandexMusicRemoveTrack.graphql",
+    "path": "queries/mutation/YandexMusicRemoveTrack.graphql",
+    "sha256": "51a9762662fddab7218f24118996430bcaaba48907fdadc30f8785a6df27010b"
+  },
+  {
+    "name": "BoxOffices",
+    "type": "query",
+    "source": "web",
+    "sourcePath": "graphql_extracted/web_graphql/operations/query/BoxOffices.graphql",
+    "path": "queries/query/BoxOffices.graphql",
+    "sha256": "6f588980dc6da2333b68c4062b77c313d4108877f2bfa27e0124b4c57ba552fa"
+  },
+  {
+    "name": "CinemaTickets",
+    "type": "query",
+    "source": "apk",
+    "sourcePath": "graphql_extracted/operations/query/076_CinemaTickets.graphql",
+    "path": "queries/query/CinemaTickets.graphql",
+    "sha256": "f9c221ebc191af22041650b0f3caab9ad314545276c831e223299a75c7736a02"
+  },
+  {
+    "name": "CollectContactsWebUrl",
+    "type": "query",
+    "source": "apk",
+    "sourcePath": "graphql_extracted/operations/query/077_CollectContactsWebUrl.graphql",
+    "path": "queries/query/CollectContactsWebUrl.graphql",
+    "sha256": "c0c4ec99350d6aa7bc440d0827a039fedebd71586f714b362f7aa324a113d1c5"
+  },
+  {
+    "name": "CompositeOfferDetails",
+    "type": "query",
+    "source": "apk",
+    "sourcePath": "graphql_extracted/operations/query/078_CompositeOfferDetails.graphql",
+    "path": "queries/query/CompositeOfferDetails.graphql",
+    "sha256": "95348c24a772e6b85ee2b2098dd4c4ad416d97d9343093175788dfe9df891a6e"
+  },
+  {
+    "name": "CompositeOffers",
+    "type": "query",
+    "source": "web",
+    "sourcePath": "graphql_extracted/web_graphql/operations/query/CompositeOffers.graphql",
+    "path": "queries/query/CompositeOffers.graphql",
+    "sha256": "39b48fd03cce77dfc83e5ce85d31cdd81f97da081ecc36422a8204ce96a3a4df"
+  },
+  {
+    "name": "CompositeUpsale",
+    "type": "query",
+    "source": "apk",
+    "sourcePath": "graphql_extracted/operations/query/079_CompositeUpsale.graphql",
+    "path": "queries/query/CompositeUpsale.graphql",
+    "sha256": "125e80eccdd262bd41f8cb952b7d20b5cd188a53e1ac1e299b01226c5cd70d88"
+  },
+  {
+    "name": "ContentAvailabilityOttMeta",
+    "type": "query",
+    "source": "apk",
+    "sourcePath": "graphql_extracted/operations/query/080_ContentAvailabilityOttMeta.graphql",
+    "path": "queries/query/ContentAvailabilityOttMeta.graphql",
+    "sha256": "44eb838e8a5822db78ea67ac57397450742c4874ae2fc26cd18a4ad9624abf1c"
+  },
+  {
+    "name": "ContentBrands",
+    "type": "query",
+    "source": "apk",
+    "sourcePath": "graphql_extracted/operations/query/081_ContentBrands.graphql",
+    "path": "queries/query/ContentBrands.graphql",
+    "sha256": "7884465a8a085f184ff6ee8f67dd1aa62988adb064351ace2754a862e3b3c888"
+  },
+  {
+    "name": "ContentBrands",
+    "type": "query",
+    "source": "web",
+    "sourcePath": "graphql_extracted/web_graphql/operations/query/ContentBrands.graphql",
+    "path": "queries/query/ContentBrands_web.graphql",
+    "sha256": "29360e86574a0bd63a5c41141209c6200e381d5a1bf585dfc60fffded429ee2a"
+  },
+  {
+    "name": "ContentBrandsNavigation",
+    "type": "query",
+    "source": "apk",
+    "sourcePath": "graphql_extracted/operations/query/082_ContentBrandsNavigation.graphql",
+    "path": "queries/query/ContentBrandsNavigation.graphql",
+    "sha256": "113684a664ccc10551d1fc8e268f84a4a861f63820e8cd6c53b222747d37838d"
+  },
+  {
+    "name": "ContinueWatching",
+    "type": "query",
+    "source": "web",
+    "sourcePath": "graphql_extracted/web_graphql/operations/query/ContinueWatching.graphql",
+    "path": "queries/query/ContinueWatching.graphql",
+    "sha256": "95919f7b3633872bbc97bfdb760c9f0076d27c4621599e941f1e381e0b32c650"
+  },
+  {
+    "name": "DeepDiveActors",
+    "type": "query",
+    "source": "apk",
+    "sourcePath": "graphql_extracted/operations/query/083_DeepDiveActors.graphql",
+    "path": "queries/query/DeepDiveActors.graphql",
+    "sha256": "71951e79ea5ac07e37aee28c9aa722592b8ab6604894b63fe5b47086086217ad"
+  },
+  {
+    "name": "DeepDiveActorsAvailability",
+    "type": "query",
+    "source": "apk",
+    "sourcePath": "graphql_extracted/operations/query/084_DeepDiveActorsAvailability.graphql",
+    "path": "queries/query/DeepDiveActorsAvailability.graphql",
+    "sha256": "385185d25b5baaa88787fc5dd57859bbdf303137fa8ba93a43453ca4849a262d"
+  },
+  {
+    "name": "DeepDiveActorsFilmography",
+    "type": "query",
+    "source": "apk",
+    "sourcePath": "graphql_extracted/operations/query/085_DeepDiveActorsFilmography.graphql",
+    "path": "queries/query/DeepDiveActorsFilmography.graphql",
+    "sha256": "534c0425377a358d633cce3b29ae41e1ab588830872a297b06c1c31fe213b93d"
+  },
+  {
+    "name": "DeepDiveMusic",
+    "type": "query",
+    "source": "apk",
+    "sourcePath": "graphql_extracted/operations/query/086_DeepDiveMusic.graphql",
+    "path": "queries/query/DeepDiveMusic.graphql",
+    "sha256": "4d85e761a7405d4d4d81f89620d4acd436b9ebdcf4d3ec80c8954dc3e5d359ae"
+  },
+  {
+    "name": "DeepDiveMusicAvailability",
+    "type": "query",
+    "source": "apk",
+    "sourcePath": "graphql_extracted/operations/query/087_DeepDiveMusicAvailability.graphql",
+    "path": "queries/query/DeepDiveMusicAvailability.graphql",
+    "sha256": "61a821e2dc1e89f79391b80398b0ed1c636736b0aa6c59685d6cb21424d5dae4"
+  },
+  {
+    "name": "DeviceProfileGetId",
+    "type": "query",
+    "source": "apk",
+    "sourcePath": "graphql_extracted/operations/query/088_DeviceProfileGetId.graphql",
+    "path": "queries/query/DeviceProfileGetId.graphql",
+    "sha256": "93c6d9bded9491ff5330694ce459115e941246f08778d52b2b30a75a9a4ba056"
+  },
+  {
+    "name": "DevicesList",
+    "type": "query",
+    "source": "apk",
+    "sourcePath": "graphql_extracted/operations/query/089_DevicesList.graphql",
+    "path": "queries/query/DevicesList.graphql",
+    "sha256": "d2d27872e7473330ea173bb5f7dd79876a64715f8078f2a6a49e83b33d9a47fd"
+  },
+  {
+    "name": "DownloadSyncStatuses",
+    "type": "query",
+    "source": "apk",
+    "sourcePath": "graphql_extracted/operations/query/090_DownloadSyncStatuses.graphql",
+    "path": "queries/query/DownloadSyncStatuses.graphql",
+    "sha256": "8efec02a5f559bde4a436fb7b1ddacc4e06ed2a39c74074e3fa772663e9997ba"
+  },
+  {
+    "name": "EditorsChoice",
+    "type": "query",
+    "source": "web",
+    "sourcePath": "graphql_extracted/web_graphql/operations/query/EditorsChoice.graphql",
+    "path": "queries/query/EditorsChoice.graphql",
+    "sha256": "a3397b78d44f208144d9d8a3484e69850c26a396e1be6a1fe436ea7370b481b1"
+  },
+  {
+    "name": "EncyclopediaGenres",
+    "type": "query",
+    "source": "apk",
+    "sourcePath": "graphql_extracted/operations/query/091_EncyclopediaGenres.graphql",
+    "path": "queries/query/EncyclopediaGenres.graphql",
+    "sha256": "687030d28863af14b08439c270141a2af2dfeac8b512aba8dc0b51beb2ecfd59"
+  },
+  {
+    "name": "EncyclopediaTodayMainPosts",
+    "type": "query",
+    "source": "apk",
+    "sourcePath": "graphql_extracted/operations/query/092_EncyclopediaTodayMainPosts.graphql",
+    "path": "queries/query/EncyclopediaTodayMainPosts.graphql",
+    "sha256": "9bedb1d7475c378baff60dbd921d4f0b2731431b8c98a93cc1938ed3a964bfed"
+  },
+  {
+    "name": "EncyclopediaTrailersByDate",
+    "type": "query",
+    "source": "apk",
+    "sourcePath": "graphql_extracted/operations/query/093_EncyclopediaTrailersByDate.graphql",
+    "path": "queries/query/EncyclopediaTrailersByDate.graphql",
+    "sha256": "1fbe48e3193e0a4785320a46f873333d16dff63ef3d0c5893b090589c5911c5d"
+  },
+  {
+    "name": "EncyclopediaTrailersByPopularity",
+    "type": "query",
+    "source": "apk",
+    "sourcePath": "graphql_extracted/operations/query/094_EncyclopediaTrailersByPopularity.graphql",
+    "path": "queries/query/EncyclopediaTrailersByPopularity.graphql",
+    "sha256": "5339d095ffef0ab32861319e305199d3212b483552b2e6520790f3042fbe8118"
+  },
+  {
+    "name": "Experiments",
+    "type": "query",
+    "source": "apk",
+    "sourcePath": "graphql_extracted/operations/query/095_Experiments.graphql",
+    "path": "queries/query/Experiments.graphql",
+    "sha256": "2a50525da2f84c5d3dcf8faf80cb21c662cd1ad60aecbd345c7fe03c8c6dfb65"
+  },
+  {
+    "name": "FilmBaseInfo",
+    "type": "query",
+    "source": "new",
+    "sourcePath": "graphql_extracted/new/FilmBaseInfo.gql",
+    "path": "queries/query/FilmBaseInfo.graphql",
+    "sha256": "5c3723bc6f88ceebbca7d96c3e20f7703aaeb96a2d1b4597bccb4ae584290153"
+  },
+  {
+    "name": "FilmCriticsReviews",
+    "type": "query",
+    "source": "web",
+    "sourcePath": "graphql_extracted/web_graphql/operations/query/FilmCriticsReviews.graphql",
+    "path": "queries/query/FilmCriticsReviews.graphql",
+    "sha256": "8770e2cccf52d64c9877726506236f99b85f1ae69bfa3f5cf6a5e037b1e5c37f"
+  },
+  {
+    "name": "FilmFriendReactions",
+    "type": "query",
+    "source": "web",
+    "sourcePath": "graphql_extracted/web_graphql/operations/query/FilmFriendReactions.graphql",
+    "path": "queries/query/FilmFriendReactions.graphql",
+    "sha256": "7b388f0b56392632331c650097e13d35886639a31d2f91cf1e0c27050f971da3"
+  },
+  {
+    "name": "FilmKinopoiskRating",
+    "type": "query",
+    "source": "web",
+    "sourcePath": "graphql_extracted/web_graphql/operations/query/FilmKinopoiskRating.graphql",
+    "path": "queries/query/FilmKinopoiskRating.graphql",
+    "sha256": "a4e5617199ad1072bb9a2f792bc586c4b9ce478cf9515c1193bca5950702e62b"
+  },
+  {
+    "name": "FilmMediaPosts",
+    "type": "query",
+    "source": "web",
+    "sourcePath": "graphql_extracted/web_graphql/operations/query/FilmMediaPosts.graphql",
+    "path": "queries/query/FilmMediaPosts.graphql",
+    "sha256": "c1b181393a4a99121d805c3b6a115a97bd18b4725c76bc00cd10f82f3da961a8"
+  },
+  {
+    "name": "FilmMovieListsRelations",
+    "type": "query",
+    "source": "web",
+    "sourcePath": "graphql_extracted/web_graphql/operations/query/FilmMovieListsRelations.graphql",
+    "path": "queries/query/FilmMovieListsRelations.graphql",
+    "sha256": "8c9cdf85512ed9bc8bce9067e46e9141ca3535b3914b84bd4df98a1e0fe51ace"
+  },
+  {
+    "name": "FilmPage",
+    "type": "query",
+    "source": "new",
+    "sourcePath": "graphql_extracted/new/FilmPage.gql",
+    "path": "queries/query/FilmPage.graphql",
+    "sha256": "f49e5ea18e8c007925feda1c84aaad273efce3cfc674ae17e775848a1e6894b0"
+  },
+  {
+    "name": "FilmSimilarMovies",
+    "type": "query",
+    "source": "web",
+    "sourcePath": "graphql_extracted/web_graphql/operations/query/FilmSimilarMovies.graphql",
+    "path": "queries/query/FilmSimilarMovies.graphql",
+    "sha256": "fb2b0d0ec73ff20f991c634f3c3c17421a5e8cc699992ee55d71607617a3c53a"
+  },
+  {
+    "name": "FilmSoundtracks",
+    "type": "query",
+    "source": "web",
+    "sourcePath": "graphql_extracted/web_graphql/operations/query/FilmSoundtracks.graphql",
+    "path": "queries/query/FilmSoundtracks.graphql",
+    "sha256": "a7f12363547118d7d622eb6dce7138957f62544716e205ab46cefde7c69d00b2"
+  },
+  {
+    "name": "FilmTrivias",
+    "type": "query",
+    "source": "web",
+    "sourcePath": "graphql_extracted/web_graphql/operations/query/FilmTrivias.graphql",
+    "path": "queries/query/FilmTrivias.graphql",
+    "sha256": "856d9109ff659370fc0f1d601368108326e54595853a2b2abecf37bc01aff398"
+  },
+  {
+    "name": "FilmographyFilters",
+    "type": "query",
+    "source": "web",
+    "sourcePath": "graphql_extracted/web_graphql/operations/query/FilmographyFilters.graphql",
+    "path": "queries/query/FilmographyFilters.graphql",
+    "sha256": "56dab25e7cbda8410f339816e423d47cbef1503e1ff585324c1e4e2027d7a577"
+  },
+  {
+    "name": "FilmographyItems",
+    "type": "query",
+    "source": "web",
+    "sourcePath": "graphql_extracted/web_graphql/operations/query/FilmographyItems.graphql",
+    "path": "queries/query/FilmographyItems.graphql",
+    "sha256": "892954c0ac333cdfcf467ee1d3a74b2ee8bfe84ed6d145dfb34f2c85b322dd73"
+  },
+  {
+    "name": "FoldersMobileFavoriteMovies",
+    "type": "query",
+    "source": "apk",
+    "sourcePath": "graphql_extracted/operations/query/096_FoldersMobileFavoriteMovies.graphql",
+    "path": "queries/query/FoldersMobileFavoriteMovies.graphql",
+    "sha256": "4c39ee4117d2a9487eaedd3b745d29be35969488fab095117e0dfd06b4492349"
+  },
+  {
+    "name": "FoldersMobileFavoriteMoviesByProfileId",
+    "type": "query",
+    "source": "apk",
+    "sourcePath": "graphql_extracted/operations/query/097_FoldersMobileFavoriteMoviesByProfileId.graphql",
+    "path": "queries/query/FoldersMobileFavoriteMoviesByProfileId.graphql",
+    "sha256": "7dd7084091c0663d444ee2e0268bfbcfc3e40911fc953cdbc19a6eecf06837ed"
+  },
+  {
+    "name": "FoldersMobileFavoriteMoviesBySocialAlias",
+    "type": "query",
+    "source": "apk",
+    "sourcePath": "graphql_extracted/operations/query/098_FoldersMobileFavoriteMoviesBySocialAlias.graphql",
+    "path": "queries/query/FoldersMobileFavoriteMoviesBySocialAlias.graphql",
+    "sha256": "58e98e9862ff780924971d2e694a4f619576bb5ea579945de30ec9b64339c359"
+  },
+  {
+    "name": "FoldersMobileFolderMovies",
+    "type": "query",
+    "source": "apk",
+    "sourcePath": "graphql_extracted/operations/query/099_FoldersMobileFolderMovies.graphql",
+    "path": "queries/query/FoldersMobileFolderMovies.graphql",
+    "sha256": "e09f937907a8b1b1cd24b412d4dfeb987b415221a81f33eefea7acf0d4a62fa6"
+  },
+  {
+    "name": "FoldersMobileFolderMoviesByProfileId",
+    "type": "query",
+    "source": "apk",
+    "sourcePath": "graphql_extracted/operations/query/100_FoldersMobileFolderMoviesByProfileId.graphql",
+    "path": "queries/query/FoldersMobileFolderMoviesByProfileId.graphql",
+    "sha256": "30fe5dc2ef5257454b804398fc7f19ce2ec3921a991441136da760dc05e5e36f"
+  },
+  {
+    "name": "FoldersMobileFolderMoviesBySocialAlias",
+    "type": "query",
+    "source": "apk",
+    "sourcePath": "graphql_extracted/operations/query/101_FoldersMobileFolderMoviesBySocialAlias.graphql",
+    "path": "queries/query/FoldersMobileFolderMoviesBySocialAlias.graphql",
+    "sha256": "ae53bf012d933e9a22f5344ad2214f6ca62c5214634a18c708eeb27bb1b30ac9"
+  },
+  {
+    "name": "FoldersMobileList",
+    "type": "query",
+    "source": "apk",
+    "sourcePath": "graphql_extracted/operations/query/102_FoldersMobileList.graphql",
+    "path": "queries/query/FoldersMobileList.graphql",
+    "sha256": "b531e6eece470b719e0ea3acd5209a5404f4680153b898f9b306d43a00ee5252"
+  },
+  {
+    "name": "FoldersMobileListByProfileId",
+    "type": "query",
+    "source": "apk",
+    "sourcePath": "graphql_extracted/operations/query/103_FoldersMobileListByProfileId.graphql",
+    "path": "queries/query/FoldersMobileListByProfileId.graphql",
+    "sha256": "43521750bb435b1791aafb0f07c896fa8ebd7e83291cd402409d67ae53f31d6c"
+  },
+  {
+    "name": "FoldersMobileListBySocialAlias",
+    "type": "query",
+    "source": "apk",
+    "sourcePath": "graphql_extracted/operations/query/104_FoldersMobileListBySocialAlias.graphql",
+    "path": "queries/query/FoldersMobileListBySocialAlias.graphql",
+    "sha256": "c6c57f59e46996d52e819b2d660c6c9da04459791e409cc57963f1bce56f1344"
+  },
+  {
+    "name": "FoldersMobileMovieFolderList",
+    "type": "query",
+    "source": "apk",
+    "sourcePath": "graphql_extracted/operations/query/105_FoldersMobileMovieFolderList.graphql",
+    "path": "queries/query/FoldersMobileMovieFolderList.graphql",
+    "sha256": "6281c9424ea8fdc52aa0707dc4d583f882d42ff9f828d3cefd3eaa32da096845"
+  },
+  {
+    "name": "FoldersMobileNoteMovies",
+    "type": "query",
+    "source": "apk",
+    "sourcePath": "graphql_extracted/operations/query/106_FoldersMobileNoteMovies.graphql",
+    "path": "queries/query/FoldersMobileNoteMovies.graphql",
+    "sha256": "8e6631dd2e226b728bba558efbde9f5feefaae570b874ab0b6816af3e3b4b2d1"
+  },
+  {
+    "name": "FoldersMobilePersonFolderList",
+    "type": "query",
+    "source": "apk",
+    "sourcePath": "graphql_extracted/operations/query/107_FoldersMobilePersonFolderList.graphql",
+    "path": "queries/query/FoldersMobilePersonFolderList.graphql",
+    "sha256": "e1e7b45f5eca8cb23c30d50d56ed90f9eb1fe54a8ada64ea829b4e660c3ef371"
+  },
+  {
+    "name": "FoldersMobilePersonFolderListByProfileId",
+    "type": "query",
+    "source": "apk",
+    "sourcePath": "graphql_extracted/operations/query/108_FoldersMobilePersonFolderListByProfileId.graphql",
+    "path": "queries/query/FoldersMobilePersonFolderListByProfileId.graphql",
+    "sha256": "2d92bc7aa06a9fc5f350fbec20eb818d2138dd2e64af0e31e75ff8c336fbb91d"
+  },
+  {
+    "name": "FoldersMobilePersonFolderListBySocialAlias",
+    "type": "query",
+    "source": "apk",
+    "sourcePath": "graphql_extracted/operations/query/109_FoldersMobilePersonFolderListBySocialAlias.graphql",
+    "path": "queries/query/FoldersMobilePersonFolderListBySocialAlias.graphql",
+    "sha256": "231b3df6a47e46b07b61f94bb73ef2670eca53daeec8c66496f2ed97690d7329"
+  },
+  {
+    "name": "FoldersMobilePlannedToWatchMovies",
+    "type": "query",
+    "source": "apk",
+    "sourcePath": "graphql_extracted/operations/query/110_FoldersMobilePlannedToWatchMovies.graphql",
+    "path": "queries/query/FoldersMobilePlannedToWatchMovies.graphql",
+    "sha256": "00a3fcf8084efba2fe3f4394e4db7294315968024e92b62bc4d93ccd3e986650"
+  },
+  {
+    "name": "FoldersMobilePlannedToWatchMoviesByProfileId",
+    "type": "query",
+    "source": "apk",
+    "sourcePath": "graphql_extracted/operations/query/111_FoldersMobilePlannedToWatchMoviesByProfileId.graphql",
+    "path": "queries/query/FoldersMobilePlannedToWatchMoviesByProfileId.graphql",
+    "sha256": "b8ae2f18f121af65ecbab1a0002c1739ca43693c0583e4b3700ede8271a1fb55"
+  },
+  {
+    "name": "FoldersMobilePlannedToWatchMoviesBySocialAlias",
+    "type": "query",
+    "source": "apk",
+    "sourcePath": "graphql_extracted/operations/query/112_FoldersMobilePlannedToWatchMoviesBySocialAlias.graphql",
+    "path": "queries/query/FoldersMobilePlannedToWatchMoviesBySocialAlias.graphql",
+    "sha256": "c4af67973e4ce59adf4835ab90f74551e7d01dc6091ca8cd4826949c79e72180"
+  },
+  {
+    "name": "FoldersMobileRatedOrWatchedMovies",
+    "type": "query",
+    "source": "apk",
+    "sourcePath": "graphql_extracted/operations/query/113_FoldersMobileRatedOrWatchedMovies.graphql",
+    "path": "queries/query/FoldersMobileRatedOrWatchedMovies.graphql",
+    "sha256": "4e9445e2f995bf5bf599fad5cd65b35c03ed317578832446d942fedb695b89cf"
+  },
+  {
+    "name": "FoldersMobileRatedOrWatchedMoviesByProfileId",
+    "type": "query",
+    "source": "apk",
+    "sourcePath": "graphql_extracted/operations/query/114_FoldersMobileRatedOrWatchedMoviesByProfileId.graphql",
+    "path": "queries/query/FoldersMobileRatedOrWatchedMoviesByProfileId.graphql",
+    "sha256": "796f7cc46aa8116c5db7c1b863dd8394d1fb5ffbca0bccb67b644efae1a98d97"
+  },
+  {
+    "name": "FoldersMobileRatedOrWatchedMoviesBySocialAlias",
+    "type": "query",
+    "source": "apk",
+    "sourcePath": "graphql_extracted/operations/query/115_FoldersMobileRatedOrWatchedMoviesBySocialAlias.graphql",
+    "path": "queries/query/FoldersMobileRatedOrWatchedMoviesBySocialAlias.graphql",
+    "sha256": "984b4c2104b39f1699c398a624a0f0fc5ed5f0cdd895ee36462c3455e63fe571"
+  },
+  {
+    "name": "Functionality",
+    "type": "query",
+    "source": "apk",
+    "sourcePath": "graphql_extracted/operations/query/116_Functionality.graphql",
+    "path": "queries/query/Functionality.graphql",
+    "sha256": "edcc5580d05b9d16978004e477f5ef1070f6055bb712df1707c4c358fb7ea263"
+  },
+  {
+    "name": "GeoContentAvailability",
+    "type": "query",
+    "source": "web",
+    "sourcePath": "graphql_extracted/web_graphql/operations/query/GeoContentAvailability.graphql",
+    "path": "queries/query/GeoContentAvailability.graphql",
+    "sha256": "af93bab699d81d704966428deabb4a4f1e4eda308f0e7c220f6c1a3eb5852a13"
+  },
+  {
+    "name": "HdShowcase",
+    "type": "query",
+    "source": "web",
+    "sourcePath": "graphql_extracted/web_graphql/operations/query/HdShowcase.graphql",
+    "path": "queries/query/HdShowcase.graphql",
+    "sha256": "416493fe86d0e2e6c907fc3f2cd77374c8777cafc56902c07ba4cd8ef220b0fd"
+  },
+  {
+    "name": "HomeConfiguration",
+    "type": "query",
+    "source": "apk",
+    "sourcePath": "graphql_extracted/operations/query/117_HomeConfiguration.graphql",
+    "path": "queries/query/HomeConfiguration.graphql",
+    "sha256": "95e69e01de8e57ed2800f992a0968aad3edecfb2531d5c11fedf74be7e3e355c"
+  },
+  {
+    "name": "InviteToFamilyWebUrl",
+    "type": "query",
+    "source": "apk",
+    "sourcePath": "graphql_extracted/operations/query/118_InviteToFamilyWebUrl.graphql",
+    "path": "queries/query/InviteToFamilyWebUrl.graphql",
+    "sha256": "e393ee725dbedb64604bd0ba824b53d56bf65fad0681a15cb5c2e3ba3531193b"
+  },
+  {
+    "name": "Invoice",
+    "type": "query",
+    "source": "apk",
+    "sourcePath": "graphql_extracted/operations/query/119_Invoice.graphql",
+    "path": "queries/query/Invoice.graphql",
+    "sha256": "ea964b387a24fce37252405f4f54a040c757a4fd5599c98d4279c65f6abeec88"
+  },
+  {
+    "name": "ListsMediaPosts",
+    "type": "query",
+    "source": "web",
+    "sourcePath": "graphql_extracted/web_graphql/operations/query/ListsMediaPosts.graphql",
+    "path": "queries/query/ListsMediaPosts.graphql",
+    "sha256": "b8b8212c6c4deb191761a462b3546b99692d4169769ffb8a13d23291bd86bd56"
+  },
+  {
+    "name": "MailingAdsAgreement",
+    "type": "query",
+    "source": "apk",
+    "sourcePath": "graphql_extracted/operations/query/120_MailingAdsAgreement.graphql",
+    "path": "queries/query/MailingAdsAgreement.graphql",
+    "sha256": "256bcc911eaf48621203ca7b15fdba982d685cd641ee90331d466d869908b49c"
+  },
+  {
+    "name": "MainPageTrailerPromoConfig",
+    "type": "query",
+    "source": "web",
+    "sourcePath": "graphql_extracted/web_graphql/operations/query/MainPageTrailerPromoConfig.graphql",
+    "path": "queries/query/MainPageTrailerPromoConfig.graphql",
+    "sha256": "e99a6f841f917d1fa97a3eb2317250d9cafffa452a0c0506acf2474c55c0eb15"
+  },
+  {
+    "name": "MediaPreview",
+    "type": "query",
+    "source": "web",
+    "sourcePath": "graphql_extracted/web_graphql/operations/query/MediaPreview.graphql",
+    "path": "queries/query/MediaPreview.graphql",
+    "sha256": "4631849546a338b9c592fcf300c767f4ec63d8de3c9a4fafd2e98ccf1a6defbd"
+  },
+  {
+    "name": "MovieAvailableMeta",
+    "type": "query",
+    "source": "web",
+    "sourcePath": "graphql_extracted/web_graphql/operations/query/MovieAvailableMeta.graphql",
+    "path": "queries/query/MovieAvailableMeta.graphql",
+    "sha256": "3b6a23288a316154a1926085a901f983e363383c8b781cba359a6b2bf947e7a4"
+  },
+  {
+    "name": "MovieCollectionCategory",
+    "type": "query",
+    "source": "apk",
+    "sourcePath": "graphql_extracted/operations/query/121_MovieCollectionCategory.graphql",
+    "path": "queries/query/MovieCollectionCategory.graphql",
+    "sha256": "40e6fbdc5d90a60a2e319bc7b7053cb4979e673f733fd4606c6a305415d1f281"
+  },
+  {
+    "name": "MovieCollectionMovies",
+    "type": "query",
+    "source": "apk",
+    "sourcePath": "graphql_extracted/operations/query/122_MovieCollectionMovies.graphql",
+    "path": "queries/query/MovieCollectionMovies.graphql",
+    "sha256": "678fde117f34cb4c6ea31340470afca53c4ac119bdf5eb6a98bc365a8e93269d"
+  },
+  {
+    "name": "MovieCollectionNavigator",
+    "type": "query",
+    "source": "apk",
+    "sourcePath": "graphql_extracted/operations/query/123_MovieCollectionNavigator.graphql",
+    "path": "queries/query/MovieCollectionNavigator.graphql",
+    "sha256": "63b6cc6c258422b90d933182a0ae28967ca742380449e4770ad56e0f67183a04"
+  },
+  {
+    "name": "MovieCollectionNavigatorFilters",
+    "type": "query",
+    "source": "apk",
+    "sourcePath": "graphql_extracted/operations/query/124_MovieCollectionNavigatorFilters.graphql",
+    "path": "queries/query/MovieCollectionNavigatorFilters.graphql",
+    "sha256": "648d9c28f2579e111887d26552b79c899f694870e87527c2e4509aae47538ada"
+  },
+  {
+    "name": "MovieCollectionWatchedProgress",
+    "type": "query",
+    "source": "apk",
+    "sourcePath": "graphql_extracted/operations/query/125_MovieCollectionWatchedProgress.graphql",
+    "path": "queries/query/MovieCollectionWatchedProgress.graphql",
+    "sha256": "1a51990e33329436cac2b26eee1de21c5ab8f24868972bb042c2433ea2a8d571"
+  },
+  {
+    "name": "MovieDesktopListPage",
+    "type": "query",
+    "source": "web",
+    "sourcePath": "graphql_extracted/web_graphql/operations/query/MovieDesktopListPage.graphql",
+    "path": "queries/query/MovieDesktopListPage.graphql",
+    "sha256": "cb4dafb7c4ffd4e31b212a8557b48ff50bb27703295ca00d4eb241b08f28153a"
+  },
+  {
+    "name": "MovieDetails",
+    "type": "query",
+    "source": "new",
+    "sourcePath": "graphql_extracted/new/MovieDetails.gql",
+    "path": "queries/query/MovieDetails.graphql",
+    "sha256": "ed97b6863e400533897e298f78299ad5f2ee1e10adc671df8766e61b3e02f580"
+  },
+  {
+    "name": "MovieDetailsByContentUuid",
+    "type": "query",
+    "source": "apk",
+    "sourcePath": "graphql_extracted/operations/query/127_MovieDetailsByContentUuid.graphql",
+    "path": "queries/query/MovieDetailsByContentUuid.graphql",
+    "sha256": "baf77f800be376ecede66cdaf20ca1c6a3b897da4dc97fa175bd6dde64c95dd6"
+  },
+  {
+    "name": "MovieDetailsMobileContinueWatchMeta",
+    "type": "query",
+    "source": "apk",
+    "sourcePath": "graphql_extracted/operations/query/128_MovieDetailsMobileContinueWatchMeta.graphql",
+    "path": "queries/query/MovieDetailsMobileContinueWatchMeta.graphql",
+    "sha256": "28f03f3dbb089e155f9595e851fd9605ac243e89127f80286dbf3405d824fe8a"
+  },
+  {
+    "name": "MovieDetailsMobileContinueWatchMetaByOttId",
+    "type": "query",
+    "source": "apk",
+    "sourcePath": "graphql_extracted/operations/query/129_MovieDetailsMobileContinueWatchMetaByOttId.graphql",
+    "path": "queries/query/MovieDetailsMobileContinueWatchMetaByOttId.graphql",
+    "sha256": "91c6541234d8afcd9a8943263aa0903839d65074534477edc092d9a5a032e7e8"
+  },
+  {
+    "name": "MovieDetailsMobileDistribution",
+    "type": "query",
+    "source": "apk",
+    "sourcePath": "graphql_extracted/operations/query/130_MovieDetailsMobileDistribution.graphql",
+    "path": "queries/query/MovieDetailsMobileDistribution.graphql",
+    "sha256": "5be77c26dbfe7d18637d2ef12f0b62b4797a208078731047b07ec115c7bd2dc3"
+  },
+  {
+    "name": "MovieDetailsMobileEditorialPosts",
+    "type": "query",
+    "source": "apk",
+    "sourcePath": "graphql_extracted/operations/query/131_MovieDetailsMobileEditorialPosts.graphql",
+    "path": "queries/query/MovieDetailsMobileEditorialPosts.graphql",
+    "sha256": "bae9aed4a87ee32dba588fe7e3f3a5726340a72f03454976ea4e5c015fe9c7cf"
+  },
+  {
+    "name": "MovieDetailsMobileExternalViewOptions",
+    "type": "query",
+    "source": "apk",
+    "sourcePath": "graphql_extracted/operations/query/132_MovieDetailsMobileExternalViewOptions.graphql",
+    "path": "queries/query/MovieDetailsMobileExternalViewOptions.graphql",
+    "sha256": "235deae32f5ec2e4194c5c7ab6b3263993c26b4a62bb2da7e67600029ab2ea18"
+  },
+  {
+    "name": "MovieDetailsMobileGeneralMeta",
+    "type": "query",
+    "source": "apk",
+    "sourcePath": "graphql_extracted/operations/query/133_MovieDetailsMobileGeneralMeta.graphql",
+    "path": "queries/query/MovieDetailsMobileGeneralMeta.graphql",
+    "sha256": "057e31e6e1235284e998154aaea0061d59c7e7de0e84cffd3e7522b76b5d839c"
+  },
+  {
+    "name": "MovieDetailsMobileGeneralMetaByOttId",
+    "type": "query",
+    "source": "apk",
+    "sourcePath": "graphql_extracted/operations/query/134_MovieDetailsMobileGeneralMetaByOttId.graphql",
+    "path": "queries/query/MovieDetailsMobileGeneralMetaByOttId.graphql",
+    "sha256": "1c557e9347e430b10d57a96f4c1ecc09b8ef386bb6bfff62995f6a1e22fbfe96"
+  },
+  {
+    "name": "MovieDetailsMobileKidsByContentId",
+    "type": "query",
+    "source": "apk",
+    "sourcePath": "graphql_extracted/operations/query/135_MovieDetailsMobileKidsByContentId.graphql",
+    "path": "queries/query/MovieDetailsMobileKidsByContentId.graphql",
+    "sha256": "33b06d203670fc3418162dd252f1a7a74aeaae3e008d125493e7ecc2b277885e"
+  },
+  {
+    "name": "MovieDetailsMobileKidsByMovieId",
+    "type": "query",
+    "source": "apk",
+    "sourcePath": "graphql_extracted/operations/query/136_MovieDetailsMobileKidsByMovieId.graphql",
+    "path": "queries/query/MovieDetailsMobileKidsByMovieId.graphql",
+    "sha256": "7abf178dfc283715be465282fcdfc2aaa13b945e95fe65757d99849f1c56af7f"
+  },
+  {
+    "name": "MovieDetailsMobileMainAwardsInfo",
+    "type": "query",
+    "source": "apk",
+    "sourcePath": "graphql_extracted/operations/query/137_MovieDetailsMobileMainAwardsInfo.graphql",
+    "path": "queries/query/MovieDetailsMobileMainAwardsInfo.graphql",
+    "sha256": "997718cd78b595cc189756596325fd7857d814a6c1b77ea28987f4cf4f21c2dc"
+  },
+  {
+    "name": "MovieDetailsMobileMainCrewMembers",
+    "type": "query",
+    "source": "apk",
+    "sourcePath": "graphql_extracted/operations/query/138_MovieDetailsMobileMainCrewMembers.graphql",
+    "path": "queries/query/MovieDetailsMobileMainCrewMembers.graphql",
+    "sha256": "4158319a7a0dda2c854c2ca04474b071cf0cd3f04f910dbe80bbca53cb5c5e50"
+  },
+  {
+    "name": "MovieDetailsMobileMainImages",
+    "type": "query",
+    "source": "apk",
+    "sourcePath": "graphql_extracted/operations/query/139_MovieDetailsMobileMainImages.graphql",
+    "path": "queries/query/MovieDetailsMobileMainImages.graphql",
+    "sha256": "11abce5022ee745d74162b8256a1908518663873daa18cf6388b7905f3e7f772"
+  },
+  {
+    "name": "MovieDetailsMobileMainRelatedMovies",
+    "type": "query",
+    "source": "apk",
+    "sourcePath": "graphql_extracted/operations/query/140_MovieDetailsMobileMainRelatedMovies.graphql",
+    "path": "queries/query/MovieDetailsMobileMainRelatedMovies.graphql",
+    "sha256": "ad10820c6fbca7606db67e12eb8e962286d70bf901d325fe46c44cb767d802ef"
+  },
+  {
+    "name": "MovieDetailsMobileMainReviews",
+    "type": "query",
+    "source": "apk",
+    "sourcePath": "graphql_extracted/operations/query/141_MovieDetailsMobileMainReviews.graphql",
+    "path": "queries/query/MovieDetailsMobileMainReviews.graphql",
+    "sha256": "2ddd05e3e6006c8b9cb183f3eabacecc1ddac35abe69571291e21d30b9a8a3fa"
+  },
+  {
+    "name": "MovieDetailsMobileMainTrivias",
+    "type": "query",
+    "source": "apk",
+    "sourcePath": "graphql_extracted/operations/query/142_MovieDetailsMobileMainTrivias.graphql",
+    "path": "queries/query/MovieDetailsMobileMainTrivias.graphql",
+    "sha256": "063631f93d147278530d6af73e9cd7f3dfdb140cd0a6c8d49cb02b1a4b484d22"
+  },
+  {
+    "name": "MovieDetailsMobileMovieCollections",
+    "type": "query",
+    "source": "apk",
+    "sourcePath": "graphql_extracted/operations/query/143_MovieDetailsMobileMovieCollections.graphql",
+    "path": "queries/query/MovieDetailsMobileMovieCollections.graphql",
+    "sha256": "2e12442020f762f4d029cfe0c44ea141a972931c65d68539be23bfa4a357a9c3"
+  },
+  {
+    "name": "MovieDetailsMobileOttMetadata",
+    "type": "query",
+    "source": "apk",
+    "sourcePath": "graphql_extracted/operations/query/144_MovieDetailsMobileOttMetadata.graphql",
+    "path": "queries/query/MovieDetailsMobileOttMetadata.graphql",
+    "sha256": "16cbd5449d3facedc1c43ba54aa110d4bef27ce79665ffbf119641b871ebe804"
+  },
+  {
+    "name": "MovieDetailsMobileRatingBase",
+    "type": "query",
+    "source": "apk",
+    "sourcePath": "graphql_extracted/operations/query/145_MovieDetailsMobileRatingBase.graphql",
+    "path": "queries/query/MovieDetailsMobileRatingBase.graphql",
+    "sha256": "a2dde8adaeb00434cb2439a0db34d76314ca98f8f383b5b807039654d2703ede"
+  },
+  {
+    "name": "MovieDetailsMobileRatingBaseByOttId",
+    "type": "query",
+    "source": "apk",
+    "sourcePath": "graphql_extracted/operations/query/146_MovieDetailsMobileRatingBaseByOttId.graphql",
+    "path": "queries/query/MovieDetailsMobileRatingBaseByOttId.graphql",
+    "sha256": "61d64d7bb9cd4c909668db4b22946da9c03f4ea8f9d929da265f690f49a8018f"
+  },
+  {
+    "name": "MovieDetailsMobileRatingExtended",
+    "type": "query",
+    "source": "apk",
+    "sourcePath": "graphql_extracted/operations/query/147_MovieDetailsMobileRatingExtended.graphql",
+    "path": "queries/query/MovieDetailsMobileRatingExtended.graphql",
+    "sha256": "639ca4269dde3d709e03dbd5dcb38316a6eb239092a6e04f735219aded21e7be"
+  },
+  {
+    "name": "MovieDetailsMobileTrailers",
+    "type": "query",
+    "source": "apk",
+    "sourcePath": "graphql_extracted/operations/query/148_MovieDetailsMobileTrailers.graphql",
+    "path": "queries/query/MovieDetailsMobileTrailers.graphql",
+    "sha256": "cc3b3c619b9da36ba3e58f45b4412e81a3a0bbe15d05b58fc79002117883e9dd"
+  },
+  {
+    "name": "MovieDetailsMobileTrailersByOttId",
+    "type": "query",
+    "source": "apk",
+    "sourcePath": "graphql_extracted/operations/query/149_MovieDetailsMobileTrailersByOttId.graphql",
+    "path": "queries/query/MovieDetailsMobileTrailersByOttId.graphql",
+    "sha256": "405c8ea5c573a0e8585ee16313b3a561ff77ffa01a0d21dd766c1990db4376cd"
+  },
+  {
+    "name": "MovieDetailsMobileUserPlannedToWatch",
+    "type": "query",
+    "source": "apk",
+    "sourcePath": "graphql_extracted/operations/query/150_MovieDetailsMobileUserPlannedToWatch.graphql",
+    "path": "queries/query/MovieDetailsMobileUserPlannedToWatch.graphql",
+    "sha256": "8de3ef0276e9a512f55b3690c80289693d24d9984b21a02572af4343606b3640"
+  },
+  {
+    "name": "MovieDetailsMobileUserPlannedToWatchByOttId",
+    "type": "query",
+    "source": "apk",
+    "sourcePath": "graphql_extracted/operations/query/151_MovieDetailsMobileUserPlannedToWatchByOttId.graphql",
+    "path": "queries/query/MovieDetailsMobileUserPlannedToWatchByOttId.graphql",
+    "sha256": "10598e11d4b5bc999b928673a6a68889df6b1dcfe9053631ad456fe2871db371"
+  },
+  {
+    "name": "MovieDetailsMobileUserRecommendationMovies",
+    "type": "query",
+    "source": "apk",
+    "sourcePath": "graphql_extracted/operations/query/152_MovieDetailsMobileUserRecommendationMovies.graphql",
+    "path": "queries/query/MovieDetailsMobileUserRecommendationMovies.graphql",
+    "sha256": "8212f3e80453c3c844b7ed26977429f4ef2324477abcb146e43715016466ee65"
+  },
+  {
+    "name": "MovieDetailsMobileUserSocialMeta",
+    "type": "query",
+    "source": "apk",
+    "sourcePath": "graphql_extracted/operations/query/153_MovieDetailsMobileUserSocialMeta.graphql",
+    "path": "queries/query/MovieDetailsMobileUserSocialMeta.graphql",
+    "sha256": "4970c6e70789c52ba87c5a3ca5d80365396bf553a4b82014da154cf1a187c2a8"
+  },
+  {
+    "name": "MovieDetailsMobileUserSocialMetaByOttId",
+    "type": "query",
+    "source": "apk",
+    "sourcePath": "graphql_extracted/operations/query/154_MovieDetailsMobileUserSocialMetaByOttId.graphql",
+    "path": "queries/query/MovieDetailsMobileUserSocialMetaByOttId.graphql",
+    "sha256": "ef652045cfa6ec14a3ee9ee2de86045c0ace76d0ed63852485c9053a1604b1f0"
+  },
+  {
+    "name": "MovieDetailsMobileUserVoting",
+    "type": "query",
+    "source": "apk",
+    "sourcePath": "graphql_extracted/operations/query/155_MovieDetailsMobileUserVoting.graphql",
+    "path": "queries/query/MovieDetailsMobileUserVoting.graphql",
+    "sha256": "67010712f380090fd8f043d35ceeb09ba589c1c5942f57123400de6b2b096d22"
+  },
+  {
+    "name": "MovieDetailsMobileUserVotingByOttId",
+    "type": "query",
+    "source": "apk",
+    "sourcePath": "graphql_extracted/operations/query/156_MovieDetailsMobileUserVotingByOttId.graphql",
+    "path": "queries/query/MovieDetailsMobileUserVotingByOttId.graphql",
+    "sha256": "f6eb2eb82212ef3942ee214f58ad934f49fa38868b6a95bea133a267ebae5994"
+  },
+  {
+    "name": "MovieDetailsMobileViewOptionWithExternal",
+    "type": "query",
+    "source": "apk",
+    "sourcePath": "graphql_extracted/operations/query/157_MovieDetailsMobileViewOptionWithExternal.graphql",
+    "path": "queries/query/MovieDetailsMobileViewOptionWithExternal.graphql",
+    "sha256": "762b23bb9427fad6ae7bfa3ad03bd027e2332995cf6d363d299101b8964e4f19"
+  },
+  {
+    "name": "MovieDetailsMobileViewOptionWithExternalByOttId",
+    "type": "query",
+    "source": "apk",
+    "sourcePath": "graphql_extracted/operations/query/158_MovieDetailsMobileViewOptionWithExternalByOttId.graphql",
+    "path": "queries/query/MovieDetailsMobileViewOptionWithExternalByOttId.graphql",
+    "sha256": "3bf4666bfc42c5b6857f6af06c31dd89b4649dcd0d646d99f0ef21d3ffac7482"
+  },
+  {
+    "name": "MovieGallery",
+    "type": "query",
+    "source": "web",
+    "sourcePath": "graphql_extracted/web_graphql/operations/query/MovieGallery.graphql",
+    "path": "queries/query/MovieGallery.graphql",
+    "sha256": "dcc5db8df3c5e6daeffe70392b105a82bd33fa3b928ba51fd0ae85131768b012"
+  },
+  {
+    "name": "MovieImagesItems",
+    "type": "query",
+    "source": "new",
+    "sourcePath": "graphql_extracted/new/MovieImagesItems.gql",
+    "path": "queries/query/MovieImagesItems.graphql",
+    "sha256": "62c1483f03fd68e4788d264d0ec8ccee623a433af3776b0009fef758a90bf805"
+  },
+  {
+    "name": "MovieListCategories",
+    "type": "query",
+    "source": "web",
+    "sourcePath": "graphql_extracted/web_graphql/operations/query/MovieListCategories.graphql",
+    "path": "queries/query/MovieListCategories.graphql",
+    "sha256": "13e0bc168ef45514518e7f89cd3d9fda4dc23f69f865efd9c5d257285b3be73c"
+  },
+  {
+    "name": "MovieListCategory",
+    "type": "query",
+    "source": "web",
+    "sourcePath": "graphql_extracted/web_graphql/operations/query/MovieListCategory.graphql",
+    "path": "queries/query/MovieListCategory.graphql",
+    "sha256": "4a73066c43a52d204fb128fbba882c9844da023a80c0327c113d7d598bcbecef"
+  },
+  {
+    "name": "MovieListCategoryWebPage",
+    "type": "query",
+    "source": "web",
+    "sourcePath": "graphql_extracted/web_graphql/operations/query/MovieListCategoryWebPage.graphql",
+    "path": "queries/query/MovieListCategoryWebPage.graphql",
+    "sha256": "b67646e9474d9eac725ce84e2b83739521e0031cabdbb3532e6c756c0f56dcd3"
+  },
+  {
+    "name": "MovieListStat",
+    "type": "query",
+    "source": "web",
+    "sourcePath": "graphql_extracted/web_graphql/operations/query/MovieListStat.graphql",
+    "path": "queries/query/MovieListStat.graphql",
+    "sha256": "4e0ef2dd4a406864a85b5af1f707a6796318510bb95aef0369dbe553db2c9be7"
+  },
+  {
+    "name": "MovieMobileDetailsAwards",
+    "type": "query",
+    "source": "apk",
+    "sourcePath": "graphql_extracted/operations/query/159_MovieMobileDetailsAwards.graphql",
+    "path": "queries/query/MovieMobileDetailsAwards.graphql",
+    "sha256": "dd74f7e8db6ae987104e9a6b864642d5d13c50e473f8f2e52631e0878c5a9529"
+  },
+  {
+    "name": "MovieMobileDetailsCrewMembers",
+    "type": "query",
+    "source": "apk",
+    "sourcePath": "graphql_extracted/operations/query/160_MovieMobileDetailsCrewMembers.graphql",
+    "path": "queries/query/MovieMobileDetailsCrewMembers.graphql",
+    "sha256": "9ea2a42fd2ce99835b12e5c02d4732655606d67e464103742b9c733f66b3a81b"
+  },
+  {
+    "name": "MovieMobileDetailsCriticsReviews",
+    "type": "query",
+    "source": "apk",
+    "sourcePath": "graphql_extracted/operations/query/161_MovieMobileDetailsCriticsReviews.graphql",
+    "path": "queries/query/MovieMobileDetailsCriticsReviews.graphql",
+    "sha256": "9d151eeb9acd6a285af20c88e206b905bf3c0669c254819c8575b25e173c0c78"
+  },
+  {
+    "name": "MovieMobileDetailsExternalViewOptions",
+    "type": "query",
+    "source": "apk",
+    "sourcePath": "graphql_extracted/operations/query/162_MovieMobileDetailsExternalViewOptions.graphql",
+    "path": "queries/query/MovieMobileDetailsExternalViewOptions.graphql",
+    "sha256": "e76eb113f4d35825f01cf90548e5a617e8dffb34d993da6899a7f45e9bfd6d1f"
+  },
+  {
+    "name": "MovieMobileDetailsFriendsReactions",
+    "type": "query",
+    "source": "apk",
+    "sourcePath": "graphql_extracted/operations/query/163_MovieMobileDetailsFriendsReactions.graphql",
+    "path": "queries/query/MovieMobileDetailsFriendsReactions.graphql",
+    "sha256": "f23161e6275d08f827c35bd4836cca63bf51f2b1fc513c7aac2a25a131800336"
+  },
+  {
+    "name": "MovieMobileDetailsFriendsVoting",
+    "type": "query",
+    "source": "apk",
+    "sourcePath": "graphql_extracted/operations/query/164_MovieMobileDetailsFriendsVoting.graphql",
+    "path": "queries/query/MovieMobileDetailsFriendsVoting.graphql",
+    "sha256": "f6528ef1751c20c72bd2c60cfcc07f01d1b3f652511654fe89ca272cde63635a"
+  },
+  {
+    "name": "MovieMobileDetailsImages",
+    "type": "query",
+    "source": "apk",
+    "sourcePath": "graphql_extracted/operations/query/165_MovieMobileDetailsImages.graphql",
+    "path": "queries/query/MovieMobileDetailsImages.graphql",
+    "sha256": "2f7d1e20d46b92bef04c91e905bf2c5565fd104a62962dc3f26ef125a7924a58"
+  },
+  {
+    "name": "MovieMobileDetailsMovieCollections",
+    "type": "query",
+    "source": "apk",
+    "sourcePath": "graphql_extracted/operations/query/166_MovieMobileDetailsMovieCollections.graphql",
+    "path": "queries/query/MovieMobileDetailsMovieCollections.graphql",
+    "sha256": "9eedc2c617db39bb36646f5048584bd3dc3372547bf2826ae12d2c86c5a8d50d"
+  },
+  {
+    "name": "MovieMobileDetailsPosts",
+    "type": "query",
+    "source": "apk",
+    "sourcePath": "graphql_extracted/operations/query/167_MovieMobileDetailsPosts.graphql",
+    "path": "queries/query/MovieMobileDetailsPosts.graphql",
+    "sha256": "9f16879b85fa5cd9fdea77c134cd48cf6fcba30d792458f221a6d77ab46d7dad"
+  },
+  {
+    "name": "MovieMobileDetailsRatedFilms",
+    "type": "query",
+    "source": "apk",
+    "sourcePath": "graphql_extracted/operations/query/168_MovieMobileDetailsRatedFilms.graphql",
+    "path": "queries/query/MovieMobileDetailsRatedFilms.graphql",
+    "sha256": "71c7dc19f4710ebb533fbca7175171302f4ac32088a9a1f99885a8e842ee72e4"
+  },
+  {
+    "name": "MovieMobileDetailsRecommendedMovies",
+    "type": "query",
+    "source": "apk",
+    "sourcePath": "graphql_extracted/operations/query/169_MovieMobileDetailsRecommendedMovies.graphql",
+    "path": "queries/query/MovieMobileDetailsRecommendedMovies.graphql",
+    "sha256": "8e14d135ddeb7cf15beee6914629813f0e772dff21dfdb3657263313a6e0176f"
+  },
+  {
+    "name": "MovieMobileDetailsRelatedMovies",
+    "type": "query",
+    "source": "apk",
+    "sourcePath": "graphql_extracted/operations/query/170_MovieMobileDetailsRelatedMovies.graphql",
+    "path": "queries/query/MovieMobileDetailsRelatedMovies.graphql",
+    "sha256": "d867190e34e797905b77425f51152333d1bbddf0b2135154dc4ea4cc71248250"
+  },
+  {
+    "name": "MovieMobileDetailsSimilarMovies",
+    "type": "query",
+    "source": "apk",
+    "sourcePath": "graphql_extracted/operations/query/171_MovieMobileDetailsSimilarMovies.graphql",
+    "path": "queries/query/MovieMobileDetailsSimilarMovies.graphql",
+    "sha256": "8e9ab02b447c897727c630b11b511574a613aa5ec2dccde003b474e583df492c"
+  },
+  {
+    "name": "MovieMobileDetailsTrailers",
+    "type": "query",
+    "source": "apk",
+    "sourcePath": "graphql_extracted/operations/query/172_MovieMobileDetailsTrailers.graphql",
+    "path": "queries/query/MovieMobileDetailsTrailers.graphql",
+    "sha256": "7ebb550d0d7e06a12a450d3615375f685dcc25a66addca94ee5435579dbe4b6d"
+  },
+  {
+    "name": "MovieMobileDetailsTrivias",
+    "type": "query",
+    "source": "apk",
+    "sourcePath": "graphql_extracted/operations/query/173_MovieMobileDetailsTrivias.graphql",
+    "path": "queries/query/MovieMobileDetailsTrivias.graphql",
+    "sha256": "e96f2e15753ef186a060a5cdcc9e027ad4e040d36194c0bc22f5b122cccc3afc"
+  },
+  {
+    "name": "MovieMobileDetailsUsersReviews",
+    "type": "query",
+    "source": "apk",
+    "sourcePath": "graphql_extracted/operations/query/174_MovieMobileDetailsUsersReviews.graphql",
+    "path": "queries/query/MovieMobileDetailsUsersReviews.graphql",
+    "sha256": "e35c5fc915fd714eee6c22fa2c44904ea315c531cc3ce11697635aac80d77f1c"
+  },
+  {
+    "name": "MoviePlayerMeta",
+    "type": "query",
+    "source": "apk",
+    "sourcePath": "graphql_extracted/operations/query/175_MoviePlayerMeta.graphql",
+    "path": "queries/query/MoviePlayerMeta.graphql",
+    "sha256": "e029f38e03337fd2a0adc47256e2efed58ce75b4f468264abef0c8f6be5a5ff9"
+  },
+  {
+    "name": "MoviePreviewCard",
+    "type": "query",
+    "source": "web",
+    "sourcePath": "graphql_extracted/web_graphql/operations/query/MoviePreviewCard.graphql",
+    "path": "queries/query/MoviePreviewCard.graphql",
+    "sha256": "e7213352c3e3808d4940dfd5b9b1d545b02786cae16c4be41a5ded3b5db60636"
+  },
+  {
+    "name": "MovieRelatedMovies",
+    "type": "query",
+    "source": "web",
+    "sourcePath": "graphql_extracted/web_graphql/operations/query/MovieRelatedMovies.graphql",
+    "path": "queries/query/MovieRelatedMovies.graphql",
+    "sha256": "3462ace988ded734f36f31731983162dd01af13f670813407da6052164112917"
+  },
+  {
+    "name": "MovieSeriesEpisodesInSeason",
+    "type": "query",
+    "source": "apk",
+    "sourcePath": "graphql_extracted/operations/query/176_MovieSeriesEpisodesInSeason.graphql",
+    "path": "queries/query/MovieSeriesEpisodesInSeason.graphql",
+    "sha256": "458ef0637f0460481d0550db8f4c5a9f9a18ecead0ffa68532c0c6e9bfa2e526"
+  },
+  {
+    "name": "MovieSeriesStructure",
+    "type": "query",
+    "source": "new",
+    "sourcePath": "graphql_extracted/new/MovieSeriesStructure.gql",
+    "path": "queries/query/MovieSeriesStructure.graphql",
+    "sha256": "ac5618b9b502b7b4c004c5e420071d603fdc71ffc199b7a0558b4d97674b3ab9"
+  },
+  {
+    "name": "MovieSeriesStructureByContentId",
+    "type": "query",
+    "source": "apk",
+    "sourcePath": "graphql_extracted/operations/query/178_MovieSeriesStructureByContentId.graphql",
+    "path": "queries/query/MovieSeriesStructureByContentId.graphql",
+    "sha256": "ed24d384bf16d9e54bdd71f7dc7850467d903ad7d6c51b8d9fc128d75fd7333c"
+  },
+  {
+    "name": "MovieSoundtracks",
+    "type": "query",
+    "source": "apk",
+    "sourcePath": "graphql_extracted/operations/query/179_MovieSoundtracks.graphql",
+    "path": "queries/query/MovieSoundtracks.graphql",
+    "sha256": "69fadd6f6b37bf717d99e0b514991c880d62e4b7bc1c746f902835b30b4f1026"
+  },
+  {
+    "name": "MovieSummaryByContentId",
+    "type": "query",
+    "source": "apk",
+    "sourcePath": "graphql_extracted/operations/query/180_MovieSummaryByContentId.graphql",
+    "path": "queries/query/MovieSummaryByContentId.graphql",
+    "sha256": "028f8899d062c6be5494a4733d133d8709402bb938bffd983f1393ee08ff0596"
+  },
+  {
+    "name": "MovieSummaryByMovieId",
+    "type": "query",
+    "source": "apk",
+    "sourcePath": "graphql_extracted/operations/query/181_MovieSummaryByMovieId.graphql",
+    "path": "queries/query/MovieSummaryByMovieId.graphql",
+    "sha256": "6893ead9a9af59d1c61064cb75f42aee5ee7d3c3212f4e21101409fd69a57487"
+  },
+  {
+    "name": "MovieSummaryUserDataByContentId",
+    "type": "query",
+    "source": "apk",
+    "sourcePath": "graphql_extracted/operations/query/182_MovieSummaryUserDataByContentId.graphql",
+    "path": "queries/query/MovieSummaryUserDataByContentId.graphql",
+    "sha256": "c7c164a6b136c86a8d825688d0e02906ad45cceaaef58d855d3e58214a70bcee"
+  },
+  {
+    "name": "MovieSummaryUserDataByMovieId",
+    "type": "query",
+    "source": "apk",
+    "sourcePath": "graphql_extracted/operations/query/183_MovieSummaryUserDataByMovieId.graphql",
+    "path": "queries/query/MovieSummaryUserDataByMovieId.graphql",
+    "sha256": "6644b37f1910bf4cf9c762f99f1bec489abd2bea7b05d8dcd7e4cc43095bbba6"
+  },
+  {
+    "name": "MovieTitle",
+    "type": "query",
+    "source": "apk",
+    "sourcePath": "graphql_extracted/operations/query/184_MovieTitle.graphql",
+    "path": "queries/query/MovieTitle.graphql",
+    "sha256": "b0f3e809d566fd90f278ab6294f1855629de8ecde8f8b917736ac64cd99401c5"
+  },
+  {
+    "name": "MovieTouchListPage",
+    "type": "query",
+    "source": "web",
+    "sourcePath": "graphql_extracted/web_graphql/operations/query/MovieTouchListPage.graphql",
+    "path": "queries/query/MovieTouchListPage.graphql",
+    "sha256": "7a5b9cd8e5d0f99c0b552046028dcd734a09c472086cec03ca945ba0eab2580b"
+  },
+  {
+    "name": "MovieTrailersWithOrder",
+    "type": "query",
+    "source": "web",
+    "sourcePath": "graphql_extracted/web_graphql/operations/query/MovieTrailersWithOrder.graphql",
+    "path": "queries/query/MovieTrailersWithOrder.graphql",
+    "sha256": "7d4d24759830527049d012e05b9e2e487af4cd143bba5fc5bff894f07aec0c8b"
+  },
+  {
+    "name": "MovieUsersReviews",
+    "type": "query",
+    "source": "web",
+    "sourcePath": "graphql_extracted/web_graphql/operations/query/MovieUsersReviews.graphql",
+    "path": "queries/query/MovieUsersReviews.graphql",
+    "sha256": "876b75c7a4eea97b7ac85378583063ff0117255b8526bd4d7755d48d473de4ca"
+  },
+  {
+    "name": "MovieWatchability",
+    "type": "query",
+    "source": "web",
+    "sourcePath": "graphql_extracted/web_graphql/operations/query/MovieWatchability.graphql",
+    "path": "queries/query/MovieWatchability.graphql",
+    "sha256": "7114181608c39a3ea10ed9bc2c637bd151d672d1bfee6fbf97e40d8d873ef247"
+  },
+  {
+    "name": "MoviesInCinemaWithFeaturing",
+    "type": "query",
+    "source": "web",
+    "sourcePath": "graphql_extracted/web_graphql/operations/query/MoviesInCinemaWithFeaturing.graphql",
+    "path": "queries/query/MoviesInCinemaWithFeaturing.graphql",
+    "sha256": "e78e77aca91bb4c71ad6fbcbf0e8c0a78af8620ba19f5fc718309acebbf19697"
+  },
+  {
+    "name": "NewTrailers",
+    "type": "query",
+    "source": "web",
+    "sourcePath": "graphql_extracted/web_graphql/operations/query/NewTrailers.graphql",
+    "path": "queries/query/NewTrailers.graphql",
+    "sha256": "55367dcd1d71aab1022319a992c24810944da8343a25ba21fb5700cb94a32180"
+  },
+  {
+    "name": "NotificationPreviews",
+    "type": "query",
+    "source": "apk",
+    "sourcePath": "graphql_extracted/operations/query/185_NotificationPreviews.graphql",
+    "path": "queries/query/NotificationPreviews.graphql",
+    "sha256": "04f3909ac166d59caf815e5d705bdbd2d02a88d5b41a83f6e93c891c29160509"
+  },
+  {
+    "name": "NotificationsByConsumer",
+    "type": "query",
+    "source": "apk",
+    "sourcePath": "graphql_extracted/operations/query/186_NotificationsByConsumer.graphql",
+    "path": "queries/query/NotificationsByConsumer.graphql",
+    "sha256": "ffaf01231976897443d31a1fd41ff70a6b139c26985c134cea21e0caac6ed508"
+  },
+  {
+    "name": "NotificationsByConsumer",
+    "type": "query",
+    "source": "web",
+    "sourcePath": "graphql_extracted/web_graphql/operations/query/NotificationsByConsumer.graphql",
+    "path": "queries/query/NotificationsByConsumer_web.graphql",
+    "sha256": "8e8f56edf8c048e544b0ded5b5952901732a6b9cfaaac07d1b640b26ad640d8e"
+  },
+  {
+    "name": "Offers",
+    "type": "query",
+    "source": "apk",
+    "sourcePath": "graphql_extracted/operations/query/187_Offers.graphql",
+    "path": "queries/query/Offers.graphql",
+    "sha256": "6f23b2bb7f3030d68627811ec50da6f7ef6bfbbb42d459c6ce46440a8b0f9c97"
+  },
+  {
+    "name": "OriginalMovies",
+    "type": "query",
+    "source": "web",
+    "sourcePath": "graphql_extracted/web_graphql/operations/query/OriginalMovies.graphql",
+    "path": "queries/query/OriginalMovies.graphql",
+    "sha256": "aa66979da433f3ce14a7c6a26d3616ebee6f38c9886a62a7eae87ae6822a3e69"
+  },
+  {
+    "name": "Panel",
+    "type": "query",
+    "source": "apk",
+    "sourcePath": "graphql_extracted/operations/query/188_Panel.graphql",
+    "path": "queries/query/Panel.graphql",
+    "sha256": "2eb93c420de316dcd58f6679dfe08f3c28c60dc58b18070a61a876d829861c29"
+  },
+  {
+    "name": "PanelSections",
+    "type": "query",
+    "source": "apk",
+    "sourcePath": "graphql_extracted/operations/query/189_PanelSections.graphql",
+    "path": "queries/query/PanelSections.graphql",
+    "sha256": "751af75ee970db90fe46e7b7f0d23239e3ce85de03126233755a83728f677320"
+  },
+  {
+    "name": "PaymentMoviePurchaseOption",
+    "type": "query",
+    "source": "apk",
+    "sourcePath": "graphql_extracted/operations/query/190_PaymentMoviePurchaseOption.graphql",
+    "path": "queries/query/PaymentMoviePurchaseOption.graphql",
+    "sha256": "0001026c8603e2dec70509e82930733c7a34a7fc19d39b955025f2298cdcaf89"
+  },
+  {
+    "name": "PaymentPurchaseOption",
+    "type": "query",
+    "source": "apk",
+    "sourcePath": "graphql_extracted/operations/query/191_PaymentPurchaseOption.graphql",
+    "path": "queries/query/PaymentPurchaseOption.graphql",
+    "sha256": "d311d67ee2329c51e3cfe1727c09924736a6e2586072b75d3de320e6445c6d48"
+  },
+  {
+    "name": "PaymentSportEventPurchaseOption",
+    "type": "query",
+    "source": "apk",
+    "sourcePath": "graphql_extracted/operations/query/192_PaymentSportEventPurchaseOption.graphql",
+    "path": "queries/query/PaymentSportEventPurchaseOption.graphql",
+    "sha256": "99e6d0becb8023d2326f58e6ef8b829ecc7141d913778424eaa97c65bf457a2b"
+  },
+  {
+    "name": "PaymentTelevisionChannelPurchaseOption",
+    "type": "query",
+    "source": "apk",
+    "sourcePath": "graphql_extracted/operations/query/193_PaymentTelevisionChannelPurchaseOption.graphql",
+    "path": "queries/query/PaymentTelevisionChannelPurchaseOption.graphql",
+    "sha256": "a1397446f769aab97aab2d35b76a567d8eef94544d3971403fb10635cb185544"
+  },
+  {
+    "name": "PersonAwardsList",
+    "type": "query",
+    "source": "apk",
+    "sourcePath": "graphql_extracted/operations/query/196_PersonAwardsList.graphql",
+    "path": "queries/query/PersonAwardsList.graphql",
+    "sha256": "b49c303276cfe69368dffe1aac1f53156d317dde8941176c336f27283629c6c1"
+  },
+  {
+    "name": "PersonBaseInfo",
+    "type": "query",
+    "source": "web",
+    "sourcePath": "graphql_extracted/web_graphql/operations/query/PersonBaseInfo.graphql",
+    "path": "queries/query/PersonBaseInfo.graphql",
+    "sha256": "5c891d8a2d10b01d3a038d0e9bc6d6a5803fc7803c0bfacadf5f3e356befada3"
+  },
+  {
+    "name": "PersonDetails",
+    "type": "query",
+    "source": "apk",
+    "sourcePath": "graphql_extracted/operations/query/197_PersonDetails.graphql",
+    "path": "queries/query/PersonDetails.graphql",
+    "sha256": "5ab03b16cba04d7152a0cb60728f5faa4b28a2fe263f3fd1c199ef88dd955c51"
+  },
+  {
+    "name": "PersonImageCollection",
+    "type": "query",
+    "source": "apk",
+    "sourcePath": "graphql_extracted/operations/query/198_PersonImageCollection.graphql",
+    "path": "queries/query/PersonImageCollection.graphql",
+    "sha256": "81430390b8bb6965537d2de8873118a56a9a67ec22060483a7723f6a16bc1476"
+  },
+  {
+    "name": "PersonImages",
+    "type": "query",
+    "source": "web",
+    "sourcePath": "graphql_extracted/web_graphql/operations/query/PersonImages.graphql",
+    "path": "queries/query/PersonImages.graphql",
+    "sha256": "9157142ede680ecdf158e92a54841a40f3bd604bf643e8fdef32df28a49fff9f"
+  },
+  {
+    "name": "PersonImagesInfo",
+    "type": "query",
+    "source": "web",
+    "sourcePath": "graphql_extracted/web_graphql/operations/query/PersonImagesInfo.graphql",
+    "path": "queries/query/PersonImagesInfo.graphql",
+    "sha256": "407395ec8eed82c048e2dda0f3d20868e9bb3d665e1a039948a2ba6ceca9a6bf"
+  },
+  {
+    "name": "PersonImagesItems",
+    "type": "query",
+    "source": "web",
+    "sourcePath": "graphql_extracted/web_graphql/operations/query/PersonImagesItems.graphql",
+    "path": "queries/query/PersonImagesItems.graphql",
+    "sha256": "f542282778c4b6b58fbd084b6c59de6a8490a6aa07a720a366b522cc2d5780d9"
+  },
+  {
+    "name": "PersonMediaPosts",
+    "type": "query",
+    "source": "web",
+    "sourcePath": "graphql_extracted/web_graphql/operations/query/PersonMediaPosts.graphql",
+    "path": "queries/query/PersonMediaPosts.graphql",
+    "sha256": "92bbbd482446e7edec5535c3dc8b05afff28a5f751abfba1b4d5f6f723007a16"
+  },
+  {
+    "name": "PersonMobileDetailsPosts",
+    "type": "query",
+    "source": "apk",
+    "sourcePath": "graphql_extracted/operations/query/199_PersonMobileDetailsPosts.graphql",
+    "path": "queries/query/PersonMobileDetailsPosts.graphql",
+    "sha256": "b4a060da600aec0fcea33778488cac980826d6c9c212630c1c410355f7fd3532"
+  },
+  {
+    "name": "PersonMoviesByRole",
+    "type": "query",
+    "source": "apk",
+    "sourcePath": "graphql_extracted/operations/query/200_PersonMoviesByRole.graphql",
+    "path": "queries/query/PersonMoviesByRole.graphql",
+    "sha256": "15ee842a4564e5d5b471d008cec061d1041cc0e0803200ad0930610c91dae17f"
+  },
+  {
+    "name": "PersonOnlineFilms",
+    "type": "query",
+    "source": "web",
+    "sourcePath": "graphql_extracted/web_graphql/operations/query/PersonOnlineFilms.graphql",
+    "path": "queries/query/PersonOnlineFilms.graphql",
+    "sha256": "b36e741820349315827f14f53340a36e148af9be970fbc66c8e9782e82392076"
+  },
+  {
+    "name": "PersonOnlineMoviesList",
+    "type": "query",
+    "source": "apk",
+    "sourcePath": "graphql_extracted/operations/query/201_PersonOnlineMoviesList.graphql",
+    "path": "queries/query/PersonOnlineMoviesList.graphql",
+    "sha256": "3943d0637cb95ef343f08f1cf99c5f1bfc0cce5f7c5fd10b48fb4487a7cd93e8"
+  },
+  {
+    "name": "PersonPopularMovieIds",
+    "type": "query",
+    "source": "web",
+    "sourcePath": "graphql_extracted/web_graphql/operations/query/PersonPopularMovieIds.graphql",
+    "path": "queries/query/PersonPopularMovieIds.graphql",
+    "sha256": "139734bff302908dc8c34432f7c2b01215d555bfa0393c27cc73d00b04fe4a87"
+  },
+  {
+    "name": "PersonPreviewCard",
+    "type": "query",
+    "source": "web",
+    "sourcePath": "graphql_extracted/web_graphql/operations/query/PersonPreviewCard.graphql",
+    "path": "queries/query/PersonPreviewCard.graphql",
+    "sha256": "521e6ebbce1b252c33a105ee388f474669096a174480a8fab37a8aae60178f85"
+  },
+  {
+    "name": "PersonSeoMeta",
+    "type": "query",
+    "source": "web",
+    "sourcePath": "graphql_extracted/web_graphql/operations/query/PersonSeoMeta.graphql",
+    "path": "queries/query/PersonSeoMeta.graphql",
+    "sha256": "32d087ea1106a8aee21f85ff4f15be5651aaf9333f9ce2a965cb654fde40f32a"
+  },
+  {
+    "name": "PersonTabs",
+    "type": "query",
+    "source": "web",
+    "sourcePath": "graphql_extracted/web_graphql/operations/query/PersonTabs.graphql",
+    "path": "queries/query/PersonTabs.graphql",
+    "sha256": "5e3a4d7ff800db6c7c939c378176402e32a252a257bc2cd7defdfeb8089684db"
+  },
+  {
+    "name": "PersonTrivia",
+    "type": "query",
+    "source": "apk",
+    "sourcePath": "graphql_extracted/operations/query/204_PersonTrivia.graphql",
+    "path": "queries/query/PersonTrivia.graphql",
+    "sha256": "0902687d048714c0d0560e970f41cebc5f81c8293f7b7470c7344ed2472e90d2"
+  },
+  {
+    "name": "PersonTrivias",
+    "type": "query",
+    "source": "web",
+    "sourcePath": "graphql_extracted/web_graphql/operations/query/PersonTrivias.graphql",
+    "path": "queries/query/PersonTrivias.graphql",
+    "sha256": "16742e350923731a196a841d3a3a484e249dac0cfa62493240dadedb8bfec617"
+  },
+  {
+    "name": "PersonalContentMobileMainData",
+    "type": "query",
+    "source": "apk",
+    "sourcePath": "graphql_extracted/operations/query/194_PersonalContentMobileMainData.graphql",
+    "path": "queries/query/PersonalContentMobileMainData.graphql",
+    "sha256": "77832e1e50e4a41b6bb1720b828d4b6b35f440052507f035b69775a9ee5345bf"
+  },
+  {
+    "name": "PersonalContentPurchases",
+    "type": "query",
+    "source": "apk",
+    "sourcePath": "graphql_extracted/operations/query/195_PersonalContentPurchases.graphql",
+    "path": "queries/query/PersonalContentPurchases.graphql",
+    "sha256": "436f4b5200a4fc0f38c3b6f424dc18107b14836bd136b01866eb3898a6d333ce"
+  },
+  {
+    "name": "PersonsListByBirthDate",
+    "type": "query",
+    "source": "apk",
+    "sourcePath": "graphql_extracted/operations/query/202_PersonsListByBirthDate.graphql",
+    "path": "queries/query/PersonsListByBirthDate.graphql",
+    "sha256": "92ef2349739dffdc9b481f08057d480b5db0ac7ce4d6c67f14dd11c60fe381c5"
+  },
+  {
+    "name": "PersonsListPopularPersons",
+    "type": "query",
+    "source": "apk",
+    "sourcePath": "graphql_extracted/operations/query/203_PersonsListPopularPersons.graphql",
+    "path": "queries/query/PersonsListPopularPersons.graphql",
+    "sha256": "df2d257081df303be889deff0caca17cd8102a05c7da1e1b0b3c043a2b05e685"
+  },
+  {
+    "name": "Plaque",
+    "type": "query",
+    "source": "apk",
+    "sourcePath": "graphql_extracted/operations/query/205_Plaque.graphql",
+    "path": "queries/query/Plaque.graphql",
+    "sha256": "fc0757be145b900e4c7b02186998146748f488226655fddb60650a5f060ed9d9"
+  },
+  {
+    "name": "PopupConfiguration",
+    "type": "query",
+    "source": "apk",
+    "sourcePath": "graphql_extracted/operations/query/206_PopupConfiguration.graphql",
+    "path": "queries/query/PopupConfiguration.graphql",
+    "sha256": "794ae78caabb783cdbb0e5c6862fa9ca9482dedebd23388dd236a306bf6ddfb5"
+  },
+  {
+    "name": "PurchaseMetadata",
+    "type": "query",
+    "source": "web",
+    "sourcePath": "graphql_extracted/web_graphql/operations/query/PurchaseMetadata.graphql",
+    "path": "queries/query/PurchaseMetadata.graphql",
+    "sha256": "4eb392c794c3cf53ea626e4d97a4a2e570dce18093d9149c62f16af704fd3e83"
+  },
+  {
+    "name": "QuickActionsMovieDetails",
+    "type": "query",
+    "source": "apk",
+    "sourcePath": "graphql_extracted/operations/query/207_QuickActionsMovieDetails.graphql",
+    "path": "queries/query/QuickActionsMovieDetails.graphql",
+    "sha256": "c058ac4eebe22e1928bb133cb21e3ff4005df5b362d779bd8cb602a147e4b9ad"
+  },
+  {
+    "name": "Recommendations",
+    "type": "query",
+    "source": "web",
+    "sourcePath": "graphql_extracted/web_graphql/operations/query/Recommendations.graphql",
+    "path": "queries/query/Recommendations.graphql",
+    "sha256": "0276087ec5016d1fad9f6f63d3fad22b3a37134be2fa6723f5a504031fa49fcb"
+  },
+  {
+    "name": "RedAlertsDigest",
+    "type": "query",
+    "source": "apk",
+    "sourcePath": "graphql_extracted/operations/query/208_RedAlertsDigest.graphql",
+    "path": "queries/query/RedAlertsDigest.graphql",
+    "sha256": "87ca58f40c8aeb4b2f6bf235db8071239941acd8bc62acf6617d8ebb9b1a6d4f"
+  },
+  {
+    "name": "ReleasesCalendar",
+    "type": "query",
+    "source": "web",
+    "sourcePath": "graphql_extracted/web_graphql/operations/query/ReleasesCalendar.graphql",
+    "path": "queries/query/ReleasesCalendar.graphql",
+    "sha256": "42a0aa688a806d503cccbd54755cdf8ea348e92080cb422dd1708927581265b1"
+  },
+  {
+    "name": "RemoteConfig",
+    "type": "query",
+    "source": "web",
+    "sourcePath": "graphql_extracted/web_graphql/operations/query/RemoteConfig.graphql",
+    "path": "queries/query/RemoteConfig.graphql",
+    "sha256": "622dd1537978fc99ac15fa42366683fa2504d588e5124f678e32b947195333e5"
+  },
+  {
+    "name": "RemoteConfigComposite",
+    "type": "query",
+    "source": "apk",
+    "sourcePath": "graphql_extracted/operations/query/209_RemoteConfigComposite.graphql",
+    "path": "queries/query/RemoteConfigComposite.graphql",
+    "sha256": "d2699c258a022d0ac7e39bec654931c5c5d8c6490fffb5b4002d5b6e940b30a8"
+  },
+  {
+    "name": "ScriptNonce",
+    "type": "query",
+    "source": "web",
+    "sourcePath": "graphql_extracted/web_graphql/operations/query/ScriptNonce.graphql",
+    "path": "queries/query/ScriptNonce.graphql",
+    "sha256": "426956ad63f16418fc62d70f8bb83c2902b21b070b8385ef9d69917852431d52"
+  },
+  {
+    "name": "SearchCinemas",
+    "type": "query",
+    "source": "apk",
+    "sourcePath": "graphql_extracted/operations/query/210_SearchCinemas.graphql",
+    "path": "queries/query/SearchCinemas.graphql",
+    "sha256": "d38861d48a4a64c12b3fee06afb5862266c5b238326ab8670b6518ce4c4cfbce"
+  },
+  {
+    "name": "SearchGlobalV2",
+    "type": "query",
+    "source": "new",
+    "sourcePath": "graphql_extracted/new/SearchGlobalV2.gql",
+    "path": "queries/query/SearchGlobalV2.graphql",
+    "sha256": "5dce01cae8427f6e5d9d47c67cc31dd3341e5e1dea2753ef0831c578e878cc27"
+  },
+  {
+    "name": "SearchHistory",
+    "type": "query",
+    "source": "apk",
+    "sourcePath": "graphql_extracted/operations/query/212_SearchHistory.graphql",
+    "path": "queries/query/SearchHistory.graphql",
+    "sha256": "efae6f0ee14b1a0380b983f6fcb90fa0646cfbe7661d71fc17b740479a07da61"
+  },
+  {
+    "name": "SearchMobileShowcase",
+    "type": "query",
+    "source": "apk",
+    "sourcePath": "graphql_extracted/operations/query/213_SearchMobileShowcase.graphql",
+    "path": "queries/query/SearchMobileShowcase.graphql",
+    "sha256": "bc32d07f9a2bf98fa7cbe30e24dcaf5d31506088f71f80067dd05583664620d7"
+  },
+  {
+    "name": "SearchMovieCollections",
+    "type": "query",
+    "source": "apk",
+    "sourcePath": "graphql_extracted/operations/query/214_SearchMovieCollections.graphql",
+    "path": "queries/query/SearchMovieCollections.graphql",
+    "sha256": "536bfac1795a2f7036bfa5f18f9494174eda226d9dc1124035a63e26f84a1af3"
+  },
+  {
+    "name": "SearchMovies",
+    "type": "query",
+    "source": "apk",
+    "sourcePath": "graphql_extracted/operations/query/215_SearchMovies.graphql",
+    "path": "queries/query/SearchMovies.graphql",
+    "sha256": "29e66fa71e39c7a620333d13da3c74428e2288d774adbebaa3e2c3a1bcc33252"
+  },
+  {
+    "name": "SearchPersons",
+    "type": "query",
+    "source": "apk",
+    "sourcePath": "graphql_extracted/operations/query/216_SearchPersons.graphql",
+    "path": "queries/query/SearchPersons.graphql",
+    "sha256": "c4fabd7bbed5b2c6af639bbf0deab674d87db9d64183523edc7662cc4338c13f"
+  },
+  {
+    "name": "SearchSuggest",
+    "type": "query",
+    "source": "apk",
+    "sourcePath": "graphql_extracted/operations/query/217_SearchSuggest.graphql",
+    "path": "queries/query/SearchSuggest.graphql",
+    "sha256": "7b39d4f71fb8fbf1444f34fcb8b9b2c875178f9004fe0608a9d9172fd8c47bbe"
+  },
+  {
+    "name": "SelectionList",
+    "type": "query",
+    "source": "web",
+    "sourcePath": "graphql_extracted/web_graphql/operations/query/SelectionList.graphql",
+    "path": "queries/query/SelectionList.graphql",
+    "sha256": "2a662a16a018c7493296ffa5e5480fe5f0844852b1f1b6bb20e13ec6b5d135b8"
+  },
+  {
+    "name": "SerialStructureSeason",
+    "type": "query",
+    "source": "new",
+    "sourcePath": "graphql_extracted/new/SerialStructureSeason.gql",
+    "path": "queries/query/SerialStructureSeason.graphql",
+    "sha256": "cb523ba219bc831b93762c676a170783b47b4c933c976aff161fdde12ade13b9"
+  },
+  {
+    "name": "ShowcaseData",
+    "type": "query",
+    "source": "apk",
+    "sourcePath": "graphql_extracted/operations/query/218_ShowcaseData.graphql",
+    "path": "queries/query/ShowcaseData.graphql",
+    "sha256": "204694f3c27fa8f432e3d0e0a39fdb77f54fbc0088fec8817c93a296fbb4e44a"
+  },
+  {
+    "name": "ShowcaseSelection",
+    "type": "query",
+    "source": "apk",
+    "sourcePath": "graphql_extracted/operations/query/219_ShowcaseSelection.graphql",
+    "path": "queries/query/ShowcaseSelection.graphql",
+    "sha256": "654364746a2a5ed8f193df0b1a5b91a92c93c508f095958f0c3fb4e951fdbfa7"
+  },
+  {
+    "name": "SocialHasNewRequests",
+    "type": "query",
+    "source": "apk",
+    "sourcePath": "graphql_extracted/operations/query/220_SocialHasNewRequests.graphql",
+    "path": "queries/query/SocialHasNewRequests.graphql",
+    "sha256": "a97e2ca24b242abccbaf104edfd2958650614ab6c870c0dc543c033cd9054d1c"
+  },
+  {
+    "name": "SocialProfile",
+    "type": "query",
+    "source": "apk",
+    "sourcePath": "graphql_extracted/operations/query/221_SocialProfile.graphql",
+    "path": "queries/query/SocialProfile.graphql",
+    "sha256": "cd26cebaa5ace85d66fa34bf19c791be9f5ccfc0d5f8c45131ae6729df16661b"
+  },
+  {
+    "name": "SocialProfileAvailableBackgrounds",
+    "type": "query",
+    "source": "apk",
+    "sourcePath": "graphql_extracted/operations/query/222_SocialProfileAvailableBackgrounds.graphql",
+    "path": "queries/query/SocialProfileAvailableBackgrounds.graphql",
+    "sha256": "c43084b18e68b38f7ca34b5efd42055ac167c021dd021cda8643b2618fb354ce"
+  },
+  {
+    "name": "SocialRecommendations",
+    "type": "query",
+    "source": "apk",
+    "sourcePath": "graphql_extracted/operations/query/223_SocialRecommendations.graphql",
+    "path": "queries/query/SocialRecommendations.graphql",
+    "sha256": "2b091615a95d67ffb6695e83fe00105755370513330de43778aca667f98da1af"
+  },
+  {
+    "name": "SocialRecommendationsByAlias",
+    "type": "query",
+    "source": "apk",
+    "sourcePath": "graphql_extracted/operations/query/224_SocialRecommendationsByAlias.graphql",
+    "path": "queries/query/SocialRecommendationsByAlias.graphql",
+    "sha256": "60c10c9a5d4dc8d4cffe4c94ca11f652385f759890743c032ed00c640c72fc58"
+  },
+  {
+    "name": "SocialSubscribers",
+    "type": "query",
+    "source": "apk",
+    "sourcePath": "graphql_extracted/operations/query/225_SocialSubscribers.graphql",
+    "path": "queries/query/SocialSubscribers.graphql",
+    "sha256": "f186c946c1099faa3ec035e849a2f06f7b7472cb1779851436ef2c3e3c6925ab"
+  },
+  {
+    "name": "SocialSubscriptions",
+    "type": "query",
+    "source": "apk",
+    "sourcePath": "graphql_extracted/operations/query/226_SocialSubscriptions.graphql",
+    "path": "queries/query/SocialSubscriptions.graphql",
+    "sha256": "06bddeec1da79317ea0be2190e40959f09d89ef0cf4931f9083873d974ebca61"
+  },
+  {
+    "name": "SocialSubscriptionsRequests",
+    "type": "query",
+    "source": "apk",
+    "sourcePath": "graphql_extracted/operations/query/227_SocialSubscriptionsRequests.graphql",
+    "path": "queries/query/SocialSubscriptionsRequests.graphql",
+    "sha256": "4844cc249f16ee2871c6014861bbd7cf28038e6ae7972226ee779c02e2f32b20"
+  },
+  {
+    "name": "SocialSummary",
+    "type": "query",
+    "source": "apk",
+    "sourcePath": "graphql_extracted/operations/query/228_SocialSummary.graphql",
+    "path": "queries/query/SocialSummary.graphql",
+    "sha256": "c234fbc021bcccd90bace2831a98f4e7eee83170a68f95015da4d2deac75d392"
+  },
+  {
+    "name": "SocialUserProfileBySocialAlias",
+    "type": "query",
+    "source": "web",
+    "sourcePath": "graphql_extracted/web_graphql/operations/query/SocialUserProfileBySocialAlias.graphql",
+    "path": "queries/query/SocialUserProfileBySocialAlias.graphql",
+    "sha256": "0b6f403dfc0189191bae4e57b75268e92048600af5794e535dac00695681dcbf"
+  },
+  {
+    "name": "SocialUserProfileSubscribe",
+    "type": "query",
+    "source": "web",
+    "sourcePath": "graphql_extracted/web_graphql/operations/query/SocialUserProfileSubscribe.graphql",
+    "path": "queries/query/SocialUserProfileSubscribe.graphql",
+    "sha256": "f3579d62a038e60a6c6c42dc19ea9da13e8ae49f7634def5e2be91dc1185ab58"
+  },
+  {
+    "name": "SocialUserProfileSubscribersRequests",
+    "type": "query",
+    "source": "web",
+    "sourcePath": "graphql_extracted/web_graphql/operations/query/SocialUserProfileSubscribersRequests.graphql",
+    "path": "queries/query/SocialUserProfileSubscribersRequests.graphql",
+    "sha256": "2b4134da8d5c1cd5eb4d3bc1ac20415240d54cd7d5959c07cbdf462597c41b54"
+  },
+  {
+    "name": "SocialUserProfileWithPerson",
+    "type": "query",
+    "source": "web",
+    "sourcePath": "graphql_extracted/web_graphql/operations/query/SocialUserProfileWithPerson.graphql",
+    "path": "queries/query/SocialUserProfileWithPerson.graphql",
+    "sha256": "40a2141f81b9211994f539d5938164d7013aca787c41f2c0412ec2d4dc878a08"
+  },
+  {
+    "name": "SportCompetitionData",
+    "type": "query",
+    "source": "apk",
+    "sourcePath": "graphql_extracted/operations/query/229_SportCompetitionData.graphql",
+    "path": "queries/query/SportCompetitionData.graphql",
+    "sha256": "0b8076431f5c6ac1fbc2686b9ed108f9ff7e8cbbf96f7c6c14d21676e6bdd65c"
+  },
+  {
+    "name": "SportCompetitionShowcaseData",
+    "type": "query",
+    "source": "apk",
+    "sourcePath": "graphql_extracted/operations/query/230_SportCompetitionShowcaseData.graphql",
+    "path": "queries/query/SportCompetitionShowcaseData.graphql",
+    "sha256": "0485c8195d03a9b93d9d7047803234bd00f25dd1307e8b939dfd2e99d42cfbf4"
+  },
+  {
+    "name": "SportCompetitionsShowcaseSelection",
+    "type": "query",
+    "source": "apk",
+    "sourcePath": "graphql_extracted/operations/query/231_SportCompetitionsShowcaseSelection.graphql",
+    "path": "queries/query/SportCompetitionsShowcaseSelection.graphql",
+    "sha256": "b8e41ef383f92991908a834fc3c7e1ca2be74d9432ed3e38d5eda6953449e1d4"
+  },
+  {
+    "name": "SportEventData",
+    "type": "query",
+    "source": "apk",
+    "sourcePath": "graphql_extracted/operations/query/232_SportEventData.graphql",
+    "path": "queries/query/SportEventData.graphql",
+    "sha256": "b0c68984ae003e0dc934091117f038cde52a90744e0642eb45e3c5323932921e"
+  },
+  {
+    "name": "SportEventShowcaseData",
+    "type": "query",
+    "source": "apk",
+    "sourcePath": "graphql_extracted/operations/query/233_SportEventShowcaseData.graphql",
+    "path": "queries/query/SportEventShowcaseData.graphql",
+    "sha256": "9958ef42a4884cad5496b7e425b9ed18ff9bed2ff4fa4140e5b66c97ab6cf9d4"
+  },
+  {
+    "name": "SportEventShowcaseSelection",
+    "type": "query",
+    "source": "apk",
+    "sourcePath": "graphql_extracted/operations/query/234_SportEventShowcaseSelection.graphql",
+    "path": "queries/query/SportEventShowcaseSelection.graphql",
+    "sha256": "1bd0c70b7aa92f8740c1a98470a0b38318c7cc09a0a3e9b45f772f1a628cd513"
+  },
+  {
+    "name": "SportHighlightData",
+    "type": "query",
+    "source": "apk",
+    "sourcePath": "graphql_extracted/operations/query/235_SportHighlightData.graphql",
+    "path": "queries/query/SportHighlightData.graphql",
+    "sha256": "4a613777d39967c91f3edfaa0e37bec52531adb63c2cd7b06657256b80404ffc"
+  },
+  {
+    "name": "SportReactionsByCompetitionId",
+    "type": "query",
+    "source": "apk",
+    "sourcePath": "graphql_extracted/operations/query/236_SportReactionsByCompetitionId.graphql",
+    "path": "queries/query/SportReactionsByCompetitionId.graphql",
+    "sha256": "f84b74ce653ecc02120a2937ae495b851a45a63088d3d30fa2e8715dafea324e"
+  },
+  {
+    "name": "SportReactionsByTeamId",
+    "type": "query",
+    "source": "apk",
+    "sourcePath": "graphql_extracted/operations/query/237_SportReactionsByTeamId.graphql",
+    "path": "queries/query/SportReactionsByTeamId.graphql",
+    "sha256": "f0ba406367266d3681dccbac0c8d2f822b1f1165297766f90345cb300702cb11"
+  },
+  {
+    "name": "SportShowcaseData",
+    "type": "query",
+    "source": "apk",
+    "sourcePath": "graphql_extracted/operations/query/238_SportShowcaseData.graphql",
+    "path": "queries/query/SportShowcaseData.graphql",
+    "sha256": "c7576d94ac921c68d5bf72f7c422a6c0c17f702ee7afa980f5d5edaf5805c8b9"
+  },
+  {
+    "name": "SportShowcaseSelection",
+    "type": "query",
+    "source": "apk",
+    "sourcePath": "graphql_extracted/operations/query/239_SportShowcaseSelection.graphql",
+    "path": "queries/query/SportShowcaseSelection.graphql",
+    "sha256": "0561c1aabaa5f727c776268abef5f81772763792fc1a24caf4b11510336c3635"
+  },
+  {
+    "name": "SportTeamData",
+    "type": "query",
+    "source": "apk",
+    "sourcePath": "graphql_extracted/operations/query/240_SportTeamData.graphql",
+    "path": "queries/query/SportTeamData.graphql",
+    "sha256": "74fc60624ec98c313b2f21f5ac0e6765b34269f2c9a8d7d5d16d8fcf3db3552f"
+  },
+  {
+    "name": "SportTeamShowcaseData",
+    "type": "query",
+    "source": "apk",
+    "sourcePath": "graphql_extracted/operations/query/241_SportTeamShowcaseData.graphql",
+    "path": "queries/query/SportTeamShowcaseData.graphql",
+    "sha256": "214e19fe1af19247254ac614779fb16c3ec580c7e11469de67b598863bdcde48"
+  },
+  {
+    "name": "SportTeamsShowcaseSelection",
+    "type": "query",
+    "source": "apk",
+    "sourcePath": "graphql_extracted/operations/query/242_SportTeamsShowcaseSelection.graphql",
+    "path": "queries/query/SportTeamsShowcaseSelection.graphql",
+    "sha256": "24a8b1ef494177fd8fe110a1416e7b3ef2ea1ff5f6cdddfa468734f0688b7ea8"
+  },
+  {
+    "name": "SportWatchingFriends",
+    "type": "query",
+    "source": "apk",
+    "sourcePath": "graphql_extracted/operations/query/243_SportWatchingFriends.graphql",
+    "path": "queries/query/SportWatchingFriends.graphql",
+    "sha256": "82489f7a1f2687f055375d9977e41904b9d6768826947e68647c150ea004a97a"
+  },
+  {
+    "name": "StreamsCatchup",
+    "type": "query",
+    "source": "apk",
+    "sourcePath": "graphql_extracted/operations/query/244_StreamsCatchup.graphql",
+    "path": "queries/query/StreamsCatchup.graphql",
+    "sha256": "e4ce4b94a3d41dc562ff3b7de0a74dae769f1f77df27c452652058ed958e0094"
+  },
+  {
+    "name": "StreamsClip",
+    "type": "query",
+    "source": "apk",
+    "sourcePath": "graphql_extracted/operations/query/245_StreamsClip.graphql",
+    "path": "queries/query/StreamsClip.graphql",
+    "sha256": "61463d509b255e9153238b043ca943c9e660a09abff57e794a3cb89de48b7fd8"
+  },
+  {
+    "name": "StreamsConcurrencyArbiterSessions",
+    "type": "query",
+    "source": "apk",
+    "sourcePath": "graphql_extracted/operations/query/246_StreamsConcurrencyArbiterSessions.graphql",
+    "path": "queries/query/StreamsConcurrencyArbiterSessions.graphql",
+    "sha256": "285ba44f079084415c09a6fb7bed253aa00f2a7547a7d8f036d4feb4ca41a1f1"
+  },
+  {
+    "name": "StreamsDownloadableStreams",
+    "type": "query",
+    "source": "apk",
+    "sourcePath": "graphql_extracted/operations/query/247_StreamsDownloadableStreams.graphql",
+    "path": "queries/query/StreamsDownloadableStreams.graphql",
+    "sha256": "1db19a1f942c2acc83c7eea8ab306cc4150b026d7bc3da96d25ec7232901c84b"
+  },
+  {
+    "name": "StreamsDownloadableStreamsDrmConfigs",
+    "type": "query",
+    "source": "apk",
+    "sourcePath": "graphql_extracted/operations/query/248_StreamsDownloadableStreamsDrmConfigs.graphql",
+    "path": "queries/query/StreamsDownloadableStreamsDrmConfigs.graphql",
+    "sha256": "66e5310fbb7c0e2aa60a24ae80651d634c47173c23e37cd2bc611eda442af3d5"
+  },
+  {
+    "name": "StreamsImages",
+    "type": "query",
+    "source": "apk",
+    "sourcePath": "graphql_extracted/operations/query/249_StreamsImages.graphql",
+    "path": "queries/query/StreamsImages.graphql",
+    "sha256": "bb2bd2f6cf0afadfa96864e177bd322666d5f80e40433b5657b513ac3c86d999"
+  },
+  {
+    "name": "StreamsNextEpisode",
+    "type": "query",
+    "source": "apk",
+    "sourcePath": "graphql_extracted/operations/query/250_StreamsNextEpisode.graphql",
+    "path": "queries/query/StreamsNextEpisode.graphql",
+    "sha256": "b5cc0528c0e08668e629330222f118e020eb9fc7bc84849953428e6500507ea7"
+  },
+  {
+    "name": "StreamsOnlineStreams",
+    "type": "query",
+    "source": "apk",
+    "sourcePath": "graphql_extracted/operations/query/251_StreamsOnlineStreams.graphql",
+    "path": "queries/query/StreamsOnlineStreams.graphql",
+    "sha256": "282c1d35ca39df5b0b04816f16a9eddd6d28f40a039862654c5f238dbd2a1280"
+  },
+  {
+    "name": "StreamsOnlineStreamsBatchV2",
+    "type": "query",
+    "source": "apk",
+    "sourcePath": "graphql_extracted/operations/query/252_StreamsOnlineStreamsBatchV2.graphql",
+    "path": "queries/query/StreamsOnlineStreamsBatchV2.graphql",
+    "sha256": "93ed9d15ffb0ff62eaf65cb20f4e61888124169d563d408160bec045b7dcc88b"
+  },
+  {
+    "name": "StreamsOnlineStreamsV2",
+    "type": "query",
+    "source": "apk",
+    "sourcePath": "graphql_extracted/operations/query/253_StreamsOnlineStreamsV2.graphql",
+    "path": "queries/query/StreamsOnlineStreamsV2.graphql",
+    "sha256": "792109c05a53371d5f01118400298d5eb45f29fed968eed67ac3392c6e4a8713"
+  },
+  {
+    "name": "StreamsParentalControl",
+    "type": "query",
+    "source": "apk",
+    "sourcePath": "graphql_extracted/operations/query/254_StreamsParentalControl.graphql",
+    "path": "queries/query/StreamsParentalControl.graphql",
+    "sha256": "ee07bad847a43941404ae7254a5109a89be5c87e2914e99596e6d1e4973a12c5"
+  },
+  {
+    "name": "StreamsSport",
+    "type": "query",
+    "source": "apk",
+    "sourcePath": "graphql_extracted/operations/query/255_StreamsSport.graphql",
+    "path": "queries/query/StreamsSport.graphql",
+    "sha256": "419162a6b77a48f5aa6fe4e9a97eab80d89440aa007e27f973dc06c5d841e76b"
+  },
+  {
+    "name": "StreamsSportAdvertisements",
+    "type": "query",
+    "source": "apk",
+    "sourcePath": "graphql_extracted/operations/query/256_StreamsSportAdvertisements.graphql",
+    "path": "queries/query/StreamsSportAdvertisements.graphql",
+    "sha256": "7079591fe817e32c940638435664f4fdb781103040a8d55268b1f9ef7592d4f7"
+  },
+  {
+    "name": "StreamsStartingChannelStreams",
+    "type": "query",
+    "source": "apk",
+    "sourcePath": "graphql_extracted/operations/query/257_StreamsStartingChannelStreams.graphql",
+    "path": "queries/query/StreamsStartingChannelStreams.graphql",
+    "sha256": "e7ee2cd7391309b612f74053e938eefa5199a7ad447db4a4bc6bce415a6173db"
+  },
+  {
+    "name": "StreamsTVChannelAdvertisementsData",
+    "type": "query",
+    "source": "apk",
+    "sourcePath": "graphql_extracted/operations/query/260_StreamsTVChannelAdvertisementsData.graphql",
+    "path": "queries/query/StreamsTVChannelAdvertisementsData.graphql",
+    "sha256": "390e90b5bc381af6a3286a87941ab4a4bcf9c02bc74160731b75ba08602c71e4"
+  },
+  {
+    "name": "StreamsTVChannelStreams",
+    "type": "query",
+    "source": "apk",
+    "sourcePath": "graphql_extracted/operations/query/261_StreamsTVChannelStreams.graphql",
+    "path": "queries/query/StreamsTVChannelStreams.graphql",
+    "sha256": "863af3d18440d83f8e8a1c06354a3bb4d856a1ac167ee1259c6eef9f482ee87b"
+  },
+  {
+    "name": "StreamsTVChannelTvis",
+    "type": "query",
+    "source": "apk",
+    "sourcePath": "graphql_extracted/operations/query/262_StreamsTVChannelTvis.graphql",
+    "path": "queries/query/StreamsTVChannelTvis.graphql",
+    "sha256": "fbf93be284569492ab0cfa836c4450811ed91b953d926ec3b7fb47510f816977"
+  },
+  {
+    "name": "StreamsTimingsAuthToken",
+    "type": "query",
+    "source": "apk",
+    "sourcePath": "graphql_extracted/operations/query/258_StreamsTimingsAuthToken.graphql",
+    "path": "queries/query/StreamsTimingsAuthToken.graphql",
+    "sha256": "dd2980b4338366a3ccfeae0038ec6c2c24e5c22a2484ef45a90a0ac62d169bbd"
+  },
+  {
+    "name": "StreamsTrailerStreams",
+    "type": "query",
+    "source": "apk",
+    "sourcePath": "graphql_extracted/operations/query/259_StreamsTrailerStreams.graphql",
+    "path": "queries/query/StreamsTrailerStreams.graphql",
+    "sha256": "1adf2cf460869caff0952bd2e53208528c5ff9d05ad422efbd251ef91580de37"
+  },
+  {
+    "name": "SubscriptionPurchaseOptions",
+    "type": "query",
+    "source": "web",
+    "sourcePath": "graphql_extracted/web_graphql/operations/query/SubscriptionPurchaseOptions.graphql",
+    "path": "queries/query/SubscriptionPurchaseOptions.graphql",
+    "sha256": "6dd752f427081af9945e6b536ebf639c76a84529df904722969801cc02beed29"
+  },
+  {
+    "name": "SuggestSearch",
+    "type": "query",
+    "source": "new",
+    "sourcePath": "graphql_extracted/new/SuggestSearch.gql",
+    "path": "queries/query/SuggestSearch.graphql",
+    "sha256": "32a6766c5d94a3f7b9d106aa5a842e5825d9039709de8f43ab6bf997c43649af"
+  },
+  {
+    "name": "SuggestSearchTop",
+    "type": "query",
+    "source": "web",
+    "sourcePath": "graphql_extracted/web_graphql/operations/query/SuggestSearchTop.graphql",
+    "path": "queries/query/SuggestSearchTop.graphql",
+    "sha256": "dc3450bad11f3279b791bdb8a602cfaf7e18624879a96ad5a58ea89763cee2f5"
+  },
+  {
+    "name": "TelevisionCatchupMeta",
+    "type": "query",
+    "source": "apk",
+    "sourcePath": "graphql_extracted/operations/query/263_TelevisionCatchupMeta.graphql",
+    "path": "queries/query/TelevisionCatchupMeta.graphql",
+    "sha256": "e22308c35a3bc2ba30ea6d18f25df5cdf6f0eed45d8e23d462d77bea3ffc0038"
+  },
+  {
+    "name": "TelevisionChannelByContentId",
+    "type": "query",
+    "source": "apk",
+    "sourcePath": "graphql_extracted/operations/query/264_TelevisionChannelByContentId.graphql",
+    "path": "queries/query/TelevisionChannelByContentId.graphql",
+    "sha256": "0a960c3ed56f1e470b07a8650b40f28bc4c34ab543322151df6464546a56cc25"
+  },
+  {
+    "name": "TelevisionChannelCategories",
+    "type": "query",
+    "source": "apk",
+    "sourcePath": "graphql_extracted/operations/query/265_TelevisionChannelCategories.graphql",
+    "path": "queries/query/TelevisionChannelCategories.graphql",
+    "sha256": "f219ca8b68a514688ed45c11b60a184f4ca7f6a4f0ef2e12a70f0e166d63abfa"
+  },
+  {
+    "name": "TelevisionChannelProgram",
+    "type": "query",
+    "source": "apk",
+    "sourcePath": "graphql_extracted/operations/query/266_TelevisionChannelProgram.graphql",
+    "path": "queries/query/TelevisionChannelProgram.graphql",
+    "sha256": "23b6f630e49b4a06bbbbb7576d4b689019d697e7cb4c8fc7763ae1fe096ae52f"
+  },
+  {
+    "name": "TelevisionChannelProgramExtended",
+    "type": "query",
+    "source": "apk",
+    "sourcePath": "graphql_extracted/operations/query/267_TelevisionChannelProgramExtended.graphql",
+    "path": "queries/query/TelevisionChannelProgramExtended.graphql",
+    "sha256": "fdeec5610546b322f52f49f746dc9e2c726d2ddfc3b02afc3ad7ca3276b14374"
+  },
+  {
+    "name": "TelevisionChannels",
+    "type": "query",
+    "source": "apk",
+    "sourcePath": "graphql_extracted/operations/query/268_TelevisionChannels.graphql",
+    "path": "queries/query/TelevisionChannels.graphql",
+    "sha256": "aaccd826bf1a0b81b30a1be45787ae4c9137cb6aa3f58bc7479091d1493c52f6"
+  },
+  {
+    "name": "TelevisionNeighborChannels",
+    "type": "query",
+    "source": "apk",
+    "sourcePath": "graphql_extracted/operations/query/269_TelevisionNeighborChannels.graphql",
+    "path": "queries/query/TelevisionNeighborChannels.graphql",
+    "sha256": "5a9059fa31db8260b173de7c9845df4421f0c288eba3cd52f8a2ae7514417cc7"
+  },
+  {
+    "name": "TelevisionStartingChannel",
+    "type": "query",
+    "source": "apk",
+    "sourcePath": "graphql_extracted/operations/query/270_TelevisionStartingChannel.graphql",
+    "path": "queries/query/TelevisionStartingChannel.graphql",
+    "sha256": "2f5ca6b5c8b676088747dc3df3bfab610086d29407e7142913daaedce6996e3a"
+  },
+  {
+    "name": "TouchFilmBaseInfo",
+    "type": "query",
+    "source": "web",
+    "sourcePath": "graphql_extracted/web_graphql/operations/query/TouchFilmBaseInfo.graphql",
+    "path": "queries/query/TouchFilmBaseInfo.graphql",
+    "sha256": "b3a18f56bf13c1e37040ea0fc8cc45237d166cf236f7dc7c7defa5c5d4f26483"
+  },
+  {
+    "name": "TouchMainTrailer",
+    "type": "query",
+    "source": "web",
+    "sourcePath": "graphql_extracted/web_graphql/operations/query/TouchMainTrailer.graphql",
+    "path": "queries/query/TouchMainTrailer.graphql",
+    "sha256": "3f73320ded642bf0d403b6177c39b504326dc82569ed8f0c8926bc569a0f7a12"
+  },
+  {
+    "name": "TouchMediaPreview",
+    "type": "query",
+    "source": "web",
+    "sourcePath": "graphql_extracted/web_graphql/operations/query/TouchMediaPreview.graphql",
+    "path": "queries/query/TouchMediaPreview.graphql",
+    "sha256": "5828f0db73375ffe482966683551a025a5913ddbc62963685c9da5e99bfbf699"
+  },
+  {
+    "name": "TouchMovieActors",
+    "type": "query",
+    "source": "web",
+    "sourcePath": "graphql_extracted/web_graphql/operations/query/TouchMovieActors.graphql",
+    "path": "queries/query/TouchMovieActors.graphql",
+    "sha256": "be01497f76d5f73c6e0b216dd12a57accbcd9059e4687663c8c3ec3d7dd24ded"
+  },
+  {
+    "name": "TouchMovieAdditionalInfo",
+    "type": "query",
+    "source": "web",
+    "sourcePath": "graphql_extracted/web_graphql/operations/query/TouchMovieAdditionalInfo.graphql",
+    "path": "queries/query/TouchMovieAdditionalInfo.graphql",
+    "sha256": "cab3cad3bfb28ea3a6629789923a3a74adaaa374a848c31f67d0a467a77e3020"
+  },
+  {
+    "name": "TouchMovieAwards",
+    "type": "query",
+    "source": "web",
+    "sourcePath": "graphql_extracted/web_graphql/operations/query/TouchMovieAwards.graphql",
+    "path": "queries/query/TouchMovieAwards.graphql",
+    "sha256": "3678d6ce070570af5f573cd924f1201dd01ea03358fd802ab7ff5b032032d54b"
+  },
+  {
+    "name": "TouchMovieCreators",
+    "type": "query",
+    "source": "web",
+    "sourcePath": "graphql_extracted/web_graphql/operations/query/TouchMovieCreators.graphql",
+    "path": "queries/query/TouchMovieCreators.graphql",
+    "sha256": "9032896476ce71cdee912d5a022736c2fa9db8ad7e3cc818562a82abc21f25e0"
+  },
+  {
+    "name": "TouchMovieRating",
+    "type": "query",
+    "source": "web",
+    "sourcePath": "graphql_extracted/web_graphql/operations/query/TouchMovieRating.graphql",
+    "path": "queries/query/TouchMovieRating.graphql",
+    "sha256": "6d2f4470616203172d241fb1d1c511b1fb2f8503817724c6173bc6c0241c75b5"
+  },
+  {
+    "name": "TouchMovieSequelsPrequels",
+    "type": "query",
+    "source": "web",
+    "sourcePath": "graphql_extracted/web_graphql/operations/query/TouchMovieSequelsPrequels.graphql",
+    "path": "queries/query/TouchMovieSequelsPrequels.graphql",
+    "sha256": "fc1a1d1f42c9d3d1046b5719f9007912108cf4a3167740e04ff83bc8e9a6b683"
+  },
+  {
+    "name": "TouchPersonAwards",
+    "type": "query",
+    "source": "web",
+    "sourcePath": "graphql_extracted/web_graphql/operations/query/TouchPersonAwards.graphql",
+    "path": "queries/query/TouchPersonAwards.graphql",
+    "sha256": "2d2b3827cb2e510b6be69a75b74f749aca33944444ebb2352d3ecd74958334d4"
+  },
+  {
+    "name": "TouchPersonBaseInfo",
+    "type": "query",
+    "source": "web",
+    "sourcePath": "graphql_extracted/web_graphql/operations/query/TouchPersonBaseInfo.graphql",
+    "path": "queries/query/TouchPersonBaseInfo.graphql",
+    "sha256": "0707adc246b2c4263b01dc75b5d3fe6121d3a7d26375d962246136f022d748eb"
+  },
+  {
+    "name": "TouchTvSeriesBaseInfo",
+    "type": "query",
+    "source": "web",
+    "sourcePath": "graphql_extracted/web_graphql/operations/query/TouchTvSeriesBaseInfo.graphql",
+    "path": "queries/query/TouchTvSeriesBaseInfo.graphql",
+    "sha256": "70bc72651d7e2e34167b1075ca1cd7f2ec31d8310eaa059446655a767267e6bb"
+  },
+  {
+    "name": "TrailerMeta",
+    "type": "query",
+    "source": "apk",
+    "sourcePath": "graphql_extracted/operations/query/271_TrailerMeta.graphql",
+    "path": "queries/query/TrailerMeta.graphql",
+    "sha256": "2ad1cd04ece4a1d2682602092e0357df2ea14d6316d4a560f1e2221c84b72782"
+  },
+  {
+    "name": "TvSeriesBaseInfo",
+    "type": "query",
+    "source": "new",
+    "sourcePath": "graphql_extracted/new/TvSeriesBaseInfo.gql",
+    "path": "queries/query/TvSeriesBaseInfo.graphql",
+    "sha256": "ca2cbddc1f122f4abda5bf3342728dc9f36ed48483f78eddeba0f5c16ed5403f"
+  },
+  {
+    "name": "TvSeriesCriticReviews",
+    "type": "query",
+    "source": "web",
+    "sourcePath": "graphql_extracted/web_graphql/operations/query/TvSeriesCriticReviews.graphql",
+    "path": "queries/query/TvSeriesCriticReviews.graphql",
+    "sha256": "06b3ea3242fcc21fbbf49406c3a21fd2116566c85baeb65a5684b1556b6607ff"
+  },
+  {
+    "name": "TvSeriesEpisodes",
+    "type": "query",
+    "source": "new",
+    "sourcePath": "graphql_extracted/new/TvSeriesEpisodes.gql",
+    "path": "queries/query/TvSeriesEpisodes.graphql",
+    "sha256": "091299a29684430e800d0bf63ba2ba6404c9792f3da00e446048989ad10f3ef8"
+  },
+  {
+    "name": "TvSeriesFriendReactions",
+    "type": "query",
+    "source": "web",
+    "sourcePath": "graphql_extracted/web_graphql/operations/query/TvSeriesFriendReactions.graphql",
+    "path": "queries/query/TvSeriesFriendReactions.graphql",
+    "sha256": "7d42c90ba339845ba28e71156b17f6c272912b36b4add7959a560b9ccef2df61"
+  },
+  {
+    "name": "TvSeriesKinopoiskRating",
+    "type": "query",
+    "source": "web",
+    "sourcePath": "graphql_extracted/web_graphql/operations/query/TvSeriesKinopoiskRating.graphql",
+    "path": "queries/query/TvSeriesKinopoiskRating.graphql",
+    "sha256": "05d95bc8218a47699752ef4f45d00ee167550bd22c6b590b79538cfb23e6f8ee"
+  },
+  {
+    "name": "TvSeriesMediaPosts",
+    "type": "query",
+    "source": "web",
+    "sourcePath": "graphql_extracted/web_graphql/operations/query/TvSeriesMediaPosts.graphql",
+    "path": "queries/query/TvSeriesMediaPosts.graphql",
+    "sha256": "facc7613c473767c2c53e7ce352744ecab65f9e0cc28b7a9ab75c2771c1b185d"
+  },
+  {
+    "name": "TvSeriesMovieListsRelations",
+    "type": "query",
+    "source": "web",
+    "sourcePath": "graphql_extracted/web_graphql/operations/query/TvSeriesMovieListsRelations.graphql",
+    "path": "queries/query/TvSeriesMovieListsRelations.graphql",
+    "sha256": "b43806fa751db5e5211b8da0f8c2222408e098585a501fd611a754e0051b602a"
+  },
+  {
+    "name": "TvSeriesSimilarMovies",
+    "type": "query",
+    "source": "web",
+    "sourcePath": "graphql_extracted/web_graphql/operations/query/TvSeriesSimilarMovies.graphql",
+    "path": "queries/query/TvSeriesSimilarMovies.graphql",
+    "sha256": "614bffe0044f8c877f7cfce2a467a7656c13f14b497fc1f73fa404e05952e73e"
+  },
+  {
+    "name": "TvSeriesSoundtracks",
+    "type": "query",
+    "source": "web",
+    "sourcePath": "graphql_extracted/web_graphql/operations/query/TvSeriesSoundtracks.graphql",
+    "path": "queries/query/TvSeriesSoundtracks.graphql",
+    "sha256": "986975792fd94ff9eaa60d13851ab96b06428a17196a527f9615e6497b39ae5c"
+  },
+  {
+    "name": "TvSeriesTouchEpisodes",
+    "type": "query",
+    "source": "web",
+    "sourcePath": "graphql_extracted/web_graphql/operations/query/TvSeriesTouchEpisodes.graphql",
+    "path": "queries/query/TvSeriesTouchEpisodes.graphql",
+    "sha256": "6562bc6da5799d7438867a1685af4fbfd47e3e98f67777fb7e313a607baf8994"
+  },
+  {
+    "name": "TvSeriesTrivias",
+    "type": "query",
+    "source": "web",
+    "sourcePath": "graphql_extracted/web_graphql/operations/query/TvSeriesTrivias.graphql",
+    "path": "queries/query/TvSeriesTrivias.graphql",
+    "sha256": "6896080ad4c2ee3c885ae0836a92e51b632bee73d3a0180c8db38b53947f897e"
+  },
+  {
+    "name": "UrbanAdsBanners",
+    "type": "query",
+    "source": "web",
+    "sourcePath": "graphql_extracted/web_graphql/operations/query/UrbanAdsBanners.graphql",
+    "path": "queries/query/UrbanAdsBanners.graphql",
+    "sha256": "8852d985efa5fee593a309da3334870a2fa26aee5692bb3bb7e4180a0be73305"
+  },
+  {
+    "name": "User",
+    "type": "query",
+    "source": "apk",
+    "sourcePath": "graphql_extracted/operations/query/272_User.graphql",
+    "path": "queries/query/User.graphql",
+    "sha256": "dc11c7542850fdcca8bd868d10def6ba0c03e2eed96ddbf3093a2fe2860fdeb0"
+  },
+  {
+    "name": "UserAccount",
+    "type": "query",
+    "source": "apk",
+    "sourcePath": "graphql_extracted/operations/query/273_UserAccount.graphql",
+    "path": "queries/query/UserAccount.graphql",
+    "sha256": "40d6d1d3f6db9ad15ae16ab7fe1edf0104560df6a5a365c8919ab68da7a69056"
+  },
+  {
+    "name": "UserAlerts",
+    "type": "query",
+    "source": "apk",
+    "sourcePath": "graphql_extracted/operations/query/274_UserAlerts.graphql",
+    "path": "queries/query/UserAlerts.graphql",
+    "sha256": "ebc3474f946201c925cda8acd8b5f73002a7659ce402f274b9d6fb5e9fe9fe07"
+  },
+  {
+    "name": "UserAvatar",
+    "type": "query",
+    "source": "apk",
+    "sourcePath": "graphql_extracted/operations/query/275_UserAvatar.graphql",
+    "path": "queries/query/UserAvatar.graphql",
+    "sha256": "f3814f7c8716187c886c20ac9b037a6985c36bfc7053b80892ff112fa96b1ed1"
+  },
+  {
+    "name": "UserContentPackagesQuery",
+    "type": "query",
+    "source": "apk",
+    "sourcePath": "graphql_extracted/operations/query/276_UserContentPackagesQuery.graphql",
+    "path": "queries/query/UserContentPackagesQuery.graphql",
+    "sha256": "956b3aefcfb604beeb9143b49b9e882c2710c71263c7f1568584bb9695100344"
+  },
+  {
+    "name": "UserDependantQuickActionsMovieDetails",
+    "type": "query",
+    "source": "apk",
+    "sourcePath": "graphql_extracted/operations/query/277_UserDependantQuickActionsMovieDetails.graphql",
+    "path": "queries/query/UserDependantQuickActionsMovieDetails.graphql",
+    "sha256": "abb985fe9b0ca6fdad75f0270f7da396c9bea0d0ad372504f000bc4adb74355f"
+  },
+  {
+    "name": "UserDependentDataMovieDetails",
+    "type": "query",
+    "source": "apk",
+    "sourcePath": "graphql_extracted/operations/query/278_UserDependentDataMovieDetails.graphql",
+    "path": "queries/query/UserDependentDataMovieDetails.graphql",
+    "sha256": "1f9d963e04ff0e13847813802cf035862ca3696181d58d2a3836a0397553cf89"
+  },
+  {
+    "name": "UserFoldersTotalForMovie",
+    "type": "query",
+    "source": "apk",
+    "sourcePath": "graphql_extracted/operations/query/279_UserFoldersTotalForMovie.graphql",
+    "path": "queries/query/UserFoldersTotalForMovie.graphql",
+    "sha256": "f304476a8b19185225bab2ed924a609a8124e0367a26fa61374fc2f10d6eb281"
+  },
+  {
+    "name": "UserKidParentalControlVideos",
+    "type": "query",
+    "source": "apk",
+    "sourcePath": "graphql_extracted/operations/query/280_UserKidParentalControlVideos.graphql",
+    "path": "queries/query/UserKidParentalControlVideos.graphql",
+    "sha256": "4c8e7fe2590897c08a506ee21da95f8b559f406d5fc9287d2b65feab5e944004"
+  },
+  {
+    "name": "UserKidPinCodeState",
+    "type": "query",
+    "source": "apk",
+    "sourcePath": "graphql_extracted/operations/query/281_UserKidPinCodeState.graphql",
+    "path": "queries/query/UserKidPinCodeState.graphql",
+    "sha256": "77fd722328f2fdc88a82f8786cd75f6e2e5a57579790f4a061cb0453aa00524d"
+  },
+  {
+    "name": "UserMovieFolders",
+    "type": "query",
+    "source": "web",
+    "sourcePath": "graphql_extracted/web_graphql/operations/query/UserMovieFolders.graphql",
+    "path": "queries/query/UserMovieFolders.graphql",
+    "sha256": "4edb74302f20f1cd4ba1dbde3b4590a520e416f56350845af36ad6fe6931dcc5"
+  },
+  {
+    "name": "UserOttId",
+    "type": "query",
+    "source": "apk",
+    "sourcePath": "graphql_extracted/operations/query/282_UserOttId.graphql",
+    "path": "queries/query/UserOttId.graphql",
+    "sha256": "a843a764488892e0ea84daad8b31bce89b9e1e8cb21948ee08b8c36b116db930"
+  },
+  {
+    "name": "UserPersonFolders",
+    "type": "query",
+    "source": "web",
+    "sourcePath": "graphql_extracted/web_graphql/operations/query/UserPersonFolders.graphql",
+    "path": "queries/query/UserPersonFolders.graphql",
+    "sha256": "74b731203dabf73b314100d33f981ddbc0154a9eb48390495255bb5468735040"
+  },
+  {
+    "name": "UserProfileBackgrounds",
+    "type": "query",
+    "source": "web",
+    "sourcePath": "graphql_extracted/web_graphql/operations/query/UserProfileBackgrounds.graphql",
+    "path": "queries/query/UserProfileBackgrounds.graphql",
+    "sha256": "37596e591fd9b6e022a213e17ecf109d2667cf070af4fecaf739224c75211380"
+  },
+  {
+    "name": "UserProfileSelectedBackground",
+    "type": "query",
+    "source": "web",
+    "sourcePath": "graphql_extracted/web_graphql/operations/query/UserProfileSelectedBackground.graphql",
+    "path": "queries/query/UserProfileSelectedBackground.graphql",
+    "sha256": "69e37290840ac336382ef53603c725bff62972ef5c3adf1d36d2dfd84c24b124"
+  },
+  {
+    "name": "UserReactionMovies",
+    "type": "query",
+    "source": "web",
+    "sourcePath": "graphql_extracted/web_graphql/operations/query/UserReactionMovies.graphql",
+    "path": "queries/query/UserReactionMovies.graphql",
+    "sha256": "db44e90c61cbe6fd9b9dccf3207f8de7964a98471670ed175a75cf82a5f4d38c"
+  },
+  {
+    "name": "UserReactionMoviesPage",
+    "type": "query",
+    "source": "web",
+    "sourcePath": "graphql_extracted/web_graphql/operations/query/UserReactionMoviesPage.graphql",
+    "path": "queries/query/UserReactionMoviesPage.graphql",
+    "sha256": "4754c8b2ff86f34f63246894b70accb29ce35243ecd10e65dbc489befbe9a58b"
+  },
+  {
+    "name": "UserReactionMoviesStat",
+    "type": "query",
+    "source": "web",
+    "sourcePath": "graphql_extracted/web_graphql/operations/query/UserReactionMoviesStat.graphql",
+    "path": "queries/query/UserReactionMoviesStat.graphql",
+    "sha256": "8040fa879361bd86789970f3fc9ac0f94ef0edee6890533d322eb5ea58cae284"
+  },
+  {
+    "name": "UserSettings",
+    "type": "query",
+    "source": "apk",
+    "sourcePath": "graphql_extracted/operations/query/283_UserSettings.graphql",
+    "path": "queries/query/UserSettings.graphql",
+    "sha256": "3884fb3e29e11002387ce08b3f932abdb88643b8f06fd1da0f7c2a4920211811"
+  },
+  {
+    "name": "UserSubscriptionProlongationStatusQuery",
+    "type": "query",
+    "source": "apk",
+    "sourcePath": "graphql_extracted/operations/query/284_UserSubscriptionProlongationStatusQuery.graphql",
+    "path": "queries/query/UserSubscriptionProlongationStatusQuery.graphql",
+    "sha256": "d4964cb7485df68861336057397c97883e6597fa294443a19ad26364bc393d4b"
+  },
+  {
+    "name": "UserSyncStatus",
+    "type": "query",
+    "source": "apk",
+    "sourcePath": "graphql_extracted/operations/query/285_UserSyncStatus.graphql",
+    "path": "queries/query/UserSyncStatus.graphql",
+    "sha256": "e68bdfe9476c1a8174ba5a0e724d691ef607cb91ce614ad302f4d1fb3327de1d"
+  },
+  {
+    "name": "VerticalSeries",
+    "type": "query",
+    "source": "apk",
+    "sourcePath": "graphql_extracted/operations/query/286_VerticalSeries.graphql",
+    "path": "queries/query/VerticalSeries.graphql",
+    "sha256": "198ab74334b566ae5e60bddf6d1ac11fe5899a9654b3893a26d33c345b4e5860"
+  },
+  {
+    "name": "VerticalSeriesEpisodeMeta",
+    "type": "query",
+    "source": "apk",
+    "sourcePath": "graphql_extracted/operations/query/287_VerticalSeriesEpisodeMeta.graphql",
+    "path": "queries/query/VerticalSeriesEpisodeMeta.graphql",
+    "sha256": "f3ebe1b161fd1c2986d461d87fe4adf551578c622a2c43cfe77a6fa82fcd9c8f"
+  },
+  {
+    "name": "VerticalSeriesStream",
+    "type": "query",
+    "source": "apk",
+    "sourcePath": "graphql_extracted/operations/query/288_VerticalSeriesStream.graphql",
+    "path": "queries/query/VerticalSeriesStream.graphql",
+    "sha256": "c80084ec57db49043f924dfce526071f4d6f6c712e1cd41e685fdcd7022e1fb8"
+  },
+  {
+    "name": "VerticalSeriesStreams",
+    "type": "query",
+    "source": "apk",
+    "sourcePath": "graphql_extracted/operations/query/289_VerticalSeriesStreams.graphql",
+    "path": "queries/query/VerticalSeriesStreams.graphql",
+    "sha256": "08ff5a7201e9dc2d7b1179cf76f013f93f744d1a5e3c35d3e48d25a57699ef79"
+  },
+  {
+    "name": "VideoFeed",
+    "type": "query",
+    "source": "apk",
+    "sourcePath": "graphql_extracted/operations/query/290_VideoFeed.graphql",
+    "path": "queries/query/VideoFeed.graphql",
+    "sha256": "2743161ae291f448941e9055d35b1c7a515707e664e68122e5214a2794c50255"
+  },
+  {
+    "name": "ViewOption",
+    "type": "query",
+    "source": "apk",
+    "sourcePath": "graphql_extracted/operations/query/291_ViewOption.graphql",
+    "path": "queries/query/ViewOption.graphql",
+    "sha256": "01ba5aa86bfdd54970f0c87bdaa463d4ba993b20b0dfa1cca1015b0c4ae60d68"
+  },
+  {
+    "name": "ViewOption",
+    "type": "query",
+    "source": "web",
+    "sourcePath": "graphql_extracted/web_graphql/operations/query/ViewOption.graphql",
+    "path": "queries/query/ViewOption_web.graphql",
+    "sha256": "4f7fa698a01d035d1dc43db86e084cbb55f940ffac4fdac90950d7fb32ae3d6d"
+  },
+  {
+    "name": "WatchNext",
+    "type": "query",
+    "source": "apk",
+    "sourcePath": "graphql_extracted/operations/query/292_WatchNext.graphql",
+    "path": "queries/query/WatchNext.graphql",
+    "sha256": "9887abe59d99a02900af65c934070ca0b890b451a1dce8482f77af51e6f15de0"
+  },
+  {
+    "name": "YandexMusicTrackStatus",
+    "type": "query",
+    "source": "apk",
+    "sourcePath": "graphql_extracted/operations/query/293_YandexMusicTrackStatus.graphql",
+    "path": "queries/query/YandexMusicTrackStatus.graphql",
+    "sha256": "50431319911e42f63b6a5db0c36f0ce1264ab7fc7e6aaa123c6b5f50a4d3b256"
+  },
+  {
+    "name": "YandexWalletQuery",
+    "type": "query",
+    "source": "web",
+    "sourcePath": "graphql_extracted/web_graphql/operations/query/YandexWalletQuery.graphql",
+    "path": "queries/query/YandexWalletQuery.graphql",
+    "sha256": "2b49c87e0032df7aea36dc5ca8e5f1a84b99c16e3ee38aee80cdbcf962a88651"
+  }
+]

@@ -1,0 +1,48 @@
+query FoldersMobileMovieFolderList(
+  $movieId: Long!
+  $offset: Int!
+  $limit: Int!
+  $includeSystemFolders: Boolean!
+) {
+  movie(id: $movieId) @include(if: $includeSystemFolders) {
+    userData {
+      isFavorite
+      isPlannedToWatch
+    }
+  }
+  userProfile {
+    userData {
+      favorite @include(if: $includeSystemFolders) {
+        public
+        movies {
+          total
+        }
+      }
+      plannedToWatch @include(if: $includeSystemFolders) {
+        public
+        movies {
+          total
+        }
+      }
+      movieFolders(limit: $limit, offset: $offset) {
+        offset
+        limit
+        total
+        items {
+          __typename
+          ...movieFolderFragment
+          containsMovie(movieId: $movieId)
+          movies {
+            total
+          }
+        }
+      }
+    }
+  }
+}
+
+fragment movieFolderFragment on Folder {
+  id
+  name
+  public
+}

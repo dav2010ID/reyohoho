@@ -1,0 +1,22 @@
+mutation SocialSetSocialData($input: setSocialInput!) {
+  userProfile {
+    social {
+      set(input: $input) {
+        status
+        message
+        aliasErrors {
+          __typename
+          message
+        }
+        nameErrors {
+          __typename
+          message
+        }
+        aboutErrors {
+          __typename
+          message
+        }
+      }
+    }
+  }
+}

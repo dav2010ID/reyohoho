@@ -1,0 +1,18 @@
+mutation UserKidRemindPinCode {
+  userProfile {
+    userKidSubProfile {
+      pinCode {
+        remind {
+          error {
+            message
+          }
+          status
+          contacts {
+            email
+            phone
+          }
+        }
+      }
+    }
+  }
+}

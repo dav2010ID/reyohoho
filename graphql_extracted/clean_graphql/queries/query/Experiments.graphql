@@ -1,0 +1,14 @@
+query Experiments(
+  $locationInput: LocationInput
+  $params: Map_String_ObjectScalar
+  $testIds: [Long!]
+) {
+  experiments(location: $locationInput, params: $params, testIds: $testIds) {
+    testIds
+    triggeredTestIds
+    triggeredExperimentSet {
+      flags
+      testId
+    }
+  }
+}

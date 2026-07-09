@@ -1,0 +1,129 @@
+query HdShowcase($id: String!, $offset: Int!, $limit: Int!) {
+  showcase(id: $id) {
+    content(offset: $offset, limit: $limit) {
+      items {
+        ... on OttTopSelection {
+          title
+          id
+          content(limit: 20, offset: 0) {
+            items {
+              ... on MovieSelectionItem {
+                ...Selection
+                __typename
+              }
+              __typename
+            }
+            __typename
+          }
+          __typename
+        }
+        ... on Selection {
+          title
+          id
+          content(limit: 20, offset: 0) {
+            items {
+              ... on MovieSelectionItem {
+                ...Selection
+                __typename
+              }
+              __typename
+            }
+            __typename
+          }
+          __typename
+        }
+        __typename
+      }
+      __typename
+    }
+    __typename
+  }
+}
+
+fragment RatingValue on RatingValue {
+  value
+  isActive
+  count
+  __typename
+}
+
+fragment MovieRatingListsItem on MovieInList {
+  movieListSlug
+  position
+  __typename
+}
+
+fragment MovieRatingLists on Movie {
+  ratingLists {
+    top10 {
+      ...MovieRatingListsItem
+      __typename
+    }
+    top250 {
+      ...MovieRatingListsItem
+      __typename
+    }
+    __typename
+  }
+  __typename
+}
+
+fragment Selection on MovieSelectionItem {
+  movie {
+    id
+    contentId
+    title {
+      russian
+      __typename
+    }
+    genres {
+      id
+      name
+      __typename
+    }
+    gallery {
+      posters {
+        vertical(override: OTT_WHEN_EXISTS) {
+          avatarsUrl
+          __typename
+        }
+        verticalWithRightholderLogo {
+          avatarsUrl
+          __typename
+        }
+        __typename
+      }
+      __typename
+    }
+    rating {
+      kinopoisk {
+        ...RatingValue
+        __typename
+      }
+      __typename
+    }
+    viewOption {
+      type
+      isAvailableOnline: isWatchable(
+        filter: { anyDevice: false, anyRegion: false }
+      )
+      buttonText
+      purchasabilityStatus
+      contentPackageToBuy {
+        billingFeatureName
+        __typename
+      }
+      subscriptionBadge {
+        image {
+          avatarsUrl
+          __typename
+        }
+        __typename
+      }
+      __typename
+    }
+    ...MovieRatingLists
+    __typename
+  }
+  __typename
+}

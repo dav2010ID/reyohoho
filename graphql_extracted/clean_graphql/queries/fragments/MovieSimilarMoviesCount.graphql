@@ -1,0 +1,7 @@
+fragment MovieSimilarMoviesCount on Movie {
+  similarMoviesCount: userRecommendations(limit: 0) {
+    total
+    __typename
+  }
+  __typename
+}

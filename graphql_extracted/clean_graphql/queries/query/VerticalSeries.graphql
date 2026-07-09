@@ -1,0 +1,90 @@
+query VerticalSeries(
+  $id: Long!
+  $seasonsOffset: Int!
+  $seasonsLimit: Int!
+  $episodesLimit: Int!
+) {
+  movie(id: $id) {
+    __typename
+    contentId
+    title {
+      __typename
+      ...titleFragment
+    }
+    shortDescription
+    gallery {
+      posters {
+        vertical {
+          __typename
+          ...imageFragment
+        }
+      }
+    }
+    genres {
+      __typename
+      ...genreFragment
+    }
+    restriction {
+      __typename
+      ...restrictionFragment
+    }
+    ott {
+      __typename
+      ...streamsOttWatchParamsFragment
+      ... on Ott_AbstractSeries {
+        nextEpisode(fallbackToFirstEpisode: true) {
+          contentId
+        }
+        trailers(onlyPromo: true, limit: 1) {
+          items {
+            contentGroupUuid
+          }
+        }
+      }
+    }
+    ... on Series {
+      seasons(
+        isOnlyOnline: true
+        offset: $seasonsOffset
+        limit: $seasonsLimit
+      ) {
+        items {
+          episodes(isOnlyOnline: true, limit: $episodesLimit) {
+            items {
+              contentId
+            }
+          }
+        }
+      }
+    }
+  }
+}
+
+fragment titleFragment on Title {
+  localized
+  original
+}
+
+fragment imageFragment on Image {
+  avatarsUrl
+  fallbackUrl
+}
+
+fragment genreFragment on Genre {
+  id
+  name
+}
+
+fragment restrictionFragment on Restriction {
+  age
+  mpaa
+}
+
+fragment streamsOttWatchParamsFragment on Ott {
+  userData {
+    watchParams {
+      audioLanguage
+      subtitleLanguage
+    }
+  }
+}

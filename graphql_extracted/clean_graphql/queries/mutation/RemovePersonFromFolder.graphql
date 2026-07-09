@@ -1,0 +1,19 @@
+mutation RemovePersonFromFolder($personId: Long!, $folderId: Long!) {
+  person {
+    folder {
+      item {
+        remove(input: { personId: $personId, folderTypeId: $folderId }) {
+          status
+          error {
+            message
+            __typename
+          }
+          __typename
+        }
+        __typename
+      }
+      __typename
+    }
+    __typename
+  }
+}

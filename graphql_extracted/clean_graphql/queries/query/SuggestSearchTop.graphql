@@ -1,0 +1,400 @@
+query SuggestSearchTop(
+  $keyword: String!
+  $yandexCityId: Int
+  $limit: Int
+  $withUserData: Boolean!
+) {
+  suggest(keyword: $keyword) {
+    top(yandexCityId: $yandexCityId, limit: $limit) {
+      topResult {
+        global {
+          ...SuggestSearchMovieItem
+          ...SuggestSearchMovieItemUserData @include(if: $withUserData)
+          ...SuggestSearchPersonItem
+          ...SuggestSearchCinemaItem
+          ...SuggestMovieListItem
+          __typename
+        }
+        __typename
+      }
+      movies {
+        movie {
+          ...SuggestSearchMovieItem
+          ...SuggestSearchMovieItemUserData @include(if: $withUserData)
+          __typename
+        }
+        __typename
+      }
+      persons {
+        person {
+          ...SuggestSearchPersonItem
+          __typename
+        }
+        __typename
+      }
+      cinemas {
+        cinema {
+          ...SuggestSearchCinemaItem
+          __typename
+        }
+        __typename
+      }
+      movieLists {
+        movieList {
+          ...SuggestMovieListItem
+          __typename
+        }
+        __typename
+      }
+      __typename
+    }
+    __typename
+  }
+}
+
+fragment MoviePosterGallery on Movie {
+  gallery {
+    posters {
+      vertical {
+        avatarsUrl
+        __typename
+      }
+      __typename
+    }
+    logos {
+      rightholderForPoster {
+        avatarsUrl
+        __typename
+      }
+      __typename
+    }
+    __typename
+  }
+  __typename
+}
+
+fragment RatingValue on RatingValue {
+  value
+  isActive
+  count
+  __typename
+}
+
+fragment TicketOptionPurchasable on Movie {
+  ticketOption {
+    purchasable
+    __typename
+  }
+  __typename
+}
+
+fragment MovieIsTicketsAvailable on Movie {
+  ...TicketOptionPurchasable
+  __typename
+}
+
+fragment MovieListReleases on Distribution {
+  rusRelease: releases(
+    types: [CINEMA]
+    rerelease: false
+    countryId: 2
+    limit: 1
+  ) {
+    items {
+      date {
+        date
+        accuracy
+        __typename
+      }
+      __typename
+    }
+    __typename
+  }
+  worldPremiere {
+    incompleteDate {
+      date
+      accuracy
+      __typename
+    }
+    __typename
+  }
+  allReleases: releases(limit: 1) {
+    items {
+      date {
+        date
+        accuracy
+        __typename
+      }
+      __typename
+    }
+    __typename
+  }
+  __typename
+}
+
+fragment MovieRatingListsItem on MovieInList {
+  movieListSlug
+  position
+  __typename
+}
+
+fragment PersonIncompleteDate on IncompleteDate {
+  date
+  accuracy
+  __typename
+}
+
+fragment SuggestSearchMovieItem on Movie {
+  id
+  contentId
+  title {
+    russian
+    original
+    __typename
+  }
+  ...MoviePosterGallery
+  countries {
+    id
+    name
+    __typename
+  }
+  genres {
+    id
+    name
+    __typename
+  }
+  cast: members(role: [ACTOR], limit: 3) {
+    items {
+      details
+      person {
+        name
+        originalName
+        __typename
+      }
+      __typename
+    }
+    __typename
+  }
+  directors: members(role: [DIRECTOR], limit: 1) {
+    items {
+      details
+      person {
+        name
+        originalName
+        __typename
+      }
+      __typename
+    }
+    __typename
+  }
+  url
+  rating {
+    kinopoisk {
+      ...RatingValue
+      __typename
+    }
+    plannedToWatch {
+      ...RatingValue
+      __typename
+    }
+    __typename
+  }
+  mainTrailer {
+    id
+    isEmbedded
+    __typename
+  }
+  viewOption {
+    buttonText
+    originalButtonText
+    isAvailableOnline: isWatchable(
+      filter: { anyDevice: false, anyRegion: false }
+    )
+    purchasabilityStatus
+    contentPackageToBuy {
+      billingFeatureName
+      __typename
+    }
+    subscriptionBadge {
+      image {
+        avatarsUrl
+        __typename
+      }
+      __typename
+    }
+    type
+    availabilityAnnounce {
+      groupPeriodType
+      announcePromise
+      availabilityDate
+      type
+      __typename
+    }
+    __typename
+  }
+  ...MovieIsTicketsAvailable
+  distribution {
+    ...MovieListReleases
+    __typename
+  }
+  ... on Film {
+    productionYear
+    duration
+    isShortFilm
+    ratingLists {
+      top250 {
+        ...MovieRatingListsItem
+        __typename
+      }
+      __typename
+    }
+    __typename
+  }
+  ... on TvSeries {
+    releaseYears {
+      start
+      end
+      __typename
+    }
+    totalDuration
+    ratingLists {
+      top250 {
+        ...MovieRatingListsItem
+        __typename
+      }
+      __typename
+    }
+    __typename
+  }
+  ... on TvShow {
+    releaseYears {
+      start
+      end
+      __typename
+    }
+    totalDuration
+    ratingLists {
+      top250 {
+        ...MovieRatingListsItem
+        __typename
+      }
+      __typename
+    }
+    __typename
+  }
+  ... on MiniSeries {
+    releaseYears {
+      start
+      end
+      __typename
+    }
+    totalDuration
+    ratingLists {
+      top250 {
+        ...MovieRatingListsItem
+        __typename
+      }
+      __typename
+    }
+    __typename
+  }
+  ... on Video {
+    productionYear
+    duration
+    isShortFilm
+    __typename
+  }
+  __typename
+}
+
+fragment SuggestSearchMovieItemUserData on Movie {
+  userData {
+    watchStatuses {
+      notInterested {
+        value
+        __typename
+      }
+      watched {
+        value
+        __typename
+      }
+      __typename
+    }
+    voting {
+      value
+      votedAt
+      __typename
+    }
+    isPlannedToWatch
+    __typename
+  }
+  __typename
+}
+
+fragment SuggestSearchPersonItem on Person {
+  id
+  name
+  originalName
+  dateOfBirth {
+    ...PersonIncompleteDate
+    __typename
+  }
+  dateOfDeath {
+    ...PersonIncompleteDate
+    __typename
+  }
+  age
+  poster {
+    avatarsUrl
+    fallbackUrl
+    __typename
+  }
+  roles: roles(isCareer: true, limit: 3) {
+    items {
+      role {
+        title {
+          russian
+          __typename
+        }
+        __typename
+      }
+      __typename
+    }
+    __typename
+  }
+  __typename
+}
+
+fragment SuggestSearchCinemaItem on Cinema {
+  id
+  ctitle: title
+  city {
+    id
+    name
+    geoId
+    __typename
+  }
+  address
+  phones
+  __typename
+}
+
+fragment SuggestMovieListItem on MovieListMeta {
+  id
+  cover {
+    avatarsUrl
+    __typename
+  }
+  coverBackground {
+    avatarsUrl
+    __typename
+  }
+  name
+  url
+  description
+  movies(limit: 0) {
+    total
+    __typename
+  }
+  __typename
+}

@@ -1,0 +1,12 @@
+mutation UserAdultDisablePinCode {
+  userProfile {
+    pinCode {
+      disable {
+        status
+        error {
+          message
+        }
+      }
+    }
+  }
+}

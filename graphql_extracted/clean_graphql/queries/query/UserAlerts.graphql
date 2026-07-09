@@ -1,0 +1,18 @@
+query UserAlerts {
+  userProfile {
+    userData {
+      alerts(filter: { includeTypes: [GRACE] }) {
+        __typename
+        ... on GraceAlert {
+          id
+          prolongationAvailability {
+            status
+            errorCode
+          }
+          reason
+          type
+        }
+      }
+    }
+  }
+}

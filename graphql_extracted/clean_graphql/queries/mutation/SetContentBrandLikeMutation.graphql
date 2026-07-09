@@ -1,0 +1,16 @@
+mutation SetContentBrandLikeMutation($input: ContentBrandSetLikeInput!) {
+  contentBrand {
+    like {
+      set(input: $input) {
+        error {
+          message
+          __typename
+        }
+        status
+        __typename
+      }
+      __typename
+    }
+    __typename
+  }
+}

@@ -1,0 +1,14 @@
+mutation UserKidDisablePinCode {
+  userProfile {
+    userKidSubProfile {
+      pinCode {
+        disable {
+          status
+          error {
+            message
+          }
+        }
+      }
+    }
+  }
+}

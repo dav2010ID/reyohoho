@@ -1,0 +1,56 @@
+query DeepDiveActors(
+  $contentId: String!
+  $query: ActorsRecognitionQueryInput!
+) {
+  content(contentId: $contentId) {
+    __typename
+    ... on Movie {
+      ottMovie: ott {
+        __typename
+        ... on Ott_AbstractVideo {
+          recognition {
+            __typename
+            ...deepDiveRecognitionActorsFragment
+          }
+        }
+      }
+    }
+    ... on Episode {
+      ottEpisode: ott {
+        recognition {
+          __typename
+          ...deepDiveRecognitionActorsFragment
+        }
+      }
+    }
+  }
+}
+
+fragment imageFragment on Image {
+  avatarsUrl
+  fallbackUrl
+}
+
+fragment deepDiveRecognitionActorsFragment on Recognition {
+  actors {
+    data(query: $query) {
+      items {
+        characterDescription
+        roleDetails
+        width
+        height
+        x
+        y
+        person {
+          id
+          name
+          originalName
+          poster {
+            __typename
+            ...imageFragment
+          }
+        }
+      }
+    }
+  }
+}

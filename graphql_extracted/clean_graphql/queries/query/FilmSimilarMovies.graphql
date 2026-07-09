@@ -1,0 +1,127 @@
+query FilmSimilarMovies(
+  $filmId: Long!
+  $similarMoviesLimit: Int = 10
+  $withUserData: Boolean = false
+) {
+  film(id: $filmId) {
+    id
+    rating {
+      kinopoisk {
+        ...RatingValue
+        __typename
+      }
+      __typename
+    }
+    userRecommendations(limit: $similarMoviesLimit) {
+      items {
+        movie {
+          id
+          title {
+            russian
+            original
+            __typename
+          }
+          countries {
+            id
+            name
+            __typename
+          }
+          poster {
+            avatarsUrl
+            fallbackUrl
+            __typename
+          }
+          genres {
+            id
+            name
+            slug
+            __typename
+          }
+          rating {
+            kinopoisk {
+              ...RatingValue
+              __typename
+            }
+            __typename
+          }
+          userData @include(if: $withUserData) {
+            watchStatuses {
+              watched {
+                value
+                __typename
+              }
+              __typename
+            }
+            __typename
+          }
+          viewOption {
+            buttonText
+            isAvailableOnline: isWatchable(
+              filter: { anyDevice: false, anyRegion: false }
+            )
+            purchasabilityStatus
+            contentPackageToBuy {
+              billingFeatureName
+              __typename
+            }
+            subscriptionBadge {
+              image {
+                avatarsUrl
+                __typename
+              }
+              __typename
+            }
+            type
+            posterWithRightholderLogo
+            __typename
+          }
+          ... on Film {
+            productionYear
+            __typename
+          }
+          ... on Video {
+            productionYear
+            __typename
+          }
+          ... on TvSeries {
+            releaseYears {
+              start
+              end
+              __typename
+            }
+            __typename
+          }
+          ... on TvShow {
+            releaseYears {
+              start
+              end
+              __typename
+            }
+            __typename
+          }
+          ... on MiniSeries {
+            releaseYears {
+              start
+              end
+              __typename
+            }
+            __typename
+          }
+          __typename
+        }
+        types
+        __typename
+      }
+      total
+      __typename
+    }
+    __typename
+  }
+}
+
+fragment RatingValue on RatingValue {
+  value
+  isActive
+  count
+  __typename
+}

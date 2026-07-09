@@ -1,0 +1,20 @@
+query PersonImages($personId: Long!, $imagesLimit: Int!, $imagesOffset: Int!) {
+  person(id: $personId) {
+    id
+    images(limit: $imagesLimit, offset: $imagesOffset) {
+      items {
+        id
+        image {
+          avatarsUrl
+          __typename
+        }
+        __typename
+      }
+      total
+      limit
+      offset
+      __typename
+    }
+    __typename
+  }
+}

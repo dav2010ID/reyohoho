@@ -1,0 +1,7 @@
+fragment MovieMediaPostsCount on Movie {
+  mediaPostsCount: post(limit: 0) {
+    total
+    __typename
+  }
+  __typename
+}

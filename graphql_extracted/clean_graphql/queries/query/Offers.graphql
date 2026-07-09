@@ -1,0 +1,170 @@
+query Offers(
+  $eventSessionId: String
+  $eventReason: String!
+  $target: String!
+  $features: [String!]
+  $tariffName: String
+  $optionNames: [String!]
+  $language: TRANSITION_LANGUAGE!
+) {
+  externalCompositeOffers(
+    input: {
+      eventSessionId: $eventSessionId
+      eventReason: $eventReason
+      filter: {
+        target: $target
+        features: $features
+        tariffOfferName: $tariffName
+        serviceOfferNames: $optionNames
+      }
+      language: $language
+      silent: true
+    }
+  ) {
+    batchPositionId
+    eventSessionId
+    offers {
+      __typename
+      ...compositeOffer
+    }
+  }
+}
+
+fragment offerPrice on Price {
+  currency
+  amount
+}
+
+fragment offerIntroPlan on IntroPlan {
+  period
+  price {
+    __typename
+    ...offerPrice
+  }
+  repetitionCount
+}
+
+fragment offerIntroUntilPlan on IntroUntilPlan {
+  price {
+    __typename
+    ...offerPrice
+  }
+  until
+}
+
+fragment offerTrialPlan on TrialPlan {
+  period
+}
+
+fragment offerTrialUntilPlan on TrialUntilPlan {
+  until
+}
+
+fragment offerPlan on OfferPlanUnion {
+  __typename
+  ... on IntroPlan {
+    __typename
+    ...offerIntroPlan
+  }
+  ... on IntroUntilPlan {
+    __typename
+    ...offerIntroUntilPlan
+  }
+  ... on TrialPlan {
+    __typename
+    ...offerTrialPlan
+  }
+  ... on TrialUntilPlan {
+    __typename
+    ...offerTrialUntilPlan
+  }
+}
+
+fragment tariffOffer on TariffOffer {
+  name
+  title
+  tariff {
+    name
+  }
+  description
+  text
+  additionText
+  commonPrice {
+    __typename
+    ...offerPrice
+  }
+  commonPeriod
+  plans {
+    __typename
+    ...offerPlan
+  }
+  offerVendorType
+  payload
+}
+
+fragment optionOffer on OptionOffer {
+  name
+  title
+  option {
+    name
+  }
+  description
+  text
+  additionText
+  commonPrice {
+    __typename
+    ...offerPrice
+  }
+  commonPeriod
+  plans {
+    __typename
+    ...offerPlan
+  }
+  offerVendorType
+  payload
+}
+
+fragment legalInfo on LegalInfo {
+  text
+  items {
+    type
+    key
+    data {
+      text
+      link
+    }
+  }
+}
+
+fragment compositeOffer on CompositeOffer {
+  positionId
+  structureType
+  forActiveTariff {
+    name
+  }
+  tariffOffer {
+    __typename
+    ...tariffOffer
+  }
+  optionOffers {
+    __typename
+    ...optionOffer
+  }
+  legalInfo {
+    __typename
+    ...legalInfo
+  }
+  invoices {
+    timestamp
+    totalPrice {
+      __typename
+      ...offerPrice
+    }
+  }
+  asset {
+    buttonText
+    buttonTextWithDetails
+    subscriptionName
+  }
+  silentInvoiceAvailable
+}

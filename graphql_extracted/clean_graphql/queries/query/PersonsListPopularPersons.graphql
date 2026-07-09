@@ -1,0 +1,50 @@
+query PersonsListPopularPersons(
+  $personsOffset: Int!
+  $personsLimit: Int!
+  $isCareerRoles: Boolean!
+  $rolesLimit: Int!
+) {
+  popularPersons(offset: $personsOffset, limit: $personsLimit) {
+    offset
+    limit
+    total
+    items {
+      person {
+        __typename
+        id
+        ...personNameFragment
+        poster {
+          __typename
+          ...imageFragment
+        }
+        roles(isCareer: $isCareerRoles, limit: $rolesLimit) {
+          items {
+            role {
+              __typename
+              ...personMovieCrewRoleFragment
+            }
+          }
+        }
+      }
+      position
+      positionDifference
+    }
+  }
+}
+
+fragment personNameFragment on Person {
+  name
+  originalName
+}
+
+fragment imageFragment on Image {
+  avatarsUrl
+  fallbackUrl
+}
+
+fragment personMovieCrewRoleFragment on MovieCrewRole {
+  slug
+  title {
+    russian
+  }
+}

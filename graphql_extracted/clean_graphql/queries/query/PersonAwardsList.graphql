@@ -1,0 +1,124 @@
+query PersonAwardsList(
+  $personId: Long!
+  $limit: Int!
+  $offset: Int!
+  $includeMovieRating: Boolean!
+) {
+  person(id: $personId) {
+    __typename
+    awards(
+      limit: $limit
+      offset: $offset
+      orderBy: AWARD_POSITION_YEAR_DESC_WIN_FIRST_NOMINATION_COUNT_DESC
+    ) {
+      __typename
+      limit
+      offset
+      total
+      items {
+        __typename
+        ...personAwardNomineeFragment
+      }
+    }
+  }
+}
+
+fragment personAwardNomineeFragment on PersonAwardNominee {
+  __typename
+  nomination {
+    __typename
+    ...nominationFragment
+  }
+  win
+  awardImage: image {
+    __typename
+    ...imageFragment
+  }
+  movie {
+    __typename
+    ...movieSummaryFragment
+  }
+}
+
+fragment nominationFragment on AwardNomination {
+  __typename
+  title
+  award {
+    __typename
+    ...awardFragment
+  }
+}
+
+fragment awardFragment on Award {
+  __typename
+  title
+  year
+}
+
+fragment imageFragment on Image {
+  __typename
+  avatarsUrl
+  fallbackUrl
+}
+
+fragment movieSummaryFragment on Movie {
+  __typename
+  id
+  gallery {
+    __typename
+    posters {
+      __typename
+      ...moviePostersFragment
+    }
+  }
+  genres {
+    __typename
+    ...genreFragment
+  }
+  title {
+    __typename
+    ...titleFragment
+  }
+  rating @include(if: $includeMovieRating) {
+    __typename
+    ...ratingFragment
+  }
+}
+
+fragment genreFragment on Genre {
+  __typename
+  name
+}
+
+fragment titleFragment on Title {
+  __typename
+  localized
+  original
+}
+
+fragment ratingFragment on Rating {
+  __typename
+  kinopoisk {
+    __typename
+    ...ratingValueFragment
+  }
+}
+
+fragment ratingValueFragment on RatingValue {
+  __typename
+  isActive
+  count
+  value(precision: 1)
+}
+
+fragment moviePostersFragment on MoviePosters {
+  __typename
+  vertical(override: OTT_WHEN_EXISTS) {
+    __typename
+    ...imageFragment
+  }
+  verticalWithRightholderLogo {
+    __typename
+    ...imageFragment
+  }
+}

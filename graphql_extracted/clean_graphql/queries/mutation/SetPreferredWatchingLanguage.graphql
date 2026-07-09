@@ -1,0 +1,12 @@
+mutation SetPreferredWatchingLanguage($code: String!) {
+  userProfile {
+    localisation {
+      setPreferredWatchingLanguage(code: $code) {
+        error {
+          message
+        }
+        status
+      }
+    }
+  }
+}

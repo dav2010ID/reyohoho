@@ -1,0 +1,17 @@
+{
+  "schema": "schema.graphql",
+  "documents": 459,
+  "apkDocuments": 290,
+  "webDocuments": 159,
+  "newDocuments": 10,
+  "queries": 316,
+  "mutations": 108,
+  "subscriptions": 0,
+  "fragmentDocuments": 35,
+  "schemaTypes": 1841,
+  "schemaFields": 5805,
+  "uniqueFragments": 662,
+  "apolloResponseFields": 1598,
+  "inputTypePlaceholders": 97,
+  "conflicts": 161
+}

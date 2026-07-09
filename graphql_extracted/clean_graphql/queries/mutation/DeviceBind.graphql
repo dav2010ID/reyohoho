@@ -1,0 +1,19 @@
+mutation DeviceBind {
+  device {
+    bind {
+      __typename
+      ...deviceMutationResult
+    }
+  }
+}
+
+fragment deviceMutationResult on DevicePayload {
+  status
+  error {
+    __typename
+    ... on DeviceLimitExceededError {
+      message
+    }
+    message
+  }
+}

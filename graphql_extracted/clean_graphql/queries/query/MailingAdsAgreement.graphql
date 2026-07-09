@@ -1,0 +1,19 @@
+query MailingAdsAgreement($language: LanguageISO639Scalar!) {
+  voluntaryMailingAdsAgreement(input: { language: $language }) {
+    agreement {
+      agreementDefaultStatus
+      logic
+      text {
+        text
+        parts {
+          __typename
+          ... on DecoratedTextReferencePartHighlight {
+            name
+            text
+            url
+          }
+        }
+      }
+    }
+  }
+}

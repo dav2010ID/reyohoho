@@ -1,0 +1,23 @@
+mutation ContentBrandSetLikeMutation(
+  $contentBrandId: Int!
+  $isLiked: Boolean!
+) {
+  contentBrand {
+    like {
+      set(input: { contentBrandIds: [$contentBrandId] })
+        @include(if: $isLiked) {
+        error {
+          message
+        }
+        status
+      }
+      remove(input: { contentBrandIds: [$contentBrandId] })
+        @skip(if: $isLiked) {
+        error {
+          message
+        }
+        status
+      }
+    }
+  }
+}

@@ -1,0 +1,19 @@
+mutation SearchHistoryRemoveMovieCollection($movieCollectionId: Long!) {
+  emptyPrefixSuggest {
+    history {
+      remove {
+        movieList(input: { id: $movieCollectionId }) {
+          __typename
+          ...searchHistoryMutationResult
+        }
+      }
+    }
+  }
+}
+
+fragment searchHistoryMutationResult on EmptyPrefixSuggestHistoryPayload {
+  status
+  error {
+    message
+  }
+}

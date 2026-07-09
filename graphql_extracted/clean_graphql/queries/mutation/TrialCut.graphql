@@ -1,0 +1,9 @@
+mutation TrialCut($token: String!) {
+  trialCut {
+    run(input: { token: $token }) {
+      errorCode
+      invoiceId
+      status
+    }
+  }
+}

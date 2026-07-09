@@ -1,0 +1,19 @@
+mutation SubscribeToUser($puid: Long!) {
+  userProfile {
+    social {
+      subscriptions {
+        subscribe(input: { targetUserPuid: $puid }) {
+          error {
+            message
+            __typename
+          }
+          status
+          __typename
+        }
+        __typename
+      }
+      __typename
+    }
+    __typename
+  }
+}

@@ -1,0 +1,37 @@
+query ContentBrands($layout: ContentBrandsLayout!, $isAuthorized: Boolean!) {
+  contentBrands(layout: $layout) {
+    items {
+      ...ContentBrand
+      __typename
+    }
+    __typename
+  }
+}
+
+fragment ContentBrand on ContentBrand {
+  id
+  name
+  gallery {
+    logos {
+      colored {
+        avatarsUrl
+        __typename
+      }
+      square {
+        avatarsUrl
+        __typename
+      }
+      __typename
+    }
+    __typename
+  }
+  colors {
+    main
+    __typename
+  }
+  userData @include(if: $isAuthorized) {
+    isLiked
+    __typename
+  }
+  __typename
+}

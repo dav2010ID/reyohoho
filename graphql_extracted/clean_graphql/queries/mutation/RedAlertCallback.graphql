@@ -1,0 +1,21 @@
+mutation RedAlertCallback(
+  $alertId: String!
+  $appVersion: String
+  $callbackType: ALERT_CALLBACK_TYPE!
+  $client: String
+  $platform: PLATFORM!
+  $sdkVersion: String
+  $service: String!
+) {
+  alertCallback(
+    input: {
+      alertId: $alertId
+      appVersion: $appVersion
+      callbackType: $callbackType
+      client: $client
+      platform: $platform
+      sdkVersion: $sdkVersion
+      service: $service
+    }
+  )
+}

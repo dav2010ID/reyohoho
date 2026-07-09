@@ -1,0 +1,12 @@
+mutation UserAdultVerifyPinCode($input: PinCodeVerifyInput!) {
+  userProfile {
+    pinCode {
+      verify(input: $input) {
+        error {
+          message
+        }
+        status
+      }
+    }
+  }
+}

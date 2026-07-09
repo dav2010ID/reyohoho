@@ -1,0 +1,12 @@
+query UserFoldersTotalForMovie($movieId: Long!) {
+  movie(id: $movieId) {
+    __typename
+    userData {
+      __typename
+      folders {
+        __typename
+        id
+      }
+    }
+  }
+}

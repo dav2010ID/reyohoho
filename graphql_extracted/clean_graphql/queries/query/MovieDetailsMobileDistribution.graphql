@@ -1,0 +1,111 @@
+query MovieDetailsMobileDistribution($movieId: Long!, $countryId: Long!) {
+  movie(id: $movieId) {
+    __typename
+    ...movieDetailsMobileDistributionFragment
+  }
+}
+
+fragment currencyFragment on Currency {
+  symbol
+  currencyCode
+}
+
+fragment moneyAmountFragment on MoneyAmount {
+  amount
+  currency {
+    __typename
+    ...currencyFragment
+  }
+}
+
+fragment countryFragment on Country {
+  id
+  name
+}
+
+fragment incompleteDateFragment on IncompleteDate {
+  date
+  accuracy
+}
+
+fragment movieDetailsMobileDistributionPremierFragment on Premiere {
+  country {
+    __typename
+    ...countryFragment
+  }
+  incompleteDate {
+    __typename
+    ...incompleteDateFragment
+  }
+}
+
+fragment movieDetailsMobileDistributionReleaseFragment on Release {
+  type
+  reRelease
+  date {
+    __typename
+    ...incompleteDateFragment
+  }
+  country {
+    __typename
+    ...countryFragment
+  }
+  companies {
+    displayName
+  }
+}
+
+fragment movieDetailsMobileDistributionFragment on Movie {
+  boxOffice {
+    worldBox {
+      __typename
+      ...moneyAmountFragment
+    }
+    usaBox {
+      __typename
+      ...moneyAmountFragment
+    }
+    rusBox {
+      __typename
+      ...moneyAmountFragment
+    }
+    budget {
+      __typename
+      ...moneyAmountFragment
+    }
+    marketing {
+      __typename
+      ...moneyAmountFragment
+    }
+  }
+  distribution {
+    localPremieres: premieres(countryId: $countryId) {
+      items {
+        __typename
+        ...movieDetailsMobileDistributionPremierFragment
+      }
+    }
+    worldPremiere {
+      __typename
+      ...movieDetailsMobileDistributionPremierFragment
+    }
+    allPremieres: premieres {
+      items {
+        __typename
+        ...movieDetailsMobileDistributionPremierFragment
+      }
+    }
+    releases(types: [BLURAY, DIGITAL, DVD]) {
+      items {
+        __typename
+        ...movieDetailsMobileDistributionReleaseFragment
+      }
+    }
+  }
+  dvdSales {
+    totalAmount {
+      __typename
+      ...moneyAmountFragment
+    }
+  }
+}

@@ -1,0 +1,13 @@
+query MovieCollectionWatchedProgress(
+  $listId: Long!
+  $filter: MovieListFilterInput
+) {
+  movieList(filter: $filter, id: $listId) {
+    userData {
+      watched
+    }
+    movies(offset: 0, limit: 0) {
+      total
+    }
+  }
+}

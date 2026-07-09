@@ -1,0 +1,76 @@
+query MovieDetailsMobileMainAwardsInfo($movieId: Long!) {
+  movie(id: $movieId) {
+    __typename
+    ...movieDetailsMobileMainAwardsInfoFragment
+  }
+}
+
+fragment awardNominationFragment on AwardNomination {
+  title
+  award {
+    title
+    year
+  }
+}
+
+fragment imageFragment on Image {
+  avatarsUrl
+  fallbackUrl
+}
+
+fragment personNameFragment on Person {
+  name
+  originalName
+}
+
+fragment personSummaryWithoutDatesFragment on Person {
+  __typename
+  id
+  ...personNameFragment
+  gender
+  age
+  height
+  poster {
+    __typename
+    ...imageFragment
+  }
+  published
+}
+
+fragment movieDetailsMobileAwardNomineeFragment on MovieAwardNominee {
+  nomination {
+    __typename
+    ...awardNominationFragment
+  }
+  image {
+    __typename
+    ...imageFragment
+  }
+  win
+  persons(limit: 10) {
+    items {
+      __typename
+      ...personSummaryWithoutDatesFragment
+    }
+  }
+}
+
+fragment movieDetailsMobileMainAwardsInfoFragment on Movie {
+  mainAwards: awards(
+    limit: 1
+    isMain: true
+    orderBy: WIN_FIRST_YEAR_DESC_NOMINATION_ASC
+  ) {
+    total
+    items {
+      __typename
+      ...movieDetailsMobileAwardNomineeFragment
+    }
+  }
+  mainAndWinAwards: awards(limit: 1, isMain: true, isWin: true) {
+    total
+  }
+  allAwards: awards(limit: 0) {
+    total
+  }
+}

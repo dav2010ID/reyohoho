@@ -1,0 +1,524 @@
+query VideoFeed(
+  $includeContentBrands: Boolean!
+  $contentBrandsLimit: Int!
+  $selectionId: String!
+  $showcaseId: String!
+  $selectionOffset: Int!
+  $selectionLimit: Int!
+  $purchaseOptionsContext: BillingFeatureClientContextInput!
+  $includeMoviePurchaseOptions: Boolean!
+  $includeTrialCutInfo: Boolean!
+  $includeContentBrandUserData: Boolean!
+  $includeMovieUserData: Boolean!
+  $includeEstEarlyAccess: Boolean! = false
+  $includeVerification: Boolean! = true
+) {
+  userProfile @include(if: $includeContentBrands) {
+    userData {
+      likedContentBrands(offset: 0, limit: $contentBrandsLimit) {
+        items {
+          contentBrand {
+            id
+            gallery {
+              logos {
+                colored {
+                  __typename
+                  ...imageFragment
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+  selection(showcaseId: $showcaseId, id: $selectionId) {
+    __typename
+    ... on VideoFeedSelection {
+      id
+      title
+      showTitle
+      comment
+      content(offset: $selectionOffset, limit: $selectionLimit) {
+        __typename
+        ...showcaseSelectionPagingMetaFragment
+        items {
+          __typename
+          ...showcaseVideoFeedSelectionItemFragment
+        }
+      }
+    }
+  }
+}
+
+fragment imageFragment on Image {
+  avatarsUrl
+  fallbackUrl
+}
+
+fragment showcaseSelectionPagingMetaFragment on SessionPagingList_SelectionItem {
+  sessionId
+  offset
+  limit
+  hasMore
+}
+
+fragment socialInfoFragment on UserSocialInfo {
+  alias {
+    defaultValue {
+      value
+      source
+    }
+  }
+  name {
+    defaultValue {
+      value
+    }
+  }
+  avatar {
+    defaultValue {
+      value {
+        __typename
+        ...imageFragment
+      }
+    }
+  }
+  publicStatus
+  url
+  badges @include(if: $includeVerification) {
+    verified {
+      id
+      title
+      description
+      icons {
+        format
+        image {
+          __typename
+          ...imageFragment
+        }
+      }
+    }
+  }
+}
+
+fragment socialArgumentUserInfoFragment on UserProfileInterface {
+  id {
+    puid
+  }
+  subscriptionInfo {
+    hasSubscription
+  }
+  social {
+    __typename
+    ...socialInfoFragment
+  }
+}
+
+fragment socialUserArgumentFragment on SocialArgument {
+  __typename
+  ... on PlannedToWatchSocialUserArgument {
+    user {
+      __typename
+      ...socialArgumentUserInfoFragment
+    }
+  }
+  ... on WatchedSocialUserArgument {
+    user {
+      __typename
+      ...socialArgumentUserInfoFragment
+    }
+  }
+  ... on VotedSocialUserArgument {
+    user {
+      __typename
+      ...socialArgumentUserInfoFragment
+    }
+    value
+  }
+  ... on WatchingSocialUserArgument {
+    user {
+      __typename
+      ...socialArgumentUserInfoFragment
+    }
+  }
+}
+
+fragment socialGroupArgumentFragment on SocialArgument {
+  __typename
+  ... on PlannedToWatchSocialGroupArgument {
+    usersTotalCount
+    users {
+      __typename
+      ...socialArgumentUserInfoFragment
+    }
+  }
+  ... on WatchedSocialGroupArgument {
+    usersTotalCount
+    users {
+      __typename
+      ...socialArgumentUserInfoFragment
+    }
+  }
+  ... on VotedSocialGroupArgument {
+    usersTotalCount
+    users {
+      __typename
+      ...socialArgumentUserInfoFragment
+    }
+  }
+  ... on WatchingSocialGroupArgument {
+    usersTotalCount
+    users {
+      __typename
+      ...socialArgumentUserInfoFragment
+    }
+  }
+}
+
+fragment socialArgumentFragment on SocialArgument {
+  __typename
+  ...socialUserArgumentFragment
+  ...socialGroupArgumentFragment
+}
+
+fragment trailerFragment on Trailer {
+  contentUuid
+  id
+  isMain
+  preview {
+    __typename
+    ...imageFragment
+  }
+  streamUrl
+  title
+  createdAt
+}
+
+fragment titleFragment on Title {
+  localized
+  original
+}
+
+fragment movieCoversFragment on MovieCovers {
+  vertical {
+    __typename
+    ...imageFragment
+  }
+  horizontal {
+    __typename
+    ...imageFragment
+  }
+  square {
+    __typename
+    ...imageFragment
+  }
+}
+
+fragment imageWithSizeFragment on Image {
+  __typename
+  ...imageFragment
+  origSize {
+    width
+    height
+  }
+}
+
+fragment licenseCoverFragment on LicenseCover {
+  formFactor
+  image {
+    __typename
+    ...imageFragment
+  }
+  theme
+}
+
+fragment movieViewOptionPurchasedSubscriptionFragment on ViewOption {
+  purchasedSubscriptionTextId
+  purchasedSubscriptionName
+}
+
+fragment availabilityAnnounceFragment on AvailabilityAnnounce {
+  announcePromise
+  availabilityDate
+  type
+}
+
+fragment movieContentPackageFragment on ContentPackage {
+  billingFeatureName
+}
+
+fragment currencyFragment on Currency {
+  symbol
+  currencyCode
+}
+
+fragment moneyAmountFragment on MoneyAmount {
+  amount
+  currency {
+    __typename
+    ...currencyFragment
+  }
+}
+
+fragment movieViewOptionTrialCutInfoFragment on TrialCutInfo {
+  texts {
+    title
+    subTitle
+    buttonText
+  }
+  token
+  type
+}
+
+fragment movieViewOptionSummaryFragment on ViewOption {
+  __typename
+  type
+  purchasabilityStatus
+  isWatchableOnDeviceInCurrentRegion: isWatchable(
+    filter: { anyDevice: false, anyRegion: false }
+  )
+  buttonText
+  ...movieViewOptionPurchasedSubscriptionFragment
+  availabilityAnnounce {
+    __typename
+    ...availabilityAnnounceFragment
+  }
+  contentPackageToBuy {
+    __typename
+    ...movieContentPackageFragment
+  }
+  contentPackageToUnfreeze {
+    __typename
+    ...movieContentPackageFragment
+  }
+  transactionalPrice {
+    __typename
+    ...moneyAmountFragment
+  }
+  transactionalMinimumPrice {
+    __typename
+    ...moneyAmountFragment
+  }
+  priceWithTotalDiscount {
+    __typename
+    ...moneyAmountFragment
+  }
+  optionMonetizationModels
+  watchabilityStatus
+  watchabilityExpirationTime
+  promotionActionType
+  downloadabilityStatus
+  purchaseOptions(clientContext: $purchaseOptionsContext)
+    @include(if: $includeMoviePurchaseOptions) {
+    billingFeatureNames
+    target
+  }
+  trialCutInfo @include(if: $includeTrialCutInfo) {
+    __typename
+    ...movieViewOptionTrialCutInfoFragment
+  }
+  purchaseOptionCustomProperties @include(if: $includeMoviePurchaseOptions)
+}
+
+fragment externalViewOptionContentBrandFragment on ContentBrand {
+  id
+  name
+  colors {
+    main
+  }
+  gallery {
+    logos {
+      colored {
+        __typename
+        ...imageFragment
+      }
+      centeredMain {
+        __typename
+        ...imageFragment
+      }
+      dynamic {
+        __typename
+        ...imageFragment
+      }
+      square {
+        __typename
+        ...imageFragment
+      }
+      gradient {
+        __typename
+        ...imageFragment
+      }
+    }
+  }
+  userData @include(if: $includeContentBrandUserData) {
+    isLiked
+  }
+}
+
+fragment incompleteDateFragment on IncompleteDate {
+  date
+  accuracy
+}
+
+fragment payOfferFragment on PayOffer {
+  button {
+    badge {
+      text
+      icon {
+        __typename
+        ...imageFragment
+      }
+    }
+    disclaimer {
+      text
+      link
+    }
+  }
+  selectorLink
+}
+
+fragment movieExternalViewOptionFragment on ExternalViewOption {
+  __typename
+  ... on ExternalBaseOption {
+    contentBrand {
+      __typename
+      ...externalViewOptionContentBrandFragment
+    }
+    externalUrl
+  }
+  ... on ExternalPartnerOption {
+    contentBrand {
+      __typename
+      ...externalViewOptionContentBrandFragment
+    }
+    externalUrl
+    action {
+      __typename
+      ... on WatchAction {
+        __typename
+      }
+      ... on BillingFeaturePurchaseAction {
+        purchaseOptionCustomProperties
+      }
+    }
+  }
+  ... on TicketOption {
+    purchasable
+    releaseAnnounce {
+      available
+      releaseDate {
+        __typename
+        ...incompleteDateFragment
+      }
+    }
+    payOffer {
+      __typename
+      ...payOfferFragment
+    }
+  }
+}
+
+fragment estEarlyAccessViewOptionFragment on Episode {
+  viewOption {
+    watchabilityStatus
+    purchasabilityStatus
+    optionMonetizationModels
+    transactionalPrice {
+      __typename
+      ...moneyAmountFragment
+    }
+    availabilityAnnounce {
+      __typename
+      ...availabilityAnnounceFragment
+    }
+  }
+}
+
+fragment movieOttAbstractNextEpisodeFragment on Ott_AbstractSeries {
+  nextEpisode {
+    fallback
+    episode {
+      __typename
+      contentId
+      number
+      season {
+        number
+      }
+      title {
+        __typename
+        ...titleFragment
+      }
+      ott {
+        editorAnnotation
+      }
+      ...estEarlyAccessViewOptionFragment @include(if: $includeEstEarlyAccess)
+    }
+  }
+}
+
+fragment movieOttNextEpisodeFragment on Series {
+  ott {
+    __typename
+    ...movieOttAbstractNextEpisodeFragment
+  }
+}
+
+fragment showcaseVideoFeedMovieFragment on Movie {
+  __typename
+  id
+  contentId
+  title {
+    __typename
+    ...titleFragment
+  }
+  shortDescription
+  gallery {
+    covers {
+      __typename
+      ...movieCoversFragment
+    }
+    logos {
+      horizontal {
+        __typename
+        ...imageWithSizeFragment
+      }
+      rightholderForCover {
+        __typename
+        ...licenseCoverFragment
+      }
+    }
+  }
+  viewOption {
+    __typename
+    ...movieViewOptionSummaryFragment
+  }
+  externalViewOptions {
+    __typename
+    ...movieExternalViewOptionFragment
+  }
+  userData @include(if: $includeMovieUserData) {
+    isPlannedToWatch
+  }
+  ...movieOttNextEpisodeFragment @include(if: $includeMovieUserData)
+}
+
+fragment showcaseVideoFeedSelectionItemFragment on SelectionItem {
+  __typename
+  ... on VideoFeedSelectionItem {
+    socialArgument {
+      __typename
+      ...socialArgumentFragment
+    }
+    item {
+      __typename
+      ... on Trailer {
+        __typename
+        ...trailerFragment
+        movie {
+          __typename
+          ...showcaseVideoFeedMovieFragment
+        }
+      }
+    }
+  }
+}

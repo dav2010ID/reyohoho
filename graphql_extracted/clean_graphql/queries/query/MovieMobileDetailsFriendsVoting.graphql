@@ -1,0 +1,93 @@
+query MovieMobileDetailsFriendsVoting(
+  $movieId: Long!
+  $offset: Int!
+  $limit: Int!
+  $includeVerification: Boolean! = false
+) {
+  movie(id: $movieId) {
+    userData {
+      friendsVoting(limit: $limit, offset: $offset, orderBy: VOTE_VALUE_DESC) {
+        offset
+        limit
+        total
+        items {
+          attitude
+          friend {
+            userProfile {
+              __typename
+              ... on UserProfile {
+                login
+              }
+              id {
+                puid
+              }
+              displayName
+              avatar {
+                __typename
+                ...imageFragment
+              }
+              social {
+                __typename
+                ...socialInfoFragment
+              }
+              subscriptionInfo {
+                hasSubscription
+              }
+            }
+          }
+          vote {
+            __typename
+            ...voteFragment
+          }
+        }
+      }
+    }
+  }
+}
+
+fragment imageFragment on Image {
+  avatarsUrl
+  fallbackUrl
+}
+
+fragment socialInfoFragment on UserSocialInfo {
+  alias {
+    defaultValue {
+      value
+      source
+    }
+  }
+  name {
+    defaultValue {
+      value
+    }
+  }
+  avatar {
+    defaultValue {
+      value {
+        __typename
+        ...imageFragment
+      }
+    }
+  }
+  publicStatus
+  url
+  badges @include(if: $includeVerification) {
+    verified {
+      id
+      title
+      description
+      icons {
+        format
+        image {
+          __typename
+          ...imageFragment
+        }
+      }
+    }
+  }
+}
+
+fragment voteFragment on Vote {
+  value
+}

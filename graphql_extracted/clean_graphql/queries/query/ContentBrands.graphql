@@ -1,0 +1,24 @@
+query ContentBrands($layout: ContentBrandsLayout!, $includeUserData: Boolean!) {
+  contentBrands(layout: $layout) {
+    items {
+      id
+      name
+      gallery {
+        logos {
+          colored {
+            __typename
+            ...imageFragment
+          }
+        }
+      }
+      userData @include(if: $includeUserData) {
+        isLiked
+      }
+    }
+  }
+}
+
+fragment imageFragment on Image {
+  avatarsUrl
+  fallbackUrl
+}

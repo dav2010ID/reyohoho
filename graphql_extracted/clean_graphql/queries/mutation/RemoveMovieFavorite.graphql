@@ -1,0 +1,16 @@
+mutation RemoveMovieFavorite($movieId: Long!) {
+  movie {
+    favorite {
+      remove(input: { movieId: $movieId }) {
+        status
+        error {
+          message
+          __typename
+        }
+        __typename
+      }
+      __typename
+    }
+    __typename
+  }
+}

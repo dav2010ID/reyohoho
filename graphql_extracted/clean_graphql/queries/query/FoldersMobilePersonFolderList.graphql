@@ -1,0 +1,29 @@
+query FoldersMobilePersonFolderList(
+  $personId: Long!
+  $offset: Int!
+  $limit: Int!
+) {
+  userProfile {
+    __typename
+    ...foldersMobilePersonFolderListFragment
+  }
+}
+
+fragment foldersMobilePersonFolderListFragment on UserProfile {
+  userData {
+    personFolders(limit: $limit, offset: $offset) {
+      offset
+      limit
+      total
+      items {
+        typeId
+        name
+        containsPerson(personId: $personId)
+        public
+        persons {
+          total
+        }
+      }
+    }
+  }
+}

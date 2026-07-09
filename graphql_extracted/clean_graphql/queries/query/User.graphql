@@ -1,0 +1,41 @@
+query User($id: ID!) {
+  user(id: $id) {
+    id
+    avatar {
+      __typename
+      ...avatar
+    }
+    family {
+      capacity
+      invitations {
+        __typename
+        ...familyInvitation
+      }
+      members {
+        __typename
+        ...familyMember
+      }
+    }
+  }
+}
+
+fragment avatar on Avatar {
+  empty
+  passportAvatarId
+}
+
+fragment familyInvitation on FamilyInvitation {
+  id
+  avatar {
+    __typename
+    ...avatar
+  }
+}
+
+fragment familyMember on User {
+  id
+  avatar {
+    __typename
+    ...avatar
+  }
+}

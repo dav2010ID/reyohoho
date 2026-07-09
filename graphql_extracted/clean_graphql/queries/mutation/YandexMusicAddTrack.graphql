@@ -1,0 +1,14 @@
+mutation YandexMusicAddTrack($input: YandexMusicKpPlaylistAddInput!) {
+  yandex {
+    music {
+      kpPlaylist {
+        add(input: $input) {
+          status
+          error {
+            message
+          }
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,7 @@
+fragment MovieFactsCount on Movie {
+  factsCount: trivias(type: FACT, limit: 0) {
+    total
+    __typename
+  }
+  __typename
+}

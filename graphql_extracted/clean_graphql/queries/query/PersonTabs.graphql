@@ -1,0 +1,18 @@
+query PersonTabs($personId: Long!) {
+  person(id: $personId) {
+    id
+    awards(limit: 0) {
+      total
+      __typename
+    }
+    images(limit: 0) {
+      total
+      __typename
+    }
+    filmographyRelations(limit: 0) {
+      total
+      __typename
+    }
+    __typename
+  }
+}

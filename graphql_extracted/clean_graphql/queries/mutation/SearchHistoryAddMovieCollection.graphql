@@ -1,0 +1,19 @@
+mutation SearchHistoryAddMovieCollection($movieCollectionId: Long!) {
+  emptyPrefixSuggest {
+    history {
+      add {
+        movieList(input: { id: $movieCollectionId }) {
+          __typename
+          ...searchHistoryMutationResult
+        }
+      }
+    }
+  }
+}
+
+fragment searchHistoryMutationResult on EmptyPrefixSuggestHistoryPayload {
+  status
+  error {
+    message
+  }
+}

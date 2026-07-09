@@ -1,0 +1,13 @@
+query YandexMusicTrackStatus($trackId: String!) {
+  userProfile {
+    yandex {
+      music {
+        kpPlaylist {
+          status(trackId: $trackId) {
+            exists
+          }
+        }
+      }
+    }
+  }
+}

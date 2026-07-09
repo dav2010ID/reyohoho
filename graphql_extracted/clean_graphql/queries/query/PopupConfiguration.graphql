@@ -1,0 +1,146 @@
+query PopupConfiguration(
+  $shortcutId: ID!
+  $lightTargetingInput: TargetingInput!
+  $darkTargetingInput: TargetingInput!
+) {
+  configuration: shortcut(targeting: $lightTargetingInput, id: $shortcutId) {
+    __typename
+    ...popupConfigurationFragment
+  }
+  darkConfiguration: shortcut(targeting: $darkTargetingInput, id: $shortcutId) {
+    __typename
+    ...darkPopupConfigurationFragment
+  }
+}
+
+fragment hexColorFragment on HexColor {
+  a
+  hex
+}
+
+fragment gradientFragment on Gradient {
+  __typename
+  colors {
+    hexColor {
+      __typename
+      ...hexColorFragment
+    }
+    location
+  }
+  ... on LinearGradient {
+    angle
+  }
+  ... on RadialGradient {
+    relativeCenter {
+      x
+      y
+    }
+    relativeRadius {
+      x
+      y
+    }
+  }
+}
+
+fragment colorFragment on Colors {
+  value {
+    __typename
+    ... on GradientColor {
+      gradient {
+        __typename
+        ...gradientFragment
+      }
+    }
+    ... on HexColor {
+      __typename
+      ...hexColorFragment
+    }
+  }
+}
+
+fragment configurationOverlayFragment on Overlay {
+  text
+  shape
+  textColor
+  textColors {
+    __typename
+    ...colorFragment
+  }
+  background {
+    color
+  }
+  attributedText {
+    items {
+      __typename
+      ... on TextProperties {
+        name
+        text
+      }
+    }
+  }
+}
+
+fragment popupConfigurationFragment on Shortcut {
+  name
+  id
+  popups {
+    textColor
+    background {
+      color
+    }
+    commonOverlays {
+      __typename
+      ...configurationOverlayFragment
+    }
+    buttons {
+      textColor
+      backgroundColor
+      action {
+        actionType
+        silent
+        subscriptionButtonType
+        subscriptionPaymentMethod
+        subscriptionProductFeatures
+        subscriptionWidgetType
+        acquisitionPlatformSubscriptionProperties {
+          page
+          places
+          restrictions
+        }
+      }
+      subscriptionProductTarget
+    }
+  }
+}
+
+fragment darkConfigurationOverlayFragment on Overlay {
+  shape
+  textColor
+  textColors {
+    __typename
+    ...colorFragment
+  }
+  background {
+    color
+  }
+}
+
+fragment darkPopupConfigurationFragment on Shortcut {
+  popups {
+    textColor
+    background {
+      color
+    }
+    commonOverlays {
+      __typename
+      ...darkConfigurationOverlayFragment
+    }
+    buttons {
+      textColor
+      backgroundColor
+      action {
+        actionType
+      }
+    }
+  }
+}

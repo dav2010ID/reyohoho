@@ -1,0 +1,57 @@
+fragment PersonDataCount on Person {
+  ...PersonMainAwardsCount
+  ...PersonImagesCount
+  ...PersonMediaPostsCount
+  ...PersonFactsCount
+  ...PersonOnlineFilmsCount
+  ...PersonMovieCount
+  __typename
+}
+
+fragment PersonMainAwardsCount on Person {
+  mainAwardsCount: awards(isMain: true, limit: 0) {
+    total
+    __typename
+  }
+  __typename
+}
+
+fragment PersonImagesCount on Person {
+  imagesCount: images(limit: 0) {
+    total
+    __typename
+  }
+  __typename
+}
+
+fragment PersonMediaPostsCount on Person {
+  mediaPostsCount: post(limit: 0) {
+    total
+    __typename
+  }
+  __typename
+}
+
+fragment PersonFactsCount on Person {
+  factsCount: trivias(limit: 0) {
+    total
+    __typename
+  }
+  __typename
+}
+
+fragment PersonOnlineFilmsCount on Person {
+  onlineFilmsCount: filmographyRelations(isOnline: true, limit: 0) {
+    total
+    __typename
+  }
+  __typename
+}
+
+fragment PersonMovieCount on Person {
+  movieCount: filmographyRelations(limit: 0) {
+    total
+    __typename
+  }
+  __typename
+}

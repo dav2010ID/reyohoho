@@ -1,0 +1,14 @@
+mutation SportTeamAddFavourite($teamId: String!) {
+  sport {
+    team {
+      like {
+        add(input: { teamId: $teamId, source: TEAM_SHOWCASE }) {
+          status
+          error {
+            message
+          }
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,30 @@
+query FilmCriticsReviews($filmId: Long!, $criticReviewsLimit: Int = 10) {
+  film(id: $filmId) {
+    id
+    criticReviews(limit: $criticReviewsLimit) {
+      items {
+        id
+        text
+        type
+        author {
+          firstName
+          lastName
+          __typename
+        }
+        source {
+          title
+          icon {
+            avatarsUrl
+            fallbackUrl
+            __typename
+          }
+          __typename
+        }
+        __typename
+      }
+      total
+      __typename
+    }
+    __typename
+  }
+}

@@ -1,0 +1,73 @@
+query TelevisionStartingChannel(
+  $programsDuration: Duration
+  $programsDurationInPast: Duration
+) {
+  userProfile {
+    userData {
+      startingTvChannel {
+        __typename
+        ...televisionChannelSummaryFragment
+        isNeedToHidePrograms
+        tvPrograms(
+          duration: $programsDuration
+          durationInPast: $programsDurationInPast
+        ) {
+          __typename
+          ...televisionProgramFragment
+        }
+      }
+    }
+  }
+}
+
+fragment imageFragment on Image {
+  avatarsUrl
+  fallbackUrl
+}
+
+fragment televisionChannelSummaryFragment on TvChannel {
+  contentId
+  title
+  gallery {
+    logos {
+      main {
+        __typename
+        ...imageFragment
+      }
+      loader {
+        __typename
+        ...imageFragment
+      }
+    }
+    covers {
+      horizontal {
+        __typename
+        ...imageFragment
+      }
+      preview {
+        __typename
+        ...imageFragment
+      }
+      paywall {
+        __typename
+        ...imageFragment
+      }
+    }
+  }
+  ageRestriction
+}
+
+fragment televisionProgramFragment on TvProgram {
+  id
+  title
+  startTime
+  endTime
+  image {
+    __typename
+    ...imageFragment
+  }
+  ageRestriction
+  episodeTitle
+  typeName
+  catchupContentId
+}

@@ -1,0 +1,7 @@
+fragment PersonMainAwardsCount on Person {
+  mainAwardsCount: awards(isMain: true, limit: 0) {
+    total
+    __typename
+  }
+  __typename
+}

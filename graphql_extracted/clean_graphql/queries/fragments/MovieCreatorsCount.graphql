@@ -1,0 +1,10 @@
+fragment MovieCreatorsCount on Movie {
+  creatorsCount: members(
+    limit: 0
+    role: [DIRECTOR, WRITER, PRODUCER, COMPOSER, OPERATOR, DESIGN, ART]
+  ) {
+    total
+    __typename
+  }
+  __typename
+}

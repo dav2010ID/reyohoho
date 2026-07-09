@@ -1,0 +1,982 @@
+{
+    "externalId": {
+        "_id": "6339888ec22d011bb5aee707",
+        "imdb": "tt1160419"
+    },
+    "logo": {
+        "_id": "633645d4248263ce89ad3933",
+        "url": "https://avatars.mds.yandex.net/get-ott/1534341/2a0000017ede1a0d9f8bae88b8f757431b94/orig"
+    },
+    "poster": {
+        "_id": "6339888ec22d011bb5aee70c",
+        "url": "https://st.kp.yandex.net/images/film_big/409424.jpg",
+        "previewUrl": "https://st.kp.yandex.net/images/film_iphone/iphone360_409424.jpg"
+    },
+    "backdrop": {
+        "_id": "6339888ec22d011bb5aee70d",
+        "url": "https://avatars.mds.yandex.net/get-ott/1672343/2a0000017c9a7befa597b53c1700dcaa89b7/orig",
+        "previewUrl": "https://avatars.mds.yandex.net/get-ott/1672343/2a0000017c9a7befa597b53c1700dcaa89b7/orig"
+    },
+    "rating": {
+        "_id": "634e8107a7faa4cbfc16c9ca",
+        "kp": 7.665,
+        "imdb": 8,
+        "filmCritics": 7.6,
+        "russianFilmCritics": 72,
+        "await": 96.96
+    },
+    "votes": {
+        "_id": "6350d907a7faa4cbfc97eca9",
+        "kp": 614689,
+        "imdb": 618851,
+        "filmCritics": 493,
+        "russianFilmCritics": 25,
+        "await": 89754
+    },
+    "videos": {
+        "_id": "632c19ca6d074d4407b769b8",
+        "trailers": [],
+        "teasers": []
+    },
+    "networks": null,
+    "budget": {
+        "_id": "6339888ec22d011bb5aee770",
+        "value": 165000000,
+        "currency": "$"
+    },
+    "fees": {
+        "world": {
+            "_id": "6339888ec22d011bb5aee772",
+            "value": 401847900,
+            "currency": "$"
+        },
+        "russia": {
+            "_id": "6339888ec22d011bb5aee773",
+            "value": 21931316,
+            "currency": "$"
+        },
+        "usa": {
+            "_id": "6339888ec22d011bb5aee774",
+            "value": 108327830,
+            "currency": "$"
+        },
+        "_id": "6339888ec22d011bb5aee771"
+    },
+    "distributors": {
+        "distributor": "UPI",
+        "distributorRelease": null
+    },
+    "premiere": {
+        "_id": "6336464a248263ce89ad5300",
+        "country": "Италия",
+        "world": "2021-09-03T00:00:00.000Z",
+        "russia": "2021-09-16T00:00:00.000Z",
+        "cinema": "2021-09-16T00:00:00.000Z",
+        "digital": "2021-10-22T00:00:00.000Z"
+    },
+    "images": {
+        "framesCount": 27
+    },
+    "collections": [],
+    "updateDates": [
+        "2021-09-25T10:52:03.000Z",
+        "2021-10-02T17:01:47.000Z"
+    ],
+    "status": "Выпущен",
+    "movieLength": 155,
+    "productionCompanies": [
+        {
+            "name": "Villeneuve Films",
+            "url": null,
+            "previewUrl": null
+        },
+        {
+            "name": "Legendary Pictures",
+            "url": "https://www.themoviedb.org/t/p/original/5UQsZrfbfG2dYJbx8DxfoTr2Bvu.png",
+            "previewUrl": "https://www.themoviedb.org/t/p/w500/5UQsZrfbfG2dYJbx8DxfoTr2Bvu.png"
+        },
+        {
+            "name": "Warner Bros. Pictures",
+            "url": "https://www.themoviedb.org/t/p/original/IuAlhI9eVC9Z8UQWOIDdWRKSEJ.png",
+            "previewUrl": "https://www.themoviedb.org/t/p/w500/IuAlhI9eVC9Z8UQWOIDdWRKSEJ.png"
+        }
+    ],
+    "spokenLanguages": [
+        {
+            "name": "English",
+            "nameEn": "English"
+        }
+    ],
+    "id": 409424,
+    "type": "movie",
+    "name": "Дюна",
+    "description": "Наследник знаменитого дома Атрейдесов Пол отправляется вместе с семьей на одну из самых опасных планет во Вселенной — Арракис. Здесь нет ничего, кроме песка, палящего солнца, гигантских чудовищ и основной причины межгалактических конфликтов — невероятно ценного ресурса, который называется меланж. В результате захвата власти Пол вынужден бежать и скрываться, и это становится началом его эпического путешествия. Враждебный мир Арракиса приготовил для него множество тяжелых испытаний, но только тот, кто готов взглянуть в глаза своему страху, достоин стать избранным.",
+    "slogan": "Час настал",
+    "year": 2021,
+    "facts": [
+        {
+            "value": "Съёмки фильма проходили в Венгрии, Норвегии (океаны на Каладане), ОАЭ, Австрии и Словакии. Сцены пустынь на Арракисе снимали в основном в Иордании и в Абу-Даби.",
+            "type": "FACT",
+            "spoiler": false
+        },
+        {
+            "value": "Режиссёр <a href=\"/name/415350/\" class=\"all\">Дени Вильнёв</a> представлял себе барона Владимира Харконнена (<a href=\"/name/11661/\" class=\"all\">Стеллан Скарсгард</a>) как &#171;носорога в человеческом обличье&#187;. Каждый день перед съёмками актёр проводил по 7 часов в кресле гримёра.",
+            "type": "FACT",
+            "spoiler": false
+        },
+        {
+            "value": "По словам режиссёра <a href=\"/name/415350/\" class=\"all\">Дени Вильнёва</a>, на разработку образа гигантских песчаных червей Арракиса ушёл год.",
+            "type": "FACT",
+            "spoiler": false
+        },
+        {
+            "value": "<a href=\"/name/415350/\" class=\"all\">Дени Вильнёв</a> мечтал снять фильм по роману <a href=\"/name/157200/\" class=\"all\">Фрэнка Герберта</a> (1920-1986) &#171;Дюна&#187; (1965) с тех пор, как прочёл его ещё мальчишкой в возрасте около 12 лет. Ему хотелось снять фильм близко к тексту первоисточника, так что вначале он набил руку на фантастических картинах &#171;<a href=\"/film/718811/\" class=\"all\">Прибытие</a>&#187; (2016) и &#171;<a href=\"/film/589290/\" class=\"all\">Бегущий по лезвию 2049</a>&#187; (2017), а уже потом взялся за &#171;Дюну&#187;.",
+            "type": "FACT",
+            "spoiler": false
+        }
+    ],
+    "genres": [
+        {
+            "name": "фантастика"
+        },
+        {
+            "name": "боевик"
+        },
+        {
+            "name": "драма"
+        },
+        {
+            "name": "приключения"
+        }
+    ],
+    "countries": [
+        {
+            "name": "США"
+        },
+        {
+            "name": "Канада"
+        },
+        {
+            "name": "Венгрия"
+        }
+    ],
+    "seasonsInfo": [],
+    "persons": [
+        {
+            "id": 1665224,
+            "photo": "https://st.kp.yandex.net/images/actor_iphone/iphone360_1665224.jpg",
+            "name": "Тимоти Шаламе",
+            "enName": "Timothée Chalamet",
+            "enProfession": "actor"
+        },
+        {
+            "id": 498650,
+            "photo": "https://st.kp.yandex.net/images/actor_iphone/iphone360_498650.jpg",
+            "name": "Ребекка Фергюсон",
+            "enName": "Rebecca Ferguson",
+            "enProfession": "actor"
+        },
+        {
+            "id": 43284,
+            "photo": "https://st.kp.yandex.net/images/actor_iphone/iphone360_43284.jpg",
+            "name": "Оскар Айзек",
+            "enName": "Oscar Isaac",
+            "enProfession": "actor"
+        },
+        {
+            "id": 14668,
+            "photo": "https://st.kp.yandex.net/images/actor_iphone/iphone360_14668.jpg",
+            "name": "Джош Бролин",
+            "enName": "Josh Brolin",
+            "enProfession": "actor"
+        },
+        {
+            "id": 554576,
+            "photo": "https://st.kp.yandex.net/images/actor_iphone/iphone360_554576.jpg",
+            "name": "Джейсон Момоа",
+            "enName": "Jason Momoa",
+            "enProfession": "actor"
+        },
+        {
+            "id": 2317683,
+            "photo": "https://st.kp.yandex.net/images/actor_iphone/iphone360_2317683.jpg",
+            "name": "Зендея",
+            "enName": "Zendaya",
+            "enProfession": "actor"
+        },
+        {
+            "id": 11661,
+            "photo": "https://st.kp.yandex.net/images/actor_iphone/iphone360_11661.jpg",
+            "name": "Стеллан Скарсгард",
+            "enName": "Stellan Skarsgård",
+            "enProfession": "actor"
+        },
+        {
+            "id": 14799,
+            "photo": "https://st.kp.yandex.net/images/actor_iphone/iphone360_14799.jpg",
+            "name": "Хавьер Бардем",
+            "enName": "Javier Bardem",
+            "enProfession": "actor"
+        },
+        {
+            "id": 1171284,
+            "photo": "https://st.kp.yandex.net/images/actor_iphone/iphone360_1171284.jpg",
+            "name": "Дэйв Батиста",
+            "enName": "Dave Bautista",
+            "enProfession": "actor"
+        },
+        {
+            "id": 15595,
+            "photo": "https://st.kp.yandex.net/images/actor_iphone/iphone360_15595.jpg",
+            "name": "Шарлотта Рэмплинг",
+            "enName": "Charlotte Rampling",
+            "enProfession": "actor"
+        },
+        {
+            "id": 152927,
+            "photo": "https://st.kp.yandex.net/images/actor_iphone/iphone360_152927.jpg",
+            "name": "Стивен Хендерсон",
+            "enName": "Stephen McKinley Henderson",
+            "enProfession": "actor"
+        },
+        {
+            "id": 1021071,
+            "photo": "https://st.kp.yandex.net/images/actor_iphone/iphone360_1021071.jpg",
+            "name": "Шэрон Дункан-Брюстер",
+            "enName": "Sharon Duncan-Brewster",
+            "enProfession": "actor"
+        },
+        {
+            "id": 10921,
+            "photo": "https://st.kp.yandex.net/images/actor_iphone/iphone360_10921.jpg",
+            "name": "Чан Чэнь",
+            "enName": "Chang Chen",
+            "enProfession": "actor"
+        },
+        {
+            "id": 1534520,
+            "photo": "https://st.kp.yandex.net/images/actor_iphone/iphone360_1534520.jpg",
+            "name": "Давид Дастмалчян",
+            "enName": "David Dastmalchian",
+            "enProfession": "actor"
+        },
+        {
+            "id": 1215714,
+            "photo": "https://st.kp.yandex.net/images/actor_iphone/iphone360_1215714.jpg",
+            "name": "Бабс Олусанмокун",
+            "enName": "Babs Olusanmokun",
+            "enProfession": "actor"
+        },
+        {
+            "id": 3933368,
+            "photo": "https://st.kp.yandex.net/images/actor_iphone/iphone360_3933368.jpg",
+            "name": "Бенжамен Клементен",
+            "enName": "Benjamin Clémentine",
+            "enProfession": "actor"
+        },
+        {
+            "id": 74041,
+            "photo": "https://st.kp.yandex.net/images/actor_iphone/iphone360_74041.jpg",
+            "name": "Суад Фаресс",
+            "enName": "Souad Faress",
+            "enProfession": "actor"
+        },
+        {
+            "id": 485740,
+            "photo": "https://st.kp.yandex.net/images/actor_iphone/iphone360_485740.jpg",
+            "name": "Голда Рошевель",
+            "enName": "Golda Rosheuvel",
+            "enProfession": "actor"
+        },
+        {
+            "id": 30683,
+            "photo": "https://st.kp.yandex.net/images/actor_iphone/iphone360_30683.jpg",
+            "name": "Роджер Юань",
+            "enName": "Roger Yuan",
+            "enProfession": "actor"
+        },
+        {
+            "id": 1231900,
+            "photo": "https://st.kp.yandex.net/images/actor_iphone/iphone360_1231900.jpg",
+            "name": "Сиун Шот",
+            "enName": "Seun Shote",
+            "enProfession": "actor"
+        },
+        {
+            "id": 41959,
+            "photo": "https://st.kp.yandex.net/images/actor_iphone/iphone360_41959.jpg",
+            "name": "Нил Белл",
+            "enName": "Neil Bell",
+            "enProfession": "actor"
+        },
+        {
+            "id": 36687,
+            "photo": "https://st.kp.yandex.net/images/actor_iphone/iphone360_36687.jpg",
+            "name": "Оливер Райан",
+            "enName": "Oliver Ryan",
+            "enProfession": "actor"
+        },
+        {
+            "id": 1848709,
+            "photo": "https://st.kp.yandex.net/images/actor_iphone/iphone360_1848709.jpg",
+            "name": "Стивен Коллинз",
+            "enName": "Stephen Collins",
+            "enProfession": "actor"
+        },
+        {
+            "id": 2717608,
+            "photo": "https://st.kp.yandex.net/images/actor_iphone/iphone360_2717608.jpg",
+            "name": "Чарли Роус",
+            "enName": "Charlie Rawes",
+            "enProfession": "actor"
+        },
+        {
+            "id": 4106038,
+            "photo": "https://st.kp.yandex.net/images/actor_iphone/iphone360_4106038.jpg",
+            "name": "Ричард Картер",
+            "enName": "Richard Carter",
+            "enProfession": "actor"
+        },
+        {
+            "id": 2565057,
+            "photo": "https://st.kp.yandex.net/images/actor_iphone/iphone360_2565057.jpg",
+            "name": "Бенжамин Диллоуэй",
+            "enName": "Ben Dilloway",
+            "enProfession": "actor"
+        },
+        {
+            "id": 6079104,
+            "photo": "https://st.kp.yandex.net/images/actor_iphone/iphone360_6079104.jpg",
+            "name": null,
+            "enName": "Elmi Rashid Elmi",
+            "enProfession": "actor"
+        },
+        {
+            "id": 1719108,
+            "photo": "https://st.kp.yandex.net/images/actor_iphone/iphone360_1719108.jpg",
+            "name": null,
+            "enName": "Tachia Newall",
+            "enProfession": "actor"
+        },
+        {
+            "id": 5007447,
+            "photo": "https://st.kp.yandex.net/images/actor_iphone/iphone360_5007447.jpg",
+            "name": "Глория Обианьо",
+            "enName": "Gloria Obianyo",
+            "enProfession": "actor"
+        },
+        {
+            "id": 5128903,
+            "photo": "https://st.kp.yandex.net/images/actor_iphone/iphone360_5128903.jpg",
+            "name": "Фехинти Балогун",
+            "enName": "Fehinti Balogun",
+            "enProfession": "actor"
+        },
+        {
+            "id": 6567578,
+            "photo": "https://st.kp.yandex.net/images/actor_iphone/iphone360_6567578.jpg",
+            "name": null,
+            "enName": "Dora Kápolnai-Schvab",
+            "enProfession": "actor"
+        },
+        {
+            "id": 6586621,
+            "photo": "https://st.kp.yandex.net/images/actor_iphone/iphone360_6586621.jpg",
+            "name": null,
+            "enName": "Joelle",
+            "enProfession": "actor"
+        },
+        {
+            "id": 3921547,
+            "photo": "https://st.kp.yandex.net/images/actor_iphone/iphone360_3921547.jpg",
+            "name": "Джимми Уокер",
+            "enName": "Jimmy Walker",
+            "enProfession": "actor"
+        },
+        {
+            "id": 3199930,
+            "photo": "https://st.kp.yandex.net/images/actor_iphone/iphone360_3199930.jpg",
+            "name": "Пол Бульон",
+            "enName": "Paul Bullion",
+            "enProfession": "actor"
+        },
+        {
+            "id": 6567580,
+            "photo": "https://st.kp.yandex.net/images/actor_iphone/iphone360_6567580.jpg",
+            "name": null,
+            "enName": "Milena Sidorova",
+            "enProfession": "actor"
+        },
+        {
+            "id": 1576039,
+            "photo": "https://st.kp.yandex.net/images/actor_iphone/iphone360_1576039.jpg",
+            "name": "Янош Тимко",
+            "enName": "János Timkó",
+            "enProfession": "actor"
+        },
+        {
+            "id": 47269,
+            "photo": "https://st.kp.yandex.net/images/actor_iphone/iphone360_47269.jpg",
+            "name": "Джин Джилпин",
+            "enName": "Jean Gilpin",
+            "enProfession": "actor"
+        },
+        {
+            "id": 52284,
+            "photo": "https://st.kp.yandex.net/images/actor_iphone/iphone360_52284.jpg",
+            "name": "Марианна Фэйтфулл",
+            "enName": "Marianne Faithfull",
+            "enProfession": "actor"
+        },
+        {
+            "id": 81477,
+            "photo": "https://st.kp.yandex.net/images/actor_iphone/iphone360_81477.jpg",
+            "name": "Эллен Дубин",
+            "enName": "Ellen Dubin",
+            "enProfession": "actor"
+        },
+        {
+            "id": 4215012,
+            "photo": "https://st.kp.yandex.net/images/actor_iphone/iphone360_4215012.jpg",
+            "name": "Карой Бакшаи",
+            "enName": "Károly Baksai",
+            "enProfession": "actor"
+        },
+        {
+            "id": 3889660,
+            "photo": "https://st.kp.yandex.net/images/actor_iphone/iphone360_3889660.jpg",
+            "name": "Бьорн Фрайберг",
+            "enName": "Björn Freiberg",
+            "enProfession": "actor"
+        },
+        {
+            "id": 5515466,
+            "photo": "https://st.kp.yandex.net/images/actor_iphone/iphone360_5515466.jpg",
+            "name": "Балаж Медьери",
+            "enName": "Balázs Megyeri",
+            "enProfession": "actor"
+        },
+        {
+            "id": 110614,
+            "photo": "https://st.kp.yandex.net/images/actor_iphone/iphone360_110614.jpg",
+            "name": "Майкл Нардон",
+            "enName": "Michael Nardone",
+            "enProfession": "actor"
+        },
+        {
+            "id": 1412765,
+            "photo": "https://st.kp.yandex.net/images/actor_iphone/iphone360_1412765.jpg",
+            "name": "Дункан Поу",
+            "enName": "Duncan Pow",
+            "enProfession": "actor"
+        },
+        {
+            "id": 5510676,
+            "photo": "https://st.kp.yandex.net/images/actor_iphone/iphone360_5510676.jpg",
+            "name": "Ференц Иван Сабо",
+            "enName": "Ferenc Iván Szabó",
+            "enProfession": "actor"
+        },
+        {
+            "id": 6439773,
+            "photo": "https://st.kp.yandex.net/images/actor_iphone/iphone360_6439773.jpg",
+            "name": "Лазло Силадьи",
+            "enName": "Laszlo Szilagyi",
+            "enProfession": "actor"
+        },
+        {
+            "id": 5696679,
+            "photo": "https://st.kp.yandex.net/images/actor_iphone/iphone360_5696679.jpg",
+            "name": "Петер Штоянов-мл.",
+            "enName": "Peter Sztojanov Jr.",
+            "enProfession": "actor"
+        },
+        {
+            "id": 5695037,
+            "photo": "https://st.kp.yandex.net/images/actor_iphone/iphone360_5695037.jpg",
+            "name": "Иштван Алдотт",
+            "enName": "István Áldott",
+            "enProfession": "actor"
+        },
+        {
+            "id": 50590,
+            "photo": "https://st.kp.yandex.net/images/actor_iphone/iphone360_50590.jpg",
+            "name": "Ханс Циммер",
+            "enName": "Hans Zimmer",
+            "enProfession": "composer"
+        },
+        {
+            "id": 1988043,
+            "photo": "https://st.kp.yandex.net/images/actor_iphone/iphone360_1988043.jpg",
+            "name": "Патрис Верметт",
+            "enName": "Patrice Vermette",
+            "enProfession": "designer"
+        },
+        {
+            "id": 1999703,
+            "photo": "https://st.kp.yandex.net/images/actor_iphone/iphone360_1999703.jpg",
+            "name": "Том Браун",
+            "enName": "Tom Brown",
+            "enProfession": "designer"
+        },
+        {
+            "id": 1986476,
+            "photo": "https://st.kp.yandex.net/images/actor_iphone/iphone360_1986476.jpg",
+            "name": "Дэвид Доран",
+            "enName": "David Doran",
+            "enProfession": "designer"
+        },
+        {
+            "id": 2728267,
+            "photo": "https://st.kp.yandex.net/images/actor_iphone/iphone360_2728267.jpg",
+            "name": "Самю Кеилани",
+            "enName": "Samy Keilani",
+            "enProfession": "designer"
+        },
+        {
+            "id": 2001223,
+            "photo": "https://st.kp.yandex.net/images/actor_iphone/iphone360_2001223.jpg",
+            "name": "Тибор Лазар",
+            "enName": "Tibor Lázár",
+            "enProfession": "designer"
+        },
+        {
+            "id": 6117091,
+            "photo": "https://st.kp.yandex.net/images/actor_iphone/iphone360_6117091.jpg",
+            "name": "Адориан Портик",
+            "enName": "Adorjan Portik",
+            "enProfession": "designer"
+        },
+        {
+            "id": 2004702,
+            "photo": "https://st.kp.yandex.net/images/actor_iphone/iphone360_2004702.jpg",
+            "name": "Карл Проберт",
+            "enName": "Karl Probert",
+            "enProfession": "designer"
+        },
+        {
+            "id": 1529372,
+            "photo": "https://st.kp.yandex.net/images/actor_iphone/iphone360_1529372.jpg",
+            "name": "Брэд Рикер",
+            "enName": "Brad Ricker",
+            "enProfession": "designer"
+        },
+        {
+            "id": 4531684,
+            "photo": "https://st.kp.yandex.net/images/actor_iphone/iphone360_4531684.jpg",
+            "name": "Гергели Ригер",
+            "enName": "Gergely Rieger",
+            "enProfession": "designer"
+        },
+        {
+            "id": 1769377,
+            "photo": "https://st.kp.yandex.net/images/actor_iphone/iphone360_1769377.jpg",
+            "name": "Боб Морган",
+            "enName": "Bob Morgan",
+            "enProfession": "designer"
+        },
+        {
+            "id": 1986366,
+            "photo": "https://st.kp.yandex.net/images/actor_iphone/iphone360_1986366.jpg",
+            "name": "Жаклин Уэст",
+            "enName": "Jacqueline West",
+            "enProfession": "designer"
+        },
+        {
+            "id": 320664,
+            "photo": "https://st.kp.yandex.net/images/actor_iphone/iphone360_320664.jpg",
+            "name": "Ричард Робертс",
+            "enName": "Richard Roberts",
+            "enProfession": "designer"
+        },
+        {
+            "id": 5501613,
+            "photo": "https://st.kp.yandex.net/images/actor_iphone/iphone360_5501613.jpg",
+            "name": "Жужанна Шипош",
+            "enName": "Zsuzsanna Sipos",
+            "enProfession": "designer"
+        },
+        {
+            "id": 415350,
+            "photo": "https://st.kp.yandex.net/images/actor_iphone/iphone360_415350.jpg",
+            "name": "Дени Вильнёв",
+            "enName": "Denis Villeneuve",
+            "enProfession": "director"
+        },
+        {
+            "id": 1280408,
+            "photo": "https://st.kp.yandex.net/images/actor_iphone/iphone360_1280408.jpg",
+            "name": "Джо Уокер",
+            "enName": "Joe Walker",
+            "enProfession": "editor"
+        },
+        {
+            "id": 735550,
+            "photo": "https://st.kp.yandex.net/images/actor_iphone/iphone360_735550.jpg",
+            "name": "Грег Фрейзер",
+            "enName": "Greig Fraser",
+            "enProfession": "operato"
+        },
+        {
+            "id": 415350,
+            "photo": "https://st.kp.yandex.net/images/actor_iphone/iphone360_415350.jpg",
+            "name": "Дени Вильнёв",
+            "enName": "Denis Villeneuve",
+            "enProfession": "producer"
+        },
+        {
+            "id": 67070,
+            "photo": "https://st.kp.yandex.net/images/actor_iphone/iphone360_67070.jpg",
+            "name": "Мэри Пэрент",
+            "enName": "Mary Parent",
+            "enProfession": "producer"
+        },
+        {
+            "id": 30187,
+            "photo": "https://st.kp.yandex.net/images/actor_iphone/iphone360_30187.jpg",
+            "name": "Кейл Бойтер",
+            "enName": "Cale Boyter",
+            "enProfession": "producer"
+        },
+        {
+            "id": 10457,
+            "photo": "https://st.kp.yandex.net/images/actor_iphone/iphone360_10457.jpg",
+            "name": "Джозеф М. Караччоло мл.",
+            "enName": "Joseph M. Caracciolo Jr.",
+            "enProfession": "producer"
+        },
+        {
+            "id": 1695751,
+            "photo": "https://st.kp.yandex.net/images/actor_iphone/iphone360_1695751.jpg",
+            "name": null,
+            "enName": "Глеб Гаврилов",
+            "enProfession": "voice_actor"
+        },
+        {
+            "id": 1929007,
+            "photo": "https://st.kp.yandex.net/images/actor_iphone/iphone360_1929007.jpg",
+            "name": null,
+            "enName": "Ирина Киреева",
+            "enProfession": "voice_actor"
+        },
+        {
+            "id": 1557066,
+            "photo": "https://st.kp.yandex.net/images/actor_iphone/iphone360_1557066.jpg",
+            "name": null,
+            "enName": "Антон Эльдаров",
+            "enProfession": "voice_actor"
+        },
+        {
+            "id": 1036893,
+            "photo": "https://st.kp.yandex.net/images/actor_iphone/iphone360_1036893.jpg",
+            "name": null,
+            "enName": "Геннадий Новиков",
+            "enProfession": "voice_actor"
+        },
+        {
+            "id": 1705878,
+            "photo": "https://st.kp.yandex.net/images/actor_iphone/iphone360_1705878.jpg",
+            "name": null,
+            "enName": "Денис Шведов",
+            "enProfession": "voice_actor"
+        },
+        {
+            "id": 2444078,
+            "photo": "https://st.kp.yandex.net/images/actor_iphone/iphone360_2444078.jpg",
+            "name": null,
+            "enName": "Александра Курагина",
+            "enProfession": "voice_actor"
+        },
+        {
+            "id": 1539232,
+            "photo": "https://st.kp.yandex.net/images/actor_iphone/iphone360_1539232.jpg",
+            "name": null,
+            "enName": "Сергей Чихачёв",
+            "enProfession": "voice_actor"
+        },
+        {
+            "id": 464505,
+            "photo": "https://st.kp.yandex.net/images/actor_iphone/iphone360_464505.jpg",
+            "name": null,
+            "enName": "Сергей Чонишвили",
+            "enProfession": "voice_actor"
+        },
+        {
+            "id": 37392,
+            "photo": "https://st.kp.yandex.net/images/actor_iphone/iphone360_37392.jpg",
+            "name": null,
+            "enName": "Максим Сергеев",
+            "enProfession": "voice_actor"
+        },
+        {
+            "id": 284695,
+            "photo": "https://st.kp.yandex.net/images/actor_iphone/iphone360_284695.jpg",
+            "name": null,
+            "enName": "Наталья Казначеева",
+            "enProfession": "voice_actor"
+        },
+        {
+            "id": 261549,
+            "photo": "https://st.kp.yandex.net/images/actor_iphone/iphone360_261549.jpg",
+            "name": null,
+            "enName": "Анатолий Хропов",
+            "enProfession": "voice_actor"
+        },
+        {
+            "id": 1665278,
+            "photo": "https://st.kp.yandex.net/images/actor_iphone/iphone360_1665278.jpg",
+            "name": null,
+            "enName": "Вероника Саркисова",
+            "enProfession": "voice_actor"
+        },
+        {
+            "id": 1324756,
+            "photo": "https://st.kp.yandex.net/images/actor_iphone/iphone360_1324756.jpg",
+            "name": null,
+            "enName": "Григорий Калинин",
+            "enProfession": "voice_actor"
+        },
+        {
+            "id": 739980,
+            "photo": "https://st.kp.yandex.net/images/actor_iphone/iphone360_739980.jpg",
+            "name": null,
+            "enName": "Александр Вартанов",
+            "enProfession": "voice_actor"
+        },
+        {
+            "id": 1179681,
+            "photo": "https://st.kp.yandex.net/images/actor_iphone/iphone360_1179681.jpg",
+            "name": null,
+            "enName": "Илья Исаев",
+            "enProfession": "voice_actor"
+        },
+        {
+            "id": 1643234,
+            "photo": "https://st.kp.yandex.net/images/actor_iphone/iphone360_1643234.jpg",
+            "name": null,
+            "enName": "Надежда Подъяпольская",
+            "enProfession": "voice_actor"
+        },
+        {
+            "id": 269650,
+            "photo": "https://st.kp.yandex.net/images/actor_iphone/iphone360_269650.jpg",
+            "name": null,
+            "enName": "Любовь Германова",
+            "enProfession": "voice_actor"
+        },
+        {
+            "id": 1649884,
+            "photo": "https://st.kp.yandex.net/images/actor_iphone/iphone360_1649884.jpg",
+            "name": null,
+            "enName": "Андрей Казанцев",
+            "enProfession": "voice_actor"
+        },
+        {
+            "id": 1824053,
+            "photo": "https://st.kp.yandex.net/images/actor_iphone/iphone360_1824053.jpg",
+            "name": "Джон Спэйтс",
+            "enName": "Jon Spaihts",
+            "enProfession": "writer"
+        },
+        {
+            "id": 415350,
+            "photo": "https://st.kp.yandex.net/images/actor_iphone/iphone360_415350.jpg",
+            "name": "Дени Вильнёв",
+            "enName": "Denis Villeneuve",
+            "enProfession": "writer"
+        },
+        {
+            "id": 512,
+            "photo": "https://st.kp.yandex.net/images/actor_iphone/iphone360_512.jpg",
+            "name": "Эрик Рот",
+            "enName": "Eric Roth",
+            "enProfession": "writer"
+        },
+        {
+            "id": 157200,
+            "photo": "https://st.kp.yandex.net/images/actor_iphone/iphone360_157200.jpg",
+            "name": "Фрэнк Герберт",
+            "enName": "Frank Herbert",
+            "enProfession": "writer"
+        }
+    ],
+    "lists": [],
+    "typeNumber": 1,
+    "alternativeName": "Dune: Part One",
+    "enName": null,
+    "names": [
+        {
+            "name": "Дюна"
+        },
+        {
+            "name": "Dune: Part One"
+        }
+    ],
+    "ageRating": null,
+    "ratingMpaa": "pg13",
+    "subType": null,
+    "similarMovies": [
+        {
+            "_id": "633647a5248263ce89ada58e",
+            "id": 589290,
+            "name": "Бегущий по лезвию 2049",
+            "enName": "Blade Runner 2049",
+            "alternativeName": "Blade Runner 2049",
+            "poster": {
+                "_id": "633647a5248263ce89ada58f",
+                "url": "https://st.kp.yandex.net/images/film_big/589290.jpg",
+                "previewUrl": "https://st.kp.yandex.net/images/film_iphone/iphone360_589290.jpg"
+            }
+        },
+        {
+            "_id": "633647a5248263ce89ada590",
+            "id": 2882,
+            "name": "Дюна",
+            "enName": "Dune",
+            "alternativeName": "Dune",
+            "poster": {
+                "_id": "633647a5248263ce89ada591",
+                "url": "https://st.kp.yandex.net/images/film_big/2882.jpg",
+                "previewUrl": "https://st.kp.yandex.net/images/film_iphone/iphone360_2882.jpg"
+            }
+        },
+        {
+            "_id": "633647a5248263ce89ada592",
+            "id": 333,
+            "name": "Звёздные войны: Эпизод 4 — Новая надежда",
+            "enName": "Star Wars",
+            "alternativeName": "Star Wars",
+            "poster": {
+                "_id": "633647a5248263ce89ada593",
+                "url": "https://st.kp.yandex.net/images/film_big/333.jpg",
+                "previewUrl": "https://st.kp.yandex.net/images/film_iphone/iphone360_333.jpg"
+            }
+        },
+        {
+            "_id": "633647a5248263ce89ada594",
+            "id": 5900,
+            "name": "Хроники Риддика",
+            "enName": "The Chronicles of Riddick",
+            "alternativeName": "The Chronicles of Riddick",
+            "poster": {
+                "_id": "633647a5248263ce89ada595",
+                "url": "https://st.kp.yandex.net/images/film_big/5900.jpg",
+                "previewUrl": "https://st.kp.yandex.net/images/film_iphone/iphone360_5900.jpg"
+            }
+        },
+        {
+            "_id": "633647a5248263ce89ada596",
+            "id": 229087,
+            "name": "Дюна",
+            "enName": "Dune",
+            "alternativeName": "Dune",
+            "poster": {
+                "_id": "633647a5248263ce89ada597",
+                "url": "https://st.kp.yandex.net/images/film_big/229087.jpg",
+                "previewUrl": "https://st.kp.yandex.net/images/film_iphone/iphone360_229087.jpg"
+            }
+        },
+        {
+            "_id": "633647a5248263ce89ada598",
+            "id": 251733,
+            "name": "Аватар",
+            "enName": "Avatar",
+            "alternativeName": "Avatar",
+            "poster": {
+                "_id": "633647a5248263ce89ada599",
+                "url": "https://st.kp.yandex.net/images/film_big/251733.jpg",
+                "previewUrl": "https://st.kp.yandex.net/images/film_iphone/iphone360_251733.jpg"
+            }
+        },
+        {
+            "_id": "633647a5248263ce89ada59a",
+            "id": 77218,
+            "name": "Дети Дюны",
+            "enName": "Children of Dune",
+            "alternativeName": "Children of Dune",
+            "poster": {
+                "_id": "633647a5248263ce89ada59b",
+                "url": "https://st.kp.yandex.net/images/film_big/77218.jpg",
+                "previewUrl": "https://st.kp.yandex.net/images/film_iphone/iphone360_77218.jpg"
+            }
+        },
+        {
+            "_id": "633647a5248263ce89ada59c",
+            "id": 462765,
+            "name": "Основание",
+            "enName": "Foundation",
+            "alternativeName": "Foundation",
+            "poster": {
+                "_id": "633647a5248263ce89ada59d",
+                "url": "https://st.kp.yandex.net/images/film_big/462765.jpg",
+                "previewUrl": "https://st.kp.yandex.net/images/film_iphone/iphone360_462765.jpg"
+            }
+        },
+        {
+            "_id": "633647a5248263ce89ada59e",
+            "id": 77540,
+            "name": "Джон Картер",
+            "enName": "John Carter",
+            "alternativeName": "John Carter",
+            "poster": {
+                "_id": "633647a5248263ce89ada59f",
+                "url": "https://st.kp.yandex.net/images/film_big/77540.jpg",
+                "previewUrl": "https://st.kp.yandex.net/images/film_iphone/iphone360_77540.jpg"
+            }
+        },
+        {
+            "_id": "633647a5248263ce89ada5a0",
+            "id": 464963,
+            "name": "Игра престолов",
+            "enName": "Game of Thrones",
+            "alternativeName": "Game of Thrones",
+            "poster": {
+                "_id": "633647a5248263ce89ada5a1",
+                "url": "https://st.kp.yandex.net/images/film_big/464963.jpg",
+                "previewUrl": "https://st.kp.yandex.net/images/film_iphone/iphone360_464963.jpg"
+            }
+        }
+    ],
+    "updatedAt": "2022-10-20T05:13:43.916Z",
+    "imagesInfo": {
+        "_id": "63364620248263ce89ad4a4c",
+        "framesCount": 27
+    },
+    "shortDescription": "Атрейдесы прибывают на планету, где им никто не рад. Фантастический эпос Дени Вильнёва с шестью «Оскарами»",
+    "technology": {
+        "_id": "633645d4248263ce89ad393b",
+        "hasImax": true,
+        "has3D": true
+    },
+    "ticketsOnSale": false,
+    "sequelsAndPrequels": [
+        {
+            "_id": "62da010a5ce08dbf7cf9eae1",
+            "id": 4540126,
+            "name": "Дюна 2",
+            "enName": "Dune: Part Two",
+            "alternativeName": "Dune: Part Two",
+            "type": "sequel",
+            "poster": {
+                "_id": "62da010a5ce08dbf7cf9eae2",
+                "url": "https://st.kp.yandex.net/images/film_big/4540126.jpg",
+                "previewUrl": "https://st.kp.yandex.net/images/film_iphone/iphone360_4540126.jpg"
+            }
+        }
+    ],
+    "watchability": {
+        "_id": "6339888ec22d011bb5aee775",
+        "items": [
+            {
+                "_id": "6339888ec22d011bb5aee776",
+                "name": "Wink",
+                "logo": {
+                    "_id": "6339888ec22d011bb5aee777",
+                    "url": "https//avatars.mds.yandex.net/get-ott/1672343/54096cbe-cc3b-41c9-8e44-990ebbca8d61/orig"
+                },
+                "url": "https://wink.ru/media_items/129900718?utm_source=yandex&utm_medium=koldunschick&utm_content=name"
+            }
+        ]
+    },
+    "createDate": "2022-10-20T05:51:54.615Z"
+}

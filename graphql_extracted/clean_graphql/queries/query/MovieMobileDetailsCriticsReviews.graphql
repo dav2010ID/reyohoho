@@ -1,0 +1,50 @@
+query MovieMobileDetailsCriticsReviews(
+  $movieId: Long!
+  $types: [CriticReviewType!]!
+  $offset: Int!
+  $limit: Int!
+) {
+  movie(id: $movieId) {
+    criticReviews(
+      types: $types
+      offset: $offset
+      limit: $limit
+      orderBy: TEXT_DATE_DESC
+    ) {
+      offset
+      limit
+      total
+      items {
+        __typename
+        ...movieCriticReviewFragment
+      }
+    }
+  }
+}
+
+fragment imageFragment on Image {
+  avatarsUrl
+  fallbackUrl
+}
+
+fragment movieCriticReviewFragment on CriticReview {
+  id
+  text
+  textDate
+  type
+  author {
+    id
+    firstName
+    lastName
+  }
+  source {
+    id
+    title
+    icon {
+      __typename
+      ...imageFragment
+    }
+  }
+  sourceUrl
+  commentsCount
+}

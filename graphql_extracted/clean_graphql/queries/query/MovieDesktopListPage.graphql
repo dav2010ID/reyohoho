@@ -1,0 +1,507 @@
+query MovieDesktopListPage(
+  $slug: String!
+  $platform: WebClientPlatform!
+  $withUserData: Boolean!
+  $supportedFilterTypes: [FilterType]!
+  $filters: FilterValuesInput
+  $singleSelectFiltersLimit: Int!
+  $singleSelectFiltersOffset: Int!
+  $moviesLimit: Int
+  $moviesOffset: Int
+  $moviesOrder: MovieListItemOrderBy
+  $supportedItemTypes: [MovieListItemType]
+) {
+  movieListBySlug(
+    slug: $slug
+    supportedFilterTypes: $supportedFilterTypes
+    filters: $filters
+  ) {
+    ...MovieListCompositeName
+    ...MovieListAvailableFilters
+    ...MovieList
+    ...DescriptionLink
+    __typename
+  }
+  webPage(platform: $platform) {
+    kpMovieListPage(movieListSlug: $slug) {
+      htmlMeta {
+        ...OgImage
+        __typename
+      }
+      __typename
+    }
+    __typename
+  }
+}
+
+fragment ToggleFilter on BooleanFilter {
+  id
+  enabled
+  name {
+    russian
+    __typename
+  }
+  __typename
+}
+
+fragment SingleSelectFilters on SingleSelectFilter {
+  id
+  name {
+    russian
+    __typename
+  }
+  hint {
+    russian
+    __typename
+  }
+  values(offset: $singleSelectFiltersOffset, limit: $singleSelectFiltersLimit) {
+    items {
+      name {
+        russian
+        __typename
+      }
+      selectable
+      value
+      __typename
+    }
+    __typename
+  }
+  __typename
+}
+
+fragment MoviePosterGallery on Movie {
+  gallery {
+    posters {
+      vertical {
+        avatarsUrl
+        __typename
+      }
+      __typename
+    }
+    logos {
+      rightholderForPoster {
+        avatarsUrl
+        __typename
+      }
+      __typename
+    }
+    __typename
+  }
+  __typename
+}
+
+fragment RatingValue on RatingValue {
+  value
+  isActive
+  count
+  __typename
+}
+
+fragment TicketOptionPurchasable on Movie {
+  ticketOption {
+    purchasable
+    __typename
+  }
+  __typename
+}
+
+fragment MovieIsTicketsAvailable on Movie {
+  ...TicketOptionPurchasable
+  __typename
+}
+
+fragment MovieListReleases on Distribution {
+  rusRelease: releases(
+    types: [CINEMA]
+    rerelease: false
+    countryId: 2
+    limit: 1
+  ) {
+    items {
+      date {
+        date
+        accuracy
+        __typename
+      }
+      __typename
+    }
+    __typename
+  }
+  worldPremiere {
+    incompleteDate {
+      date
+      accuracy
+      __typename
+    }
+    __typename
+  }
+  allReleases: releases(limit: 1) {
+    items {
+      date {
+        date
+        accuracy
+        __typename
+      }
+      __typename
+    }
+    __typename
+  }
+  __typename
+}
+
+fragment MovieRatingListsItem on MovieInList {
+  movieListSlug
+  position
+  __typename
+}
+
+fragment Folder on Folder {
+  id
+  name
+  public
+  __typename
+}
+
+fragment MovieUserFolders on Movie {
+  userData {
+    userFolders(offset: 0, limit: 20) {
+      items {
+        ...Folder
+        __typename
+      }
+      __typename
+    }
+    isFavorite
+    __typename
+  }
+  __typename
+}
+
+fragment MovieListUserData on Movie {
+  userData {
+    watchStatuses {
+      notInterested {
+        value
+        __typename
+      }
+      watched {
+        value
+        __typename
+      }
+      __typename
+    }
+    voting {
+      value
+      votedAt
+      __typename
+    }
+    isPlannedToWatch
+    __typename
+  }
+  ...MovieUserFolders
+  __typename
+}
+
+fragment MovieListCompositeName on MovieListMeta {
+  compositeName {
+    parts {
+      ... on FilterReferencedMovieListNamePart {
+        filterValue {
+          ... on SingleSelectFilterValue {
+            filterId
+            __typename
+          }
+          __typename
+        }
+        name
+        __typename
+      }
+      ... on StaticMovieListNamePart {
+        name
+        __typename
+      }
+      __typename
+    }
+    __typename
+  }
+  __typename
+}
+
+fragment MovieListAvailableFilters on MovieListMeta {
+  availableFilters {
+    items {
+      ... on BooleanFilter {
+        ...ToggleFilter
+        __typename
+      }
+      ... on SingleSelectFilter {
+        ...SingleSelectFilters
+        __typename
+      }
+      __typename
+    }
+    __typename
+  }
+  __typename
+}
+
+fragment MovieList on MovieListMeta {
+  id
+  name
+  description
+  cover {
+    avatarsUrl
+    __typename
+  }
+  movies(
+    limit: $moviesLimit
+    offset: $moviesOffset
+    orderBy: $moviesOrder
+    supportedItemTypes: $supportedItemTypes
+  ) {
+    total
+    items {
+      movie {
+        id
+        contentId
+        title {
+          russian
+          original
+          __typename
+        }
+        ...MoviePosterGallery
+        countries {
+          id
+          name
+          __typename
+        }
+        genres {
+          id
+          name
+          __typename
+        }
+        cast: members(role: [ACTOR], limit: 3) {
+          items {
+            details
+            person {
+              name
+              originalName
+              __typename
+            }
+            __typename
+          }
+          __typename
+        }
+        directors: members(role: [DIRECTOR], limit: 1) {
+          items {
+            details
+            person {
+              name
+              originalName
+              __typename
+            }
+            __typename
+          }
+          __typename
+        }
+        url
+        rating {
+          kinopoisk {
+            ...RatingValue
+            __typename
+          }
+          plannedToWatch {
+            ...RatingValue
+            __typename
+          }
+          __typename
+        }
+        mainTrailer {
+          id
+          isEmbedded
+          __typename
+        }
+        viewOption {
+          buttonText
+          originalButtonText
+          promotionIcons {
+            avatarsUrl
+            fallbackUrl
+            __typename
+          }
+          isAvailableOnline: isWatchable(
+            filter: { anyDevice: false, anyRegion: false }
+          )
+          purchasabilityStatus
+          type
+          rightholderLogoUrlForPoster
+          availabilityAnnounce {
+            availabilityDate
+            type
+            groupPeriodType
+            announcePromise
+            __typename
+          }
+          __typename
+        }
+        ...MovieIsTicketsAvailable
+        distribution {
+          ...MovieListReleases
+          __typename
+        }
+        ... on Film {
+          productionYear
+          duration
+          isShortFilm
+          ratingLists {
+            top250 {
+              ...MovieRatingListsItem
+              __typename
+            }
+            __typename
+          }
+          __typename
+        }
+        ... on TvSeries {
+          releaseYears {
+            start
+            end
+            __typename
+          }
+          totalDuration
+          ratingLists {
+            top250 {
+              ...MovieRatingListsItem
+              __typename
+            }
+            __typename
+          }
+          __typename
+        }
+        ... on MiniSeries {
+          releaseYears {
+            start
+            end
+            __typename
+          }
+          totalDuration
+          ratingLists {
+            top250 {
+              ...MovieRatingListsItem
+              __typename
+            }
+            __typename
+          }
+          __typename
+        }
+        ... on TvShow {
+          releaseYears {
+            start
+            end
+            __typename
+          }
+          totalDuration
+          ratingLists {
+            top250 {
+              ...MovieRatingListsItem
+              __typename
+            }
+            __typename
+          }
+          __typename
+        }
+        ... on Video {
+          productionYear
+          duration
+          isShortFilm
+          __typename
+        }
+        ...MovieListUserData @include(if: $withUserData)
+        __typename
+      }
+      ... on TopMovieListItem {
+        position
+        positionDiff
+        rate
+        votes
+        __typename
+      }
+      ... on MostProfitableMovieListItem {
+        boxOffice {
+          amount
+          __typename
+        }
+        budget {
+          amount
+          __typename
+        }
+        ratio
+        __typename
+      }
+      ... on MostExpensiveMovieListItem {
+        budget {
+          amount
+          __typename
+        }
+        __typename
+      }
+      ... on OfflineAudienceMovieListItem {
+        viewers
+        __typename
+      }
+      ... on PopularMovieListItem {
+        positionDiff
+        __typename
+      }
+      ... on BoxOfficeMovieListItem {
+        boxOffice {
+          amount
+          __typename
+        }
+        __typename
+      }
+      ... on RecommendationMovieListItem {
+        __typename
+      }
+      ... on ComingSoonMovieListItem {
+        releaseDate {
+          date
+          accuracy
+          __typename
+        }
+        __typename
+      }
+      ... on MoviesInCinemaListItem {
+        promo
+        __typename
+      }
+      ... on PlannedToWatchMovieListItem {
+        votes
+        __typename
+      }
+      __typename
+    }
+    __typename
+  }
+  __typename
+}
+
+fragment DescriptionLink on MovieListMeta {
+  descriptionLink {
+    title
+    url
+    __typename
+  }
+  __typename
+}
+
+fragment OgImage on HtmlMeta {
+  openGraph {
+    image {
+      avatarsUrl
+      __typename
+    }
+    __typename
+  }
+  __typename
+}

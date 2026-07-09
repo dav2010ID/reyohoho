@@ -1,0 +1,54 @@
+query PersonPreviewCard(
+  $personId: Long!
+  $rolesLimit: Int = 10
+  $bestMoviesLimit: Int = 10
+) {
+  person(id: $personId) {
+    id
+    poster {
+      avatarsUrl
+      fallbackUrl
+      __typename
+    }
+    name
+    originalName
+    roles(limit: $rolesLimit, isCareer: true) {
+      items {
+        role {
+          title {
+            russian
+            __typename
+          }
+          __typename
+        }
+        __typename
+      }
+      __typename
+    }
+    bestFilms: bestMovies(limit: $bestMoviesLimit, type: FILM) {
+      ...PersonPreviewCardBestMovies
+      __typename
+    }
+    bestSeries: bestMovies(limit: $bestMoviesLimit, type: SERIES) {
+      ...PersonPreviewCardBestMovies
+      __typename
+    }
+    __typename
+  }
+}
+
+fragment PersonPreviewCardBestMovies on PagingList_PersonBestMovie {
+  items {
+    movie {
+      id
+      title {
+        russian
+        original
+        __typename
+      }
+      __typename
+    }
+    __typename
+  }
+  __typename
+}

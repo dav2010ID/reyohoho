@@ -1,0 +1,63 @@
+query MovieMobileDetailsRatedFilms(
+  $offset: Int!
+  $limit: Int!
+  $voteValue: Int!
+) {
+  userProfile {
+    userData {
+      ratedMovies(
+        filter: { voteValue: $voteValue }
+        offset: $offset
+        limit: $limit
+      ) {
+        offset
+        limit
+        total
+        items {
+          movie {
+            id
+            title {
+              __typename
+              ...titleFragment
+            }
+            gallery {
+              posters {
+                __typename
+                ...baseMoviePostersFragment
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}
+
+fragment titleFragment on Title {
+  localized
+  original
+}
+
+fragment imageFragment on Image {
+  avatarsUrl
+  fallbackUrl
+}
+
+fragment baseMoviePostersFragment on MoviePosters {
+  vertical(override: OTT_WHEN_EXISTS) {
+    __typename
+    ...imageFragment
+  }
+  verticalWithRightholderLogo {
+    __typename
+    ...imageFragment
+  }
+  horizontal {
+    __typename
+    ...imageFragment
+  }
+  horizontalWithRightholderLogo {
+    __typename
+    ...imageFragment
+  }
+}

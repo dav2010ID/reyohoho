@@ -1,0 +1,16 @@
+mutation RemoveContentBrandLikeMutation($input: ContentBrandRemoveLikeInput!) {
+  contentBrand {
+    like {
+      remove(input: $input) {
+        error {
+          message
+          __typename
+        }
+        status
+        __typename
+      }
+      __typename
+    }
+    __typename
+  }
+}

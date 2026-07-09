@@ -1,0 +1,491 @@
+query PersonBaseInfo(
+  $personId: Long!
+  $isAuthorized: Boolean = false
+  $bestMoviesLimit: Int = 5
+) {
+  person(id: $personId) {
+    id
+    ...PersonName
+    ...PersonPoster
+    ...PersonTableInfo
+    gender
+    personMainAward: awards(
+      isMain: true
+      limit: 10
+      orderBy: WIN_FIRST_YEAR_DESC_NOMINATION_ASC
+    ) {
+      items {
+        nomination {
+          award {
+            title
+            slug
+            year
+            __typename
+          }
+          title
+          __typename
+        }
+        movie {
+          id
+          title {
+            russian
+            original
+            __typename
+          }
+          __typename
+        }
+        win
+        __typename
+      }
+      total
+      __typename
+    }
+    mainAwardWinNominationsTotal: awards(isMain: true, isWin: true, limit: 0) {
+      total
+      __typename
+    }
+    ...PersonSeoMeta
+    ...PersonUserNote @include(if: $isAuthorized)
+    popularMovies {
+      ...PersonPopularMovies
+      __typename
+    }
+    ...PersonMediaPostsCount
+    ...PersonFactsCount
+    ...PersonOnlineFilmsCount
+    userProfile {
+      ...SocialUserProfileInfo
+      social {
+        subscribers(limit: 0, offset: 0) {
+          total
+          __typename
+        }
+        __typename
+      }
+      __typename
+    }
+    __typename
+  }
+  webPage {
+    ...PersonWebPage
+    __typename
+  }
+}
+
+fragment PersonIncompleteDate on IncompleteDate {
+  date
+  accuracy
+  __typename
+}
+
+fragment PersonMovieCount on Person {
+  movieCount: filmographyRelations(limit: 0) {
+    total
+    __typename
+  }
+  __typename
+}
+
+fragment PersonBestMovies on PagingList_PersonBestMovie {
+  items {
+    movie {
+      id
+      title {
+        russian
+        __typename
+      }
+      __typename
+    }
+    __typename
+  }
+  __typename
+}
+
+fragment MovieImage on Image {
+  avatarsUrl
+  fallbackUrl
+  __typename
+}
+
+fragment RatingValue on RatingValue {
+  value
+  isActive
+  count
+  __typename
+}
+
+fragment TicketOptionPurchasable on Movie {
+  ticketOption {
+    purchasable
+    __typename
+  }
+  __typename
+}
+
+fragment MovieIsTicketsAvailable on Movie {
+  ...TicketOptionPurchasable
+  __typename
+}
+
+fragment MovieReleaseYears on YearsRange {
+  start
+  end
+  __typename
+}
+
+fragment PopularMovie on Movie {
+  id
+  title {
+    russian
+    original
+    __typename
+  }
+  poster {
+    ...MovieImage
+    __typename
+  }
+  rating {
+    kinopoisk {
+      ...RatingValue
+      __typename
+    }
+    __typename
+  }
+  ...MovieIsTicketsAvailable
+  viewOption {
+    buttonText
+    isAvailableOnline: isWatchable(
+      filter: { anyDevice: false, anyRegion: false }
+    )
+    purchasabilityStatus
+    contentPackageToBuy {
+      billingFeatureName
+      __typename
+    }
+    subscriptionBadge {
+      image {
+        avatarsUrl
+        __typename
+      }
+      __typename
+    }
+    type
+    posterWithRightholderLogo
+    __typename
+  }
+  genres {
+    name
+    __typename
+  }
+  ... on Film {
+    productionYear
+    __typename
+  }
+  ... on TvSeries {
+    releaseYears {
+      ...MovieReleaseYears
+      __typename
+    }
+    __typename
+  }
+  ... on MiniSeries {
+    releaseYears {
+      ...MovieReleaseYears
+      __typename
+    }
+    __typename
+  }
+  ... on TvShow {
+    releaseYears {
+      ...MovieReleaseYears
+      __typename
+    }
+    __typename
+  }
+  ... on Video {
+    productionYear
+    __typename
+  }
+  __typename
+}
+
+fragment SocialUserProfileId on UserProfileInterface {
+  id {
+    kpId
+    ottId
+    puid
+    __typename
+  }
+  __typename
+}
+
+fragment SocialUserBadges on UserSocialInfo {
+  badges {
+    verified {
+      id
+      title
+      description
+      icons {
+        image {
+          avatarsUrl
+          __typename
+        }
+        format
+        __typename
+      }
+      __typename
+    }
+    __typename
+  }
+  __typename
+}
+
+fragment SocialUserProfileShortInfo on UserProfileInterface {
+  ...SocialUserProfileId
+  subscriptionInfo {
+    hasSubscription
+    __typename
+  }
+  social {
+    publicStatus
+    url
+    avatar {
+      defaultValue {
+        value {
+          avatarsUrl
+          fallbackUrl
+          __typename
+        }
+        __typename
+      }
+      __typename
+    }
+    name {
+      defaultValue {
+        source
+        value
+        __typename
+      }
+      __typename
+    }
+    alias {
+      defaultValue {
+        source
+        value
+        __typename
+      }
+      __typename
+    }
+    isSubscribedTo @include(if: $isAuthorized)
+    isSubscriptionRequestSentTo @include(if: $isAuthorized)
+    ...SocialUserBadges
+    __typename
+  }
+  __typename
+}
+
+fragment PersonName on Person {
+  name
+  originalName
+  __typename
+}
+
+fragment PersonPoster on Person {
+  poster {
+    avatarsUrl
+    fallbackUrl
+    __typename
+  }
+  images(limit: 0) {
+    total
+    __typename
+  }
+  __typename
+}
+
+fragment PersonTableInfo on Person {
+  id
+  height
+  age
+  dateOfDeath {
+    ...PersonIncompleteDate
+    __typename
+  }
+  deathPlace
+  dateOfBirth {
+    ...PersonIncompleteDate
+    __typename
+  }
+  birthPlace
+  zodiacSign {
+    slug
+    title {
+      russian
+      __typename
+    }
+    __typename
+  }
+  mainGenres {
+    id
+    name
+    slug
+    __typename
+  }
+  marriages {
+    children
+    spouse {
+      id
+      name
+      originalName
+      gender
+      published
+      poster {
+        avatarsUrl
+        fallbackUrl
+        __typename
+      }
+      __typename
+    }
+    status
+    __typename
+  }
+  filmographyYears {
+    end
+    start
+    __typename
+  }
+  roles(isCareer: true) {
+    items {
+      role {
+        title {
+          russian
+          __typename
+        }
+        slug
+        __typename
+      }
+      __typename
+    }
+    __typename
+  }
+  ...PersonMovieCount
+  __typename
+}
+
+fragment PersonSeoMeta on Person {
+  name
+  originalName
+  dateOfBirth {
+    accuracy
+    date
+    __typename
+  }
+  poster {
+    avatarsUrl
+    fallbackUrl
+    __typename
+  }
+  roles(isCareer: true) {
+    items {
+      role {
+        title {
+          russian
+          __typename
+        }
+        slug
+        __typename
+      }
+      __typename
+    }
+    __typename
+  }
+  bestFilms: bestMovies(limit: $bestMoviesLimit, type: FILM) {
+    ...PersonBestMovies
+    __typename
+  }
+  bestSeries: bestMovies(limit: $bestMoviesLimit, type: SERIES) {
+    ...PersonBestMovies
+    __typename
+  }
+  __typename
+}
+
+fragment PersonUserNote on Person {
+  userData {
+    note {
+      value
+      makeDate
+      __typename
+    }
+    __typename
+  }
+  __typename
+}
+
+fragment PersonPopularMovies on PagingList_PersonPopularMovie {
+  items {
+    movie {
+      ...PopularMovie
+      __typename
+    }
+    __typename
+  }
+  __typename
+}
+
+fragment PersonMediaPostsCount on Person {
+  mediaPostsCount: post(limit: 0) {
+    total
+    __typename
+  }
+  __typename
+}
+
+fragment PersonFactsCount on Person {
+  factsCount: trivias(limit: 0) {
+    total
+    __typename
+  }
+  __typename
+}
+
+fragment PersonOnlineFilmsCount on Person {
+  onlineFilmsCount: filmographyRelations(isOnline: true, limit: 0) {
+    total
+    __typename
+  }
+  __typename
+}
+
+fragment SocialUserProfileInfo on UserProfileInterface {
+  ...SocialUserProfileShortInfo
+  social {
+    about {
+      defaultValue {
+        source
+        value
+        __typename
+      }
+      __typename
+    }
+    __typename
+  }
+  __typename
+}
+
+fragment PersonWebPage on WebPageContext {
+  kpPersonPage(personId: $personId) {
+    htmlMeta {
+      openGraph {
+        image {
+          avatarsUrl
+          __typename
+        }
+        __typename
+      }
+      __typename
+    }
+    __typename
+  }
+  __typename
+}

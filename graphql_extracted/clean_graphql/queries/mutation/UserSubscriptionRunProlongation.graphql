@@ -1,0 +1,18 @@
+mutation UserSubscriptionRunProlongation {
+  subscription {
+    prolongation {
+      run {
+        prolongation {
+          __typename
+          id
+          ...userSubscriptionProlongationFragment
+        }
+      }
+    }
+  }
+}
+
+fragment userSubscriptionProlongationFragment on Prolongation {
+  errorCode
+  status
+}

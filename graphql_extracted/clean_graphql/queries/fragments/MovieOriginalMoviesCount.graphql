@@ -1,0 +1,31 @@
+fragment MovieOriginalMoviesCount on Movie {
+  distribution {
+    releases(original: true, types: [DIGITAL], limit: 1) {
+      ...OriginalsFragment
+      __typename
+    }
+    __typename
+  }
+  __typename
+}
+
+fragment OriginalsFragment on PagingList_Release {
+  items {
+    companies {
+      displayName
+      id
+      originalsMovieList {
+        id
+        url
+        movies(supportedItemTypes: [MOVIE_LIST_ITEM], limit: 0) {
+          total
+          __typename
+        }
+        __typename
+      }
+      __typename
+    }
+    __typename
+  }
+  __typename
+}

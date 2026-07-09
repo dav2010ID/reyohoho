@@ -1,0 +1,18 @@
+mutation MovieSetWatched($movieId: Long!, $watched: Boolean!) {
+  movie {
+    watched {
+      set(input: { movieId: $movieId }) @include(if: $watched) {
+        status
+        error {
+          message
+        }
+      }
+      remove(input: { movieId: $movieId }) @skip(if: $watched) {
+        status
+        error {
+          message
+        }
+      }
+    }
+  }
+}

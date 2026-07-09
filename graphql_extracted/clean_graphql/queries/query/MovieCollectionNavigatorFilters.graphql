@@ -1,0 +1,39 @@
+query MovieCollectionNavigatorFilters($filters: FilterValuesInput) {
+  movieList(filters: $filters, supportedFilterTypes: [BOOLEAN, SINGLE_SELECT]) {
+    __typename
+    ...movieListMetaAvailableFiltersFragment
+  }
+}
+
+fragment movieListMetaSelectFilterOptionFragment on SelectFilterOption {
+  name {
+    russian
+  }
+  selectable
+  value
+}
+
+fragment movieListMetaAvailableFiltersFragment on MovieListMeta {
+  availableFilters {
+    items {
+      __typename
+      id
+      enabled
+      name {
+        russian
+      }
+      type
+      ... on SingleSelectFilter {
+        hint {
+          russian
+        }
+        values(limit: 500) {
+          items {
+            __typename
+            ...movieListMetaSelectFilterOptionFragment
+          }
+        }
+      }
+    }
+  }
+}

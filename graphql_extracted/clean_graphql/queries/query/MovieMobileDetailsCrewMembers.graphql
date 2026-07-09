@@ -1,0 +1,66 @@
+query MovieMobileDetailsCrewMembers(
+  $movieId: Long!
+  $roles: [MovieCrewRoleSlug!]!
+  $offset: Int!
+  $limit: Int!
+) {
+  movie(id: $movieId) {
+    members(
+      role: $roles
+      offset: $offset
+      limit: $limit
+      orderBy: BY_ROLE_POSITION_BY_CREW_PRIORITY
+    ) {
+      offset
+      limit
+      total
+      items {
+        roleInfo {
+          slug
+        }
+        roleDetails: details
+        person {
+          __typename
+          ...personSummaryFragment
+        }
+      }
+    }
+  }
+}
+
+fragment personNameFragment on Person {
+  name
+  originalName
+}
+
+fragment imageFragment on Image {
+  avatarsUrl
+  fallbackUrl
+}
+
+fragment incompleteDateFragment on IncompleteDate {
+  date
+  accuracy
+}
+
+fragment personSummaryFragment on Person {
+  __typename
+  id
+  ...personNameFragment
+  gender
+  poster {
+    __typename
+    ...imageFragment
+  }
+  age
+  height
+  dateOfBirth {
+    __typename
+    ...incompleteDateFragment
+  }
+  dateOfDeath {
+    __typename
+    ...incompleteDateFragment
+  }
+  published
+}

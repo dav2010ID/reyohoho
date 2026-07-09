@@ -1,0 +1,10 @@
+mutation MovieUserReviewDownvote($reviewId: Int!) {
+  userReview {
+    downvote(input: { reviewId: $reviewId }) {
+      status
+      error {
+        message
+      }
+    }
+  }
+}

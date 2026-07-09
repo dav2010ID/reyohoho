@@ -1,0 +1,12 @@
+mutation UserAdultSetPinCode($input: PinCodeEnableInput!) {
+  userProfile {
+    pinCode {
+      enable(input: $input) {
+        status
+        error {
+          message
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,19 @@
+mutation SearchHistoryRemoveSearchRequest($keyword: String!) {
+  emptyPrefixSuggest {
+    history {
+      remove {
+        searchRequest(input: { keyword: $keyword }) {
+          __typename
+          ...searchHistoryMutationResult
+        }
+      }
+    }
+  }
+}
+
+fragment searchHistoryMutationResult on EmptyPrefixSuggestHistoryPayload {
+  status
+  error {
+    message
+  }
+}

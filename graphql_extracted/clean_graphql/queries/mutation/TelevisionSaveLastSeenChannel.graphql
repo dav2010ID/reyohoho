@@ -1,0 +1,12 @@
+mutation TelevisionSaveLastSeenChannel($input: SaveLastSeenTvChannelInput!) {
+  tvChannel {
+    lastSeen {
+      save(input: $input) {
+        status
+        error {
+          message
+        }
+      }
+    }
+  }
+}

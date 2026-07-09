@@ -1,0 +1,59 @@
+query DeepDiveMusic(
+  $contentId: String!
+  $query: MusicRecognitionQueryInput!
+  $limit: Int!
+  $offset: Int!
+) {
+  content(contentId: $contentId) {
+    __typename
+    ... on Movie {
+      ottMovie: ott {
+        __typename
+        ... on Ott_AbstractVideo {
+          recognition {
+            __typename
+            ...deepDiveRecognitionMusicFragment
+          }
+        }
+      }
+    }
+    ... on Episode {
+      ottEpisode: ott {
+        recognition {
+          __typename
+          ...deepDiveRecognitionMusicFragment
+        }
+      }
+    }
+  }
+}
+
+fragment imageFragment on Image {
+  avatarsUrl
+  fallbackUrl
+}
+
+fragment deepDiveRecognitionMusicFragment on Recognition {
+  music {
+    data(query: $query, limit: $limit, offset: $offset) {
+      items {
+        endTimeMs
+        startTimeMs
+        track {
+          id
+          title
+          artistNames
+          album {
+            cover {
+              __typename
+              ...imageFragment
+            }
+          }
+        }
+      }
+      total
+      limit
+      offset
+    }
+  }
+}

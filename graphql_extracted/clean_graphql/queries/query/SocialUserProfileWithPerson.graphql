@@ -1,0 +1,127 @@
+query SocialUserProfileWithPerson($socialAlias: String!) {
+  userProfileBySocialAlias(socialAlias: { socialAlias: $socialAlias }) {
+    ...SocialUserProfileId
+    social {
+      person {
+        ...PersonPoster
+        ...PersonName
+        ...PersonTableInfo
+        __typename
+      }
+      __typename
+    }
+    __typename
+  }
+}
+
+fragment PersonIncompleteDate on IncompleteDate {
+  date
+  accuracy
+  __typename
+}
+
+fragment PersonMovieCount on Person {
+  movieCount: filmographyRelations(limit: 0) {
+    total
+    __typename
+  }
+  __typename
+}
+
+fragment SocialUserProfileId on UserProfileInterface {
+  id {
+    kpId
+    ottId
+    puid
+    __typename
+  }
+  __typename
+}
+
+fragment PersonPoster on Person {
+  poster {
+    avatarsUrl
+    fallbackUrl
+    __typename
+  }
+  images(limit: 0) {
+    total
+    __typename
+  }
+  __typename
+}
+
+fragment PersonName on Person {
+  name
+  originalName
+  __typename
+}
+
+fragment PersonTableInfo on Person {
+  id
+  height
+  age
+  dateOfDeath {
+    ...PersonIncompleteDate
+    __typename
+  }
+  deathPlace
+  dateOfBirth {
+    ...PersonIncompleteDate
+    __typename
+  }
+  birthPlace
+  zodiacSign {
+    slug
+    title {
+      russian
+      __typename
+    }
+    __typename
+  }
+  mainGenres {
+    id
+    name
+    slug
+    __typename
+  }
+  marriages {
+    children
+    spouse {
+      id
+      name
+      originalName
+      gender
+      published
+      poster {
+        avatarsUrl
+        fallbackUrl
+        __typename
+      }
+      __typename
+    }
+    status
+    __typename
+  }
+  filmographyYears {
+    end
+    start
+    __typename
+  }
+  roles(isCareer: true) {
+    items {
+      role {
+        title {
+          russian
+          __typename
+        }
+        slug
+        __typename
+      }
+      __typename
+    }
+    __typename
+  }
+  ...PersonMovieCount
+  __typename
+}

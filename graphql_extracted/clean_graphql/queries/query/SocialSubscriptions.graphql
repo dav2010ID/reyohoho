@@ -1,0 +1,81 @@
+query SocialSubscriptions(
+  $socialAlias: UserSocialAliasInput!
+  $limit: Int!
+  $offset: Int!
+  $includeIsCurrentUserSubscribed: Boolean!
+  $includeVerification: Boolean!
+) {
+  userProfileBySocialAlias(socialAlias: $socialAlias) {
+    social {
+      subscriptions(limit: $limit, offset: $offset) {
+        __typename
+        items {
+          target {
+            id {
+              puid
+            }
+            subscriptionInfo {
+              hasSubscription
+            }
+            social {
+              __typename
+              isSubscriptionRequestSentTo
+              ...socialInfoWithSubscriptionInfoFragment
+            }
+          }
+        }
+        ...socialInfoListMetaFragment
+      }
+    }
+  }
+}
+
+fragment imageFragment on Image {
+  avatarsUrl
+  fallbackUrl
+}
+
+fragment socialInfoWithSubscriptionInfoFragment on UserSocialInfo {
+  alias {
+    defaultValue {
+      value
+      source
+    }
+  }
+  name {
+    defaultValue {
+      value
+    }
+  }
+  avatar {
+    defaultValue {
+      value {
+        __typename
+        ...imageFragment
+      }
+    }
+  }
+  publicStatus
+  url
+  badges @include(if: $includeVerification) {
+    verified {
+      id
+      title
+      description
+      icons {
+        format
+        image {
+          __typename
+          ...imageFragment
+        }
+      }
+    }
+  }
+  isSubscribedTo
+}
+
+fragment socialInfoListMetaFragment on PagingList_SocialSubscription {
+  total
+  limit
+  offset
+}

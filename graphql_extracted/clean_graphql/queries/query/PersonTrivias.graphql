@@ -1,0 +1,23 @@
+query PersonTrivias(
+  $personId: Long!
+  $triviasLimit: Int = 10
+  $triviasOffset: Int = 0
+) {
+  person(id: $personId) {
+    id
+    trivias(limit: $triviasLimit, offset: $triviasOffset) {
+      items {
+        id
+        isSpoiler
+        text
+        type
+        __typename
+      }
+      total
+      limit
+      offset
+      __typename
+    }
+    __typename
+  }
+}

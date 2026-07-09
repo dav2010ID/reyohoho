@@ -1,0 +1,14 @@
+mutation YandexMusicRemoveTrack($input: YandexMusicKpPlaylistRemoveInput!) {
+  yandex {
+    music {
+      kpPlaylist {
+        remove(input: $input) {
+          status
+          error {
+            message
+          }
+        }
+      }
+    }
+  }
+}

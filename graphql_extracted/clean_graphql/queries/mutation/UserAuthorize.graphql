@@ -1,0 +1,15 @@
+mutation UserAuthorize {
+  userProfile {
+    create {
+      status
+      error {
+        message
+      }
+      userProfileId {
+        puid
+        kpId
+        ottId
+      }
+    }
+  }
+}

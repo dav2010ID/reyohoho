@@ -1,0 +1,138 @@
+query StreamsClip(
+  $contentId: String!
+  $prerollsSupported: Boolean!
+  $prerollsClientFeedbackSupported: Boolean!
+) {
+  content(contentId: $contentId) {
+    __typename
+    ... on Clip {
+      ageRestriction
+      contentId
+      onlineStreams(
+        prerollsSupported: $prerollsSupported
+        prerollsClientFeedbackSupported: $prerollsClientFeedbackSupported
+      ) {
+        __typename
+        ...streamsOnlineStreamsFragment
+      }
+    }
+  }
+}
+
+fragment movieStreamsAudioMetaFragment on AudioMeta {
+  audioChannelsNumber
+  audioGroupId
+  forAdult
+  language
+  languageName
+  quality
+  qualityName
+  studio
+  type
+  visibleByDefault
+}
+
+fragment streamsVideoMetaFragment on VideoMeta {
+  bitrate
+  codec
+  dynamicRange
+  framesPerSecond
+  height
+  width
+  label
+}
+
+fragment movieStreamsSubtitleMetaFragment on SubtitleMeta {
+  forAdult
+  language
+  languageName
+  studio
+  type
+  visibleByDefault
+}
+
+fragment streamsDrmMetaFragment on StreamMeta {
+  drmConfig {
+    drmServers {
+      certificateUrl
+      name
+      processSPCPath
+      provisioningUrl
+      url
+    }
+    headers
+    requestParams
+  }
+}
+
+fragment streamsMetaFragment on StreamMeta {
+  __typename
+  audioMetas {
+    __typename
+    ...movieStreamsAudioMetaFragment
+  }
+  cuesUrl
+  videoMetas {
+    __typename
+    ...streamsVideoMetaFragment
+  }
+  subtitleMetas {
+    __typename
+    ...movieStreamsSubtitleMetaFragment
+  }
+  prerollsDuration
+  prerolls {
+    durationMs
+    promotedEntityId
+    sourceMeta {
+      __typename
+      ... on PrerollNotificationMeta {
+        communicationId
+        notificationId
+        feedbackToken
+      }
+    }
+  }
+  videoToken
+  clearStreamEncoding
+  ...streamsDrmMetaFragment
+  skippableFragments {
+    endTime
+    final
+    startTime
+    type
+  }
+  trackings
+  disclaimers {
+    type
+  }
+}
+
+fragment streamsStreamItemFragment on Stream {
+  drmType
+  streamType
+  uri
+  videoDescriptorName
+  streamMeta {
+    __typename
+    ...streamsMetaFragment
+  }
+}
+
+fragment streamsOnlineStreamsFragment on OnlineStreams {
+  concurrencyArbiterConfig {
+    concurrencyArbiterRequestParams
+    server
+  }
+  drmRequirement
+  monetizationModel
+  playerRestrictionConfig {
+    dvrSeconds
+    subtitlesButtonEnable
+  }
+  sessionId
+  streams {
+    __typename
+    ...streamsStreamItemFragment
+  }
+}

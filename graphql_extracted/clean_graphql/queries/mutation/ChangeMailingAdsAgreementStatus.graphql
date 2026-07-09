@@ -1,0 +1,7 @@
+mutation ChangeMailingAdsAgreementStatus(
+  $status: VOLUNTARY_MAILING_AGREEMENT_STATUS!
+) {
+  changeVoluntaryAgreementStatus(input: { status: $status }) {
+    status
+  }
+}

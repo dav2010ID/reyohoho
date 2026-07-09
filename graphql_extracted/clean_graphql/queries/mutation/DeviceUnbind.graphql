@@ -1,0 +1,19 @@
+mutation DeviceUnbind($deviceId: String!) {
+  device {
+    unbind(input: { deviceId: $deviceId }) {
+      __typename
+      ...deviceMutationResult
+    }
+  }
+}
+
+fragment deviceMutationResult on DevicePayload {
+  status
+  error {
+    __typename
+    ... on DeviceLimitExceededError {
+      message
+    }
+    message
+  }
+}

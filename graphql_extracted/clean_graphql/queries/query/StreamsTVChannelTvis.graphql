@@ -1,0 +1,38 @@
+query StreamsTVChannelTvis(
+  $contentId: String!
+  $includeStartingChannelData: Boolean!
+  $includeDataByContentId: Boolean!
+  $scheduleDuration: Duration!
+) {
+  dataByContentId: content(contentId: $contentId)
+    @include(if: $includeDataByContentId) {
+    __typename
+    ...streamsTVChannelTvisFragment
+  }
+  startingChannelData: userProfile @include(if: $includeStartingChannelData) {
+    userData {
+      startingTvChannel {
+        __typename
+        ...streamsTVChannelTvisFragment
+      }
+    }
+  }
+  clientInfo {
+    time {
+      currentTimeUtc
+    }
+  }
+}
+
+fragment streamsTVChannelTvisFragment on TvChannel {
+  tvis {
+    url
+  }
+  tvPrograms(duration: $scheduleDuration, extraCount: 1) {
+    startTime
+    endTime
+    tvis {
+      url
+    }
+  }
+}

@@ -1,0 +1,15 @@
+mutation SocialProfileSubscribe($input: AddSocialSubscriptionInput!) {
+  userProfile {
+    social {
+      subscriptions {
+        subscribe(input: $input) {
+          status
+          actionTarget
+          error {
+            message
+          }
+        }
+      }
+    }
+  }
+}

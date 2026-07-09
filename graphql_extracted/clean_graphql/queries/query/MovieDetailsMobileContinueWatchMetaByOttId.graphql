@@ -1,0 +1,83 @@
+query MovieDetailsMobileContinueWatchMetaByOttId(
+  $contentUuid: String!
+  $includeEstEarlyAccess: Boolean!
+) {
+  movieByContentUuid(contentUuid: $contentUuid) {
+    __typename
+    ...movieDetailsMobileContinueWatchMetaFragment
+  }
+}
+
+fragment titleFragment on Title {
+  localized
+  original
+}
+
+fragment currencyFragment on Currency {
+  symbol
+  currencyCode
+}
+
+fragment moneyAmountFragment on MoneyAmount {
+  amount
+  currency {
+    __typename
+    ...currencyFragment
+  }
+}
+
+fragment availabilityAnnounceFragment on AvailabilityAnnounce {
+  announcePromise
+  availabilityDate
+  type
+}
+
+fragment estEarlyAccessViewOptionFragment on Episode {
+  viewOption {
+    watchabilityStatus
+    purchasabilityStatus
+    optionMonetizationModels
+    transactionalPrice {
+      __typename
+      ...moneyAmountFragment
+    }
+    availabilityAnnounce {
+      __typename
+      ...availabilityAnnounceFragment
+    }
+  }
+}
+
+fragment movieOttAbstractNextEpisodeFragment on Ott_AbstractSeries {
+  nextEpisode {
+    fallback
+    episode {
+      __typename
+      contentId
+      number
+      season {
+        number
+      }
+      title {
+        __typename
+        ...titleFragment
+      }
+      ott {
+        editorAnnotation
+      }
+      ...estEarlyAccessViewOptionFragment @include(if: $includeEstEarlyAccess)
+    }
+  }
+}
+
+fragment movieOttNextEpisodeFragment on Series {
+  ott {
+    __typename
+    ...movieOttAbstractNextEpisodeFragment
+  }
+}
+
+fragment movieDetailsMobileContinueWatchMetaFragment on Movie {
+  __typename
+  ...movieOttNextEpisodeFragment
+}

@@ -1,0 +1,13 @@
+query TvSeriesKinopoiskRating($tvSeriesId: Long!) {
+  tvSeries(id: $tvSeriesId) {
+    id
+    rating {
+      kinopoisk {
+        isActive
+        __typename
+      }
+      __typename
+    }
+    __typename
+  }
+}

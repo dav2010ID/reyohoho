@@ -1,0 +1,24 @@
+mutation AddSuggestHistoryMovieList($id: Long!) {
+  emptyPrefixSuggest {
+    history {
+      add {
+        movieList(input: { id: $id }) {
+          ...SuggestHistoryResponse
+          __typename
+        }
+        __typename
+      }
+      __typename
+    }
+    __typename
+  }
+}
+
+fragment SuggestHistoryResponse on EmptyPrefixSuggestHistoryPayload {
+  error {
+    message
+    __typename
+  }
+  status
+  __typename
+}

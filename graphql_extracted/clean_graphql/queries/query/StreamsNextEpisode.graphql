@@ -1,0 +1,80 @@
+query StreamsNextEpisode(
+  $contentId: String!
+  $includeEstEarlyAccess: Boolean!
+) {
+  episodeByContentId(contentId: $contentId) {
+    __typename
+    ...streamsNextEpisodeAvailability
+  }
+}
+
+fragment currencyFragment on Currency {
+  symbol
+  currencyCode
+}
+
+fragment moneyAmountFragment on MoneyAmount {
+  amount
+  currency {
+    __typename
+    ...currencyFragment
+  }
+}
+
+fragment availabilityAnnounceFragment on AvailabilityAnnounce {
+  announcePromise
+  availabilityDate
+  type
+}
+
+fragment estEarlyAccessViewOptionFragment on Episode {
+  viewOption {
+    watchabilityStatus
+    purchasabilityStatus
+    optionMonetizationModels
+    transactionalPrice {
+      __typename
+      ...moneyAmountFragment
+    }
+    availabilityAnnounce {
+      __typename
+      ...availabilityAnnounceFragment
+    }
+  }
+}
+
+fragment imageFragment on Image {
+  avatarsUrl
+  fallbackUrl
+}
+
+fragment titleFragment on Title {
+  localized
+  original
+}
+
+fragment streamsNextEpisodeAvailability on Episode {
+  neighbourhoodInSeries(filter: { onlyOnline: true }, limit: 1) {
+    items {
+      __typename
+      contentId
+      tvSeries {
+        contentId
+      }
+      ott {
+        viewOption {
+          watchabilityStatus
+        }
+      }
+      ...estEarlyAccessViewOptionFragment @include(if: $includeEstEarlyAccess)
+      cover {
+        __typename
+        ...imageFragment
+      }
+      episodeTitle: title {
+        __typename
+        ...titleFragment
+      }
+    }
+  }
+}

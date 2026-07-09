@@ -1,0 +1,83 @@
+query MovieUsersReviews(
+  $movieId: Long!
+  $userReviewsOrderBy: UserReviewOrderBy!
+  $userReviewsLimit: Int
+  $withUserData: Boolean!
+  $withSummaryReview: Boolean!
+) {
+  movie(id: $movieId) {
+    id
+    reviews @include(if: $withSummaryReview) {
+      user {
+        summary {
+          text
+          __typename
+        }
+        __typename
+      }
+      __typename
+    }
+    usersReviewsPositive: userReviews(types: [POSITIVE]) {
+      total
+      __typename
+    }
+    usersReviewsNegative: userReviews(types: [NEGATIVE]) {
+      total
+      __typename
+    }
+    usersReviewsNeutral: userReviews(types: [NEUTRAL]) {
+      total
+      __typename
+    }
+    usersReviewsPaginatedList: userReviews(
+      limit: $userReviewsLimit
+      orderBy: $userReviewsOrderBy
+    ) {
+      items {
+        ...UserReview
+        __typename
+      }
+      total
+      __typename
+    }
+    __typename
+  }
+}
+
+fragment UserReview on UserReview {
+  id
+  author {
+    id
+    avatar {
+      avatarsUrl
+      fallbackUrl
+      __typename
+    }
+    displayName
+    reviewsCount
+    isActive
+    subscription {
+      name
+      title
+      __typename
+    }
+    __typename
+  }
+  createdAt
+  text
+  title
+  type
+  votes {
+    negativeCount
+    positiveCount
+    __typename
+  }
+  userData @include(if: $withUserData) {
+    ... on UserReviewUserData {
+      voting
+      __typename
+    }
+    __typename
+  }
+  __typename
+}

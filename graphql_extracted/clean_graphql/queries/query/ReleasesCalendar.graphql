@@ -1,0 +1,54 @@
+query ReleasesCalendar(
+  $offset: Int
+  $limit: Int
+  $withUserData: Boolean!
+  $cinemaReleasesDate: LocalDate!
+) {
+  cinemaReleases: upcomingReleases(
+    filter: { releaseType: CINEMA, date: $cinemaReleasesDate }
+    limit: $limit
+    offset: $offset
+  ) {
+    items {
+      ...ReleaseItem
+      __typename
+    }
+    __typename
+  }
+}
+
+fragment ReleasesMovie on Movie {
+  id
+  poster {
+    avatarsUrl
+    __typename
+  }
+  title {
+    original
+    russian
+    __typename
+  }
+  userData @include(if: $withUserData) {
+    isPlannedToWatch
+    __typename
+  }
+  genres {
+    id
+    name
+    slug
+    __typename
+  }
+  __typename
+}
+
+fragment ReleaseItem on Release {
+  date {
+    date
+    __typename
+  }
+  movie {
+    ...ReleasesMovie
+    __typename
+  }
+  __typename
+}

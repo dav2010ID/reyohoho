@@ -1,0 +1,12 @@
+fragment PersonPoster on Person {
+  poster {
+    avatarsUrl
+    fallbackUrl
+    __typename
+  }
+  images(limit: 0) {
+    total
+    __typename
+  }
+  __typename
+}

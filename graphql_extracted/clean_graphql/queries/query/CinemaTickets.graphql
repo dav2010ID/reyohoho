@@ -1,0 +1,89 @@
+query CinemaTickets($offset: Int!, $limit: Int!, $onlyActive: Boolean!) {
+  userCinemaTickets(
+    filter: { onlyActive: $onlyActive }
+    offset: $offset
+    limit: $limit
+  ) {
+    items {
+      __typename
+      ...userCinemaTicketFragment
+    }
+    offset
+    limit
+    total
+  }
+}
+
+fragment imageFragment on Image {
+  avatarsUrl
+  fallbackUrl
+}
+
+fragment baseMoviePostersFragment on MoviePosters {
+  vertical(override: OTT_WHEN_EXISTS) {
+    __typename
+    ...imageFragment
+  }
+  verticalWithRightholderLogo {
+    __typename
+    ...imageFragment
+  }
+  horizontal {
+    __typename
+    ...imageFragment
+  }
+  horizontalWithRightholderLogo {
+    __typename
+    ...imageFragment
+  }
+}
+
+fragment movieIntroPostersFragment on MoviePosters {
+  verticalIntro {
+    __typename
+    ...imageFragment
+  }
+  verticalIntroWithRightholderLogo {
+    __typename
+    ...imageFragment
+  }
+  horizontalIntro {
+    __typename
+    ...imageFragment
+  }
+  horizontalIntroWithRightholderLogo {
+    __typename
+    ...imageFragment
+  }
+}
+
+fragment moviePostersFragment on MoviePosters {
+  __typename
+  ...baseMoviePostersFragment
+  ...movieIntroPostersFragment
+}
+
+fragment userCinemaTicketFragment on UserCinemaTicket {
+  colors {
+    backgroundGradient
+    backgroundMain
+  }
+  orderId
+  title
+  sessionTime
+  saleCompleteUrl
+  seatsCount
+  cinema {
+    id
+    title
+  }
+  movie {
+    id
+    gallery {
+      posters {
+        __typename
+        ...moviePostersFragment
+      }
+    }
+  }
+}

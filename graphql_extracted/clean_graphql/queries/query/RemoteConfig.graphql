@@ -1,0 +1,19 @@
+query RemoteConfig(
+  $namespace: String!
+  $groups: [String!]
+  $parameterValues: [ParameterRawValueInput!]
+) {
+  ...RemoteConfig
+}
+
+fragment RemoteConfig on Query {
+  remoteConfig(
+    namespace: $namespace
+    groups: $groups
+    parameterValues: $parameterValues
+  ) {
+    configs
+    __typename
+  }
+  __typename
+}

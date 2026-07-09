@@ -1,0 +1,61 @@
+query StreamsSportAdvertisements($contentId: String!) {
+  dataByContentId: content(contentId: $contentId) {
+    __typename
+    ... on SportBroadcast {
+      advertisement {
+        __typename
+        ...streamsAdvertisementDataFragment
+      }
+    }
+  }
+  clientInfo {
+    time {
+      currentTimeUtc
+    }
+  }
+}
+
+fragment streamsAdvertisementItem on TvAdvertisementItem {
+  __typename
+  ... on TvSdkAdvertisementItem {
+    data {
+      params
+      type
+      vendorClientId
+    }
+  }
+  ... on TvUrlAdvertisementItem {
+    url
+  }
+}
+
+fragment streamsAdvertisementDataFragment on AdvertisementData {
+  preroll {
+    interval
+    maxTotalDuration
+    permitted
+    maxDuration
+    skipAvailable
+    items {
+      __typename
+      ...streamsAdvertisementItem
+    }
+  }
+  midroll {
+    afterSeekDelay
+    maxDuration
+    skipAvailable
+    items {
+      __typename
+      ...streamsAdvertisementItem
+    }
+  }
+  pauseroll {
+    maxDuration
+    skipAvailable
+    items {
+      __typename
+      ...streamsAdvertisementItem
+    }
+  }
+}

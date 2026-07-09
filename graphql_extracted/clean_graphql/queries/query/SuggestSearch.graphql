@@ -1,0 +1,219 @@
+query SuggestSearch($keyword: String!, $yandexCityId: Int, $limit: Int) {
+  suggest(keyword: $keyword) {
+    top(yandexCityId: $yandexCityId, limit: $limit) {
+      topResult {
+        global {
+          ...SuggestMovieItem
+          ...SuggestPersonItem
+          ...SuggestCinemaItem
+          ...SuggestMovieListItem
+          __typename
+        }
+        __typename
+      }
+      movies {
+        movie {
+          ...SuggestMovieItem
+          __typename
+        }
+        __typename
+      }
+      persons {
+        person {
+          ...SuggestPersonItem
+          __typename
+        }
+        __typename
+      }
+      cinemas {
+        cinema {
+          ...SuggestCinemaItem
+          __typename
+        }
+        __typename
+      }
+      movieLists {
+        movieList {
+          ...SuggestMovieListItem
+          __typename
+        }
+        __typename
+      }
+      __typename
+    }
+    __typename
+  }
+}
+
+fragment ShortImage on Image {
+  avatarsUrl
+  fallbackUrl
+  __typename
+}
+
+fragment MovieHdVerticalPoster on Movie {
+  gallery {
+    posters {
+      hdVertical: vertical(override: OTT_WHEN_EXISTS) {
+        ...ShortImage
+        __typename
+      }
+      __typename
+    }
+    __typename
+  }
+  __typename
+}
+
+fragment MovieKpVerticalPoster on Movie {
+  gallery {
+    posters {
+      kpVertical: vertical {
+        ...ShortImage
+        __typename
+      }
+      __typename
+    }
+    __typename
+  }
+  __typename
+}
+
+fragment TicketOption on Movie {
+  ticketOption {
+    purchasable
+    releaseAnnounce {
+      available
+      releaseDate {
+        accuracy
+        date
+        __typename
+      }
+      __typename
+    }
+    __typename
+  }
+  __typename
+}
+
+fragment SuggestMovieItem on Movie {
+  id
+  contentId
+  title {
+    russian
+    original
+    __typename
+  }
+  rating {
+    kinopoisk {
+      isActive
+      value
+      __typename
+    }
+    __typename
+  }
+  ...MovieHdVerticalPoster
+  ...MovieKpVerticalPoster
+  viewOption {
+    buttonText
+    isAvailableOnline: isWatchable(
+      filter: { anyDevice: false, anyRegion: false }
+    )
+    purchasabilityStatus
+    contentPackageToBuy {
+      billingFeatureName
+      __typename
+    }
+    subscriptionBadge {
+      image {
+        avatarsUrl
+        __typename
+      }
+      __typename
+    }
+    type
+    availabilityAnnounce {
+      groupPeriodType
+      announcePromise
+      availabilityDate
+      type
+      __typename
+    }
+    __typename
+  }
+  ...TicketOption
+  ... on Film {
+    productionYear
+    __typename
+  }
+  ... on TvSeries {
+    releaseYears {
+      end
+      start
+      __typename
+    }
+    __typename
+  }
+  ... on TvShow {
+    releaseYears {
+      end
+      start
+      __typename
+    }
+    __typename
+  }
+  ... on MiniSeries {
+    releaseYears {
+      end
+      start
+      __typename
+    }
+    __typename
+  }
+  __typename
+}
+
+fragment SuggestPersonItem on Person {
+  id
+  name
+  originalName
+  birthDate
+  poster {
+    avatarsUrl
+    fallbackUrl
+    __typename
+  }
+  __typename
+}
+
+fragment SuggestCinemaItem on Cinema {
+  id
+  ctitle: title
+  city {
+    id
+    name
+    geoId
+    __typename
+  }
+  __typename
+}
+
+fragment SuggestMovieListItem on MovieListMeta {
+  id
+  cover {
+    avatarsUrl
+    __typename
+  }
+  coverBackground {
+    avatarsUrl
+    __typename
+  }
+  name
+  url
+  description
+  movies(limit: 0) {
+    total
+    __typename
+  }
+  __typename
+}

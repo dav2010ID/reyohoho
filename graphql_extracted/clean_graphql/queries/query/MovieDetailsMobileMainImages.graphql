@@ -1,0 +1,59 @@
+query MovieDetailsMobileMainImages($movieId: Long!, $eachTypeLimit: Int!) {
+  movie(id: $movieId) {
+    __typename
+    ...movieDetailsMobileMainImagesFragment
+  }
+}
+
+fragment imageFragment on Image {
+  avatarsUrl
+  fallbackUrl
+}
+
+fragment imageWithSizeFragment on Image {
+  __typename
+  ...imageFragment
+  origSize {
+    width
+    height
+  }
+}
+
+fragment movieDetailsMobileImageFragment on MovieImage {
+  image {
+    __typename
+    ...imageWithSizeFragment
+  }
+  type
+  author {
+    login
+  }
+  copyright
+}
+
+fragment movieDetailsMobileMainImagesFragment on Movie {
+  gallery {
+    stillImages: images(types: [STILL], offset: 0, limit: $eachTypeLimit) {
+      items {
+        __typename
+        ...movieDetailsMobileImageFragment
+      }
+    }
+    shootingImages: images(
+      types: [SHOOTING]
+      offset: 0
+      limit: $eachTypeLimit
+    ) {
+      items {
+        __typename
+        ...movieDetailsMobileImageFragment
+      }
+    }
+    posterImages: images(types: [POSTER], offset: 0, limit: $eachTypeLimit) {
+      items {
+        __typename
+        ...movieDetailsMobileImageFragment
+      }
+    }
+  }
+}

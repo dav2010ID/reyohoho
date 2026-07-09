@@ -1,0 +1,69 @@
+query PersonImagesInfo(
+  $id: Long!
+  $type: PersonImageType!
+  $offset: Int
+  $limit: Int
+) {
+  person(id: $id) {
+    id
+    ...PersonImagesHeadInfo
+    ...PersonImagesTitle
+    ...PersonImagesStats
+    ...PersonImages
+    __typename
+  }
+}
+
+fragment PersonImagesHeadInfo on Person {
+  name
+  originalName
+  __typename
+}
+
+fragment PersonImagesTitle on Person {
+  name
+  originalName
+  poster {
+    avatarsUrl
+    __typename
+  }
+  allImages: images(limit: 0) {
+    total
+    __typename
+  }
+  __typename
+}
+
+fragment PersonImagesStats on Person {
+  photos: images(types: [PHOTO], limit: 0) {
+    total
+    __typename
+  }
+  events: images(types: [EVENT], limit: 0) {
+    total
+    __typename
+  }
+  __typename
+}
+
+fragment PersonImages on Person {
+  images(types: [$type], offset: $offset, limit: $limit) {
+    items {
+      id
+      type
+      image {
+        avatarsUrl
+        origSize {
+          width
+          height
+          __typename
+        }
+        __typename
+      }
+      __typename
+    }
+    total
+    __typename
+  }
+  __typename
+}

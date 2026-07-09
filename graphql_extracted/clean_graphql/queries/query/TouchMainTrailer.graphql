@@ -1,0 +1,29 @@
+query TouchMainTrailer($movieId: Long!) {
+  movie(id: $movieId) {
+    id
+    title {
+      ...MovieTitle
+      __typename
+    }
+    mainTrailer {
+      id
+      title
+      preview {
+        avatarsUrl
+        fallbackUrl
+        __typename
+      }
+      duration
+      createdAt
+      isEmbedded
+      __typename
+    }
+    __typename
+  }
+}
+
+fragment MovieTitle on Title {
+  russian
+  original
+  __typename
+}

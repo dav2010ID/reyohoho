@@ -1,0 +1,11 @@
+query DownloadSyncStatuses {
+  userProfile {
+    downloads {
+      id
+      rejection {
+        reason
+        details
+      }
+    }
+  }
+}

@@ -1,0 +1,19 @@
+fragment MovieRelatedMoviesCount on Movie {
+  relatedMoviesCount: relatedMovies(
+    limit: 0
+    type: [
+      VERSION
+      SPOOFS
+      SPOOFED
+      SPIN_OFF
+      REFERENCES
+      REFERENCES_IN
+      EDITED_INTO
+      EDITED_FROM
+    ]
+  ) {
+    total
+    __typename
+  }
+  __typename
+}

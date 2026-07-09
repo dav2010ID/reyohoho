@@ -1,0 +1,6 @@
+mutation ReportPlaqueClicked(
+  $targetingInput: TargetingInput!
+  $plaqueId: String!
+) {
+  plaqueClicked(input: { plaqueId: $plaqueId, targeting: $targetingInput })
+}

@@ -1,0 +1,30 @@
+query TouchMovieActors($movieId: Long!, $actorsLimit: Int) {
+  movie(id: $movieId) {
+    id
+    actors: members(limit: $actorsLimit, role: [ACTOR, CAMEO, UNCREDITED]) {
+      items {
+        ...MovieCrewMember
+        __typename
+      }
+      __typename
+    }
+    __typename
+  }
+}
+
+fragment MovieCrewMember on FilmCrewMember {
+  person {
+    id
+    name
+    originalName
+    poster {
+      avatarsUrl
+      fallbackUrl
+      __typename
+    }
+    __typename
+  }
+  details
+  role
+  __typename
+}

@@ -1,0 +1,286 @@
+fragment BaseUserProfile on Query {
+  userProfile {
+    ...UserId
+    social {
+      publicStatus
+      ...BaseUserSocialInfoFragment
+      __typename
+    }
+    gender
+    ... on UserProfile {
+      login
+      passportLogin
+      passportEmail
+      firstName
+      lastName
+      email
+      ...UserProfileMessages
+      ...UserProfilePinCode
+      ...StaffMember
+      __typename
+    }
+    ... on UserKidSubProfile {
+      parentProfile {
+        ...UserId
+        __typename
+      }
+      displayName
+      restrictions {
+        parentalControlEnabled
+        ageRestriction
+        __typename
+      }
+      avatar {
+        avatarsUrl
+        __typename
+      }
+      ...UserProfileMessages
+      __typename
+    }
+    ... on UserChildProfile {
+      login
+      passportLogin
+      passportEmail
+      firstName
+      lastName
+      displayName
+      avatar {
+        avatarsUrl
+        __typename
+      }
+      restrictions {
+        ageRestriction
+        __typename
+      }
+      __typename
+    }
+    ...BaseFamilyFragment
+    ...UserSubscriptionInfoFragment
+    ...YandexMultiAccountsFragment
+    ...UserProfileSocialAlias
+    __typename
+  }
+  clientInfo {
+    ...YandexNet
+    __typename
+  }
+  __typename
+}
+
+fragment UserId on UserProfileInterface {
+  id {
+    ottId
+    kpId
+    puid
+    __typename
+  }
+  __typename
+}
+
+fragment UserKidProfileFamily on UserKidSubProfile {
+  ...UserId
+  displayName
+  avatar {
+    avatarsUrl
+    __typename
+  }
+  restrictions {
+    ageRestriction
+    parentalControlEnabled
+    __typename
+  }
+  __typename
+}
+
+fragment UserChildProfileFamily on UserChildProfile {
+  ...UserId
+  displayName
+  avatar {
+    avatarsUrl
+    __typename
+  }
+  restrictions {
+    ageRestriction
+    __typename
+  }
+  subscriptionInfo {
+    contentPackages {
+      billingFeatureName
+      __typename
+    }
+    __typename
+  }
+  email
+  passportLogin
+  passportEmail
+  family {
+    familyAdmin
+    __typename
+  }
+  __typename
+}
+
+fragment BaseUserSocialInfoFragment on UserSocialInfo {
+  avatar {
+    defaultValue {
+      value {
+        avatarsUrl
+        __typename
+      }
+      __typename
+    }
+    values {
+      value {
+        avatarsUrl
+        __typename
+      }
+      source
+      __typename
+    }
+    __typename
+  }
+  name {
+    defaultValue {
+      value
+      __typename
+    }
+    __typename
+  }
+  __typename
+}
+
+fragment UserProfilePinCode on UserProfile {
+  pinCode @include(if: $withPinCode) {
+    enabled
+    initialized
+    __typename
+  }
+  __typename
+}
+
+fragment UserProfileFamily on UserProfile {
+  ...UserId
+  social {
+    ...BaseUserSocialInfoFragment
+    __typename
+  }
+  subscriptionInfo {
+    contentPackages {
+      billingFeatureName
+      __typename
+    }
+    __typename
+  }
+  email
+  passportLogin
+  passportEmail
+  family {
+    familyAdmin
+    __typename
+  }
+  ...UserProfilePinCode
+  __typename
+}
+
+fragment UserProfileMessages on UserProfileInterface {
+  userData @include(if: $withMessages) {
+    messages {
+      unreadCount
+      __typename
+    }
+    __typename
+  }
+  __typename
+}
+
+fragment StaffMember on UserProfile {
+  yandexoid
+  __typename
+}
+
+fragment BaseFamilyFragment on UserProfileInterface {
+  family {
+    canCreateKid
+    canInviteUser
+    familyAdmin
+    members(
+      filter: {
+        types: [USER_PROFILE, CHILD_USER_PROFILE, USER_KID_SUB_PROFILE]
+      }
+    ) {
+      ...UserKidProfileFamily @include(if: $withKidSubProfile)
+      ...UserChildProfileFamily @include(if: $withChildProfile)
+      ...UserProfileFamily
+      __typename
+    }
+    __typename
+  }
+  __typename
+}
+
+fragment UserSubscriptionInfoFragment on UserProfileInterface {
+  subscriptionInfo {
+    contentPackages {
+      billingFeatureName
+      __typename
+    }
+    hasSubscription
+    showcaseAccess {
+      access
+      __typename
+    }
+    __typename
+  }
+  __typename
+}
+
+fragment YandexMultiAccountsFragment on UserProfileInterface {
+  yandex {
+    multiAccounts {
+      accounts(
+        filter: {
+          includeCurrentAccount: false
+          includeCurrentFamilyMembers: true
+        }
+      ) {
+        avatar {
+          avatarsUrl
+          __typename
+        }
+        defaultEmail
+        displayName
+        hasContentPackages
+        puid
+        socialProviderCode
+        ... on ChildYandexAccount {
+          ageRestriction
+          __typename
+        }
+        __typename
+      }
+      allowMoreAccounts
+      __typename
+    }
+    __typename
+  }
+  __typename
+}
+
+fragment UserProfileSocialAlias on UserProfileInterface {
+  social {
+    alias {
+      defaultValue {
+        value
+        __typename
+      }
+      __typename
+    }
+    __typename
+  }
+  __typename
+}
+
+fragment YandexNet on ClientInfo {
+  yandexNet
+  __typename
+}

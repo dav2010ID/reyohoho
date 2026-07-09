@@ -1,0 +1,63 @@
+query UserDependantQuickActionsMovieDetails(
+  $movieId: Long!
+  $isAppendUserData: Boolean!
+  $isInternationalUserData: Boolean!
+  $includeEmotion: Boolean!
+) {
+  movie(id: $movieId) {
+    __typename
+    userData @include(if: $isAppendUserData) {
+      __typename
+      ...movieUserDataFragment
+    }
+  }
+}
+
+fragment movieUserDataFragment on MovieUserData {
+  __typename
+  isPlannedToWatch
+  folders @skip(if: $isInternationalUserData) {
+    __typename
+    ...folderFragment
+  }
+  voting @skip(if: $isInternationalUserData) {
+    __typename
+    ...voteFragment
+  }
+  watchStatuses {
+    __typename
+    ...watchStatusesFragment
+  }
+  emotion @include(if: $includeEmotion) {
+    __typename
+    ...emotionFragment
+  }
+}
+
+fragment folderFragment on Folder {
+  __typename
+  id
+  name
+}
+
+fragment voteFragment on Vote {
+  __typename
+  value
+}
+
+fragment watchStatusesFragment on WatchStatuses {
+  __typename
+  notInterested {
+    __typename
+    value
+  }
+  watched {
+    __typename
+    value
+  }
+}
+
+fragment emotionFragment on Emotion {
+  __typename
+  value
+}

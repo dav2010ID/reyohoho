@@ -1,0 +1,26 @@
+query MovieListCategoryWebPage(
+  $categoryId: Int!
+  $platform: WebClientPlatform
+) {
+  webPage(platform: $platform) {
+    kpMovieListCategoryPage(categoryId: $categoryId) {
+      htmlMeta {
+        ...OgImage
+        __typename
+      }
+      __typename
+    }
+    __typename
+  }
+}
+
+fragment OgImage on HtmlMeta {
+  openGraph {
+    image {
+      avatarsUrl
+      __typename
+    }
+    __typename
+  }
+  __typename
+}

@@ -1,0 +1,107 @@
+query PaymentPurchaseOption(
+  $clientName: String!
+  $context: [BillingFeatureClientContextItemInput!]
+  $paymentType: BillingFeaturePaymentType!
+  $includeOffer: Boolean!
+  $includeOfferInvoice: Boolean! = false
+  $checkSilentInvoiceAvailability: Boolean! = false
+) {
+  subscription {
+    purchaseOptions(
+      clientContext: {
+        clientName: $clientName
+        context: $context
+        paymentType: $paymentType
+      }
+    ) {
+      target
+      billingFeatureNames
+      interfaceMeta
+      subscriptionCompositeOffers(
+        checkSilentInvoiceAvailability: $checkSilentInvoiceAvailability
+      ) @include(if: $includeOffer) {
+        __typename
+        ...subscriptionOfferCompositeDataFragment
+      }
+    }
+  }
+}
+
+fragment subscriptionOfferOptionFragment on PlusOptionOffer {
+  additionText
+  description
+  name
+  title
+  text
+  option {
+    name
+  }
+  plans {
+    __typename
+  }
+}
+
+fragment subscriptionOfferTariffFragment on PlusTariffOffer {
+  additionText
+  description
+  name
+  title
+  text
+  tariff {
+    name
+  }
+  plans {
+    __typename
+  }
+}
+
+fragment subscriptionOfferInvoiceFragment on PlusCompositeOfferInvoice {
+  timestamp
+  totalPrice {
+    currency
+    amount
+  }
+}
+
+fragment subscriptionOfferCompositeDataFragment on SubscriptionCompositeOffers {
+  batchPositionId
+  eventSessionId
+  offers {
+    compositeOffer {
+      asset {
+        subscriptionName
+      }
+      forActiveOffers {
+        __typename
+        ... on PlusOptionOffer {
+          __typename
+          ...subscriptionOfferOptionFragment
+        }
+        ... on PlusTariffOffer {
+          __typename
+          ...subscriptionOfferTariffFragment
+        }
+      }
+      structureType
+      tariffOffer {
+        __typename
+        ...subscriptionOfferTariffFragment
+      }
+      optionOffers {
+        __typename
+        ...subscriptionOfferOptionFragment
+      }
+      positionId
+      silentInvoiceAvailable
+      invoices @include(if: $includeOfferInvoice) {
+        __typename
+        ...subscriptionOfferInvoiceFragment
+      }
+    }
+    customPayload {
+      overridedAdditionalText
+      overridedText
+      overridedTarget
+    }
+  }
+}

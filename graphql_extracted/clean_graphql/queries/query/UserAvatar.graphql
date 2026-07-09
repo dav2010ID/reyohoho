@@ -1,0 +1,14 @@
+query UserAvatar($id: ID!) {
+  user(id: $id) {
+    id
+    avatar {
+      __typename
+      ...avatar
+    }
+  }
+}
+
+fragment avatar on Avatar {
+  empty
+  passportAvatarId
+}

@@ -1,0 +1,17 @@
+query Functionality(
+  $id: String!
+  $purchaseOptionsContext: BillingFeatureClientContextInput!
+  $includeMoviePurchaseOptions: Boolean!
+  $input: FunctionalityClientContextInput
+) {
+  functionality(id: $id) {
+    access(input: $input) {
+      status
+      purchaseOptions(clientContext: $purchaseOptionsContext)
+        @include(if: $includeMoviePurchaseOptions) {
+        billingFeatureNames
+        target
+      }
+    }
+  }
+}

@@ -1,0 +1,10 @@
+query VerticalSeriesEpisodeMeta($contentId: String!) {
+  content(contentId: $contentId) {
+    __typename
+    ... on Episode {
+      ott {
+        hasSmokingScenes
+      }
+    }
+  }
+}

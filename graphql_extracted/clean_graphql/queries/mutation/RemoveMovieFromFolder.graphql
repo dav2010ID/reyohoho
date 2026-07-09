@@ -1,0 +1,19 @@
+mutation RemoveMovieFromFolder($movieId: Long!, $folderId: Long!) {
+  movie {
+    folder {
+      item {
+        remove(input: { movieId: $movieId, folderTypeId: $folderId }) {
+          status
+          error {
+            message
+            __typename
+          }
+          __typename
+        }
+        __typename
+      }
+      __typename
+    }
+    __typename
+  }
+}

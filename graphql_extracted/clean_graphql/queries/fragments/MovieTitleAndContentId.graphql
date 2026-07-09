@@ -1,0 +1,14 @@
+fragment MovieTitleAndContentId on Movie {
+  ...MovieTitleOption
+  contentId
+  __typename
+}
+
+fragment MovieTitleOption on Movie {
+  title {
+    russian
+    original
+    __typename
+  }
+  __typename
+}

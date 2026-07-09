@@ -1,0 +1,6 @@
+mutation InviteToFamily($email: String, $phone: String) {
+  invite: inviteToFamily(invitation: { email: $email, phone: $phone }) {
+    inviteId
+    inviteUrl
+  }
+}

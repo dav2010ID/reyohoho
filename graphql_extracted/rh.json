@@ -1,0 +1,367 @@
+{
+  "kinopoisk_id": 301,
+  "imdb_id": "tt0133093",
+  "name_ru": "Матрица",
+  "name_en": "The Matrix",
+  "name_original": "The Matrix",
+  "poster_url": "https://kinopoiskapiunofficial.tech/images/posters/kp/301.jpg",
+  "poster_url_preview": "https://kinopoiskapiunofficial.tech/images/posters/kp_small/301.jpg",
+  "reviews_count": 319,
+  "rating_good_review": 89.0,
+  "rating_good_review_vote_count": 264,
+  "rating_kinopoisk": 8.5,
+  "rating_kinopoisk_vote_count": 796307,
+  "rating_imdb": 8.7,
+  "rating_imdb_vote_count": 2200000,
+  "rating_film_critics": 7.9,
+  "rating_film_critics_vote_count": 209,
+  "rating_await": null,
+  "rating_await_count": 0,
+  "rating_rf_critics": 60.0,
+  "rating_rf_critics_vote_count": 5,
+  "year": 1999,
+  "film_length": 136,
+  "is_tickets_available": false,
+  "production_status": null,
+  "type": "FILM",
+  "has_imax": false,
+  "has_3_d": false,
+  "countries": [
+    {
+      "country": "США"
+    },
+    {
+      "country": "Австралия"
+    }
+  ],
+  "genres": [
+    {
+      "genre": "фантастика"
+    },
+    {
+      "genre": "боевик"
+    }
+  ],
+  "start_year": null,
+  "end_year": null,
+  "cover_url": "https://avatars.mds.yandex.net/get-ott/2419418/2a0000017c27e0e090b55381c1b06e5c5b0b/orig",
+  "logo_url": "https://avatars.mds.yandex.net/get-ott/1648503/2a00000170a5418408119bc802b53a03007b/orig",
+  "web_url": "https://www.kinopoisk.ru/film/301/",
+  "slogan": "Добро пожаловать в реальный мир",
+  "description": "Жизнь Томаса Андерсона разделена на две части: днём он — самый обычный офисный работник, получающий нагоняи от начальства, а ночью превращается в хакера по имени Нео, и нет места в сети, куда он бы не смог проникнуть. Но однажды всё меняется. Томас узнаёт ужасающую правду о реальности.",
+  "short_description": "Хакер Нео узнает, что его мир — виртуальный. Выдающийся экшен, доказавший, что зрелищное кино может быть умным",
+  "editor_annotation": null,
+  "rating_mpaa": "r",
+  "rating_age_limits": "age18",
+  "last_sync": "2026-04-19T16:02:03.057916",
+  "serial": false,
+  "short_film": false,
+  "completed": false,
+  "sequels_and_prequels": [
+    {
+      "film_id": 299,
+      "name_ru": "Матрица: Перезагрузка",
+      "name_en": "The Matrix Reloaded",
+      "name_original": "The Matrix Reloaded",
+      "poster_url": "https://kinopoiskapiunofficial.tech/images/posters/kp/299.jpg",
+      "poster_url_preview": "https://kinopoiskapiunofficial.tech/images/posters/kp_small/299.jpg",
+      "relation_type": "SEQUEL"
+    },
+    {
+      "film_id": 316,
+      "name_ru": "Матрица: Революция",
+      "name_en": "The Matrix Revolutions",
+      "name_original": "The Matrix Revolutions",
+      "poster_url": "https://kinopoiskapiunofficial.tech/images/posters/kp/316.jpg",
+      "poster_url_preview": "https://kinopoiskapiunofficial.tech/images/posters/kp_small/316.jpg",
+      "relation_type": "SEQUEL"
+    },
+    {
+      "film_id": 8407,
+      "name_ru": "Аниматрица: Последний полет Осириса",
+      "name_en": "Final Flight of the Osiris",
+      "name_original": "Final Flight of the Osiris",
+      "poster_url": "https://kinopoiskapiunofficial.tech/images/posters/kp/8407.jpg",
+      "poster_url_preview": "https://kinopoiskapiunofficial.tech/images/posters/kp_small/8407.jpg",
+      "relation_type": "SEQUEL"
+    },
+    {
+      "film_id": 63744,
+      "name_ru": "Аниматрица: Второе возрождение – Часть 1",
+      "name_en": "The Second Renaissance Part I",
+      "name_original": "The Second Renaissance Part I",
+      "poster_url": "https://kinopoiskapiunofficial.tech/images/posters/kp/63744.jpg",
+      "poster_url_preview": "https://kinopoiskapiunofficial.tech/images/posters/kp_small/63744.jpg",
+      "relation_type": "SEQUEL"
+    },
+    {
+      "film_id": 63745,
+      "name_ru": "Аниматрица: Второе возрождение – Часть 2",
+      "name_en": "The Second Renaissance Part II",
+      "name_original": "The Second Renaissance Part II",
+      "poster_url": "https://kinopoiskapiunofficial.tech/images/posters/kp/63745.jpg",
+      "poster_url_preview": "https://kinopoiskapiunofficial.tech/images/posters/kp_small/63745.jpg",
+      "relation_type": "SEQUEL"
+    },
+    {
+      "film_id": 1294123,
+      "name_ru": "Матрица: Воскрешение",
+      "name_en": "The Matrix Resurrections",
+      "name_original": "The Matrix Resurrections",
+      "poster_url": "https://kinopoiskapiunofficial.tech/images/posters/kp/1294123.jpg",
+      "poster_url_preview": "https://kinopoiskapiunofficial.tech/images/posters/kp_small/1294123.jpg",
+      "relation_type": "SEQUEL"
+    }
+  ],
+  "similars": [
+    {
+      "film_id": 309,
+      "name_ru": "Эквилибриум",
+      "name_en": "Equilibrium",
+      "name_original": "Equilibrium",
+      "poster_url": "https://kinopoiskapiunofficial.tech/images/posters/kp/309.jpg",
+      "poster_url_preview": "https://kinopoiskapiunofficial.tech/images/posters/kp_small/309.jpg",
+      "relation_type": "SIMILAR"
+    },
+    {
+      "film_id": 1086,
+      "name_ru": "Тринадцатый этаж",
+      "name_en": "The Thirteenth Floor",
+      "name_original": "The Thirteenth Floor",
+      "poster_url": "https://kinopoiskapiunofficial.tech/images/posters/kp/1086.jpg",
+      "poster_url_preview": "https://kinopoiskapiunofficial.tech/images/posters/kp_small/1086.jpg",
+      "relation_type": "SIMILAR"
+    },
+    {
+      "film_id": 3800,
+      "name_ru": "Джонни Мнемоник",
+      "name_en": "Johnny Mnemonic",
+      "name_original": "Johnny Mnemonic",
+      "poster_url": "https://kinopoiskapiunofficial.tech/images/posters/kp/3800.jpg",
+      "poster_url_preview": "https://kinopoiskapiunofficial.tech/images/posters/kp_small/3800.jpg",
+      "relation_type": "SIMILAR"
+    },
+    {
+      "film_id": 4739,
+      "name_ru": "Тёмный город",
+      "name_en": "Dark City",
+      "name_original": "Dark City",
+      "poster_url": "https://kinopoiskapiunofficial.tech/images/posters/kp/4739.jpg",
+      "poster_url_preview": "https://kinopoiskapiunofficial.tech/images/posters/kp_small/4739.jpg",
+      "relation_type": "SIMILAR"
+    },
+    {
+      "film_id": 8228,
+      "name_ru": "Призрак в доспехах",
+      "name_en": "Koukaku Kidoutai",
+      "name_original": "Koukaku Kidoutai",
+      "poster_url": "https://kinopoiskapiunofficial.tech/images/posters/kp/8228.jpg",
+      "poster_url_preview": "https://kinopoiskapiunofficial.tech/images/posters/kp_small/8228.jpg",
+      "relation_type": "SIMILAR"
+    },
+    {
+      "film_id": 17463,
+      "name_ru": "Трон",
+      "name_en": "Tron",
+      "name_original": "Tron",
+      "poster_url": "https://kinopoiskapiunofficial.tech/images/posters/kp/17463.jpg",
+      "poster_url_preview": "https://kinopoiskapiunofficial.tech/images/posters/kp_small/17463.jpg",
+      "relation_type": "SIMILAR"
+    },
+    {
+      "film_id": 81291,
+      "name_ru": "Остров",
+      "name_en": "The Island",
+      "name_original": "The Island",
+      "poster_url": "https://kinopoiskapiunofficial.tech/images/posters/kp/81291.jpg",
+      "poster_url_preview": "https://kinopoiskapiunofficial.tech/images/posters/kp_small/81291.jpg",
+      "relation_type": "SIMILAR"
+    },
+    {
+      "film_id": 180577,
+      "name_ru": "Девять",
+      "name_en": "9",
+      "name_original": "9",
+      "poster_url": "https://kinopoiskapiunofficial.tech/images/posters/kp/180577.jpg",
+      "poster_url_preview": "https://kinopoiskapiunofficial.tech/images/posters/kp_small/180577.jpg",
+      "relation_type": "SIMILAR"
+    },
+    {
+      "film_id": 259876,
+      "name_ru": "Особо опасен",
+      "name_en": "Wanted",
+      "name_original": "Wanted",
+      "poster_url": "https://kinopoiskapiunofficial.tech/images/posters/kp/259876.jpg",
+      "poster_url_preview": "https://kinopoiskapiunofficial.tech/images/posters/kp_small/259876.jpg",
+      "relation_type": "SIMILAR"
+    },
+    {
+      "film_id": 321835,
+      "name_ru": "Эксперименты Лэйн",
+      "name_en": "Serial Experiments Lain",
+      "name_original": "Serial Experiments Lain",
+      "poster_url": "https://kinopoiskapiunofficial.tech/images/posters/kp/321835.jpg",
+      "poster_url_preview": "https://kinopoiskapiunofficial.tech/images/posters/kp_small/321835.jpg",
+      "relation_type": "SIMILAR"
+    },
+    {
+      "film_id": 325797,
+      "name_ru": "Аниматрица",
+      "name_en": "The Animatrix",
+      "name_original": "The Animatrix",
+      "poster_url": "https://kinopoiskapiunofficial.tech/images/posters/kp/325797.jpg",
+      "poster_url_preview": "https://kinopoiskapiunofficial.tech/images/posters/kp_small/325797.jpg",
+      "relation_type": "SIMILAR"
+    },
+    {
+      "film_id": 397220,
+      "name_ru": "Эрго Прокси",
+      "name_en": "Ergo Proxy",
+      "name_original": "Ergo Proxy",
+      "poster_url": "https://kinopoiskapiunofficial.tech/images/posters/kp/397220.jpg",
+      "poster_url_preview": "https://kinopoiskapiunofficial.tech/images/posters/kp_small/397220.jpg",
+      "relation_type": "SIMILAR"
+    },
+    {
+      "film_id": 397671,
+      "name_ru": "Суррогаты",
+      "name_en": "Surrogates",
+      "name_original": "Surrogates",
+      "poster_url": "https://kinopoiskapiunofficial.tech/images/posters/kp/397671.jpg",
+      "poster_url_preview": "https://kinopoiskapiunofficial.tech/images/posters/kp_small/397671.jpg",
+      "relation_type": "SIMILAR"
+    },
+    {
+      "film_id": 399959,
+      "name_ru": "Трон: Наследие",
+      "name_en": "Tron: Legacy",
+      "name_original": "Tron: Legacy",
+      "poster_url": "https://kinopoiskapiunofficial.tech/images/posters/kp/399959.jpg",
+      "poster_url_preview": "https://kinopoiskapiunofficial.tech/images/posters/kp_small/399959.jpg",
+      "relation_type": "SIMILAR"
+    },
+    {
+      "film_id": 409600,
+      "name_ru": "Доктор Стрэндж",
+      "name_en": "Doctor Strange",
+      "name_original": "Doctor Strange",
+      "poster_url": "https://kinopoiskapiunofficial.tech/images/posters/kp/409600.jpg",
+      "poster_url_preview": "https://kinopoiskapiunofficial.tech/images/posters/kp_small/409600.jpg",
+      "relation_type": "SIMILAR"
+    },
+    {
+      "film_id": 410599,
+      "name_ru": "Груз",
+      "name_en": "Cargo",
+      "name_original": "Cargo",
+      "poster_url": "https://kinopoiskapiunofficial.tech/images/posters/kp/410599.jpg",
+      "poster_url_preview": "https://kinopoiskapiunofficial.tech/images/posters/kp_small/410599.jpg",
+      "relation_type": "SIMILAR"
+    },
+    {
+      "film_id": 447301,
+      "name_ru": "Начало",
+      "name_en": "Inception",
+      "name_original": "Inception",
+      "poster_url": "https://kinopoiskapiunofficial.tech/images/posters/kp/447301.jpg",
+      "poster_url_preview": "https://kinopoiskapiunofficial.tech/images/posters/kp_small/447301.jpg",
+      "relation_type": "SIMILAR"
+    },
+    {
+      "film_id": 450765,
+      "name_ru": "Меняющие реальность",
+      "name_en": "The Adjustment Bureau",
+      "name_original": "The Adjustment Bureau",
+      "poster_url": "https://kinopoiskapiunofficial.tech/images/posters/kp/450765.jpg",
+      "poster_url_preview": "https://kinopoiskapiunofficial.tech/images/posters/kp_small/450765.jpg",
+      "relation_type": "SIMILAR"
+    },
+    {
+      "film_id": 464484,
+      "name_ru": "Облачный атлас",
+      "name_en": "Cloud Atlas",
+      "name_original": "Cloud Atlas",
+      "poster_url": "https://kinopoiskapiunofficial.tech/images/posters/kp/464484.jpg",
+      "poster_url_preview": "https://kinopoiskapiunofficial.tech/images/posters/kp_small/464484.jpg",
+      "relation_type": "SIMILAR"
+    },
+    {
+      "film_id": 470185,
+      "name_ru": "Обливион",
+      "name_en": "Oblivion",
+      "name_original": "Oblivion",
+      "poster_url": "https://kinopoiskapiunofficial.tech/images/posters/kp/470185.jpg",
+      "poster_url_preview": "https://kinopoiskapiunofficial.tech/images/posters/kp_small/470185.jpg",
+      "relation_type": "SIMILAR"
+    },
+    {
+      "film_id": 470998,
+      "name_ru": "Метропия",
+      "name_en": "Metropia",
+      "name_original": "Metropia",
+      "poster_url": "https://kinopoiskapiunofficial.tech/images/posters/kp/470998.jpg",
+      "poster_url_preview": "https://kinopoiskapiunofficial.tech/images/posters/kp_small/470998.jpg",
+      "relation_type": "SIMILAR"
+    },
+    {
+      "film_id": 580655,
+      "name_ru": "Пробуждение",
+      "name_en": "Awake",
+      "name_original": "Awake",
+      "poster_url": "https://kinopoiskapiunofficial.tech/images/posters/kp/580655.jpg",
+      "poster_url_preview": "https://kinopoiskapiunofficial.tech/images/posters/kp_small/580655.jpg",
+      "relation_type": "SIMILAR"
+    },
+    {
+      "film_id": 760326,
+      "name_ru": "Люси",
+      "name_en": "Lucy",
+      "name_original": "Lucy",
+      "poster_url": "https://kinopoiskapiunofficial.tech/images/posters/kp/760326.jpg",
+      "poster_url_preview": "https://kinopoiskapiunofficial.tech/images/posters/kp_small/760326.jpg",
+      "relation_type": "SIMILAR"
+    },
+    {
+      "film_id": 35545,
+      "name_ru": "Нирвана",
+      "name_en": "Nirvana",
+      "name_original": "Nirvana",
+      "poster_url": "https://kinopoiskapiunofficial.tech/images/posters/kp/35545.jpg",
+      "poster_url_preview": "https://kinopoiskapiunofficial.tech/images/posters/kp_small/35545.jpg",
+      "relation_type": "SIMILAR"
+    },
+    {
+      "film_id": 444,
+      "name_ru": "Терминатор 2: Судный день",
+      "name_en": "Terminator 2: Judgment Day",
+      "name_original": "Terminator 2: Judgment Day",
+      "poster_url": "https://kinopoiskapiunofficial.tech/images/posters/kp/444.jpg",
+      "poster_url_preview": "https://kinopoiskapiunofficial.tech/images/posters/kp_small/444.jpg",
+      "relation_type": "SIMILAR"
+    }
+  ],
+  "videos": [],
+  "staff": [],
+  "nudity_timings": [
+    {
+      "id": 2031,
+      "username": "Таня Белкова",
+      "timing_text": "00:32:22(вид глотки изнутри, спорно)",
+      "status": "approved",
+      "user_id": 21923,
+      "user_timing_count": 1079,
+      "upvotes": 0,
+      "downvotes": 0,
+      "vote_score": 0
+    }
+  ],
+  "lists": {
+    "isFavorite": false,
+    "isHistory": true,
+    "isLater": false,
+    "isCompleted": true,
+    "isAbandoned": false,
+    "isWatching": false,
+    "isRated": true
+  }
+}

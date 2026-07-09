@@ -1,0 +1,51 @@
+query RedAlertsDigest(
+  $service: String!
+  $client: String
+  $language: String
+  $coordinates: CoordinatesInput
+  $geoPinPosition: CoordinatesInput
+  $platform: PLATFORM!
+  $alertKind: ALERT_KIND
+) {
+  alertsDigest: alertsDigest(
+    input: {
+      service: $service
+      client: $client
+      lang: $language
+      location: { coordinates: $coordinates, geoPinPosition: $geoPinPosition }
+      platform: $platform
+      alertKind: $alertKind
+    }
+  ) {
+    __typename
+    ...redAlertsDigestFragment
+  }
+}
+
+fragment keyValueFragment on KeyValue {
+  key
+  value
+}
+
+fragment redAlertsFragment on Alert {
+  clickUrl
+  id
+  payload {
+    __typename
+    ...keyValueFragment
+  }
+  texts {
+    __typename
+    ...keyValueFragment
+  }
+  type
+  kind
+}
+
+fragment redAlertsDigestFragment on AlertsDigest {
+  alert {
+    __typename
+    ...redAlertsFragment
+  }
+  alertsCount
+}

@@ -1,0 +1,10 @@
+mutation MovieUserReviewRemoveVote($reviewId: Int!) {
+  userReview {
+    remove(input: { reviewId: $reviewId }) {
+      status
+      error {
+        message
+      }
+    }
+  }
+}

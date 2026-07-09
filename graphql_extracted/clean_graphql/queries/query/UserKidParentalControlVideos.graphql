@@ -1,0 +1,18 @@
+query UserKidParentalControlVideos {
+  userRestrictionsInfo {
+    parentalControlVideos {
+      id
+      streamUrl
+      title
+      image {
+        __typename
+        ...imageFragment
+      }
+    }
+  }
+}
+
+fragment imageFragment on Image {
+  avatarsUrl
+  fallbackUrl
+}

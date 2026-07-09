@@ -1,0 +1,87 @@
+query BoxOffices {
+  weekendBoxOfficeMovies {
+    endDate
+    startDate
+    russiaBoxOfficeMovies {
+      movie {
+        ...BoxOfficeMovie
+        __typename
+      }
+      weekendBoxOffice {
+        rusBox {
+          amount
+          __typename
+        }
+        __typename
+      }
+      totalBoxOffice {
+        weeks
+        rusBox {
+          amount
+          __typename
+        }
+        __typename
+      }
+      __typename
+    }
+    usaBoxOfficeMovies {
+      movie {
+        ...BoxOfficeMovie
+        __typename
+      }
+      weekendBoxOffice {
+        usaBox {
+          amount
+          __typename
+        }
+        __typename
+      }
+      totalBoxOffice {
+        weeks
+        usaBox {
+          amount
+          __typename
+        }
+        __typename
+      }
+      __typename
+    }
+    worldBoxOfficeMovies {
+      movie {
+        ...BoxOfficeMovie
+        __typename
+      }
+      weekendBoxOffice {
+        worldBox {
+          amount
+          __typename
+        }
+        __typename
+      }
+      totalBoxOffice {
+        weeks
+        worldBox {
+          amount
+          __typename
+        }
+        __typename
+      }
+      __typename
+    }
+    __typename
+  }
+}
+
+fragment BoxOfficeMovie on Movie {
+  id
+  title {
+    russian
+    original
+    __typename
+  }
+  poster {
+    avatarsUrl
+    __typename
+  }
+  __typename
+}

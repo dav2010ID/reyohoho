@@ -1,0 +1,196 @@
+query CompositeUpsale(
+  $eventSessionId: String!
+  $purchasedOptionOffers: [OfferNameScalar]!
+  $purchasedTariffOffers: OfferNameScalar
+  $flags: Map_String_BooleanScalar
+  $testIds: [String!]
+  $target: String!
+  $inAppPurchases: [InAppPurchaseInput!]
+  $language: LanguageISO639Scalar!
+) {
+  upsaleComposites(
+    input: {
+      eventSessionId: $eventSessionId
+      purchasedOffers: {
+        optionOffers: $purchasedOptionOffers
+        tariffOffer: $purchasedTariffOffers
+      }
+      experiments: { flags: $flags, testIds: $testIds }
+      target: $target
+      language: $language
+      inAppPurchases: $inAppPurchases
+    }
+  ) {
+    offersBatchIdUpsale
+    eventSessionId
+    upsales {
+      offer {
+        __typename
+        ...compositeOffer
+      }
+      asset {
+        titleText
+        subtitleText
+        benefits {
+          text
+        }
+        acceptButtonText
+        buttonText
+        buttonAdditionalText
+        rejectButtonText
+        mainImageMobile
+        mainImageTV
+      }
+      storePurchaseInfo {
+        __typename
+        ...storePurchaseInfo
+      }
+    }
+  }
+}
+
+fragment offerPrice on Price {
+  currency
+  amount
+}
+
+fragment offerIntroPlan on IntroPlan {
+  period
+  price {
+    __typename
+    ...offerPrice
+  }
+  repetitionCount
+}
+
+fragment offerIntroUntilPlan on IntroUntilPlan {
+  price {
+    __typename
+    ...offerPrice
+  }
+  until
+}
+
+fragment offerTrialPlan on TrialPlan {
+  period
+}
+
+fragment offerTrialUntilPlan on TrialUntilPlan {
+  until
+}
+
+fragment offerPlan on OfferPlanUnion {
+  __typename
+  ... on IntroPlan {
+    __typename
+    ...offerIntroPlan
+  }
+  ... on IntroUntilPlan {
+    __typename
+    ...offerIntroUntilPlan
+  }
+  ... on TrialPlan {
+    __typename
+    ...offerTrialPlan
+  }
+  ... on TrialUntilPlan {
+    __typename
+    ...offerTrialUntilPlan
+  }
+}
+
+fragment tariffOffer on TariffOffer {
+  name
+  title
+  tariff {
+    name
+  }
+  description
+  text
+  additionText
+  commonPrice {
+    __typename
+    ...offerPrice
+  }
+  commonPeriod
+  plans {
+    __typename
+    ...offerPlan
+  }
+  offerVendorType
+  payload
+}
+
+fragment optionOffer on OptionOffer {
+  name
+  title
+  option {
+    name
+  }
+  description
+  text
+  additionText
+  commonPrice {
+    __typename
+    ...offerPrice
+  }
+  commonPeriod
+  plans {
+    __typename
+    ...offerPlan
+  }
+  offerVendorType
+  payload
+}
+
+fragment legalInfo on LegalInfo {
+  text
+  items {
+    type
+    key
+    data {
+      text
+      link
+    }
+  }
+}
+
+fragment compositeOffer on CompositeOffer {
+  positionId
+  structureType
+  forActiveTariff {
+    name
+  }
+  tariffOffer {
+    __typename
+    ...tariffOffer
+  }
+  optionOffers {
+    __typename
+    ...optionOffer
+  }
+  legalInfo {
+    __typename
+    ...legalInfo
+  }
+  invoices {
+    timestamp
+    totalPrice {
+      __typename
+      ...offerPrice
+    }
+  }
+  asset {
+    buttonText
+    buttonTextWithDetails
+    subscriptionName
+  }
+  silentInvoiceAvailable
+}
+
+fragment storePurchaseInfo on StorePurchaseInfo {
+  googleOfferReplaceParams {
+    purchaseToken
+    strategy
+  }
+}

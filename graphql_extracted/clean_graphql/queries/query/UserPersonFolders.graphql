@@ -1,0 +1,40 @@
+query UserPersonFolders($personId: Long!) {
+  ...UserPersonFolders
+}
+
+fragment UserId on UserProfileInterface {
+  id {
+    ottId
+    kpId
+    puid
+    __typename
+  }
+  __typename
+}
+
+fragment PersonFolder on PersonFolder {
+  containsPerson(personId: $personId)
+  name
+  public
+  typeId
+  __typename
+}
+
+fragment UserPersonFolders on Query {
+  userProfile {
+    ...UserId
+    userData {
+      personFolders(offset: 0, limit: 20) {
+        items {
+          ...PersonFolder
+          __typename
+        }
+        total
+        __typename
+      }
+      __typename
+    }
+    __typename
+  }
+  __typename
+}

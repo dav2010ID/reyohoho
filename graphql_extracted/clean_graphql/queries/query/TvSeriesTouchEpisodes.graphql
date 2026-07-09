@@ -1,0 +1,23 @@
+query TvSeriesTouchEpisodes($tvSeriesId: Long!) {
+  tvSeries(id: $tvSeriesId) {
+    id
+    episodesCount
+    releasedEpisodes: episodes(
+      released: true
+      limit: 1
+      orderBy: SEASON_NUMBER_EPISODE_NUMBER_DESC
+    ) {
+      items {
+        id
+        number
+        season {
+          number
+          __typename
+        }
+        __typename
+      }
+      __typename
+    }
+    __typename
+  }
+}

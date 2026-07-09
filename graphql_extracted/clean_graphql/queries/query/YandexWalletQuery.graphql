@@ -1,0 +1,19 @@
+query YandexWalletQuery {
+  user {
+    __typename
+    yandex {
+      wallet {
+        balance {
+          amount
+          __typename
+        }
+        featureStatus {
+          enabled
+          __typename
+        }
+        __typename
+      }
+      __typename
+    }
+  }
+}

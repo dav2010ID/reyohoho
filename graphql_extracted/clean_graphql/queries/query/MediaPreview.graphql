@@ -1,0 +1,81 @@
+query MediaPreview(
+  $popularPostsOffset: Int
+  $popularPostsLimit: Int
+  $todayMainPostsOffset: Int
+  $todayMainPostsLimit: Int
+  $videoPostsOffset: Int
+  $videoPostsLimit: Int
+) {
+  popularPosts(offset: $popularPostsOffset, limit: $popularPostsLimit) {
+    items {
+      ...PopularPost
+      __typename
+    }
+    __typename
+  }
+  todayMainPosts(offset: $todayMainPostsOffset, limit: $todayMainPostsLimit) {
+    items {
+      ...TodayMainPost
+      __typename
+    }
+    __typename
+  }
+  posts(
+    filter: { types: [VIDEO] }
+    offset: $videoPostsOffset
+    limit: $videoPostsLimit
+  ) {
+    items {
+      ...MediaPreviewVideoPost
+      __typename
+    }
+    __typename
+  }
+}
+
+fragment PopularPost on Post {
+  title
+  type
+  id
+  commentsCount
+  commentable
+  slug
+  thumbImage {
+    avatarsUrl
+    __typename
+  }
+  __typename
+}
+
+fragment TodayMainPost on Post {
+  title
+  type
+  id
+  commentsCount
+  commentable
+  slug
+  badge {
+    label
+    url
+    __typename
+  }
+  rubric {
+    title
+    __typename
+  }
+  thumbImage {
+    avatarsUrl
+    __typename
+  }
+  __typename
+}
+
+fragment MediaPreviewVideoPost on Post {
+  title
+  id
+  thumbImage {
+    avatarsUrl
+    __typename
+  }
+  __typename
+}

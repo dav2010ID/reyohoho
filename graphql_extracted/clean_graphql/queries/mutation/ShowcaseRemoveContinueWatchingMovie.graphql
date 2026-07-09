@@ -1,0 +1,10 @@
+mutation ShowcaseRemoveContinueWatchingMovie($contentId: String!) {
+  continueWatching {
+    remove(input: { contentId: $contentId }) {
+      status
+      error {
+        message
+      }
+    }
+  }
+}

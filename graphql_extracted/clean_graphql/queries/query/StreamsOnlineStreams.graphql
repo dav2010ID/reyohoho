@@ -1,0 +1,316 @@
+query StreamsOnlineStreams(
+  $contentId: String!
+  $includeLogo: Boolean!
+  $prerollsSupported: Boolean!
+  $prerollsClientFeedbackSupported: Boolean!
+  $includeWatchParams: Boolean!
+  $includeTiming: Boolean!
+  $includeMyShowsComments: Boolean!
+) {
+  content(contentId: $contentId) {
+    __typename
+    ... on Movie {
+      __typename
+      ...streamsMovieOnlineStreamsFragment
+    }
+    ... on Episode {
+      __typename
+      ...streamsEpisodeOnlineStreamsFragment
+    }
+    ... on Series {
+      __typename
+      ...streamsSeriesOnlineStreamsFragment
+    }
+  }
+}
+
+fragment titleFragment on Title {
+  localized
+  original
+}
+
+fragment imageFragment on Image {
+  avatarsUrl
+  fallbackUrl
+}
+
+fragment restrictionFragment on Restriction {
+  age
+  mpaa
+}
+
+fragment streamsOttWatchParamsFragment on Ott {
+  userData {
+    watchParams {
+      audioLanguage
+      subtitleLanguage
+    }
+  }
+}
+
+fragment streamsWatchParamsFragment on Movie {
+  ott {
+    __typename
+    ...streamsOttWatchParamsFragment
+  }
+}
+
+fragment myShowsCommentsFragment on MyShowsComments {
+  __typename
+  url
+  count
+  rawCount
+}
+
+fragment movieCommentsFragment on Movie {
+  myShowsComments @include(if: $includeMyShowsComments) {
+    __typename
+    ...myShowsCommentsFragment
+  }
+}
+
+fragment streamsMovieMetaFragment on Movie {
+  __typename
+  id
+  contentId
+  title {
+    __typename
+    ...titleFragment
+  }
+  editorAnnotation
+  gallery @include(if: $includeLogo) {
+    logos {
+      horizontal {
+        __typename
+        ...imageFragment
+      }
+    }
+  }
+  restriction {
+    __typename
+    ...restrictionFragment
+  }
+  ...streamsWatchParamsFragment @include(if: $includeWatchParams)
+  ...movieCommentsFragment
+}
+
+fragment movieFilmOttWatchProgressFragment on Ott {
+  preview {
+    __typename
+    ... on OttPreview_AbstractVideo {
+      duration
+      timing @include(if: $includeTiming) {
+        current
+      }
+    }
+  }
+}
+
+fragment movieStreamsAudioMetaFragment on AudioMeta {
+  audioChannelsNumber
+  audioGroupId
+  forAdult
+  language
+  languageName
+  quality
+  qualityName
+  studio
+  type
+  visibleByDefault
+}
+
+fragment streamsVideoMetaFragment on VideoMeta {
+  bitrate
+  codec
+  dynamicRange
+  framesPerSecond
+  height
+  width
+  label
+}
+
+fragment movieStreamsSubtitleMetaFragment on SubtitleMeta {
+  forAdult
+  language
+  languageName
+  studio
+  type
+  visibleByDefault
+}
+
+fragment streamsDrmMetaFragment on StreamMeta {
+  drmConfig {
+    drmServers {
+      certificateUrl
+      name
+      processSPCPath
+      provisioningUrl
+      url
+    }
+    headers
+    requestParams
+  }
+}
+
+fragment streamsMetaFragment on StreamMeta {
+  __typename
+  audioMetas {
+    __typename
+    ...movieStreamsAudioMetaFragment
+  }
+  cuesUrl
+  videoMetas {
+    __typename
+    ...streamsVideoMetaFragment
+  }
+  subtitleMetas {
+    __typename
+    ...movieStreamsSubtitleMetaFragment
+  }
+  prerollsDuration
+  prerolls {
+    durationMs
+    promotedEntityId
+    sourceMeta {
+      __typename
+      ... on PrerollNotificationMeta {
+        communicationId
+        notificationId
+        feedbackToken
+      }
+    }
+  }
+  videoToken
+  clearStreamEncoding
+  ...streamsDrmMetaFragment
+  skippableFragments {
+    endTime
+    final
+    startTime
+    type
+  }
+  trackings
+  disclaimers {
+    type
+  }
+}
+
+fragment streamsStreamItemFragment on Stream {
+  drmType
+  streamType
+  uri
+  videoDescriptorName
+  streamMeta {
+    __typename
+    ...streamsMetaFragment
+  }
+}
+
+fragment streamsOnlineStreamsFragment on OnlineStreams {
+  concurrencyArbiterConfig {
+    concurrencyArbiterRequestParams
+    server
+  }
+  drmRequirement
+  monetizationModel
+  playerRestrictionConfig {
+    dvrSeconds
+    subtitlesButtonEnable
+  }
+  sessionId
+  streams {
+    __typename
+    ...streamsStreamItemFragment
+  }
+}
+
+fragment streamsMovieOnlineStreamsFragment on Movie {
+  __typename
+  ...streamsMovieMetaFragment
+  ott {
+    __typename
+    ...movieFilmOttWatchProgressFragment
+    ... on Ott_AbstractVideo {
+      hasSmokingScenes
+      onlineStreams(
+        prerollsSupported: $prerollsSupported
+        prerollsClientFeedbackSupported: $prerollsClientFeedbackSupported
+      ) {
+        __typename
+        ...streamsOnlineStreamsFragment
+      }
+    }
+  }
+}
+
+fragment movieEpisodeOttWatchProgressFragment on OttEpisode {
+  duration
+  timing @include(if: $includeTiming) {
+    current
+  }
+}
+
+fragment episodeCommentsFragment on Episode {
+  myShowsComments @include(if: $includeMyShowsComments) {
+    __typename
+    ...myShowsCommentsFragment
+  }
+}
+
+fragment streamsEpisodeMetaFragment on Episode {
+  __typename
+  id
+  contentId
+  number
+  season {
+    number
+  }
+  title {
+    __typename
+    ...titleFragment
+  }
+  tvSeries {
+    __typename
+    ...streamsMovieMetaFragment
+  }
+  ottEpisode: ott {
+    __typename
+    ...movieEpisodeOttWatchProgressFragment
+  }
+  ...episodeCommentsFragment
+}
+
+fragment streamsEpisodeOnlineStreamsFragment on Episode {
+  __typename
+  ...streamsEpisodeMetaFragment
+  ottEpisode: ott {
+    hasSmokingScenes
+    onlineStreams(
+      prerollsSupported: $prerollsSupported
+      prerollsClientFeedbackSupported: $prerollsClientFeedbackSupported
+    ) {
+      __typename
+      ...streamsOnlineStreamsFragment
+    }
+  }
+}
+
+fragment streamsSeriesOnlineStreamsFragment on Series {
+  ott {
+    __typename
+    ... on Ott_AbstractSeries {
+      nextEpisode {
+        __typename
+        ... on OttNextEpisode {
+          episode {
+            __typename
+            ... on Episode {
+              __typename
+              ...streamsEpisodeOnlineStreamsFragment
+            }
+          }
+        }
+      }
+    }
+  }
+}

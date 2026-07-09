@@ -1,0 +1,25 @@
+query MovieMobileDetailsTrivias(
+  $movieId: Long!
+  $type: TriviaType!
+  $offset: Int!
+  $limit: Int!
+) {
+  movie(id: $movieId) {
+    trivias(type: $type, offset: $offset, limit: $limit) {
+      offset
+      limit
+      total
+      items {
+        __typename
+        ...mediaTriviaFragment
+      }
+    }
+  }
+}
+
+fragment mediaTriviaFragment on Trivia {
+  id
+  text
+  isSpoiler
+  type
+}

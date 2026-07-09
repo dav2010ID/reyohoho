@@ -1,0 +1,71 @@
+query MainPageTrailerPromoConfig(
+  $platform: WebClientPlatform
+  $withUserData: Boolean!
+) {
+  webPage(platform: $platform) {
+    kpMainPage {
+      trailerPromo {
+        ...TrailerPromoConfig
+        __typename
+      }
+      __typename
+    }
+    __typename
+  }
+}
+
+fragment TrailerPromoConfigMovie on Movie {
+  id
+  contentId
+  userData @include(if: $withUserData) {
+    isPlannedToWatch
+    __typename
+  }
+  title {
+    original
+    russian
+    __typename
+  }
+  genres {
+    id
+    name
+    slug
+    __typename
+  }
+  __typename
+}
+
+fragment TrailerPromoConfig on TrailerPromoConfiguration {
+  button {
+    type
+    text
+    color
+    __typename
+  }
+  movie {
+    ...TrailerPromoConfigMovie
+    __typename
+  }
+  trailer {
+    id
+    __typename
+  }
+  trailerPromoInfo {
+    cast
+    directors
+    description
+    subtitle
+    disclaimer
+    logoImage {
+      avatarsUrl
+      __typename
+    }
+    screenshotImage {
+      avatarsUrl
+      __typename
+    }
+    __typename
+  }
+  enabled
+  __typename
+}

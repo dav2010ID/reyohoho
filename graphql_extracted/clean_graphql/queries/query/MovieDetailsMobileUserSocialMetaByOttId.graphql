@@ -1,0 +1,139 @@
+query MovieDetailsMobileUserSocialMetaByOttId(
+  $contentUuid: String!
+  $friendsVotesLimit: Int!
+  $friendsVotesOffset: Int! = 0
+  $includeVerification: Boolean! = true
+) {
+  movieByContentUuid(contentUuid: $contentUuid) {
+    __typename
+    ...movieDetailsMobileUserSocialMetaFragment
+  }
+}
+
+fragment imageFragment on Image {
+  avatarsUrl
+  fallbackUrl
+}
+
+fragment socialInfoFragment on UserSocialInfo {
+  alias {
+    defaultValue {
+      value
+      source
+    }
+  }
+  name {
+    defaultValue {
+      value
+    }
+  }
+  avatar {
+    defaultValue {
+      value {
+        __typename
+        ...imageFragment
+      }
+    }
+  }
+  publicStatus
+  url
+  badges @include(if: $includeVerification) {
+    verified {
+      id
+      title
+      description
+      icons {
+        format
+        image {
+          __typename
+          ...imageFragment
+        }
+      }
+    }
+  }
+}
+
+fragment socialUserFragment on UserMovieReactions {
+  user {
+    id {
+      puid
+    }
+    subscriptionInfo {
+      hasSubscription
+    }
+    social {
+      __typename
+      ...socialInfoFragment
+    }
+  }
+}
+
+fragment socialMovieReactionFragment on UserMovieReaction {
+  __typename
+  ... on Vote {
+    value
+  }
+  ... on PlannedToWatch {
+    plannedToWatch
+  }
+  ... on WatchingSeries {
+    watchingSeries
+  }
+  ... on Watched {
+    watched
+  }
+}
+
+fragment socialMovieArgumentFragment on MovieUserData {
+  socialArgument {
+    total
+    items {
+      __typename
+      ...socialUserFragment
+      reactions(includeTypes: [WATCHING_SERIES, VOTE, PLANNED_TO_WATCH]) {
+        __typename
+        ...socialMovieReactionFragment
+      }
+    }
+  }
+}
+
+fragment socialFriendsReactionsFragment on MovieUserData {
+  friendsMovieReactions(
+    limit: $friendsVotesLimit
+    offset: $friendsVotesOffset
+    includeTypes: [WATCHING_SERIES, VOTE, PLANNED_TO_WATCH, WATCHED]
+  ) {
+    limit
+    offset
+    total
+    items {
+      __typename
+      ...socialUserFragment
+      reactions(
+        includeTypes: [WATCHING_SERIES, VOTE, PLANNED_TO_WATCH, WATCHED]
+      ) {
+        __typename
+        ...socialMovieReactionFragment
+      }
+    }
+  }
+}
+
+fragment movieDetailsMobileUserSocialMetaFragment on Movie {
+  userData {
+    __typename
+    ...socialMovieArgumentFragment
+    ...socialFriendsReactionsFragment
+    voteReactions: friendsMovieReactions(includeTypes: [VOTE]) {
+      statistics {
+        byReaction {
+          __typename
+          ... on VoteStatistic {
+            average
+          }
+        }
+      }
+    }
+  }
+}

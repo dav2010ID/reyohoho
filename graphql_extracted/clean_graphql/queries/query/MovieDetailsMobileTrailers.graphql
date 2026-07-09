@@ -1,0 +1,59 @@
+query MovieDetailsMobileTrailers(
+  $movieId: Long!
+  $offset: Int!
+  $limit: Int!
+  $includeMainTrailer: Boolean!
+) {
+  movie(id: $movieId) {
+    __typename
+    ...movieDetailsMobileTrailersFragment
+  }
+}
+
+fragment imageFragment on Image {
+  avatarsUrl
+  fallbackUrl
+}
+
+fragment trailerFragment on Trailer {
+  contentUuid
+  id
+  isMain
+  preview {
+    __typename
+    ...imageFragment
+  }
+  streamUrl
+  title
+  createdAt
+}
+
+fragment trailerWithDurationFragment on Trailer {
+  contentUuid
+  duration
+  id
+  isMain
+  preview {
+    __typename
+    ...imageFragment
+  }
+  streamUrl
+  title
+  createdAt
+}
+
+fragment movieDetailsMobileTrailersFragment on Movie {
+  mainTrailer @include(if: $includeMainTrailer) {
+    __typename
+    ...trailerFragment
+  }
+  trailers(offset: $offset, limit: $limit, orderBy: IS_MAIN_MAKE_DATE_DESC) {
+    offset
+    limit
+    total
+    items {
+      __typename
+      ...trailerWithDurationFragment
+    }
+  }
+}

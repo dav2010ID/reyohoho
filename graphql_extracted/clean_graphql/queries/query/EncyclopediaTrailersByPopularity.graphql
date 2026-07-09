@@ -1,0 +1,55 @@
+query EncyclopediaTrailersByPopularity($offset: Int!, $limit: Int!) {
+  popularTrailers(offset: $offset, limit: $limit) {
+    offset
+    limit
+    total
+    items {
+      __typename
+      ...encyclopediaTrailerFragment
+    }
+  }
+}
+
+fragment imageFragment on Image {
+  avatarsUrl
+  fallbackUrl
+}
+
+fragment trailerFragment on Trailer {
+  contentUuid
+  id
+  isMain
+  preview {
+    __typename
+    ...imageFragment
+  }
+  streamUrl
+  title
+  createdAt
+}
+
+fragment titleFragment on Title {
+  localized
+  original
+}
+
+fragment genreFragment on Genre {
+  id
+  name
+}
+
+fragment encyclopediaTrailerFragment on Trailer {
+  __typename
+  ...trailerFragment
+  movie {
+    id
+    title {
+      __typename
+      ...titleFragment
+    }
+    genres {
+      __typename
+      ...genreFragment
+    }
+  }
+}

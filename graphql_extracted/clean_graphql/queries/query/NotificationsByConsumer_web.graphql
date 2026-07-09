@@ -1,0 +1,36 @@
+query NotificationsByConsumer(
+  $consumer: String!
+  $platform: String!
+  $supportedTemplateIds: [String!]!
+  $domain: [NotificationTargetDomainInput!]! = []
+  $supportedTemplateToActions: Map_String_Set_StringScalar! = {}
+  $notificationCount: Int
+) {
+  notificationsByConsumer(
+    filters: [
+      {
+        consumer: $consumer
+        domain: $domain
+        platform: $platform
+        supportedTemplateIds: $supportedTemplateIds
+        supportedTemplateToActions: $supportedTemplateToActions
+        notificationCount: $notificationCount
+      }
+    ]
+  ) {
+    communicationId
+    items {
+      ...Notification
+      __typename
+    }
+    __typename
+  }
+}
+
+fragment Notification on Notification {
+  notificationPayloadId
+  templateId
+  feedbackToken
+  payload
+  __typename
+}

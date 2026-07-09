@@ -1,0 +1,56 @@
+query MovieListCategory(
+  $id: Int!
+  $limit: Int
+  $offset: Int
+  $withUserData: Boolean!
+) {
+  movieListCategory(id: $id) {
+    id
+    name
+    movieLists(limit: $limit, offset: $offset) {
+      total
+      items {
+        name
+        slug
+        movies {
+          total
+          __typename
+        }
+        cover {
+          avatarsUrl
+          __typename
+        }
+        currentFilters {
+          booleanFilterValues {
+            filterId
+            value
+            __typename
+          }
+          singleSelectFilterValues {
+            filterId
+            value
+            __typename
+          }
+          __typename
+        }
+        availableFilters(limit: 1, offset: 0, filter: { filterIds: ["top"] }) {
+          items {
+            ... on BooleanFilter {
+              enabled
+              __typename
+            }
+            __typename
+          }
+          __typename
+        }
+        userData @include(if: $withUserData) {
+          watched
+          __typename
+        }
+        __typename
+      }
+      __typename
+    }
+    __typename
+  }
+}

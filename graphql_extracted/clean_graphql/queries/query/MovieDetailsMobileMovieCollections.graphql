@@ -1,0 +1,47 @@
+query MovieDetailsMobileMovieCollections(
+  $movieId: Long!
+  $offset: Int!
+  $limit: Int!
+  $includeMovieListMetaTotal: Boolean! = true
+) {
+  movie(id: $movieId) {
+    __typename
+    ...movieDetailsMobileMovieCollectionsFragment
+  }
+}
+
+fragment imageFragment on Image {
+  avatarsUrl
+  fallbackUrl
+}
+
+fragment movieListMetaBaseFragment on MovieListMeta {
+  id
+  autoList
+  name
+  description
+  url
+  cover {
+    __typename
+    ...imageFragment
+  }
+  moviesCount: movies(offset: 0, limit: 0)
+    @include(if: $includeMovieListMetaTotal) {
+    total
+  }
+}
+
+fragment movieDetailsMobileMovieCollectionsFragment on Movie {
+  movieLists(offset: $offset, limit: $limit) {
+    offset
+    limit
+    total
+    items {
+      position
+      movieList {
+        __typename
+        ...movieListMetaBaseFragment
+      }
+    }
+  }
+}

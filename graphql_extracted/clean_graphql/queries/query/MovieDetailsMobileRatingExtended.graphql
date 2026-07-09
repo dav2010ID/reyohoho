@@ -1,0 +1,38 @@
+query MovieDetailsMobileRatingExtended($movieId: Long!) {
+  movie(id: $movieId) {
+    __typename
+    ...movieDetailsMobileRatingExtendedFragment
+  }
+}
+
+fragment ratingValueFragment on RatingValue {
+  isActive
+  count
+  value(precision: 1)
+}
+
+fragment movieDetailsMobileRatingExtendedFragment on Movie {
+  rating {
+    imdb {
+      __typename
+      ...ratingValueFragment
+    }
+    positiveReviewRate {
+      __typename
+      ...ratingValueFragment
+    }
+    russianCritics {
+      __typename
+      ...ratingValueFragment
+    }
+    worldwideCritics {
+      isActive
+      count
+      value
+    }
+    reviewCount {
+      __typename
+      ...ratingValueFragment
+    }
+  }
+}

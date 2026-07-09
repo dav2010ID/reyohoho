@@ -1,0 +1,12 @@
+query MovieDetailsMobileUserPlannedToWatch($movieId: Long!) {
+  movie(id: $movieId) {
+    __typename
+    ...movieDetailsMobileUserPlannedToWatchFragment
+  }
+}
+
+fragment movieDetailsMobileUserPlannedToWatchFragment on Movie {
+  userData {
+    isPlannedToWatch
+  }
+}

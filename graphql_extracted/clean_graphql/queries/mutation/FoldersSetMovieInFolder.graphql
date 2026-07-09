@@ -1,0 +1,26 @@
+mutation FoldersSetMovieInFolder(
+  $folderTypeId: Long!
+  $movieId: Long!
+  $isAdded: Boolean!
+) {
+  movie {
+    folder {
+      item {
+        add(input: { folderTypeId: $folderTypeId, movieId: $movieId })
+          @include(if: $isAdded) {
+          error {
+            message
+          }
+          status
+        }
+        remove(input: { folderTypeId: $folderTypeId, movieId: $movieId })
+          @skip(if: $isAdded) {
+          error {
+            message
+          }
+          status
+        }
+      }
+    }
+  }
+}

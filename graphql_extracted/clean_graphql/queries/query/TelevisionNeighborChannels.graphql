@@ -1,0 +1,231 @@
+query TelevisionNeighborChannels(
+  $categoryIds: [Long]!
+  $includeStartingChannelData: Boolean!
+  $includeStartingChannelInfo: Boolean!
+  $channelByContentId: String!
+  $includeChannelByContentIdData: Boolean!
+  $includeChannelByContentIdInfo: Boolean!
+  $includePreviousChannels: Boolean!
+  $includeNextChannels: Boolean!
+  $neighborLimit: Int!
+  $programsDuration: Duration
+  $programsDurationInPast: Duration
+  $programsExtraCount: Int
+  $purchaseOptionsContext: BillingFeatureClientContextInput!
+  $includeMoviePurchaseOptions: Boolean!
+  $includeCatchupAvailability: Boolean!
+  $includeTrialCutInfo: Boolean!
+) {
+  startingChannelData: userProfile @include(if: $includeStartingChannelData) {
+    userData {
+      startingTvChannel {
+        __typename
+        ...televisionTvChannelNeighbourListFragment
+        ...televisionTvChannelFragment @include(if: $includeStartingChannelInfo)
+      }
+    }
+  }
+  channelByContentIdData: content(contentId: $channelByContentId)
+    @include(if: $includeChannelByContentIdData) {
+    __typename
+    ... on TvChannel {
+      __typename
+      ...televisionTvChannelNeighbourListFragment
+      ...televisionTvChannelFragment
+        @include(if: $includeChannelByContentIdInfo)
+    }
+  }
+  clientInfo {
+    time {
+      currentTimeUtc
+    }
+  }
+}
+
+fragment imageFragment on Image {
+  avatarsUrl
+  fallbackUrl
+}
+
+fragment televisionChannelSummaryFragment on TvChannel {
+  contentId
+  title
+  gallery {
+    logos {
+      main {
+        __typename
+        ...imageFragment
+      }
+      loader {
+        __typename
+        ...imageFragment
+      }
+    }
+    covers {
+      horizontal {
+        __typename
+        ...imageFragment
+      }
+      preview {
+        __typename
+        ...imageFragment
+      }
+      paywall {
+        __typename
+        ...imageFragment
+      }
+    }
+  }
+  ageRestriction
+}
+
+fragment televisionProgramFragment on TvProgram {
+  id
+  title
+  startTime
+  endTime
+  image {
+    __typename
+    ...imageFragment
+  }
+  ageRestriction
+  episodeTitle
+  typeName
+  catchupContentId
+}
+
+fragment movieViewOptionPurchasedSubscriptionFragment on ViewOption {
+  purchasedSubscriptionTextId
+  purchasedSubscriptionName
+}
+
+fragment availabilityAnnounceFragment on AvailabilityAnnounce {
+  announcePromise
+  availabilityDate
+  type
+}
+
+fragment movieContentPackageFragment on ContentPackage {
+  billingFeatureName
+}
+
+fragment currencyFragment on Currency {
+  symbol
+  currencyCode
+}
+
+fragment moneyAmountFragment on MoneyAmount {
+  amount
+  currency {
+    __typename
+    ...currencyFragment
+  }
+}
+
+fragment movieViewOptionTrialCutInfoFragment on TrialCutInfo {
+  texts {
+    title
+    subTitle
+    buttonText
+  }
+  token
+  type
+}
+
+fragment movieViewOptionSummaryFragment on ViewOption {
+  __typename
+  type
+  purchasabilityStatus
+  isWatchableOnDeviceInCurrentRegion: isWatchable(
+    filter: { anyDevice: false, anyRegion: false }
+  )
+  buttonText
+  ...movieViewOptionPurchasedSubscriptionFragment
+  availabilityAnnounce {
+    __typename
+    ...availabilityAnnounceFragment
+  }
+  contentPackageToBuy {
+    __typename
+    ...movieContentPackageFragment
+  }
+  contentPackageToUnfreeze {
+    __typename
+    ...movieContentPackageFragment
+  }
+  transactionalPrice {
+    __typename
+    ...moneyAmountFragment
+  }
+  transactionalMinimumPrice {
+    __typename
+    ...moneyAmountFragment
+  }
+  priceWithTotalDiscount {
+    __typename
+    ...moneyAmountFragment
+  }
+  optionMonetizationModels
+  watchabilityStatus
+  watchabilityExpirationTime
+  promotionActionType
+  downloadabilityStatus
+  purchaseOptions(clientContext: $purchaseOptionsContext)
+    @include(if: $includeMoviePurchaseOptions) {
+    billingFeatureNames
+    target
+  }
+  trialCutInfo @include(if: $includeTrialCutInfo) {
+    __typename
+    ...movieViewOptionTrialCutInfoFragment
+  }
+  purchaseOptionCustomProperties @include(if: $includeMoviePurchaseOptions)
+}
+
+fragment televisionTvChannelFragment on TvChannel {
+  __typename
+  ...televisionChannelSummaryFragment
+  tvPrograms(
+    extraCount: $programsExtraCount
+    duration: $programsDuration
+    durationInPast: $programsDurationInPast
+  ) {
+    __typename
+    ...televisionProgramFragment
+  }
+  viewOption {
+    __typename
+    ...movieViewOptionSummaryFragment
+  }
+  catchupAvailable @include(if: $includeCatchupAvailability)
+  isNeedToHidePrograms
+}
+
+fragment televisionTvChannelNeighbourListFragment on TvChannel {
+  previous: neighbourhoodInList(
+    filter: { categoryIds: $categoryIds }
+    limit: $neighborLimit
+    relation: LEFT
+  ) @include(if: $includePreviousChannels) {
+    items {
+      tvChannel {
+        __typename
+        ...televisionTvChannelFragment
+      }
+    }
+    total
+  }
+  next: neighbourhoodInList(
+    filter: { categoryIds: $categoryIds }
+    limit: $neighborLimit
+    relation: RIGHT
+  ) @include(if: $includeNextChannels) {
+    items {
+      tvChannel {
+        __typename
+        ...televisionTvChannelFragment
+      }
+    }
+    total
+  }
+}

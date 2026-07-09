@@ -1,0 +1,22 @@
+mutation RejectSubscribeRequest($puid: Long!) {
+  userProfile {
+    social {
+      subscriptions {
+        requests {
+          reject(input: { sourceUserPuid: $puid }) {
+            error {
+              message
+              __typename
+            }
+            status
+            __typename
+          }
+          __typename
+        }
+        __typename
+      }
+      __typename
+    }
+    __typename
+  }
+}

@@ -1,0 +1,17 @@
+query NotificationPreviews($filter: NotificationPreviewFilterInput!) {
+  notificationPreviews(filter: $filter) {
+    communicationId
+    items {
+      templateId
+      feedbackToken
+      type
+      previewPayload
+      status
+      viewedAt
+      active
+      priority
+      notificationPayloadId
+      notificationPayload
+    }
+  }
+}

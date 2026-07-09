@@ -1,0 +1,2589 @@
+query ShowcaseData(
+  $showcaseId: String!
+  $showcaseOffset: Int!
+  $showcaseLimit: Int!
+  $selectionOffset: Int!
+  $selectionLimit: Int!
+  $promoSelectionOffset: Int!
+  $promoSelectionLimit: Int!
+  $ottTopSelectionOffset: Int!
+  $ottTopSelectionLimit: Int!
+  $includeChannelsInContinueWatchingSelection: Boolean!
+  $includeNewOttTopSelection: Boolean!
+  $includeMovieUserData: Boolean!
+  $includeTVMovieSummary: Boolean!
+  $includeChannelsSelection: Boolean!
+  $includeIncut: Boolean!
+  $includeMovieRating: Boolean!
+  $includeMovieOnlyClientSupportedContentFeatures: Boolean! = true
+  $includeCatchupsSelection: Boolean!
+  $includePromoCatchup: Boolean!
+  $includeGamesSelection: Boolean!
+  $includeMovieTop250: Boolean!
+  $includeTiming: Boolean!
+  $includeCinemaAnnounceInPromoSelection: Boolean!
+  $includeCinemaAnnouncePostersInPromoSelection: Boolean!
+  $includePlannedToWatchRating: Boolean! = false
+  $purchaseOptionsContext: BillingFeatureClientContextInput!
+  $includeMoviePurchaseOptions: Boolean!
+  $includeTrialCutInfo: Boolean!
+  $includeChannelProgramsSelection: Boolean!
+  $includeStyledShowcasesSelection: Boolean!
+  $includeMeta: Boolean!
+  $includeDeepDiveFlag: Boolean! = true
+  $includeSocialFriendsRating: Boolean!
+  $includeStyledShowcaseOwner: Boolean!
+  $includeStyledShowcaseOwnerUserData: Boolean!
+  $includeNotificationsSelection: Boolean!
+  $filter: ShowcaseFilterInput
+  $includeVideoFeedSelection: Boolean!
+  $includeVideoCardsSelection: Boolean!
+  $videoCardsSelectionLimit: Int!
+  $includeContentBrandUserData: Boolean!
+  $includeVerification: Boolean!
+  $includePosterSelection: Boolean!
+  $includeHighlightsInContinueWatchingSelection: Boolean!
+  $includeExternalMoviesSelection: Boolean!
+  $includeEstEarlyAccess: Boolean!
+  $includeRewindSelection: Boolean!
+  $rewindSelectionExtraInPast: Int!
+  $rewindSelectionDuration: Duration!
+  $includeEpisodesCountInSeason: Boolean!
+  $includePromoExternalMovies: Boolean!
+  $includeSportWatchingUsersTotalCount: Boolean!
+  $includeSportWatchingFriends: Boolean!
+  $includeSocialArgument: Boolean!
+) {
+  showcase(id: $showcaseId, filter: $filter) {
+    __typename
+    id
+    ...showcaseMetaFragment @include(if: $includeMeta)
+    ...showcaseStyledMetaFragment
+    content(offset: $showcaseOffset, limit: $showcaseLimit) {
+      sessionId
+      offset
+      limit
+      hasMore
+      items {
+        __typename
+        ...showcaseSelectionFragment
+        ...showcaseIncutFragment @include(if: $includeIncut)
+      }
+    }
+  }
+  clientInfo {
+    __typename
+    ...showcaseClientInfoFragment
+  }
+}
+
+fragment imageFragment on Image {
+  avatarsUrl
+  fallbackUrl
+}
+
+fragment showcaseMetaFragment on AbstractShowcase {
+  __typename
+  ... on Showcase {
+    title
+    gallery {
+      logo {
+        __typename
+        ...imageFragment
+      }
+      background {
+        __typename
+        ...imageFragment
+      }
+    }
+  }
+}
+
+fragment themedColorFragment on ThemedColor {
+  light
+  dark
+}
+
+fragment gradientFragment on Gradient {
+  start {
+    __typename
+    ...themedColorFragment
+  }
+  end {
+    __typename
+    ...themedColorFragment
+  }
+}
+
+fragment showcaseStyledMetaFragment on StyledShowcase {
+  owner @include(if: $includeStyledShowcaseOwner) {
+    __typename
+    ... on ContentBrand {
+      id
+      userData @include(if: $includeStyledShowcaseOwnerUserData) {
+        isLiked
+      }
+      gallery {
+        logos {
+          centeredMain {
+            __typename
+            ...imageFragment
+          }
+          square {
+            __typename
+            ...imageFragment
+          }
+          dynamic {
+            __typename
+            ...imageFragment
+          }
+          gradient {
+            __typename
+            ...imageFragment
+          }
+        }
+      }
+      colors {
+        main
+        top10 {
+          __typename
+          ...themedColorFragment
+        }
+        top10Gradient {
+          __typename
+          ...gradientFragment
+        }
+      }
+    }
+  }
+  title
+  gallery {
+    backgrounds {
+      main {
+        __typename
+        ...imageFragment
+      }
+    }
+  }
+}
+
+fragment showcaseSelectionPagingMetaFragment on SessionPagingList_SelectionItem {
+  sessionId
+  offset
+  limit
+  hasMore
+}
+
+fragment socialInfoFragment on UserSocialInfo {
+  alias {
+    defaultValue {
+      value
+      source
+    }
+  }
+  name {
+    defaultValue {
+      value
+    }
+  }
+  avatar {
+    defaultValue {
+      value {
+        __typename
+        ...imageFragment
+      }
+    }
+  }
+  publicStatus
+  url
+  badges @include(if: $includeVerification) {
+    verified {
+      id
+      title
+      description
+      icons {
+        format
+        image {
+          __typename
+          ...imageFragment
+        }
+      }
+    }
+  }
+}
+
+fragment socialArgumentUserInfoFragment on UserProfileInterface {
+  id {
+    puid
+  }
+  subscriptionInfo {
+    hasSubscription
+  }
+  social {
+    __typename
+    ...socialInfoFragment
+  }
+}
+
+fragment socialUserArgumentFragment on SocialArgument {
+  __typename
+  ... on PlannedToWatchSocialUserArgument {
+    user {
+      __typename
+      ...socialArgumentUserInfoFragment
+    }
+  }
+  ... on WatchedSocialUserArgument {
+    user {
+      __typename
+      ...socialArgumentUserInfoFragment
+    }
+  }
+  ... on VotedSocialUserArgument {
+    user {
+      __typename
+      ...socialArgumentUserInfoFragment
+    }
+    value
+  }
+  ... on WatchingSocialUserArgument {
+    user {
+      __typename
+      ...socialArgumentUserInfoFragment
+    }
+  }
+}
+
+fragment socialGroupArgumentFragment on SocialArgument {
+  __typename
+  ... on PlannedToWatchSocialGroupArgument {
+    usersTotalCount
+    users {
+      __typename
+      ...socialArgumentUserInfoFragment
+    }
+  }
+  ... on WatchedSocialGroupArgument {
+    usersTotalCount
+    users {
+      __typename
+      ...socialArgumentUserInfoFragment
+    }
+  }
+  ... on VotedSocialGroupArgument {
+    usersTotalCount
+    users {
+      __typename
+      ...socialArgumentUserInfoFragment
+    }
+  }
+  ... on WatchingSocialGroupArgument {
+    usersTotalCount
+    users {
+      __typename
+      ...socialArgumentUserInfoFragment
+    }
+  }
+}
+
+fragment socialArgumentFragment on SocialArgument {
+  __typename
+  ...socialUserArgumentFragment
+  ...socialGroupArgumentFragment
+}
+
+fragment titleFragment on Title {
+  localized
+  original
+}
+
+fragment genreFragment on Genre {
+  id
+  name
+}
+
+fragment ratingValueFragment on RatingValue {
+  isActive
+  count
+  value(precision: 1)
+}
+
+fragment ratingFragment on Rating {
+  kinopoisk {
+    __typename
+    ...ratingValueFragment
+  }
+  plannedToWatch @include(if: $includePlannedToWatchRating) {
+    __typename
+    ...ratingValueFragment
+  }
+}
+
+fragment movieTopsFragment on Movie {
+  ratingLists {
+    top10 {
+      position
+      movieListSlug
+    }
+    top250 @include(if: $includeMovieTop250) {
+      position
+      movieListSlug
+    }
+  }
+}
+
+fragment movieViewOptionPurchasedSubscriptionFragment on ViewOption {
+  purchasedSubscriptionTextId
+  purchasedSubscriptionName
+}
+
+fragment availabilityAnnounceFragment on AvailabilityAnnounce {
+  announcePromise
+  availabilityDate
+  type
+}
+
+fragment movieContentPackageFragment on ContentPackage {
+  billingFeatureName
+}
+
+fragment currencyFragment on Currency {
+  symbol
+  currencyCode
+}
+
+fragment moneyAmountFragment on MoneyAmount {
+  amount
+  currency {
+    __typename
+    ...currencyFragment
+  }
+}
+
+fragment movieViewOptionTrialCutInfoFragment on TrialCutInfo {
+  texts {
+    title
+    subTitle
+    buttonText
+  }
+  token
+  type
+}
+
+fragment movieViewOptionSummaryFragment on ViewOption {
+  __typename
+  type
+  purchasabilityStatus
+  isWatchableOnDeviceInCurrentRegion: isWatchable(
+    filter: { anyDevice: false, anyRegion: false }
+  )
+  buttonText
+  ...movieViewOptionPurchasedSubscriptionFragment
+  availabilityAnnounce {
+    __typename
+    ...availabilityAnnounceFragment
+  }
+  contentPackageToBuy {
+    __typename
+    ...movieContentPackageFragment
+  }
+  contentPackageToUnfreeze {
+    __typename
+    ...movieContentPackageFragment
+  }
+  transactionalPrice {
+    __typename
+    ...moneyAmountFragment
+  }
+  transactionalMinimumPrice {
+    __typename
+    ...moneyAmountFragment
+  }
+  priceWithTotalDiscount {
+    __typename
+    ...moneyAmountFragment
+  }
+  optionMonetizationModels
+  watchabilityStatus
+  watchabilityExpirationTime
+  promotionActionType
+  downloadabilityStatus
+  purchaseOptions(clientContext: $purchaseOptionsContext)
+    @include(if: $includeMoviePurchaseOptions) {
+    billingFeatureNames
+    target
+  }
+  trialCutInfo @include(if: $includeTrialCutInfo) {
+    __typename
+    ...movieViewOptionTrialCutInfoFragment
+  }
+  purchaseOptionCustomProperties @include(if: $includeMoviePurchaseOptions)
+}
+
+fragment movieContentFeaturesFragment on Ott {
+  preview {
+    features(
+      filter: {
+        layout: OTT_TITLE_CARD
+        onlyClientSupported: $includeMovieOnlyClientSupportedContentFeatures
+      }
+    ) {
+      group
+      alias
+      displayName
+    }
+  }
+}
+
+fragment baseMoviePostersFragment on MoviePosters {
+  vertical(override: OTT_WHEN_EXISTS) {
+    __typename
+    ...imageFragment
+  }
+  verticalWithRightholderLogo {
+    __typename
+    ...imageFragment
+  }
+  horizontal {
+    __typename
+    ...imageFragment
+  }
+  horizontalWithRightholderLogo {
+    __typename
+    ...imageFragment
+  }
+}
+
+fragment movieIntroPostersFragment on MoviePosters {
+  verticalIntro {
+    __typename
+    ...imageFragment
+  }
+  verticalIntroWithRightholderLogo {
+    __typename
+    ...imageFragment
+  }
+  horizontalIntro {
+    __typename
+    ...imageFragment
+  }
+  horizontalIntroWithRightholderLogo {
+    __typename
+    ...imageFragment
+  }
+}
+
+fragment moviePostersFragment on MoviePosters {
+  __typename
+  ...baseMoviePostersFragment
+  ...movieIntroPostersFragment
+}
+
+fragment imageWithSizeFragment on Image {
+  __typename
+  ...imageFragment
+  origSize {
+    width
+    height
+  }
+}
+
+fragment licenseCoverFragment on LicenseCover {
+  formFactor
+  image {
+    __typename
+    ...imageFragment
+  }
+  theme
+}
+
+fragment countryFragment on Country {
+  id
+  name
+}
+
+fragment restrictionFragment on Restriction {
+  age
+  mpaa
+}
+
+fragment movieYearsFragment on Movie {
+  __typename
+  ... on VideoInterface {
+    productionYear(override: OTT_WHEN_EXISTS)
+  }
+  ... on Series {
+    fallbackYear: productionYear
+    releaseYears {
+      start
+      end
+    }
+  }
+}
+
+fragment showcaseTVMovieSummaryFragment on Movie {
+  __typename
+  id
+  contentId
+  title {
+    __typename
+    ...titleFragment
+  }
+  ott {
+    __typename
+    ...movieContentFeaturesFragment
+    preview {
+      __typename
+      ... on OttPreview_AbstractVideo {
+        duration
+      }
+    }
+  }
+  gallery {
+    posters {
+      __typename
+      ...moviePostersFragment
+    }
+    logos {
+      horizontal {
+        __typename
+        ...imageWithSizeFragment
+      }
+      rightholderForCover(filter: { formFactor: M }) {
+        __typename
+        ...licenseCoverFragment
+      }
+      rightholderForCoverRecommendedTheme
+    }
+    covers {
+      horizontal {
+        __typename
+        ...imageFragment
+      }
+    }
+  }
+  genres {
+    __typename
+    ...genreFragment
+  }
+  countries {
+    __typename
+    ...countryFragment
+  }
+  editorAnnotation
+  restriction {
+    __typename
+    ...restrictionFragment
+  }
+  rating @include(if: $includeMovieRating) {
+    __typename
+    ...ratingFragment
+  }
+  ...movieTopsFragment
+  shortDescription
+  ... on TvSeries {
+    seasons {
+      total
+    }
+  }
+  ...movieYearsFragment
+}
+
+fragment showcaseBaseMovieFragment on Movie {
+  __typename
+  id
+  contentId
+  title {
+    __typename
+    ...titleFragment
+  }
+  genres {
+    __typename
+    ...genreFragment
+  }
+  rating @include(if: $includeMovieRating) {
+    __typename
+    ...ratingFragment
+  }
+  ...movieTopsFragment
+  viewOption {
+    __typename
+    ...movieViewOptionSummaryFragment
+  }
+  ...showcaseTVMovieSummaryFragment @include(if: $includeTVMovieSummary)
+}
+
+fragment showcaseMovieFragment on Movie {
+  __typename
+  ...showcaseBaseMovieFragment
+  gallery {
+    posters {
+      __typename
+      ...baseMoviePostersFragment
+    }
+  }
+  ...showcaseTVMovieSummaryFragment @include(if: $includeTVMovieSummary)
+}
+
+fragment showcaseMovieSelectionItemFragment on SelectionItem {
+  __typename
+  ... on MovieSelectionItem {
+    socialArgument @include(if: $includeSocialArgument) {
+      __typename
+      ...socialArgumentFragment
+    }
+    movie {
+      __typename
+      ...showcaseMovieFragment
+      userData @include(if: $includeMovieUserData) {
+        isPlannedToWatch
+      }
+    }
+  }
+}
+
+fragment showcaseAnnounceMovieFragment on Movie {
+  __typename
+  ...showcaseBaseMovieFragment
+  gallery {
+    posters {
+      __typename
+      ...movieIntroPostersFragment
+    }
+  }
+  ...showcaseTVMovieSummaryFragment @include(if: $includeTVMovieSummary)
+}
+
+fragment showcaseSeasonAnnounceFragment on Season {
+  viewOption {
+    availabilityAnnounce {
+      __typename
+      ...availabilityAnnounceFragment
+    }
+  }
+}
+
+fragment showcaseAnnounceSelectionItemFragment on SelectionItem {
+  __typename
+  ... on AnnounceSelectionItem {
+    socialArgument @include(if: $includeSocialArgument) {
+      __typename
+      ...socialArgumentFragment
+    }
+    movie {
+      __typename
+      ...showcaseAnnounceMovieFragment
+      userData @include(if: $includeMovieUserData) {
+        isPlannedToWatch
+      }
+    }
+  }
+  ... on SeasonAnnounceSelectionItem {
+    movie {
+      __typename
+      ...showcaseAnnounceMovieFragment
+      userData @include(if: $includeMovieUserData) {
+        isPlannedToWatch
+      }
+    }
+    season {
+      __typename
+      ...showcaseSeasonAnnounceFragment
+    }
+  }
+}
+
+fragment showcaseSelectionItemFragment on SelectionItem {
+  __typename
+  ...showcaseMovieSelectionItemFragment
+  ...showcaseAnnounceSelectionItemFragment
+}
+
+fragment showcaseLinkSelectionItemFragment on SelectionItem {
+  __typename
+  ... on LinkSelectionItem {
+    cover {
+      __typename
+      ...imageFragment
+    }
+    entity {
+      __typename
+      ... on AbstractSelection {
+        selectionId: id
+        selectionTitle: title
+      }
+      ... on AbstractShowcase {
+        showcaseId: id
+        showcaseTitle: title
+      }
+    }
+  }
+}
+
+fragment showcaseOriginalMovieSelectionItemFragment on SelectionItem {
+  __typename
+  ... on OriginalMovieSelectionItem {
+    movie {
+      __typename
+      ...showcaseMovieFragment
+      userData @include(if: $includeMovieUserData) {
+        isPlannedToWatch
+      }
+    }
+    startCover {
+      __typename
+      ...imageFragment
+    }
+    finishCover {
+      __typename
+      ...imageFragment
+    }
+    backgroundCover {
+      __typename
+      ...imageFragment
+    }
+  }
+  ... on OriginalAnnounceMovieSelectionItem {
+    movie {
+      __typename
+      ...showcaseAnnounceMovieFragment
+      userData @include(if: $includeMovieUserData) {
+        isPlannedToWatch
+      }
+    }
+    startCover {
+      __typename
+      ...imageFragment
+    }
+    finishCover {
+      __typename
+      ...imageFragment
+    }
+    backgroundCover {
+      __typename
+      ...imageFragment
+    }
+  }
+}
+
+fragment showcaseOttTopMovieSelectionItemFragment on SelectionItem {
+  __typename
+  ... on AbstractMovieSelectionItem {
+    movie {
+      __typename
+      id
+      contentId
+      title {
+        __typename
+        ...titleFragment
+      }
+      gallery {
+        posters {
+          __typename
+          ...moviePostersFragment
+        }
+      }
+      genres {
+        __typename
+        ...genreFragment
+      }
+      ...showcaseTVMovieSummaryFragment @include(if: $includeTVMovieSummary)
+      viewOption @include(if: $includeTVMovieSummary) {
+        __typename
+        ...movieViewOptionSummaryFragment
+      }
+    }
+  }
+}
+
+fragment movieCoversFragment on MovieCovers {
+  vertical {
+    __typename
+    ...imageFragment
+  }
+  horizontal {
+    __typename
+    ...imageFragment
+  }
+  square {
+    __typename
+    ...imageFragment
+  }
+}
+
+fragment socialUserFragment on UserMovieReactions {
+  user {
+    id {
+      puid
+    }
+    subscriptionInfo {
+      hasSubscription
+    }
+    social {
+      __typename
+      ...socialInfoFragment
+    }
+  }
+}
+
+fragment socialMovieReactionFragment on UserMovieReaction {
+  __typename
+  ... on Vote {
+    value
+  }
+  ... on PlannedToWatch {
+    plannedToWatch
+  }
+  ... on WatchingSeries {
+    watchingSeries
+  }
+  ... on Watched {
+    watched
+  }
+}
+
+fragment socialMovieArgumentFragment on MovieUserData {
+  socialArgument {
+    total
+    items {
+      __typename
+      ...socialUserFragment
+      reactions(includeTypes: [WATCHING_SERIES, VOTE, PLANNED_TO_WATCH]) {
+        __typename
+        ...socialMovieReactionFragment
+      }
+    }
+  }
+}
+
+fragment movieUserNotInterestedFragment on MovieUserData {
+  watchStatuses {
+    notInterested {
+      value
+    }
+  }
+}
+
+fragment estEarlyAccessViewOptionFragment on Episode {
+  viewOption {
+    watchabilityStatus
+    purchasabilityStatus
+    optionMonetizationModels
+    transactionalPrice {
+      __typename
+      ...moneyAmountFragment
+    }
+    availabilityAnnounce {
+      __typename
+      ...availabilityAnnounceFragment
+    }
+  }
+}
+
+fragment movieOttAbstractNextEpisodeFragment on Ott_AbstractSeries {
+  nextEpisode {
+    fallback
+    episode {
+      __typename
+      contentId
+      number
+      season {
+        number
+      }
+      title {
+        __typename
+        ...titleFragment
+      }
+      ott {
+        editorAnnotation
+      }
+      ...estEarlyAccessViewOptionFragment @include(if: $includeEstEarlyAccess)
+    }
+  }
+}
+
+fragment movieOttNextEpisodeFragment on Series {
+  ott {
+    __typename
+    ...movieOttAbstractNextEpisodeFragment
+  }
+}
+
+fragment showcasePromoMovieFragment on Movie {
+  __typename
+  id
+  contentId
+  title {
+    __typename
+    ...titleFragment
+  }
+  shortDescription
+  gallery {
+    covers {
+      __typename
+      ...movieCoversFragment
+    }
+    logos {
+      horizontal {
+        __typename
+        ...imageWithSizeFragment
+      }
+    }
+  }
+  ...movieTopsFragment
+  viewOption {
+    __typename
+    mainPromotionAbsoluteAmount {
+      __typename
+      ...moneyAmountFragment
+    }
+    ...movieViewOptionSummaryFragment
+  }
+  userData @include(if: $includeMovieUserData) {
+    __typename
+    isPlannedToWatch
+    ...socialMovieArgumentFragment @include(if: $includeSocialFriendsRating)
+    ...movieUserNotInterestedFragment
+  }
+  ...movieOttNextEpisodeFragment @include(if: $includeMovieUserData)
+}
+
+fragment promoTelevisionChannelFragment on PromoTvChannel {
+  contentId
+  ageRestriction
+  finishTime
+  title
+  logo {
+    __typename
+    ...imageFragment
+  }
+}
+
+fragment promoTelevisionProgramFragment on PromoTvProgram {
+  id
+  title
+  startTime
+  endTime
+  image {
+    __typename
+    ...imageFragment
+  }
+  coverLogoRecommendedTheme
+  coverLogos {
+    __typename
+    ...licenseCoverFragment
+  }
+  ageRestriction
+  episodeTitle
+  typeName
+}
+
+fragment sportViewOptionFragment on ViewOption {
+  type
+  purchasabilityStatus
+  contentPackageToBuy {
+    __typename
+    ...movieContentPackageFragment
+  }
+  contentPackageToUnfreeze {
+    __typename
+    ...movieContentPackageFragment
+  }
+  purchaseOptions(clientContext: $purchaseOptionsContext)
+    @include(if: $includeMoviePurchaseOptions) {
+    billingFeatureNames
+    target
+  }
+  trialCutInfo @include(if: $includeTrialCutInfo) {
+    texts {
+      title
+      subTitle
+      buttonText
+    }
+    token
+    type
+  }
+  purchaseOptionCustomProperties @include(if: $includeMoviePurchaseOptions)
+}
+
+fragment sportWatchingFriendFragment on UserProfileInterface {
+  id {
+    puid
+  }
+  social {
+    alias {
+      defaultValue {
+        value
+        source
+      }
+    }
+    name {
+      defaultValue {
+        value
+      }
+    }
+    avatar {
+      defaultValue {
+        value {
+          __typename
+          ...imageFragment
+        }
+      }
+    }
+  }
+}
+
+fragment sportWatchingSocialArgumentFragment on AbstractSportEvent {
+  watchingSportSocialArgument {
+    usersTotalCount @include(if: $includeSportWatchingUsersTotalCount)
+    socialSubscriptionsWatching(limit: 3, offset: 0)
+      @include(if: $includeSportWatchingFriends) {
+      total
+      items {
+        __typename
+        ...sportWatchingFriendFragment
+      }
+    }
+  }
+}
+
+fragment showcasePromoSportBaseEventFragment on AbstractSportEvent {
+  __typename
+  id
+  sportEventId
+  title
+  comment
+  matchStartTime
+  startTime
+  expirationTime
+  endTime
+  deepDiveAvailable @include(if: $includeDeepDiveFlag)
+  gallery {
+    covers {
+      accentRightSquare {
+        __typename
+        ...imageFragment
+      }
+      accentRight {
+        __typename
+        ...imageFragment
+      }
+    }
+  }
+  competition {
+    id
+    shortName
+    sportType {
+      name
+    }
+  }
+  viewOption {
+    __typename
+    ...sportViewOptionFragment
+  }
+  ...sportWatchingSocialArgumentFragment
+}
+
+fragment showcasePromoSportTeamFragment on SportTeam {
+  id
+  name
+  logo {
+    __typename
+    ...imageFragment
+  }
+}
+
+fragment showcasePromoSportEventFragment on SportEventSelectionItem {
+  sportEvent {
+    __typename
+    ... on SportEvent {
+      __typename
+      ...showcasePromoSportBaseEventFragment
+    }
+    ... on SportTeamsEvent {
+      __typename
+      ...showcasePromoSportBaseEventFragment
+      firstTeam {
+        __typename
+        ...showcasePromoSportTeamFragment
+      }
+      secondTeam {
+        __typename
+        ...showcasePromoSportTeamFragment
+      }
+    }
+  }
+}
+
+fragment showcaseCatchupGalleryFragment on Catchup {
+  gallery {
+    covers {
+      square {
+        __typename
+        ...imageFragment
+      }
+      horizontal {
+        __typename
+        ...imageFragment
+      }
+    }
+  }
+}
+
+fragment televisionChannelSummaryFragment on TvChannel {
+  contentId
+  title
+  gallery {
+    logos {
+      main {
+        __typename
+        ...imageFragment
+      }
+      loader {
+        __typename
+        ...imageFragment
+      }
+    }
+    covers {
+      horizontal {
+        __typename
+        ...imageFragment
+      }
+      preview {
+        __typename
+        ...imageFragment
+      }
+      paywall {
+        __typename
+        ...imageFragment
+      }
+    }
+  }
+  ageRestriction
+}
+
+fragment showcaseCatchupTvChannelFragment on Catchup {
+  tvChannel {
+    __typename
+    ...televisionChannelSummaryFragment
+  }
+}
+
+fragment showcaseCatchupViewOptionFragment on Catchup {
+  viewOption {
+    watchabilityStatus
+    purchasabilityStatus
+    watchabilityExpirationTime
+  }
+}
+
+fragment showcasePromoCatchupSelectionItemFragment on CatchupSelectionItem {
+  catchup {
+    __typename
+    contentId
+    title
+    ...showcaseCatchupGalleryFragment
+    ...showcaseCatchupTvChannelFragment
+    ...showcaseCatchupViewOptionFragment
+  }
+}
+
+fragment externalViewOptionContentBrandFragment on ContentBrand {
+  id
+  name
+  colors {
+    main
+  }
+  gallery {
+    logos {
+      colored {
+        __typename
+        ...imageFragment
+      }
+      centeredMain {
+        __typename
+        ...imageFragment
+      }
+      dynamic {
+        __typename
+        ...imageFragment
+      }
+      square {
+        __typename
+        ...imageFragment
+      }
+      gradient {
+        __typename
+        ...imageFragment
+      }
+    }
+  }
+  userData @include(if: $includeContentBrandUserData) {
+    isLiked
+  }
+}
+
+fragment incompleteDateFragment on IncompleteDate {
+  date
+  accuracy
+}
+
+fragment payOfferFragment on PayOffer {
+  button {
+    badge {
+      text
+      icon {
+        __typename
+        ...imageFragment
+      }
+    }
+    disclaimer {
+      text
+      link
+    }
+  }
+  selectorLink
+}
+
+fragment movieExternalViewOptionFragment on ExternalViewOption {
+  __typename
+  ... on ExternalBaseOption {
+    contentBrand {
+      __typename
+      ...externalViewOptionContentBrandFragment
+    }
+    externalUrl
+  }
+  ... on ExternalPartnerOption {
+    contentBrand {
+      __typename
+      ...externalViewOptionContentBrandFragment
+    }
+    externalUrl
+    action {
+      __typename
+      ... on WatchAction {
+        __typename
+      }
+      ... on BillingFeaturePurchaseAction {
+        purchaseOptionCustomProperties
+      }
+    }
+  }
+  ... on TicketOption {
+    purchasable
+    releaseAnnounce {
+      available
+      releaseDate {
+        __typename
+        ...incompleteDateFragment
+      }
+    }
+    payOffer {
+      __typename
+      ...payOfferFragment
+    }
+  }
+}
+
+fragment ottTrailerFragment on OttTrailer {
+  contentGroupUuid
+  main
+  promo
+  streamUrl
+}
+
+fragment showcasePromoExternalMovieSelectionItemFragment on ExternalMovieSelectionItem {
+  movie {
+    __typename
+    ...showcasePromoMovieFragment
+    externalViewOptions {
+      __typename
+      ...movieExternalViewOptionFragment
+    }
+    ott {
+      promoTrailer: trailers(onlyPromo: true, limit: 1) {
+        items {
+          __typename
+          ...ottTrailerFragment
+        }
+      }
+    }
+  }
+}
+
+fragment showcasePromoSelectionItemFragment on SelectionItem {
+  __typename
+  ... on PromoSelectionItem {
+    movie {
+      __typename
+      ...showcasePromoMovieFragment
+    }
+    videoContentId
+    coverLogos {
+      __typename
+      ...licenseCoverFragment
+    }
+  }
+  ... on PromoAnnounceSelectionItem {
+    movie {
+      __typename
+      ...showcasePromoMovieFragment
+    }
+    videoContentId
+    coverLogos {
+      __typename
+      ...licenseCoverFragment
+    }
+  }
+  ... on VideoMovieSelectionItem {
+    movie {
+      __typename
+      ...showcasePromoMovieFragment
+    }
+    videoContentId
+    optionalCoverLogos: coverLogos {
+      __typename
+      ...licenseCoverFragment
+    }
+  }
+  ... on PromoTvChannelProgramSelectionItem {
+    promoTvChannel {
+      __typename
+      ...promoTelevisionChannelFragment
+    }
+    promoTvPrograms {
+      __typename
+      ...promoTelevisionProgramFragment
+    }
+  }
+  ... on SportEventSelectionItem {
+    __typename
+    ...showcasePromoSportEventFragment
+  }
+  ... on CatchupSelectionItem @include(if: $includePromoCatchup) {
+    __typename
+    ...showcasePromoCatchupSelectionItemFragment
+  }
+  ... on ExternalMovieSelectionItem @include(if: $includePromoExternalMovies) {
+    __typename
+    ...showcasePromoExternalMovieSelectionItemFragment
+  }
+  ... on CinemaAnnounceSelectionItem
+    @include(if: $includeCinemaAnnounceInPromoSelection) {
+    movie {
+      __typename
+      ...showcasePromoMovieFragment
+      ott {
+        promoTrailer: trailers(onlyPromo: true, limit: 1) {
+          items {
+            __typename
+            ...ottTrailerFragment
+          }
+        }
+      }
+      gallery {
+        posters @include(if: $includeCinemaAnnouncePostersInPromoSelection) {
+          __typename
+          ...baseMoviePostersFragment
+        }
+      }
+      ticketOption {
+        payOffer {
+          __typename
+          ...payOfferFragment
+        }
+      }
+    }
+  }
+}
+
+fragment showcaseChannelSelectionItemFragment on SelectionItem {
+  __typename
+  ... on TvChannelSelectionItem {
+    tvChannel {
+      __typename
+      ...televisionChannelSummaryFragment
+    }
+  }
+}
+
+fragment showcaseCatchupReferenceContentFragment on Catchup {
+  referenceContent {
+    __typename
+    ... on Film {
+      __typename
+      ...movieTopsFragment
+      rating @include(if: $includeMovieRating) {
+        __typename
+        ...ratingFragment
+      }
+    }
+  }
+}
+
+fragment showcaseCatchupSelectionItemFragment on SelectionItem {
+  __typename
+  ... on CatchupSelectionItem {
+    catchup {
+      __typename
+      contentId
+      title
+      duration
+      ...showcaseCatchupGalleryFragment
+      ...showcaseCatchupTvChannelFragment
+      ...showcaseCatchupReferenceContentFragment
+      ...showcaseCatchupViewOptionFragment
+    }
+  }
+}
+
+fragment showcaseGameSelectionItemFragment on SelectionItem {
+  __typename
+  ... on GameSelectionItem {
+    game {
+      contentId
+      id
+      title {
+        __typename
+        ...titleFragment
+      }
+      shortDescription
+      duration
+      ageRestriction
+      playersCount
+      difficulty
+      gallery {
+        covers {
+          horizontal {
+            __typename
+            ...imageFragment
+          }
+        }
+        logos {
+          icon {
+            __typename
+            ...imageFragment
+          }
+          logo {
+            __typename
+            ...imageWithSizeFragment
+          }
+        }
+        backgrounds {
+          forIcon {
+            __typename
+            ...imageFragment
+          }
+        }
+      }
+    }
+  }
+}
+
+fragment showcaseEditorialSelectionItemFragment on SelectionItem {
+  __typename
+  ... on EditorialFeatureSelectionItem {
+    description
+    entityId
+    entityKpId
+    entityType
+    entityName
+    itemType
+    imageSizeType
+    image {
+      __typename
+      ...imageFragment
+    }
+  }
+}
+
+fragment televisionProgramFragment on TvProgram {
+  id
+  title
+  startTime
+  endTime
+  image {
+    __typename
+    ...imageFragment
+  }
+  ageRestriction
+  episodeTitle
+  typeName
+  catchupContentId
+}
+
+fragment showcaseChannelProgramsSelectionItemFragment on TvChannelProgramSelectionItem {
+  tvChannel {
+    __typename
+    ...televisionChannelSummaryFragment
+    viewOption {
+      __typename
+      ...movieViewOptionSummaryFragment
+    }
+  }
+  tvPrograms {
+    __typename
+    ...televisionProgramFragment
+  }
+}
+
+fragment movieFilmOttWatchProgressFragment on Ott {
+  preview {
+    __typename
+    ... on OttPreview_AbstractVideo {
+      duration
+      timing @include(if: $includeTiming) {
+        current
+      }
+    }
+  }
+}
+
+fragment movieWatchPeriodFragment on WatchPeriod {
+  timeToExpire
+  watchPeriodStatus
+}
+
+fragment movieEpisodeOttWatchProgressFragment on OttEpisode {
+  duration
+  timing @include(if: $includeTiming) {
+    current
+  }
+}
+
+fragment estEarlyAccessImagesFragment on Series {
+  gallery {
+    covers {
+      __typename
+      ...movieCoversFragment
+    }
+    logos {
+      horizontal {
+        __typename
+        ...imageFragment
+      }
+    }
+  }
+}
+
+fragment showcaseContinueWatchingSelectionItemFragment on ContinueWatchingSelectionItemEntity {
+  __typename
+  ... on VideoInterface {
+    __typename
+    id
+    contentId
+    title {
+      __typename
+      ...titleFragment
+    }
+    editorAnnotation
+    gallery {
+      covers {
+        horizontal {
+          __typename
+          ...imageFragment
+        }
+      }
+    }
+    ott {
+      __typename
+      ...movieFilmOttWatchProgressFragment
+    }
+    viewOption {
+      __typename
+      watchPeriod {
+        __typename
+        ...movieWatchPeriodFragment
+      }
+      ...movieViewOptionSummaryFragment
+    }
+    restriction {
+      __typename
+      ...restrictionFragment
+    }
+    ...showcaseTVMovieSummaryFragment @include(if: $includeTVMovieSummary)
+  }
+  ... on Episode {
+    __typename
+    id
+    contentId
+    title {
+      __typename
+      ...titleFragment
+    }
+    ottEpisode: ott {
+      __typename
+      editorAnnotation
+      ...movieEpisodeOttWatchProgressFragment
+      viewOption {
+        availabilityEndDate
+      }
+    }
+    cover {
+      __typename
+      ...imageFragment
+    }
+    season {
+      number
+      episodesCount @include(if: $includeEpisodesCountInSeason)
+    }
+    number
+    tvSeries {
+      __typename
+      id
+      contentId
+      title {
+        __typename
+        ...titleFragment
+      }
+      viewOption {
+        __typename
+        watchPeriod {
+          __typename
+          ...movieWatchPeriodFragment
+        }
+        ...movieViewOptionSummaryFragment
+      }
+      ...showcaseTVMovieSummaryFragment @include(if: $includeTVMovieSummary)
+      ...estEarlyAccessImagesFragment @include(if: $includeEstEarlyAccess)
+    }
+    ...estEarlyAccessViewOptionFragment @include(if: $includeEstEarlyAccess)
+  }
+}
+
+fragment showcaseContinueWatchingSportEventSelectionItemFragment on SportEventSelectionItem {
+  sportEvent {
+    __typename
+    id
+    sportEventId
+    title
+    comment
+    startTime
+    endTime
+    expirationTime
+    deepDiveAvailable @include(if: $includeDeepDiveFlag)
+    gallery {
+      posters {
+        accentRightWithLogo {
+          __typename
+          ...imageFragment
+        }
+      }
+    }
+    competition {
+      id
+      shortName
+      sportType {
+        name
+      }
+    }
+    viewOption {
+      __typename
+      ...sportViewOptionFragment
+    }
+    ... on SportTeamsEvent {
+      firstTeam {
+        id
+        name
+        logo {
+          __typename
+          ...imageFragment
+        }
+      }
+      secondTeam {
+        id
+        name
+        logo {
+          __typename
+          ...imageFragment
+        }
+      }
+    }
+  }
+}
+
+fragment showcaseContinueWatchingSportHighlightSelectionItemFragment on SportHighlightSelectionItem {
+  highlight {
+    id
+    title
+    description
+    comment
+    duration
+    gallery {
+      posters {
+        horizontal {
+          __typename
+          ...imageFragment
+        }
+        horizontalWithoutLogo {
+          __typename
+          ...imageFragment
+        }
+      }
+    }
+    viewOption {
+      __typename
+      ...sportViewOptionFragment
+    }
+  }
+}
+
+fragment sportBrandingFragment on style {
+  __typename
+  ... on CoverAndLogoStyle {
+    title
+    comment
+    cover {
+      __typename
+      ...imageFragment
+    }
+    squareCover {
+      __typename
+      ...imageFragment
+    }
+    logo {
+      __typename
+      ...imageFragment
+    }
+  }
+  ... on ShieldAndTextStyle {
+    icon {
+      __typename
+      ...imageFragment
+    }
+    text
+    textColor
+  }
+}
+
+fragment sportEventSelectionItemTeamFragment on SportTeam {
+  id
+  name
+  gallery {
+    logos {
+      main {
+        __typename
+        ...imageFragment
+      }
+    }
+  }
+}
+
+fragment sportEventSelectionItemFragment on SportEventSelectionItem {
+  sportEvent {
+    __typename
+    id
+    sportEventId
+    title
+    comment
+    startTime
+    endTime
+    expirationTime
+    deepDiveAvailable @include(if: $includeDeepDiveFlag)
+    description
+    gallery {
+      posters {
+        accentRightWithLogo {
+          __typename
+          ...imageFragment
+        }
+        announceHorizontal {
+          __typename
+          ...imageFragment
+        }
+        liveHorizontal {
+          __typename
+          ...imageFragment
+        }
+        recordHorizontal {
+          __typename
+          ...imageFragment
+        }
+      }
+    }
+    competition {
+      id
+      shortName
+      sportType {
+        name
+      }
+    }
+    liveMeta {
+      __typename
+      ... on SportEventLiveMeta {
+        stage
+      }
+      ... on SportTeamsEventLiveMeta {
+        stage
+        firstTeamScore {
+          result
+        }
+        secondTeamScore {
+          result
+        }
+      }
+    }
+    viewOption {
+      __typename
+      ...sportViewOptionFragment
+    }
+    ... on SportTeamsEvent {
+      firstTeam {
+        __typename
+        ...sportEventSelectionItemTeamFragment
+      }
+      secondTeam {
+        __typename
+        ...sportEventSelectionItemTeamFragment
+      }
+    }
+  }
+}
+
+fragment showcasePlannedToWatchMovieSelectionItemFragment on SelectionItem {
+  __typename
+  ... on MovieSelectionItem {
+    movie {
+      __typename
+      ...showcaseMovieFragment
+    }
+  }
+  ... on AnnounceSelectionItem {
+    movie {
+      __typename
+      ...showcaseAnnounceMovieFragment
+    }
+  }
+  ... on SeasonAnnounceSelectionItem {
+    movie {
+      __typename
+      ...showcaseAnnounceMovieFragment
+    }
+    season {
+      __typename
+      ...showcaseSeasonAnnounceFragment
+    }
+  }
+}
+
+fragment showcasePremiereVideoSelectionItemFragment on PremiereVideoSelectionItem {
+  movie {
+    __typename
+    ...showcaseBaseMovieFragment
+    gallery {
+      covers {
+        __typename
+        ...movieCoversFragment
+      }
+      logos {
+        horizontal {
+          __typename
+          ...imageWithSizeFragment
+        }
+        rightholderLogo: rightholderForCover(
+          filter: { formFactor: M, theme: LIGHT }
+        ) {
+          __typename
+          ...licenseCoverFragment
+        }
+      }
+    }
+    restriction {
+      __typename
+      ...restrictionFragment
+    }
+    userData @include(if: $includeMovieUserData) {
+      isPlannedToWatch
+    }
+    ticketOption {
+      releaseAnnounce {
+        available
+        releaseDate {
+          __typename
+          ...incompleteDateFragment
+        }
+      }
+    }
+  }
+  premiereVideoContentId: videoContentId
+}
+
+fragment showcaseCinemaMovieSelectionItemFragment on CinemaMovieSelectionItem {
+  movie {
+    __typename
+    ...showcaseMovieFragment
+    userData @include(if: $includeMovieUserData) {
+      isPlannedToWatch
+    }
+    ticketOption {
+      purchasable
+    }
+  }
+}
+
+fragment userCinemaTicketFragment on UserCinemaTicket {
+  colors {
+    backgroundGradient
+    backgroundMain
+  }
+  orderId
+  title
+  sessionTime
+  saleCompleteUrl
+  seatsCount
+  cinema {
+    id
+    title
+  }
+  movie {
+    id
+    gallery {
+      posters {
+        __typename
+        ...moviePostersFragment
+      }
+    }
+  }
+}
+
+fragment showcaseUserCinemaTicketsSelectionItemFragment on SelectionItem {
+  __typename
+  ... on UserCinemaTicketSelectionItem {
+    ticket {
+      __typename
+      ...userCinemaTicketFragment
+    }
+  }
+}
+
+fragment showcaseStyledShowcasesSelectionItemFragment on SelectionItem {
+  __typename
+  ... on StyledShowcaseSelectionItem {
+    showcaseReference {
+      id
+      title
+      gallery {
+        logos {
+          dynamicWidth: dynamic {
+            __typename
+            ...imageFragment
+          }
+          square {
+            __typename
+            ...imageFragment
+          }
+          gradient {
+            __typename
+            ...imageFragment
+          }
+        }
+      }
+    }
+  }
+}
+
+fragment showcasePosterSelectionFragment on PosterSelection {
+  gallery {
+    horizontal {
+      __typename
+      ...imageFragment
+    }
+  }
+  title
+  comment
+  customDestination {
+    type
+    destinationId
+  }
+}
+
+fragment socialInfoWithSubscriptionInfoFragment on UserSocialInfo {
+  alias {
+    defaultValue {
+      value
+      source
+    }
+  }
+  name {
+    defaultValue {
+      value
+    }
+  }
+  avatar {
+    defaultValue {
+      value {
+        __typename
+        ...imageFragment
+      }
+    }
+  }
+  publicStatus
+  url
+  badges @include(if: $includeVerification) {
+    verified {
+      id
+      title
+      description
+      icons {
+        format
+        image {
+          __typename
+          ...imageFragment
+        }
+      }
+    }
+  }
+  isSubscribedTo
+}
+
+fragment socialArgumentUserInfoWithSubscriptionInfoFragment on UserProfileInterface {
+  id {
+    puid
+  }
+  subscriptionInfo {
+    hasSubscription
+  }
+  social {
+    __typename
+    isSubscriptionRequestSentTo
+    ...socialInfoWithSubscriptionInfoFragment
+  }
+}
+
+fragment socialUserArgumentWithSubscriptionInfoFragment on SocialArgument {
+  __typename
+  ... on PlannedToWatchSocialUserArgument {
+    user {
+      __typename
+      ...socialArgumentUserInfoWithSubscriptionInfoFragment
+    }
+  }
+  ... on WatchedSocialUserArgument {
+    user {
+      __typename
+      ...socialArgumentUserInfoWithSubscriptionInfoFragment
+    }
+  }
+  ... on VotedSocialUserArgument {
+    user {
+      __typename
+      ...socialArgumentUserInfoWithSubscriptionInfoFragment
+    }
+    value
+  }
+  ... on WatchingSocialUserArgument {
+    user {
+      __typename
+      ...socialArgumentUserInfoWithSubscriptionInfoFragment
+    }
+  }
+}
+
+fragment showcaseSocialSelectionItemFragment on SelectionItem {
+  __typename
+  ... on SocialSelectionItem {
+    movie {
+      __typename
+      ...showcaseMovieFragment
+    }
+    argument {
+      __typename
+      ...socialUserArgumentWithSubscriptionInfoFragment
+    }
+  }
+}
+
+fragment showcaseNotificationSelectionItemFragment on SelectionItem {
+  __typename
+  ... on NotificationSelectionItem {
+    notification {
+      notificationPayloadId
+      payload
+      templateId
+      feedbackToken
+    }
+  }
+}
+
+fragment trailerFragment on Trailer {
+  contentUuid
+  id
+  isMain
+  preview {
+    __typename
+    ...imageFragment
+  }
+  streamUrl
+  title
+  createdAt
+}
+
+fragment showcaseVideoFeedMovieFragment on Movie {
+  __typename
+  id
+  contentId
+  title {
+    __typename
+    ...titleFragment
+  }
+  shortDescription
+  gallery {
+    covers {
+      __typename
+      ...movieCoversFragment
+    }
+    logos {
+      horizontal {
+        __typename
+        ...imageWithSizeFragment
+      }
+      rightholderForCover {
+        __typename
+        ...licenseCoverFragment
+      }
+    }
+  }
+  viewOption {
+    __typename
+    ...movieViewOptionSummaryFragment
+  }
+  externalViewOptions {
+    __typename
+    ...movieExternalViewOptionFragment
+  }
+  userData @include(if: $includeMovieUserData) {
+    isPlannedToWatch
+  }
+  ...movieOttNextEpisodeFragment @include(if: $includeMovieUserData)
+}
+
+fragment showcaseVideoFeedSelectionItemFragment on SelectionItem {
+  __typename
+  ... on VideoFeedSelectionItem {
+    socialArgument {
+      __typename
+      ...socialArgumentFragment
+    }
+    item {
+      __typename
+      ... on Trailer {
+        __typename
+        ...trailerFragment
+        movie {
+          __typename
+          ...showcaseVideoFeedMovieFragment
+        }
+      }
+    }
+  }
+}
+
+fragment showcaseVideoCardsSelectionItemFragment on SelectionItem {
+  __typename
+  ... on ClipSelectionItem {
+    clip {
+      contentId
+      gallery {
+        covers {
+          preview {
+            __typename
+            ...imageFragment
+          }
+        }
+      }
+      referenceMovie {
+        __typename
+        ...showcaseBaseMovieFragment
+        ...movieOttNextEpisodeFragment @include(if: $includeMovieUserData)
+        gallery {
+          logos {
+            horizontal {
+              __typename
+              ...imageWithSizeFragment
+            }
+          }
+        }
+        genres {
+          __typename
+          ...genreFragment
+        }
+        ott {
+          preview {
+            __typename
+            ... on OttPreview_AbstractVideo {
+              duration
+            }
+          }
+        }
+        userData @include(if: $includeMovieUserData) {
+          isPlannedToWatch
+        }
+        ... on TvSeries {
+          contentId
+          episodesCount
+          seasons {
+            total
+          }
+        }
+      }
+    }
+  }
+}
+
+fragment showcaseExternalMovieSelectionItemFragment on SelectionItem {
+  __typename
+  ... on ExternalMovieSelectionItem {
+    movie {
+      __typename
+      ...showcaseMovieFragment
+    }
+  }
+}
+
+fragment showcaseRewindSelectionItemFragment on SelectionItem {
+  __typename
+  ... on RewindSelectionItem {
+    rewindTvChannel: tvChannel {
+      __typename
+      ...televisionChannelSummaryFragment
+      tvPrograms(
+        duration: $rewindSelectionDuration
+        extraCountInPast: $rewindSelectionExtraInPast
+      ) {
+        __typename
+        ...televisionProgramFragment
+      }
+    }
+  }
+}
+
+fragment showcaseSelectionFragment on AbstractSelection {
+  __typename
+  id
+  title
+  showTitle
+  comment
+  ... on Selection {
+    content(offset: $selectionOffset, limit: $selectionLimit) {
+      __typename
+      ...showcaseSelectionPagingMetaFragment
+      items {
+        __typename
+        ...showcaseSelectionItemFragment
+      }
+    }
+  }
+  ... on MultiSelection {
+    content(offset: $selectionOffset, limit: $selectionLimit) {
+      __typename
+      ...showcaseSelectionPagingMetaFragment
+      items {
+        __typename
+        ...showcaseLinkSelectionItemFragment
+      }
+    }
+  }
+  ... on UpsaleSelection {
+    targetShowcaseId
+    subscription
+    content(offset: $selectionOffset, limit: $selectionLimit) {
+      __typename
+      ...showcaseSelectionPagingMetaFragment
+      items {
+        __typename
+        ...showcaseMovieSelectionItemFragment
+      }
+    }
+  }
+  ... on AnnounceSelection {
+    content(offset: $selectionOffset, limit: $selectionLimit) {
+      __typename
+      ...showcaseSelectionPagingMetaFragment
+      items {
+        __typename
+        ...showcaseAnnounceSelectionItemFragment
+      }
+    }
+  }
+  ... on OriginalsSelection {
+    content(offset: $selectionOffset, limit: $selectionLimit) {
+      __typename
+      ...showcaseSelectionPagingMetaFragment
+      items {
+        __typename
+        ...showcaseOriginalMovieSelectionItemFragment
+      }
+    }
+  }
+  ... on OttTopSelection {
+    content(offset: $ottTopSelectionOffset, limit: $ottTopSelectionLimit) {
+      __typename
+      ...showcaseSelectionPagingMetaFragment
+      items {
+        __typename
+        ...showcaseOttTopMovieSelectionItemFragment
+      }
+    }
+  }
+  ... on OttTopFilmsSelection {
+    content(offset: $ottTopSelectionOffset, limit: $ottTopSelectionLimit)
+      @include(if: $includeNewOttTopSelection) {
+      __typename
+      ...showcaseSelectionPagingMetaFragment
+      items {
+        __typename
+        ...showcaseOttTopMovieSelectionItemFragment
+      }
+    }
+  }
+  ... on PromoSelection {
+    content(offset: $promoSelectionOffset, limit: $promoSelectionLimit) {
+      __typename
+      ...showcaseSelectionPagingMetaFragment
+      items {
+        __typename
+        ...showcasePromoSelectionItemFragment
+      }
+    }
+  }
+  ... on SnippetSelection {
+    content(offset: $selectionOffset, limit: $selectionLimit) {
+      __typename
+      ...showcaseSelectionPagingMetaFragment
+      items {
+        __typename
+        ...showcaseLinkSelectionItemFragment
+      }
+    }
+  }
+  ... on ChannelsSelection {
+    content(offset: $selectionOffset, limit: $selectionLimit)
+      @include(if: $includeChannelsSelection) {
+      __typename
+      ...showcaseSelectionPagingMetaFragment
+      items {
+        __typename
+        ...showcaseChannelSelectionItemFragment
+      }
+    }
+  }
+  ... on CatchupsSelection {
+    content(offset: $selectionOffset, limit: $selectionLimit)
+      @include(if: $includeCatchupsSelection) {
+      __typename
+      ...showcaseSelectionPagingMetaFragment
+      items {
+        __typename
+        ...showcaseCatchupSelectionItemFragment
+      }
+    }
+  }
+  ... on GamesSelection {
+    content(offset: $selectionOffset, limit: $selectionLimit)
+      @include(if: $includeGamesSelection) {
+      __typename
+      ...showcaseSelectionPagingMetaFragment
+      items {
+        __typename
+        ...showcaseGameSelectionItemFragment
+      }
+    }
+  }
+  ... on EditorialFeatureSelection {
+    content(offset: $selectionOffset, limit: $selectionLimit) {
+      __typename
+      ...showcaseSelectionPagingMetaFragment
+      items {
+        __typename
+        ...showcaseEditorialSelectionItemFragment
+      }
+    }
+  }
+  ... on ChannelProgramsSelection {
+    content(offset: $selectionOffset, limit: $selectionLimit)
+      @include(if: $includeChannelProgramsSelection) {
+      __typename
+      ...showcaseSelectionPagingMetaFragment
+      items {
+        __typename
+        ...showcaseChannelProgramsSelectionItemFragment
+      }
+    }
+  }
+  ... on ContinueWatchingEmbeddedSelection {
+    content(offset: $selectionOffset, limit: $selectionLimit) {
+      __typename
+      ...showcaseSelectionPagingMetaFragment
+      items {
+        __typename
+        ... on ContinueWatchingSelectionItem {
+          entity {
+            __typename
+            ...showcaseContinueWatchingSelectionItemFragment
+          }
+        }
+        ...showcaseChannelProgramsSelectionItemFragment
+          @include(if: $includeChannelsInContinueWatchingSelection)
+        ...showcaseContinueWatchingSportEventSelectionItemFragment
+        ...showcaseContinueWatchingSportHighlightSelectionItemFragment
+          @include(if: $includeHighlightsInContinueWatchingSelection)
+      }
+    }
+  }
+  ... on SportSelection {
+    style {
+      __typename
+      ...sportBrandingFragment
+    }
+    content(offset: $selectionOffset, limit: $selectionLimit) {
+      __typename
+      ...showcaseSelectionPagingMetaFragment
+      items {
+        __typename
+        ...sportEventSelectionItemFragment
+      }
+    }
+  }
+  ... on WatchLaterSelection {
+    content(offset: $selectionOffset, limit: $selectionLimit) {
+      __typename
+      ...showcaseSelectionPagingMetaFragment
+      items {
+        __typename
+        ...showcasePlannedToWatchMovieSelectionItemFragment
+      }
+    }
+  }
+  ... on PremiereVideosSelection {
+    content(offset: $selectionOffset, limit: $selectionLimit) {
+      __typename
+      ...showcaseSelectionPagingMetaFragment
+      items {
+        __typename
+        ...showcasePremiereVideoSelectionItemFragment
+      }
+    }
+  }
+  ... on CinemaMoviesSelection {
+    content(offset: $selectionOffset, limit: $selectionLimit) {
+      __typename
+      ...showcaseSelectionPagingMetaFragment
+      items {
+        __typename
+        ...showcaseCinemaMovieSelectionItemFragment
+      }
+    }
+  }
+  ... on UserCinemaTicketsSelection {
+    content(offset: $selectionOffset, limit: $selectionLimit) {
+      __typename
+      ...showcaseSelectionPagingMetaFragment
+      items {
+        __typename
+        ...showcaseUserCinemaTicketsSelectionItemFragment
+      }
+    }
+  }
+  ... on StyledShowcasesSelection {
+    content(offset: $selectionOffset, limit: $selectionLimit)
+      @include(if: $includeStyledShowcasesSelection) {
+      __typename
+      ...showcaseSelectionPagingMetaFragment
+      items {
+        __typename
+        ...showcaseStyledShowcasesSelectionItemFragment
+      }
+    }
+  }
+  ... on PosterSelection {
+    __typename
+    ...showcasePosterSelectionFragment
+    content(offset: $selectionOffset, limit: $selectionLimit)
+      @include(if: $includePosterSelection) {
+      __typename
+      ...showcaseSelectionPagingMetaFragment
+      items {
+        __typename
+        ...showcaseSelectionItemFragment
+      }
+    }
+  }
+  ... on SocialSelection {
+    content(offset: $selectionOffset, limit: $selectionLimit) {
+      __typename
+      ...showcaseSelectionPagingMetaFragment
+      items {
+        __typename
+        ...showcaseSocialSelectionItemFragment
+      }
+    }
+  }
+  ... on NotificationsSelection {
+    content(offset: $selectionOffset, limit: $selectionLimit)
+      @include(if: $includeNotificationsSelection) {
+      __typename
+      ...showcaseSelectionPagingMetaFragment
+      items {
+        __typename
+        ...showcaseNotificationSelectionItemFragment
+      }
+    }
+  }
+  ... on VideoFeedSelection {
+    content(offset: $selectionOffset, limit: $selectionLimit)
+      @include(if: $includeVideoFeedSelection) {
+      __typename
+      ...showcaseSelectionPagingMetaFragment
+      items {
+        __typename
+        ...showcaseVideoFeedSelectionItemFragment
+      }
+    }
+  }
+  ... on ClipsSelection @include(if: $includeVideoCardsSelection) {
+    content(offset: $selectionOffset, limit: $videoCardsSelectionLimit) {
+      __typename
+      ...showcaseSelectionPagingMetaFragment
+      items {
+        __typename
+        ...showcaseVideoCardsSelectionItemFragment
+      }
+    }
+    clipsType
+  }
+  ... on ExternalMoviesSelection @include(if: $includeExternalMoviesSelection) {
+    content(offset: $selectionOffset, limit: $selectionLimit) {
+      __typename
+      ...showcaseSelectionPagingMetaFragment
+      items {
+        __typename
+        ...showcaseExternalMovieSelectionItemFragment
+      }
+    }
+  }
+  ... on RewindSelection @include(if: $includeRewindSelection) {
+    content(offset: $selectionOffset, limit: $selectionLimit) {
+      __typename
+      ...showcaseSelectionPagingMetaFragment
+      items {
+        __typename
+        ...showcaseRewindSelectionItemFragment
+      }
+    }
+  }
+}
+
+fragment showcaseIncutFragment on ShowcaseIncut {
+  id
+  title
+  showTitle
+  notificationId
+  payload
+}
+
+fragment showcaseClientInfoFragment on ClientInfo {
+  time {
+    currentTimeUtc
+  }
+}

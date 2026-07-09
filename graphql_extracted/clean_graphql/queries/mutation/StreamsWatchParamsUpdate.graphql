@@ -1,0 +1,20 @@
+mutation StreamsWatchParamsUpdate(
+  $contentId: String!
+  $audioLanguage: String!
+  $subtitlesLanguage: String
+) {
+  watchParams {
+    save(
+      input: {
+        contentId: $contentId
+        audioLanguage: $audioLanguage
+        subtitleLanguage: $subtitlesLanguage
+      }
+    ) {
+      status
+      error {
+        message
+      }
+    }
+  }
+}

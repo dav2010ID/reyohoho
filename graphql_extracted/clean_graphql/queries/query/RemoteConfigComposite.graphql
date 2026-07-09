@@ -1,0 +1,34 @@
+query RemoteConfigComposite(
+  $ottRemoteConfigInclude: Boolean!
+  $ottRemoteConfigNamespace: String!
+  $ottRemoteConfigGroups: [String!]!
+  $ottRemoteConfigParameters: [ParameterRawValueInput!]!
+  $experimentsInclude: Boolean!
+) {
+  remoteConfig(
+    namespace: $ottRemoteConfigNamespace
+    groups: $ottRemoteConfigGroups
+    parameterValues: $ottRemoteConfigParameters
+  ) @include(if: $ottRemoteConfigInclude) {
+    configs
+  }
+  abExperiments @include(if: $experimentsInclude) {
+    experiments {
+      __typename
+      ...remoteConfigCompositeExperimentsFragment
+    }
+    featureToggles {
+      __typename
+      ...remoteConfigCompositeExperimentsFragment
+    }
+  }
+}
+
+fragment remoteConfigCompositeExperimentsFragment on AbSplitResult {
+  rawHandlers
+  testBuckets {
+    bucket
+    slot
+    testId
+  }
+}

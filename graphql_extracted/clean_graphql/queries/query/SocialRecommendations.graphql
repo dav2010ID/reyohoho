@@ -1,0 +1,73 @@
+query SocialRecommendations(
+  $recommendationLimit: Int!
+  $includeVerification: Boolean!
+) {
+  recommendations {
+    __typename
+    ...recommendationsFragment
+  }
+}
+
+fragment imageFragment on Image {
+  avatarsUrl
+  fallbackUrl
+}
+
+fragment socialInfoWithSubscriptionInfoFragment on UserSocialInfo {
+  alias {
+    defaultValue {
+      value
+      source
+    }
+  }
+  name {
+    defaultValue {
+      value
+    }
+  }
+  avatar {
+    defaultValue {
+      value {
+        __typename
+        ...imageFragment
+      }
+    }
+  }
+  publicStatus
+  url
+  badges @include(if: $includeVerification) {
+    verified {
+      id
+      title
+      description
+      icons {
+        format
+        image {
+          __typename
+          ...imageFragment
+        }
+      }
+    }
+  }
+  isSubscribedTo
+}
+
+fragment recommendationsFragment on Recommendations {
+  userSocialSubscriptions(limit: $recommendationLimit) {
+    items {
+      user {
+        id {
+          puid
+        }
+        subscriptionInfo {
+          hasSubscription
+        }
+        social {
+          __typename
+          isSubscriptionRequestSentTo
+          ...socialInfoWithSubscriptionInfoFragment
+        }
+      }
+    }
+  }
+}

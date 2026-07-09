@@ -1,0 +1,54 @@
+query TelevisionChannelProgramExtended(
+  $contentId: String!
+  $programsDurationInPast: Duration
+  $programsDuration: Duration
+) {
+  clientInfo {
+    time {
+      currentTimeUtc
+    }
+  }
+  content(contentId: $contentId) {
+    __typename
+    ... on TvChannel {
+      contentId
+      title
+      gallery {
+        logos {
+          main {
+            __typename
+            ...imageFragment
+          }
+        }
+      }
+      isNeedToHidePrograms
+      tvPrograms(
+        durationInPast: $programsDurationInPast
+        duration: $programsDuration
+      ) {
+        __typename
+        ...televisionProgramFragment
+      }
+    }
+  }
+}
+
+fragment imageFragment on Image {
+  avatarsUrl
+  fallbackUrl
+}
+
+fragment televisionProgramFragment on TvProgram {
+  id
+  title
+  startTime
+  endTime
+  image {
+    __typename
+    ...imageFragment
+  }
+  ageRestriction
+  episodeTitle
+  typeName
+  catchupContentId
+}

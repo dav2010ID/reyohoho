@@ -1,0 +1,55 @@
+query MovieMobileDetailsImages(
+  $movieId: Long!
+  $types: [MovieImageType!]!
+  $offset: Int!
+  $limit: Int!
+) {
+  movie(id: $movieId) {
+    gallery {
+      images(types: $types, offset: $offset, limit: $limit) {
+        offset
+        limit
+        total
+        items {
+          __typename
+          ...movieMobileDetailsImageFragment
+        }
+      }
+    }
+    title {
+      __typename
+      ...titleFragment
+    }
+  }
+}
+
+fragment imageFragment on Image {
+  avatarsUrl
+  fallbackUrl
+}
+
+fragment imageWithSizeFragment on Image {
+  __typename
+  ...imageFragment
+  origSize {
+    width
+    height
+  }
+}
+
+fragment movieMobileDetailsImageFragment on MovieImage {
+  copyright
+  author {
+    login
+  }
+  image {
+    __typename
+    ...imageWithSizeFragment
+  }
+  type
+}
+
+fragment titleFragment on Title {
+  localized
+  original
+}

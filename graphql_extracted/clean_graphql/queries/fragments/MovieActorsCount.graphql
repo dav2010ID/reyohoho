@@ -1,0 +1,7 @@
+fragment MovieActorsCount on Movie {
+  actorsCount: members(limit: 0, role: [ACTOR, CAMEO, UNCREDITED]) {
+    total
+    __typename
+  }
+  __typename
+}
