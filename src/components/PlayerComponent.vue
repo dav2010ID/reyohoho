@@ -1166,6 +1166,8 @@ const startIframeVideoErrorTracking = (loadId) => {
     const iframe = playerIframe.value
     const iframeSrc = selectedPlayerInternal.value?.iframe || ''
     if (!iframe || !isExpectedIframeSrc(iframe, iframeSrc)) return
+    const iframeOrigin = new URL(iframeSrc, window.location.href).origin
+    if (iframeOrigin !== window.location.origin) return
 
     const iframeDoc = iframe.contentDocument || iframe.contentWindow?.document
     if (!iframeDoc || loadId !== iframeVideoTrackingLoadId) return
@@ -1354,7 +1356,6 @@ watch(
     if (!newProvider || newProvider === oldProvider) return
 
     iframeLoading.value = true
-    selectedPlayerInternal.value = null
     playerStore.clearPreferredPlayer()
     resetElectronPlaybackState()
     if (currentOverlayElement.value) {
@@ -2437,6 +2438,8 @@ const removeVideoOverlay = () => {
     clearTimeout(overlayControlsTimeout.value)
     overlayControlsTimeout.value = null
   }
+  clearTimeout(hideTimingsTimeout)
+  hideTimingsTimeout = null
 }
 
 onMounted(() => {
@@ -2542,6 +2545,8 @@ onBeforeUnmount(() => {
   disconnectFromOBS()
 
   delete window.connectToOBS
+  delete window.toggleCompressor
+  delete window.toggleMirror
   delete window.testOBSBlur
   delete window.refreshOBSFilters
   delete window.getOBSFiltersInfo

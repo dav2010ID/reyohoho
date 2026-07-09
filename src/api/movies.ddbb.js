@@ -37,12 +37,10 @@ const normalizePlayerType = (value) => String(value || 'Player').trim()
 
 const toPlayersMap = (
   providers = [],
-  { type = null, translationId = null, source = 'ddbb', sourceLabel = 'DDBB' } = {}
+  { type = null, source = 'ddbb', sourceLabel = 'DDBB' } = {}
 ) => {
   const players = {}
   const selectedType = type ? String(type).toLowerCase() : null
-  const selectedTranslationId =
-    translationId === null || translationId === undefined ? null : String(translationId)
 
   for (const provider of providers) {
     const providerType = normalizePlayerType(provider?.type)
@@ -67,28 +65,6 @@ const toPlayersMap = (
       }
     }
 
-    const translations = Array.isArray(provider?.translations) ? provider.translations : []
-    for (const translation of translations) {
-      const iframe = translation?.iframeUrl || ''
-      if (!iframe) continue
-
-      const tId =
-        translation?.id === null || translation?.id === undefined ? null : String(translation.id)
-      if (selectedTranslationId && tId !== selectedTranslationId) continue
-
-      const translationName = String(translation?.name || 'Translation').trim()
-      const key = ensureUniqueKey(players, `${providerLabel}>${translationName}`)
-      players[key] = {
-        name: key,
-        translate: translationName,
-        iframe,
-        quality: translation?.quality || '',
-        warning: false,
-        source,
-        raw_data: translation,
-        provider: providerType
-      }
-    }
   }
 
   return players

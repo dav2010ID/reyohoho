@@ -38,7 +38,11 @@ export function getProviderName(player) {
 
 export function getProviderDisplayName(player) {
   const provider = getProviderName(player)
-  return provider || cleanPlayerName(player?.translate) || 'Плеер'
+  const translation = cleanPlayerName(player?.translate)
+  if (provider && translation && provider.toLowerCase() !== translation.toLowerCase()) {
+    return `${provider} — ${translation}`
+  }
+  return provider || translation || 'Плеер'
 }
 
 export const copyText = async (text) => {

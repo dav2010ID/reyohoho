@@ -74,20 +74,17 @@ export function usePlayerSources({ props, getProviderDisplayName, onSelectedPlay
 
   const applyPlayersData = (players) => {
     const dedupedPlayers = []
-    const seenProviders = new Set()
+    const seenPlayers = new Set()
 
     for (const [key, value] of Object.entries(players || {})) {
       const player = {
         key: normalizePlayerKey(key),
         ...value
       }
-      const providerName = normalizePlayerKey(getProviderDisplayName(player))
-      if (providerName && seenProviders.has(providerName)) {
-        continue
-      }
-      if (providerName) {
-        seenProviders.add(providerName)
-      }
+      const iframe = String(player?.iframe || '').trim()
+      const identity = iframe || normalizePlayerKey(player.key)
+      if (seenPlayers.has(identity)) continue
+      seenPlayers.add(identity)
       dedupedPlayers.push(player)
     }
 
