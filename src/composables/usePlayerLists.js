@@ -40,7 +40,7 @@ export function usePlayerLists({ authStore, emit, kpId, movieInfo, notificationR
         await delFromList(kpId.value, type)
         notificationRef.value.showNotification(`Удалено из ${listNames[type]}`)
       } else {
-        await addToList(kpId.value, type)
+        await addToList(kpId.value, type, movieInfo.value)
         notificationRef.value.showNotification(`Добавлено в ${listNames[type]}`)
       }
     } catch (error) {

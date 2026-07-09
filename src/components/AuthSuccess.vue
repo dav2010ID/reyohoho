@@ -26,6 +26,8 @@ import { useMainStore } from '@/store/main'
 import { ref, onMounted } from 'vue'
 import { getMyLists, addToList, getUser } from '@/api/user'
 import { USER_LIST_TYPES_ENUM } from '@/constants'
+import { getKpInfo } from '@/api/movies'
+import { getLocalList } from '@/utils/localUserLists'
 export default {
   name: 'AuthSuccess',
   setup() {
@@ -52,26 +54,62 @@ export default {
 
         let user = await getUser()
         authStore.setUser(user)
+        const localHistory = [...mainStore.history]
+        const syncedListTypes = [
+          USER_LIST_TYPES_ENUM.FAVORITE,
+          USER_LIST_TYPES_ENUM.LATER,
+          USER_LIST_TYPES_ENUM.WATCHING,
+          USER_LIST_TYPES_ENUM.COMPLETED,
+          USER_LIST_TYPES_ENUM.ABANDONED
+        ]
+        const localLists = new Map(
+          syncedListTypes.map((type) => [type, [...getLocalList(type)]])
+        )
         let response = await getMyLists(USER_LIST_TYPES_ENUM.HISTORY)
-        mainStore.setHistory(response)
-        if (response.length !== 0) {
-          loading.value = false
-
-          success.value = true
-          setTimeout(async () => {
-            await router.push({ path: '/' })
-            router.go(0)
-          }, 2000)
-          return
-        }
         loading.value = false
         moveHistory.value = true
         try {
-          for (const title of [...mainStore.history].reverse()) {
-            await addToList(title.kp_id, USER_LIST_TYPES_ENUM.HISTORY)
+          const candidates = new Map()
+          for (const title of response) candidates.set(String(title.kp_id), title)
+          for (const title of localHistory) candidates.set(String(title.kp_id), title)
+
+          for (const title of [...candidates.values()].reverse()) {
+            let metadata = title
+            const needsMetadata =
+              !title.title ||
+              !title.poster ||
+              (title.rating_kinopoisk == null && title.rating_kp == null)
+            if (needsMetadata) {
+              try {
+                const movie = await getKpInfo(title.kp_id)
+                metadata = {
+                  ...movie,
+                  ...title,
+                  title: title.title || movie?.name_ru || movie?.name_original || '',
+                  poster: title.poster || movie?.poster_url_preview || movie?.poster_url || ''
+                }
+              } catch (metadataError) {
+                console.warn(`Не удалось дополнить историю для ${title.kp_id}`, metadataError)
+              }
+            }
+            await addToList(title.kp_id, USER_LIST_TYPES_ENUM.HISTORY, metadata)
           }
           response = await getMyLists(USER_LIST_TYPES_ENUM.HISTORY)
           mainStore.setHistory(response)
+
+          for (const type of syncedListTypes) {
+            const serverList = await getMyLists(type)
+            const merged = new Map(
+              [...serverList, ...(localLists.get(type) || [])].map((item) => [
+                String(item.kp_id),
+                item
+              ])
+            )
+            for (const item of merged.values()) {
+              await addToList(item.kp_id, type, item)
+            }
+            await getMyLists(type)
+          }
         } catch (err) {
           console.error('Auth error:', err)
           error.value = 'Произошла ошибка при переноси истории, попробуйте позднее...'
