@@ -168,5 +168,8 @@ describe('Тесты хранилища main', () => {
     const store = useMainStore()
     store.setContentApiProvider('ddbb_live')
     expect(store.contentApiProvider).toBe('ddbb_live')
+
+    store.setContentApiProvider('local')
+    expect(store.contentApiProvider).toBe('local')
   })
 })
