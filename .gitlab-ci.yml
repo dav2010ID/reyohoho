@@ -1,8 +1,12 @@
 pages:
-  image: node:20
+  image: node:22
   script:
-    - npm install
-    - VITE_BASE_URL=/reyohoho/ npm run build
+    - corepack enable
+    - yarn install --frozen-lockfile
+    - yarn lint
+    - yarn check:encoding
+    - yarn test:unit --run
+    - VITE_BASE_URL=/reyohoho/ yarn build
     - rm -rf ./public
     - mkdir ./public
     - cp -r ./dist/* ./public/
