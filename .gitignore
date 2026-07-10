@@ -43,3 +43,6 @@ backend/*.db
 
 # Local profiling output
 kp_info2_*.json
+
+# Generated GraphQL research corpus
+/graphql_extracted/
