@@ -86,12 +86,14 @@ async function initRemoteConfig() {
   initPromise = (async () => {
     const apiStore = useApiStore()
 
-    if (
-      typeof window !== 'undefined' &&
-      ['localhost', '127.0.0.1'].includes(window.location.hostname)
-    ) {
-      await apiStore.setBackendMode('local')
+    if (apiStore.backendMode === 'local' && apiStore.backendModeUserSelected) {
+      await apiStore.selectLocalEndpoint()
       return
+    }
+
+    if (apiStore.backendMode === 'local') {
+      apiStore.backendMode = 'auto'
+      apiStore.localApiHealthy = null
     }
 
     try {

@@ -92,6 +92,11 @@ async def test_auth_ratings_lists_and_private_notes(api):
     _, response = await app.asgi_client.get("/list/history", headers=headers)
     assert [item["id"] for item in response.json[:2]] == ["2022", "301"]
 
+    _, response = await app.asgi_client.delete("/list/history/2022", headers=headers)
+    assert response.status == 200
+    _, response = await app.asgi_client.get("/list/history", headers=headers)
+    assert [item["id"] for item in response.json] == ["301"]
+
     _, response = await app.asgi_client.post(
         "/movies/301/note", headers=headers, json={"note_text": "private"}
     )

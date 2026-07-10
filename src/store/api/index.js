@@ -16,6 +16,7 @@ export const useApiStore = defineStore(API_STORE_NAME, {
     fallbackUrl: import.meta.env.VITE_APP_API_URL,
     endpointsHash: null,
     backendMode: 'auto',
+    backendModeUserSelected: false,
     localApiUrl: LOCAL_API_URL,
     localApiHealthy: null
   }),
@@ -102,9 +103,10 @@ export const useApiStore = defineStore(API_STORE_NAME, {
       return this.localApiUrl
     },
 
-    async setBackendMode(mode) {
+    async setBackendMode(mode, { userSelected = true } = {}) {
       if (!['auto', 'local'].includes(mode)) return
       this.backendMode = mode
+      this.backendModeUserSelected = userSelected
 
       if (mode === 'local') {
         return await this.selectLocalEndpoint()
@@ -179,7 +181,8 @@ export const useApiStore = defineStore(API_STORE_NAME, {
       'availableEndpoints',
       'lastCheckedAt',
       'endpointsHash',
-      'backendMode'
+      'backendMode',
+      'backendModeUserSelected'
     ]
   }
 })

@@ -17,6 +17,7 @@ describe('API backend selection', () => {
     await store.setBackendMode('local')
 
     expect(store.backendMode).toBe('local')
+    expect(store.backendModeUserSelected).toBe(true)
     expect(store.currentApiUrl).toBe(LOCAL_API_URL)
     expect(store.localApiHealthy).toBe(true)
     expect(fetch).toHaveBeenCalledWith(`${LOCAL_API_URL}/health`, expect.any(Object))
@@ -30,6 +31,16 @@ describe('API backend selection', () => {
 
     expect(store.currentApiUrl).toBe(LOCAL_API_URL)
     expect(store.localApiHealthy).toBe(false)
+  })
+
+  it('keeps automatic and explicit local backend choices distinguishable', async () => {
+    vi.stubGlobal('fetch', vi.fn().mockResolvedValue({ ok: true }))
+    const store = useApiStore()
+
+    await store.setBackendMode('local', { userSelected: false })
+
+    expect(store.backendMode).toBe('local')
+    expect(store.backendModeUserSelected).toBe(false)
   })
 
   it('returns to automatic endpoint selection', async () => {
