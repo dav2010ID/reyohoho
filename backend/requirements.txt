@@ -1,5 +1,4 @@
 sanic>=25.12,<26
-sanic-ext>=24.12,<26
 aiohttp>=3.11
 fastapi>=0.128,<1
 python-dotenv>=1.0

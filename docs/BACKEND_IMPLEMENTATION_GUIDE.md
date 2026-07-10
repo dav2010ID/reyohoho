@@ -51,7 +51,7 @@ backend/
   migrations/
 ```
 
-Для production используйте PostgreSQL и асинхронный SQLAlchemy. SQLite допустим только для локальной разработки. Добавьте в зависимости `sqlalchemy[asyncio]`, `asyncpg`, `alembic`, `pyjwt`, `pydantic` и `sanic-ext`.
+Для production используйте PostgreSQL и асинхронный SQLAlchemy. SQLite допустим только для локальной разработки. Добавьте в зависимости `sqlalchemy[asyncio]`, `asyncpg`, `alembic`, `pyjwt` и `pydantic`.
 
 Sanic поддерживает Pydantic-валидацию через `@validate(json=Model)`. Подключение БД создавайте в lifecycle listener, а сессию передавайте через `request.ctx`. Для API задайте `app.config.FALLBACK_ERROR_FORMAT = "json"`.
 
