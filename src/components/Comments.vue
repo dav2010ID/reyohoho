@@ -53,7 +53,15 @@
         </button>
       </div>
 
-      <form class="comment-form" @submit.prevent="submitComment">
+      <div v-if="commentsLoading" class="comments-state" role="status" aria-live="polite">
+        Загрузка комментариев…
+      </div>
+      <div v-else-if="commentsLoadError" class="comments-state comments-state--error" role="alert">
+        <p>{{ commentsLoadError }}</p>
+        <button type="button" class="comments-retry-btn" @click="loadComments">Повторить</button>
+      </div>
+
+      <form v-if="!commentsLoading && !commentsLoadError" class="comment-form" @submit.prevent="submitComment">
         <div class="textarea-container">
           <textarea
             ref="commentTextarea"
@@ -173,7 +181,7 @@
         </div>
       </form>
 
-      <div class="comments-list">
+      <div v-if="!commentsLoading && !commentsLoadError" class="comments-list">
         <template v-for="comment in displayedComments" :key="comment.id">
           <CommentThread
             :comment="comment"
@@ -221,6 +229,7 @@ import { useCommentActions } from '@/composables/useCommentActions'
 import { useNotificationService } from '@/composables/useNotificationService'
 import { getCommentWordForm } from '@/utils/textUtils'
 import { useMainStore } from '@/store/main'
+import { useCommentsData } from '@/composables/useCommentsData'
 
 export default {
   name: 'Comments',
@@ -241,7 +250,12 @@ export default {
     const authStore = useAuthStore()
     const router = useRouter()
     const mainStore = useMainStore()
-    const comments = ref([])
+    const {
+      comments,
+      commentsLoading,
+      commentsLoadError,
+      loadCommentsData
+    } = useCommentsData({ movieId: () => props.movieId, fetchComments: getComments })
     const newComment = ref('')
     const replyTo = ref(null)
     const replyContent = ref('')
@@ -354,11 +368,8 @@ export default {
     }
 
     const loadComments = async () => {
-      try {
-        const response = await getComments(props.movieId)
-        comments.value = response
-      } catch (error) {
-        console.error('Failed to load comments:', error)
+      const loaded = await loadCommentsData()
+      if (!loaded) {
         notify(
           'Ошибка при загрузке комментариев. Попробуйте обновить страницу.'
         )
@@ -664,6 +675,9 @@ export default {
 
     return {
       comments,
+      commentsLoading,
+      commentsLoadError,
+      loadComments,
       groupedComments,
       displayedComments,
       hasMoreComments,
@@ -1227,6 +1241,25 @@ export default {
 :deep(.spoiler-text.revealed a:hover) {
   color: var(--accent-hover) !important;
   border-bottom-color: var(--accent-hover) !important;
+}
+
+.comments-state {
+  padding: 24px;
+  text-align: center;
+  color: #ddd;
+}
+
+.comments-state--error {
+  color: #ffb0b0;
+}
+
+.comments-retry-btn {
+  padding: 8px 16px;
+  border: 0;
+  border-radius: 6px;
+  background: var(--accent-color);
+  color: #fff;
+  cursor: pointer;
 }
 
 :deep(.spoiler-text.revealed a:visited) {
