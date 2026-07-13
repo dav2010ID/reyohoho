@@ -100,6 +100,7 @@ import { useMainStore } from '@/store/main'
 import { getRatingColor } from '@/utils/ratingUtils'
 import { getMovieName } from '@/utils/textUtils'
 import { getMovieSeoPath } from '@/utils/movieSeo'
+import { createLatestRequestGuard } from '@/utils/latestRequest'
 
 const navbarStore = useNavbarStore()
 
@@ -107,6 +108,7 @@ const searchTerm = ref('')
 const movies = ref([])
 const getMoviePath = (movie) => getMovieSeoPath(movie)
 const loading = ref(false)
+const searchRequestGuard = createLatestRequestGuard()
 
 // Глобальные переменные для ошибок
 const errorMessage = ref('')
@@ -127,11 +129,15 @@ onMounted(async () => {
 })
 
 onUnmounted(() => {
+  debouncedPerformSearch.cancel()
+  searchRequestGuard.invalidate()
   document.removeEventListener('keydown', handleKeyDown)
 })
 
 // Очистка поиска
 const resetSearch = () => {
+  searchRequestGuard.invalidate()
+  loading.value = false
   searchTerm.value = ''
   movies.value = []
   errorMessage.value = ''
@@ -147,6 +153,8 @@ const search = () => {
 }
 
 const performSearch = async () => {
+  const requestId = searchRequestGuard.begin()
+  const requestedTerm = searchTerm.value
   loading.value = true
   movies.value = []
 
@@ -156,9 +164,11 @@ const performSearch = async () => {
 
   try {
     // Поиск по названию
-    const results = await apiSearch(searchTerm.value)
+    const results = await apiSearch(requestedTerm)
+    if (!searchRequestGuard.isLatest(requestId)) return
     movies.value = (results || []).map((movie) => ({ ...movie, kp_id: movie.id.toString() }))
   } catch (error) {
+    if (!searchRequestGuard.isLatest(requestId)) return
     // Используем универсальный обработчик ошибок
     const { message, code } = handleApiError(error)
     errorMessage.value = message
@@ -166,7 +176,9 @@ const performSearch = async () => {
     console.error('Ошибка при выполнении поиска:', error)
     movies.value = []
   } finally {
-    loading.value = false
+    if (searchRequestGuard.isLatest(requestId)) {
+      loading.value = false
+    }
   }
 }
 
@@ -174,6 +186,8 @@ const debouncedPerformSearch = debounce(() => {
   if (searchTerm.value.length >= 2) {
     performSearch()
   } else if (searchTerm.value.length < 2) {
+    searchRequestGuard.invalidate()
+    loading.value = false
     movies.value = []
   }
 }, 700)

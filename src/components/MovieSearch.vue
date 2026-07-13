@@ -172,6 +172,7 @@ import SpinnerLoading from '@/components/SpinnerLoading.vue'
 import RandomMovieModal from '@/components/RandomMovieModal.vue'
 import { getMovieSeoPath } from '@/utils/movieSeo'
 import { debugLog } from '@/utils/logger'
+import { createLatestRequestGuard } from '@/utils/latestRequest'
 
 const mainStore = useMainStore()
 const authStore = useAuthStore()
@@ -197,6 +198,7 @@ const topMoviesHasMore = ref(true)
 const homeTopSentinel = ref(null)
 const HOME_TOP_PAGE_SIZE = 24
 let homeTopObserver = null
+const searchRequestGuard = createLatestRequestGuard()
 
 const dedupeMoviesByKpId = (items = []) => {
   const seen = new Set()
@@ -463,6 +465,8 @@ const getPlaceholder = () => {
 
 // Очистка поиска
 const resetSearch = () => {
+  searchRequestGuard.invalidate()
+  loading.value = false
   searchTerm.value = ''
   movies.value = []
   searchPerformed.value = false
@@ -482,6 +486,8 @@ const search = () => {
 }
 
 const performSearch = async () => {
+  const requestId = searchRequestGuard.begin()
+  const requestedTerm = searchTerm.value
   loading.value = true
   searchPerformed.value = true
   movies.value = []
@@ -502,8 +508,10 @@ const performSearch = async () => {
 
       let response = null
       try {
-        response = await getKpIDfromIMDB(searchTerm.value)
+        response = await getKpIDfromIMDB(requestedTerm)
+        if (!searchRequestGuard.isLatest(requestId)) return
       } catch (error) {
+        if (!searchRequestGuard.isLatest(requestId)) return
         if (error.response?.status === 404) {
           errorMessage.value = 'IMDb ID не найден'
           errorCode.value = 404
@@ -527,7 +535,8 @@ const performSearch = async () => {
       }
 
       try {
-        const response = await getKpIDfromSHIKI(searchTerm.value)
+        const response = await getKpIDfromSHIKI(requestedTerm)
+        if (!searchRequestGuard.isLatest(requestId)) return
         const kpId = response?.id_kp || response?.kinopoisk_id
         if (kpId) {
           router.push(getMovieSeoPath({ kp_id: `${kpId}` }))
@@ -537,11 +546,13 @@ const performSearch = async () => {
         debugLog('Switch to kodik', e)
       }
 
-      router.push({ name: 'movie-info-shiki', params: { shiki_id: searchTerm.value } })
+      if (!searchRequestGuard.isLatest(requestId)) return
+      router.push({ name: 'movie-info-shiki', params: { shiki_id: requestedTerm } })
       return
     }
     if (searchType.value === 'title') {
-      const response = await apiSearch(searchTerm.value)
+      const response = await apiSearch(requestedTerm)
+      if (!searchRequestGuard.isLatest(requestId)) return
       movies.value = response.map((movie) => ({
         ...movie,
         kp_id: movie.id.toString(),
@@ -551,6 +562,7 @@ const performSearch = async () => {
       }))
     }
   } catch (error) {
+    if (!searchRequestGuard.isLatest(requestId)) return
     const { message, code } = handleApiError(error)
     errorMessage.value = message
     errorCode.value = code
@@ -558,7 +570,9 @@ const performSearch = async () => {
       console.error('Ошибка при поиске:', error)
     }
   } finally {
-    loading.value = false
+    if (searchRequestGuard.isLatest(requestId)) {
+      loading.value = false
+    }
   }
 }
 
@@ -603,6 +617,8 @@ const debouncedPerformSearch = debounce(() => {
   if (searchTerm.value.length >= 2) {
     performSearch()
   } else if (searchTerm.value.length < 2) {
+    searchRequestGuard.invalidate()
+    loading.value = false
     movies.value = []
     searchPerformed.value = false
   }
@@ -633,7 +649,11 @@ onMounted(() => {
   searchInput.value?.focus()
 })
 
-onUnmounted(disconnectHomeTopInfiniteScroll)
+onUnmounted(() => {
+  debouncedPerformSearch.cancel()
+  searchRequestGuard.invalidate()
+  disconnectHomeTopInfiniteScroll()
+})
 
 // Автопоиск с задержкой (только для поиска по названию)
 watch(searchTerm, () => {
