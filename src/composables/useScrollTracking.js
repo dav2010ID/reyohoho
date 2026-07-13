@@ -1,9 +1,11 @@
-export const useScrollTracking = () => {
-  let userHasScrolled = false
-  let scrollTimeoutId = null
+import { ref } from 'vue'
 
+const userHasScrolled = ref(false)
+let scrollTimeoutId = null
+
+export const useScrollTracking = () => {
   const handleScroll = () => {
-    userHasScrolled = true
+    userHasScrolled.value = true
 
     if (scrollTimeoutId) {
       clearTimeout(scrollTimeoutId)
@@ -11,17 +13,24 @@ export const useScrollTracking = () => {
 
     scrollTimeoutId = setTimeout(() => {
       window.removeEventListener('scroll', handleScroll)
+      scrollTimeoutId = null
     }, 100)
   }
 
   const startTracking = () => {
-    userHasScrolled = false
+    if (scrollTimeoutId) {
+      clearTimeout(scrollTimeoutId)
+      scrollTimeoutId = null
+    }
+    window.removeEventListener('scroll', handleScroll)
+    userHasScrolled.value = false
     window.addEventListener('scroll', handleScroll, { passive: true })
   }
 
   const stopTracking = () => {
     if (scrollTimeoutId) {
       clearTimeout(scrollTimeoutId)
+      scrollTimeoutId = null
     }
     window.removeEventListener('scroll', handleScroll)
   }
