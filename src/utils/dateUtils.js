@@ -1,23 +1,27 @@
+const LEGACY_UTC_DATE = /^(\d{4})(\d{2})(\d{2})T(\d{2})(\d{2})(\d{2})$/
+
+export const parseDate = (value) => {
+  if (!value) return null
+  if (value instanceof Date) return Number.isNaN(value.getTime()) ? null : value
+
+  const legacyMatch = String(value).match(LEGACY_UTC_DATE)
+  const parsed = legacyMatch
+    ? new Date(
+        Date.UTC(
+          ...legacyMatch
+            .slice(1)
+            .map(Number)
+            .map((part, index) => (index === 1 ? part - 1 : part))
+        )
+      )
+    : new Date(value)
+
+  return Number.isNaN(parsed.getTime()) ? null : parsed
+}
+
 export const formatDate = (dateStr) => {
-  if (!dateStr) return ''
-
-  const year = dateStr.substring(0, 4)
-  const month = dateStr.substring(4, 6)
-  const day = dateStr.substring(6, 8)
-  const hour = dateStr.substring(9, 11)
-  const minute = dateStr.substring(11, 13)
-  const second = dateStr.substring(13, 15)
-
-  const utcDate = new Date(
-    Date.UTC(
-      parseInt(year),
-      parseInt(month) - 1,
-      parseInt(day),
-      parseInt(hour),
-      parseInt(minute),
-      parseInt(second)
-    )
-  )
+  const utcDate = parseDate(dateStr)
+  if (!utcDate) return ''
 
   return utcDate.toLocaleDateString('ru-RU', {
     year: 'numeric',
@@ -30,25 +34,8 @@ export const formatDate = (dateStr) => {
 }
 
 export const formatRelativeTime = (dateStr) => {
-  if (!dateStr) return ''
-
-  const year = dateStr.substring(0, 4)
-  const month = dateStr.substring(4, 6)
-  const day = dateStr.substring(6, 8)
-  const hour = dateStr.substring(9, 11)
-  const minute = dateStr.substring(11, 13)
-  const second = dateStr.substring(13, 15)
-
-  const commentDate = new Date(
-    Date.UTC(
-      parseInt(year),
-      parseInt(month) - 1,
-      parseInt(day),
-      parseInt(hour),
-      parseInt(minute),
-      parseInt(second)
-    )
-  )
+  const commentDate = parseDate(dateStr)
+  if (!commentDate) return ''
   const now = new Date()
   const diffInSeconds = Math.floor((now - commentDate) / 1000)
 
