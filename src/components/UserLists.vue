@@ -117,6 +117,7 @@ import ErrorMessage from '@/components/ErrorMessage.vue'
 import Notification from '@/components/notification/ToastMessage.vue'
 import BaseModal from '@/components/BaseModal.vue'
 import { useMainStore } from '@/store/main'
+import { logoutAndRedirect } from '@/utils/authSession'
 
 const movies = ref([])
 const loading = ref(true)
@@ -450,9 +451,7 @@ const clearList = async () => {
       errorCode.value = code
       console.error('Ошибка при очистке списка:', error)
       if (code === 401) {
-        authStore.logout()
-        await router.push('/login')
-        router.go(0)
+        await logoutAndRedirect({ authStore, router })
       }
     }
   }
@@ -473,9 +472,7 @@ const handleItemDeleted = async (deletedItemId) => {
       errorCode.value = code
       console.error('Ошибка при удалении фильма:', error)
       if (code === 401) {
-        authStore.logout()
-        await router.push('/login')
-        router.go(0)
+        await logoutAndRedirect({ authStore, router })
       }
     }
   }

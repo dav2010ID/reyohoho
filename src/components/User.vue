@@ -64,6 +64,7 @@ import { ref, onMounted, nextTick } from 'vue'
 import { useAuthStore } from '@/store/auth'
 import { useRouter } from 'vue-router'
 import { getBaseURL } from '@/api/axios'
+import { logoutAndRedirect } from '@/utils/authSession'
 
 export default {
   name: 'ProfilePage',
@@ -84,13 +85,7 @@ export default {
 
     const logout = async (openLogin = false) => {
       showDialog.value = false
-      authStore.logout()
-      if (openLogin) {
-        await router.push('/')
-      } else {
-        await router.push('/login')
-      }
-      router.go(0)
+      await logoutAndRedirect({ authStore, router, to: openLogin ? '/' : '/login' })
     }
 
     const startEditName = () => {

@@ -65,6 +65,7 @@ import { delFromList } from '@/api/user'
 import { handleApiError } from '@/constants'
 import { USER_LIST_TYPES_ENUM } from '@/constants'
 import { getMovieSeoPath } from '@/utils/movieSeo'
+import { logoutAndRedirect } from '@/utils/authSession'
 
 const mainStore = useMainStore()
 const authStore = useAuthStore()
@@ -124,9 +125,7 @@ const removeFromHistory = async (kp_id) => {
       const { code } = handleApiError(error)
       console.error('Ошибка загрузки истории:', error)
       if (code === 401) {
-        authStore.logout()
-        await router.push('/login')
-        router.go(0)
+        await logoutAndRedirect({ authStore, router })
       } else if (isHistory) {
         mainStore.setHistory(previousHistory)
       }

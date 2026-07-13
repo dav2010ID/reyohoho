@@ -173,6 +173,7 @@ import RandomMovieModal from '@/components/RandomMovieModal.vue'
 import { getMovieSeoPath } from '@/utils/movieSeo'
 import { debugLog } from '@/utils/logger'
 import { createLatestRequestGuard } from '@/utils/latestRequest'
+import { logoutAndRedirect } from '@/utils/authSession'
 
 const mainStore = useMainStore()
 const authStore = useAuthStore()
@@ -393,9 +394,7 @@ watch(
         errorCode.value = code
         console.error('Ошибка загрузки истории:', error)
         if (code === 401) {
-          authStore.logout()
-          await router.push('/login')
-          router.go(0)
+          await logoutAndRedirect({ authStore, router })
         }
       } finally {
         historyLoading.value = false
@@ -595,9 +594,7 @@ const clearAllHistory = async () => {
       errorCode.value = code
       console.error('Ошибка загрузки истории:', error)
       if (code === 401) {
-        authStore.logout()
-        await router.push('/login')
-        router.go(0)
+        await logoutAndRedirect({ authStore, router })
       }
       historyLoading.value = false
       showModal.value = false
