@@ -6,6 +6,7 @@ import { isTrustedApiRequest } from '@/utils/apiTrust'
 
 let apiInstance = null
 let apiInstancePromise = null
+let apiInstanceGeneration = 0
 
 const getResolvedBaseUrl = async () => {
   const apiStore = useApiStore()
@@ -65,19 +66,31 @@ export const getApi = async () => {
     return apiInstancePromise
   }
 
-  apiInstancePromise = (async () => {
+  const generation = apiInstanceGeneration
+  const creationPromise = (async () => {
     const apiUrl = await getResolvedBaseUrl()
+    if (generation !== apiInstanceGeneration) {
+      return await getApi()
+    }
 
-    apiInstance = axios.create({
+    const instance = axios.create({
       baseURL: apiUrl,
       headers: { 'Content-Type': 'application/json' }
     })
-    attachDynamicRequestState(apiInstance)
+    attachDynamicRequestState(instance)
 
-    return apiInstance
+    apiInstance = instance
+    return instance
   })()
+  apiInstancePromise = creationPromise
+  const clearCreationPromise = () => {
+    if (apiInstancePromise === creationPromise) {
+      apiInstancePromise = null
+    }
+  }
+  creationPromise.then(clearCreationPromise, clearCreationPromise)
 
-  return apiInstancePromise
+  return creationPromise
 }
 
 export const getBaseURL = async () => {
@@ -112,6 +125,7 @@ export const getCurrentApiInfo = () => {
  * The next call to getApi() will create a fresh instance with the new URL.
  */
 export const resetApi = () => {
+  apiInstanceGeneration += 1
   apiInstance = null
   apiInstancePromise = null
 }
