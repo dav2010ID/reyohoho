@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { getTrustedApiOrigins, isTrustedApiRequest } from './apiTrust'
+import { getApiAuthorizationState, getTrustedApiOrigins, isTrustedApiRequest } from './apiTrust'
 
 const env = {
   VITE_APP_API_URL: 'https://api.example.com/v1',
@@ -45,5 +45,17 @@ describe('API trust policy', () => {
         VITE_TRUSTED_API_ORIGINS: ''
       })
     ).toEqual(new Set(['http://localhost:8000']))
+  })
+
+  it('reports whether authorization can be attached', () => {
+    expect(
+      getApiAuthorizationState({ baseURL: 'https://api.example.com', hasToken: false, env })
+    ).toBe('anonymous')
+    expect(
+      getApiAuthorizationState({ baseURL: 'https://api.example.com', hasToken: true, env })
+    ).toBe('allowed')
+    expect(
+      getApiAuthorizationState({ baseURL: 'https://unknown.example', hasToken: true, env })
+    ).toBe('blocked')
   })
 })

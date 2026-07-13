@@ -110,6 +110,9 @@
         <p class="api-note backend-status" :class="backendStatusClass">
           {{ backendStatusText }} · {{ apiStore.currentApiUrl || localApiUrl }}
         </p>
+        <p class="api-note backend-status" :class="authorizationStatusClass">
+          {{ authorizationStatusText }}
+        </p>
         <div class="settings-actions">
           <button
             type="button"
@@ -248,6 +251,8 @@ import { useMainStore } from '@/store/main'
 import { usePlayerStore } from '@/store/player'
 import { useTrailerStore } from '@/store/trailer'
 import { LOCAL_API_URL, useApiStore } from '@/store/api'
+import { useAuthStore } from '@/store/auth'
+import { getApiAuthorizationState } from '@/utils/apiTrust'
 import { computed, ref, watch } from 'vue'
 import BaseModal from './BaseModal.vue'
 
@@ -256,6 +261,7 @@ const backgroundStore = useBackgroundStore()
 const playerStore = usePlayerStore()
 const trailerStore = useTrailerStore()
 const apiStore = useApiStore()
+const authStore = useAuthStore()
 const showModal = ref(false)
 const appVersion = ref(import.meta.env.VITE_APP_VERSION_FULL_VERSION)
 const activeSettingsTab = ref('appearance')
@@ -287,6 +293,27 @@ const backendStatusText = computed(() => {
 const backendStatusClass = computed(() => ({
   'backend-status--ok': apiStore.backendMode === 'local' && apiStore.localApiHealthy === true,
   'backend-status--error': apiStore.backendMode === 'local' && apiStore.localApiHealthy === false
+}))
+
+const authorizationStatus = computed(() =>
+  getApiAuthorizationState({
+    baseURL: apiStore.currentApiUrl || localApiUrl,
+    hasToken: Boolean(authStore.token)
+  })
+)
+
+const authorizationStatusText = computed(
+  () =>
+    ({
+      anonymous: 'Авторизация: пользователь не вошёл',
+      allowed: 'Авторизация: JWT разрешён для этого origin',
+      blocked: 'Авторизация: JWT не отправляется недоверенному origin'
+    })[authorizationStatus.value]
+)
+
+const authorizationStatusClass = computed(() => ({
+  'backend-status--ok': authorizationStatus.value === 'allowed',
+  'backend-status--error': authorizationStatus.value === 'blocked'
 }))
 
 const checkSelectedBackend = () => apiStore.recheckSelectedEndpoint()

@@ -32,3 +32,8 @@ export const isTrustedApiRequest = ({ baseURL, url = '', env = import.meta.env }
     return false
   }
 }
+
+export const getApiAuthorizationState = ({ baseURL, hasToken, env = import.meta.env }) => {
+  if (!hasToken) return 'anonymous'
+  return isTrustedApiRequest({ baseURL, env }) ? 'allowed' : 'blocked'
+}
