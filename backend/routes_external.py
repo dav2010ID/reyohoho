@@ -12,7 +12,7 @@ from .config import SETTINGS
 from .errors import APIError
 from .models import Movie, TimingSubmission, UserList, ViewEvent
 from .routes_core import as_utc_iso
-from .routes_social import timing_json
+from .routes_social import timing_payloads
 
 
 bp = Blueprint("external_integrations")
@@ -66,9 +66,9 @@ async def enrich_movie(request: Request, movie_data: dict[str, Any], kp_id: str)
             )
         ).all()
     )
-    movie_data["nudity_timings"] = [
-        await timing_json(session, item, user.id if user else None) for item in timings
-    ]
+    movie_data["nudity_timings"] = await timing_payloads(
+        session, timings, user.id if user else None
+    )
     await session.commit()
     return movie_data
 

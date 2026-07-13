@@ -124,31 +124,89 @@ async def timing_vote_payload(session: AsyncSession, timing_id: int, user_id: in
 
 
 async def timing_json(session: AsyncSession, timing: TimingSubmission, user_id: int | None) -> dict[str, Any]:
-    user = await session.get(User, timing.user_id)
-    votes = await timing_vote_payload(session, timing.id, user_id)
-    approved_count = await session.scalar(
-        select(func.count(TimingSubmission.id)).where(
-            TimingSubmission.user_id == timing.user_id,
-            TimingSubmission.status == "approved",
-            TimingSubmission.is_deleted.is_(False),
-        )
+    return (await timing_payloads(session, [timing], user_id))[0]
+
+
+async def timing_payloads(
+    session: AsyncSession, timings: list[TimingSubmission], user_id: int | None
+) -> list[dict[str, Any]]:
+    if not timings:
+        return []
+
+    timing_ids = [timing.id for timing in timings]
+    user_ids = {timing.user_id for timing in timings}
+    usernames = dict(
+        (await session.execute(select(User.id, User.name).where(User.id.in_(user_ids)))).all()
     )
-    return {
-        "id": timing.id,
-        "kp_id": timing.kp_id,
-        "user_id": timing.user_id,
-        "username": user.name if user else "",
-        "user_timing_count": int(approved_count or 0),
-        "timing_text": timing.timing_text,
-        "status": timing.status,
-        "upvotes": votes["upvotes"],
-        "downvotes": votes["downvotes"],
-        "voteScore": votes["vote_score"],
-        "userVote": votes["user_vote"],
-        **votes,
-        "created_at": as_utc_iso(timing.created_at),
-        "updated_at": as_utc_iso(timing.updated_at),
+    approved_counts = dict(
+        (
+            await session.execute(
+                select(TimingSubmission.user_id, func.count(TimingSubmission.id))
+                .where(
+                    TimingSubmission.user_id.in_(user_ids),
+                    TimingSubmission.status == "approved",
+                    TimingSubmission.is_deleted.is_(False),
+                )
+                .group_by(TimingSubmission.user_id)
+            )
+        ).all()
+    )
+    vote_rows = (
+        await session.execute(
+            select(
+                TimingVote.timing_id,
+                func.count(case((TimingVote.vote_type == "upvote", 1))),
+                func.count(case((TimingVote.vote_type == "downvote", 1))),
+            )
+            .where(TimingVote.timing_id.in_(timing_ids))
+            .group_by(TimingVote.timing_id)
+        )
+    ).all()
+    vote_counts = {
+        timing_id: (int(upvotes or 0), int(downvotes or 0))
+        for timing_id, upvotes, downvotes in vote_rows
     }
+    user_votes: dict[int, str] = {}
+    if user_id is not None:
+        user_votes = dict(
+            (
+                await session.execute(
+                    select(TimingVote.timing_id, TimingVote.vote_type).where(
+                        TimingVote.timing_id.in_(timing_ids), TimingVote.user_id == user_id
+                    )
+                )
+            ).all()
+        )
+
+    result = []
+    for timing in timings:
+        upvotes, downvotes = vote_counts.get(timing.id, (0, 0))
+        user_vote = user_votes.get(timing.id)
+        votes = {
+            "upvotes": upvotes,
+            "downvotes": downvotes,
+            "vote_score": upvotes - downvotes,
+            "user_vote": user_vote,
+        }
+        result.append(
+            {
+                "id": timing.id,
+                "kp_id": timing.kp_id,
+                "user_id": timing.user_id,
+                "username": usernames.get(timing.user_id, ""),
+                "user_timing_count": int(approved_counts.get(timing.user_id, 0)),
+                "timing_text": timing.timing_text,
+                "status": timing.status,
+                "upvotes": upvotes,
+                "downvotes": downvotes,
+                "voteScore": votes["vote_score"],
+                "userVote": user_vote,
+                **votes,
+                "created_at": as_utc_iso(timing.created_at),
+                "updated_at": as_utc_iso(timing.updated_at),
+            }
+        )
+    return result
 
 
 async def get_comments(request: Request, movie_id: str):
@@ -422,7 +480,11 @@ async def timings_all(request: Request):
         ).all()
     )
     return json(
-        {"timings": [await timing_json(request.ctx.db, item, request.ctx.user.id) for item in timings], "page": page, "limit": limit}
+        {
+            "timings": await timing_payloads(request.ctx.db, timings, request.ctx.user.id),
+            "page": page,
+            "limit": limit,
+        }
     )
 
 
