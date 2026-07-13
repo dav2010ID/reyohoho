@@ -556,6 +556,7 @@ import { OBSWebSocket } from '@/utils/obsWebSocket'
 import { debugLog } from '@/utils/logger'
 import { getProviderDisplayName } from '@/utils/playerUtils'
 import { trackAnalyticsEvent } from '@/utils/analytics'
+import { assessPlayerIframe, getPersistablePlayerKey } from '@/utils/playerSecurity'
 import {
   applyOverlayButtonHoverStyle,
   applyOverlayProgressBackgroundStyle,
@@ -655,8 +656,7 @@ const {
   closePlayerModal,
   openSourceModal,
   closeSourceModal,
-  applySourceCandidate,
-  normalizePlayerKey
+  applySourceCandidate
 } = usePlayerSources({
   props,
   getProviderDisplayName,
@@ -1243,6 +1243,16 @@ const onIframeLoad = () => {
     status: 'success',
     duration_ms: iframeLoadStartedAt ? Date.now() - iframeLoadStartedAt : 0
   })
+  const securityAssessment = assessPlayerIframe({ iframeUrl: iframeSrc })
+  trackAnalyticsEvent('player_iframe_security', {
+    ...getPlayerAnalyticsPayload(),
+    security_status: securityAssessment.status,
+    iframe_origin: securityAssessment.origin
+  })
+  const preferredPlayerKey = getPersistablePlayerKey(selectedPlayerInternal.value)
+  if (preferredPlayerKey) {
+    playerStore.updatePreferredPlayer(preferredPlayerKey)
+  }
   window.iframeLoadTime = Date.now()
   startMirrorMonitoring()
   startVideoPositionMonitoring()
@@ -1298,9 +1308,6 @@ const handlePlayerSelect = (player) => {
     clearInterval(videoPositionInterval.value)
     videoPositionInterval.value = null
   }
-  if (!player.key.toLowerCase().includes('torrents')) {
-    playerStore.updatePreferredPlayer(normalizePlayerKey(player.key))
-  }
   // Note: emit('update:selectedPlayer') is handled by the watcher on selectedPlayerInternal
   closePlayerModal()
 }
@@ -1317,9 +1324,6 @@ watch(selectedPlayerInternal, (newVal) => {
     if (videoPositionInterval.value) {
       clearInterval(videoPositionInterval.value)
       videoPositionInterval.value = null
-    }
-    if (!newVal.key.toLowerCase().includes('torrents')) {
-      playerStore.updatePreferredPlayer(normalizePlayerKey(newVal.key))
     }
     emit('update:selectedPlayer', newVal)
   } else {
