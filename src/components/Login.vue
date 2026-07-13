@@ -83,6 +83,8 @@ import { ref, onBeforeUnmount, onMounted } from 'vue'
 import QrcodeVue from 'qrcode.vue'
 import { generateToken, getTGAuthResult } from '@/api/user'
 import { createTelegramAuthPoller } from '@/utils/telegramAuthPoller'
+import { saveAuthRedirect } from '@/utils/authRedirect'
+import { useRoute } from 'vue-router'
 
 export default {
   components: {
@@ -97,6 +99,7 @@ export default {
     const popup = ref(null)
     const base = ref(import.meta.env.VITE_BASE_URL || '/')
     const showModal = ref(false)
+    const route = useRoute()
     let popupCloseTimeout = null
 
     const closePopup = () => {
@@ -164,6 +167,7 @@ export default {
     const retryAuth = () => initAuth()
 
     onMounted(async () => {
+      saveAuthRedirect(route.query.redirect)
       await initAuth()
     })
 

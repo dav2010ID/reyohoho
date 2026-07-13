@@ -23,11 +23,12 @@
 import { useRouter } from 'vue-router'
 import { useAuthStore } from '@/store/auth'
 import { useMainStore } from '@/store/main'
-import { ref, onMounted } from 'vue'
+import { onBeforeUnmount, onMounted, ref } from 'vue'
 import { getMyLists, addToList, getUser } from '@/api/user'
 import { USER_LIST_TYPES_ENUM } from '@/constants'
 import { getKpInfo } from '@/api/movies'
 import { getLocalList } from '@/utils/localUserLists'
+import { consumeAuthRedirect } from '@/utils/authRedirect'
 export default {
   name: 'AuthSuccess',
   setup() {
@@ -39,6 +40,7 @@ export default {
     const success = ref(false)
     const error = ref(null)
     const base = ref(import.meta.env.VITE_BASE_URL || '/')
+    let redirectTimeout = null
 
     const processAuth = async () => {
       try {
@@ -117,9 +119,8 @@ export default {
         }
         moveHistory.value = false
         success.value = true
-        setTimeout(async () => {
-          await router.push({ path: '/' })
-          router.go(0)
+        redirectTimeout = setTimeout(async () => {
+          await router.replace(consumeAuthRedirect())
         }, 2000)
       } catch (err) {
         console.error('Auth error:', err)
@@ -130,6 +131,13 @@ export default {
 
     onMounted(() => {
       processAuth()
+    })
+
+    onBeforeUnmount(() => {
+      if (redirectTimeout) {
+        clearTimeout(redirectTimeout)
+        redirectTimeout = null
+      }
     })
 
     return {
