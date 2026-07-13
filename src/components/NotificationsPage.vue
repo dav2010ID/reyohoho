@@ -28,6 +28,7 @@
       <ErrorMessage
         v-else-if="notificationsStore.error"
         :message="notificationsStore.error"
+        show-retry
         @retry="fetchNotifications"
       />
 

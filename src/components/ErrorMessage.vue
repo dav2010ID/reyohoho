@@ -4,6 +4,9 @@
     <div v-if="message" class="error-message">
       <p>{{ message }}</p>
       <div class="buttons-container">
+        <button v-if="showRetry" type="button" class="button" @click="emit('retry')">
+          Повторить
+        </button>
         <!-- Если код ошибки >= 500, показываем кнопку "Статус" -->
         <a v-if="code >= 500" :href="statusUrl" class="button">Статус</a>
         <router-link to="/" class="button">На главную</router-link>
@@ -17,9 +20,11 @@
 </template>
 
 <script setup>
+const emit = defineEmits(['retry'])
+
 const statusUrl = 'http://38.180.83.227:8080/status/reyohoho'
 
-const { message, code } = defineProps({
+const { message, code, showRetry } = defineProps({
   message: {
     type: String,
     default: ''
@@ -27,6 +32,10 @@ const { message, code } = defineProps({
   code: {
     type: Number,
     default: null
+  },
+  showRetry: {
+    type: Boolean,
+    default: false
   }
 })
 </script>
@@ -47,6 +56,9 @@ const { message, code } = defineProps({
   border-radius: 5px;
   font-size: 16px;
   transition: background-color 0.3s;
+  border: 0;
+  cursor: pointer;
+  font-family: inherit;
 }
 
 .button:hover {
