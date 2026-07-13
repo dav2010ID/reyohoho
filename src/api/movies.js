@@ -1,61 +1,16 @@
 import { useMainStore } from '@/store/main'
 import { normalizeMovieListResponse } from '@/api/movieSeoNormalizer'
 import { trackAnalyticsEvent } from '@/utils/analytics'
+import {
+  CONTENT_PROVIDERS,
+  DDBB_SUPPORTED_METHODS,
+  KINOBD_SUPPORTED_METHODS,
+  KINOBOX_SUPPORTED_METHODS,
+  LOCAL_SUPPORTED_METHODS,
+  loadProvider
+} from '@/api/providerRegistry'
 
-const CONTENT_PROVIDERS = {
-  RHSERV: 'rhserv',
-  KINOBD: 'kinobd',
-  KINOBOX: 'kinobox',
-  DDBB: 'ddbb',
-  DDBB_LIVE: 'ddbb_live',
-  LOCAL: 'local'
-}
-
-const KINOBD_SUPPORTED_METHODS = new Set([
-  'apiSearch',
-  'getKpInfo',
-  'getMovies',
-  'getDiscussedMovies',
-  'getKpIDfromIMDB',
-  'getRandomMovie'
-])
-const KINOBOX_SUPPORTED_METHODS = new Set(['getPlayers'])
-const DDBB_SUPPORTED_METHODS = new Set(['getPlayers'])
-const LOCAL_SUPPORTED_METHODS = new Set([
-  'getShikiInfo',
-  'getShikiPlayers',
-  'getKpIDfromSHIKI',
-  'getRating',
-  'setRating',
-  'getRandomMovie'
-])
 const PLAYER_PROVIDER_TIMEOUT_MS = 15000
-
-const providers = {
-  rhserv: null,
-  kinobd: null,
-  kinobox: null,
-  ddbb: null,
-  ddbb_live: null,
-  local: null
-}
-
-const providerImporters = {
-  rhserv: () => import('@/api/movies.rhserv'),
-  kinobd: () => import('@/api/movies.kinobd'),
-  kinobox: () => import('@/api/movies.kinobox'),
-  ddbb: () => import('@/api/movies.ddbb'),
-  ddbb_live: () => import('@/api/movies.ddbb-live'),
-  local: () => import('@/api/movies.local')
-}
-
-const loadProvider = async (provider) => {
-  if (!providers[provider]) {
-    providers[provider] = providerImporters[provider]()
-  }
-
-  return providers[provider]
-}
 
 const getCurrentProvider = () => {
   try {
