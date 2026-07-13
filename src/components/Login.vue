@@ -40,10 +40,18 @@
 
       <!-- Модальное окно с QR-кодом -->
       <div v-if="showModal" class="modal-overlay" @click="closeModal">
-        <div class="modal-content" @click.stop>
+        <div
+          class="modal-content"
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="telegram-qr-title"
+          @click.stop
+        >
           <div class="modal-header">
-            <h3>Вход через QR-код</h3>
-            <button class="close-btn" @click="closeModal">&times;</button>
+            <h3 id="telegram-qr-title">Вход через QR-код</h3>
+            <button class="close-btn" aria-label="Закрыть QR-код" @click="closeModal">
+              &times;
+            </button>
           </div>
           <div class="modal-body">
             <p class="qr-hint">Отсканируйте QR-код для входа через Telegram</p>
@@ -60,17 +68,21 @@
         </div>
       </div>
 
-      <div v-if="error" class="error-message">
+      <div v-if="error" class="error-message" role="alert" aria-live="polite">
         {{ error }}
+        <button type="button" class="retry-btn" :disabled="loading" @click="retryAuth">
+          Повторить
+        </button>
       </div>
     </div>
   </div>
 </template>
 
 <script>
-import { ref, onMounted } from 'vue'
+import { ref, onBeforeUnmount, onMounted } from 'vue'
 import QrcodeVue from 'qrcode.vue'
 import { generateToken, getTGAuthResult } from '@/api/user'
+import { createTelegramAuthPoller } from '@/utils/telegramAuthPoller'
 
 export default {
   components: {
@@ -85,8 +97,37 @@ export default {
     const popup = ref(null)
     const base = ref(import.meta.env.VITE_BASE_URL || '/')
     const showModal = ref(false)
+    let popupCloseTimeout = null
+
+    const closePopup = () => {
+      if (popupCloseTimeout) {
+        clearTimeout(popupCloseTimeout)
+        popupCloseTimeout = null
+      }
+      if (popup.value && !popup.value.closed) {
+        popup.value.close()
+      }
+      popup.value = null
+    }
+
+    const authPoller = createTelegramAuthPoller({
+      checkAuth: getTGAuthResult,
+      onAuthenticated: (accessToken) => {
+        closePopup()
+        window.location.href = `${base.value}auth-success?token=${accessToken}`
+      },
+      onExpired: () => {
+        error.value = 'Время ожидания входа истекло. Создайте новый QR-код.'
+      },
+      onError: (pollError) => {
+        console.warn('Ошибка проверки статуса Telegram-входа:', pollError)
+      }
+    })
 
     const initAuth = async () => {
+      authPoller.stop()
+      error.value = null
+      loading.value = true
       try {
         const generateTokenResponse = await generateToken()
         const token = generateTokenResponse.token
@@ -94,17 +135,7 @@ export default {
         qrValue.value = authURL
         authValue.value = authURL
         loading.value = false
-
-        setInterval(async () => {
-          const response = await getTGAuthResult(token)
-          if (response.authenticated && response.token) {
-            if (popup.value) {
-              popup.value.close()
-              popup.value = null
-            }
-            window.location.href = `${base.value}auth-success?token=${response.token}`
-          }
-        }, 2000)
+        authPoller.start(token, generateTokenResponse.expires_in)
       } catch (err) {
         error.value = 'Не удалось получить данные для входа. Пожалуйста, попробуйте позже.'
         loading.value = false
@@ -114,13 +145,9 @@ export default {
 
     function loginWithTelegram() {
       if (authValue.value) {
+        closePopup()
         popup.value = window.open(authValue.value, 'tg_open')
-        setTimeout(function () {
-          if (popup.value) {
-            popup.value.close()
-            popup.value = null
-          }
-        }, 3000)
+        popupCloseTimeout = setTimeout(closePopup, 3000)
       } else {
         error.value = 'URL для входа не доступен'
       }
@@ -134,8 +161,15 @@ export default {
       showModal.value = false
     }
 
+    const retryAuth = () => initAuth()
+
     onMounted(async () => {
       await initAuth()
+    })
+
+    onBeforeUnmount(() => {
+      authPoller.stop()
+      closePopup()
     })
 
     return {
@@ -146,7 +180,8 @@ export default {
       loginWithTelegram,
       showModal,
       showQRModal,
-      closeModal
+      closeModal,
+      retryAuth
     }
   }
 }
@@ -347,5 +382,21 @@ h1 {
 
 .qr-code {
   margin: 0 auto;
+}
+
+.retry-btn {
+  display: block;
+  margin: 12px auto 0;
+  padding: 8px 16px;
+  border: 0;
+  border-radius: 5px;
+  background: var(--accent-color);
+  color: #fff;
+  cursor: pointer;
+}
+
+.retry-btn:disabled {
+  cursor: wait;
+  opacity: 0.65;
 }
 </style>
