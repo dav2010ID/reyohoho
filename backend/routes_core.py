@@ -152,20 +152,42 @@ def validate_list_type(list_type: str, *, writable: bool = False) -> None:
         raise APIError("READ_ONLY_LIST", "Список rated формируется из оценок", 409)
 
 
-async def fetch_list(session: AsyncSession, user_id: int, list_type: str) -> list[dict[str, Any]]:
+def optional_list_pagination(request: Request) -> tuple[int, int] | None:
+    raw_page = request.args.get("page")
+    raw_limit = request.args.get("limit")
+    if raw_page is None and raw_limit is None:
+        return None
+    try:
+        page = max(1, int(raw_page or 1))
+        limit = min(100, max(1, int(raw_limit or 50)))
+    except ValueError as exc:
+        raise APIError("VALIDATION_ERROR", "page и limit должны быть числами", 422) from exc
+    return page, limit
+
+
+async def fetch_list(
+    session: AsyncSession,
+    user_id: int,
+    list_type: str,
+    pagination: tuple[int, int] | None = None,
+) -> list[dict[str, Any]]:
     created_at_by_id: dict[str, datetime] = {}
     if list_type == "rated":
-        ids = list(
-            (await session.scalars(select(Rating.kp_id).where(Rating.user_id == user_id))).all()
-        )
+        query = select(Rating.kp_id).where(Rating.user_id == user_id)
+        if pagination is not None:
+            page, limit = pagination
+            query = query.order_by(Rating.updated_at.desc()).offset((page - 1) * limit).limit(limit)
+        ids = list((await session.scalars(query)).all())
     else:
-        rows = (
-            await session.execute(
-                select(UserList.content_id, UserList.created_at)
-                .where(UserList.user_id == user_id, UserList.list_type == list_type)
-                .order_by(UserList.created_at.desc())
-            )
-        ).all()
+        query = (
+            select(UserList.content_id, UserList.created_at)
+            .where(UserList.user_id == user_id, UserList.list_type == list_type)
+            .order_by(UserList.created_at.desc())
+        )
+        if pagination is not None:
+            page, limit = pagination
+            query = query.offset((page - 1) * limit).limit(limit)
+        rows = (await session.execute(query)).all()
         ids = [content_id for content_id, _ in rows]
         created_at_by_id = {
             content_id: created_at
@@ -484,7 +506,14 @@ async def clear_list(request: Request, list_type: str):
 @auth_required
 async def get_own_list(request: Request, list_type: str):
     validate_list_type(list_type)
-    return json(await fetch_list(request.ctx.db, request.ctx.user.id, list_type))
+    return json(
+        await fetch_list(
+            request.ctx.db,
+            request.ctx.user.id,
+            list_type,
+            optional_list_pagination(request),
+        )
+    )
 
 
 @bp.get("/user-list/<user_id:int>/<list_type:str>")
@@ -495,7 +524,9 @@ async def get_public_list(request: Request, user_id: int, list_type: str):
         raise APIError("PRIVATE_LIST", "Этот список является приватным", 403)
     if await request.ctx.db.get(User, user_id) is None:
         raise APIError("USER_NOT_FOUND", "Пользователь не найден", 404)
-    return json(await fetch_list(request.ctx.db, user_id, list_type))
+    return json(
+        await fetch_list(request.ctx.db, user_id, list_type, optional_list_pagination(request))
+    )
 
 
 @bp.get("/user-list-counters/<user_id:int>")
