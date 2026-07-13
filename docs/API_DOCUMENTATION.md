@@ -7,7 +7,18 @@
   - сначала из Firebase Remote Config (`api_endpoints`),
   - если не удалось, используется `VITE_APP_API_URL`.
 - Fallback в текущем `.env`: `https://api4.rhserv.vu`
-- Если есть токен, добавляется заголовок `Authorization: Bearer <token>`.
+- Если есть токен, заголовок `Authorization: Bearer <token>` добавляется только
+  для exact origin из trusted allowlist:
+  - origin `VITE_APP_API_URL`;
+  - origin `VITE_LOCAL_API_URL` (по умолчанию `http://localhost:8000`);
+  - дополнительные HTTPS origins из `VITE_TRUSTED_API_ORIGINS`, разделённые
+    запятыми.
+- Для недоверенного endpoint запрос выполняется без JWT. HTTP разрешён только для
+  loopback origins (`localhost`, `127.0.0.1`, `[::1]`). Пути в значениях env не
+  влияют на сравнение: policy сопоставляет `scheme + host + port`.
+- Исключение: `src/api/movies.local.js` использует отдельный Axios interceptor и
+  пока прикрепляет JWT к `VITE_LOCAL_API_URL` без общей trust-проверки. Не задавайте
+  для этой переменной непроверенный origin до унификации interceptor policy.
 
 ## 2) Проверка доступности API
 
@@ -62,13 +73,18 @@
 - `PUT /list/{type}/{id}`
 - `DELETE /list/{type}/{id}`
 - `DELETE /list/{type}`
-- `GET /list/{type}`
-- `GET /user-list/{userId}/{type}`
+- `GET /list/{type}[?page={page}&limit={1..100}]`
+- `GET /user-list/{userId}/{type}[?page={page}&limit={1..100}]`
 - `GET /user-list-counters/{userId}`
 - `GET /user`
 - `GET /auth/telegram-login-token`
 - `GET /auth/check-telegram-auth?token={token}`
 - `PUT /user/name` body: `{ name }`
+
+Pagination списков совместима со старым клиентом: если `page` и `limit` не
+переданы, backend возвращает полный массив как раньше. При наличии хотя бы одного
+параметра применяются defaults `page=1`, `limit=50`; форма ответа остаётся
+массивом без envelope.
 
 ### 3.3 Emotes API (`src/api/emotes.js`)
 
