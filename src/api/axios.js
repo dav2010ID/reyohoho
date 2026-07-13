@@ -2,6 +2,7 @@ import axios from 'axios'
 import { getCurrentApiUrl } from '@/firebase/firebase'
 import { useAuthStore } from '@/store/auth'
 import { useApiStore } from '@/store/api'
+import { isTrustedApiRequest } from '@/utils/apiTrust'
 
 let apiInstance = null
 let apiInstancePromise = null
@@ -21,12 +22,13 @@ const attachDynamicRequestState = (instance) => {
       config.baseURL = baseURL
       instance.defaults.baseURL = baseURL
 
-      if (authStore.token) {
+      const canAttachAuthorization = isTrustedApiRequest({ baseURL, url: config.url })
+      delete instance.defaults.headers.common['Authorization']
+
+      if (authStore.token && canAttachAuthorization) {
         config.headers.Authorization = `Bearer ${authStore.token}`
-        instance.defaults.headers.common['Authorization'] = `Bearer ${authStore.token}`
       } else {
         delete config.headers.Authorization
-        delete instance.defaults.headers.common['Authorization']
       }
 
       return config
