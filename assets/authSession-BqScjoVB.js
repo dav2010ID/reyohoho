@@ -1,0 +1,1 @@
+var e=async({authStore:e,router:t,to:n=`/login`})=>{e.logout(),await t.push(n)};export{e as t};

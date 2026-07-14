@@ -1,0 +1,1 @@
+var e=e=>{let t=`/${String(e||``).trim().replace(/^\/+|\/+$/g,``)}`;return t===`/`?``:t};export{e as t};
