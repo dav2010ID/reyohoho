@@ -1,6 +1,7 @@
 import { useMainStore } from '@/store/main'
 import { normalizeMovieListResponse } from '@/api/movieSeoNormalizer'
 import { trackAnalyticsEvent } from '@/utils/analytics'
+import { rethrowRequestCancellation } from '@/utils/requestCancellation'
 import {
   CONTENT_PROVIDERS,
   DDBB_SUPPORTED_METHODS,
@@ -190,6 +191,7 @@ const callWithProvider = async (methodName, ...args) => {
       const local = await loadProvider(CONTENT_PROVIDERS.LOCAL)
       return await local[methodName](...args)
     } catch (error) {
+      rethrowRequestCancellation(error)
       console.warn(`[movies] ${methodName} failed on local backend, fallback to RHServ`, error)
       const rhserv = await loadProvider(CONTENT_PROVIDERS.RHSERV)
       return await rhserv[methodName](...args)
@@ -201,12 +203,14 @@ const callWithProvider = async (methodName, ...args) => {
       const kinobox = await loadProvider('kinobox')
       return await kinobox[methodName](...args)
     } catch (error) {
+      rethrowRequestCancellation(error)
       console.warn(`[movies] ${methodName} failed on Kinobox, fallback to KinoBD/RHServ`, error)
       if (KINOBD_SUPPORTED_METHODS.has(methodName)) {
         try {
           const kinobd = await loadProvider('kinobd')
           return await kinobd[methodName](...args)
         } catch (fallbackError) {
+          rethrowRequestCancellation(fallbackError)
           console.warn(`[movies] ${methodName} failed on KinoBD, fallback to RHServ`, fallbackError)
         }
       }
@@ -220,6 +224,7 @@ const callWithProvider = async (methodName, ...args) => {
       const ddbb = await loadProvider('ddbb')
       return await ddbb[methodName](...args)
     } catch (error) {
+      rethrowRequestCancellation(error)
       console.warn(
         `[movies] ${methodName} failed on DDBB, fallback to Kinobox/KinoBD/RHServ`,
         error
@@ -228,6 +233,7 @@ const callWithProvider = async (methodName, ...args) => {
         const kinobox = await loadProvider('kinobox')
         return await kinobox[methodName](...args)
       } catch (fallbackError) {
+        rethrowRequestCancellation(fallbackError)
         console.warn(
           `[movies] ${methodName} failed on Kinobox, fallback to KinoBD/RHServ`,
           fallbackError
@@ -237,6 +243,7 @@ const callWithProvider = async (methodName, ...args) => {
             const kinobd = await loadProvider('kinobd')
             return await kinobd[methodName](...args)
           } catch (kinobdError) {
+            rethrowRequestCancellation(kinobdError)
             console.warn(`[movies] ${methodName} failed on KinoBD, fallback to RHServ`, kinobdError)
           }
         }
@@ -251,6 +258,7 @@ const callWithProvider = async (methodName, ...args) => {
       const kinobd = await loadProvider('kinobd')
       return await kinobd[methodName](...args)
     } catch (error) {
+      rethrowRequestCancellation(error)
       console.warn(`[movies] ${methodName} failed on KinoBD, fallback to RHServ`, error)
       const rhserv = await loadProvider('rhserv')
       return await rhserv[methodName](...args)
@@ -290,6 +298,7 @@ const apiSearch = async (...args) => {
 
       console.warn(`[movies] apiSearch returned no results on ${provider}`)
     } catch (error) {
+      rethrowRequestCancellation(error)
       lastError = error
       console.warn(`[movies] apiSearch failed on ${provider}`, error)
     }
@@ -342,6 +351,7 @@ const getKpInfoWithFallback = async (...args) => {
 
       console.warn(`[movies] getKpInfo returned empty result on ${provider}`, { kp_id: kpId })
     } catch (error) {
+      rethrowRequestCancellation(error)
       lastError = error
       console.warn(`[movies] getKpInfo failed on ${provider}`, error)
     }

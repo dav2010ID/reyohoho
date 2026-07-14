@@ -21,18 +21,18 @@ const apiCall = async (callFn) => {
 }
 
 // ===== API-функции =====
-const apiSearch = async (searchTerm) => {
-  const { data } = await apiCall((api) => api.get(`/search/${searchTerm}`))
+const apiSearch = async (searchTerm, requestConfig = {}) => {
+  const { data } = await apiCall((api) => api.get(`/search/${searchTerm}`, requestConfig))
   return data
 }
 
-const getShikiInfo = async (shikiId) => {
-  const { data } = await apiCall((api) => api.get(`/shiki_info/${shikiId}`))
+const getShikiInfo = async (shikiId, requestConfig = {}) => {
+  const { data } = await apiCall((api) => api.get(`/shiki_info/${shikiId}`, requestConfig))
   return data
 }
 
-const getKpInfo = async (kpId) => {
-  const { data } = await apiCall((api) => api.get(`/kp_info2/${kpId}`))
+const getKpInfo = async (kpId, requestConfig = {}) => {
+  const { data } = await apiCall((api) => api.get(`/kp_info2/${kpId}`, requestConfig))
   return data
 }
 
@@ -78,8 +78,8 @@ const getDons = async () => {
   return data
 }
 
-const getKpIDfromIMDB = async (imdb_id) => {
-  const { data } = await apiCall((api) => api.get(`/imdb_to_kp/${imdb_id}`))
+const getKpIDfromIMDB = async (imdb_id, requestConfig = {}) => {
+  const { data } = await apiCall((api) => api.get(`/imdb_to_kp/${imdb_id}`, requestConfig))
   return data
 }
 
@@ -88,8 +88,8 @@ const getNudityInfoFromIMDB = async (imdb_id) => {
   return data
 }
 
-const getKpIDfromSHIKI = async (shiki_id) => {
-  const { data } = await apiCall((api) => api.get(`/shiki_to_kp/${shiki_id}`))
+const getKpIDfromSHIKI = async (shiki_id, requestConfig = {}) => {
+  const { data } = await apiCall((api) => api.get(`/shiki_to_kp/${shiki_id}`, requestConfig))
   return data
 }
 
@@ -103,8 +103,8 @@ const setRating = async (kpId, rating) => {
   return data
 }
 
-const getComments = async (movieId) => {
-  const { data } = await apiCall((api) => api.get(`/comments/${movieId}`))
+const getComments = async (movieId, requestConfig = {}) => {
+  const { data } = await apiCall((api) => api.get(`/comments/${movieId}`, requestConfig))
   return data
 }
 

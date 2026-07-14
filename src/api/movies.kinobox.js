@@ -242,9 +242,10 @@ const getPlayers = async (kpId, options = {}) => {
   return toPlayersMap(providers, options)
 }
 
-const getKpInfo = async (kpId) => {
+const getKpInfo = async (kpId, requestConfig = {}) => {
   const { data } = await apiCall((client) =>
     client.get(`/api/movies/${kpId}`, {
+      ...requestConfig,
       params: {
         ts: Math.floor(Date.now() / 1000)
       }
@@ -255,9 +256,10 @@ const getKpInfo = async (kpId) => {
   return normalizeKinoboxMovie(movie, kpId)
 }
 
-const apiSearch = async (searchTerm) => {
+const apiSearch = async (searchTerm, requestConfig = {}) => {
   const { data } = await apiCall((client) =>
     client.get('/api/movies/search/', {
+      ...requestConfig,
       params: {
         query: String(searchTerm),
         ts: Math.floor(Date.now() / 1000)

@@ -216,7 +216,7 @@
 </template>
 
 <script>
-import { ref, onMounted, nextTick, computed } from 'vue'
+import { ref, onMounted, onUnmounted, nextTick, computed, watch } from 'vue'
 import { useAuthStore } from '@/store/auth'
 import { useRouter } from 'vue-router'
 import { getComments, createComment, updateComment, deleteComment, rateComment } from '@/api/movies'
@@ -254,7 +254,8 @@ export default {
       comments,
       commentsLoading,
       commentsLoadError,
-      loadCommentsData
+      loadCommentsData,
+      cancelCommentsLoad
     } = useCommentsData({ movieId: () => props.movieId, fetchComments: getComments })
     const newComment = ref('')
     const replyTo = ref(null)
@@ -369,7 +370,7 @@ export default {
 
     const loadComments = async () => {
       const loaded = await loadCommentsData()
-      if (!loaded) {
+      if (loaded === false) {
         notify(
           'Ошибка при загрузке комментариев. Попробуйте обновить страницу.'
         )
@@ -672,6 +673,15 @@ export default {
     onMounted(() => {
       loadComments()
     })
+
+    watch(
+      () => props.movieId,
+      (movieId, previousMovieId) => {
+        if (movieId && previousMovieId && movieId !== previousMovieId) loadComments()
+      }
+    )
+
+    onUnmounted(cancelCommentsLoad)
 
     return {
       comments,

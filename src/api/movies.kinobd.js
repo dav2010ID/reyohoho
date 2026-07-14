@@ -410,9 +410,12 @@ const getPlayerDataByInid = async (
   return toProviderPlayersMap(data)
 }
 
-const apiSearch = async (searchTerm, page = 1) => {
+const apiSearch = async (searchTerm, pageOrConfig = 1, requestConfig = {}) => {
+  const page = typeof pageOrConfig === 'number' ? pageOrConfig : 1
+  const config = typeof pageOrConfig === 'number' ? requestConfig : pageOrConfig
   const { data } = await apiCall((api) =>
     api.get('/api/films/search/title', {
+      ...config,
       params: {
         q: searchTerm,
         page
@@ -424,10 +427,11 @@ const apiSearch = async (searchTerm, page = 1) => {
   return rows.map(buildLegacyMovie)
 }
 
-const getKpInfo = async (kpId) => {
+const getKpInfo = async (kpId, requestConfig = {}) => {
   const [kbResponse, rhFilm] = await Promise.all([
     apiCall((api) =>
       api.get('/api/films/search/kp_id', {
+        ...requestConfig,
         params: {
           q: String(kpId),
           page: 1,
@@ -435,7 +439,10 @@ const getKpInfo = async (kpId) => {
         }
       })
     ),
-    rhserv.getKpInfo(kpId).catch(() => null)
+    rhserv.getKpInfo(kpId, requestConfig).catch((error) => {
+      if (requestConfig.signal?.aborted) throw error
+      return null
+    })
   ])
 
   const film = Array.isArray(kbResponse?.data?.data) ? kbResponse.data.data[0] : null
@@ -547,9 +554,10 @@ const getDiscussedMovies = async (sortMode = 'hot') => {
   return result
 }
 
-const getKpIDfromIMDB = async (imdbId) => {
+const getKpIDfromIMDB = async (imdbId, requestConfig = {}) => {
   const { data } = await apiCall((api) =>
     api.get('/api/films/search/imdb_id', {
+      ...requestConfig,
       params: {
         q: String(imdbId),
         page: 1

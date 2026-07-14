@@ -19,24 +19,24 @@ localApi.interceptors.request.use((config) => {
   return config
 })
 
-const apiSearch = async (searchTerm) => {
-  const { data } = await localApi.get(`/search/${encodeURIComponent(searchTerm)}`)
+const apiSearch = async (searchTerm, requestConfig = {}) => {
+  const { data } = await localApi.get(`/search/${encodeURIComponent(searchTerm)}`, requestConfig)
   return data
 }
 
-const getKpInfo = async (kpId) => {
-  const { data } = await localApi.get(`/kp_info2/${kpId}`)
+const getKpInfo = async (kpId, requestConfig = {}) => {
+  const { data } = await localApi.get(`/kp_info2/${kpId}`, requestConfig)
   return data
 }
 
-const getShikiInfo = async (shikiId) => {
-  const { data } = await localApi.get(`/shiki_info/${shikiId}`)
+const getShikiInfo = async (shikiId, requestConfig = {}) => {
+  const { data } = await localApi.get(`/shiki_info/${shikiId}`, requestConfig)
   return data
 }
 
-const getKpIDfromSHIKI = async (shikiId) => {
+const getKpIDfromSHIKI = async (shikiId, requestConfig = {}) => {
   const cleanId = String(shikiId || '').replace(/\D/g, '')
-  const { data } = await localApi.get(`/shiki_to_kp/${cleanId}`)
+  const { data } = await localApi.get(`/shiki_to_kp/${cleanId}`, requestConfig)
   return {
     ...data,
     id_kp: data?.id_kp || data?.kinopoisk_id || null
@@ -62,7 +62,8 @@ const setRating = async (kpId, rating) => {
   return data
 }
 
-const getComments = async (movieId) => (await localApi.get(`/comments/${movieId}`)).data
+const getComments = async (movieId, requestConfig = {}) =>
+  (await localApi.get(`/comments/${movieId}`, requestConfig)).data
 const createComment = async (movieId, content, parentId = null) =>
   (await localApi.post(`/comments/${movieId}`, { content, parent_id: parentId })).data
 const updateComment = async (commentId, content) =>

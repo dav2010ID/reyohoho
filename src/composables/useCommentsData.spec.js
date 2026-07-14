@@ -15,7 +15,9 @@ describe('useCommentsData', () => {
 
     expect(state.comments.value).toEqual([{ id: 1 }])
     expect(state.commentsLoadError.value).toBe('')
-    expect(fetchComments).toHaveBeenCalledWith('301')
+    expect(fetchComments).toHaveBeenLastCalledWith('301', {
+      signal: expect.any(AbortSignal)
+    })
   })
 
   it('exposes loading while the request is pending', async () => {
@@ -31,5 +33,28 @@ describe('useCommentsData', () => {
     await request
 
     expect(state.commentsLoading.value).toBe(false)
+  })
+
+  it('cancels a stale request before loading comments again', async () => {
+    const signals = []
+    const fetchComments = vi.fn((_, { signal }) => {
+      signals.push(signal)
+      return new Promise((resolve, reject) => {
+        signal.addEventListener('abort', () =>
+          reject(Object.assign(new Error('canceled'), { code: 'ERR_CANCELED' }))
+        )
+        if (signals.length === 2) resolve([{ id: 2 }])
+      })
+    })
+    const state = useCommentsData({ movieId: () => '301', fetchComments })
+
+    const staleRequest = state.loadCommentsData()
+    const latestRequest = state.loadCommentsData()
+
+    expect(await staleRequest).toBe(null)
+    expect(signals[0].aborted).toBe(true)
+    expect(await latestRequest).toBe(true)
+    expect(state.comments.value).toEqual([{ id: 2 }])
+    expect(state.commentsLoadError.value).toBe('')
   })
 })

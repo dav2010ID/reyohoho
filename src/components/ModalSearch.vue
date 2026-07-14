@@ -154,6 +154,7 @@ const search = () => {
 
 const performSearch = async () => {
   const requestId = searchRequestGuard.begin()
+  const signal = searchRequestGuard.getSignal(requestId)
   const requestedTerm = searchTerm.value
   loading.value = true
   movies.value = []
@@ -164,7 +165,7 @@ const performSearch = async () => {
 
   try {
     // Поиск по названию
-    const results = await apiSearch(requestedTerm)
+    const results = await apiSearch(requestedTerm, { signal })
     if (!searchRequestGuard.isLatest(requestId)) return
     movies.value = (results || []).map((movie) => ({ ...movie, kp_id: movie.id.toString() }))
   } catch (error) {

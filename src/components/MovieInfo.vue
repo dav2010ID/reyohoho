@@ -986,6 +986,7 @@ import { getRatingColor } from '@/utils/ratingUtils'
 import { buildMovieSeo, getMovieSeoEntry, getMovieSeoPath, getMovieSeoSlug } from '@/utils/movieSeo'
 import { optimizePosterUrl, resolvePosterByMovie } from '@/utils/mediaUtils'
 import { formatProductionStatus } from '@/utils/movieStatus'
+import { isRequestCanceled } from '@/utils/requestCancellation'
 import TwitchIcon from '@/components/icons/TwitchIcon.vue'
 
 const TrailerCarousel = defineAsyncComponent(() => import('@/components/TrailerCarousel.vue'))
@@ -1319,14 +1320,24 @@ const copyMovieMeta = async () => {
   }
 }
 
+let movieInfoRequestController = null
+
 const fetchMovieInfo = async (updateHistory = true) => {
+  movieInfoRequestController?.abort()
+  const controller = new AbortController()
+  movieInfoRequestController = controller
+  const requestedKpId = kp_id.value
+  infoLoading.value = true
+
   try {
     let response
-    if (kp_id.value.startsWith('shiki')) {
-      response = await getShikiInfo(kp_id.value)
+    if (requestedKpId.startsWith('shiki')) {
+      response = await getShikiInfo(requestedKpId, { signal: controller.signal })
     } else {
-      response = await getKpInfo(kp_id.value, authStore.token)
+      response = await getKpInfo(requestedKpId, { signal: controller.signal })
     }
+
+    if (controller.signal.aborted || requestedKpId !== kp_id.value) return false
 
     if (Array.isArray(response) && response.length === 0) {
       throw new Error('Данные не найдены. Пожалуйста, повторите поиск.')
@@ -1334,7 +1345,7 @@ const fetchMovieInfo = async (updateHistory = true) => {
 
     movieInfo.value = response
 
-    if (kp_id.value.startsWith('shiki')) {
+    if (requestedKpId.startsWith('shiki')) {
       movieInfo.value = {
         ...movieInfo.value,
         title: movieInfo.value.name_ru || movieInfo.value.name_en,
@@ -1345,7 +1356,7 @@ const fetchMovieInfo = async (updateHistory = true) => {
       movieInfo.value = {
         ...movieInfo.value,
         title: movieInfo.value.name_ru || movieInfo.value.name_en || movieInfo.value.name_original,
-        kinopoisk_id: kp_id.value
+        kinopoisk_id: requestedKpId
       }
     }
 
@@ -1359,11 +1370,12 @@ const fetchMovieInfo = async (updateHistory = true) => {
     })
 
     await syncCanonicalMovieRoute()
+    if (controller.signal.aborted || requestedKpId !== kp_id.value) return false
 
     const movieToSave = {
-      kp_id: kp_id.value,
+      kp_id: requestedKpId,
       title: movieInfo.value?.name_ru || movieInfo.value?.name_en || movieInfo.value?.name_original,
-      slug: getMovieSeoSlug(movieInfo.value, kp_id.value),
+      slug: getMovieSeoSlug(movieInfo.value, requestedKpId),
       poster:
         optimizePosterUrl(movieInfo.value?.poster_url) ||
         optimizePosterUrl(movieInfo.value?.cover_url) ||
@@ -1373,7 +1385,7 @@ const fetchMovieInfo = async (updateHistory = true) => {
     }
 
     // Устанавливаем фон фильма через новый метод
-    if (kp_id.value.startsWith('shiki')) {
+    if (requestedKpId.startsWith('shiki')) {
       if (movieInfo.value.screenshots && movieInfo.value.screenshots.length > 0) {
         const randomIndex = Math.floor(Math.random() * movieInfo.value.screenshots.length)
         const randomScreenshot = movieInfo.value.screenshots[randomIndex]
@@ -1401,11 +1413,19 @@ const fetchMovieInfo = async (updateHistory = true) => {
         mainStore.addToHistory({ ...movieToSave })
       }
     }
+    return true
   } catch (error) {
+    if (isRequestCanceled(error)) return false
     const { message, code } = handleApiError(error)
     errorMessage.value = message
     errorCode.value = code
     console.error('Ошибка при загрузке информации о фильмах:', error)
+    return false
+  } finally {
+    if (movieInfoRequestController === controller) {
+      movieInfoRequestController = null
+      infoLoading.value = false
+    }
   }
 }
 
@@ -1578,7 +1598,6 @@ onMounted(async () => {
   moviePlayerComponent.value = (await import('@/components/PlayerComponent.vue')).default
   movieRatingComponent.value = (await import('@/components/MovieRating.vue')).default
   await fetchMovieInfo()
-  infoLoading.value = false
   document.addEventListener('keydown', onKeyDown)
   document.addEventListener('click', handleClickOutside)
   document.addEventListener('click', handleNudityPopupOutsideClick, true)
@@ -1588,6 +1607,8 @@ onMounted(async () => {
 })
 
 onUnmounted(async () => {
+  movieInfoRequestController?.abort()
+  movieInfoRequestController = null
   navbarStore.clearHeaderContent()
   document.removeEventListener('keydown', onKeyDown)
   document.removeEventListener('click', handleClickOutside)
@@ -1605,7 +1626,6 @@ watch(
       kp_id.value = newKpId
       activeTrailerIndex.value = null
       await fetchMovieInfo()
-      infoLoading.value = false
     }
   },
   { immediate: true }

@@ -492,6 +492,7 @@ const search = () => {
 
 const performSearch = async () => {
   const requestId = searchRequestGuard.begin()
+  const signal = searchRequestGuard.getSignal(requestId)
   const requestedTerm = searchTerm.value
   loading.value = true
   searchPerformed.value = true
@@ -513,7 +514,7 @@ const performSearch = async () => {
 
       let response = null
       try {
-        response = await getKpIDfromIMDB(requestedTerm)
+        response = await getKpIDfromIMDB(requestedTerm, { signal })
         if (!searchRequestGuard.isLatest(requestId)) return
       } catch (error) {
         if (!searchRequestGuard.isLatest(requestId)) return
@@ -540,7 +541,7 @@ const performSearch = async () => {
       }
 
       try {
-        const response = await getKpIDfromSHIKI(requestedTerm)
+        const response = await getKpIDfromSHIKI(requestedTerm, { signal })
         if (!searchRequestGuard.isLatest(requestId)) return
         const kpId = response?.id_kp || response?.kinopoisk_id
         if (kpId) {
@@ -556,7 +557,7 @@ const performSearch = async () => {
       return
     }
     if (searchType.value === 'title') {
-      const response = await apiSearch(requestedTerm)
+      const response = await apiSearch(requestedTerm, { signal })
       if (!searchRequestGuard.isLatest(requestId)) return
       movies.value = response.map((movie) => ({
         ...movie,
