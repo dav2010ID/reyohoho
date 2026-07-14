@@ -985,6 +985,7 @@ import Comments from '@/components/Comments.vue'
 import { getRatingColor } from '@/utils/ratingUtils'
 import { buildMovieSeo, getMovieSeoEntry, getMovieSeoPath, getMovieSeoSlug } from '@/utils/movieSeo'
 import { optimizePosterUrl, resolvePosterByMovie } from '@/utils/mediaUtils'
+import { formatProductionStatus } from '@/utils/movieStatus'
 
 const TrailerCarousel = defineAsyncComponent(() => import('@/components/TrailerCarousel.vue'))
 const MovieMobileListDropdown = defineAsyncComponent(
@@ -1115,19 +1116,9 @@ const isCommentsEnabled = computed(() => mainStore.isCommentsEnabled)
 const isDescriptionExpanded = ref(false)
 const countryNames = computed(() => (movieInfo.value?.countries || []).map((item) => item.country).filter(Boolean))
 const genreNames = computed(() => (movieInfo.value?.genres || []).map((item) => item.genre).filter(Boolean))
-const productionStatusLabel = computed(() => {
-  const labels = {
-    ANNOUNCED: 'Анонсирован',
-    PRE_PRODUCTION: 'Подготовка к производству',
-    FILMING: 'Съёмки',
-    POST_PRODUCTION: 'Постпродакшн',
-    ONGOING: 'Выходит',
-    RELEASED: 'Вышел',
-    COMPLETED: 'Завершён'
-  }
-  const status = movieInfo.value?.production_status
-  return status ? labels[status] || status : ''
-})
+const productionStatusLabel = computed(() =>
+  formatProductionStatus(movieInfo.value?.production_status)
+)
 const mobileSummaryChips = computed(() => {
   const chips = []
   const typeLabel = movieInfo.value?.type ? TYPES_ENUM[movieInfo.value.type] : ''
