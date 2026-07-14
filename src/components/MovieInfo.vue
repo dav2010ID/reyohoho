@@ -2729,7 +2729,7 @@ const handleFilterSelect = () => {
 
 .info-description-row {
   display: inline-grid;
-  grid-template-columns: 240px minmax(520px, 980px);
+  grid-template-columns: 240px minmax(0, 980px);
   gap: 48px;
   align-items: start;
   width: fit-content;
@@ -2738,6 +2738,7 @@ const handleFilterSelect = () => {
 }
 
 .content-description {
+  min-width: 0;
   max-width: min(100%, 980px);
 }
 
@@ -2745,6 +2746,7 @@ const handleFilterSelect = () => {
   margin: 0;
   white-space: pre-wrap;
   max-width: 100%;
+  overflow-wrap: anywhere;
   color: rgba(255, 255, 255, 0.88);
   line-height: 1.68;
 }
