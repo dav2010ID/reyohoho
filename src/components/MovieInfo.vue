@@ -116,6 +116,8 @@
                 src="/src/assets/icon-external-link.png"
                 alt="Внешняя ссылка"
                 class="external-link-icon"
+                width="48"
+                height="48"
               />
             </a>
           </div>
@@ -141,6 +143,8 @@
                 src="/src/assets/icon-external-link.png"
                 alt="Внешняя ссылка"
                 class="external-link-icon"
+                width="48"
+                height="48"
               />
             </a>
           </div>
@@ -166,6 +170,8 @@
                 src="/src/assets/icon-external-link.png"
                 alt="Внешняя ссылка"
                 class="external-link-icon"
+                width="48"
+                height="48"
               />
             </a>
           </div>
@@ -191,6 +197,8 @@
                 src="/src/assets/icon-external-link.png"
                 alt="Внешняя ссылка"
                 class="external-link-icon"
+                width="48"
+                height="48"
               />
             </a>
           </div>
@@ -215,6 +223,8 @@
                 src="/src/assets/icon-external-link.png"
                 alt="Внешняя ссылка"
                 class="external-link-icon"
+                width="48"
+                height="48"
               />
             </a>
           </div>
