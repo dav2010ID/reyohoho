@@ -7,15 +7,16 @@ import {
   createCleanContext,
   createCollector,
   ensureReportsDir,
-  reportsDir
+  reportsDir,
+  resolveAppUrl
 } from './browser-test-utils.js'
 
 const baseUrl = process.argv[2] || 'http://127.0.0.1:4179/'
 const sampleCount = Number(process.argv[3] || 5)
 
 const listRoutes = [
-  { name: 'home', url: new URL('/', baseUrl).toString(), minCards: 1 },
-  { name: 'top', url: new URL('/top', baseUrl).toString(), minCards: 1 }
+  { name: 'home', url: resolveAppUrl(baseUrl), minCards: 1 },
+  { name: 'top', url: resolveAppUrl(baseUrl, 'top'), minCards: 1 }
 ]
 
 async function getCardSamples(page, route, count) {
@@ -67,17 +68,17 @@ async function profileCard(browser, route, sample) {
     const card = page.locator('.movie-card').nth(sample.index)
     const href = await card.getAttribute('href')
 
-    await Promise.all([
-      page.waitForURL(/\/movie\//, { timeout: 30000 }),
-      card.click()
-    ])
+    await Promise.all([page.waitForURL(/\/movie\//, { timeout: 30000 }), card.click()])
     await page.waitForLoadState('networkidle', { timeout: 60000 }).catch(() => {})
     await assertNoNotFound(page, `${route.name} card ${sample.index}`)
 
     const movieUrl = page.url()
     const metrics = await collectPerformance(page)
     const movieTitle = await page.title().catch(() => '')
-    const playerFrames = await page.locator('iframe').count().catch(() => 0)
+    const playerFrames = await page
+      .locator('iframe')
+      .count()
+      .catch(() => 0)
 
     await page.screenshot({
       path: path.join(reportsDir, `card-${route.name}-${sample.index}.png`),

@@ -6,7 +6,8 @@ import {
   createCleanContext,
   createCollector,
   ensureReportsDir,
-  reportsDir
+  reportsDir,
+  resolveAppUrl
 } from './browser-test-utils.js'
 
 const baseUrl = process.argv[2] || 'http://127.0.0.1:4178/'
@@ -42,10 +43,7 @@ async function clickFirstMovieCard(page, sourceName) {
   }
 
   const firstHref = await cards.first().getAttribute('href')
-  await Promise.all([
-    page.waitForURL(/\/movie\//, { timeout: 30000 }),
-    cards.first().click()
-  ])
+  await Promise.all([page.waitForURL(/\/movie\//, { timeout: 30000 }), cards.first().click()])
   await page.waitForLoadState('networkidle', { timeout: 60000 }).catch(() => {})
   await assertNoNotFound(page, `${sourceName} first card`)
 
@@ -65,16 +63,20 @@ async function waitForMinimumCardCount(page, expectedCount, stepName) {
 
   const actualCount = await page.locator('.movie-card').count()
   if (actualCount < expectedCount) {
-    throw new Error(`${stepName}: expected at least ${expectedCount} movie cards, got ${actualCount}`)
+    throw new Error(
+      `${stepName}: expected at least ${expectedCount} movie cards, got ${actualCount}`
+    )
   }
 
   return actualCount
 }
 
 async function goBackToHome(page) {
+  const expectedPath = new URL(resolveAppUrl(baseUrl)).pathname.replace(/\/+$/, '') || '/'
   for (let attempt = 0; attempt < 3; attempt += 1) {
     await page.goBack({ waitUntil: 'domcontentloaded', timeout: 60000 })
-    if (new URL(page.url()).pathname === '/') return
+    const currentPath = new URL(page.url()).pathname.replace(/\/+$/, '') || '/'
+    if (currentPath === expectedPath) return
   }
 
   throw new Error(`back home: expected /, got ${page.url()}`)
@@ -127,13 +129,16 @@ async function main() {
     })
 
     await recordStep(steps, 'open top page', async () => {
-      await page.goto(new URL('/top', baseUrl).toString(), { waitUntil: 'networkidle', timeout: 60000 })
+      await page.goto(resolveAppUrl(baseUrl, 'top'), { waitUntil: 'networkidle', timeout: 60000 })
       await assertNoNotFound(page, 'top')
       await page.screenshot({ path: path.join(reportsDir, 'smoke-top.png') })
       return {
         url: page.url(),
         cards: await page.locator('.movie-card').count(),
-        loadMoreVisible: await page.locator('.load-more-btn').isVisible().catch(() => false)
+        loadMoreVisible: await page
+          .locator('.load-more-btn')
+          .isVisible()
+          .catch(() => false)
       }
     })
 
@@ -193,7 +198,7 @@ async function main() {
     })
 
     await recordStep(steps, 'open settings', async () => {
-      await page.goto(new URL('/settings', baseUrl).toString(), {
+      await page.goto(resolveAppUrl(baseUrl, 'settings'), {
         waitUntil: 'networkidle',
         timeout: 60000
       })
@@ -205,7 +210,7 @@ async function main() {
     })
 
     await recordStep(steps, 'open expected 404 route', async () => {
-      await page.goto(new URL('/definitely-not-existing-route', baseUrl).toString(), {
+      await page.goto(resolveAppUrl(baseUrl, 'definitely-not-existing-route'), {
         waitUntil: 'networkidle',
         timeout: 60000
       })

@@ -1,7 +1,13 @@
 import { chromium } from 'playwright'
 import fs from 'node:fs/promises'
 import path from 'node:path'
-import { createCleanContext, reportsDir } from './browser-test-utils.js'
+import {
+  assertNoNotFound,
+  collectPerformance,
+  createCleanContext,
+  reportsDir,
+  resolveAppUrl
+} from './browser-test-utils.js'
 
 const baseUrl = process.argv[2] || 'http://127.0.0.1:4176/'
 
@@ -11,11 +17,11 @@ async function ensureReportsDir() {
   await fs.mkdir(reportsDir, { recursive: true })
 }
 
-async function measurePage(page, name, url) {
+async function measurePage(page, name, url, readySelector) {
   const responses = []
   const consoleErrors = []
 
-  page.on('response', async (response) => {
+  const onResponse = async (response) => {
     const headers = response.headers()
     const length = Number(headers['content-length'] || 0)
     responses.push({
@@ -24,16 +30,22 @@ async function measurePage(page, name, url) {
       contentType: headers['content-type'] || '',
       bytes: Number.isFinite(length) ? length : 0
     })
-  })
+  }
 
-  page.on('console', (message) => {
+  const onConsole = (message) => {
     if (message.type() === 'error') {
       consoleErrors.push(message.text())
     }
-  })
+  }
+
+  page.on('response', onResponse)
+  page.on('console', onConsole)
 
   const startedAt = Date.now()
-  await page.goto(url, { waitUntil: 'networkidle', timeout: 60000 })
+  await page.goto(url, { waitUntil: 'domcontentloaded', timeout: 30000 })
+  await assertNoNotFound(page, name)
+  await page.locator(readySelector).first().waitFor({ state: 'visible', timeout: 20000 })
+  await page.waitForTimeout(250)
   const loadedAt = Date.now()
 
   await page.screenshot({
@@ -41,39 +53,13 @@ async function measurePage(page, name, url) {
     fullPage: false
   })
 
-  const metrics = await page.evaluate(async () => {
-    const nav = performance.getEntriesByType('navigation')[0]
-    const paint = performance.getEntriesByType('paint')
-    const paintByName = Object.fromEntries(paint.map((entry) => [entry.name, entry.startTime]))
+  const metrics = {
+    ...(await collectPerformance(page)),
+    cardCount: await page.locator('.movie-card').count()
+  }
 
-    const rafStart = performance.now()
-    await new Promise((resolve) => {
-      let frames = 0
-      const tick = () => {
-        frames += 1
-        if (frames >= 120) {
-          resolve()
-          return
-        }
-        requestAnimationFrame(tick)
-      }
-      requestAnimationFrame(tick)
-    })
-    const rafDuration = performance.now() - rafStart
-
-    return {
-      domContentLoaded: nav.domContentLoadedEventEnd,
-      loadEventEnd: nav.loadEventEnd,
-      firstPaint: paintByName['first-paint'] || null,
-      firstContentfulPaint: paintByName['first-contentful-paint'] || null,
-      transferSize: performance
-        .getEntriesByType('resource')
-        .reduce((total, entry) => total + (entry.transferSize || 0), 0),
-      resourceCount: performance.getEntriesByType('resource').length,
-      fpsEstimate: Math.round((120 / rafDuration) * 1000),
-      cardCount: document.querySelectorAll('.movie-card').length
-    }
-  })
+  page.off('response', onResponse)
+  page.off('console', onConsole)
 
   return {
     name,
@@ -90,19 +76,24 @@ async function measurePage(page, name, url) {
 }
 
 async function measureInteraction(page) {
-  await page.goto(baseUrl, { waitUntil: 'networkidle', timeout: 60000 })
+  await page.goto(baseUrl, { waitUntil: 'domcontentloaded', timeout: 30000 })
   const input = page.locator('.search-input')
   await input.waitFor({ timeout: 10000 })
 
   const startedAt = Date.now()
-  await input.fill('matrix')
+  await input.fill('Матрица')
   await page.locator('.search-button').click()
-  await page.waitForLoadState('networkidle', { timeout: 60000 })
+  await page
+    .locator('.content-container .movie-card, .content-container .no-results')
+    .first()
+    .waitFor({ state: 'visible', timeout: 20000 })
   const endedAt = Date.now()
+  const resultCards = await page.locator('.content-container .movie-card').count()
+  if (resultCards === 0) throw new Error('search interaction returned no movie cards')
 
   return {
     searchInteractionMs: endedAt - startedAt,
-    resultCards: await page.locator('.movie-card').count(),
+    resultCards,
     url: page.url()
   }
 }
@@ -112,7 +103,7 @@ async function main() {
 
   const browser = await chromium.launch({
     channel: 'msedge',
-    headless: false
+    headless: true
   })
 
   const { context, page } = await createCleanContext(browser, {
@@ -122,8 +113,8 @@ async function main() {
       content: 'omit'
     }
   })
-  const home = await measurePage(page, 'home-desktop', baseUrl)
-  const top = await measurePage(page, 'top-desktop', new URL('/top', baseUrl).toString())
+  const home = await measurePage(page, 'home-desktop', baseUrl, '.search-input')
+  const top = await measurePage(page, 'top-desktop', resolveAppUrl(baseUrl, 'top'), '.movie-card')
   const interaction = await measureInteraction(page)
 
   const { context: mobileContext, page: mobilePage } = await createCleanContext(browser, {
@@ -131,7 +122,7 @@ async function main() {
     isMobile: true,
     hasTouch: true
   })
-  const mobileHome = await measurePage(mobilePage, 'home-mobile', baseUrl)
+  const mobileHome = await measurePage(mobilePage, 'home-mobile', baseUrl, '.search-input')
   await mobileContext.close()
 
   await context.close()

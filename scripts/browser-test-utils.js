@@ -3,19 +3,38 @@ import path from 'node:path'
 
 export const reportsDir = path.resolve('reports-browser')
 
+export const resolveAppUrl = (baseUrl, route = '') => {
+  const url = new URL(baseUrl)
+  const basePath = url.pathname.replace(/\/+$/, '')
+  const routePath = String(route).replace(/^\/+/, '')
+  url.pathname = routePath ? `${basePath}/${routePath}` : `${basePath}/`
+  url.search = ''
+  url.hash = ''
+  return url.toString()
+}
+
 export const ignoredFailedUrlPatterns = [
   /googleapis\.com/,
   /gstatic\.com/,
   /goatcounter/,
   /favicon\.ico/,
   /stravers\.live/,
-  /api4\.rhserv\.vu\/kp_info2\//,
+  /api4\.rhserv\.vu\//,
   /avatars\.mds\.yandex\.net/,
   /st\.kp\.yandex\.net/
 ]
 
 export const isIgnoredFailure = (url) =>
   ignoredFailedUrlPatterns.some((pattern) => pattern.test(url))
+
+const ignoredConsoleMessagePatterns = [
+  /api4\.rhserv\.vu\//,
+  /^Error loading rating: AxiosError: Network Error/
+]
+
+export const isIgnoredConsoleError = (message, locationUrl = '') =>
+  isIgnoredFailure(locationUrl) ||
+  ignoredConsoleMessagePatterns.some((pattern) => pattern.test(message))
 
 export const isCancelledByNavigation = (request) =>
   request.failure()?.errorText === 'net::ERR_ABORTED'
@@ -65,7 +84,7 @@ export function createCollector(page) {
   page.on('console', (message) => {
     if (message.type() === 'error') {
       const location = message.location()
-      if (location.url && isIgnoredFailure(location.url)) return
+      if (isIgnoredConsoleError(message.text(), location.url)) return
 
       events.consoleErrors.push({
         text: message.text(),
@@ -118,7 +137,10 @@ export function createCollector(page) {
 export async function assertNoNotFound(page, stepName) {
   const url = page.url()
   const title = await page.title().catch(() => '')
-  const bodyText = await page.locator('body').innerText({ timeout: 5000 }).catch(() => '')
+  const bodyText = await page
+    .locator('body')
+    .innerText({ timeout: 5000 })
+    .catch(() => '')
   const hasNotFoundRoute = /\/404(?:\.html)?$/.test(new URL(url).pathname)
   const hasNotFoundText = /404|not found|страница не найдена/i.test(`${title}\n${bodyText}`)
 

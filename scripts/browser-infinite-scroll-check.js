@@ -6,7 +6,8 @@ import {
   createCleanContext,
   createCollector,
   ensureReportsDir,
-  reportsDir
+  reportsDir,
+  resolveAppUrl
 } from './browser-test-utils.js'
 
 const baseUrl = process.argv[2] || 'http://127.0.0.1:4178/'
@@ -48,7 +49,7 @@ async function main() {
       after: homeAfter
     })
 
-    await page.goto(new URL('/top', baseUrl).toString(), {
+    await page.goto(resolveAppUrl(baseUrl, 'top'), {
       waitUntil: 'networkidle',
       timeout: 60000
     })
