@@ -18,6 +18,14 @@ let staticMovieSeoEntriesPromise = null
 
 const BASE_PATH = normalizeBasePath(SITE_BASE_PATH)
 
+const truncateDescription = (value, maximum = 160) => {
+  const normalized = String(value || '').replace(/\s+/g, ' ').trim()
+  if (normalized.length <= maximum) return normalized
+  const truncated = normalized.slice(0, maximum - 1)
+  const wordBoundary = truncated.lastIndexOf(' ')
+  return `${truncated.slice(0, wordBoundary > 100 ? wordBoundary : maximum - 1).trim()}…`
+}
+
 const normalizeMovie = (movie) => {
   const identity = resolveCanonicalMovieIdentity(movie)
   const kpId = identity.kpId
@@ -122,7 +130,7 @@ export const getMovieSeoPath = (movieLike = {}, kpIdOverride = null) => {
 }
 
 export const buildMovieCanonicalUrl = (kpId, slug = '') =>
-  `${SITE_ORIGIN}${BASE_PATH}${buildMoviePath(kpId, slug)}`
+  `${SITE_ORIGIN}${BASE_PATH}${buildMoviePath(kpId, slug)}/`
 
 export const buildMovieSeo = (movieLike = {}, kpIdOverride = null) => {
   const fallbackEntry = kpIdOverride ? getMovieSeoEntry(kpIdOverride) : null
@@ -130,9 +138,9 @@ export const buildMovieSeo = (movieLike = {}, kpIdOverride = null) => {
   const kpId = identity.kpId
   const baseTitle = String(movieLike?.title || movieLike?.name_ru || fallbackEntry?.title || identity.preferredTitle || '').trim()
   const year = String(movieLike?.year || fallbackEntry?.year || '').trim()
-  const description = String(movieLike?.description || fallbackEntry?.description || FALLBACK_DESCRIPTION)
-    .replace(/\s+/g, ' ')
-    .trim()
+  const description = truncateDescription(
+    movieLike?.description || fallbackEntry?.description || FALLBACK_DESCRIPTION
+  )
   const poster = String(
     movieLike?.poster_url ||
       movieLike?.poster ||

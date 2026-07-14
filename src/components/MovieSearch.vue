@@ -1,6 +1,7 @@
 <template>
   <div class="wrapper">
     <div class="mainpage">
+      <h1 class="visually-hidden">Поиск фильмов и сериалов онлайн</h1>
       <!-- Кнопки выбора типа поиска -->
       <div class="search-type-buttons">
         <button :class="{ active: searchType === 'title' }" @click="setSearchType('title')">

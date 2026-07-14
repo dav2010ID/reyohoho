@@ -1,6 +1,7 @@
 <template>
   <div class="wrapper">
     <div class="top-100-page" tabindex="0">
+      <h1 class="visually-hidden">Популярные фильмы и сериалы</h1>
       <div class="controls">
         <div class="filter-card time-card">
           <div class="button-group time-buttons">
@@ -61,6 +62,17 @@ import { MovieList } from '@/components/MovieList'
 import { handleApiError } from '@/constants'
 import { computed, nextTick, onMounted, onServerPrefetch, onUnmounted, ref, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
+import { useHead } from '@unhead/vue'
+import { buildStaticPageHead } from '@/utils/staticSeo'
+
+useHead(
+  buildStaticPageHead({
+    routePath: '/top',
+    title: 'Популярные фильмы и сериалы онлайн - ReYohoho',
+    description:
+      'Популярные фильмы и сериалы за сутки, неделю, месяц и всё время. Фильтры по типу и обсуждаемости на ReYohoho.'
+  })
+)
 
 const movies = ref([])
 const loading = ref(false)

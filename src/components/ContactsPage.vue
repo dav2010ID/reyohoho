@@ -1,5 +1,6 @@
 <template>
   <div class="contact-text">
+    <h1>Контакты и информация для правообладателей</h1>
     <p>
       Если Вы владелец авторских прав, просим Вас учесть, что все плееры на сайте из сторонних API
       источников. Напишите на почту или в Телеграм с подтверждением авторских прав для удаления
@@ -18,6 +19,20 @@
     </p>
   </div>
 </template>
+
+<script setup>
+import { useHead } from '@unhead/vue'
+import { buildStaticPageHead } from '@/utils/staticSeo'
+
+useHead(
+  buildStaticPageHead({
+    routePath: '/contact',
+    title: 'Контакты и информация для правообладателей - ReYohoho',
+    description:
+      'Контактные данные ReYohoho и порядок обращения правообладателей по вопросам сторонних видеоплееров.'
+  })
+)
+</script>
 
 <style scoped>
 .contact-text {
@@ -38,5 +53,10 @@
 
 .contact-text a:hover {
   text-decoration: underline;
+}
+
+.contact-text h1 {
+  margin-top: 0;
+  font-size: clamp(1.35rem, 4vw, 2rem);
 }
 </style>

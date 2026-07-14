@@ -20,8 +20,8 @@ describe('generate-seo-assets', () => {
 
     expect(urls.map((item) => item.loc)).toEqual([
       'https://example.com/app/',
-      'https://example.com/app/top',
-      'https://example.com/app/contact'
+      'https://example.com/app/top/',
+      'https://example.com/app/contact/'
     ])
   })
 
@@ -41,7 +41,7 @@ describe('generate-seo-assets', () => {
       ]
     })
 
-    expect(urls.some((item) => item.loc === 'https://example.com/app/movie/123/interstellar')).toBe(
+    expect(urls.some((item) => item.loc === 'https://example.com/app/movie/123/interstellar/')).toBe(
       true
     )
   })

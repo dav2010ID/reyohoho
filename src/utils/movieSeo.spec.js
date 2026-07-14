@@ -1,6 +1,8 @@
 import movies from '../data/movies.json'
 import { describe, expect, it } from 'vitest'
 import {
+  buildMovieCanonicalUrl,
+  buildMovieSeo,
   getMovieSeoEntry,
   getMovieSeoPath,
   getMovieSeoSlug,
@@ -10,6 +12,23 @@ import {
 import { getMovieIdentifier } from './movieSlug'
 
 describe('movieSeo', () => {
+  it('uses the directly served nested SSG URL as canonical', () => {
+    expect(buildMovieCanonicalUrl('123', 'test-movie')).toBe(
+      'https://dav2010id.github.io/reyohoho/movie/123/test-movie/'
+    )
+  })
+
+  it('keeps meta descriptions concise', () => {
+    const seo = buildMovieSeo({
+      kp_id: '123',
+      title: 'Test Movie',
+      description: 'Long description '.repeat(30)
+    })
+
+    expect(seo.description.length).toBeLessThanOrEqual(160)
+    expect(seo.description).toMatch(/…$/)
+  })
+
   it('prefers the original Latin title over a stale fallback slug', () => {
     const movie = {
       kp_id: '5591410',

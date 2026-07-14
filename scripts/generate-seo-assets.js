@@ -41,11 +41,11 @@ export const createSitemapUrls = ({
 } = {}) => {
   return [
     ...staticPaths.map((routePath) => ({
-      loc: `${siteOrigin}${basePath}${routePath === '/' ? '/' : routePath}`,
+      loc: `${siteOrigin}${basePath}${routePath === '/' ? '/' : `${routePath}/`}`,
       lastmod: currentDate
     })),
     ...movies.map((movie) => ({
-      loc: `${siteOrigin}${basePath}/movie/${movie.kp_id}/${resolveCanonicalMovieIdentity(movie).slug}`,
+      loc: `${siteOrigin}${basePath}/movie/${movie.kp_id}/${resolveCanonicalMovieIdentity(movie).slug}/`,
       lastmod: String(movie.updatedAt || '').slice(0, 10) || currentDate
     }))
   ]
