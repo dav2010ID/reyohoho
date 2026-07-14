@@ -6,8 +6,13 @@ import { useAuthStore } from '@/store/auth'
 import { handleHashNavigation } from '@/helpers/hashHandler'
 import { useScrollTracking } from '@/composables/useScrollTracking'
 import { buildMoviePath, getMovieSeoEntry } from '@/utils/movieSeo'
+import {
+  createSpaPageViewTracker,
+  createYandexPageViewSender,
+  normalizePageViewUrl
+} from '@/utils/analytics'
 
-const shouldSkipGoatCounterTracking = (to) => {
+const shouldSkipPageViewTracking = (to) => {
   const path = to?.path || ''
 
   return path === '/auth-success' || path === '/reyohoho/auth-success'
@@ -15,7 +20,7 @@ const shouldSkipGoatCounterTracking = (to) => {
 
 const trackGoatCounterPageView = (to, attempt = 0) => {
   if (typeof window === 'undefined') return
-  if (shouldSkipGoatCounterTracking(to)) return
+  if (shouldSkipPageViewTracking(to)) return
 
   const goatcounter = window.goatcounter
   if (goatcounter?.count) {
@@ -102,8 +107,19 @@ export const installRouterGuards = (router, { isClient = typeof window !== 'unde
   })
 
   if (isClient) {
+    const trackYandexPageView = createSpaPageViewTracker({
+      sendPageView: createYandexPageViewSender(),
+      getPage: () => ({
+        url: normalizePageViewUrl(window.location.href),
+        title: document.title
+      }),
+      shouldSkip: shouldSkipPageViewTracking
+    })
+
     router.afterEach((to) => {
+      window.loadReyohohoAnalytics?.()
       trackGoatCounterPageView(to)
+      trackYandexPageView(to)
     })
   }
 
