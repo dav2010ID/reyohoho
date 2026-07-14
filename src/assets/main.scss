@@ -84,6 +84,14 @@ body.theater-mode-active .side-panel.right {
   clip: rect(0, 0, 0, 0) !important;
   white-space: nowrap !important;
   border: 0 !important;
+.material-icons,
+.material-symbols-outlined {
+  display: inline-block;
+  width: 1em;
+  min-width: 1em;
+  line-height: 1;
+}
+
 }
 
 button,

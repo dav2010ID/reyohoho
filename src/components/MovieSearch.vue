@@ -38,10 +38,15 @@
             @input="handleInput"
           />
           <div class="icons">
-            <button v-if="searchTerm" class="reset-button" @click="resetSearch">
+            <button
+              v-if="searchTerm"
+              class="reset-button"
+              aria-label="Очистить поиск"
+              @click="resetSearch"
+            >
               <i class="fas fa-times"></i>
             </button>
-            <button class="search-button" @click="search">
+            <button class="search-button" aria-label="Найти фильм" @click="search">
               <i class="fas fa-search"></i>
             </button>
           </div>
@@ -744,6 +749,7 @@ const fetchRandomMovie = async () => {
 
 .search-type-buttons button {
   padding: 5px 10px;
+  min-height: 44px;
   font-size: 16px;
   border: none;
   background: none;
@@ -773,7 +779,7 @@ const fetchRandomMovie = async () => {
 }
 
 .random-button {
-  background: var(--accent-color) !important;
+  background: color-mix(in srgb, var(--accent-color) 70%, #000000) !important;
   color: white !important;
   border-radius: 8px;
   padding: 8px 16px !important;
@@ -785,7 +791,7 @@ const fetchRandomMovie = async () => {
 }
 
 .random-button:hover:not(:disabled) {
-  background: var(--accent-hover-color) !important;
+  background: color-mix(in srgb, var(--accent-color) 78%, #000000) !important;
   transform: translateY(-1px);
 }
 
@@ -814,13 +820,14 @@ const fetchRandomMovie = async () => {
 .search-input {
   box-sizing: border-box;
   width: 100%;
-  padding: 10px;
+  padding: 10px 96px 10px 12px;
   font-size: 16px;
   border: 1px solid #ccc;
   border-radius: 10px;
   background: rgba(30, 30, 30, 0.8);
   color: #fff;
   transition: border-color 0.3s ease;
+  min-height: 44px;
 }
 
 .search-input:focus {
@@ -850,7 +857,9 @@ const fetchRandomMovie = async () => {
   border: none;
   color: #fff;
   cursor: pointer;
-  padding: 2px;
+  width: 40px;
+  height: 40px;
+  padding: 10px;
   opacity: 0.7;
   transition: opacity 0.2s ease;
 }
@@ -982,15 +991,16 @@ h2 {
 .home-load-more__button {
   border: 1px solid rgba(255, 255, 255, 0.12);
   border-radius: 8px;
-  background: var(--accent-color);
+  background: color-mix(in srgb, var(--accent-color) 70%, #000000);
   color: #fff;
   cursor: pointer;
   font-weight: 600;
   padding: 10px 18px;
+  min-height: 44px;
 }
 
 .home-load-more__button:hover {
-  background: var(--accent-hover);
+  background: color-mix(in srgb, var(--accent-color) 78%, #000000);
 }
 
 .home-load-more__button:disabled {

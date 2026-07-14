@@ -287,7 +287,7 @@
           <div class="tooltip-container" data-tooltip-container="aspect_ratio">
             <button
               class="aspect-ratio-dropdown-btn"
-              aria-label="Изменить соотношение сторон"
+              :aria-label="`Изменить соотношение сторон, сейчас ${aspectRatio}`"
               @mouseenter="showTooltip('aspect_ratio')"
               @mouseleave="tryHideTooltip"
               @click="cycleAspectRatio"
@@ -435,7 +435,7 @@
           <button
             class="mobile-control-btn aspect-ratio-dropdown-btn"
             type="button"
-            aria-label="Изменить соотношение сторон"
+            :aria-label="`Изменить соотношение сторон, сейчас ${aspectRatio}`"
             @click="cycleAspectRatio"
           >
             <span class="current-ratio">{{ aspectRatio }}</span>

@@ -18,7 +18,7 @@
       <!-- Если нет ни текста, ни изображения, ничего не показываем -->
     </div>
     <div class="header-actions">
-      <button class="btn btn--search" @click="toggleSearch">
+      <button class="btn btn--search" aria-label="Открыть поиск" @click="toggleSearch">
         <i class="fas fa-search"></i>
       </button>
     </div>

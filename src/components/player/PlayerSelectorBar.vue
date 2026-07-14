@@ -4,7 +4,7 @@
     <button
       class="player-btn"
       type="button"
-      aria-label="Выбрать плеер"
+      :aria-label="`Выбрать плеер: ${selectedLabel}`"
       @click="$emit('open-player-modal')"
     >
       {{ selectedLabel }}
