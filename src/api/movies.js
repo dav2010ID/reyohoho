@@ -4,6 +4,10 @@ import { trackAnalyticsEvent } from '@/utils/analytics'
 import { rethrowRequestCancellation } from '@/utils/requestCancellation'
 import { getSearchProviderOrder } from '@/api/searchProviderOrder'
 import {
+  getMovieInfoProviderOrder,
+  getPlayerProviderOrder
+} from '@/api/contentProviderOrder'
+import {
   CONTENT_PROVIDERS,
   DDBB_SUPPORTED_METHODS,
   KINOBD_SUPPORTED_METHODS,
@@ -121,21 +125,7 @@ const getPlayersWithFallback = async (...args) => {
   const provider = getCurrentProvider()
   const startedAt = Date.now()
   const [contentId] = args
-  const supportedPlayersProviders = new Set([
-    CONTENT_PROVIDERS.LOCAL,
-    CONTENT_PROVIDERS.DDBB,
-    CONTENT_PROVIDERS.DDBB_LIVE,
-    CONTENT_PROVIDERS.KINOBOX,
-    CONTENT_PROVIDERS.KINOBD
-  ])
-  const aggregateProviders = [CONTENT_PROVIDERS.LOCAL, CONTENT_PROVIDERS.DDBB]
-  const order =
-    provider === CONTENT_PROVIDERS.LOCAL
-      ? [CONTENT_PROVIDERS.LOCAL]
-      : [
-          provider,
-          ...aggregateProviders.filter((currentProvider) => currentProvider !== provider)
-        ].filter((currentProvider) => supportedPlayersProviders.has(currentProvider))
+  const order = getPlayerProviderOrder(provider)
 
   const attempts = await Promise.all(
     order.map(async (currentProvider) => {
@@ -316,16 +306,7 @@ const hasKpInfo = (movieInfo) => {
 const getKpInfoWithFallback = async (...args) => {
   const [kpId] = args
   const configuredProvider = getCurrentProvider()
-  const supportedProviders = [
-    CONTENT_PROVIDERS.LOCAL,
-    CONTENT_PROVIDERS.RHSERV,
-    CONTENT_PROVIDERS.KINOBOX,
-    CONTENT_PROVIDERS.KINOBD
-  ]
-  const order = [
-    configuredProvider,
-    ...supportedProviders.filter((provider) => provider !== configuredProvider)
-  ].filter((provider) => supportedProviders.includes(provider))
+  const order = getMovieInfoProviderOrder(configuredProvider)
   let lastError = null
 
   for (const provider of order) {
