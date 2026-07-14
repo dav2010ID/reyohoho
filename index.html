@@ -63,11 +63,37 @@
 
     <!-- Импорт иконок -->
     <link rel="stylesheet" href="/node_modules/@fortawesome/fontawesome-free/css/all.min.css" />
-    <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
-      rel="stylesheet"
-      href="https://fonts.googleapis.com/icon?family=Material+Symbols+Outlined"
+      rel="preload"
+      as="style"
+      href="https://fonts.googleapis.com/css2?family=Neucha&family=Roboto:ital,wght@0,100..900;1,100..900&display=swap"
+      onload="this.onload=null;this.rel='stylesheet'"
     />
+    <link
+      rel="preload"
+      as="style"
+      href="https://fonts.googleapis.com/icon?family=Material+Icons&display=swap"
+      onload="this.onload=null;this.rel='stylesheet'"
+    />
+    <link
+      rel="preload"
+      as="style"
+      href="https://fonts.googleapis.com/icon?family=Material+Symbols+Outlined"
+      onload="this.onload=null;this.rel='stylesheet'"
+    />
+    <noscript>
+      <link
+        rel="stylesheet"
+        href="https://fonts.googleapis.com/css2?family=Neucha&family=Roboto:ital,wght@0,100..900;1,100..900&display=swap"
+      />
+      <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons" />
+      <link
+        rel="stylesheet"
+        href="https://fonts.googleapis.com/icon?family=Material+Symbols+Outlined"
+      />
+    </noscript>
 
     <!-- Тема PWA -->
     <meta name="theme-color" content="#000000" />

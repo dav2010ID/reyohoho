@@ -2,7 +2,7 @@
   <div class="movie-poster-container" :class="[`card-size-${cardSize}`, `variant-${variant}`]">
     <div v-if="posterSrc" class="movie-poster-frame">
       <img
-        v-if="isServerRender"
+        v-if="isServerRender || priority"
         :src="posterSrc"
         class="movie-poster"
         :alt="movie.title ? `Постер ${movie.title}` : 'Постер фильма'"
