@@ -23,6 +23,7 @@
     "profile:cards": "node scripts/browser-card-profile.js",
     "icons": "node scripts/generate-icons.js",
     "icons:material": "node scripts/generate-material-icons.js",
+    "icons:fontawesome": "node scripts/generate-fontawesome-subset.js",
     "build:icons": "node scripts/generate-icons.js && vite-ssg build && node scripts/postbuild-gh-pages.js"
   },
   "dependencies": {

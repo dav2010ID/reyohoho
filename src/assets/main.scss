@@ -6,6 +6,33 @@
   src: url('./fonts/material-symbols-subset.ttf') format('truetype');
 }
 
+/* Font Awesome Free subsets. Regenerate with `yarn icons:fontawesome`. */
+@font-face {
+  font-family: 'Font Awesome 7 Free';
+  font-style: normal;
+  font-weight: 900;
+  font-display: block;
+  src: url('./fonts/fa-solid-subset.woff2') format('woff2');
+}
+
+@font-face {
+  font-family: 'Font Awesome 7 Free';
+  font-style: normal;
+  font-weight: 400;
+  font-display: block;
+  src: url('./fonts/fa-regular-subset.woff2') format('woff2');
+}
+
+.fa-solid,
+.fas {
+  --fa-style: 900;
+}
+
+.fa-regular,
+.far {
+  --fa-style: 400;
+}
+
 :root {
   --accent-color: #6c5ce7;
   --accent-hover: #5a4fcf;
