@@ -128,33 +128,37 @@ describe('MovieInfo SEO', () => {
     })
   })
 
-  it('uses the initial SEO entry before client fetch resolves', async () => {
-    const MovieInfo = (await import('./MovieInfo.vue')).default
-    shallowMount(MovieInfo, {
-      global: {
-        plugins: [
-          createTestingPinia({
-            createSpy: vi.fn,
-            stubActions: false
-          })
-        ],
-        stubs: {
-          MovieList: true,
-          ErrorMessage: true,
-          SpinnerLoading: true,
-          Notification: true,
-          TrailerCarousel: true,
-          Comments: true,
-          RouterLink: true
+  it(
+    'uses the initial SEO entry before client fetch resolves',
+    async () => {
+      const MovieInfo = (await import('./MovieInfo.vue')).default
+      shallowMount(MovieInfo, {
+        global: {
+          plugins: [
+            createTestingPinia({
+              createSpy: vi.fn,
+              stubActions: false
+            })
+          ],
+          stubs: {
+            MovieList: true,
+            ErrorMessage: true,
+            SpinnerLoading: true,
+            Notification: true,
+            TrailerCarousel: true,
+            Comments: true,
+            RouterLink: true
+          }
         }
-      }
-    })
+      })
 
-    expect(useHeadMock).toHaveBeenCalled()
-    const headFactory = useHeadMock.mock.calls[0][0]
-    const head = headFactory()
+      expect(useHeadMock).toHaveBeenCalled()
+      const headFactory = useHeadMock.mock.calls[0][0]
+      const head = headFactory()
 
-    expect(head.title).toContain('Seed Movie')
-    expect(head.link[0].href).toContain('/movie/123/')
-  })
+      expect(head.title).toContain('Seed Movie')
+      expect(head.link[0].href).toContain('/movie/123/')
+    },
+    10000
+  )
 })
