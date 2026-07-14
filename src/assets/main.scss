@@ -1,4 +1,11 @@
-@use './controls.scss';
+@font-face {
+  font-family: 'ReYohoho Material Symbols';
+  font-style: normal;
+  font-weight: 400;
+  font-display: block;
+  src: url('./fonts/material-symbols-subset.ttf') format('truetype');
+}
+
 :root {
   --accent-color: #6c5ce7;
   --accent-hover: #5a4fcf;
@@ -86,6 +93,15 @@ body.theater-mode-active .side-panel.right {
 
 .material-icons,
 .material-symbols-outlined {
+  font-family: 'ReYohoho Material Symbols';
+  font-style: normal;
+  font-weight: 400;
+  font-feature-settings: 'liga';
+  letter-spacing: normal;
+  text-transform: none;
+  white-space: nowrap;
+  word-wrap: normal;
+  direction: ltr;
   display: inline-block;
   width: 1em;
   min-width: 1em;

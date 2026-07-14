@@ -22,6 +22,7 @@
     "test:infinite-scroll": "node scripts/browser-infinite-scroll-check.js",
     "profile:cards": "node scripts/browser-card-profile.js",
     "icons": "node scripts/generate-icons.js",
+    "icons:material": "node scripts/generate-material-icons.js",
     "build:icons": "node scripts/generate-icons.js && vite-ssg build && node scripts/postbuild-gh-pages.js"
   },
   "dependencies": {

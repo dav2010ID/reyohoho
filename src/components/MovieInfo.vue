@@ -621,7 +621,7 @@
               rel="noopener noreferrer"
               class="twitch-link"
             >
-              <i class="fa-brands fa-twitch"></i>
+              <TwitchIcon />
               <span>TanyaBelkova</span>
             </a>
             <span class="acknowledgment-text">— за основу базы таймингов</span>
@@ -986,6 +986,7 @@ import { getRatingColor } from '@/utils/ratingUtils'
 import { buildMovieSeo, getMovieSeoEntry, getMovieSeoPath, getMovieSeoSlug } from '@/utils/movieSeo'
 import { optimizePosterUrl, resolvePosterByMovie } from '@/utils/mediaUtils'
 import { formatProductionStatus } from '@/utils/movieStatus'
+import TwitchIcon from '@/components/icons/TwitchIcon.vue'
 
 const TrailerCarousel = defineAsyncComponent(() => import('@/components/TrailerCarousel.vue'))
 const MovieMobileListDropdown = defineAsyncComponent(

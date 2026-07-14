@@ -42,7 +42,7 @@
                 <template v-if="submitter.stream_link">
                   <a :href="submitter.stream_link" target="_blank" rel="noopener noreferrer">
                     {{ submitter.username }}
-                    <i class="fa-brands fa-twitch"></i>
+                    <TwitchIcon />
                   </a>
                 </template>
                 <template v-else>
@@ -68,6 +68,7 @@
 </template>
 
 <script setup>
+import TwitchIcon from '@/components/icons/TwitchIcon.vue'
 const props = defineProps({
   topSubmitters: {
     type: Array,

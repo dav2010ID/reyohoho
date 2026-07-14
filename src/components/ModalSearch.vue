@@ -80,7 +80,7 @@
 
       <ErrorMessage v-if="errorMessage" :message="errorMessage" :code="errorCode" />
 
-      <button class="btn btn--close" @click="closeModal">
+      <button class="btn--close" @click="closeModal">
         <i class="fas fa-close"></i>
       </button>
     </div>
@@ -286,6 +286,30 @@ watch(searchTerm, () => {
 </script>
 
 <style lang="scss" scoped>
+.btn--close {
+  position: absolute;
+  top: 8px;
+  right: 6px;
+  border: 0;
+  background: none;
+  color: var(--text-color);
+  cursor: pointer;
+  padding: 2px;
+  opacity: 0.7;
+  transition: opacity 0.2s ease;
+
+  &:hover {
+    opacity: 1;
+  }
+
+  i {
+    display: block;
+    width: 20px;
+    height: 20px;
+    font-size: 18px;
+  }
+}
+
 .search {
   position: fixed;
   top: 0;

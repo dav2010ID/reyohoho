@@ -18,7 +18,7 @@
       <!-- Если нет ни текста, ни изображения, ничего не показываем -->
     </div>
     <div class="header-actions">
-      <button class="btn btn--search" aria-label="Открыть поиск" @click="toggleSearch">
+      <button class="btn--search" aria-label="Открыть поиск" @click="toggleSearch">
         <i class="fas fa-search"></i>
       </button>
     </div>
@@ -120,5 +120,14 @@ onUnmounted(() => {
   gap: 10px;
   margin: 10px;
   flex-shrink: 0;
+}
+
+.btn--search {
+  border: 0;
+  background: none;
+  color: var(--text-color);
+  cursor: pointer;
+  font-size: 30px;
+  padding: 0;
 }
 </style>
