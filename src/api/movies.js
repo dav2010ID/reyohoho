@@ -2,6 +2,7 @@ import { useMainStore } from '@/store/main'
 import { normalizeMovieListResponse } from '@/api/movieSeoNormalizer'
 import { trackAnalyticsEvent } from '@/utils/analytics'
 import { rethrowRequestCancellation } from '@/utils/requestCancellation'
+import { getSearchProviderOrder } from '@/api/searchProviderOrder'
 import {
   CONTENT_PROVIDERS,
   DDBB_SUPPORTED_METHODS,
@@ -271,16 +272,7 @@ const callWithProvider = async (methodName, ...args) => {
 
 const apiSearch = async (...args) => {
   const configuredProvider = getCurrentSearchProvider()
-  const supportedSearchProviders = [
-    CONTENT_PROVIDERS.LOCAL,
-    CONTENT_PROVIDERS.RHSERV,
-    CONTENT_PROVIDERS.KINOBD,
-    CONTENT_PROVIDERS.KINOBOX
-  ]
-  const order = [
-    configuredProvider,
-    ...supportedSearchProviders.filter((provider) => provider !== configuredProvider)
-  ].filter((provider) => supportedSearchProviders.includes(provider))
+  const order = getSearchProviderOrder(configuredProvider)
   let lastError = null
 
   for (const provider of order) {
