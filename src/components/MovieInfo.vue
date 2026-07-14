@@ -349,9 +349,9 @@
                     </span>
                   </div>
                 </li>
-                <li v-if="movieInfo.film_length">
+                <li v-if="formattedDuration">
                   <strong>{{ movieInfo.serial ? 'Время серии:' : 'Продолжительность:' }}</strong>
-                  <span class="info-value">{{ formatTime(movieInfo.film_length) }}</span>
+                  <span class="info-value">{{ formattedDuration }}</span>
                 </li>
                 <li v-if="movieInfo.seasons_count">
                   <strong>Сезонов:</strong>
@@ -986,6 +986,7 @@ import { getRatingColor } from '@/utils/ratingUtils'
 import { buildMovieSeo, getMovieSeoEntry, getMovieSeoPath, getMovieSeoSlug } from '@/utils/movieSeo'
 import { optimizePosterUrl, resolvePosterByMovie } from '@/utils/mediaUtils'
 import { formatProductionStatus } from '@/utils/movieStatus'
+import { formatMovieDuration } from '@/utils/movieDuration'
 import { isRequestCanceled } from '@/utils/requestCancellation'
 import TwitchIcon from '@/components/icons/TwitchIcon.vue'
 
@@ -1121,6 +1122,7 @@ const genreNames = computed(() => (movieInfo.value?.genres || []).map((item) => 
 const productionStatusLabel = computed(() =>
   formatProductionStatus(movieInfo.value?.production_status)
 )
+const formattedDuration = computed(() => formatMovieDuration(movieInfo.value?.film_length))
 const mobileSummaryChips = computed(() => {
   const chips = []
   const typeLabel = movieInfo.value?.type ? TYPES_ENUM[movieInfo.value.type] : ''
@@ -1260,15 +1262,6 @@ const transformMoviesData = (movies) => {
   }))
 }
 
-const formatTime = (minutes) => {
-  if (typeof minutes !== 'number') {
-    return
-  }
-  const hours = Math.floor(minutes / 60)
-  const mins = minutes % 60
-  return `${hours} ч. ${mins} мин.`
-}
-
 const getAgeRatingClass = (ratingAgeLimits) => {
   const age = Number(String(ratingAgeLimits || '').replace(/\D/g, ''))
 
@@ -1311,7 +1304,7 @@ const copyMovieMeta = async () => {
     const movieMeta = [
       movieInfo.value.name_ru || movieInfo.value.name_en || movieInfo.value.name_original,
       ...(movieInfo.value.year ? [movieInfo.value.year] : []),
-      ...(movieInfo.value.film_length ? [formatTime(movieInfo.value.film_length)] : [])
+      ...(formattedDuration.value ? [formattedDuration.value] : [])
     ]
     await navigator.clipboard.writeText(movieMeta.join(', '))
     notificationRef.value.showNotification('Скопировано')
