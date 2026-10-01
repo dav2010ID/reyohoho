@@ -1,10 +1,59 @@
 from pathlib import Path
+from types import SimpleNamespace
 
 import pytest
 
 from backend import backend as graphql_backend
 from backend import kinoserver
 from backend.backend import GraphQLError, fetch_film_async, operation_document, operation_path
+
+
+@pytest.mark.asyncio
+async def test_kinopoisk_routes_use_graphql_without_tech_token(monkeypatch):
+    async def search(_app, term):
+        assert term == "Matrix"
+        return [{"kp_id": "301"}]
+
+    async def film(_app, kp_id):
+        assert kp_id == "301"
+        return {"kinopoisk_id": 301}
+
+    monkeypatch.setattr(kinoserver, "kinopoisk_graphql_search", search)
+    monkeypatch.setattr(kinoserver, "kinopoisk_graphql_film", film)
+    app = SimpleNamespace(ctx=SimpleNamespace(cache=kinoserver.TTLCache()))
+    assert await kinoserver.kinopoisk_search(app, "Matrix") == [{"kp_id": "301"}]
+    assert await kinoserver.kinopoisk_film(app, "301") == {"kinopoisk_id": 301}
+
+
+@pytest.mark.asyncio
+async def test_top_uses_kinopoisk_movie_list(monkeypatch):
+    async def execute(_app, operation_name, query, variables):
+        assert operation_name == "MovieTouchListPage"
+        assert "query MovieTouchListPage" in query
+        assert variables["slug"] == "popular-films"
+        return {"data": {"movieListBySlug": {"movies": {"items": [
+            {"movie": {"id": 301, "__typename": "Film", "title": {"russian": "Матрица"},
+                       "productionYear": 1999, "gallery": {"posters": {"vertical": {
+                           "avatarsUrl": "//avatars.mds.yandex.net/get-kinopoisk-image/example"}}}}}
+        ]}}}}
+
+    monkeypatch.setattr(kinoserver, "kinopoisk_graphql", execute)
+    app = SimpleNamespace(ctx=SimpleNamespace(cache=kinoserver.TTLCache()))
+    movies = await kinoserver.get_top_movies(app, "week", limit=5)
+    assert movies[0]["kp_id"] == "301"
+    assert movies[0]["poster"].startswith("https://avatars.mds.yandex.net/")
+
+
+@pytest.mark.asyncio
+async def test_imdb_mapping_uses_wikidata(monkeypatch):
+    async def fetch(_app, url, *, params, **_kwargs):
+        assert url == kinoserver.WIKIDATA_SPARQL_URL
+        assert 'wdt:P345 "tt0133093"' in params["query"]
+        return {"results": {"bindings": [{"kp": {"value": "301"}}]}}
+
+    monkeypatch.setattr(kinoserver, "fetch_json", fetch)
+    app = SimpleNamespace(ctx=SimpleNamespace(cache=kinoserver.TTLCache()))
+    assert await kinoserver.imdb_to_kp_id(app, "tt0133093") == "301"
 
 
 @pytest.mark.parametrize(
