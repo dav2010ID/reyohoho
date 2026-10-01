@@ -3,6 +3,7 @@ from pathlib import Path
 import pytest
 
 from backend import backend as graphql_backend
+from backend import kinoserver
 from backend.backend import GraphQLError, fetch_film_async, operation_document, operation_path
 
 
@@ -30,6 +31,48 @@ def test_required_graphql_operations_are_resolvable(operation_name):
 def test_operation_name_rejects_path_traversal():
     with pytest.raises(RuntimeError, match="invalid GraphQL operation name"):
         operation_path("../FilmBaseInfo")
+
+
+@pytest.mark.asyncio
+async def test_graphql_search_uses_bundled_query(monkeypatch):
+    async def execute(_app, operation_name, query, variables):
+        assert operation_name == "SuggestSearch"
+        assert "query SuggestSearch" in query
+        assert variables == {"keyword": "Matrix", "yandexCityId": 0, "limit": 10}
+        return {
+            "data": {
+                "suggest": {
+                    "top": {"movies": [{"movie": {"id": 301, "title": {"russian": "Матрица"}}}]}
+                }
+            }
+        }
+
+    monkeypatch.setattr(kinoserver, "kinopoisk_graphql", execute)
+    results = await kinoserver.kinopoisk_graphql_search(object(), "Matrix")
+    assert results[0]["kp_id"] == "301"
+
+
+@pytest.mark.asyncio
+async def test_graphql_movie_extras_use_bundled_queries(monkeypatch):
+    async def execute(_app, operation_name, query, variables, **_kwargs):
+        assert f"query {operation_name}" in query
+        assert variables["movieId" if operation_name != "FilmSimilarMovies" else "filmId"] == 301
+        if operation_name == "FilmSimilarMovies":
+            movie = {"id": 447301, "title": {"russian": "Начало"}}
+            return {"data": {"film": {"userRecommendations": {"items": [{"movie": movie}]}}}}
+        if operation_name == "MovieMobileDetailsTrailers":
+            return {"data": {"movie": {"trailers": {"items": [
+                {"id": 1, "title": "Трейлер", "streamUrl": "https://example.test/video"}
+            ]}}}}
+        return {"data": {"movie": {"usersReviewsPaginatedList": {"total": 318}}}}
+
+    monkeypatch.setattr(kinoserver, "kinopoisk_graphql", execute)
+    similar = await kinoserver.kinopoisk_graphql_similars(object(), "301")
+    trailers = await kinoserver.kinopoisk_graphql_trailers(object(), "301")
+    reviews = await kinoserver.kinopoisk_graphql_reviews_total(object(), "301")
+    assert similar[0]["film_id"] == 447301
+    assert trailers[0]["url"] == "https://example.test/video"
+    assert reviews == 318
 
 
 @pytest.mark.asyncio

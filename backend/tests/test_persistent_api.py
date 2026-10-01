@@ -213,6 +213,10 @@ async def test_top_type_filter_is_applied_before_pagination(api):
     assert response.status == 200
     assert [item["kp_id"] for item in response.json] == ["9002"]
 
+    _, response = await app.asgi_client.get("/chance")
+    assert response.status == 200
+    assert response.json["kp_id"] in {"9001", "9002"}
+
 
 async def test_telegram_login_is_one_time(api):
     object.__setattr__(SETTINGS, "telegram_bot_username", "test_bot")

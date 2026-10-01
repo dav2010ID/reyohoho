@@ -22,6 +22,7 @@ from sanic.response import html, json, text
 try:
     from .backend import GraphQLError as BackendGraphQLError
     from .backend import fetch_film_async as fetch_graphql_film
+    from .backend import operation_document
     from .errors import APIError, error_payload
     from .routes_external import cached_mapping, enrich_movie, local_top, store_mapping
     from .services.shikimori import (
@@ -34,6 +35,7 @@ except ImportError:  # Direct execution: python graphql_extracted/kinoserver.py
     sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
     from backend.backend import GraphQLError as BackendGraphQLError
     from backend.backend import fetch_film_async as fetch_graphql_film
+    from backend.backend import operation_document
     from backend.errors import APIError, error_payload
     from backend.routes_external import cached_mapping, enrich_movie, local_top, store_mapping
     from backend.services.shikimori import (
@@ -527,8 +529,9 @@ def register_routes(app: Sanic) -> None:
         return json(items)
 
     @app.get("/chance")
-    async def random_movie(_: Request):
-        movie = await get_random_movie(app)
+    async def random_movie(request: Request):
+        local_movies = await local_top(request, "all", "all", 1, 50)
+        movie = random.choice(local_movies) if local_movies else await get_random_movie(app)
         return json(movie)
 
     @app.get("/get_dons")
@@ -1189,9 +1192,12 @@ async def kinopoisk_film(app: Sanic, kp_id: str) -> dict[str, Any]:
 
 
 async def kinopoisk_graphql_search(app: Sanic, term: str) -> list[dict[str, Any]]:
-    body = load_kinopapi_body("search", "SuggestSearch.json")
-    body["variables"].update({"keyword": term, "yandexCityId": 0, "limit": 10})
-    data = await kinopoisk_graphql_from_body(app, body)
+    data = await kinopoisk_graphql(
+        app,
+        "SuggestSearch",
+        operation_document("SuggestSearch"),
+        {"keyword": term, "yandexCityId": 0, "limit": 10},
+    )
     top = (((data.get("data") or {}).get("suggest") or {}).get("top") or {})
     results: list[dict[str, Any]] = []
 
@@ -1260,11 +1266,11 @@ async def get_imdb_id_by_kp(app: Sanic, kp_id: str) -> str | None:
 
 async def kinopoisk_graphql_similars(app: Sanic, kp_id: str) -> list[dict[str, Any]]:
     try:
-        body = load_kinopapi_body("film", "FilmSimilarMovies.json")
-        body["variables"].update({"filmId": int(kp_id), "similarMoviesLimit": 10, "withUserData": False})
-        data = await kinopoisk_graphql_from_body(
+        data = await kinopoisk_graphql(
             app,
-            body,
+            "FilmSimilarMovies",
+            operation_document("FilmSimilarMovies"),
+            {"filmId": int(kp_id), "similarMoviesLimit": 10, "withUserData": False},
             referer=f"https://www.kinopoisk.ru/film/{kp_id}/",
         )
         items = (
@@ -1279,11 +1285,11 @@ async def kinopoisk_graphql_similars(app: Sanic, kp_id: str) -> list[dict[str, A
 
 async def kinopoisk_graphql_trailers(app: Sanic, kp_id: str) -> list[dict[str, Any]]:
     try:
-        body = load_kinopapi_body("movie", "MovieTrailersWithOrder.json")
-        body["variables"].update({"movieId": int(kp_id), "trailersLimit": 10, "orderBy": "MAKE_DATE_DESC"})
-        data = await kinopoisk_graphql_from_body(
+        data = await kinopoisk_graphql(
             app,
-            body,
+            "MovieMobileDetailsTrailers",
+            operation_document("MovieMobileDetailsTrailers"),
+            {"movieId": int(kp_id), "offset": 0, "limit": 10},
             referer=f"https://www.kinopoisk.ru/film/{kp_id}/",
         )
         items = ((((data.get("data") or {}).get("movie") or {}).get("trailers") or {}).get("items") or [])
@@ -1311,18 +1317,12 @@ async def kinopoisk_graphql_trailers(app: Sanic, kp_id: str) -> list[dict[str, A
 
 async def kinopoisk_graphql_reviews_total(app: Sanic, kp_id: str) -> int | None:
     try:
-        body = load_kinopapi_body("movie", "MovieUsersReviews.json")
-        body["variables"].update(
-            {
-                "movieId": int(kp_id),
-                "userReviewsOrderBy": "TOP_USEFULNESS_THEN_CREATED_AT_DESC",
-                "userReviewsLimit": 1,
-                "withUserData": False,
-            }
-        )
-        data = await kinopoisk_graphql_from_body(
+        data = await kinopoisk_graphql(
             app,
-            body,
+            "MovieUsersReviews",
+            operation_document("MovieUsersReviews"),
+            {"movieId": int(kp_id), "userReviewsOrderBy": "TOP_USEFULNESS_THEN_CREATED_AT_DESC",
+             "userReviewsLimit": 1, "withUserData": False, "withSummaryReview": False},
             referer=f"https://www.kinopoisk.ru/film/{kp_id}/",
         )
         reviews = (((data.get("data") or {}).get("movie") or {}).get("usersReviewsPaginatedList") or {})
