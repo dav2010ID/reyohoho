@@ -1,9 +1,8 @@
 import { CONTENT_PROVIDERS } from '@/api/providerRegistry'
 
 const REMOTE_SEARCH_PROVIDERS = [
-  CONTENT_PROVIDERS.RHSERV,
-  CONTENT_PROVIDERS.KINOBD,
   CONTENT_PROVIDERS.KINOBOX
+  // CONTENT_PROVIDERS.KINOBD // Temporarily disabled.
 ]
 
 export const getSearchProviderOrder = (configuredProvider) => {

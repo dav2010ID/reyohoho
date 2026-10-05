@@ -19,12 +19,9 @@ remoteConfig.settings.minimumFetchIntervalMillis = 60000
 remoteConfig.settings.fetchTimeoutMillis = 10000
 
 remoteConfig.defaultConfig = {
-  api_endpoints: JSON.stringify([
-    {
-      url: import.meta.env.VITE_APP_API_URL,
-      description: 'Primary API'
-    }
-  ]),
+  api_endpoints: JSON.stringify(import.meta.env.VITE_APP_API_URL
+    ? [{ url: import.meta.env.VITE_APP_API_URL, description: 'Primary API' }]
+    : []),
   load_script: false
 }
 
@@ -34,9 +31,10 @@ const fallbackEndpoint = {
   url: import.meta.env.VITE_APP_API_URL,
   description: 'Fallback API'
 }
+const fallbackEndpoints = fallbackEndpoint.url ? [fallbackEndpoint] : []
 
 function getAllowedApiHosts() {
-  const fallbackHost = URL.canParse(import.meta.env.VITE_APP_API_URL)
+  const fallbackHost = import.meta.env.VITE_APP_API_URL && URL.canParse(import.meta.env.VITE_APP_API_URL)
     ? new URL(import.meta.env.VITE_APP_API_URL).hostname
     : null
   const configuredHosts = (import.meta.env.VITE_ALLOWED_API_HOSTS || '')
@@ -70,11 +68,11 @@ function parseApiEndpoints(configValue) {
     const parsed = JSON.parse(configValue)
     if (Array.isArray(parsed)) {
       const safeEndpoints = parsed.filter(isValidApiEndpoint)
-      return safeEndpoints.length > 0 ? safeEndpoints : [fallbackEndpoint]
+      return safeEndpoints.length > 0 ? safeEndpoints : fallbackEndpoints
     }
-    return [fallbackEndpoint]
+    return fallbackEndpoints
   } catch {
-    return [fallbackEndpoint]
+    return fallbackEndpoints
   }
 }
 
@@ -85,6 +83,11 @@ async function initRemoteConfig() {
 
   initPromise = (async () => {
     const apiStore = useApiStore()
+
+    // Persisted endpoints may outlive their deployment; validate them before making requests.
+    if (apiStore.currentApiUrl && !isValidApiEndpoint({ url: apiStore.currentApiUrl, description: 'Saved API' })) {
+      apiStore.setCurrentApiUrl(null)
+    }
 
     if (apiStore.backendMode === 'local' && apiStore.backendModeUserSelected) {
       await apiStore.selectLocalEndpoint()
@@ -109,8 +112,6 @@ async function initRemoteConfig() {
 
       await apiStore.selectWorkingEndpoint(endpoints)
     } catch {
-      const fallbackEndpoints = [fallbackEndpoint]
-
       apiStore.setAvailableEndpoints(fallbackEndpoints)
       await apiStore.selectWorkingEndpoint(fallbackEndpoints)
     }

@@ -130,17 +130,19 @@
             <input v-model="contentApiProvider" type="radio" value="local" />
             <span class="radio-label">Локальный backend (search/cards/players)</span>
           </label>
+          <!-- KinoBD temporarily disabled; keep option for reactivation.
           <label class="radio">
             <input v-model="contentApiProvider" type="radio" value="kinobd" />
             <span class="radio-label">KinoBD (search/cards/players)</span>
           </label>
+          -->
           <label class="radio">
             <input v-model="contentApiProvider" type="radio" value="kinobox" />
-            <span class="radio-label">Kinobox (players)</span>
+            <span class="radio-label">Kinobox (search/cards/players, по умолчанию)</span>
           </label>
           <label class="radio">
             <input v-model="contentApiProvider" type="radio" value="ddbb" />
-            <span class="radio-label">DDBB (players, по умолчанию)</span>
+            <span class="radio-label">DDBB (players)</span>
           </label>
           <label class="radio">
             <input v-model="contentApiProvider" type="radio" value="ddbb_live" />
@@ -158,13 +160,15 @@
             <span class="radio-label">Локальный backend</span>
           </label>
           <label class="radio">
-            <input v-model="searchApiProvider" type="radio" value="rhserv" />
-            <span class="radio-label">RHServ (по умолчанию)</span>
+            <input v-model="searchApiProvider" type="radio" value="kinobox" />
+            <span class="radio-label">Kinobox (по умолчанию)</span>
           </label>
+          <!-- KinoBD temporarily disabled; keep option for reactivation.
           <label class="radio">
             <input v-model="searchApiProvider" type="radio" value="kinobd" />
             <span class="radio-label">KinoBD</span>
           </label>
+          -->
         </div>
         <p class="api-note">Этот параметр влияет только на поиск по названию.</p>
         <div class="settings-actions">

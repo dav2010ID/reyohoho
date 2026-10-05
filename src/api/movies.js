@@ -16,23 +16,27 @@ import {
   loadProvider
 } from '@/api/providerRegistry'
 
-const PLAYER_PROVIDER_TIMEOUT_MS = 15000
+import { KINOBD_ENABLED } from '@/api/providerAvailability'
 
+const PLAYER_PROVIDER_TIMEOUT_MS = 15000
 const getCurrentProvider = () => {
   try {
     const mainStore = useMainStore()
-    return mainStore.contentApiProvider || CONTENT_PROVIDERS.DDBB
+    const provider = mainStore.contentApiProvider || CONTENT_PROVIDERS.KINOBOX
+    return provider === CONTENT_PROVIDERS.KINOBD && !KINOBD_ENABLED
+      ? CONTENT_PROVIDERS.KINOBOX
+      : provider
   } catch {
-    return CONTENT_PROVIDERS.DDBB
+    return CONTENT_PROVIDERS.KINOBOX
   }
 }
 
 const getCurrentSearchProvider = () => {
   try {
     const mainStore = useMainStore()
-    return mainStore.searchApiProvider || CONTENT_PROVIDERS.RHSERV
+    return mainStore.searchApiProvider || CONTENT_PROVIDERS.KINOBOX
   } catch {
-    return CONTENT_PROVIDERS.RHSERV
+    return CONTENT_PROVIDERS.KINOBOX
   }
 }
 
@@ -183,9 +187,7 @@ const callWithProvider = async (methodName, ...args) => {
       return await local[methodName](...args)
     } catch (error) {
       rethrowRequestCancellation(error)
-      console.warn(`[movies] ${methodName} failed on local backend, fallback to RHServ`, error)
-      const rhserv = await loadProvider(CONTENT_PROVIDERS.RHSERV)
-      return await rhserv[methodName](...args)
+      throw error
     }
   }
 
@@ -195,18 +197,17 @@ const callWithProvider = async (methodName, ...args) => {
       return await kinobox[methodName](...args)
     } catch (error) {
       rethrowRequestCancellation(error)
-      console.warn(`[movies] ${methodName} failed on Kinobox, fallback to KinoBD/RHServ`, error)
-      if (KINOBD_SUPPORTED_METHODS.has(methodName)) {
+      console.warn(`[movies] ${methodName} failed on Kinobox`, error)
+      if (KINOBD_ENABLED && KINOBD_SUPPORTED_METHODS.has(methodName)) {
         try {
           const kinobd = await loadProvider('kinobd')
           return await kinobd[methodName](...args)
         } catch (fallbackError) {
           rethrowRequestCancellation(fallbackError)
-          console.warn(`[movies] ${methodName} failed on KinoBD, fallback to RHServ`, fallbackError)
+          throw fallbackError
         }
       }
-      const rhserv = await loadProvider('rhserv')
-      return await rhserv[methodName](...args)
+      throw error
     }
   }
 
@@ -217,7 +218,7 @@ const callWithProvider = async (methodName, ...args) => {
     } catch (error) {
       rethrowRequestCancellation(error)
       console.warn(
-        `[movies] ${methodName} failed on DDBB, fallback to Kinobox/KinoBD/RHServ`,
+        `[movies] ${methodName} failed on DDBB, fallback to Kinobox`,
         error
       )
       try {
@@ -226,38 +227,35 @@ const callWithProvider = async (methodName, ...args) => {
       } catch (fallbackError) {
         rethrowRequestCancellation(fallbackError)
         console.warn(
-          `[movies] ${methodName} failed on Kinobox, fallback to KinoBD/RHServ`,
+          `[movies] ${methodName} failed on Kinobox`,
           fallbackError
         )
-        if (KINOBD_SUPPORTED_METHODS.has(methodName)) {
+        if (KINOBD_ENABLED && KINOBD_SUPPORTED_METHODS.has(methodName)) {
           try {
             const kinobd = await loadProvider('kinobd')
             return await kinobd[methodName](...args)
           } catch (kinobdError) {
             rethrowRequestCancellation(kinobdError)
-            console.warn(`[movies] ${methodName} failed on KinoBD, fallback to RHServ`, kinobdError)
+            throw kinobdError
           }
         }
-        const rhserv = await loadProvider('rhserv')
-        return await rhserv[methodName](...args)
+        throw fallbackError
       }
     }
   }
 
-  if (provider === CONTENT_PROVIDERS.KINOBD && KINOBD_SUPPORTED_METHODS.has(methodName)) {
+  if (KINOBD_ENABLED && provider === CONTENT_PROVIDERS.KINOBD && KINOBD_SUPPORTED_METHODS.has(methodName)) {
     try {
       const kinobd = await loadProvider('kinobd')
       return await kinobd[methodName](...args)
     } catch (error) {
       rethrowRequestCancellation(error)
-      console.warn(`[movies] ${methodName} failed on KinoBD, fallback to RHServ`, error)
-      const rhserv = await loadProvider('rhserv')
-      return await rhserv[methodName](...args)
+      throw error
     }
   }
 
-  const rhserv = await loadProvider('rhserv')
-  return await rhserv[methodName](...args)
+  const backend = await loadProvider(CONTENT_PROVIDERS.BACKEND)
+  return await backend[methodName](...args)
 }
 
 const apiSearch = async (...args) => {
@@ -338,7 +336,7 @@ const getKpInfo = async (...args) => getKpInfoWithFallback(...args)
 const getPlayers = async (...args) => getPlayersWithFallback(...args)
 const getShikiPlayers = async (...args) => callWithProvider('getShikiPlayers', ...args)
 const shouldEnrichListSeo = import.meta.env.SSR
-// Top lists now come from KinoBD because it exposes stable page-based pagination.
+// KinoBD list code is preserved, but Kinobox has no verified top-list replacement.
 const getMovies = async (...args) => {
   if (getCurrentProvider() === CONTENT_PROVIDERS.LOCAL) {
     try {
@@ -347,9 +345,11 @@ const getMovies = async (...args) => {
         { enrichMissingSeo: shouldEnrichListSeo }
       )
     } catch (error) {
-      console.warn('[movies] getMovies failed on local backend, fallback to KinoBD/RHServ', error)
+      rethrowRequestCancellation(error)
+      console.warn('[movies] getMovies failed on local backend', error)
     }
   }
+  if (!KINOBD_ENABLED) return []
   try {
     return await normalizeMovieListResponse(
       await (await loadProvider('kinobd')).getMovies(...args),
@@ -358,13 +358,9 @@ const getMovies = async (...args) => {
       }
     )
   } catch (error) {
-    console.warn('[movies] getMovies failed on KinoBD, fallback to RHServ', error)
-    return await normalizeMovieListResponse(
-      await (await loadProvider('rhserv')).getMovies(...args),
-      {
-        enrichMissingSeo: shouldEnrichListSeo
-      }
-    )
+    rethrowRequestCancellation(error)
+    console.warn('[movies] getMovies failed on KinoBD', error)
+    return []
   }
 }
 const getDiscussedMovies = async (...args) => {
@@ -375,13 +371,21 @@ const getDiscussedMovies = async (...args) => {
         { enrichMissingSeo: shouldEnrichListSeo }
       )
     } catch (error) {
-      console.warn('[movies] getDiscussedMovies failed on local backend, fallback to RHServ', error)
+      rethrowRequestCancellation(error)
+      console.warn('[movies] getDiscussedMovies failed on local backend', error)
     }
   }
-  return await normalizeMovieListResponse(
-    await (await loadProvider(CONTENT_PROVIDERS.RHSERV)).getDiscussedMovies(...args),
-    { enrichMissingSeo: shouldEnrichListSeo }
-  )
+  if (!KINOBD_ENABLED) return []
+  try {
+    return await normalizeMovieListResponse(
+      await (await loadProvider(CONTENT_PROVIDERS.KINOBD)).getDiscussedMovies(...args),
+      { enrichMissingSeo: shouldEnrichListSeo }
+    )
+  } catch (error) {
+    rethrowRequestCancellation(error)
+    console.warn('[movies] getDiscussedMovies failed on KinoBD', error)
+    return []
+  }
 }
 const getDons = async (...args) => callWithProvider('getDons', ...args)
 const getKpIDfromIMDB = async (...args) => callWithProvider('getKpIDfromIMDB', ...args)
@@ -451,28 +455,19 @@ export {
 }
 
 export const toggleErrorSimulation = (enabled) => {
-  return Promise.all([
-    loadProvider('rhserv'),
-    loadProvider('kinobd'),
-    loadProvider('kinobox'),
-    loadProvider('ddbb'),
-    loadProvider('ddbb_live'),
-    loadProvider('local')
-  ]).then(([rhserv, kinobd, kinobox, ddbb, ddbbLive]) => {
-    if (typeof rhserv.toggleErrorSimulation === 'function') {
-      rhserv.toggleErrorSimulation(enabled)
-    }
-    if (typeof kinobd.toggleErrorSimulation === 'function') {
-      kinobd.toggleErrorSimulation(enabled)
-    }
-    if (typeof kinobox.toggleErrorSimulation === 'function') {
-      kinobox.toggleErrorSimulation(enabled)
-    }
-    if (typeof ddbb.toggleErrorSimulation === 'function') {
-      ddbb.toggleErrorSimulation(enabled)
-    }
-    if (typeof ddbbLive.toggleErrorSimulation === 'function') {
-      ddbbLive.toggleErrorSimulation(enabled)
+  const providers = [
+    'backend',
+    ...(KINOBD_ENABLED ? ['kinobd'] : []),
+    'kinobox',
+    'ddbb',
+    'ddbb_live',
+    'local'
+  ]
+  return Promise.all(providers.map((provider) => loadProvider(provider))).then((apis) => {
+    for (const api of apis) {
+      if (typeof api.toggleErrorSimulation === 'function') {
+        api.toggleErrorSimulation(enabled)
+      }
     }
   })
 }

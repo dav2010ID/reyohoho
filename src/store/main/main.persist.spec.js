@@ -11,7 +11,10 @@ import {
   PLAYER_STORE_NAME
 } from '../constants'
 import { usePlayerStore } from '../player'
-import { CONTENT_PROVIDER_DDBB_DEFAULT_MIGRATION_KEY } from '../utils'
+import {
+  CONTENT_PROVIDER_DDBB_DEFAULT_MIGRATION_KEY,
+  CONTENT_PROVIDER_KINOBOX_DEFAULT_MIGRATION_KEY
+} from '../utils'
 import { useMainStore } from './main'
 
 const pickMainPersistedState = (state) => ({
@@ -94,14 +97,14 @@ describe('Базовы persist тесты для main', () => {
     )
   })
 
-  it('Один раз переводит старый Kinobox provider на DDBB', () => {
+  it('Сохраняет Kinobox вместо старой миграции на DDBB', () => {
     window.localStorage.setItem(MAIN_STORE_NAME, JSON.stringify({ contentApiProvider: 'kinobox' }))
 
     const store = useMainStore()
 
-    expect(store.contentApiProvider).toBe('ddbb')
+    expect(store.contentApiProvider).toBe('kinobox')
     expect(window.localStorage.getItem(CONTENT_PROVIDER_DDBB_DEFAULT_MIGRATION_KEY)).toBe('done')
-    expect(JSON.parse(window.localStorage.getItem(MAIN_STORE_NAME)).contentApiProvider).toBe('ddbb')
+    expect(JSON.parse(window.localStorage.getItem(MAIN_STORE_NAME)).contentApiProvider).toBe('kinobox')
   })
 
   it('Не перезаписывает Kinobox после выполненной миграции', () => {
@@ -111,6 +114,29 @@ describe('Базовы persist тесты для main', () => {
     const store = useMainStore()
 
     expect(store.contentApiProvider).toBe('kinobox')
+  })
+
+  it('Переводит сохранённый KinoBD на Kinobox даже после старой миграции', () => {
+    window.localStorage.setItem(CONTENT_PROVIDER_DDBB_DEFAULT_MIGRATION_KEY, 'done')
+    window.localStorage.setItem(MAIN_STORE_NAME, JSON.stringify({
+      contentApiProvider: 'kinobd', searchApiProvider: 'kinobd'
+    }))
+    const store = useMainStore()
+    expect(store.contentApiProvider).toBe('kinobox')
+    expect(store.searchApiProvider).toBe('kinobox')
+  })
+
+  it('Один раз меняет старый дефолт DDBB на Kinobox', () => {
+    window.localStorage.setItem(CONTENT_PROVIDER_DDBB_DEFAULT_MIGRATION_KEY, 'done')
+    window.localStorage.setItem(MAIN_STORE_NAME, JSON.stringify({ contentApiProvider: 'ddbb' }))
+    expect(useMainStore().contentApiProvider).toBe('kinobox')
+    expect(window.localStorage.getItem(CONTENT_PROVIDER_KINOBOX_DEFAULT_MIGRATION_KEY)).toBe('done')
+  })
+
+  it('Сохраняет явный выбор DDBB после новой миграции', () => {
+    window.localStorage.setItem(CONTENT_PROVIDER_KINOBOX_DEFAULT_MIGRATION_KEY, 'done')
+    window.localStorage.setItem(MAIN_STORE_NAME, JSON.stringify({ contentApiProvider: 'ddbb' }))
+    expect(useMainStore().contentApiProvider).toBe('ddbb')
   })
 })
 
@@ -344,8 +370,8 @@ describe('Тесты миграций на новый способ хранен�
         cardSize: 'medium',
         isStreamerMode: true,
         rememberScrollPosition: true,
-        contentApiProvider: 'ddbb',
-        searchApiProvider: 'rhserv',
+        contentApiProvider: 'kinobox',
+        searchApiProvider: 'kinobox',
         sidebarAutoHide: false,
         sidebarPosition: 'left'
       }

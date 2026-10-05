@@ -1,5 +1,5 @@
 export const CONTENT_PROVIDERS = {
-  RHSERV: 'rhserv',
+  BACKEND: 'backend',
   KINOBD: 'kinobd',
   KINOBOX: 'kinobox',
   DDBB: 'ddbb',
@@ -27,8 +27,8 @@ export const LOCAL_SUPPORTED_METHODS = new Set([
 ])
 
 const defaultImporters = {
-  rhserv: () => import('@/api/movies.rhserv'),
-  kinobd: () => import('@/api/movies.kinobd'),
+  backend: () => import('@/api/movies.backend'),
+  // Temporarily disabled: kinobd: () => import('@/api/movies.kinobd'),
   kinobox: () => import('@/api/movies.kinobox'),
   ddbb: () => import('@/api/movies.ddbb'),
   ddbb_live: () => import('@/api/movies.ddbb-live'),

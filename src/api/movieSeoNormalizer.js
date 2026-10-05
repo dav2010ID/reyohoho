@@ -1,4 +1,5 @@
 import * as kinobd from '@/api/movies.kinobd'
+import { KINOBD_ENABLED } from '@/api/providerAvailability'
 import {
   getMovieSeoEntry,
   getMovieSeoSlug,
@@ -48,6 +49,7 @@ export const normalizeMovieListEntry = (item, seoEntry = null) => {
 }
 
 const getMovieSeoEnrichment = async (kpId) => {
+  if (!KINOBD_ENABLED) return null
   if (!seoEnrichmentPromises.has(kpId)) {
     const enrichmentPromise = kinobd
       .getMovieSeoByKpId(kpId)

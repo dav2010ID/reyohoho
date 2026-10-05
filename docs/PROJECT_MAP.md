@@ -152,13 +152,15 @@ GoatCounter tracking. Не менять route names: они используют
 - `src/api/axios.js` — dynamic selected backend, request/response interceptors, trusted-origin JWT policy.
 - `src/api/providerRegistry.js` — lazy provider imports и supported-method sets.
 - `src/api/movies.js` — stable public facade, fallback orchestration, player aggregation/timeout/analytics.
-- `movies.rhserv.js` и `movies.local.js` — одинаковый ReYohoho REST contract, но local adapter имеет
+- `movies.backend.js` и `movies.local.js` — одинаковый ReYohoho REST contract, но local adapter имеет
   фиксированный local base URL.
 - `movies.kinobd.js`, `movies.kinobox.js`, `movies.ddbb.js`, `movies.ddbb-live.js` — third-party adapters.
 - `src/api/user.js`, `notifications.js`, `emotes.js` — persistent/user APIs.
 
-Search order: configured search provider, затем `local → rhserv → kinobd → kinobox` без повторения
-configured provider. Movie-info order строится из configured provider и `local/rhserv/kinobox/kinobd`.
+Search order: `kinobox` по умолчанию; `local → kinobox` при явном выборе local.
+Movie-info order: `kinobox`; `local → kinobox` при явном выборе local.
+KinoBD временно отключён: адаптер сохранён, но исключён из registry и fallback order.
+Флаг `KINOBD_ENABLED` также блокирует прямые запросы и обновление SEO-каталога через KinoBD.
 Player loading выполняет parallel attempts для configured source и aggregate sources, применяет
 15-second provider timeout, затем `mergePlayerMaps()` удаляет duplicate iframe и слабые mirrors при
 наличии предпочтительного source.
@@ -245,7 +247,7 @@ Auth: `нет` означает публичный route; `опц.` — Bearer �
 |---|---|---|---|---|
 | `GET /health` | health + provider configuration flags | нет | `store/api/index.js` | `kinoserver.py`; не проверяет реальную доступность upstream |
 | `GET /openapi.json`, `/docs` | OpenAPI/Swagger | нет | browser/manual | `kinoserver.py`, `openapi.py`; schema сверять с decorators |
-| `GET /search/{term}` | catalog search | нет | `movies.rhserv.js`, `movies.local.js` | `kinoserver.py`; provider fallback/cache |
+| `GET /search/{term}` | catalog search | нет | `movies.backend.js`, `movies.local.js` | `kinoserver.py`; provider fallback/cache |
 | `GET /kp_info2/{kpId}` | enriched movie; optional `include_players` | нет | те же adapters | `kinoserver.py` + `routes_external.py`; создаёт ViewEvent |
 | `GET /kp_info/{kpId}` | legacy movie response | нет | прямой caller не найден | `kinoserver.py`; compatibility route |
 | `GET /shiki_info/{id}` | anime details | нет | movie adapters | `kinoserver.py`, Shikimori |
@@ -253,7 +255,7 @@ Auth: `нет` означает публичный route; `опц.` — Bearer �
 | `GET /top/{period}` | top by period/type/page | нет | movie adapters | local ViewEvent first, provider fallback; abuse/growth risk |
 | `GET /discussed/{kind}` | discussed by comments | нет | movie adapters | `routes_social.py`; page/limit |
 | `GET /chance` | random movie | нет | movie adapters | `kinoserver.py` provider call |
-| `GET /get_dons` | donor text | нет | `movies.rhserv.js` | env/default text; legacy contract |
+| `GET /get_dons` | donor text | нет | `movies.backend.js` | env/default text; legacy contract |
 | `GET /trailer/youtube` | trailer search | нет | прямой caller не найден | `kinoserver.py`; token optional |
 | `GET /trailer/tmdb/{type}/{id}` | TMDb trailer | нет | прямой caller не найден | `kinoserver.py`; token optional |
 | `POST /cache` | player map by Kinopoisk ID, form-urlencoded | нет | movie adapters | `kinoserver.py`; legacy name/contract |
@@ -352,10 +354,10 @@ Security review обязателен для `apiTrust.js`, `axios.js`, `auth.py`
 
 | Provider | Реализация/данные | Normalization/fallback | Known risks and smoke checks |
 |---|---|---|---|
-| RHServ | `movies.rhserv.js`; полный ReYohoho REST | default generic facade | dynamic origin/JWT trust; smoke search, card, comments/auth separately |
-| Local | `movies.local.js`; local Sanic contract | selected explicitly, fallback to RHServ for supported methods | localhost/backend-mode mismatch; test health + auth request |
-| KinoBD | `movies.kinobd.js`; search, cards, top, player/source candidates | provider-specific normalization; fallback RHServ | token is client-visible `VITE_*`; smoke title/kp search and playerdata |
-| Kinobox | `movies.kinobox.js`; players and search fallback | normalized player/search response | upstream TLS/CORS instability; smoke real response shape |
+| Собственный backend | `movies.backend.js`; полный ReYohoho REST | dynamic backend facade | dynamic origin/JWT trust; smoke search, card, comments/auth separately |
+| Local | `movies.local.js`; local Sanic contract | selected explicitly; search/cards can fall back to Kinobox | localhost/backend-mode mismatch; test health + auth request |
+| KinoBD | `movies.kinobd.js`; adapter preserved but temporarily disabled | requests blocked before network access; remote tops/discussed unavailable | reactivation requires restoring importer/order entries and enabling the flag |
+| Kinobox | `movies.kinobox.js`; default search, cards and players | search reads `data.items`; player aggregation includes DDBB | upstream TLS/CORS instability; smoke real response shape |
 | DDBB | `movies.ddbb.js`; player index | merged with local and deduplicated | changing response shape/origin; smoke iframe list |
 | DDBB Live | `movies.ddbb-live.js`; player index | participates when configured | external availability/CORS; smoke only, no auth headers |
 

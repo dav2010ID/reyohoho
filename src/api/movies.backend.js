@@ -22,7 +22,7 @@ const apiCall = async (callFn) => {
 
 // ===== API-функции =====
 const apiSearch = async (searchTerm, requestConfig = {}) => {
-  const { data } = await apiCall((api) => api.get(`/search/${searchTerm}`, requestConfig))
+  const { data } = await apiCall((api) => api.get(`/search/${encodeURIComponent(searchTerm)}`, requestConfig))
   return data
 }
 

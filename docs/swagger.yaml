@@ -5,8 +5,8 @@ info:
   description: Swagger/OpenAPI спецификация по фактическим вызовам фронтенда.
 
 servers:
-  - url: https://api4.rhserv.vu
-    description: Fallback API из VITE_APP_API_URL
+  - url: http://localhost:8000
+    description: Локальный backend (укажите свой адрес для production)
 
 tags:
   - name: Movies
@@ -199,7 +199,7 @@ paths:
       summary: Поиск фильмов/аниме
       description: |
         Пример запроса:
-        `GET https://api4.rhserv.vu/search/Паразит`
+        `GET http://localhost:8000/search/Паразит`
       parameters:
         - name: searchTerm
           in: path

@@ -17,4 +17,8 @@ describe('provider registry', () => {
 
     await expect(registry.loadProvider('missing')).rejects.toThrow('Unknown content provider')
   })
+
+  it('does not load the temporarily disabled KinoBD adapter', async () => {
+    await expect(createProviderRegistry().loadProvider('kinobd')).rejects.toThrow('Unknown content provider')
+  })
 })

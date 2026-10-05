@@ -6,7 +6,7 @@
 - Базовый URL берется динамически:
   - сначала из Firebase Remote Config (`api_endpoints`),
   - если не удалось, используется `VITE_APP_API_URL`.
-- Fallback в текущем `.env`: `https://api4.rhserv.vu`
+- Публичный backend в текущем `.env` не настроен; для аккаунтов и функций backend задайте `VITE_APP_API_URL` адресом своего сервера.
 - Если есть токен, заголовок `Authorization: Bearer <token>` добавляется только
   для exact origin из trusted allowlist:
   - origin `VITE_APP_API_URL`;

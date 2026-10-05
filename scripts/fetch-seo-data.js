@@ -2,11 +2,18 @@ import fs from 'node:fs/promises'
 import path from 'node:path'
 import { pathToFileURL } from 'node:url'
 import { resolveCanonicalMovieIdentity } from '../src/utils/movieSlug.js'
+import { KINOBD_ENABLED } from '../src/api/providerAvailability.js'
 
 const OUTPUT_PATH = path.resolve(process.cwd(), 'src/data/movies.json')
 const API_BASE_URL = process.env.SEO_SOURCE_API_URL || 'https://kinobd.net'
 const PAGE_SIZE = Number(process.env.SEO_PAGE_SIZE || 100)
 const PAGE_COUNT = Number(process.env.SEO_PAGE_COUNT || 3)
+const SEO_FETCH_TIMEOUT_MS = 15000
+
+export const isSeoSourceDisabled = (apiBaseUrl) => {
+  const hostname = new URL(apiBaseUrl).hostname.toLowerCase()
+  return !KINOBD_ENABLED && (hostname === 'kinobd.net' || hostname.endsWith('.kinobd.net'))
+}
 
 export const ensureOutputFile = async (outputPath = OUTPUT_PATH) => {
   const normalizedOutputPath = path.resolve(outputPath)
@@ -41,8 +48,10 @@ export const resolveMoviesToPersist = (existingMovies = [], fetchedMovies = []) 
 }
 
 export const fetchPage = async (page, apiBaseUrl = API_BASE_URL) => {
+  if (isSeoSourceDisabled(apiBaseUrl)) return []
   const url = `${apiBaseUrl}/api/films/top?page=${page}&per_page=${PAGE_SIZE}`
   const response = await fetch(url, {
+    signal: AbortSignal.timeout(SEO_FETCH_TIMEOUT_MS),
     headers: {
       Accept: 'application/json'
     }
@@ -106,6 +115,8 @@ export async function updateSeoDataFile({
 
   const existingMovies = await readMoviesFile(outputPath)
   const fetchedMovies = await fetchSeoMovies({ apiBaseUrl, pageCount })
+  // Disabled/empty sources must leave the catalog unchanged, including file formatting.
+  if (fetchedMovies.length === 0) return existingMovies
   const moviesToPersist = resolveMoviesToPersist(existingMovies, fetchedMovies)
 
   await writeMoviesFile(moviesToPersist, outputPath)
@@ -113,6 +124,11 @@ export async function updateSeoDataFile({
 }
 
 async function main() {
+  if (isSeoSourceDisabled(API_BASE_URL)) {
+    await ensureOutputFile()
+    console.log(`KinoBD SEO source is temporarily disabled; keeping existing ${OUTPUT_PATH}`)
+    return
+  }
   const movies = await updateSeoDataFile()
   if (movies.length === 0) {
     console.warn(`SEO fetch returned 0 movies from ${API_BASE_URL}, keeping existing ${OUTPUT_PATH}`)

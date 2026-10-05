@@ -19,7 +19,6 @@ export const ignoredFailedUrlPatterns = [
   /goatcounter/,
   /favicon\.ico/,
   /stravers\.live/,
-  /api4\.rhserv\.vu\//,
   /avatars\.mds\.yandex\.net/,
   /st\.kp\.yandex\.net/
 ]
@@ -28,7 +27,6 @@ export const isIgnoredFailure = (url) =>
   ignoredFailedUrlPatterns.some((pattern) => pattern.test(url))
 
 const ignoredConsoleMessagePatterns = [
-  /api4\.rhserv\.vu\//,
   /^Error loading rating: AxiosError: Network Error/
 ]
 

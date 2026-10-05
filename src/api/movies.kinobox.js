@@ -97,6 +97,7 @@ const normalizeKinoboxMovie = (movie, kpId) => {
     kp_id: resolvedKpId,
     kinopoisk_id: resolvedKpId,
     imdb_id: null,
+    title: String(movie?.title?.russian || movie?.title?.original || '').trim(),
     name_ru: movie?.title?.russian || '',
     name_en: '',
     name_original: movie?.title?.original || '',
@@ -177,6 +178,8 @@ const normalizeKinoboxSearchResponse = (data) => {
     data?.data,
     data?.movies,
     data?.results,
+    data?.items,
+    data?.data?.items,
     data?.data?.movies,
     data?.data?.results
   ]

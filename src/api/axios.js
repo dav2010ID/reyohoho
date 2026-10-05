@@ -9,8 +9,9 @@ let apiInstancePromise = null
 let apiInstanceGeneration = 0
 
 const getResolvedBaseUrl = async () => {
-  const apiStore = useApiStore()
-  return apiStore.currentApiUrl || (await getCurrentApiUrl())
+  const baseURL = await getCurrentApiUrl()
+  if (!baseURL) throw new Error('Backend API is not configured (VITE_APP_API_URL)')
+  return baseURL
 }
 
 const attachDynamicRequestState = (instance) => {

@@ -1,5 +1,6 @@
 import axios from 'axios'
-import * as rhserv from '@/api/movies.rhserv'
+import { KINOBD_ENABLED } from '@/api/providerAvailability'
+import * as backend from '@/api/movies.backend'
 import { resolvePosterSetByMovie } from '@/utils/mediaUtils'
 
 let apiInstance = null
@@ -77,6 +78,8 @@ const simulateErrorIfNeeded = async () => {
 }
 
 const apiCall = async (callFn) => {
+  // Guard direct imports as well as the disabled provider registry.
+  if (!KINOBD_ENABLED) throw new Error('KinoBD is temporarily disabled')
   await simulateErrorIfNeeded()
   const api = getApi()
   return await callFn(api)
@@ -428,34 +431,20 @@ const apiSearch = async (searchTerm, pageOrConfig = 1, requestConfig = {}) => {
 }
 
 const getKpInfo = async (kpId, requestConfig = {}) => {
-  const [kbResponse, rhFilm] = await Promise.all([
-    apiCall((api) =>
-      api.get('/api/films/search/kp_id', {
-        ...requestConfig,
-        params: {
-          q: String(kpId),
-          page: 1,
-          with: 'persons,genres,countries,popularity,images'
-        }
-      })
-    ),
-    rhserv.getKpInfo(kpId, requestConfig).catch((error) => {
-      if (requestConfig.signal?.aborted) throw error
-      return null
+  const { data } = await apiCall((api) =>
+    api.get('/api/films/search/kp_id', {
+      ...requestConfig,
+      params: {
+        q: String(kpId),
+        page: 1,
+        with: 'persons,genres,countries,popularity,images'
+      }
     })
-  ])
+  )
 
-  const film = Array.isArray(kbResponse?.data?.data) ? kbResponse.data.data[0] : null
+  const film = Array.isArray(data?.data) ? data.data[0] : null
   if (!film) return null
-
-  const mappedFilm = mapKpInfo(film)
-  return {
-    ...mappedFilm,
-    sequels_and_prequels: Array.isArray(rhFilm?.sequels_and_prequels)
-      ? rhFilm.sequels_and_prequels
-      : [],
-    similars: Array.isArray(rhFilm?.similars) ? rhFilm.similars : []
-  }
+  return mapKpInfo(film)
 }
 
 const getMovieSeoByKpId = async (kpId) => {
@@ -509,9 +498,9 @@ const getPlayers = async (kpId, options = {}) => {
   return buildPlayersMap(candidates.map((c) => c.raw_data))
 }
 
-const getShikiInfo = async (...args) => rhserv.getShikiInfo(...args)
+const getShikiInfo = async (...args) => backend.getShikiInfo(...args)
 
-const getShikiPlayers = async (...args) => rhserv.getShikiPlayers(...args)
+const getShikiPlayers = async (...args) => backend.getShikiPlayers(...args)
 
 const getMovies = async ({ activeTime = 'all', typeFilter = 'all', limit = null, page = 1 } = {}) => {
   let endpoint = '/api/films/top'
@@ -581,31 +570,31 @@ const getRandomMovie = async () => {
   return { kp_id: pick?.kinopoisk_id || null, source: 'kinobd', film: buildLegacyMovie(pick) }
 }
 
-const getDons = async (...args) => rhserv.getDons(...args)
-const getKpIDfromSHIKI = async (...args) => rhserv.getKpIDfromSHIKI(...args)
-const getNudityInfoFromIMDB = async (...args) => rhserv.getNudityInfoFromIMDB(...args)
-const getRating = async (...args) => rhserv.getRating(...args)
-const setRating = async (...args) => rhserv.setRating(...args)
-const getComments = async (...args) => rhserv.getComments(...args)
-const createComment = async (...args) => rhserv.createComment(...args)
-const updateComment = async (...args) => rhserv.updateComment(...args)
-const deleteComment = async (...args) => rhserv.deleteComment(...args)
-const rateComment = async (...args) => rhserv.rateComment(...args)
-const submitTiming = async (...args) => rhserv.submitTiming(...args)
-const updateTiming = async (...args) => rhserv.updateTiming(...args)
-const deleteTiming = async (...args) => rhserv.deleteTiming(...args)
-const reportTiming = async (...args) => rhserv.reportTiming(...args)
-const getTopTimingSubmitters = async (...args) => rhserv.getTopTimingSubmitters(...args)
-const getAllTimingSubmissions = async (...args) => rhserv.getAllTimingSubmissions(...args)
-const approveTiming = async (...args) => rhserv.approveTiming(...args)
-const rejectTiming = async (...args) => rhserv.rejectTiming(...args)
-const markAsCleanText = async (...args) => rhserv.markAsCleanText(...args)
-const getTwitchStream = async (...args) => rhserv.getTwitchStream(...args)
-const voteOnTiming = async (...args) => rhserv.voteOnTiming(...args)
-const getTimingVote = async (...args) => rhserv.getTimingVote(...args)
-const getMovieNote = async (...args) => rhserv.getMovieNote(...args)
-const saveMovieNote = async (...args) => rhserv.saveMovieNote(...args)
-const deleteMovieNote = async (...args) => rhserv.deleteMovieNote(...args)
+const getDons = async (...args) => backend.getDons(...args)
+const getKpIDfromSHIKI = async (...args) => backend.getKpIDfromSHIKI(...args)
+const getNudityInfoFromIMDB = async (...args) => backend.getNudityInfoFromIMDB(...args)
+const getRating = async (...args) => backend.getRating(...args)
+const setRating = async (...args) => backend.setRating(...args)
+const getComments = async (...args) => backend.getComments(...args)
+const createComment = async (...args) => backend.createComment(...args)
+const updateComment = async (...args) => backend.updateComment(...args)
+const deleteComment = async (...args) => backend.deleteComment(...args)
+const rateComment = async (...args) => backend.rateComment(...args)
+const submitTiming = async (...args) => backend.submitTiming(...args)
+const updateTiming = async (...args) => backend.updateTiming(...args)
+const deleteTiming = async (...args) => backend.deleteTiming(...args)
+const reportTiming = async (...args) => backend.reportTiming(...args)
+const getTopTimingSubmitters = async (...args) => backend.getTopTimingSubmitters(...args)
+const getAllTimingSubmissions = async (...args) => backend.getAllTimingSubmissions(...args)
+const approveTiming = async (...args) => backend.approveTiming(...args)
+const rejectTiming = async (...args) => backend.rejectTiming(...args)
+const markAsCleanText = async (...args) => backend.markAsCleanText(...args)
+const getTwitchStream = async (...args) => backend.getTwitchStream(...args)
+const voteOnTiming = async (...args) => backend.voteOnTiming(...args)
+const getTimingVote = async (...args) => backend.getTimingVote(...args)
+const getMovieNote = async (...args) => backend.getMovieNote(...args)
+const saveMovieNote = async (...args) => backend.saveMovieNote(...args)
+const deleteMovieNote = async (...args) => backend.deleteMovieNote(...args)
 
 export {
   searchPlayerCandidates,

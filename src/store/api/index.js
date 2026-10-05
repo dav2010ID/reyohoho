@@ -13,7 +13,7 @@ export const useApiStore = defineStore(API_STORE_NAME, {
     availableEndpoints: [],
     lastCheckedAt: null,
     isCheckingHealth: false,
-    fallbackUrl: import.meta.env.VITE_APP_API_URL,
+    fallbackUrl: import.meta.env.VITE_APP_API_URL || null,
     endpointsHash: null,
     backendMode: 'auto',
     backendModeUserSelected: false,
@@ -23,6 +23,7 @@ export const useApiStore = defineStore(API_STORE_NAME, {
 
   actions: {
     async checkEndpointHealth(url) {
+      if (!url) return false
       const controller = new AbortController()
       const timeoutId = setTimeout(() => controller.abort(), 5000)
       try {

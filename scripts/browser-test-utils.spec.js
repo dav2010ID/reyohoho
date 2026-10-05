@@ -18,18 +18,18 @@ describe('browser test URL resolution', () => {
 })
 
 describe('optional external provider failures', () => {
-  it('classifies RHServ endpoint failures as non-blocking', () => {
-    expect(isIgnoredFailure('https://api4.rhserv.vu/health')).toBe(true)
-    expect(isIgnoredFailure('https://api4.rhserv.vu/comments/123')).toBe(true)
+  it('does not hide backend endpoint failures', () => {
+    expect(isIgnoredFailure('https://backend.example.test/health')).toBe(false)
+    expect(isIgnoredFailure('https://backend.example.test/comments/123')).toBe(false)
   })
 
   it('classifies matching browser console errors as non-blocking', () => {
     expect(
       isIgnoredConsoleError(
-        '[API Error] {url: https://api4.rhserv.vu/rating/123, message: Network Error}',
+        '[API Error] {url: https://backend.example.test/rating/123, message: Network Error}',
         'http://127.0.0.1/app.js'
       )
-    ).toBe(true)
+    ).toBe(false)
     expect(
       isIgnoredConsoleError('Error loading rating: AxiosError: Network Error', '/assets/rating.js')
     ).toBe(true)

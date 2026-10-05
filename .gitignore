@@ -32,6 +32,7 @@ _user_site_tmp/
 # Local browser/performance artifacts
 reports-browser/
 reports-lighthouse*.json
+/api-search-browser-check.html
 
 # Python
 __pycache__/

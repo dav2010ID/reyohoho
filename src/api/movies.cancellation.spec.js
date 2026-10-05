@@ -2,20 +2,20 @@ import { beforeEach, describe, expect, it, vi } from 'vitest'
 
 const providerMocks = vi.hoisted(() => ({
   loadProvider: vi.fn(),
-  rhservSearch: vi.fn(),
+  kinoboxSearch: vi.fn(),
   kinobdSearch: vi.fn()
 }))
 
 vi.mock('@/store/main', () => ({
   useMainStore: () => ({
-    contentApiProvider: 'rhserv',
-    searchApiProvider: 'rhserv'
+    contentApiProvider: 'ddbb',
+    searchApiProvider: 'kinobox'
   })
 }))
 
 vi.mock('@/api/providerRegistry', () => ({
   CONTENT_PROVIDERS: {
-    RHSERV: 'rhserv',
+    BACKEND: 'backend',
     KINOBD: 'kinobd',
     KINOBOX: 'kinobox',
     DDBB: 'ddbb',
@@ -35,7 +35,7 @@ describe('movies request cancellation', () => {
   beforeEach(() => {
     vi.clearAllMocks()
     providerMocks.loadProvider.mockImplementation(async (provider) => {
-      if (provider === 'rhserv') return { apiSearch: providerMocks.rhservSearch }
+      if (provider === 'kinobox') return { apiSearch: providerMocks.kinoboxSearch }
       if (provider === 'kinobd') return { apiSearch: providerMocks.kinobdSearch }
       return { apiSearch: vi.fn().mockResolvedValue([]) }
     })
@@ -43,7 +43,7 @@ describe('movies request cancellation', () => {
 
   it('does not continue provider fallback after a canceled search', async () => {
     const canceled = Object.assign(new Error('canceled'), { code: 'ERR_CANCELED' })
-    providerMocks.rhservSearch.mockRejectedValue(canceled)
+    providerMocks.kinoboxSearch.mockRejectedValue(canceled)
 
     await expect(apiSearch('matrix', { signal: new AbortController().signal })).rejects.toBe(
       canceled
