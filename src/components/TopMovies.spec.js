@@ -41,6 +41,10 @@ describe('top page source semantics', () => {
     await flushPromises()
     expect(wrapper.find('h1').text()).toBe('Топ-250 Кинопоиска')
     expect(wrapper.find('.time-card').exists()).toBe(false)
+    expect(wrapper.find('.top-header h1').text()).toBe('Топ-250 Кинопоиска')
+    expect(wrapper.find('.top-tabs').attributes('aria-label')).toBe('Тип подборки')
+    expect(wrapper.findAll('.top-tabs button').map((button) => button.attributes('aria-pressed')))
+      .toEqual(['true', 'false'])
     expect(wrapper.findAll('.type-btn').map((button) => button.text())).toEqual([
       'Фильмы',
       'Сериалы'

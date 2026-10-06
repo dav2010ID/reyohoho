@@ -1,9 +1,27 @@
 <template>
   <div class="wrapper">
     <div class="top-100-page" tabindex="0">
-      <h1 v-if="isKinopoiskTop">Топ-250 Кинопоиска</h1>
+      <header v-if="isKinopoiskTop" class="top-header">
+        <div class="top-heading">
+          <h1>Топ-250 Кинопоиска</h1>
+          <p>Лучшие {{ typeFilter === 'series' ? 'сериалы' : 'фильмы' }} по рейтингу зрителей</p>
+        </div>
+        <div class="top-tabs" role="group" aria-label="Тип подборки">
+          <button
+            v-for="btn in currentTypeFilters"
+            :key="btn.value"
+            class="filter-btn type-btn"
+            :class="{ active: typeFilter === btn.value }"
+            :aria-pressed="typeFilter === btn.value"
+            :disabled="loading"
+            @click="changeTypeFilter(btn.value)"
+          >
+            {{ btn.label }}
+          </button>
+        </div>
+      </header>
       <h1 v-else class="visually-hidden">Популярные фильмы и сериалы</h1>
-      <div class="controls">
+      <div v-if="!isKinopoiskTop" class="controls">
         <div v-if="!isKinopoiskTop" class="filter-card time-card">
           <div class="button-group time-buttons">
             <i class="material-icons card-icon">schedule</i>
@@ -335,15 +353,74 @@ onUnmounted(disconnectInfiniteScroll)
 <style scoped>
 .wrapper {
   display: flex;
+  min-width: 0;
   min-height: 100vh;
 }
 
 .top-100-page {
   flex: 1;
+  min-width: 0;
   padding-top: 20px;
   padding-bottom: 40px;
   width: 100%;
   margin: 0 auto;
+}
+
+.top-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 16px 24px;
+  padding: 0 15px;
+  margin-bottom: 24px;
+}
+
+.top-heading {
+  min-width: 0;
+}
+
+.top-heading h1 {
+  margin: 0;
+  font-size: clamp(1.4rem, 2.5vw, 2rem);
+  line-height: 1.25;
+  font-weight: 700;
+  letter-spacing: -0.025em;
+  overflow-wrap: anywhere;
+}
+
+.top-heading p {
+  margin: 8px 0 0;
+  color: #a8a8a8;
+  font-size: 0.9rem;
+  line-height: 1.5;
+}
+
+.top-tabs {
+  display: flex;
+  flex-shrink: 0;
+  gap: 4px;
+  padding: 4px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 12px;
+  background: rgba(28, 28, 28, 0.85);
+}
+
+.top-tabs .type-btn {
+  min-height: 40px;
+  padding: 8px 18px;
+  border-color: transparent;
+  background: transparent;
+  font-size: 0.9rem;
+}
+
+.top-tabs .type-btn.active {
+  background: var(--accent-color);
+}
+
+.top-tabs .type-btn:focus-visible {
+  outline: 2px solid #fff;
+  outline-offset: 2px;
 }
 
 .controls {
@@ -518,6 +595,21 @@ onUnmounted(disconnectInfiniteScroll)
 }
 
 @media (max-width: 600px) {
+  .top-header {
+    padding: 0 10px;
+    margin-bottom: 16px;
+  }
+
+  .top-tabs {
+    width: 100%;
+    box-sizing: border-box;
+  }
+
+  .top-tabs .type-btn {
+    flex: 1;
+    min-height: 44px;
+  }
+
   .button-group {
     flex-wrap: wrap;
     justify-content: center;
