@@ -1,0 +1,37 @@
+{
+  "tls": {
+    "url": "https://esm.sh/@reclaimprotocol/tls@0.1.4/es2022/tls.bundle.mjs",
+    "size": 531893,
+    "sha256": "0a3e7d878dbc36d1066d0e96904b2ee4ca1d24541a3433bb0250553c808d9363",
+    "trustStore": {
+      "start": 45547,
+      "end": 316417,
+      "spans": [
+        {
+          "start": 217021,
+          "end": 218961
+        },
+        {
+          "start": 218962,
+          "end": 219753
+        }
+      ]
+    },
+    "adaptedSize": 263752,
+    "adaptedSha256": "d094373d6f9fd39202c012177833e83b335e9ce918c6b4ccd751bde7226bc779"
+  },
+  "crypto": {
+    "url": "https://esm.sh/@reclaimprotocol/tls@0.1.4/es2022/webcrypto.bundle.mjs",
+    "size": 162227,
+    "sha256": "21b462bd0ed540fa29bb132451a35c88a77a80c6ce7b45631e3d124daf80c1dd",
+    "adaptedSize": 162217,
+    "adaptedSha256": "7e232f3fa720a8531043135174edba71935c4c13ea7c125ac8f7bd8c03c83e92"
+  },
+  "hpack": {
+    "url": "https://esm.sh/hpack.js@2.1.6/es2022/hpack.bundle.mjs",
+    "size": 68069,
+    "sha256": "e51d47f8c298cc52ae3731c9957ce4712bcb456f158153a00deb60cf37223ae6",
+    "adaptedSize": 68049,
+    "adaptedSha256": "909a83a60b4eebfbba86f3760aa82a82c1b0c8af623bdbc5d7a6adea7993da8b"
+  }
+}

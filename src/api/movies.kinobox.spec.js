@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import { normalizeKinoboxSearchResponse } from './movies.kinobox'
+import { getMovieName } from '@/utils/textUtils'
 
 describe('Kinobox search response normalization', () => {
   it('reads the live API data.items envelope', () => {
@@ -7,11 +8,25 @@ describe('Kinobox search response normalization', () => {
       data: {
         success: true,
         total: 131,
-        items: [{ id: 301, title: { russian: 'Матрица', original: 'The Matrix' }, year: 1999 }]
+        items: [
+          {
+            id: 301,
+            title: { russian: 'Матрица', original: 'The Matrix' },
+            gallery: { posterUrl: 'https://poster.example/matrix.jpg' },
+            year: 1999
+          }
+        ]
       }
     })
     expect(results).toHaveLength(1)
-    expect(results[0]).toMatchObject({ kp_id: 301, title: 'Матрица', name_ru: 'Матрица', year: 1999 })
+    expect(results[0]).toMatchObject({
+      kp_id: 301,
+      title: 'Матрица',
+      name_ru: 'Матрица',
+      year: 1999
+    })
+    expect(getMovieName(results[0].raw_data)).toBe('Матрица')
+    expect(results[0].poster).toBe('https://poster.example/matrix.jpg')
   })
   it('normalizes nested movie search results for the existing search UI', () => {
     const results = normalizeKinoboxSearchResponse({
@@ -52,5 +67,6 @@ describe('Kinobox search response normalization', () => {
       data: { items: [{ id: 301, title: { russian: null, original: 'The Matrix' } }] }
     })
     expect(results[0].title).toBe('The Matrix')
+    expect(getMovieName(results[0].raw_data)).toBe('The Matrix')
   })
 })

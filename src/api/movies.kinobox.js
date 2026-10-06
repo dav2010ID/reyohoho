@@ -4,6 +4,10 @@ let isErrorSimulationEnabled = false
 const simulatedErrorCode = 500
 
 const KINOBOX_BASE_URL = import.meta.env.VITE_KINOBOX_API_URL || 'https://api.kinobox.tv'
+// Only search goes through the Worker; movie details and players keep their own API.
+const KINOBOX_SEARCH_BASE_URL =
+  import.meta.env.VITE_KINOBOX_SEARCH_API_URL ||
+  'https://lively-cloud-4e31.reyohoho-search.workers.dev'
 
 const api = axios.create({
   baseURL: KINOBOX_BASE_URL,
@@ -101,6 +105,7 @@ const normalizeKinoboxMovie = (movie, kpId) => {
     name_ru: movie?.title?.russian || '',
     name_en: '',
     name_original: movie?.title?.original || '',
+    poster: movie?.gallery?.posterUrl || '',
     poster_url: movie?.gallery?.posterUrl || '',
     poster_url_preview: movie?.gallery?.posterUrl || '',
     reviews_count: 0,
@@ -165,6 +170,8 @@ const normalizeKinoboxMovie = (movie, kpId) => {
     rating_kp: toNumberOrNull(ratingKinopoisk.value),
     raw_data: {
       ...movie,
+      name_ru: movie?.title?.russian || movie?.title?.original || '',
+      name_en: movie?.title?.original || '',
       rating: toNumberOrNull(ratingKinopoisk.value),
       type: toLegacyType(movie?.type)
     },
@@ -263,6 +270,7 @@ const apiSearch = async (searchTerm, requestConfig = {}) => {
   const { data } = await apiCall((client) =>
     client.get('/api/movies/search/', {
       ...requestConfig,
+      baseURL: KINOBOX_SEARCH_BASE_URL,
       params: {
         query: String(searchTerm),
         ts: Math.floor(Date.now() / 1000)
