@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { normalizeKinoboxSearchResponse } from './movies.kinobox'
+import { normalizeKinoboxSearchResponse, normalizeKinoboxMovie } from './movies.kinobox'
 import { getMovieName } from '@/utils/textUtils'
 
 describe('Kinobox search response normalization', () => {
@@ -68,5 +68,40 @@ describe('Kinobox search response normalization', () => {
     })
     expect(results[0].title).toBe('The Matrix')
     expect(getMovieName(results[0].raw_data)).toBe('The Matrix')
+  })
+})
+
+describe('Kinobox movie card normalization', () => {
+  it('keeps title, description, ratings, poster and other movie information', () => {
+    const movie = normalizeKinoboxMovie(
+      {
+        id: 301,
+        title: { russian: 'Матрица', original: 'The Matrix' },
+        description: 'Хакер Нео узнает правду о своём мире.',
+        synopsis: 'Жизнь Томаса Андерсона разделена на две части.',
+        rating: { kinopoisk: { value: 8.5, count: 815101 }, imdb: { value: 8.7, count: 2200000 } },
+        gallery: { posterUrl: 'https://poster.example/matrix.jpg' },
+        year: 1999,
+        duration: '02:16:00',
+        countries: [{ name: 'США' }],
+        genres: [{ name: 'фантастика' }]
+      },
+      301
+    )
+    expect(movie).toMatchObject({
+      kp_id: 301,
+      title: 'Матрица',
+      name_original: 'The Matrix',
+      description: 'Хакер Нео узнает правду о своём мире.',
+      rating_kinopoisk: 8.5,
+      rating_imdb: 8.7,
+      rating_kinopoisk_vote_count: 815101,
+      rating_imdb_vote_count: 2200000,
+      poster: 'https://poster.example/matrix.jpg',
+      year: 1999,
+      film_length: '02:16:00',
+      countries: [{ country: 'США' }],
+      genres: [{ genre: 'фантастика' }]
+    })
   })
 })

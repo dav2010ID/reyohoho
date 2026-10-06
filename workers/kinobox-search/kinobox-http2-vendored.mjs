@@ -9,7 +9,8 @@ globalThis.TLS_ADDITIONAL_ROOT_CA_LIST.length = 0
 const HOST = 'api.kinobox.tv'
 const MAX_BODY = 1024 * 1024
 const quiet = { trace() {}, debug() {}, info() {}, warn() {}, error() {} }
-const UA = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/154.0.0.0 Safari/537.36 Edg/154.0.0.0'
+const UA =
+  'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/154.0.0.0 Safari/537.36 Edg/154.0.0.0'
 
 function frame(type, flags, stream, payload = Buffer.alloc(0)) {
   const header = Buffer.alloc(9)
@@ -20,15 +21,30 @@ function frame(type, flags, stream, payload = Buffer.alloc(0)) {
   return Buffer.concat([header, payload])
 }
 
-export function requestKinoboxHttp2(query, openTransport, options = {}) {
+export function requestKinoboxHttp2(resource, openTransport, options = {}) {
+  if (!/^\/api\/(?:movies\/(?:search\/|[1-9]\d{0,11})|players)$/.test(resource?.path || '')) {
+    return Promise.reject(new Error('Unsupported Kinobox path'))
+  }
   return new Promise((resolve, reject) => {
-    let transport, reader, writer, tls, done = false
-    let incoming = Buffer.alloc(0), headerBlock = Buffer.alloc(0), continuation = false, headersEnded = false
-    let responseStatus, responseHeaders = {}, responseEnded = false
+    let transport,
+      reader,
+      writer,
+      tls,
+      done = false
+    let incoming = Buffer.alloc(0),
+      headerBlock = Buffer.alloc(0),
+      continuation = false,
+      headersEnded = false
+    let responseStatus,
+      responseHeaders = {},
+      responseEnded = false
     const bodies = []
     let bodyLength = 0
     let outgoing = Promise.resolve()
-    const timer = setTimeout(() => finish(new Error('Upstream timeout')), options.timeoutMs || 15000)
+    const timer = setTimeout(
+      () => finish(new Error('Upstream timeout')),
+      options.timeoutMs || 15000
+    )
     const finish = (error, value) => {
       if (done) return
       done = true
@@ -37,22 +53,24 @@ export function requestKinoboxHttp2(query, openTransport, options = {}) {
       if (transport) void Promise.resolve(transport.close()).catch(() => {})
       error ? reject(error) : resolve(value)
     }
-    const send = packet => {
+    const send = (packet) => {
       outgoing = outgoing.then(() => {
         if (!done) return tls.write(packet)
       })
-      void outgoing.catch(error => finish(error))
+      void outgoing.catch((error) => finish(error))
     }
     const complete = () => {
       responseEnded = true
       if (!responseStatus) return finish(new Error('Missing HTTP/2 response status'))
       finish(null, {
-        status: responseStatus, headers: responseHeaders,
-        body: Buffer.concat(bodies), tls: tls.getMetadata()
+        status: responseStatus,
+        headers: responseHeaders,
+        body: Buffer.concat(bodies),
+        tls: tls.getMetadata()
       })
     }
     const decomp = hpack.decompressor.create({ table: { maxSize: 4096 } })
-    decomp.on('error', error => finish(error))
+    decomp.on('error', (error) => finish(error))
     function decodeHeaders() {
       decomp.write(headerBlock)
       decomp.execute()
@@ -71,12 +89,14 @@ export function requestKinoboxHttp2(query, openTransport, options = {}) {
         const length = incoming.readUIntBE(0, 3)
         if (length > 16384) throw new Error('Oversized HTTP/2 frame')
         if (incoming.length < length + 9) break
-        const type = incoming[3], flags = incoming[4], stream = incoming.readUInt32BE(5) & 0x7fffffff
+        const type = incoming[3],
+          flags = incoming[4],
+          stream = incoming.readUInt32BE(5) & 0x7fffffff
         let payload = incoming.subarray(9, 9 + length)
         incoming = incoming.subarray(9 + length)
         if (continuation && (type !== 9 || stream !== 1)) throw new Error('Missing CONTINUATION')
         if (type === 4) {
-          if (stream !== 0 || ((flags & 1) && length)) throw new Error('Invalid SETTINGS')
+          if (stream !== 0 || (flags & 1 && length)) throw new Error('Invalid SETTINGS')
           if (!(flags & 1)) send(frame(4, 1, 0))
         } else if (type === 6) {
           if (stream !== 0 || length !== 8) throw new Error('Invalid PING')
@@ -124,7 +144,10 @@ export function requestKinoboxHttp2(query, openTransport, options = {}) {
     }
     async function run() {
       transport = await openTransport(HOST, 443)
-      if (done) { await transport.close(); return }
+      if (done) {
+        await transport.close()
+        return
+      }
       reader = transport.readable.getReader()
       writer = transport.writable.getWriter()
       tls = makeTLSClient({
@@ -137,9 +160,15 @@ export function requestKinoboxHttp2(query, openTransport, options = {}) {
         logger: quiet,
         async fetchCertificateBytes(url) {
           const target = new URL(url)
-          if (!['https:', 'http:'].includes(target.protocol) ||
-              !target.hostname.endsWith('.lencr.org')) throw new Error('Unapproved certificate issuer URL')
-          const response = await fetch(target, { redirect: 'error', signal: AbortSignal.timeout(5000) })
+          if (
+            !['https:', 'http:'].includes(target.protocol) ||
+            !target.hostname.endsWith('.lencr.org')
+          )
+            throw new Error('Unapproved certificate issuer URL')
+          const response = await fetch(target, {
+            redirect: 'error',
+            signal: AbortSignal.timeout(5000)
+          })
           if (!response.ok) throw new Error('Issuer certificate unavailable')
           const certificateReader = response.body.getReader()
           const chunks = []
@@ -162,15 +191,20 @@ export function requestKinoboxHttp2(query, openTransport, options = {}) {
           await writer.write(content)
         },
         onHandshake() {
-          if (tls.getMetadata().selectedAlpn !== 'h2') return finish(new Error('HTTP/2 was not negotiated'))
+          if (tls.getMetadata().selectedAlpn !== 'h2')
+            return finish(new Error('HTTP/2 was not negotiated'))
           const settings = Buffer.alloc(12)
-          settings.writeUInt16BE(2, 0); settings.writeUInt32BE(0, 2)
-          settings.writeUInt16BE(4, 6); settings.writeUInt32BE(MAX_BODY, 8)
+          settings.writeUInt16BE(2, 0)
+          settings.writeUInt32BE(0, 2)
+          settings.writeUInt16BE(4, 6)
+          settings.writeUInt32BE(MAX_BODY, 8)
           const window = Buffer.alloc(4)
           window.writeUInt32BE(MAX_BODY - 65535)
-          const url = new URL('https://' + HOST + '/api/movies/search/')
-          url.searchParams.set('query', query)
-          url.searchParams.set('ts', String(Math.floor(Date.now() / 1000)))
+          // Callers supply only validated Kinobox paths, never a destination URL.
+          const url = new URL(resource.path, 'https://' + HOST)
+          for (const [name, value] of Object.entries(resource.params || {})) {
+            url.searchParams.set(name, String(value))
+          }
           const comp = hpack.compressor.create({ table: { size: 4096 } })
           comp.write([
             { name: ':method', value: 'GET' },
@@ -182,17 +216,25 @@ export function requestKinoboxHttp2(query, openTransport, options = {}) {
             { name: 'referer', value: 'https://kinobox.in/' },
             { name: 'user-agent', value: UA }
           ])
-          send(Buffer.concat([
-            Buffer.from('PRI * HTTP/2.0\r\n\r\nSM\r\n\r\n'),
-            frame(4, 0, 0, settings),
-            frame(8, 0, 0, window),
-            frame(1, 5, 1, comp.read())
-          ]))
+          send(
+            Buffer.concat([
+              Buffer.from('PRI * HTTP/2.0\r\n\r\nSM\r\n\r\n'),
+              frame(4, 0, 0, settings),
+              frame(8, 0, 0, window),
+              frame(1, 5, 1, comp.read())
+            ])
+          )
         },
         onApplicationData(bytes) {
-          try { receive(bytes) } catch (error) { finish(error) }
+          try {
+            receive(bytes)
+          } catch (error) {
+            finish(error)
+          }
         },
-        onTlsEnd(error) { if (!done) finish(error || new Error('Upstream closed before END_STREAM')) }
+        onTlsEnd(error) {
+          if (!done) finish(error || new Error('Upstream closed before END_STREAM'))
+        }
       })
       const pump = async () => {
         while (!done) {
@@ -204,9 +246,9 @@ export function requestKinoboxHttp2(query, openTransport, options = {}) {
           await tls.handleReceivedBytes(chunk.value)
         }
       }
-      void pump().catch(error => finish(error))
+      void pump().catch((error) => finish(error))
       await tls.startHandshake()
     }
-    void run().catch(error => finish(error))
+    void run().catch((error) => finish(error))
   })
 }

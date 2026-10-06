@@ -19,7 +19,7 @@ beforeEach(() => {
 })
 afterEach(() => vi.unstubAllEnvs())
 
-describe('Kinobox search proxy routing', () => {
+describe('Kinobox content proxy routing', () => {
   it('routes search to the permanent Worker and keeps request cancellation', async () => {
     const { apiSearch } = await import('./movies.kinobox')
     mocks.get.mockResolvedValue({
@@ -47,7 +47,7 @@ describe('Kinobox search proxy routing', () => {
     expect(mocks.get.mock.calls[0][1].baseURL).toBe('https://search.example')
   })
 
-  it('does not send movie details or players to the search-only Worker', async () => {
+  it('uses the same Worker for movie details and players', async () => {
     const { getKpInfo, getPlayersRaw } = await import('./movies.kinobox')
     mocks.get.mockResolvedValue({ data: { data: { movie: { id: 301 } } } })
     await getKpInfo(301)
@@ -55,10 +55,23 @@ describe('Kinobox search proxy routing', () => {
     await getPlayersRaw(301)
     expect(mocks.create).toHaveBeenCalledWith(
       expect.objectContaining({
-        baseURL: 'https://api.kinobox.tv'
+        baseURL: 'https://lively-cloud-4e31.reyohoho-search.workers.dev'
       })
     )
     expect(mocks.get.mock.calls[0][1]).not.toHaveProperty('baseURL')
     expect(mocks.get.mock.calls[1][1]).not.toHaveProperty('baseURL')
+  })
+
+  it('uses the general API override for search when no separate override is set', async () => {
+    vi.stubEnv('VITE_KINOBOX_API_URL', 'https://kinobox-proxy.example')
+    const { apiSearch } = await import('./movies.kinobox')
+    mocks.get.mockResolvedValue({ data: { data: { items: [] } } })
+    await apiSearch('Matrix')
+    expect(mocks.create).toHaveBeenCalledWith(
+      expect.objectContaining({
+        baseURL: 'https://kinobox-proxy.example'
+      })
+    )
+    expect(mocks.get.mock.calls[0][1].baseURL).toBe('https://kinobox-proxy.example')
   })
 })

@@ -3,11 +3,10 @@ import axios from 'axios'
 let isErrorSimulationEnabled = false
 const simulatedErrorCode = 500
 
-const KINOBOX_BASE_URL = import.meta.env.VITE_KINOBOX_API_URL || 'https://api.kinobox.tv'
-// Only search goes through the Worker; movie details and players keep their own API.
-const KINOBOX_SEARCH_BASE_URL =
-  import.meta.env.VITE_KINOBOX_SEARCH_API_URL ||
-  'https://lively-cloud-4e31.reyohoho-search.workers.dev'
+const KINOBOX_BASE_URL =
+  import.meta.env.VITE_KINOBOX_API_URL || 'https://lively-cloud-4e31.reyohoho-search.workers.dev'
+// All Kinobox content uses the same Worker; a separate search override remains supported.
+const KINOBOX_SEARCH_BASE_URL = import.meta.env.VITE_KINOBOX_SEARCH_API_URL || KINOBOX_BASE_URL
 
 const api = axios.create({
   baseURL: KINOBOX_BASE_URL,
@@ -228,7 +227,6 @@ const toPlayersMap = (providers = [], { type = null } = {}) => {
         raw_data: provider
       }
     }
-
   }
 
   return players

@@ -1,4 +1,4 @@
-# Kinobox search HTTP/2 proxy
+# Kinobox content HTTP/2 proxy
 
 This Worker uses `cloudflare:sockets` for raw TCP, a TLS 1.3 client with
 certificate verification and ALPN `h2`, and a bounded HTTP/2/HPACK client.
@@ -27,9 +27,22 @@ are cleared before the first handshake.
 Public endpoint after deployment:
 `https://lively-cloud-4e31.reyohoho-search.workers.dev/?query=Матрица`
 
-The JSON schema is forwarded unchanged (`data.items`). Requests have a
-15-second deadline, 150-character query limit, 1 MiB response limit and a
-10-minute per-location success cache. Browser origins are restricted to
+The frontend uses this Worker by default for search, movie cards/details and
+player lists. `VITE_KINOBOX_API_URL` overrides the shared base URL;
+`VITE_KINOBOX_SEARCH_API_URL` optionally overrides search only.
+
+The upstream JSON envelopes are forwarded unchanged. Allowlisted routes:
+
+| Route | Parameters | Per-location success cache |
+| --- | --- | --- |
+| `/` or `/api/movies/search/` | `query`, 1–150 characters | 10 minutes |
+| `/api/movies/{id}` | Positive numeric movie ID | 1 hour |
+| `/api/players` | Positive numeric `kinopoisk`, optional `title` up to 300 characters | 1 minute |
+
+Other paths are rejected; arbitrary upstream URLs and headers cannot be supplied.
+Invalid responses and upstream errors are not cached. Cache keys include the
+resource path and validated parameters, not the caller's timestamp.
+Requests have a 15-second deadline and 1 MiB response limit. Browser origins are restricted to
 GitHub Pages and local development; CORS is **not** authentication and
 does not prevent requests made outside browsers. No rate-limit binding is
 configured. Monitor CPU usage/error rates before broader rollout.
@@ -43,15 +56,20 @@ module. The temporary uploader and namespace are removed after verification;
 the production Worker has no KV binding or staging dependency.
 
 Node.js and a clean Edge browser on the production GitHub Pages origin returned
-HTTP 200, 30 Matrix results, successful CORS and cache hits.
-Validation, method, path and Origin checks also passed. Local frontend search
-uses the Worker only for movie search; details and player endpoints stay direct.
+HTTP 200 for search, movie details and player lists on the production GitHub
+Pages origin: 30 Matrix results and 7 player sources. A clean local Edge browser
+opened the Matrix card and displayed its title, description and ratings 8.5/8.7
+without direct Kinobox API requests. Embedded player playback is not covered by
+this API verification.
 
 Deployment bundle SHA256:
-`28ceb0688d87f619eb1d5aad0a1f4875a3a9c5f7a0f1afe61f6b734967fcb59b`
+`64feb37d16db51d6f12d60c318456d8e92e10ef13c81cdbd1fdc058bec4190b1`
+
+Deployed version (100%):
+`c6804158-4430-49f8-a9a3-b62f2a792840`
 
 Rollback version before this deployment:
-`66fc11d3-7c82-4002-b4fc-d9e2da9d7a20`
+`9fdb8d3e-f802-41a5-b074-a994f1078494`
 
 ## Dependencies
 
