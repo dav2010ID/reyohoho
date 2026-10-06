@@ -1,4 +1,4 @@
-# Kinobox content HTTP/2 proxy
+# Kinobox content HTTP/2 and Kinopoisk top proxy
 
 This Worker uses `cloudflare:sockets` for raw TCP, a TLS 1.3 client with
 certificate verification and ALPN `h2`, and a bounded HTTP/2/HPACK client.
@@ -31,13 +31,33 @@ The frontend uses this Worker by default for search, movie cards/details and
 player lists. `VITE_KINOBOX_API_URL` overrides the shared base URL;
 `VITE_KINOBOX_SEARCH_API_URL` optionally overrides search only.
 
-The upstream JSON envelopes are forwarded unchanged. Allowlisted routes:
+Kinobox JSON envelopes are forwarded unchanged. Kinopoisk top responses are
+reduced to public movie cards. Allowlisted routes:
 
 | Route | Parameters | Per-location success cache |
 | --- | --- | --- |
 | `/` or `/api/movies/search/` | `query`, 1–150 characters | 10 minutes |
 | `/api/movies/{id}` | Positive numeric movie ID | 1 hour |
 | `/api/players` | Positive numeric `kinopoisk`, optional `title` up to 300 characters | 1 minute |
+| `/api/kinopoisk/top` | `type=movie` or `series`, positive `page`, `limit=1..50` (default 36), offset below 250 | 1 hour |
+
+## Kinopoisk top
+
+The top route uses native Worker `fetch()` to a fixed Kinopoisk GraphQL endpoint,
+with the public website's fixed `MovieDesktopListPage` query. It does not use the
+custom Kinobox HTTP/2 client and does not claim a forced upstream ALPN protocol.
+Callers cannot supply a query, upstream host, headers or cookies. User data is
+disabled (`withUserData: false`); redirects are rejected.
+
+Films use `top250`; series use `series-top250`. These are rating-ranked lists,
+not daily/weekly popularity or discussion rankings. The frontend labels them
+“Топ-250 Кинопоиска” and offers separate film/series tabs. Local backend mode
+retains its existing popularity filters and does not silently substitute this top.
+
+The GraphQL interface is the website's internal API, not an officially supported
+public API or availability guarantee. Its schema or allowed query may change.
+Failures return 502 (504 for timeout), are not cached, and are not replaced with
+fabricated rankings. Poster image URLs remain direct Yandex URLs, not proxy routes.
 
 Other paths are rejected; arbitrary upstream URLs and headers cannot be supplied.
 Invalid responses and upstream errors are not cached. Cache keys include the
@@ -63,13 +83,21 @@ without direct Kinobox API requests. Embedded player playback is not covered by
 this API verification.
 
 Deployment bundle SHA256:
-`64feb37d16db51d6f12d60c318456d8e92e10ef13c81cdbd1fdc058bec4190b1`
+`cc10b356f75d30933506653c6aa6ed417f4f9d98a336252c2bd4d376fdc2f9aa`
 
 Deployed version (100%):
-`c6804158-4430-49f8-a9a3-b62f2a792840`
+`ffb2d1bd-3515-4da1-8280-618a101a7625`
 
 Rollback version before this deployment:
-`9fdb8d3e-f802-41a5-b074-a994f1078494`
+`c6804158-4430-49f8-a9a3-b62f2a792840`
+
+The top deployment was verified on October 6, 2026: all seven pages returned
+250 unique film IDs and 250 unique series IDs, repeated requests reported cache
+HIT, and invalid parameters/origins/methods were rejected. A clean local Edge
+browser using the actual production Worker displayed 36 cards, loaded page two
+(72 cards), and switched to series without JavaScript errors. Search, details
+and player endpoints remained HTTP 200 with the Kinobox HTTP/2 transport.
+This verifies the new frontend locally; publishing it to GitHub Pages is separate.
 
 ## Dependencies
 

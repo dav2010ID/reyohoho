@@ -1,9 +1,10 @@
 <template>
   <div class="wrapper">
     <div class="top-100-page" tabindex="0">
-      <h1 class="visually-hidden">Популярные фильмы и сериалы</h1>
+      <h1 v-if="isKinopoiskTop">Топ-250 Кинопоиска</h1>
+      <h1 v-else class="visually-hidden">Популярные фильмы и сериалы</h1>
       <div class="controls">
-        <div class="filter-card time-card">
+        <div v-if="!isKinopoiskTop" class="filter-card time-card">
           <div class="button-group time-buttons">
             <i class="material-icons card-icon">schedule</i>
             <template v-for="(btn, idx) in timeFilters" :key="idx">
@@ -64,13 +65,20 @@ import { computed, nextTick, onMounted, onServerPrefetch, onUnmounted, ref, watc
 import { useRoute, useRouter } from 'vue-router'
 import { useHead } from '@unhead/vue'
 import { buildStaticPageHead } from '@/utils/staticSeo'
+import { useMainStore } from '@/store/main'
 
-useHead(
+const mainStore = useMainStore()
+const isKinopoiskTop = computed(() => mainStore.contentApiProvider !== 'local')
+
+useHead(() =>
   buildStaticPageHead({
     routePath: '/top',
-    title: 'Популярные фильмы и сериалы онлайн - ReYohoho',
-    description:
-      'Популярные фильмы и сериалы за сутки, неделю, месяц и всё время. Фильтры по типу и обсуждаемости на ReYohoho.'
+    title: isKinopoiskTop.value
+      ? 'Топ-250 фильмов и сериалов Кинопоиска - ReYohoho'
+      : 'Популярные фильмы и сериалы онлайн - ReYohoho',
+    description: isKinopoiskTop.value
+      ? '250 лучших фильмов и сериалов по рейтингу Кинопоиска. Русские названия, постеры и рейтинги.'
+      : 'Популярные фильмы и сериалы за сутки, неделю, месяц и всё время. Фильтры по типу и обсуждаемости на ReYohoho.'
   })
 )
 
@@ -112,7 +120,11 @@ const discussedTypeFilters = [
 ]
 
 const currentTypeFilters = computed(() =>
-  activeTimeFilter.value === 'discussed' ? discussedTypeFilters : normalTypeFilters
+  isKinopoiskTop.value
+    ? normalTypeFilters.filter((filter) => filter.value !== 'all')
+    : activeTimeFilter.value === 'discussed'
+      ? discussedTypeFilters
+      : normalTypeFilters
 )
 const visibleMovies = computed(() => movies.value)
 const canShowMore = computed(() => !loading.value && hasMore.value && !errorMessage.value)
@@ -209,6 +221,12 @@ const setupInfiniteScroll = async () => {
 }
 
 const applyRouteFilters = (query) => {
+  if (isKinopoiskTop.value) {
+    activeTimeFilter.value = 'top250'
+    typeFilter.value = query.type === 'series' ? 'series' : 'movie'
+    lastNormalTypeFilter.value = typeFilter.value
+    return
+  }
   const nextTime = typeof query.time === 'string' && query.time ? query.time : DEFAULT_ACTIVE_TIME
   const nextType = typeof query.type === 'string' && query.type ? query.type : null
 
@@ -266,14 +284,13 @@ const changeTimeFilter = (apiUrl) => {
     typeFilter.value = lastNormalTypeFilter.value
   }
 
-  router
-    .push({
-      query: {
-        ...route.query,
-        time: activeTimeFilter.value,
-        type: typeFilter.value
-      }
-    })
+  router.push({
+    query: {
+      ...route.query,
+      time: activeTimeFilter.value,
+      type: typeFilter.value
+    }
+  })
 }
 
 const changeTypeFilter = (value) => {
@@ -282,13 +299,12 @@ const changeTypeFilter = (value) => {
     lastNormalTypeFilter.value = value
   }
 
-  router
-    .push({
-      query: {
-        ...route.query,
-        type: value
-      }
-    })
+  router.push({
+    query: {
+      ...route.query,
+      type: value
+    }
+  })
 }
 
 watch(
@@ -305,7 +321,8 @@ watch(
 
 onMounted(() => {
   applyRouteFilters(route.query)
-  if (!movies.value.length && !errorMessage.value) {
+  // Prerendered cards use the default remote provider, not persisted local preferences.
+  if (!isKinopoiskTop.value || (!movies.value.length && !errorMessage.value)) {
     fetchMovies().then(setupInfiniteScroll)
   } else {
     setupInfiniteScroll()

@@ -279,11 +279,34 @@ const apiSearch = async (searchTerm, requestConfig = {}) => {
   return normalizeKinoboxSearchResponse(data)
 }
 
+const getTopMovies = async ({ typeFilter = 'movie', page = 1, limit = 36 } = {}) => {
+  const { data } = await apiCall((client) =>
+    client.get('/api/kinopoisk/top', {
+      params: { type: typeFilter === 'series' ? 'series' : 'movie', page, limit },
+      timeout: 20000
+    })
+  )
+  if (!Array.isArray(data?.data?.items)) throw new Error('Invalid Kinopoisk top response')
+  return data.data.items.map(({ movie, position }) => {
+    const poster = movie?.gallery?.posterUrl || ''
+    const posterUrl = poster.startsWith('//') ? 'https:' + poster + '/300x450' : poster
+    return {
+      ...normalizeKinoboxMovie({
+        ...movie,
+        gallery: { ...movie?.gallery, posterUrl }
+      }),
+      position,
+      source: 'kinopoisk'
+    }
+  })
+}
+
 export {
   apiSearch,
   getKpInfo,
   getPlayers,
   getPlayersRaw,
+  getTopMovies,
   normalizeKinoboxMovie,
   normalizeKinoboxSearchResponse
 }

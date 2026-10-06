@@ -1,8 +1,9 @@
 import { connect } from 'cloudflare:sockets'
 import { requestKinoboxHttp2 } from './kinobox-http2-vendored.mjs'
 import { resolveKinoboxResource, getKinoboxCacheUrl, isKinoboxResponseValid } from './routes.mjs'
+import { resolveKinopoiskTop, serveKinopoiskTop } from './kinopoisk-top.mjs'
 
-const VERSION = 'kinobox-content-h2-2026-10-06'
+const VERSION = 'kinobox-content-kp-top-2026-10-06'
 const ALLOWED = new Set([
   'https://dav2010id.github.io',
   'http://127.0.0.1:5173',
@@ -38,7 +39,7 @@ export default {
       'Access-Control-Allow-Methods': 'GET, OPTIONS',
       'Access-Control-Allow-Headers': 'Content-Type',
       'Access-Control-Expose-Headers':
-        'X-Search-Transport, X-Worker-Version, X-Search-Cache, X-Kinobox-Transport, X-Kinobox-Cache',
+        'X-Search-Transport, X-Worker-Version, X-Search-Cache, X-Kinobox-Transport, X-Kinobox-Cache, X-Top-Cache, X-Data-Source',
       Vary: 'Origin',
       'Cache-Control': 'no-store',
       'X-Search-Transport': 'h2',
@@ -50,8 +51,10 @@ export default {
     if (request.method === 'OPTIONS') return new Response(null, { status: 204, headers })
     if (request.method !== 'GET') return reply({ error: 'Method not allowed' }, 405)
     const url = new URL(request.url)
-    const resource = resolveKinoboxResource(url)
+    const resource = resolveKinopoiskTop(url) || resolveKinoboxResource(url)
     if (resource.error) return reply({ error: resource.error }, resource.status)
+    if (resource.kind === 'top')
+      return serveKinopoiskTop(resource, url, headers, ctx, caches.default)
     const cacheUrl = getKinoboxCacheUrl(url.origin, resource, VERSION)
     const cache = caches.default
     const cached = await cache.match(cacheUrl)

@@ -323,7 +323,7 @@ const getKpInfo = async (...args) => getKpInfoWithFallback(...args)
 const getPlayers = async (...args) => getPlayersWithFallback(...args)
 const getShikiPlayers = async (...args) => callWithProvider('getShikiPlayers', ...args)
 const shouldEnrichListSeo = import.meta.env.SSR
-// KinoBD list code is preserved, but Kinobox has no verified top-list replacement.
+// KinoBD code is preserved; remote top lists now use the Worker's fixed Kinopoisk query.
 const getMovies = async (...args) => {
   if (getCurrentProvider() === CONTENT_PROVIDERS.LOCAL) {
     try {
@@ -334,9 +334,16 @@ const getMovies = async (...args) => {
     } catch (error) {
       rethrowRequestCancellation(error)
       console.warn('[movies] getMovies failed on local backend', error)
+      // Do not silently present a rating top as local day/week popularity.
+      if (!KINOBD_ENABLED) throw error
     }
   }
-  if (!KINOBD_ENABLED) return []
+  if (!KINOBD_ENABLED) {
+    return normalizeMovieListResponse(
+      await (await loadProvider(CONTENT_PROVIDERS.KINOBOX)).getTopMovies(...args),
+      { enrichMissingSeo: shouldEnrichListSeo }
+    )
+  }
   try {
     return await normalizeMovieListResponse(
       await (await loadProvider('kinobd')).getMovies(...args),

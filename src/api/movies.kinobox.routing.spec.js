@@ -20,6 +20,40 @@ beforeEach(() => {
 afterEach(() => vi.unstubAllEnvs())
 
 describe('Kinobox content proxy routing', () => {
+  it('loads top cards through the shared Worker, not a browser GraphQL call', async () => {
+    const { getTopMovies } = await import('./movies.kinobox')
+    mocks.get.mockResolvedValue({
+      data: {
+        data: {
+          items: [
+            {
+              position: 1,
+              movie: {
+                id: 258687,
+                type: 'Film',
+                title: { russian: 'Интерстеллар', original: 'Interstellar' },
+                gallery: { posterUrl: '//poster.test/card' },
+                year: 2014,
+                rating: { kinopoisk: { value: 8.685, count: 42 } }
+              }
+            }
+          ]
+        }
+      }
+    })
+    const movies = await getTopMovies({ typeFilter: 'series', page: 2, limit: 36 })
+    expect(mocks.get).toHaveBeenCalledWith('/api/kinopoisk/top', {
+      params: { type: 'series', page: 2, limit: 36 },
+      timeout: 20000
+    })
+    expect(movies[0]).toMatchObject({
+      kp_id: 258687,
+      title: 'Интерстеллар',
+      source: 'kinopoisk',
+      poster_url: 'https://poster.test/card/300x450',
+      position: 1
+    })
+  })
   it('routes search to the permanent Worker and keeps request cancellation', async () => {
     const { apiSearch } = await import('./movies.kinobox')
     mocks.get.mockResolvedValue({
