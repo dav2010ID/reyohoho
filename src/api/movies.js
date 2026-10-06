@@ -131,31 +131,17 @@ const getPlayersWithFallback = async (...args) => {
   const [contentId] = args
   const order = getPlayerProviderOrder(provider)
 
-  const attempts = await Promise.all(
-    order.map(async (currentProvider) => {
-      const attemptStartedAt = Date.now()
-      try {
-        const providerApi = await loadProvider(currentProvider)
-        const players = await withProviderTimeout(providerApi.getPlayers(...args), currentProvider)
-        return {
-          currentProvider,
-          players,
-          duration: Date.now() - attemptStartedAt,
-          error: null
-        }
-      } catch (error) {
-        return {
-          currentProvider,
-          players: {},
-          duration: Date.now() - attemptStartedAt,
-          error
-        }
-      }
-    })
-  )
-
-  for (const attempt of attempts) {
-    const { currentProvider, players, duration, error } = attempt
+  for (const currentProvider of order) {
+    const attemptStartedAt = Date.now()
+    let players = {}
+    let error = null
+    try {
+      const providerApi = await loadProvider(currentProvider)
+      players = await withProviderTimeout(providerApi.getPlayers(...args), currentProvider)
+    } catch (requestError) {
+      error = requestError
+    }
+    const duration = Date.now() - attemptStartedAt
     const isTimeout = error?.name === 'PlayerProviderTimeoutError'
     const status = error ? (isTimeout ? 'timeout' : 'error') : hasPlayers(players) ? 'success' : 'empty'
     const attemptPayload = {
@@ -163,7 +149,7 @@ const getPlayersWithFallback = async (...args) => {
       kp_id: contentId,
       configured_source: provider,
       source: currentProvider,
-      fallback_used: currentProvider !== provider,
+      fallback_used: currentProvider !== order[0],
       duration_ms: Date.now() - startedAt,
       attempt_duration_ms: duration
     }
@@ -173,9 +159,10 @@ const getPlayersWithFallback = async (...args) => {
       attemptPayload
     )
     if (error) console.warn(`[movies] getPlayers failed on ${currentProvider}`, error)
+    if (!error && hasPlayers(players)) return mergePlayerMaps([players])
   }
 
-  return mergePlayerMaps(attempts.map((attempt) => attempt.players))
+  return {}
 }
 
 const callWithProvider = async (methodName, ...args) => {

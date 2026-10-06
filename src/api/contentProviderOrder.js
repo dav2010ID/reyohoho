@@ -20,11 +20,14 @@ const configuredFirst = (configuredProvider, providers) => [
 export const getPlayerProviderOrder = (configuredProvider) => {
   if (configuredProvider === CONTENT_PROVIDERS.LOCAL) return [CONTENT_PROVIDERS.LOCAL]
 
-  const aggregateProviders = [CONTENT_PROVIDERS.DDBB]
-  return configuredFirst(configuredProvider, [
-    ...REMOTE_PLAYER_PROVIDERS.filter((provider) => provider === configuredProvider),
-    ...aggregateProviders
-  ])
+  // Player discovery is a fallback chain, not a combined list of mirrors.
+  return [
+    CONTENT_PROVIDERS.DDBB,
+    ...(configuredProvider === CONTENT_PROVIDERS.DDBB_LIVE
+      ? [CONTENT_PROVIDERS.DDBB_LIVE]
+      : []),
+    CONTENT_PROVIDERS.KINOBOX
+  ].filter((provider) => REMOTE_PLAYER_PROVIDERS.includes(provider))
 }
 
 export const getMovieInfoProviderOrder = (configuredProvider) => {
