@@ -1,6 +1,7 @@
 import { useAuthStore } from '@/store/auth'
 import { useMainStore } from '@/store/main'
 import { normalizeHistory } from '../../migration/history-transfer/history-data.js'
+import { enrichListMetadata } from './listMetadata'
 
 export const cloudHistoryAvailable =
   import.meta.env.VITE_CLOUD_HISTORY_ENABLED === 'true' ||
@@ -45,12 +46,21 @@ export async function historyRequest(path = '', method = 'GET', body) {
 }
 
 export async function importCloudHistory(items) {
-  const normalized = normalizeHistory(items)
   const token = useAuthStore().token
+  const normalized = normalizeHistory(
+    await enrichListMetadata(normalizeHistory(items), {
+      isCurrent: () => useAuthStore().token === token
+    })
+  )
   for (let i = 0; i < normalized.length; i += 40) {
     if (useAuthStore().token !== token) throw new Error('Аккаунт изменился. Повторите операцию')
     await historyRequest('/import', 'POST', { history: normalized.slice(i, i + 40) })
   }
   if (useAuthStore().token !== token) throw new Error('Аккаунт изменился. Повторите операцию')
-  return normalizeHistory((await historyRequest()).history)
+  return normalizeHistory(
+    await enrichListMetadata(normalizeHistory((await historyRequest()).history), {
+      isCurrent: () => useAuthStore().token === token,
+      persist: (metadata) => historyRequest(`/${metadata.kp_id}`, 'PATCH', { metadata })
+    })
+  )
 }

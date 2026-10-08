@@ -1,5 +1,6 @@
 import { createPinia, setActivePinia } from 'pinia'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
+vi.mock('./listMetadata', () => ({ enrichListMetadata: async (items) => items }))
 
 let api, auth, main
 beforeEach(async () => {

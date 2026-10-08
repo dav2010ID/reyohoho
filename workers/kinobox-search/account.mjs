@@ -8,6 +8,7 @@ import {
   verifyWorkerSession
 } from './private-api.mjs'
 import { serveHistory } from './history.mjs'
+import { metadataUpdate, readMetadataPatch } from './metadata.mjs'
 
 const TYPES = new Set(['favorite', 'later', 'watching', 'completed', 'abandoned', 'history'])
 
@@ -87,6 +88,14 @@ export async function serveAccount(request, env, origin) {
       const response = await serveHistory(new Request(url, request), env, origin)
       if (request.method === 'GET' && response.ok) return reply((await response.json()).history)
       return response
+    }
+    if (id && request.method === 'PATCH') {
+      let metadata
+      try { metadata = await readMetadataPatch(request, id) }
+      catch { return reply({ error: 'Invalid metadata' }, 400) }
+      const update = metadataUpdate('account_lists', metadata, { userId: uid, id, type })
+      if (update) await db.prepare(update.sql).bind(...update.params).run()
+      return reply({ ok: true })
     }
     if (!id && request.method === 'GET') {
       const { results } = await db

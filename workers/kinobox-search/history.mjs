@@ -1,11 +1,12 @@
 import { normalizeHistory } from '../../migration/history-transfer/history-data.js'
 import { boundedJson, checkLimit, verifyWorkerSession } from './private-api.mjs'
+import { metadataUpdate, readMetadataPatch } from './metadata.mjs'
 
 export async function serveHistory(request, env, origin) {
   const headers = {
     'Content-Type': 'application/json; charset=utf-8',
     'Access-Control-Allow-Origin': origin || 'https://reyhoho.fun',
-    'Access-Control-Allow-Methods': 'GET, PUT, POST, DELETE, OPTIONS',
+    'Access-Control-Allow-Methods': 'GET, PUT, PATCH, POST, DELETE, OPTIONS',
     'Access-Control-Allow-Headers': 'Content-Type, Authorization',
     'Cache-Control': 'private, no-store',
     Vary: 'Origin',
@@ -28,7 +29,7 @@ export async function serveHistory(request, env, origin) {
   if (
     !(
       (root && ['GET', 'DELETE'].includes(request.method)) ||
-      (id && ['PUT', 'DELETE'].includes(request.method)) ||
+      (id && ['PUT', 'PATCH', 'DELETE'].includes(request.method)) ||
       (importing && request.method === 'POST')
     )
   )
@@ -82,6 +83,14 @@ export async function serveHistory(request, env, origin) {
     const db = env.HISTORY_DB.withSession
       ? env.HISTORY_DB.withSession('first-primary')
       : env.HISTORY_DB
+    if (request.method === 'PATCH') {
+      let metadata
+      try { metadata = await readMetadataPatch(request, id) }
+      catch { return reply({ error: 'Invalid metadata' }, 400) }
+      const update = metadataUpdate('user_history', metadata, { userId, id })
+      if (update) await db.prepare(update.sql).bind(...update.params).run()
+      return reply({ ok: true })
+    }
     if (request.method === 'GET') {
       const { results } = await db
         .prepare(

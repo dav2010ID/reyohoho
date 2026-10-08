@@ -5,6 +5,7 @@ import { historyRequest, isCloudHistoryEnabled } from './cloudHistory'
 import { normalizeHistory } from '../../migration/history-transfer/history-data.js'
 import { useAuthStore } from '@/store/auth'
 import { workerAccountAdapter, workerAccountRequest, workerAuthEnabled } from './workerAccount'
+import { enrichListMetadata } from './listMetadata'
 import {
   addLocalListItem,
   clearLocalList,
@@ -19,6 +20,12 @@ const apiCall = async (callFn) => {
 }
 
 const addToList = async (id, type, metadata = null) => {
+  const token = useAuthStore().token
+  if (useAuthStore().isWorkerSession) {
+    ;[metadata] = await enrichListMetadata([{ ...metadata, kp_id: String(id) }], {
+      isCurrent: () => useAuthStore().token === token
+    })
+  }
   const payload = metadata ? { metadata } : undefined
   addLocalListItem(type, id, metadata || {})
   if (type === USER_LIST_TYPES_ENUM.HISTORY && isCloudHistoryEnabled()) {
@@ -52,25 +59,42 @@ const delAllFromList = async (type) => {
 }
 
 const getMyLists = async (type) => {
+  const auth = useAuthStore()
+  const token = auth.token
+  const hydrate = (items) =>
+    enrichListMetadata(items, {
+      isCurrent: () => useAuthStore().token === token,
+      persist: auth.isWorkerSession
+        ? (metadata) =>
+            type === USER_LIST_TYPES_ENUM.HISTORY
+              ? historyRequest(`/${metadata.kp_id}`, 'PATCH', { metadata })
+              : workerAccountRequest(`/list/${type}/${metadata.kp_id}`, 'PATCH', { metadata })
+        : undefined
+    })
   if (type === USER_LIST_TYPES_ENUM.HISTORY && isCloudHistoryEnabled()) {
-    const history = normalizeHistory((await historyRequest()).history)
+    const history = await hydrate(normalizeHistory((await historyRequest()).history))
     replaceLocalList(type, history)
     return history
   }
   try {
     const { data } = await apiCall((api) => api.get(`/list/${type}`))
-    const normalized = await normalizeMovieListResponse(data, {
-      enrichMissingSeo: type !== USER_LIST_TYPES_ENUM.HISTORY
-    })
+    const normalized = await hydrate(
+      await normalizeMovieListResponse(data, {
+        enrichMissingSeo: type !== USER_LIST_TYPES_ENUM.HISTORY
+      })
+    )
     replaceLocalList(type, normalized)
     return normalized
   } catch (error) {
+    if (useAuthStore().token !== token) throw error
     if (!error.response) return getLocalList(type)
     throw error
   }
 }
 
 const getUserLists = async (type, userId) => {
+  if (useAuthStore().isWorkerSession && String(useAuthStore().user?.id) === String(userId))
+    return getMyLists(type)
   const { data } = await apiCall((api) => api.get(`/user-list/${userId}/${type}`))
   return await normalizeMovieListResponse(data, {
     enrichMissingSeo: type !== USER_LIST_TYPES_ENUM.HISTORY

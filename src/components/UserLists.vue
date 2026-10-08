@@ -118,6 +118,8 @@ import Notification from '@/components/notification/ToastMessage.vue'
 import BaseModal from '@/components/BaseModal.vue'
 import { useMainStore } from '@/store/main'
 import { logoutAndRedirect } from '@/utils/authSession'
+import { enrichListMetadata } from '@/api/listMetadata'
+import { importCloudHistory, isCloudHistoryEnabled } from '@/api/cloudHistory'
 
 const movies = ref([])
 const loading = ref(true)
@@ -266,7 +268,8 @@ const openImportDialog = () => {
 const parseImportPayload = (rawPayload) => {
   const payload = rawPayload && typeof rawPayload === 'object' ? rawPayload : {}
   const sourceLists = payload?.data?.serverLists || payload?.serverLists || payload?.lists || {}
-  const sourceLocalHistory = payload?.data?.localHistory || payload?.localHistory || payload?.history || []
+  const sourceLocalHistory =
+    payload?.data?.localHistory || payload?.localHistory || payload?.history || []
 
   const parsedLists = {}
   exportableListTypes.forEach((type) => {
@@ -289,6 +292,7 @@ const importServerLists = async (parsedLists) => {
 
   let addedCount = 0
   let failedCount = 0
+  const token = authStore.token
 
   const currentLists = {}
   for (const type of exportableListTypes) {
@@ -305,6 +309,7 @@ const importServerLists = async (parsedLists) => {
   for (const type of exportableListTypes) {
     const incomingIds = parsedLists[type] || []
     for (const kpId of incomingIds) {
+      if (authStore.token !== token) throw new Error('Аккаунт изменился. Повторите импорт')
       if (currentLists[type].has(kpId)) continue
       try {
         await addToList(kpId, type)
@@ -353,7 +358,13 @@ const handleImportFileSelect = async (event) => {
 
     if (hasLocalHistory) {
       const beforeCount = mainStore.history.length
-      const mergedHistory = mergeHistory(mainStore.history, parsedPayload.localHistory)
+      const token = authStore.token
+      const importedHistory = await enrichListMetadata(parsedPayload.localHistory, {
+        isCurrent: () => authStore.token === token
+      })
+      const mergedHistory = isCloudHistoryEnabled()
+        ? await importCloudHistory(importedHistory)
+        : mergeHistory(mainStore.history, importedHistory)
       mainStore.setHistory(mergedHistory)
       const importedCount = Math.max(0, mergedHistory.length - beforeCount)
       summary.push(`история: +${importedCount}`)
@@ -364,7 +375,9 @@ const handleImportFileSelect = async (event) => {
       summary.length ? `Импорт завершен (${summary.join(', ')})` : 'Импорт завершен'
     )
   } catch {
-    notificationRef.value.showNotification('Не удалось импортировать списки. Проверьте соединение и выберите файл, сохранённый через экспорт списков на сайте.')
+    notificationRef.value.showNotification(
+      'Не удалось импортировать списки. Проверьте соединение и выберите файл, сохранённый через экспорт списков на сайте.'
+    )
   } finally {
     isImporting.value = false
     loading.value = false
@@ -775,4 +788,3 @@ onMounted(() => {
   display: none;
 }
 </style>
-
