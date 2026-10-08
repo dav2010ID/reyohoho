@@ -14,7 +14,7 @@ import { getMovieIdentifier } from './movieSlug'
 describe('movieSeo', () => {
   it('uses the directly served nested SSG URL as canonical', () => {
     expect(buildMovieCanonicalUrl('123', 'test-movie')).toBe(
-      'https://dav2010id.github.io/reyohoho/movie/123/test-movie/'
+      'https://reyhoho.fun/movie/123/test-movie/'
     )
   })
 

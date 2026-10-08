@@ -3,8 +3,12 @@ import { requestKinoboxHttp2 } from './kinobox-http2-vendored.mjs'
 import { resolveKinoboxResource, getKinoboxCacheUrl, isKinoboxResponseValid } from './routes.mjs'
 import { resolveKinopoiskTop, serveKinopoiskTop } from './kinopoisk-top.mjs'
 
-const VERSION = 'kinobox-content-kp-top-2026-10-06'
+const VERSION = 'kinobox-content-custom-domain-2026-10-08'
 const ALLOWED = new Set([
+  'https://reyhoho.fun',
+  'https://www.reyhoho.fun',
+  'http://reyhoho.fun',
+  'http://www.reyhoho.fun',
   'https://dav2010id.github.io',
   'http://127.0.0.1:5173',
   'http://localhost:5173'
@@ -35,7 +39,7 @@ export default {
     const origin = request.headers.get('Origin')
     const headers = {
       'Content-Type': 'application/json; charset=utf-8',
-      'Access-Control-Allow-Origin': ALLOWED.has(origin) ? origin : 'https://dav2010id.github.io',
+      'Access-Control-Allow-Origin': ALLOWED.has(origin) ? origin : 'https://reyhoho.fun',
       'Access-Control-Allow-Methods': 'GET, OPTIONS',
       'Access-Control-Allow-Headers': 'Content-Type',
       'Access-Control-Expose-Headers':

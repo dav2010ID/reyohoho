@@ -9,8 +9,8 @@ import {
 const FALLBACK_DESCRIPTION =
   'ReYohoho - online movie and TV streaming with collections, ratings, and simple navigation.'
 const SITE_NAME = 'ReYohoho'
-const SITE_ORIGIN = import.meta.env.VITE_SITE_ORIGIN || 'https://dav2010id.github.io'
-const SITE_BASE_PATH = import.meta.env.VITE_BASE_URL || '/reyohoho'
+const SITE_ORIGIN = import.meta.env.VITE_SITE_ORIGIN || 'https://reyhoho.fun'
+const SITE_BASE_PATH = import.meta.env.VITE_BASE_URL || '/'
 const runtimeMoviesByKpId = new Map()
 let normalizedMovies = []
 let moviesByKpId = new Map()

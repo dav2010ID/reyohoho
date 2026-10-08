@@ -4,8 +4,8 @@ import { pathToFileURL } from 'node:url'
 import { normalizeBasePath } from '../src/utils/basePath.js'
 import { resolveCanonicalMovieIdentity } from '../src/utils/movieSlug.js'
 
-const SITE_ORIGIN = process.env.VITE_SITE_ORIGIN || 'https://dav2010id.github.io'
-const SITE_BASE_PATH = process.env.VITE_BASE_URL || '/reyohoho'
+const SITE_ORIGIN = process.env.VITE_SITE_ORIGIN || 'https://reyhoho.fun'
+const SITE_BASE_PATH = process.env.VITE_BASE_URL || '/'
 const MOVIES_PATH = path.resolve(process.cwd(), 'src/data/movies.json')
 const ROBOTS_PATH = path.resolve(process.cwd(), 'public/robots.txt')
 const SITEMAP_PATH = path.resolve(process.cwd(), 'public/sitemap.xml')

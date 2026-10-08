@@ -63,7 +63,8 @@ Other paths are rejected; arbitrary upstream URLs and headers cannot be supplied
 Invalid responses and upstream errors are not cached. Cache keys include the
 resource path and validated parameters, not the caller's timestamp.
 Requests have a 15-second deadline and 1 MiB response limit. Browser origins are restricted to
-GitHub Pages and local development; CORS is **not** authentication and
+`reyhoho.fun` and `www.reyhoho.fun` (HTTPS and transitional HTTP), the old
+GitHub Pages origin, and local development; CORS is **not** authentication and
 does not prevent requests made outside browsers. No rate-limit binding is
 configured. Monitor CPU usage/error rates before broader rollout.
 
@@ -83,13 +84,21 @@ without direct Kinobox API requests. Embedded player playback is not covered by
 this API verification.
 
 Deployment bundle SHA256:
-`cc10b356f75d30933506653c6aa6ed417f4f9d98a336252c2bd4d376fdc2f9aa`
+`b074cd4505ecd91d65f46bcbab6097b17d4770c2886cf4b09074c303a781d39a`
 
 Deployed version (100%):
-`ffb2d1bd-3515-4da1-8280-618a101a7625`
+`c3b69a24-6c6b-4ced-ae56-8d4dec879ce6`
 
 Rollback version before this deployment:
-`c6804158-4430-49f8-a9a3-b62f2a792840`
+`ffb2d1bd-3515-4da1-8280-618a101a7625`
+
+On October 8, 2026, the custom-domain CORS update was deployed through the API.
+The prior bundle hash was checked before replacement, and the updated module
+was verified byte-for-byte against the local Wrangler dry-run bundle. All
+existing bindings/settings were retained; no temporary resources were needed.
+Preflight requests from both custom-domain hostnames, old GitHub Pages and
+localhost passed. Search, movie 301, players and top returned HTTP 200 with
+`Access-Control-Allow-Origin: https://reyhoho.fun`; unrelated origins stayed 403.
 
 The top deployment was verified on October 6, 2026: all seven pages returned
 250 unique film IDs and 250 unique series IDs, repeated requests reported cache

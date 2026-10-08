@@ -1,7 +1,7 @@
 import { normalizeBasePath } from './basePath'
 
-const DEFAULT_SITE_ORIGIN = 'https://dav2010id.github.io'
-const DEFAULT_BASE_PATH = '/reyohoho'
+const DEFAULT_SITE_ORIGIN = 'https://reyhoho.fun'
+const DEFAULT_BASE_PATH = '/'
 
 export const buildStaticCanonicalUrl = (
   routePath,

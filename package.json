@@ -10,7 +10,7 @@
     "seo:prepare": "node scripts/fetch-seo-data.js && node scripts/generate-seo-assets.js",
     "postbuild:gh-pages": "node scripts/postbuild-gh-pages.js",
     "build": "vite-ssg build && node scripts/postbuild-gh-pages.js",
-    "build:github": "cross-env VITE_BASE_URL=/reyohoho/ vite-ssg build --mode github && cross-env VITE_BASE_URL=/reyohoho/ node scripts/postbuild-gh-pages.js",
+    "build:github": "cross-env VITE_BASE_URL=/ vite-ssg build --mode github && cross-env VITE_BASE_URL=/ node scripts/postbuild-gh-pages.js",
     "preview": "vite preview",
     "test:unit": "vitest",
     "lint": "eslint --ext .js,.vue src",

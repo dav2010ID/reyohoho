@@ -29,11 +29,11 @@ describe('static route SEO', () => {
 
     expect(head.link).toContainEqual({
       rel: 'canonical',
-      href: 'https://dav2010id.github.io/reyohoho/contact/'
+      href: 'https://reyhoho.fun/contact/'
     })
     expect(head.meta).toContainEqual({
       property: 'og:url',
-      content: 'https://dav2010id.github.io/reyohoho/contact/'
+      content: 'https://reyhoho.fun/contact/'
     })
   })
 })

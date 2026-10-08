@@ -230,8 +230,8 @@ const randomLoading = ref(false)
 const randomError = ref('')
 
 const searchInput = ref(null)
-const siteOrigin = import.meta.env.VITE_SITE_ORIGIN || 'https://dav2010id.github.io'
-const basePath = normalizeBasePath(import.meta.env.VITE_BASE_URL || '/reyohoho')
+const siteOrigin = import.meta.env.VITE_SITE_ORIGIN || 'https://reyhoho.fun'
+const basePath = normalizeBasePath(import.meta.env.VITE_BASE_URL || '/')
 const canonicalUrl = `${siteOrigin}${basePath || ''}/`
 const homeTitle = 'ReYohoho - поиск фильмов и сериалов онлайн бесплатно'
 const homeDescription =
