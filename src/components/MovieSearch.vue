@@ -60,6 +60,7 @@
 
       <!-- Контейнер для истории и результатов -->
       <div class="content-container">
+        <HistoryMigrationNotice v-show="!searchTerm" />
         <!-- История просмотра -->
         <div v-if="!searchTerm">
           <h2>
@@ -176,6 +177,7 @@ import { useRouter } from 'vue-router'
 import { useHead } from '@unhead/vue'
 import SpinnerLoading from '@/components/SpinnerLoading.vue'
 import RandomMovieModal from '@/components/RandomMovieModal.vue'
+import HistoryMigrationNotice from '@/components/HistoryMigrationNotice.vue'
 import { getMovieSeoPath } from '@/utils/movieSeo'
 import { debugLog } from '@/utils/logger'
 import { createLatestRequestGuard } from '@/utils/latestRequest'

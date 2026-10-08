@@ -66,4 +66,12 @@ describe('history transfer confirmation', () => {
     expect(wrapper.text()).not.toContain('Подтвердить импорт')
     wrapper.unmount()
   })
+  it('offers transfer and JSON in compact mode without cloud deletion controls', () => {
+    const wrapper = mount(HistorySyncSettings, { props: { compact: true } })
+    expect(wrapper.text()).toContain('Перенести со старого сайта')
+    expect(wrapper.text()).toContain('Импорт JSON')
+    expect(wrapper.text()).not.toContain('Удалить облачную историю')
+    expect(wrapper.text()).not.toContain('Экспорт JSON')
+    wrapper.unmount()
+  })
 })

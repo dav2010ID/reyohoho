@@ -1,46 +1,46 @@
 <template>
   <section class="history-sync">
-    <h4>Облачная история и перенос</h4>
-    <p>
+    <h4 v-if="!compact">Облачная история и перенос</h4>
+    <p v-if="!compact">
       Локальная история остаётся в браузере. JSON и перенос со старого сайта не содержат токенов.
     </p>
-    <p v-if="cloudHistoryAvailable">
+    <p v-if="!compact && cloudHistoryAvailable">
       {{
         enabled
           ? 'История хранится в Cloudflare для текущего аккаунта.'
           : 'Для синхронизации войдите через Telegram и включите облачную историю.'
       }}
     </p>
-    <p v-else>Облачная история подготовлена, но ещё не включена на сервере.</p>
-    <p v-if="enabled">
+    <p v-else-if="!compact">Облачная история подготовлена, но ещё не включена на сервере.</p>
+    <p v-if="!compact && enabled">
       После удаления в облаке остаются только ID как отметки удаления: повторный импорт их не
       восстановит.
     </p>
     <div class="history-actions">
       <button
-        v-if="cloudHistoryAvailable && auth.isAuthenticated && !enabled"
+        v-if="!compact && cloudHistoryAvailable && auth.isAuthenticated && !enabled"
         :disabled="busy"
         @click="enable"
       >
         Включить и импортировать локальную историю
       </button>
-      <button v-if="enabled" :disabled="busy" @click="refresh">Загрузить из облака</button>
-      <button v-if="enabled" :disabled="busy" @click="uploadLocal">
+      <button v-if="!compact && enabled" :disabled="busy" @click="refresh">Загрузить из облака</button>
+      <button v-if="!compact && enabled" :disabled="busy" @click="uploadLocal">
         Добавить локальную историю в облако
       </button>
       <button
-        v-if="enabled && !auth.isWorkerSession"
+        v-if="!compact && enabled && !auth.isWorkerSession"
         :disabled="busy"
         @click="main.cloudHistoryAccount = null"
       >
         Отключить синхронизацию
       </button>
-      <button v-if="enabled" :disabled="busy" @click="clearCloud">Удалить облачную историю</button>
+      <button v-if="!compact && enabled" :disabled="busy" @click="clearCloud">Удалить облачную историю</button>
       <button :disabled="busy" @click="transfer">Перенести со старого сайта</button>
-      <button v-if="guestBackup.length" :disabled="busy" @click="pending = guestBackup">
+      <button v-if="!compact && guestBackup.length" :disabled="busy" @click="pending = guestBackup">
         Импортировать сохранённую гостевую историю
       </button>
-      <button @click="download">Экспорт JSON</button>
+      <button v-if="!compact" @click="download">Экспорт JSON</button>
       <label
         >Импорт JSON
         <input type="file" accept=".json,application/json" :disabled="busy" @change="readFile"
@@ -81,6 +81,8 @@ import { addToList, getMyLists } from '@/api/user'
 import { USER_LIST_TYPES_ENUM } from '@/constants'
 import { mergeHistory, normalizeHistory } from '../../migration/history-transfer/history-data.js'
 
+defineProps({ compact: { type: Boolean, default: false } })
+const emit = defineEmits(['imported'])
 const auth = useAuthStore()
 const main = useMainStore()
 const enabled = computed(isCloudHistoryEnabled)
@@ -185,6 +187,7 @@ function acceptImport() {
     }
     main.setHistory(history)
     pending.value = null
+    emit('imported')
   })
 }
 function download() {
@@ -205,6 +208,7 @@ function download() {
 <style scoped>
 .history-sync {
   margin-top: 24px;
+  text-align: left;
 }
 .history-sync p {
   line-height: 1.5;
