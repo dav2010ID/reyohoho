@@ -26,7 +26,11 @@ const addToList = async (id, type, metadata = null) => {
       isCurrent: () => useAuthStore().token === token
     })
   }
-  const payload = metadata ? { metadata } : undefined
+  // Cloud lists store cards, not full provider responses (cast, trailers, raw_data).
+  // Preserve the legacy backend payload contract.
+  const payload = useAuthStore().isWorkerSession
+    ? { metadata: normalizeHistory([{ ...metadata, kp_id: id }])[0] }
+    : metadata ? { metadata } : undefined
   addLocalListItem(type, id, metadata || {})
   if (type === USER_LIST_TYPES_ENUM.HISTORY && isCloudHistoryEnabled()) {
     const [item] = normalizeHistory([{ ...metadata, kp_id: id }])
@@ -65,10 +69,12 @@ const getMyLists = async (type) => {
     enrichListMetadata(items, {
       isCurrent: () => useAuthStore().token === token,
       persist: auth.isWorkerSession
-        ? (metadata) =>
-            type === USER_LIST_TYPES_ENUM.HISTORY
+        ? (item) => {
+            const [metadata] = normalizeHistory([item])
+            return type === USER_LIST_TYPES_ENUM.HISTORY
               ? historyRequest(`/${metadata.kp_id}`, 'PATCH', { metadata })
               : workerAccountRequest(`/list/${type}/${metadata.kp_id}`, 'PATCH', { metadata })
+          }
         : undefined
     })
   if (type === USER_LIST_TYPES_ENUM.HISTORY && isCloudHistoryEnabled()) {

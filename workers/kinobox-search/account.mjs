@@ -11,6 +11,8 @@ import { serveHistory } from './history.mjs'
 import { metadataUpdate, readMetadataPatch } from './metadata.mjs'
 
 const TYPES = new Set(['favorite', 'later', 'watching', 'completed', 'abandoned', 'history'])
+// Older clients send full provider responses. Bound reads, then store only card fields.
+const MAX_LIST_BODY_BYTES = 64 * 1024
 
 export async function serveAccount(request, env, origin) {
   const reply = privateReply(origin)
@@ -120,11 +122,13 @@ export async function serveAccount(request, env, origin) {
       try {
         if (!(request.headers.get('Content-Type') || '').startsWith('application/json'))
           throw new Error('JSON required')
-        const body = await boundedJson(request.body, 8192)
+        const body = await boundedJson(request.body, MAX_LIST_BODY_BYTES)
         ;[item] = normalizeHistory([
           { ...body.metadata, kp_id: id, addedAt: new Date().toISOString() }
         ])
-      } catch {
+      } catch (error) {
+        if (error.message === 'Body too large')
+          return reply({ error: 'Metadata payload too large' }, 413)
         return reply({ error: 'Invalid metadata' }, 400)
       }
       await db
