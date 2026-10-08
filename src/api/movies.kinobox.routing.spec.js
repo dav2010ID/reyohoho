@@ -64,7 +64,7 @@ describe('Kinobox content proxy routing', () => {
     expect(mocks.get).toHaveBeenCalledWith(
       '/api/movies/search/',
       expect.objectContaining({
-        baseURL: 'https://lively-cloud-4e31.reyohoho-search.workers.dev',
+        baseURL: 'https://api.reyhoho.fun',
         signal,
         timeout: 20000,
         params: { query: 'Матрица', ts: expect.any(Number) }
@@ -89,7 +89,7 @@ describe('Kinobox content proxy routing', () => {
     await getPlayersRaw(301)
     expect(mocks.create).toHaveBeenCalledWith(
       expect.objectContaining({
-        baseURL: 'https://lively-cloud-4e31.reyohoho-search.workers.dev'
+        baseURL: 'https://api.reyhoho.fun'
       })
     )
     expect(mocks.get.mock.calls[0][1]).not.toHaveProperty('baseURL')

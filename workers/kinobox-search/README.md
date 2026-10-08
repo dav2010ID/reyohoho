@@ -25,7 +25,13 @@ The trust store is scoped to ISRG Root X1/X2. TLS library supplemental roots
 are cleared before the first handshake.
 
 Public endpoint after deployment:
-`https://lively-cloud-4e31.reyohoho-search.workers.dev/?query=Матрица`
+`https://api.reyhoho.fun/?query=Матрица`
+
+The custom domain is attached to the same `lively-cloud-4e31` Worker. DNS and
+its TLS certificate are managed by Cloudflare. The frontend uses this custom
+domain by default. The previous `workers.dev` endpoint and preview/version URLs
+are disabled (`workers_dev: false`, `preview_urls: false`). Old open tabs using
+the previous endpoint need to reload to receive the updated frontend.
 
 The frontend uses this Worker by default for search, movie cards/details and
 player lists. `VITE_KINOBOX_API_URL` overrides the shared base URL;

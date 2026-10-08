@@ -4,7 +4,7 @@ let isErrorSimulationEnabled = false
 const simulatedErrorCode = 500
 
 const KINOBOX_BASE_URL =
-  import.meta.env.VITE_KINOBOX_API_URL || 'https://lively-cloud-4e31.reyohoho-search.workers.dev'
+  import.meta.env.VITE_KINOBOX_API_URL || 'https://api.reyhoho.fun'
 // All Kinobox content uses the same Worker; a separate search override remains supported.
 const KINOBOX_SEARCH_BASE_URL = import.meta.env.VITE_KINOBOX_SEARCH_API_URL || KINOBOX_BASE_URL
 

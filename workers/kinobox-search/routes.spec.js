@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest'
 import { resolveKinoboxResource, getKinoboxCacheUrl, isKinoboxResponseValid } from './routes.mjs'
 
-const origin = 'https://lively-cloud-4e31.reyohoho-search.workers.dev'
+const origin = 'https://api.reyhoho.fun'
 const resolve = (path) => resolveKinoboxResource(new URL(path, origin))
 
 describe('Kinobox Worker routes', () => {
