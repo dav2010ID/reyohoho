@@ -157,14 +157,14 @@ export const useApiStore = defineStore(API_STORE_NAME, {
 
     getCurrentApiDescription() {
       if (this.backendMode === 'local') {
-        return 'Локальный backend'
+        return 'Локальный сервер'
       }
       if (!this.currentApiUrl || !this.availableEndpoints.length) {
-        return 'Fallback API'
+        return 'Резервный сервер'
       }
 
       const endpoint = this.availableEndpoints.find((ep) => ep.url === this.currentApiUrl)
-      return endpoint ? endpoint.description : 'Unknown API'
+      return endpoint ? endpoint.description : 'Неизвестный сервер'
     },
 
     shouldRecheckEndpoints() {

@@ -64,7 +64,7 @@
         >
         <SliderRound v-model="showFavoriteTooltip"
           >Стиль отображения кнопок избранного:
-          {{ showFavoriteTooltip ? 'Тултип' : 'Все кнопки' }}</SliderRound
+          {{ showFavoriteTooltip ? 'Всплывающее меню' : 'Все кнопки' }}</SliderRound
         >
       </div>
 
@@ -95,16 +95,16 @@
       </div>
 
       <div v-show="activeSettingsTab === 'api'" class="settings-group">
-        <h3>API</h3>
-        <h4 class="api-subtitle">Backend приложения</h4>
+        <h3>Источники данных</h3>
+        <h4 class="api-subtitle">Сервер приложения</h4>
         <div class="radio-group">
           <label class="radio">
             <input v-model="backendMode" type="radio" value="auto" />
-            <span class="radio-label">Автоматический RHServ</span>
+            <span class="radio-label">Автоматический выбор сервера</span>
           </label>
           <label class="radio">
             <input v-model="backendMode" type="radio" value="local" />
-            <span class="radio-label">Локальный backend (localhost:8000)</span>
+            <span class="radio-label">Локальный сервер (для самостоятельной настройки)</span>
           </label>
         </div>
         <p class="api-note backend-status" :class="backendStatusClass">
@@ -121,14 +121,14 @@
             @click="checkSelectedBackend"
           >
             <i class="fa-solid fa-rotate"></i>
-            {{ apiStore.isCheckingHealth ? 'Проверка…' : 'Проверить backend' }}
+            {{ apiStore.isCheckingHealth ? 'Проверка…' : 'Проверить соединение' }}
           </button>
         </div>
         <h4 class="api-subtitle">Источники контента</h4>
         <div class="radio-group">
           <label class="radio">
             <input v-model="contentApiProvider" type="radio" value="local" />
-            <span class="radio-label">Локальный backend (search/cards/players)</span>
+            <span class="radio-label">Локальный сервер (поиск, информация о фильмах и плееры)</span>
           </label>
           <!-- KinoBD temporarily disabled; keep option for reactivation.
           <label class="radio">
@@ -138,26 +138,26 @@
           -->
           <label class="radio">
             <input v-model="contentApiProvider" type="radio" value="kinobox" />
-            <span class="radio-label">Kinobox (search/cards/players, по умолчанию)</span>
+            <span class="radio-label">Kinobox (поиск, информация о фильмах и плееры, по умолчанию)</span>
           </label>
           <label class="radio">
             <input v-model="contentApiProvider" type="radio" value="ddbb" />
-            <span class="radio-label">DDBB (players)</span>
+            <span class="radio-label">DDBB (плееры)</span>
           </label>
           <label class="radio">
             <input v-model="contentApiProvider" type="radio" value="ddbb_live" />
-            <span class="radio-label">DDBB Live (players)</span>
+            <span class="radio-label">DDBB Live (плееры)</span>
           </label>
         </div>
         <p class="api-note">
-          Выбранный источник используется первым. Для локального backend внешние провайдеры остаются резервными.
-          Комментарии, тайминги, рейтинги и другие backend-функции идут через выбранный backend.
+          Выбранный источник используется первым. Если локальный сервер не отвечает, используются резервные источники.
+          Комментарии, тайминги, рейтинги и другие функции сайта работают через выбранный сервер приложения.
         </p>
-        <h4 class="api-subtitle">API для поиска</h4>
+        <h4 class="api-subtitle">Источник поиска</h4>
         <div class="radio-group">
           <label class="radio">
             <input v-model="searchApiProvider" type="radio" value="local" />
-            <span class="radio-label">Локальный backend</span>
+            <span class="radio-label">Локальный сервер</span>
           </label>
           <label class="radio">
             <input v-model="searchApiProvider" type="radio" value="kinobox" />
@@ -276,7 +276,7 @@ const settingsTabs = [
   { id: 'appearance', label: 'Вид', description: 'Фон, тема и карточки' },
   { id: 'player', label: 'Плеер', description: 'Плеер, трейлеры и режим стримера' },
   { id: 'behavior', label: 'Поведение', description: 'История, навигация и комментарии' },
-  { id: 'api', label: 'API', description: 'Источники данных и плееров' },
+  { id: 'api', label: 'Источники', description: 'Данные, поиск и плееры' },
   { id: 'about', label: 'О сайте', description: 'Версия приложения' }
 ]
 const activeSettingsSection = computed(
@@ -292,9 +292,9 @@ const backendMode = computed({
 const backendStatusText = computed(() => {
   if (apiStore.isCheckingHealth) return 'Проверяется'
   if (apiStore.backendMode !== 'local') return 'Автоматический выбор активен'
-  if (apiStore.localApiHealthy === true) return 'Локальный backend доступен'
-  if (apiStore.localApiHealthy === false) return 'Локальный backend недоступен'
-  return 'Локальный backend ещё не проверен'
+  if (apiStore.localApiHealthy === true) return 'Локальный сервер доступен'
+  if (apiStore.localApiHealthy === false) return 'Локальный сервер недоступен'
+  return 'Локальный сервер ещё не проверен'
 })
 
 const backendStatusClass = computed(() => ({
@@ -312,9 +312,9 @@ const authorizationStatus = computed(() =>
 const authorizationStatusText = computed(
   () =>
     ({
-      anonymous: 'Авторизация: пользователь не вошёл',
-      allowed: 'Авторизация: JWT разрешён для этого origin',
-      blocked: 'Авторизация: JWT не отправляется недоверенному origin'
+      anonymous: 'Вы не вошли в аккаунт',
+      allowed: 'Выбранному серверу разрешено получать данные входа',
+      blocked: 'Данные входа не передаются: выбранный сервер не входит в список доверенных'
     })[authorizationStatus.value]
 )
 

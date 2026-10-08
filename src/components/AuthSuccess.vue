@@ -5,11 +5,11 @@
       <div class="spinner"></div>
     </div>
     <div v-if="moveHistory" class="loading-message2">
-      <p>Переносим историю...</p>
+      <p>Синхронизируем историю и списки...</p>
       <div class="spinner"></div>
     </div>
     <div v-if="error" class="error-message">
-      <p>Ошибка авторизации: {{ error }}</p>
+      <p>{{ error }}</p>
       <router-link to="/login" class="retry-button">Попробовать снова</router-link>
     </div>
     <div v-if="success" class="success-message">
@@ -50,7 +50,7 @@ export default {
         const token = urlParams.get('token') || authStore.token
 
         if (!token) {
-          throw new Error('Токен авторизации не найден')
+          throw new Error('Не удалось подтвердить вход. Войдите через Telegram ещё раз.')
         }
         authStore.setToken(token)
 
@@ -77,7 +77,7 @@ export default {
             if (
               hasLocalData &&
               window.confirm(
-                'Добавить локальную историю и списки этого браузера в ваш новый аккаунт Cloudflare?'
+                'Синхронизировать локальную историю и списки этого браузера с облаком?'
               )
             ) {
               response = await importCloudHistory(localHistory.slice(0, 1000))
@@ -145,7 +145,7 @@ export default {
           }
         } catch (err) {
           console.error('Auth error:', err)
-          error.value = 'Произошла ошибка при переноси истории, попробуйте позднее...'
+          error.value = 'Не удалось синхронизировать историю и списки. Попробуйте позже в настройках.'
           moveHistory.value = false
         }
         moveHistory.value = false
@@ -155,7 +155,7 @@ export default {
         }, 2000)
       } catch (err) {
         console.error('Auth error:', err)
-        error.value = err.message
+        error.value = 'Не удалось завершить вход. Попробуйте войти через Telegram ещё раз.'
         loading.value = false
       }
     }

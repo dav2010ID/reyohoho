@@ -25,7 +25,7 @@ export function startHistoryTransfer(onHistory, onError) {
       const history = validateTransferMessage(event, popup, nonce)
       if (!history) return
       cleanup()
-      if (!history.length) { onError('В старом браузере не найдена история'); return }
+      if (!history.length) { onError('На старом сайте не найдена история в этом браузере. Попробуйте браузер и профиль, которыми пользовались раньше.'); return }
       onHistory(history)
     } catch { cleanup(); onError('Некорректный формат истории') }
   }
@@ -33,11 +33,11 @@ export function startHistoryTransfer(onHistory, onError) {
   closedCheck = setInterval(() => {
     if (!popup.closed) return
     cleanup()
-    onError('Окно переноса закрыто. Начните перенос заново или импортируйте JSON')
+    onError('Окно переноса закрыто. Начните перенос заново или загрузите историю из файла')
   }, 1000)
   timeout = setTimeout(() => {
     cleanup()
-    onError('Перенос не завершён. Проверьте, опубликована ли страница переноса')
+    onError('Не удалось завершить перенос. Попробуйте снова или скачайте файл истории на странице переноса.')
   }, 120000)
   return cleanup
 }

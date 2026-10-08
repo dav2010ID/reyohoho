@@ -364,7 +364,7 @@ const handleImportFileSelect = async (event) => {
       summary.length ? `Импорт завершен (${summary.join(', ')})` : 'Импорт завершен'
     )
   } catch {
-    notificationRef.value.showNotification('Ошибка импорта: проверьте формат JSON')
+    notificationRef.value.showNotification('Не удалось импортировать списки. Проверьте соединение и выберите файл, сохранённый через экспорт списков на сайте.')
   } finally {
     isImporting.value = false
     loading.value = false

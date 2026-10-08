@@ -16,6 +16,12 @@ beforeEach(async () => {
 afterEach(() => { vi.unstubAllGlobals(); vi.unstubAllEnvs() })
 
 describe('Worker account routing', () => {
+  it('explains service unavailability without exposing backend terminology', async () => {
+    vi.stubGlobal('fetch', vi.fn(async () => new globalThis.Response('{}', { status: 503 })))
+    await expect(api.workerAccountRequest('/user')).rejects.toThrow(
+      'Сервис аккаунта временно недоступен. Попробуйте позже.'
+    )
+  })
   it('recognizes own sessions and sends them only to the fixed custom domain', async () => {
     const fetchMock = vi.fn(async () => new globalThis.Response('{"id":"123"}'))
     vi.stubGlobal('fetch', fetchMock)

@@ -35,7 +35,7 @@ export async function workerAccountRequest(
   if (!response.ok) {
     const error = new Error(
       response.status === 503
-        ? 'Telegram-backend пока недоступен'
+        ? 'Сервис аккаунта временно недоступен. Попробуйте позже.'
         : `Ошибка аккаунта (${response.status})`
     )
     error.response = { status: response.status, data: { error: error.message } }
