@@ -279,9 +279,10 @@ const apiSearch = async (searchTerm, requestConfig = {}) => {
   return normalizeKinoboxSearchResponse(data)
 }
 
-const getTopMovies = async ({ typeFilter = 'movie', page = 1, limit = 36 } = {}) => {
+const getTopMovies = async ({ typeFilter = 'movie', page = 1, limit = 36 } = {}, requestConfig = {}) => {
   const { data } = await apiCall((client) =>
     client.get('/api/kinopoisk/top', {
+      ...requestConfig,
       params: { type: typeFilter === 'series' ? 'series' : 'movie', page, limit },
       timeout: 20000
     })
@@ -301,12 +302,23 @@ const getTopMovies = async ({ typeFilter = 'movie', page = 1, limit = 36 } = {})
   })
 }
 
+// The proxy exposes a 250-film rating list, not a random/all-cinema endpoint.
+// Equal-sized pages keep selection uniform and reuse the proxy's cached top pages.
+const getRandomMovie = async (requestConfig = {}) => {
+  const page = Math.floor(Math.random() * 5) + 1
+  const movies = (await getTopMovies({ typeFilter: 'movie', page, limit: 50 }, requestConfig))
+    .filter((movie) => movie?.kp_id && movie?.title)
+  if (!movies.length) throw new Error('Random movie selection is empty')
+  return movies[Math.floor(Math.random() * movies.length)]
+}
+
 export {
   apiSearch,
   getKpInfo,
   getPlayers,
   getPlayersRaw,
   getTopMovies,
+  getRandomMovie,
   normalizeKinoboxMovie,
   normalizeKinoboxSearchResponse
 }

@@ -181,6 +181,8 @@ import HistoryMigrationNotice from '@/components/HistoryMigrationNotice.vue'
 import { getMovieSeoPath } from '@/utils/movieSeo'
 import { debugLog } from '@/utils/logger'
 import { createLatestRequestGuard } from '@/utils/latestRequest'
+import { normalizeRandomMovie } from '@/utils/randomMovie'
+import { isRequestCanceled } from '@/utils/requestCancellation'
 import { logoutAndRedirect } from '@/utils/authSession'
 
 const mainStore = useMainStore()
@@ -208,6 +210,7 @@ const homeTopSentinel = ref(null)
 const HOME_TOP_PAGE_SIZE = 24
 let homeTopObserver = null
 const searchRequestGuard = createLatestRequestGuard()
+const randomRequestGuard = createLatestRequestGuard()
 
 const dedupeMoviesByKpId = (items = []) => {
   const seen = new Set()
@@ -656,6 +659,7 @@ onMounted(() => {
 })
 
 onUnmounted(() => {
+  randomRequestGuard.invalidate()
   debouncedPerformSearch.cancel()
   searchRequestGuard.invalidate()
   disconnectHomeTopInfiniteScroll()
@@ -684,45 +688,39 @@ const openRandomMovie = () => {
 }
 
 const closeRandomModal = () => {
+  randomRequestGuard.invalidate()
+  randomLoading.value = false
   showRandomModal.value = false
   randomMovie.value = null
   randomError.value = ''
 }
 
 const fetchRandomMovie = async () => {
+  const requestId = randomRequestGuard.begin()
+  const signal = randomRequestGuard.getSignal(requestId)
   randomLoading.value = true
   randomError.value = ''
+  randomMovie.value = null
 
   try {
-    const response = await getRandomMovie()
+    const response = await getRandomMovie({ signal })
+    if (!randomRequestGuard.isLatest(requestId)) return
+    if (!response?.kp_id) throw new Error('Random movie has no identifier')
 
-    if (response.kp_id) {
-      try {
-        const kpInfo = await getKpInfo(response.kp_id)
-        randomMovie.value = {
-          ...response,
-          description: kpInfo.description,
-          budget: kpInfo.budget,
-          fees_world: kpInfo.fees_world,
-          fees_russia: kpInfo.fees_russia,
-          premiere_ru: kpInfo.premiere_ru,
-          premiere_world: kpInfo.premiere_world,
-          age_rating: kpInfo.age_rating,
-          duration: kpInfo.duration,
-          total_rating: kpInfo.total_rating
-        }
-      } catch {
-        randomMovie.value = response
-      }
-    } else {
-      randomMovie.value = response
+    try {
+      const kpInfo = await getKpInfo(response.kp_id, { signal, timeout: 15000 })
+      if (!randomRequestGuard.isLatest(requestId)) return
+      randomMovie.value = normalizeRandomMovie(response, kpInfo || {})
+    } catch (error) {
+      if (isRequestCanceled(error) || !randomRequestGuard.isLatest(requestId)) return
+      randomMovie.value = normalizeRandomMovie(response)
     }
   } catch (error) {
-    const { message } = handleApiError(error)
-    randomError.value = message
+    if (isRequestCanceled(error) || !randomRequestGuard.isLatest(requestId)) return
+    randomError.value = 'Не удалось подобрать фильм. Попробуйте ещё раз чуть позже.'
     console.error('Ошибка при получении случайного фильма:', error)
   } finally {
-    randomLoading.value = false
+    if (randomRequestGuard.isLatest(requestId)) randomLoading.value = false
   }
 }
 </script>

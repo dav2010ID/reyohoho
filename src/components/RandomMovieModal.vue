@@ -13,6 +13,9 @@
         </div>
 
         <div class="modal-content">
+          <p v-if="movie?.source === 'kinopoisk' && !loading" class="selection-note">
+            Подборка из Топ-250 Кинопоиска
+          </p>
           <div v-if="loading" class="loading-container">
             <div class="spinner"></div>
             <p>Подбираем фильм...</p>
@@ -175,6 +178,10 @@ const getNewMovie = () => {
 
 const formatType = (type) => {
   const typeMap = {
+    FILM: 'Фильм',
+    TV_SERIES: 'Сериал',
+    TV_SHOW: 'ТВ-шоу',
+    MINI_SERIES: 'Мини-сериал',
     'FilmType.FILM': 'Фильм',
     'FilmType.TV_SERIES': 'Сериал',
     'FilmType.TV_SHOW': 'ТВ-шоу',
@@ -292,6 +299,12 @@ const handleImageError = (event) => {
   padding: 20px;
   max-height: 60vh;
   overflow-y: auto;
+}
+
+.selection-note {
+  margin: 0 0 16px;
+  color: #a0a0a0;
+  font-size: 0.85rem;
 }
 
 .loading-container {

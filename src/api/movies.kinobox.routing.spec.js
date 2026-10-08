@@ -17,9 +17,40 @@ beforeEach(() => {
   mocks.get.mockReset()
   mocks.create.mockReset().mockReturnValue({ get: mocks.get })
 })
-afterEach(() => vi.unstubAllEnvs())
+afterEach(() => {
+  vi.unstubAllEnvs()
+  vi.restoreAllMocks()
+})
 
 describe('Kinobox content proxy routing', () => {
+  it.each([0, 0.999])('selects a film from valid top pages at random boundary %s', async (random) => {
+    vi.spyOn(Math, 'random').mockReturnValue(random)
+    const { getRandomMovie } = await import('./movies.kinobox')
+    mocks.get.mockResolvedValue({ data: { data: { items: [
+      { movie: { id: 301, title: { russian: 'Матрица' } } },
+      { movie: { id: 302, title: { russian: 'Другой фильм' } } }
+    ] } } })
+    const signal = new AbortController().signal
+    expect(await getRandomMovie({ signal })).toMatchObject({ kp_id: random === 0 ? 301 : 302 })
+    expect(mocks.get).toHaveBeenCalledWith('/api/kinopoisk/top', {
+      signal, timeout: 20000,
+      params: { type: 'movie', page: random === 0 ? 1 : 5, limit: 50 }
+    })
+  })
+  it('rejects an empty or unusable random pool rather than returning a broken watch link', async () => {
+    const { getRandomMovie } = await import('./movies.kinobox')
+    mocks.get.mockResolvedValue({ data: { data: { items: [] } } })
+    await expect(getRandomMovie()).rejects.toThrow('selection is empty')
+    mocks.get.mockResolvedValue({ data: { data: { items: [{ movie: { id: 301 } }] } } })
+    await expect(getRandomMovie()).rejects.toThrow('selection is empty')
+  })
+  it('preserves random request cancellation without calling another endpoint', async () => {
+    const { getRandomMovie } = await import('./movies.kinobox')
+    const error = Object.assign(new Error('Canceled'), { code: 'ERR_CANCELED' })
+    mocks.get.mockRejectedValue(error)
+    await expect(getRandomMovie()).rejects.toBe(error)
+    expect(mocks.get).toHaveBeenCalledTimes(1)
+  })
   it('loads top cards through the shared Worker, not a browser GraphQL call', async () => {
     const { getTopMovies } = await import('./movies.kinobox')
     mocks.get.mockResolvedValue({
