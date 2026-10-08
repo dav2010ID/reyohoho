@@ -19,6 +19,7 @@ import { useMainStore } from './main'
 
 const pickMainPersistedState = (state) => ({
   history: state.history,
+  cloudHistoryAccount: state.cloudHistoryAccount,
   isHistoryAllowed: state.isHistoryAllowed,
   isCommentsEnabled: state.isCommentsEnabled,
   isAutoShowComments: state.isAutoShowComments,
@@ -361,6 +362,7 @@ describe('Тесты миграций на новый способ хранен�
       },
       main: {
         history: [],
+        cloudHistoryAccount: null,
         isHistoryAllowed: true,
         isCommentsEnabled: true,
         isAutoShowComments: false,

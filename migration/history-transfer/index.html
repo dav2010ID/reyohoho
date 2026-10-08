@@ -1,0 +1,22 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="referrer" content="no-referrer">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self'; style-src 'self'; connect-src 'none'; base-uri 'none'; form-action 'none'">
+  <link rel="stylesheet" href="./style.css">
+  <title>Перенос истории Reyhoho</title>
+</head>
+<body>
+  <main>
+    <h1>Перенос истории</h1>
+    <p>Используйте тот же браузер и профиль, в котором смотрели фильмы на старом сайте.</p>
+    <p id="status" role="status">Читаем локальную историю…</p>
+    <p>Передаётся только список фильмов. Токены, аккаунт и настройки не передаются. Старая история не удаляется.</p>
+    <button id="transfer" disabled>Перенести на reyhoho.fun</button>
+    <button id="download" disabled>Скачать JSON</button>
+  </main>
+  <script type="module" src="./transfer.js"></script>
+</body>
+</html>

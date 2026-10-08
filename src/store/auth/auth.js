@@ -1,5 +1,6 @@
 import { defineStore } from 'pinia'
 import { AUTH_STORE_NAME } from '../constants'
+import { useMainStore } from '../main'
 
 export const useAuthStore = defineStore(AUTH_STORE_NAME, {
   state: () => ({
@@ -16,9 +17,11 @@ export const useAuthStore = defineStore(AUTH_STORE_NAME, {
       this.user = user
     },
     setToken(token) {
+      if (this.token !== token) useMainStore().cloudHistoryAccount = null
       this.token = token
     },
     logout() {
+      useMainStore().cloudHistoryAccount = null
       this.user = null
       this.token = null
     },

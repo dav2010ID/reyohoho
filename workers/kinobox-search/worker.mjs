@@ -2,6 +2,7 @@ import { connect } from 'cloudflare:sockets'
 import { requestKinoboxHttp2 } from './kinobox-http2-vendored.mjs'
 import { resolveKinoboxResource, getKinoboxCacheUrl, isKinoboxResponseValid } from './routes.mjs'
 import { resolveKinopoiskTop, serveKinopoiskTop } from './kinopoisk-top.mjs'
+import { serveHistory } from './history.mjs'
 
 const VERSION = 'kinobox-content-custom-domain-2026-10-08'
 const ALLOWED = new Set([
@@ -52,6 +53,8 @@ export default {
     }
     const reply = (data, status = 200) => new Response(JSON.stringify(data), { status, headers })
     if (origin && !ALLOWED.has(origin)) return reply({ error: 'Origin not allowed' }, 403)
+    if (/^\/api\/history(?:\/|$)/.test(new URL(request.url).pathname))
+      return serveHistory(request, env, origin)
     if (request.method === 'OPTIONS') return new Response(null, { status: 204, headers })
     if (request.method !== 'GET') return reply({ error: 'Method not allowed' }, 405)
     const url = new URL(request.url)

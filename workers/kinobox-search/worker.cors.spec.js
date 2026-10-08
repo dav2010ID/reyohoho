@@ -2,16 +2,30 @@
 import { readFileSync } from 'node:fs'
 import vm from 'node:vm'
 import { describe, expect, it } from 'vitest'
+import { serveHistory } from './history.mjs'
 
 // Exercise the real entrypoint's CORS gate without opening Cloudflare sockets.
 const source = readFileSync(new URL('./worker.mjs', import.meta.url), 'utf8')
   .replace(/^import .*$/gm, '')
   .replace('export default {', 'globalThis.worker = {')
-const context = vm.createContext({ Request, Response, URL, Set })
+const context = vm.createContext({ Request, Response, URL, Set, serveHistory })
 vm.runInContext(source, context)
 const worker = context.worker
 
 describe('Worker custom domain origins', () => {
+  it('routes authenticated history separately without opening the Kinobox transport', async () => {
+    const request = new Request('https://api.reyhoho.fun/api/history', {
+      method: 'OPTIONS',
+      headers: { Origin: 'https://reyhoho.fun' }
+    })
+    const preflight = await worker.fetch(request, {}, {})
+    expect(preflight.headers.get('Access-Control-Allow-Methods')).toContain('DELETE')
+    expect(preflight.headers.get('Access-Control-Allow-Headers')).toContain('Authorization')
+    expect(preflight.headers.get('X-Kinobox-Transport')).toBeNull()
+    const response = await worker.fetch(new Request(request.url), {}, {})
+    expect(response.status).toBe(503)
+    expect(response.headers.get('Cache-Control')).toBe('private, no-store')
+  })
   it.each([
     'https://reyhoho.fun',
     'https://www.reyhoho.fun',

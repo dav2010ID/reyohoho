@@ -116,6 +116,11 @@ This verifies the new frontend locally; publishing it to GitHub Pages is separat
 
 ## Dependencies
 
+Prepared, opt-in D1 user history and legacy-origin transfer:
+see `../../docs/cloud-history.md`. No database binding or authentication authority
+is configured by default; `/api/history` fails closed until configured.
+Existing Kinobox transport and public cache routes are unchanged.
+
 Pinned `@reclaimprotocol/tls@0.1.4` and `hpack.js@2.1.6` bundles.
 The Reclaim license is included in `LICENSE-reclaim.txt`; dependency license
 notices are retained in the generated bundles.

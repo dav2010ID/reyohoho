@@ -1,6 +1,8 @@
 import { getApi } from '@/api/axios'
 import { normalizeMovieListResponse } from '@/api/movieSeoNormalizer'
 import { USER_LIST_TYPES_ENUM } from '@/constants'
+import { historyRequest, isCloudHistoryEnabled } from './cloudHistory'
+import { normalizeHistory } from '../../migration/history-transfer/history-data.js'
 import {
   addLocalListItem,
   clearLocalList,
@@ -17,23 +19,42 @@ const apiCall = async (callFn) => {
 const addToList = async (id, type, metadata = null) => {
   const payload = metadata ? { metadata } : undefined
   addLocalListItem(type, id, metadata || {})
+  if (type === USER_LIST_TYPES_ENUM.HISTORY && isCloudHistoryEnabled()) {
+    const [item] = normalizeHistory([{ ...metadata, kp_id: id }])
+    return historyRequest(`/${encodeURIComponent(id)}`, 'PUT', item)
+  }
   const { data } = await apiCall((api) => api.put(`/list/${type}/${id}`, payload))
   return data
 }
 
 const delFromList = async (id, type) => {
+  if (type === USER_LIST_TYPES_ENUM.HISTORY && isCloudHistoryEnabled()) {
+    const data = await historyRequest(`/${encodeURIComponent(id)}`, 'DELETE')
+    removeLocalListItem(type, id)
+    return data
+  }
   const { data } = await apiCall((api) => api.delete(`/list/${type}/${id}`))
   removeLocalListItem(type, id)
   return data
 }
 
 const delAllFromList = async (type) => {
+  if (type === USER_LIST_TYPES_ENUM.HISTORY && isCloudHistoryEnabled()) {
+    const data = await historyRequest('', 'DELETE')
+    clearLocalList(type)
+    return data
+  }
   const { data } = await apiCall((api) => api.delete(`/list/${type}`))
   clearLocalList(type)
   return data
 }
 
 const getMyLists = async (type) => {
+  if (type === USER_LIST_TYPES_ENUM.HISTORY && isCloudHistoryEnabled()) {
+    const history = normalizeHistory((await historyRequest()).history)
+    replaceLocalList(type, history)
+    return history
+  }
   try {
     const { data } = await apiCall((api) => api.get(`/list/${type}`))
     const normalized = await normalizeMovieListResponse(data, {

@@ -1,0 +1,4 @@
+body { background:#161616; color:#eee; font:16px/1.5 system-ui,sans-serif; margin:0; }
+main { max-width:580px; margin:32px auto; padding:24px; }
+button { font:inherit; padding:10px 14px; margin:8px 8px 0 0; border-radius:8px; cursor:pointer; }
+button:disabled { cursor:default; opacity:.5; }

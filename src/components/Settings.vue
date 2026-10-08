@@ -182,6 +182,7 @@
       <div v-show="activeSettingsTab === 'behavior'" class="settings-group">
         <h3>История</h3>
         <SliderRound v-model="isHistoryAllowed"> Сохранять историю просмотра</SliderRound>
+        <HistorySyncSettings />
         <div class="settings-actions">
           <button class="reset-button" @click="showModal = true">
             <i class="fa-solid fa-trash-can"></i>
@@ -249,6 +250,7 @@
 
 <script setup>
 import SliderRound from '@/components/slider/SliderRound.vue'
+import HistorySyncSettings from '@/components/HistorySyncSettings.vue'
 import ThemeSelector from '@/components/ThemeSelector.vue'
 import { useBackgroundStore } from '@/store/background'
 import { useMainStore } from '@/store/main'
@@ -259,6 +261,7 @@ import { useAuthStore } from '@/store/auth'
 import { getApiAuthorizationState } from '@/utils/apiTrust'
 import { computed, ref, watch } from 'vue'
 import BaseModal from './BaseModal.vue'
+import { historyRequest, isCloudHistoryEnabled } from '@/api/cloudHistory'
 
 const mainStore = useMainStore()
 const backgroundStore = useBackgroundStore()
@@ -322,7 +325,15 @@ const authorizationStatusClass = computed(() => ({
 
 const checkSelectedBackend = () => apiStore.recheckSelectedEndpoint()
 
-const clearAllHistory = () => {
+const clearAllHistory = async () => {
+  if (isCloudHistoryEnabled()) {
+    try {
+      await historyRequest('', 'DELETE')
+    } catch (error) {
+      window.alert(error.message)
+      return
+    }
+  }
   mainStore.clearAllHistory()
   showModal.value = false
 }

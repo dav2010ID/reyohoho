@@ -7,6 +7,7 @@ import { resolvePosterByMovie } from '@/utils/mediaUtils'
 export const useMainStore = defineStore(MAIN_STORE_NAME, {
   state: () => ({
     history: [],
+    cloudHistoryAccount: null,
     isHistoryAllowed: true,
     isCommentsEnabled: true,
     isAutoShowComments: false,
@@ -149,6 +150,7 @@ export const useMainStore = defineStore(MAIN_STORE_NAME, {
     key: MAIN_STORE_NAME,
     pick: [
       'history',
+      'cloudHistoryAccount',
       'isHistoryAllowed',
       'isCommentsEnabled',
       'isAutoShowComments',
