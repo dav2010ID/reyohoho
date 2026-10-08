@@ -42,7 +42,9 @@ export function readLegacyHistory(storage) {
 }
 
 export function mergeHistory(current, imported) {
-  return normalizeHistory([...new Map(
-    [...normalizeHistory(imported), ...normalizeHistory(current)].map((item) => [item.kp_id, item])
-  ).values()].slice(0, MAX_HISTORY_ITEMS))
+  const existing = normalizeHistory(current)
+  const ids = new Set(existing.map((item) => item.kp_id))
+  const missing = normalizeHistory(imported).filter((item) => !ids.has(item.kp_id))
+  // Preserve every current entry even when the combined history reaches the limit.
+  return normalizeHistory([...existing, ...missing].slice(0, MAX_HISTORY_ITEMS))
 }

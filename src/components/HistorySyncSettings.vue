@@ -58,8 +58,10 @@
     </div>
     <p role="status">{{ message }}</p>
     <p>
-      Если старый адрес перенаправляет сюда, сначала нужно опубликовать отдельную страницу переноса
-      на старом домене.
+      Переносите историю в том же браузере и профиле, где пользовались старым сайтом.
+      Если всплывающее окно заблокировано, разрешите его или
+      <a :href="TRANSFER_URL" target="_blank" rel="noopener noreferrer">откройте страницу переноса</a>,
+      скачайте JSON и выберите «Импорт JSON».
     </p>
   </section>
 </template>
@@ -74,7 +76,7 @@ import {
   importCloudHistory,
   isCloudHistoryEnabled
 } from '@/api/cloudHistory'
-import { startHistoryTransfer } from '@/utils/historyTransfer'
+import { startHistoryTransfer, TRANSFER_URL } from '@/utils/historyTransfer'
 import { addToList, getMyLists } from '@/api/user'
 import { USER_LIST_TYPES_ENUM } from '@/constants'
 import { mergeHistory, normalizeHistory } from '../../migration/history-transfer/history-data.js'

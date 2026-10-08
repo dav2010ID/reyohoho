@@ -32,4 +32,21 @@ describe('history migration', () => {
     expect(validateTransferMessage(event, {}, 'nonce')).toBeNull()
     expect(validateTransferMessage(event, popup, 'other')).toBeNull()
   })
+  it('keeps all current entries when the merged history exceeds the limit', () => {
+    const current = Array.from({ length: 999 }, (_, i) => ({ kp_id: i + 1 }))
+    const imported = [{ kp_id: 2000 }, { kp_id: 2001 }]
+    const merged = mergeHistory(current, imported)
+    expect(merged).toHaveLength(1000)
+    expect(current.every((item) => merged.some((entry) => entry.kp_id === String(item.kp_id)))).toBe(true)
+    expect(merged.some((item) => item.kp_id === '2000')).toBe(true)
+  })
+  it('reads nested Vuex history and skips damaged stores', () => {
+    const storage = { getItem(key) {
+      if (key === 'main') return '{broken'
+      if (key === 'reyohoho.store') return JSON.stringify({ main: { history: [{ id: 301 }] } })
+      if (key === 'reyohoho-user-lists') return JSON.stringify({ history: [{ kp_id: 42 }] })
+      return null
+    } }
+    expect(readLegacyHistory(storage).map((item) => item.kp_id)).toEqual(['301', '42'])
+  })
 })
