@@ -27,7 +27,8 @@ const attachDynamicRequestState = (instance) => {
       const canAttachAuthorization = isTrustedApiRequest({ baseURL, url: config.url })
       delete instance.defaults.headers.common['Authorization']
 
-      if (authStore.token && canAttachAuthorization) {
+      // Opaque Worker sessions MUST NOT be forwarded to the legacy backend.
+      if (authStore.token && !authStore.token.startsWith('rh1_') && canAttachAuthorization) {
         config.headers.Authorization = `Bearer ${authStore.token}`
       } else {
         delete config.headers.Authorization

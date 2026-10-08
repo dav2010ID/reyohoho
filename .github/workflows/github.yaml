@@ -44,6 +44,8 @@ jobs:
         run: yarn build:github
         env:
           VITE_PRERENDER_MOVIE_PAGES: 'true'
+          VITE_WORKER_AUTH_ENABLED: ${{ vars.VITE_WORKER_AUTH_ENABLED || 'false' }}
+          VITE_CLOUD_HISTORY_ENABLED: ${{ vars.VITE_CLOUD_HISTORY_ENABLED || 'false' }}
 
       - uses: actions/upload-artifact@v4
         with:

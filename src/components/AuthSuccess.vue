@@ -29,6 +29,8 @@ import { USER_LIST_TYPES_ENUM } from '@/constants'
 import { getKpInfo } from '@/api/movies'
 import { getLocalList } from '@/utils/localUserLists'
 import { consumeAuthRedirect } from '@/utils/authRedirect'
+import { importCloudHistory } from '@/api/cloudHistory'
+import { normalizeHistory } from '../../migration/history-transfer/history-data.js'
 export default {
   name: 'AuthSuccess',
   setup() {
@@ -45,7 +47,7 @@ export default {
     const processAuth = async () => {
       try {
         const urlParams = new URLSearchParams(window.location.search)
-        const token = urlParams.get('token')
+        const token = urlParams.get('token') || authStore.token
 
         if (!token) {
           throw new Error('Токен авторизации не найден')
@@ -64,53 +66,82 @@ export default {
           USER_LIST_TYPES_ENUM.COMPLETED,
           USER_LIST_TYPES_ENUM.ABANDONED
         ]
-        const localLists = new Map(
-          syncedListTypes.map((type) => [type, [...getLocalList(type)]])
-        )
+        const localLists = new Map(syncedListTypes.map((type) => [type, [...getLocalList(type)]]))
         let response = await getMyLists(USER_LIST_TYPES_ENUM.HISTORY)
         loading.value = false
         moveHistory.value = true
         try {
-          const candidates = new Map()
-          for (const title of response) candidates.set(String(title.kp_id), title)
-          for (const title of localHistory) candidates.set(String(title.kp_id), title)
-
-          for (const title of [...candidates.values()].reverse()) {
-            let metadata = title
-            const needsMetadata =
-              !title.title ||
-              !title.poster ||
-              (title.rating_kinopoisk == null && title.rating_kp == null)
-            if (needsMetadata) {
-              try {
-                const movie = await getKpInfo(title.kp_id)
-                metadata = {
-                  ...movie,
-                  ...title,
-                  title: title.title || movie?.name_ru || movie?.name_original || '',
-                  poster: title.poster || movie?.poster_url_preview || movie?.poster_url || ''
+          if (authStore.isWorkerSession) {
+            const hasLocalData =
+              localHistory.length || [...localLists.values()].some((items) => items.length)
+            if (
+              hasLocalData &&
+              window.confirm(
+                'Добавить локальную историю и списки этого браузера в ваш новый аккаунт Cloudflare?'
+              )
+            ) {
+              response = await importCloudHistory(localHistory.slice(0, 1000))
+              for (const type of syncedListTypes) {
+                const existing = new Set((await getMyLists(type)).map((item) => String(item.kp_id)))
+                for (const item of (localLists.get(type) || []).slice(0, 1000)) {
+                  if (authStore.token !== token) throw new Error('Аккаунт изменился')
+                  if (!existing.has(String(item.kp_id))) await addToList(item.kp_id, type, item)
                 }
-              } catch (metadataError) {
-                console.warn(`Не удалось дополнить историю для ${title.kp_id}`, metadataError)
+                await getMyLists(type)
               }
+            } else {
+              // Keep a local backup if the user declines importing guest history.
+              if (localHistory.length)
+                localStorage.setItem(
+                  'reyohoho-guest-history-backup',
+                  JSON.stringify(normalizeHistory(localHistory.slice(0, 1000)))
+                )
+              for (const type of syncedListTypes) await getMyLists(type)
             }
-            await addToList(title.kp_id, USER_LIST_TYPES_ENUM.HISTORY, metadata)
-          }
-          response = await getMyLists(USER_LIST_TYPES_ENUM.HISTORY)
-          mainStore.setHistory(response)
+            if (authStore.token !== token) throw new Error('Аккаунт изменился')
+            mainStore.setHistory(response)
+          } else {
+            const candidates = new Map()
+            for (const title of response) candidates.set(String(title.kp_id), title)
+            for (const title of localHistory) candidates.set(String(title.kp_id), title)
 
-          for (const type of syncedListTypes) {
-            const serverList = await getMyLists(type)
-            const merged = new Map(
-              [...serverList, ...(localLists.get(type) || [])].map((item) => [
-                String(item.kp_id),
-                item
-              ])
-            )
-            for (const item of merged.values()) {
-              await addToList(item.kp_id, type, item)
+            for (const title of [...candidates.values()].reverse()) {
+              let metadata = title
+              const needsMetadata =
+                !title.title ||
+                !title.poster ||
+                (title.rating_kinopoisk == null && title.rating_kp == null)
+              if (needsMetadata) {
+                try {
+                  const movie = await getKpInfo(title.kp_id)
+                  metadata = {
+                    ...movie,
+                    ...title,
+                    title: title.title || movie?.name_ru || movie?.name_original || '',
+                    poster: title.poster || movie?.poster_url_preview || movie?.poster_url || ''
+                  }
+                } catch (metadataError) {
+                  console.warn(`Не удалось дополнить историю для ${title.kp_id}`, metadataError)
+                }
+              }
+              await addToList(title.kp_id, USER_LIST_TYPES_ENUM.HISTORY, metadata)
             }
-            await getMyLists(type)
+            response = await getMyLists(USER_LIST_TYPES_ENUM.HISTORY)
+            mainStore.setHistory(response)
+
+            for (const type of syncedListTypes) {
+              const serverList = await getMyLists(type)
+              const merged = new Map(
+                [...serverList, ...(localLists.get(type) || [])].map((item) => [
+                  String(item.kp_id),
+                  item
+                ])
+              )
+              for (const item of merged.values()) {
+                await addToList(item.kp_id, type, item)
+              }
+              await getMyLists(type)
+            }
           }
         } catch (err) {
           console.error('Auth error:', err)

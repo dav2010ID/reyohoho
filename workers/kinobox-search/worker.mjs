@@ -3,8 +3,10 @@ import { requestKinoboxHttp2 } from './kinobox-http2-vendored.mjs'
 import { resolveKinoboxResource, getKinoboxCacheUrl, isKinoboxResponseValid } from './routes.mjs'
 import { resolveKinopoiskTop, serveKinopoiskTop } from './kinopoisk-top.mjs'
 import { serveHistory } from './history.mjs'
+import { serveTelegramAuth, cleanupAuth } from './telegram-auth.mjs'
+import { serveAccount } from './account.mjs'
 
-const VERSION = 'kinobox-content-custom-domain-2026-10-08'
+const VERSION = 'kinobox-content-tg-d1-2026-10-08'
 const ALLOWED = new Set([
   'https://reyhoho.fun',
   'https://www.reyhoho.fun',
@@ -36,6 +38,9 @@ async function openTransport(hostname, port) {
 }
 
 export default {
+  async scheduled(_event, env, ctx) {
+    ctx.waitUntil(cleanupAuth(env).catch(() => console.error('auth_cleanup_failed')))
+  },
   async fetch(request, env, ctx) {
     const origin = request.headers.get('Origin')
     const headers = {
@@ -53,6 +58,10 @@ export default {
     }
     const reply = (data, status = 200) => new Response(JSON.stringify(data), { status, headers })
     if (origin && !ALLOWED.has(origin)) return reply({ error: 'Origin not allowed' }, 403)
+    const privatePath = new URL(request.url).pathname
+    if (privatePath.startsWith('/api/auth/')) return serveTelegramAuth(request, env, origin)
+    if (/^\/api\/(?:user(?:\/|$)|list\/|user-list(?:-counters)?\/|notifications(?:\/|$))/.test(privatePath))
+      return serveAccount(request, env, origin)
     if (/^\/api\/history(?:\/|$)/.test(new URL(request.url).pathname))
       return serveHistory(request, env, origin)
     if (request.method === 'OPTIONS') return new Response(null, { status: 204, headers })

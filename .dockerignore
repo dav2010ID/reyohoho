@@ -2,7 +2,15 @@
 .github
 .gitlab-ci.yml
 .env
+.env.*
 backend/.env
+workers/**/.env*
+workers/**/wrangler.local.jsonc
+.dev.vars
+.dev.vars.*
+workers/**/.dev.vars*
+.wrangler
+workers/**/.wrangler
 backend/*.db
 
 node_modules

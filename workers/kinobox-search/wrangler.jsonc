@@ -1,9 +1,10 @@
 {
   "name": "lively-cloud-4e31",
-  "account_id": "d181201fe8f228fde92a95f4a085c82b",
   "main": "worker.mjs",
   "compatibility_date": "2026-10-05",
-  "compatibility_flags": ["nodejs_compat"],
+  "compatibility_flags": [
+    "nodejs_compat"
+  ],
   "workers_dev": false,
   "routes": [
     {
@@ -12,9 +13,55 @@
     }
   ],
   "preview_urls": false,
+  "d1_databases": [
+    {
+      "binding": "HISTORY_DB",
+      "database_name": "reyohoho-history",
+      "database_id": "<YOUR_D1_DATABASE_ID>",
+      "migrations_dir": "migrations"
+    }
+  ],
+  "vars": {
+    "TELEGRAM_AUTH_ENABLED": "false",
+    "TELEGRAM_BOT_USERNAME": ""
+  },
+  "ratelimits": [
+    {
+      "name": "LOGIN_RATE_LIMITER",
+      "namespace_id": "610081001",
+      "simple": {
+        "limit": 10,
+        "period": 60
+      }
+    },
+    {
+      "name": "AUTH_RATE_LIMITER",
+      "namespace_id": "610081002",
+      "simple": {
+        "limit": 120,
+        "period": 60
+      }
+    },
+    {
+      "name": "ACCOUNT_RATE_LIMITER",
+      "namespace_id": "610081003",
+      "simple": {
+        "limit": 180,
+        "period": 60
+      }
+    }
+  ],
+  "triggers": {
+    "crons": [
+      "17 * * * *"
+    ]
+  },
   "observability": {
     "enabled": true,
     "head_sampling_rate": 1,
-    "redact_query_string": true
+    "redact_query_string": true,
+    "traces": {
+      "enabled": false
+    }
   }
 }

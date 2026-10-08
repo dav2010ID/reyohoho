@@ -9,7 +9,8 @@ export const useAuthStore = defineStore(AUTH_STORE_NAME, {
   }),
 
   getters: {
-    isAuthenticated: (state) => !!state.token && !!state.user
+    isAuthenticated: (state) => !!state.token && !!state.user,
+    isWorkerSession: (state) => /^rh1_[A-Za-z0-9_-]{43}$/.test(state.token || '')
   },
 
   actions: {
@@ -21,6 +22,14 @@ export const useAuthStore = defineStore(AUTH_STORE_NAME, {
       this.token = token
     },
     logout() {
+      if (this.isWorkerSession) {
+        const token = this.token
+        void import('@/api/workerAccount')
+          .then(({ workerAccountRequest }) =>
+            workerAccountRequest('/auth/logout', 'POST', {}, { token })
+          )
+          .catch(() => {})
+      }
       useMainStore().cloudHistoryAccount = null
       this.user = null
       this.token = null

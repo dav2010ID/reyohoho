@@ -1,5 +1,11 @@
 # API документация проекта ReYohoho
 
+При `VITE_WORKER_AUTH_ENABLED=true` Telegram-вход, профиль, приватные списки и
+история используют Worker API: [worker-telegram.md](worker-telegram.md) и
+[cloud-history.md](cloud-history.md). Worker-токены не отправляются в прежний
+backend. Описанные ниже GET-маршруты Telegram относятся к Python backend;
+Worker использует POST с JSON.
+
 ## 1) Базовый API backend
 
 - HTTP-клиент: `axios` через [`src/api/axios.js`](../src/api/axios.js)

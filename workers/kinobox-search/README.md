@@ -12,11 +12,16 @@ implemented in the tested runtime. Native `fetch()` returned upstream 520.
 
 ## Build and deploy
 
+Copy `wrangler.jsonc` to ignored `wrangler.local.jsonc`, then set your account ID
+and D1 database ID there. Configure Telegram using
+[`worker-telegram.md`](../../docs/worker-telegram.md). Never store credentials in
+either configuration file; use Cloudflare Secrets.
+
 ```powershell
 node prepare-vendor.mjs
-npx --yes wrangler@4.147.0 deploy --dry-run --config wrangler.jsonc
+npx --yes wrangler@4.147.0 deploy --dry-run --config wrangler.local.jsonc
 npx --yes wrangler@4.147.0 login --scopes account:read user:read workers:write workers_scripts:write workers_tail:read
-npx --yes wrangler@4.147.0 deploy --config wrangler.jsonc
+npx --yes wrangler@4.147.0 deploy --config wrangler.local.jsonc
 ```
 
 Generated vendor modules are ignored by Git. Downloads are pinned by version
@@ -27,7 +32,7 @@ are cleared before the first handshake.
 Public endpoint after deployment:
 `https://api.reyhoho.fun/?query=Матрица`
 
-The custom domain is attached to the same `lively-cloud-4e31` Worker. DNS and
+The custom domain is attached to the configured Worker. DNS and
 its TLS certificate are managed by Cloudflare. The frontend uses this custom
 domain by default. The previous `workers.dev` endpoint and preview/version URLs
 are disabled (`workers_dev: false`, `preview_urls: false`). Old open tabs using
@@ -71,54 +76,15 @@ resource path and validated parameters, not the caller's timestamp.
 Requests have a 15-second deadline and 1 MiB response limit. Browser origins are restricted to
 `reyhoho.fun` and `www.reyhoho.fun` (HTTPS and transitional HTTP), the old
 GitHub Pages origin, and local development; CORS is **not** authentication and
-does not prevent requests made outside browsers. No rate-limit binding is
-configured. Monitor CPU usage/error rates before broader rollout.
-
-## Verification status
-
-The permanent Worker was deployed through the Cloudflare API on October 6,
-2026. The exact Wrangler bundle was uploaded into a temporary, SHA256-checked
-KV staging namespace, read through the authorized API and deployed as one
-module. The temporary uploader and namespace are removed after verification;
-the production Worker has no KV binding or staging dependency.
-
-Node.js and a clean Edge browser on the production GitHub Pages origin returned
-HTTP 200 for search, movie details and player lists on the production GitHub
-Pages origin: 30 Matrix results and 7 player sources. A clean local Edge browser
-opened the Matrix card and displayed its title, description and ratings 8.5/8.7
-without direct Kinobox API requests. Embedded player playback is not covered by
-this API verification.
-
-Deployment bundle SHA256:
-`b074cd4505ecd91d65f46bcbab6097b17d4770c2886cf4b09074c303a781d39a`
-
-Deployed version (100%):
-`c3b69a24-6c6b-4ced-ae56-8d4dec879ce6`
-
-Rollback version before this deployment:
-`ffb2d1bd-3515-4da1-8280-618a101a7625`
-
-On October 8, 2026, the custom-domain CORS update was deployed through the API.
-The prior bundle hash was checked before replacement, and the updated module
-was verified byte-for-byte against the local Wrangler dry-run bundle. All
-existing bindings/settings were retained; no temporary resources were needed.
-Preflight requests from both custom-domain hostnames, old GitHub Pages and
-localhost passed. Search, movie 301, players and top returned HTTP 200 with
-`Access-Control-Allow-Origin: https://reyhoho.fun`; unrelated origins stayed 403.
-
-The top deployment was verified on October 6, 2026: all seven pages returned
-250 unique film IDs and 250 unique series IDs, repeated requests reported cache
-HIT, and invalid parameters/origins/methods were rejected. A clean local Edge
-browser using the actual production Worker displayed 36 cards, loaded page two
-(72 cards), and switched to series without JavaScript errors. Search, details
-and player endpoints remained HTTP 200 with the Kinobox HTTP/2 transport.
-This verifies the new frontend locally; publishing it to GitHub Pages is separate.
+does not prevent requests made outside browsers. Public catalogue routes have no rate-limit binding. Private auth/account routes
+use their configured rate-limit bindings. Monitor CPU usage/error rates before broader rollout.
 
 ## Dependencies
 
 Prepared, opt-in D1 user history and legacy-origin transfer:
-see `../../docs/cloud-history.md`. No database binding or authentication authority
-is configured by default; `/api/history` fails closed until configured.
+see `../../docs/cloud-history.md` and `../../docs/worker-telegram.md`.
+The tracked configuration is a template: configure D1 and authentication in the
+ignored local configuration before deploying. Private routes fail closed without them.
 Existing Kinobox transport and public cache routes are unchanged.
 
 Pinned `@reclaimprotocol/tls@0.1.4` and `hpack.js@2.1.6` bundles.

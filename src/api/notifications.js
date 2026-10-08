@@ -1,4 +1,6 @@
 import { getApi } from '@/api/axios'
+import { useAuthStore } from '@/store/auth'
+import { workerAccountAdapter } from './workerAccount'
 
 let isErrorSimulationEnabled = false
 const simulatedErrorCode = 500
@@ -14,7 +16,7 @@ const simulateErrorIfNeeded = async () => {
 
 const apiCall = async (callFn) => {
   await simulateErrorIfNeeded()
-  const api = await getApi()
+  const api = useAuthStore().isWorkerSession ? workerAccountAdapter : await getApi()
   return await callFn(api)
 }
 

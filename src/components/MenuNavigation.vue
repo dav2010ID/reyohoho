@@ -17,7 +17,7 @@
 import { useMainStore } from '@/store/main'
 import { useAuthStore } from '@/store/auth'
 import { useNavbarStore } from '@/store/navbar'
-import { computed, ref, onMounted } from 'vue'
+import { computed, ref, onMounted, onBeforeUnmount } from 'vue'
 import DesktopMenu from './MenuNavigation/DesktopMenu.vue'
 import MobileMenu from './MenuNavigation/MobileMenu.vue'
 import ModalSearch from './ModalSearch.vue'
@@ -27,22 +27,24 @@ const store = useMainStore()
 const authStore = useAuthStore()
 const navbarStore = useNavbarStore()
 const isMobile = computed(() => store.isMobile)
-const navLinks = ref([])
+const baseURL = ref(import.meta.env.VITE_APP_API_URL || '')
 
-const initializeNavLinks = (baseURL) => {
-  navLinks.value = [
+// The menu stays mounted during login/logout: derive links from live auth state.
+const navLinks = computed(() => {
+  const authenticated = authStore.isAuthenticated
+  return [
     { to: '/', exact: true, icon: 'fas fa-home', text: 'Главная' },
     {
-      to: authStore.user ? '/user' : '/login',
+      to: authenticated ? '/user' : '/login',
       exact: true,
-      icon: authStore.user
+      icon: authenticated
         ? authStore.user.photo
-          ? `${baseURL}${authStore.user.photo}`
+          ? `${baseURL.value}${authStore.user.photo}`
           : 'fas fa-user'
         : 'fas fa-right-to-bracket',
-      text: authStore.user ? 'Профиль' : 'Войти'
+      text: authenticated ? 'Профиль' : 'Войти'
     },
-    ...(authStore.token
+    ...(authenticated
       ? [
           {
             to: '/lists',
@@ -62,23 +64,32 @@ const initializeNavLinks = (baseURL) => {
     { to: '/top', icon: 'fa-solid fa-trophy', text: 'Популярное' },
     { to: '/settings', icon: 'fa-solid fa-gear', text: 'Настройки' }
   ]
-}
+})
 
-const baseURL = import.meta.env.VITE_APP_API_URL
-initializeNavLinks(baseURL)
+let active = true
+onBeforeUnmount(() => {
+  active = false
+})
 
 onMounted(async () => {
-  if (authStore.token) {
+  const session = authStore.token
+  const isCurrentSession = () => active && authStore.token === session
+  if (session) {
     try {
       const [{ getUser }, { getBaseURL }] = await Promise.all([
         import('@/api/user'),
         import('@/api/axios')
       ])
-      let user = await getUser()
+      if (!isCurrentSession()) return
+      const user = await getUser()
+      if (!isCurrentSession()) return
       authStore.setUser(user)
+      // Worker profiles have no legacy avatar; do not query the old backend.
+      if (authStore.isWorkerSession) return
       const updatedBaseURL = await getBaseURL()
-      initializeNavLinks(updatedBaseURL)
+      if (isCurrentSession()) baseURL.value = updatedBaseURL
     } catch (error) {
+      if (!isCurrentSession()) return
       const { code } = handleApiError(error)
       if (code === 401) {
         authStore.logout()

@@ -3,6 +3,8 @@ import { normalizeMovieListResponse } from '@/api/movieSeoNormalizer'
 import { USER_LIST_TYPES_ENUM } from '@/constants'
 import { historyRequest, isCloudHistoryEnabled } from './cloudHistory'
 import { normalizeHistory } from '../../migration/history-transfer/history-data.js'
+import { useAuthStore } from '@/store/auth'
+import { workerAccountAdapter, workerAccountRequest, workerAuthEnabled } from './workerAccount'
 import {
   addLocalListItem,
   clearLocalList,
@@ -12,7 +14,7 @@ import {
 } from '@/utils/localUserLists'
 
 const apiCall = async (callFn) => {
-  const api = await getApi()
+  const api = useAuthStore().isWorkerSession ? workerAccountAdapter : await getApi()
   return await callFn(api)
 }
 
@@ -86,11 +88,15 @@ const getUser = async () => {
 }
 
 const generateToken = async () => {
+  if (workerAuthEnabled)
+    return workerAccountRequest('/auth/telegram-login-token', 'POST', {}, { anonymous: true })
   const { data } = await apiCall((api) => api.get('/auth/telegram-login-token'))
   return data
 }
 
 const getTGAuthResult = async (token) => {
+  if (workerAuthEnabled)
+    return workerAccountRequest('/auth/check-telegram-auth', 'POST', { token }, { anonymous: true })
   const { data } = await apiCall((api) => api.get(`/auth/check-telegram-auth?token=${token}`))
   return data
 }

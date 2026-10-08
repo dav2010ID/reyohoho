@@ -8,6 +8,10 @@
       </div>
 
       <div v-else class="login-methods">
+        <p v-if="verificationCode">
+          Код подтверждения: <strong>{{ verificationCode }}</strong
+          >. Сверьте его в боте.
+        </p>
         <!-- Кнопка входа через Telegram -->
         <div class="telegram-btn-container">
           <button class="telegram-btn" @click="loginWithTelegram">
@@ -85,6 +89,8 @@ import { generateToken, getTGAuthResult } from '@/api/user'
 import { createTelegramAuthPoller } from '@/utils/telegramAuthPoller'
 import { saveAuthRedirect } from '@/utils/authRedirect'
 import { useRoute } from 'vue-router'
+import { useRouter } from 'vue-router'
+import { useAuthStore } from '@/store/auth'
 
 export default {
   components: {
@@ -97,9 +103,11 @@ export default {
     const loading = ref(true)
     const error = ref(null)
     const popup = ref(null)
-    const base = ref(import.meta.env.VITE_BASE_URL || '/')
     const showModal = ref(false)
     const route = useRoute()
+    const router = useRouter()
+    const authStore = useAuthStore()
+    const verificationCode = ref('')
     let popupCloseTimeout = null
 
     const closePopup = () => {
@@ -117,7 +125,10 @@ export default {
       checkAuth: getTGAuthResult,
       onAuthenticated: (accessToken) => {
         closePopup()
-        window.location.href = `${base.value}auth-success?token=${accessToken}`
+        authStore.setUser(null)
+        authStore.setToken(accessToken)
+        // Bearer session stays out of URLs, referrers and analytics.
+        return router.replace('/auth-success')
       },
       onExpired: () => {
         error.value = 'Время ожидания входа истекло. Создайте новый QR-код.'
@@ -135,6 +146,7 @@ export default {
         const generateTokenResponse = await generateToken()
         const token = generateTokenResponse.token
         const authURL = generateTokenResponse.telegram_link
+        verificationCode.value = generateTokenResponse.code || ''
         qrValue.value = authURL
         authValue.value = authURL
         loading.value = false
@@ -178,6 +190,7 @@ export default {
 
     return {
       qrValue,
+      verificationCode,
       qrSize,
       loading,
       error,

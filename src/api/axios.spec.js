@@ -1,4 +1,4 @@
-import { beforeEach, describe, expect, it, vi } from 'vitest'
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
 const mocks = vi.hoisted(() => ({
   axiosCreate: vi.fn(),
@@ -38,9 +38,22 @@ describe('dynamic axios instance', () => {
   beforeEach(async () => {
     vi.clearAllMocks()
     mocks.apiStore.currentApiUrl = null
+    mocks.authStore.token = null
     mocks.axiosCreate.mockImplementation(({ baseURL }) => createAxiosInstance(baseURL))
     const { resetApi } = await import('./axios')
     resetApi()
+  })
+  afterEach(() => vi.unstubAllEnvs())
+
+  it('never forwards a Worker bearer session to the legacy backend', async () => {
+    vi.stubEnv('VITE_APP_API_URL', 'https://legacy.example')
+    mocks.getCurrentApiUrl.mockResolvedValue('https://legacy.example')
+    mocks.authStore.token = `rh1_${'a'.repeat(43)}`
+    const { getApi } = await import('./axios')
+    const instance = await getApi()
+    const interceptor = instance.interceptors.request.use.mock.calls[0][0]
+    const config = await interceptor({ url: '/user', headers: { Authorization: 'old-value' } })
+    expect(config.headers).not.toHaveProperty('Authorization')
   })
 
   it('does not restore a stale endpoint after resetApi', async () => {

@@ -1,5 +1,9 @@
 # Карта проекта ReYohoho
 
+Карта ниже описывает прежнюю архитектуру. Текущая интеграция Telegram/D1:
+[worker-telegram.md](worker-telegram.md), перенос истории:
+[cloud-history.md](cloud-history.md).
+
 > Практическая карта репозитория для разработчиков и ИИ-агентов. Состояние кода проверено
 > 2026-07-13. Детальные контракты API находятся в [API_DOCUMENTATION.md](API_DOCUMENTATION.md),
 > история рисков — в [CODE_AUDIT.md](CODE_AUDIT.md), а backend-инструкции — в

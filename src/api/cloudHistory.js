@@ -2,17 +2,23 @@ import { useAuthStore } from '@/store/auth'
 import { useMainStore } from '@/store/main'
 import { normalizeHistory } from '../../migration/history-transfer/history-data.js'
 
-export const cloudHistoryAvailable = import.meta.env.VITE_CLOUD_HISTORY_ENABLED === 'true'
+export const cloudHistoryAvailable =
+  import.meta.env.VITE_CLOUD_HISTORY_ENABLED === 'true' ||
+  import.meta.env.VITE_WORKER_AUTH_ENABLED === 'true'
 
 export function isCloudHistoryEnabled() {
   const auth = useAuthStore()
-  return cloudHistoryAvailable && auth.isAuthenticated &&
-    useMainStore().cloudHistoryAccount === String(auth.user.id)
+  return (
+    cloudHistoryAvailable &&
+    auth.isAuthenticated &&
+    (auth.isWorkerSession || useMainStore().cloudHistoryAccount === String(auth.user.id))
+  )
 }
 
 export async function historyRequest(path = '', method = 'GET', body) {
   const auth = useAuthStore()
-  if (!cloudHistoryAvailable || !auth.isAuthenticated) throw new Error('Войдите в аккаунт для облачной истории')
+  if (!cloudHistoryAvailable || !auth.isAuthenticated)
+    throw new Error('Войдите в аккаунт для облачной истории')
   const token = auth.token
   const response = await fetch(`https://api.reyhoho.fun/api/history${path}`, {
     method,
@@ -27,9 +33,11 @@ export async function historyRequest(path = '', method = 'GET', body) {
   const data = await response.json()
   if (useAuthStore().token !== token) throw new Error('Аккаунт изменился. Повторите операцию')
   if (!response.ok) {
-    const error = new Error(response.status === 503
-      ? 'Облачная история пока недоступна. Локальная история сохранена'
-      : `Ошибка облачной истории (${response.status})`)
+    const error = new Error(
+      response.status === 503
+        ? 'Облачная история пока недоступна. Локальная история сохранена'
+        : `Ошибка облачной истории (${response.status})`
+    )
     error.response = { status: response.status, data: { error: error.message } }
     throw error
   }
