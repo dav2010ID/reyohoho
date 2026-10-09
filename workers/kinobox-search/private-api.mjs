@@ -30,6 +30,7 @@ export function privateReply(origin) {
     'Access-Control-Allow-Origin': origin || 'https://reyhoho.fun',
     'Access-Control-Allow-Methods': 'GET, PUT, PATCH, POST, DELETE, OPTIONS',
     'Access-Control-Allow-Headers': 'Content-Type, Authorization',
+    'Access-Control-Max-Age': '600',
     'Cache-Control': 'private, no-store',
     'X-Content-Type-Options': 'nosniff',
     Vary: 'Origin'

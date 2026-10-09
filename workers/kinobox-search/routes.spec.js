@@ -18,7 +18,7 @@ describe('Kinobox Worker routes', () => {
       kind: 'movie',
       path: '/api/movies/301',
       params: {},
-      cacheTtl: 3600
+      cacheTtl: 21600
     })
     expect(resolve('/api/movies/301/')).toEqual(resolve('/api/movies/301'))
   })

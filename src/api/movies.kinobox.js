@@ -1,18 +1,15 @@
 import axios from 'axios'
+import { createPublicDataCache } from './publicDataCache'
 
 let isErrorSimulationEnabled = false
 const simulatedErrorCode = 500
 
-const KINOBOX_BASE_URL =
-  import.meta.env.VITE_KINOBOX_API_URL || 'https://api.reyhoho.fun'
+const KINOBOX_BASE_URL = import.meta.env.VITE_KINOBOX_API_URL || 'https://api.reyhoho.fun'
 // All Kinobox content uses the same Worker; a separate search override remains supported.
 const KINOBOX_SEARCH_BASE_URL = import.meta.env.VITE_KINOBOX_SEARCH_API_URL || KINOBOX_BASE_URL
 
 const api = axios.create({
-  baseURL: KINOBOX_BASE_URL,
-  headers: {
-    'Content-Type': 'application/json'
-  }
+  baseURL: KINOBOX_BASE_URL
 })
 
 const simulateErrorIfNeeded = async () => {
@@ -24,9 +21,26 @@ const simulateErrorIfNeeded = async () => {
   }
 }
 
-const apiCall = async (callFn) => {
+const publicData = createPublicDataCache()
+const publicGet = async (path, config, ttl, validate) => {
   await simulateErrorIfNeeded()
-  return await callFn(api)
+  const key = JSON.stringify([config.baseURL || KINOBOX_BASE_URL, path, config.params || {}])
+  const data = await publicData(key, async () => (await api.get(path, config)).data, ttl, {
+    signal: config.signal,
+    validate,
+    // No shared module cache during SSR or for customized/authenticated requests.
+    bypass:
+      import.meta.env.SSR ||
+      Boolean(
+        config.headers ||
+        config.auth ||
+        config.adapter ||
+        config.transformResponse ||
+        config.cancelToken ||
+        config.withCredentials
+      )
+  })
+  return { data }
 }
 
 const ensureUniqueKey = (obj, baseKey) => {
@@ -234,13 +248,16 @@ const toPlayersMap = (providers = [], { type = null } = {}) => {
 }
 
 const getPlayersRaw = async (kpId, { title = '' } = {}) => {
-  const { data } = await apiCall((client) =>
-    client.get('/api/players', {
+  const { data } = await publicGet(
+    '/api/players',
+    {
       params: {
         kinopoisk: String(kpId),
         ...(title ? { title: String(title) } : {})
       }
-    })
+    },
+    30000,
+    (data) => Array.isArray(data?.data)
   )
 
   return Array.isArray(data?.data) ? data.data : []
@@ -252,13 +269,11 @@ const getPlayers = async (kpId, options = {}) => {
 }
 
 const getKpInfo = async (kpId, requestConfig = {}) => {
-  const { data } = await apiCall((client) =>
-    client.get(`/api/movies/${kpId}`, {
-      ...requestConfig,
-      params: {
-        ts: Math.floor(Date.now() / 1000)
-      }
-    })
+  const { data } = await publicGet(
+    `/api/movies/${kpId}`,
+    { ...requestConfig },
+    5 * 60000,
+    (data) => Boolean(data?.data?.movie) && data?.data?.isSuccess !== false
   )
 
   const movie = data?.data?.movie || data?.movie || data?.data || null
@@ -266,27 +281,35 @@ const getKpInfo = async (kpId, requestConfig = {}) => {
 }
 
 const apiSearch = async (searchTerm, requestConfig = {}) => {
-  const { data } = await apiCall((client) =>
-    client.get('/api/movies/search/', {
+  const { data } = await publicGet(
+    '/api/movies/search/',
+    {
       ...requestConfig,
       baseURL: KINOBOX_SEARCH_BASE_URL,
       params: {
-        query: String(searchTerm),
-        ts: Math.floor(Date.now() / 1000)
+        query: String(searchTerm).trim()
       }
-    })
+    },
+    60000,
+    (data) => Array.isArray(data?.data?.items)
   )
 
   return normalizeKinoboxSearchResponse(data)
 }
 
-const getTopMovies = async ({ typeFilter = 'movie', page = 1, limit = 36 } = {}, requestConfig = {}) => {
-  const { data } = await apiCall((client) =>
-    client.get('/api/kinopoisk/top', {
+const getTopMovies = async (
+  { typeFilter = 'movie', page = 1, limit = 36 } = {},
+  requestConfig = {}
+) => {
+  const { data } = await publicGet(
+    '/api/kinopoisk/top',
+    {
       ...requestConfig,
       params: { type: typeFilter === 'series' ? 'series' : 'movie', page, limit },
       timeout: 20000
-    })
+    },
+    5 * 60000,
+    (data) => Array.isArray(data?.data?.items) && data.data.items.length > 0
   )
   if (!Array.isArray(data?.data?.items)) throw new Error('Invalid Kinopoisk top response')
   return data.data.items.map(({ movie, position }) => {
@@ -307,8 +330,9 @@ const getTopMovies = async ({ typeFilter = 'movie', page = 1, limit = 36 } = {},
 // Equal-sized pages keep selection uniform and reuse the proxy's cached top pages.
 const getRandomMovie = async (requestConfig = {}) => {
   const page = Math.floor(Math.random() * 5) + 1
-  const movies = (await getTopMovies({ typeFilter: 'movie', page, limit: 50 }, requestConfig))
-    .filter((movie) => movie?.kp_id && movie?.title)
+  const movies = (
+    await getTopMovies({ typeFilter: 'movie', page, limit: 50 }, requestConfig)
+  ).filter((movie) => movie?.kp_id && movie?.title)
   if (!movies.length) throw new Error('Random movie selection is empty')
   return movies[Math.floor(Math.random() * movies.length)]
 }

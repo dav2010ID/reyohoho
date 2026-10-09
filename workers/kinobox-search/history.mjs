@@ -8,6 +8,7 @@ export async function serveHistory(request, env, origin) {
     'Access-Control-Allow-Origin': origin || 'https://reyhoho.fun',
     'Access-Control-Allow-Methods': 'GET, PUT, PATCH, POST, DELETE, OPTIONS',
     'Access-Control-Allow-Headers': 'Content-Type, Authorization',
+    'Access-Control-Max-Age': '600',
     'Cache-Control': 'private, no-store',
     Vary: 'Origin',
     'X-Content-Type-Options': 'nosniff'

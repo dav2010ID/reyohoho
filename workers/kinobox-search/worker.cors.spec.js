@@ -3,6 +3,7 @@ import { readFileSync } from 'node:fs'
 import vm from 'node:vm'
 import { describe, expect, it } from 'vitest'
 import { serveHistory } from './history.mjs'
+import { privateReply } from './private-api.mjs'
 
 // Exercise the real entrypoint's CORS gate without opening Cloudflare sockets.
 const source = readFileSync(new URL('./worker.mjs', import.meta.url), 'utf8')
@@ -22,6 +23,7 @@ describe('Worker custom domain origins', () => {
     expect(preflight.headers.get('Access-Control-Allow-Methods')).toContain('DELETE')
     expect(preflight.headers.get('Access-Control-Allow-Headers')).toContain('Authorization')
     expect(preflight.headers.get('X-Kinobox-Transport')).toBeNull()
+    expect(preflight.headers.get('Access-Control-Max-Age')).toBe('600')
     const response = await worker.fetch(new Request(request.url), {}, {})
     expect(response.status).toBe(503)
     expect(response.headers.get('Cache-Control')).toBe('private, no-store')
@@ -46,6 +48,8 @@ describe('Worker custom domain origins', () => {
     expect(response.status).toBe(204)
     expect(response.headers.get('Access-Control-Allow-Origin')).toBe(origin)
     expect(response.headers.get('Vary')).toBe('Origin')
+    expect(response.headers.get('Access-Control-Max-Age')).toBe('600')
+    expect(response.headers.get('Cache-Control')).toBe('no-store')
   })
 
   it.each(['https://reyhoho.fun.evil.example', 'https://evil.example'])(
@@ -62,4 +66,10 @@ describe('Worker custom domain origins', () => {
       expect(await response.json()).toEqual({ error: 'Origin not allowed' })
     }
   )
+  it('caches only preflight permission, not private account or auth responses', () => {
+    const response = privateReply('https://reyhoho.fun')(null, 204)
+    expect(response.headers.get('Access-Control-Max-Age')).toBe('600')
+    expect(response.headers.get('Cache-Control')).toBe('private, no-store')
+    expect(response.headers.get('Access-Control-Allow-Headers')).toContain('Authorization')
+  })
 })

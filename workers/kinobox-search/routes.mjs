@@ -27,7 +27,7 @@ export function resolveKinoboxResource(url) {
   const movie = /^\/api\/movies\/([^/]+)\/?$/.exec(path)
   if (movie) {
     if (!VALID_ID.test(movie[1])) return { error: 'Invalid Kinopoisk ID', status: 400 }
-    return { kind: 'movie', path: '/api/movies/' + movie[1], params: {}, cacheTtl: 3600 }
+    return { kind: 'movie', path: '/api/movies/' + movie[1], params: {}, cacheTtl: 21600 }
   }
   return { error: 'Not found', status: 404 }
 }

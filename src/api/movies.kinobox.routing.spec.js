@@ -98,7 +98,7 @@ describe('Kinobox content proxy routing', () => {
         baseURL: 'https://api.reyhoho.fun',
         signal,
         timeout: 20000,
-        params: { query: 'Матрица', ts: expect.any(Number) }
+        params: { query: 'Матрица' }
       })
     )
     expect(results[0]).toMatchObject({ id: 301, title: 'Матрица' })

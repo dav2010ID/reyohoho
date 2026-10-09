@@ -1,3 +1,4 @@
+import { logPublicCache, cacheMatch } from './public-cache.mjs'
 import { KINOPOISK_TOP_QUERY } from './kinopoisk-top-query.mjs'
 
 const ENDPOINT = 'https://graphql.kinopoisk.ru/graphql/?operationName=MovieDesktopListPage'
@@ -124,6 +125,7 @@ export async function requestKinopoiskTop(resource, fetchImpl = fetch, timeoutMs
 }
 
 export async function serveKinopoiskTop(resource, url, headers, ctx, cache) {
+  const started = Date.now()
   delete headers['X-Search-Transport']
   delete headers['X-Kinobox-Transport']
   headers['X-Data-Source'] = 'kinopoisk'
@@ -132,9 +134,10 @@ export async function serveKinopoiskTop(resource, url, headers, ctx, cache) {
   for (const [key, value] of Object.entries(resource.params)) {
     cacheUrl.searchParams.set(key, value)
   }
-  const cached = await cache.match(cacheUrl.toString())
+  const cached = await cacheMatch(cache, cacheUrl.toString())
   if (cached) {
     headers['X-Top-Cache'] = 'HIT'
+    logPublicCache('top', 'HIT', started)
     return new Response(cached.body, { headers })
   }
   try {
@@ -154,6 +157,7 @@ export async function serveKinopoiskTop(resource, url, headers, ctx, cache) {
         .catch(() => console.error('kinopoisk_top_cache_error'))
     )
     headers['X-Top-Cache'] = 'MISS'
+    logPublicCache('top', 'MISS', started)
     console.log(
       JSON.stringify({
         event: 'kinopoisk_top',
@@ -164,6 +168,7 @@ export async function serveKinopoiskTop(resource, url, headers, ctx, cache) {
     return new Response(body, { headers })
   } catch (error) {
     const timeout = /timeout/i.test(error.message)
+    logPublicCache('top', 'MISS', started, timeout ? 504 : 502)
     console.error(JSON.stringify({ event: 'kinopoisk_top_error', message: error.message }))
     return new Response(
       JSON.stringify({ error: timeout ? 'Upstream timeout' : 'Kinopoisk top unavailable' }),

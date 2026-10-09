@@ -129,6 +129,9 @@ export default defineConfig(({ mode }) => {
       cssCodeSplit: true,
       rollupOptions: {
         output: {
+          assetFileNames: 'assets/immutable/[name]-[hash][extname]',
+          chunkFileNames: 'assets/immutable/[name]-[hash].js',
+          entryFileNames: 'assets/immutable/[name]-[hash].js',
           manualChunks(id) {
             if (!id.includes('node_modules')) return
             if (id.includes('/firebase/') || id.includes('@firebase')) return 'vendor-firebase'
