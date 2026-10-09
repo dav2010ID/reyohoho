@@ -46,7 +46,7 @@
           :key="kp_id"
           :kp-id="kp_id"
           :movie-info="movieInfo"
-          @update:movie-info="fetchMovieInfo"
+          @toggle-list="toggleList"
         />
       </div>
 
@@ -283,7 +283,7 @@
           :key="kp_id"
           :kp-id="kp_id"
           :movie-info="movieInfo"
-          @update:movie-info="fetchMovieInfo"
+          @toggle-list="toggleList"
         />
 
         <MovieMobileListDropdown
@@ -976,7 +976,9 @@ import {
 } from '@/api/movies'
 import { parseTimingTextToSeconds, formatSecondsToTime } from '@/utils/dateUtils'
 import { handleApiError } from '@/constants'
-import { addToList, delFromList } from '@/api/user'
+import { addToList } from '@/api/user'
+import { usePlayerLists } from '@/composables/usePlayerLists'
+import { cardRatings } from '../../migration/history-transfer/history-data.js'
 import { MovieList } from '@/components/MovieList/'
 import ErrorMessage from '@/components/ErrorMessage.vue'
 import SpinnerLoading from '@/components/SpinnerLoading.vue'
@@ -1376,6 +1378,8 @@ const fetchMovieInfo = async (updateHistory = true) => {
     if (controller.signal.aborted || requestedKpId !== kp_id.value) return false
 
     const movieToSave = {
+      ...cardRatings(movieInfo.value),
+      ratings_checked: 1,
       kp_id: requestedKpId,
       title: movieInfo.value?.name_ru || movieInfo.value?.name_en || movieInfo.value?.name_original,
       slug: getMovieSeoSlug(movieInfo.value, requestedKpId),
@@ -1407,8 +1411,15 @@ const fetchMovieInfo = async (updateHistory = true) => {
     if (isHistoryAllowed.value && movieToSave.kp_id && movieToSave.title && updateHistory) {
       if (authStore.token) {
         mainStore.addToHistory({ ...movieToSave })
+        const historyToken = authStore.token
+        const historyMovie = movieInfo.value
         try {
-          await addToList(movieToSave.kp_id, USER_LIST_TYPES_ENUM.HISTORY, movieInfo.value)
+          await addToList(movieToSave.kp_id, USER_LIST_TYPES_ENUM.HISTORY, historyMovie)
+          await loadStatus()
+          if (!controller.signal.aborted && requestedKpId === kp_id.value &&
+            authStore.token === historyToken && movieInfo.value === historyMovie) {
+            movieInfo.value.lists = { ...movieInfo.value.lists, isHistory: true }
+          }
         } catch (error) {
           console.error('Ошибка при добавлении в историю:', error)
         }
@@ -1517,52 +1528,16 @@ const showTimingsPanel = () => {
     movieInfo.value?.nudity_timings === null ? '' : movieInfo.value?.nudity_timings || ''
 }
 
-const getListStatus = (listType) => {
-  const statusMap = {
-    [USER_LIST_TYPES_ENUM.FAVORITE]: movieInfo.value?.lists?.isFavorite || false,
-    [USER_LIST_TYPES_ENUM.HISTORY]: movieInfo.value?.lists?.isHistory || false,
-    [USER_LIST_TYPES_ENUM.LATER]: movieInfo.value?.lists?.isLater || false,
-    [USER_LIST_TYPES_ENUM.COMPLETED]: movieInfo.value?.lists?.isCompleted || false,
-    [USER_LIST_TYPES_ENUM.ABANDONED]: movieInfo.value?.lists?.isAbandoned || false,
-    [USER_LIST_TYPES_ENUM.WATCHING]: movieInfo.value?.lists?.isWatching || false
-  }
-  return statusMap[listType] ?? false
-}
-
-const toggleList = async (type) => {
-  if (!authStore.token) {
-    notificationRef.value.showNotification(
-      'Необходимо <a class="auth-link">авторизоваться</a>',
-      5000,
-      { onClick: () => router.push('/login') }
-    )
-    return
-  }
-
-  try {
-    const listNames = {
-      [USER_LIST_TYPES_ENUM.FAVORITE]: 'избранное',
-      [USER_LIST_TYPES_ENUM.HISTORY]: 'историю',
-      [USER_LIST_TYPES_ENUM.LATER]: 'список "Смотреть позже"',
-      [USER_LIST_TYPES_ENUM.COMPLETED]: 'список "Просмотрено"',
-      [USER_LIST_TYPES_ENUM.ABANDONED]: 'список "Брошено"',
-      [USER_LIST_TYPES_ENUM.WATCHING]: 'список "Смотрю"'
-    }
-
-    if (getListStatus(type)) {
-      await delFromList(kp_id.value, type)
-      notificationRef.value.showNotification(`Удалено из ${listNames[type]}`)
-    } else {
-      await addToList(kp_id.value, type, movieInfo.value)
-      notificationRef.value.showNotification(`Добавлено в ${listNames[type]}`)
-    }
-    await fetchMovieInfo(false)
+const { toggleList, loadStatus } = usePlayerLists({
+  authStore,
+  kpId: kp_id,
+  movieInfo,
+  notificationRef,
+  openLogin: () => router.push('/login'),
+  onChanged: () => {
     isListExpanded.value = false
-  } catch (error) {
-    const { message, code } = handleApiError(error)
-    notificationRef.value.showNotification(`${message} ${code}`)
   }
-}
+})
 
 // Close dropdown when clicking outside
 const handleClickOutside = (event) => {

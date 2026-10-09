@@ -60,7 +60,7 @@ export default {
     if (origin && !ALLOWED.has(origin)) return reply({ error: 'Origin not allowed' }, 403)
     const privatePath = new URL(request.url).pathname
     if (privatePath.startsWith('/api/auth/')) return serveTelegramAuth(request, env, origin)
-    if (/^\/api\/(?:user(?:\/|$)|list\/|user-list(?:-counters)?\/|notifications(?:\/|$))/.test(privatePath))
+    if (/^\/api\/(?:user(?:\/|$)|list(?:-status)?\/|user-list(?:-counters)?\/|notifications(?:\/|$))/.test(privatePath))
       return serveAccount(request, env, origin)
     if (/^\/api\/history(?:\/|$)/.test(new URL(request.url).pathname))
       return serveHistory(request, env, origin)

@@ -1,5 +1,15 @@
 // Only card fields are shared between browser imports and cloud storage.
-export const CARD_FIELDS = ['title', 'poster', 'year', 'type', 'slug']
+export const CARD_FIELDS = [
+  'title',
+  'poster',
+  'year',
+  'type',
+  'slug',
+  'rating_kp',
+  'rating_imdb',
+  'rating',
+  'ratings_checked'
+]
 export const hasCardValue = (value) =>
   (typeof value === 'string' && Boolean(value.trim())) ||
   (typeof value === 'number' && Number.isFinite(value) && value > 0)

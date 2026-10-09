@@ -3,6 +3,18 @@ import { mergeHistory, normalizeHistory, readLegacyHistory } from '../../migrati
 import { LEGACY_ORIGIN, validateTransferMessage } from './historyTransfer'
 
 describe('history migration', () => {
+  it('preserves only valid numeric ratings and never full provider data', () => {
+    const [movie] = normalizeHistory([{
+      kp_id: 301, rating_kinopoisk: '8,5', raw_data: { rating_imdb: '8.7', token: 'secret' },
+      average_rating: 7.2, ratings_checked: 1
+    }])
+    expect(movie).toMatchObject({ rating_kp: 8.5, rating_imdb: 8.7, rating: 7.2, ratings_checked: 1 })
+    expect(movie).not.toHaveProperty('raw_data')
+    const [invalid] = normalizeHistory([{ kp_id: 42, rating_kp: 11, rating_imdb: {}, rating: -1 }])
+    expect(invalid).not.toHaveProperty('rating_kp')
+    expect(invalid).not.toHaveProperty('rating_imdb')
+    expect(invalid).not.toHaveProperty('rating')
+  })
   it('reads supported legacy formats without auth or other settings', () => {
     const read = []
     const storage = { getItem(key) {

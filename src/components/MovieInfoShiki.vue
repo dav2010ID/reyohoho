@@ -45,7 +45,7 @@
           v-if="moviePlayerComponent"
           :key="shiki_id"
           :movie-info="movieInfo"
-          @update:movie-info="fetchMovieInfo"
+          @toggle-list="toggleList"
         />
       </div>
 
@@ -220,7 +220,7 @@
           :key="shiki_id"
           :kp-id="shiki_id"
           :movie-info="movieInfo"
-          @update:movie-info="fetchMovieInfo"
+          @toggle-list="toggleList"
         />
 
         <div class="additional-info">
@@ -257,6 +257,7 @@
       </div>
     </div>
   </div>
+  <Notification ref="notificationRef" />
 </template>
 
 <script setup>
@@ -265,8 +266,11 @@ import ErrorMessage from '@/components/ErrorMessage.vue'
 import SpinnerLoading from '@/components/SpinnerLoading.vue'
 import { useBackgroundStore } from '@/store/background'
 import { useNavbarStore } from '@/store/navbar'
+import { useAuthStore } from '@/store/auth'
+import { usePlayerLists } from '@/composables/usePlayerLists'
+import Notification from '@/components/notification/ToastMessage.vue'
 import { onMounted, ref, watch } from 'vue'
-import { useRoute } from 'vue-router'
+import { useRoute, useRouter } from 'vue-router'
 import { getRatingColor } from '@/utils/ratingUtils'
 import { getShikiInfo } from '@/api/movies'
 
@@ -281,6 +285,15 @@ const moviePlayerComponent = ref(null)
 const movieRatingComponent = ref(null)
 const navbarStore = useNavbarStore()
 const notificationRef = ref(null)
+const authStore = useAuthStore()
+const router = useRouter()
+const { toggleList } = usePlayerLists({
+  authStore,
+  kpId: shiki_id,
+  movieInfo,
+  notificationRef,
+  openLogin: () => router.push('/login')
+})
 
 const titleCopyTooltip = ref(false)
 const tooltipStyle = ref({})

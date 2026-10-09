@@ -5,6 +5,14 @@ import { resolvePosterByMovie } from '@/utils/mediaUtils'
 import { useMainStore } from './main'
 
 describe('Тесты хранилища main', () => {
+  it('сохраняет оценки и обновляет ту же запись для числового и строкового ID', () => {
+    const store = useMainStore()
+    store.addToHistory({ kp_id: 301, title: 'Матрица', rating_kinopoisk: 8.5, rating_imdb: 8.7 })
+    expect(store.history[0]).toMatchObject({ rating_kp: 8.5, rating_imdb: 8.7 })
+    store.addToHistory({ kp_id: '301', title: 'Матрица', ratings_checked: 1 })
+    expect(store.history).toHaveLength(1)
+    expect(store.history[0]).toMatchObject({ rating_kp: 8.5, rating_imdb: 8.7, ratings_checked: 1 })
+  })
   beforeEach(() => {
     setActivePinia(
       createTestingPinia({

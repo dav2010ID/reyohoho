@@ -10,6 +10,47 @@ const movie = {
   type: 'FILM'
 }
 describe('imported card metadata', () => {
+  it('loads ratings for complete old cards only when requested, retaining existing fields', async () => {
+    getKpInfo.mockResolvedValue({
+      ...movie,
+      title: 'Other title',
+      rating_kp: 8.5,
+      rating_imdb: 8.7
+    })
+    const [result] = await enrichListMetadata([{ ...movie, kp_id: '301' }], {
+      includeRatings: true
+    })
+    expect(result).toMatchObject({ ...movie, rating_kp: 8.5, rating_imdb: 8.7, ratings_checked: 1 })
+    await enrichListMetadata([result], { includeRatings: true })
+    expect(getKpInfo).toHaveBeenCalledTimes(1)
+  })
+  it('does not repeatedly fetch a successfully checked movie with no published ratings', async () => {
+    getKpInfo.mockResolvedValue(movie)
+    const [result] = await enrichListMetadata([{ ...movie, kp_id: '301' }], {
+      includeRatings: true
+    })
+    expect(result.ratings_checked).toBe(1)
+    await enrichListMetadata([result], { includeRatings: true })
+    expect(getKpInfo).toHaveBeenCalledTimes(1)
+  })
+  it('bounds concurrent metadata requests across independent cards', async () => {
+    let active = 0,
+      peak = 0
+    getKpInfo.mockImplementation(async () => {
+      active++
+      peak = Math.max(peak, active)
+      await new Promise((resolve) => setTimeout(resolve, 5))
+      active--
+      return movie
+    })
+    await Promise.all(
+      Array.from({ length: 9 }, (_, index) =>
+        enrichListMetadata([{ ...movie, kp_id: String(1000 + index) }], { includeRatings: true })
+      )
+    )
+    expect(getKpInfo).toHaveBeenCalledTimes(9)
+    expect(peak).toBe(3)
+  })
   it('enriches bare IDs and persists only improvements, preserving dates and filled fields', async () => {
     getKpInfo.mockResolvedValue(movie)
     const persist = vi.fn().mockResolvedValue({ ok: true })

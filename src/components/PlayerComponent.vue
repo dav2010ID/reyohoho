@@ -89,6 +89,7 @@
         >
           <button
             v-if="showFavoriteTooltip"
+            type="button"
             class="favorite-btn"
             :class="{ active: movieInfo?.lists?.isFavorite }"
             aria-label="Управление списками"
@@ -113,6 +114,7 @@
           >
             <div class="list-button-item">
               <button
+                type="button"
                 class="favorite-btn"
                 :class="{ active: movieInfo?.lists?.isFavorite }"
                 @click="toggleList(USER_LIST_TYPES_ENUM.FAVORITE)"
@@ -125,6 +127,7 @@
             </div>
             <div class="list-button-item">
               <button
+                type="button"
                 class="watching-btn"
                 :class="{ active: movieInfo?.lists?.isWatching }"
                 @click="toggleList(USER_LIST_TYPES_ENUM.WATCHING)"
@@ -137,6 +140,7 @@
             </div>
             <div class="list-button-item">
               <button
+                type="button"
                 class="later-btn"
                 :class="{ active: movieInfo?.lists?.isLater }"
                 @click="toggleList(USER_LIST_TYPES_ENUM.LATER)"
@@ -147,6 +151,7 @@
             </div>
             <div class="list-button-item">
               <button
+                type="button"
                 class="completed-btn"
                 :class="{ active: movieInfo?.lists?.isCompleted }"
                 @click="toggleList(USER_LIST_TYPES_ENUM.COMPLETED)"
@@ -159,6 +164,7 @@
             </div>
             <div class="list-button-item">
               <button
+                type="button"
                 class="abandoned-btn"
                 :class="{ active: movieInfo?.lists?.isAbandoned }"
                 @click="toggleList(USER_LIST_TYPES_ENUM.ABANDONED)"
@@ -446,6 +452,7 @@
       <div v-if="!isMobile && !showFavoriteTooltip && kp_id" class="desktop-list-buttons">
         <div class="tooltip-container">
           <button
+            type="button"
             class="favorite-btn"
             :class="{ active: movieInfo?.lists?.isFavorite }"
             @mouseenter="showTooltip('favorite')"
@@ -463,6 +470,7 @@
 
         <div class="tooltip-container">
           <button
+            type="button"
             class="watching-btn"
             :class="{ active: movieInfo?.lists?.isWatching }"
             @mouseenter="showTooltip('watching')"
@@ -480,6 +488,7 @@
 
         <div class="tooltip-container">
           <button
+            type="button"
             class="later-btn"
             :class="{ active: movieInfo?.lists?.isLater }"
             @mouseenter="showTooltip('later')"
@@ -495,6 +504,7 @@
 
         <div class="tooltip-container">
           <button
+            type="button"
             class="completed-btn"
             :class="{ active: movieInfo?.lists?.isCompleted }"
             @mouseenter="showTooltip('completed')"
@@ -512,6 +522,7 @@
 
         <div class="tooltip-container">
           <button
+            type="button"
             class="abandoned-btn"
             :class="{ active: movieInfo?.lists?.isAbandoned }"
             @mouseenter="showTooltip('abandoned')"
@@ -540,12 +551,10 @@ import Notification from '@/components/notification/ToastMessage.vue'
 import SliderRound from '@/components/slider/SliderRound.vue'
 import { usePlayerElectronControls } from '@/composables/usePlayerElectronControls'
 import { usePlayerLayout } from '@/composables/usePlayerLayout'
-import { usePlayerLists } from '@/composables/usePlayerLists'
 import { usePlayerSharing } from '@/composables/usePlayerSharing'
 import { usePlayerSources } from '@/composables/usePlayerSources'
 import { useMainStore } from '@/store/main'
 import { usePlayerStore } from '@/store/player'
-import { useAuthStore } from '@/store/auth'
 import { USER_LIST_TYPES_ENUM } from '@/constants'
 import { computed, defineAsyncComponent, nextTick, onBeforeUnmount, onMounted, ref, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
@@ -586,7 +595,6 @@ const PlayerSourceModal = defineAsyncComponent(() => import('@/components/player
 
 const mainStore = useMainStore()
 const playerStore = usePlayerStore()
-const authStore = useAuthStore()
 const route = useRoute()
 const router = useRouter()
 const kp_id = ref(route.params.kp_id)
@@ -598,7 +606,7 @@ const props = defineProps({
     default: () => ({})
   }
 })
-const emit = defineEmits(['update:selectedPlayer', 'update:movieInfo'])
+const emit = defineEmits(['update:selectedPlayer', 'toggle-list'])
 
 const iframeLoading = ref(true)
 const playerIframe = ref(null)
@@ -1475,18 +1483,7 @@ watch(
   { deep: true }
 )
 
-const openLogin = () => {
-  router.push('/login')
-}
-
-const { toggleList } = usePlayerLists({
-  authStore,
-  emit,
-  kpId: kp_id,
-  movieInfo: computed(() => props.movieInfo),
-  notificationRef,
-  openLogin
-})
+const toggleList = (type) => emit('toggle-list', type)
 
 const showFavoriteTooltip = computed(() => playerStore.showFavoriteTooltip)
 

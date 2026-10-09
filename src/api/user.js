@@ -19,6 +19,60 @@ const apiCall = async (callFn) => {
   return await callFn(api)
 }
 
+export async function getMovieListStatus(id) {
+  if (!/^[1-9]\d{0,11}$/.test(String(id))) return {}
+  const auth = useAuthStore()
+  const token = auth.token
+  if (auth.isWorkerSession) {
+    try {
+      return await workerAccountRequest(`/list-status/${id}`)
+    } catch (error) {
+      // Old Workers also reject Authorization in this route's CORS preflight.
+      // Fall back to their existing private endpoints, never to cached membership.
+      if (error.response?.status !== 404 && !(error instanceof TypeError)) throw error
+    }
+  }
+  const types = Object.values(USER_LIST_TYPES_ENUM).filter((type) =>
+    ['favorite', 'later', 'watching', 'completed', 'abandoned', 'history'].includes(type)
+  )
+  const entries = await Promise.all(
+    types.map(async (type) => {
+      const items =
+        type === 'history' && isCloudHistoryEnabled()
+          ? (await historyRequest()).history
+          : (await apiCall((api) => api.get(`/list/${type}`))).data
+      return [
+        type,
+        Array.isArray(items) && items.some((item) => String(item.kp_id ?? item.id) === String(id))
+      ]
+    })
+  )
+  if (auth.token !== token) throw new Error('Аккаунт изменился. Повторите операцию')
+  return Object.fromEntries(entries)
+}
+
+export async function repairCardRatings(item, type, isCurrent = () => true) {
+  const auth = useAuthStore()
+  const token = auth.token
+  const current = () => auth.token === token && isCurrent()
+  const [result] = await enrichListMetadata([item], {
+    includeRatings: true,
+    isCurrent: current,
+    persist:
+      token &&
+      auth.isWorkerSession &&
+      ['history', 'favorite', 'later', 'watching', 'completed', 'abandoned'].includes(type)
+        ? (card) => {
+            const [metadata] = normalizeHistory([card])
+            return type === USER_LIST_TYPES_ENUM.HISTORY
+              ? historyRequest(`/${metadata.kp_id}`, 'PATCH', { metadata })
+              : workerAccountRequest(`/list/${type}/${metadata.kp_id}`, 'PATCH', { metadata })
+          }
+        : undefined
+  })
+  return result
+}
+
 const addToList = async (id, type, metadata = null) => {
   const token = useAuthStore().token
   if (useAuthStore().isWorkerSession) {
@@ -30,13 +84,17 @@ const addToList = async (id, type, metadata = null) => {
   // Preserve the legacy backend payload contract.
   const payload = useAuthStore().isWorkerSession
     ? { metadata: normalizeHistory([{ ...metadata, kp_id: id }])[0] }
-    : metadata ? { metadata } : undefined
-  addLocalListItem(type, id, metadata || {})
+    : metadata
+      ? { metadata }
+      : undefined
   if (type === USER_LIST_TYPES_ENUM.HISTORY && isCloudHistoryEnabled()) {
     const [item] = normalizeHistory([{ ...metadata, kp_id: id }])
-    return historyRequest(`/${encodeURIComponent(id)}`, 'PUT', item)
+    const data = await historyRequest(`/${encodeURIComponent(id)}`, 'PUT', item)
+    if (useAuthStore().token === token) addLocalListItem(type, id, metadata || {})
+    return data
   }
   const { data } = await apiCall((api) => api.put(`/list/${type}/${id}`, payload))
+  if (useAuthStore().token === token) addLocalListItem(type, id, metadata || {})
   return data
 }
 

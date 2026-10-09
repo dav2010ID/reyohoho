@@ -119,6 +119,7 @@ import BaseModal from '@/components/BaseModal.vue'
 import { useMainStore } from '@/store/main'
 import { logoutAndRedirect } from '@/utils/authSession'
 import { enrichListMetadata } from '@/api/listMetadata'
+import { cardRatings } from '../../migration/history-transfer/history-data.js'
 import { importCloudHistory, isCloudHistoryEnabled } from '@/api/cloudHistory'
 
 const movies = ref([])
@@ -166,6 +167,8 @@ const normalizeHistoryItems = (historyItems) => {
 
       return {
         kp_id: kpId,
+        ...cardRatings(item),
+        slug: typeof item?.slug === 'string' ? item.slug : '',
         title: typeof item?.title === 'string' ? item.title : '',
         year: item?.year ?? '',
         type: item?.type ?? '',

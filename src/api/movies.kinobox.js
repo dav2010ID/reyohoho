@@ -113,6 +113,7 @@ const normalizeKinoboxMovie = (movie, kpId) => {
     rating_kinopoisk: toNumberOrNull(ratingKinopoisk.value),
     rating_kinopoisk_vote_count: Number(ratingKinopoisk.count) || 0,
     rating_imdb: toNumberOrNull(ratingImdb.value),
+    ratings_checked: 1,
     rating_imdb_vote_count: Number(ratingImdb.count) || 0,
     rating_film_critics: null,
     rating_film_critics_vote_count: 0,

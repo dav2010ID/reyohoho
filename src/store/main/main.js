@@ -3,6 +3,7 @@ import { defineStore } from 'pinia'
 import { MAIN_STORE_NAME } from '../constants'
 import { beforeHydrateMainStore } from '../utils'
 import { resolvePosterByMovie } from '@/utils/mediaUtils'
+import { cardRatings } from '../../../migration/history-transfer/history-data.js'
 
 export const useMainStore = defineStore(MAIN_STORE_NAME, {
   state: () => ({
@@ -47,12 +48,13 @@ export const useMainStore = defineStore(MAIN_STORE_NAME, {
       if (!movie?.kp_id) return
 
       // Находим индекс фильма в истории
-      const existingMovieIndex = this.history.findIndex((m) => m.kp_id === movie.kp_id)
+      const existingMovieIndex = this.history.findIndex((m) => String(m.kp_id) === String(movie.kp_id))
 
       if (existingMovieIndex !== -1) {
         // Если фильм уже есть, обновляем время добавления и ставим первым
         this.history[existingMovieIndex] = {
           ...this.history[existingMovieIndex],
+          ...cardRatings(movie),
           title: movie.title || this.history[existingMovieIndex].title || '',
           slug: movie.slug || this.history[existingMovieIndex].slug || '',
           year: movie.year || this.history[existingMovieIndex].year || '',
@@ -69,6 +71,7 @@ export const useMainStore = defineStore(MAIN_STORE_NAME, {
         // Если фильма нет, добавляем его в начало
         const movieWithDate = {
           kp_id: movie.kp_id,
+          ...cardRatings(movie),
           title: movie.title || '',
           slug: movie.slug || '',
           year: movie.year || '',

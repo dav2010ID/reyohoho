@@ -33,6 +33,17 @@ export async function serveAccount(request, env, origin) {
     const path = new URL(request.url).pathname
     const db = primaryDb(env)
     const uid = `worker-tg:${user.id}`
+    const status = /^\/api\/list-status\/([1-9]\d{0,11})$/.exec(path)
+    if (status && request.method === 'GET') {
+      const { results } = await db
+        .prepare(
+          "SELECT list_type FROM account_lists WHERE user_id=? AND kp_id=? UNION ALL SELECT 'history' AS list_type FROM user_history WHERE user_id=? AND kp_id=? AND deleted=0"
+        )
+        .bind(uid, status[1], uid, status[1])
+        .all()
+      const active = new Set(results.map((row) => row.list_type))
+      return reply(Object.fromEntries([...TYPES].map((type) => [type, active.has(type)])))
+    }
     if (path === '/api/notifications' && request.method === 'GET')
       return reply({ notifications: [], unread_count: 0 })
     if (path === '/api/notifications/unread-count' && request.method === 'GET')
@@ -93,10 +104,17 @@ export async function serveAccount(request, env, origin) {
     }
     if (id && request.method === 'PATCH') {
       let metadata
-      try { metadata = await readMetadataPatch(request, id) }
-      catch { return reply({ error: 'Invalid metadata' }, 400) }
+      try {
+        metadata = await readMetadataPatch(request, id)
+      } catch {
+        return reply({ error: 'Invalid metadata' }, 400)
+      }
       const update = metadataUpdate('account_lists', metadata, { userId: uid, id, type })
-      if (update) await db.prepare(update.sql).bind(...update.params).run()
+      if (update)
+        await db
+          .prepare(update.sql)
+          .bind(...update.params)
+          .run()
       return reply({ ok: true })
     }
     if (!id && request.method === 'GET') {

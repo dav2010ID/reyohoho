@@ -15,7 +15,7 @@
     tabindex="0"
   >
     <CardsMovieMainContent
-      :movie
+      :movie="displayMovie"
       :is-history
       :is-mobile
       :is-user-list="isUserList"
@@ -31,12 +31,16 @@
 </template>
 
 <script setup>
-import { onMounted, useTemplateRef, computed } from 'vue'
+import { onMounted, onUnmounted, useTemplateRef, computed, ref, watch } from 'vue'
 import CardMovieDetails from './CardMovieDetails.vue'
 import CardsMovieMainContent from './CardsMovieMainContent.vue'
 import { useBackgroundStore } from '@/store/background'
 import { useMainStore } from '@/store/main'
 import { getMovieSeoPath } from '@/utils/movieSeo'
+import { useAuthStore } from '@/store/auth'
+import { useRoute } from 'vue-router'
+import { repairCardRatings } from '@/api/user'
+import { cardRatings } from '../../../migration/history-transfer/history-data.js'
 
 const backgroundStore = useBackgroundStore()
 const mainStore = useMainStore()
@@ -70,11 +74,79 @@ const {
 const emit = defineEmits(['remove:from-history', 'save:element'])
 const element = useTemplateRef('element')
 const moviePath = computed(() => getMovieSeoPath(movie))
+const authStore = useAuthStore()
+const route = useRoute()
+const enrichedMovie = ref(null)
+const displayMovie = computed(() => ({ ...movie, ...cardRatings(enrichedMovie.value || movie) }))
+let observer
+let generation = 0
+let visible = false
+const loadRatings = async () => {
+  const currentGeneration = ++generation
+  const original = movie
+  const token = authStore.token
+  if (
+    !(isHistory || isUserList) ||
+    original?.ratings_checked === 1 ||
+    cardRatings(original).rating_kp ||
+    cardRatings(original).rating_imdb
+  )
+    return
+  const isCurrent = () =>
+    generation === currentGeneration && movie === original && authStore.token === token
+  const ownList =
+    !route.params.user_id || String(route.params.user_id) === String(authStore.user?.id)
+  const type = isHistory ? 'history' : ownList ? route.query.type || 'favorite' : null
+  try {
+    const card = await repairCardRatings(original, type, isCurrent)
+    if (!isCurrent()) return
+    enrichedMovie.value = card
+    // Patch only metadata of an existing entry; never resurrect a deleted history item.
+    if (isHistory) {
+      const ratings = cardRatings(card)
+      mainStore.setHistory(
+        mainStore.history.map((item) =>
+          String(item.kp_id) === String(original.kp_id) &&
+          Object.entries(ratings).some(([key, value]) => item[key] !== value)
+            ? { ...item, ...ratings }
+            : item
+        )
+      )
+    }
+  } catch {
+    /* Keep the card usable when the metadata service is unavailable. */
+  }
+}
+watch([() => movie, () => authStore.token], () => {
+  generation++
+  enrichedMovie.value = null
+  if (visible) void loadRatings()
+})
 
 onMounted(() => {
   if (element.value && element.value.$el) {
     emit('save:element', element.value.$el)
+    if (typeof window.IntersectionObserver === 'undefined') {
+      visible = true
+      void loadRatings()
+    } else {
+      observer = new window.IntersectionObserver(
+        (entries) => {
+          if (entries.some((entry) => entry.isIntersecting)) {
+            visible = true
+            observer.disconnect()
+            void loadRatings()
+          }
+        },
+        { rootMargin: '200px' }
+      )
+      observer.observe(element.value.$el)
+    }
   }
+})
+onUnmounted(() => {
+  generation++
+  observer?.disconnect()
 })
 </script>
 

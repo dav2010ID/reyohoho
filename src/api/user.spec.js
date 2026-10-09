@@ -1,5 +1,5 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest'
-import { addToList, getMyLists } from './user'
+import { addToList, getMyLists, getMovieListStatus, repairCardRatings } from './user'
 import { getKpInfo } from './movies.kinobox'
 import { normalizeHistory } from '../../migration/history-transfer/history-data.js'
 
@@ -33,7 +33,11 @@ vi.mock('@/utils/localUserLists', () => ({
 }))
 
 const movie = {
-  kp_id: '843831', title: 'Сноуден', slug: 'snowden', year: 2016, type: 'FILM',
+  kp_id: '843831',
+  title: 'Сноуден',
+  slug: 'snowden',
+  year: 2016,
+  type: 'FILM',
   poster: 'https://example.com/poster.jpg',
   description: 'Описание'.repeat(1500),
   raw_data: { cast: Array(100).fill({ name: 'Актёр' }) }
@@ -50,8 +54,48 @@ beforeEach(() => {
 })
 
 describe('compact cloud list requests', () => {
+  it('does not put a failed cloud list write in the local cache', async () => {
+    mocks.worker.put.mockRejectedValue(new Error('offline'))
+    await expect(addToList('843831', 'favorite', movie)).rejects.toThrow('offline')
+    expect(mocks.localAdd).not.toHaveBeenCalled()
+  })
+  it('reads membership with one private request without hydrating cards', async () => {
+    mocks.patch.mockResolvedValue({ favorite: true, later: false })
+    expect(await getMovieListStatus('301')).toEqual({ favorite: true, later: false })
+    expect(mocks.patch).toHaveBeenCalledWith('/list-status/301')
+    expect(getKpInfo).not.toHaveBeenCalled()
+  })
+  it.each([{ response: { status: 404 } }, new TypeError('Failed to fetch')])(
+    'supports the old Worker during endpoint rollout without provider requests (%s)',
+    async (error) => {
+      mocks.patch.mockRejectedValue(error)
+      mocks.worker.get.mockImplementation(async (path) => ({
+        data: path === '/list/favorite' ? [{ kp_id: 301 }] : []
+      }))
+      mocks.history.mockResolvedValue({ history: [{ kp_id: '301' }] })
+      expect(await getMovieListStatus(301)).toEqual({
+        favorite: true,
+        later: false,
+        watching: false,
+        completed: false,
+        abandoned: false,
+        history: true
+      })
+      expect(getKpInfo).not.toHaveBeenCalled()
+    }
+  )
+  it('repairs ratings using a compact fill-only cloud history PATCH', async () => {
+    getKpInfo.mockResolvedValue({ ...movie, rating_kp: 7.5 })
+    const result = await repairCardRatings(movie, 'history')
+    expect(result.rating_kp).toBe(7.5)
+    expect(mocks.history).toHaveBeenCalledWith('/843831', 'PATCH', {
+      metadata: expect.objectContaining({ rating_kp: 7.5, ratings_checked: 1 })
+    })
+    expect(mocks.history.mock.calls[0][2].metadata).not.toHaveProperty('raw_data')
+  })
   it.each(['favorite', 'later', 'watching', 'completed', 'abandoned'])(
-    'sends only card metadata to %s while retaining local metadata', async (type) => {
+    'sends only card metadata to %s while retaining local metadata',
+    async (type) => {
       expect(byteLength({ metadata: movie })).toBeGreaterThan(8192)
       expect(await addToList('843831', type, movie)).toEqual({ ok: true })
       const [path, payload] = mocks.worker.put.mock.calls[0]
@@ -67,7 +111,11 @@ describe('compact cloud list requests', () => {
     getKpInfo.mockResolvedValue(movie)
     await addToList('843831', 'favorite')
     expect(mocks.worker.put.mock.calls[0][1].metadata).toMatchObject({
-      kp_id: '843831', title: 'Сноуден', poster: movie.poster, year: '2016', type: 'FILM'
+      kp_id: '843831',
+      title: 'Сноуден',
+      poster: movie.poster,
+      year: '2016',
+      type: 'FILM'
     })
   })
   it('still adds the ID if metadata loading is unavailable', async () => {

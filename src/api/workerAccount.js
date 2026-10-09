@@ -9,7 +9,7 @@ export async function workerAccountRequest(
   { anonymous = false, token } = {}
 ) {
   if (
-    !/^\/(?:auth\/[a-z-]+|user(?:\/name)?|list\/[a-z]+(?:\/[1-9]\d{0,11})?|user-list\/[1-9]\d{0,19}\/[a-z]+|user-list-counters\/[1-9]\d{0,19}|notifications(?:\/unread-count)?)$/.test(
+    !/^\/(?:auth\/[a-z-]+|user(?:\/name)?|list-status\/[1-9]\d{0,11}|list\/[a-z]+(?:\/[1-9]\d{0,11})?|user-list\/[1-9]\d{0,19}\/[a-z]+|user-list-counters\/[1-9]\d{0,19}|notifications(?:\/unread-count)?)$/.test(
       path
     )
   )
