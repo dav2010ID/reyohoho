@@ -1,1 +1,0 @@
-import{M as e}from"./vendor-vue-BPHKIuah.js";function t(t){let n=t.replace(/\/(?=\?|$)/,``),r=e(`publicPageState`,null);return{read:()=>r?.state.publicPages?.[n],save:e=>{r?.server&&(r.state.publicPages||={},r.state.publicPages[n]=e)}}}export{t};
