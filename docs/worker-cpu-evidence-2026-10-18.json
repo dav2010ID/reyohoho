@@ -1,0 +1,786 @@
+{
+  "date": "2026-10-18",
+  "production": {
+    "worker": "lively-cloud-4e31",
+    "environment": "production",
+    "accountId": "<account-id>",
+    "versionId": "2a55f6fd-3944-4635-bf84-c2513d70b2d8",
+    "percentage": 100,
+    "changed": false
+  },
+  "conclusions": {
+    "cpuLimitMs": 10,
+    "limitSatisfied": false,
+    "edgeCpuReductionDemonstrated": false,
+    "nativeFetchCompatibleInTest": false
+  },
+  "limitations": [
+    "Isolated content harness, PRG; not a production deployment or controlled estimate of production percentiles.",
+    "Only 36 of 96 requests from the second functional run matched tail events; P99 equals maximum at this sample size.",
+    "Local workerd sample counts are not CPU milliseconds or speedup percentages.",
+    "No production after measurements; production was left unchanged."
+  ],
+  "functionalRuns": [
+    {
+      "started": "2026-10-18T15:49:38.995Z",
+      "finished": "2026-10-18T15:49:56.384Z",
+      "requests": 96,
+      "http200": 96,
+      "validJson": 96,
+      "canonicalHashPairs": 48,
+      "equalCanonicalHashPairs": 48,
+      "perVariant": {
+        "before": {
+          "MISS": 24,
+          "HIT": 24
+        },
+        "after": {
+          "MISS": 24,
+          "HIT": 24
+        }
+      }
+    },
+    {
+      "started": "2026-10-18T15:54:12.130Z",
+      "finished": "2026-10-18T15:54:28.966Z",
+      "requests": 96,
+      "http200": 96,
+      "validJson": 96,
+      "canonicalHashPairs": 48,
+      "equalCanonicalHashPairs": 48,
+      "perVariant": {
+        "before": {
+          "MISS": 24,
+          "HIT": 24
+        },
+        "after": {
+          "MISS": 24,
+          "HIT": 24
+        }
+      }
+    }
+  ],
+  "edgeTail": {
+    "sourceRequests": 96,
+    "matchedEvents": 36,
+    "quantileMethod": "nearest-rank",
+    "summaries": [
+      {
+        "variant": "before",
+        "cache": "MISS",
+        "n": 13,
+        "cpuMs": {
+          "p50": 26,
+          "p90": 35,
+          "empiricalP99": 41,
+          "min": 19,
+          "max": 41
+        },
+        "streamLogs": 572
+      },
+      {
+        "variant": "before",
+        "cache": "HIT",
+        "n": 5,
+        "cpuMs": {
+          "p50": 0,
+          "p90": 1,
+          "empiricalP99": 1,
+          "min": 0,
+          "max": 1
+        },
+        "streamLogs": 0
+      },
+      {
+        "variant": "after",
+        "cache": "MISS",
+        "n": 13,
+        "cpuMs": {
+          "p50": 35,
+          "p90": 39,
+          "empiricalP99": 56,
+          "min": 25,
+          "max": 56
+        },
+        "streamLogs": 0
+      },
+      {
+        "variant": "after",
+        "cache": "HIT",
+        "n": 5,
+        "cpuMs": {
+          "p50": 1,
+          "p90": 1,
+          "empiricalP99": 1,
+          "min": 1,
+          "max": 1
+        },
+        "streamLogs": 0
+      }
+    ],
+    "events": [
+      {
+        "label": "before",
+        "requestId": "a4c8b861cf8958b7",
+        "cpu": 41,
+        "wall": 389,
+        "outcome": "ok",
+        "status": 200,
+        "kind": "search",
+        "cache": "MISS",
+        "streamLogs": 44,
+        "totalLogs": 46
+      },
+      {
+        "label": "before",
+        "requestId": "a4c8b8647f6158b7",
+        "cpu": 1,
+        "wall": 4,
+        "outcome": "ok",
+        "status": 200,
+        "kind": "search",
+        "cache": "HIT",
+        "streamLogs": 0,
+        "totalLogs": 1
+      },
+      {
+        "label": "before",
+        "requestId": "a4c8b868dba558b7",
+        "cpu": 21,
+        "wall": 178,
+        "outcome": "ok",
+        "status": 200,
+        "kind": "players",
+        "cache": "MISS",
+        "streamLogs": 44,
+        "totalLogs": 46
+      },
+      {
+        "label": "before",
+        "requestId": "a4c8b86a1f2058b7",
+        "cpu": 0,
+        "wall": 4,
+        "outcome": "ok",
+        "status": 200,
+        "kind": "players",
+        "cache": "HIT",
+        "streamLogs": 0,
+        "totalLogs": 1
+      },
+      {
+        "label": "before",
+        "requestId": "a4c8b86d481c58b7",
+        "cpu": 22,
+        "wall": 180,
+        "outcome": "ok",
+        "status": 200,
+        "kind": "movie",
+        "cache": "MISS",
+        "streamLogs": 44,
+        "totalLogs": 46
+      },
+      {
+        "label": "before",
+        "requestId": "a4c8b86e9c1858b7",
+        "cpu": 0,
+        "wall": 4,
+        "outcome": "ok",
+        "status": 200,
+        "kind": "movie",
+        "cache": "HIT",
+        "streamLogs": 0,
+        "totalLogs": 1
+      },
+      {
+        "label": "before",
+        "requestId": "a4c8b873a99c58b7",
+        "cpu": 26,
+        "wall": 392,
+        "outcome": "ok",
+        "status": 200,
+        "kind": "search",
+        "cache": "MISS",
+        "streamLogs": 44,
+        "totalLogs": 46
+      },
+      {
+        "label": "before",
+        "requestId": "a4c8b8765a3958b7",
+        "cpu": 1,
+        "wall": 4,
+        "outcome": "ok",
+        "status": 200,
+        "kind": "search",
+        "cache": "HIT",
+        "streamLogs": 0,
+        "totalLogs": 1
+      },
+      {
+        "label": "before",
+        "requestId": "a4c8b878382458b7",
+        "cpu": 22,
+        "wall": 173,
+        "outcome": "ok",
+        "status": 200,
+        "kind": "players",
+        "cache": "MISS",
+        "streamLogs": 44,
+        "totalLogs": 46
+      },
+      {
+        "label": "before",
+        "requestId": "a4c8b8797c7558b7",
+        "cpu": 0,
+        "wall": 3,
+        "outcome": "ok",
+        "status": 200,
+        "kind": "players",
+        "cache": "HIT",
+        "streamLogs": 0,
+        "totalLogs": 1
+      },
+      {
+        "label": "before",
+        "requestId": "a4c8b87b8b9258b7",
+        "cpu": 35,
+        "wall": 196,
+        "outcome": "ok",
+        "status": 200,
+        "kind": "movie",
+        "cache": "MISS",
+        "streamLogs": 44,
+        "totalLogs": 46
+      },
+      {
+        "label": "before",
+        "requestId": "a4c8b896e94258b7",
+        "cpu": 32,
+        "wall": 396,
+        "outcome": "ok",
+        "status": 200,
+        "kind": "search",
+        "cache": "MISS",
+        "streamLogs": 44,
+        "totalLogs": 46
+      },
+      {
+        "label": "before",
+        "requestId": "a4c8b8a1288058b7",
+        "cpu": 19,
+        "wall": 171,
+        "outcome": "ok",
+        "status": 200,
+        "kind": "movie",
+        "cache": "MISS",
+        "streamLogs": 44,
+        "totalLogs": 46
+      },
+      {
+        "label": "before",
+        "requestId": "a4c8b8a79e5858b7",
+        "cpu": 30,
+        "wall": 454,
+        "outcome": "ok",
+        "status": 200,
+        "kind": "search",
+        "cache": "MISS",
+        "streamLogs": 44,
+        "totalLogs": 46
+      },
+      {
+        "label": "before",
+        "requestId": "a4c8b8ac7cd158b7",
+        "cpu": 27,
+        "wall": 182,
+        "outcome": "ok",
+        "status": 200,
+        "kind": "players",
+        "cache": "MISS",
+        "streamLogs": 44,
+        "totalLogs": 46
+      },
+      {
+        "label": "before",
+        "requestId": "a4c8b8b1ac6558b7",
+        "cpu": 22,
+        "wall": 362,
+        "outcome": "ok",
+        "status": 200,
+        "kind": "search",
+        "cache": "MISS",
+        "streamLogs": 44,
+        "totalLogs": 46
+      },
+      {
+        "label": "before",
+        "requestId": "a4c8b8b7d85b58b7",
+        "cpu": 23,
+        "wall": 187,
+        "outcome": "ok",
+        "status": 200,
+        "kind": "players",
+        "cache": "MISS",
+        "streamLogs": 44,
+        "totalLogs": 46
+      },
+      {
+        "label": "before",
+        "requestId": "a4c8b8c15de058b7",
+        "cpu": 30,
+        "wall": 381,
+        "outcome": "ok",
+        "status": 200,
+        "kind": "search",
+        "cache": "MISS",
+        "streamLogs": 44,
+        "totalLogs": 46
+      },
+      {
+        "label": "after",
+        "requestId": "a4c8b86559ea58b7",
+        "cpu": 39,
+        "wall": 436,
+        "outcome": "ok",
+        "status": 200,
+        "kind": "search",
+        "cache": "MISS",
+        "streamLogs": 0,
+        "totalLogs": 2
+      },
+      {
+        "label": "after",
+        "requestId": "a4c8b868ab0658b7",
+        "cpu": 1,
+        "wall": 6,
+        "outcome": "ok",
+        "status": 200,
+        "kind": "search",
+        "cache": "HIT",
+        "streamLogs": 0,
+        "totalLogs": 1
+      },
+      {
+        "label": "after",
+        "requestId": "a4c8b86a5fd958b7",
+        "cpu": 56,
+        "wall": 213,
+        "outcome": "ok",
+        "status": 200,
+        "kind": "players",
+        "cache": "MISS",
+        "streamLogs": 0,
+        "totalLogs": 2
+      },
+      {
+        "label": "after",
+        "requestId": "a4c8b86c7de558b7",
+        "cpu": 1,
+        "wall": 6,
+        "outcome": "ok",
+        "status": 200,
+        "kind": "players",
+        "cache": "HIT",
+        "streamLogs": 0,
+        "totalLogs": 1
+      },
+      {
+        "label": "after",
+        "requestId": "a4c8b86eecc558b7",
+        "cpu": 35,
+        "wall": 201,
+        "outcome": "ok",
+        "status": 200,
+        "kind": "movie",
+        "cache": "MISS",
+        "streamLogs": 0,
+        "totalLogs": 2
+      },
+      {
+        "label": "after",
+        "requestId": "a4c8b87078b558b7",
+        "cpu": 1,
+        "wall": 7,
+        "outcome": "ok",
+        "status": 200,
+        "kind": "movie",
+        "cache": "HIT",
+        "streamLogs": 0,
+        "totalLogs": 1
+      },
+      {
+        "label": "after",
+        "requestId": "a4c8b870a94358b7",
+        "cpu": 36,
+        "wall": 390,
+        "outcome": "ok",
+        "status": 200,
+        "kind": "search",
+        "cache": "MISS",
+        "streamLogs": 0,
+        "totalLogs": 2
+      },
+      {
+        "label": "after",
+        "requestId": "a4c8b87358e458b7",
+        "cpu": 1,
+        "wall": 11,
+        "outcome": "ok",
+        "status": 200,
+        "kind": "search",
+        "cache": "HIT",
+        "streamLogs": 0,
+        "totalLogs": 1
+      },
+      {
+        "label": "after",
+        "requestId": "a4c8b8768add58b7",
+        "cpu": 39,
+        "wall": 195,
+        "outcome": "ok",
+        "status": 200,
+        "kind": "players",
+        "cache": "MISS",
+        "streamLogs": 0,
+        "totalLogs": 2
+      },
+      {
+        "label": "after",
+        "requestId": "a4c8b877ff6b58b7",
+        "cpu": 1,
+        "wall": 6,
+        "outcome": "ok",
+        "status": 200,
+        "kind": "players",
+        "cache": "HIT",
+        "streamLogs": 0,
+        "totalLogs": 1
+      },
+      {
+        "label": "after",
+        "requestId": "a4c8b879bd4358b7",
+        "cpu": 38,
+        "wall": 204,
+        "outcome": "ok",
+        "status": 200,
+        "kind": "movie",
+        "cache": "MISS",
+        "streamLogs": 0,
+        "totalLogs": 2
+      },
+      {
+        "label": "after",
+        "requestId": "a4c8b899d9f258b7",
+        "cpu": 32,
+        "wall": 364,
+        "outcome": "ok",
+        "status": 200,
+        "kind": "search",
+        "cache": "MISS",
+        "streamLogs": 0,
+        "totalLogs": 2
+      },
+      {
+        "label": "after",
+        "requestId": "a4c8b89e3fef58b7",
+        "cpu": 39,
+        "wall": 192,
+        "outcome": "ok",
+        "status": 200,
+        "kind": "players",
+        "cache": "MISS",
+        "streamLogs": 0,
+        "totalLogs": 2
+      },
+      {
+        "label": "after",
+        "requestId": "a4c8b8a48beb58b7",
+        "cpu": 28,
+        "wall": 435,
+        "outcome": "ok",
+        "status": 200,
+        "kind": "search",
+        "cache": "MISS",
+        "streamLogs": 0,
+        "totalLogs": 2
+      },
+      {
+        "label": "after",
+        "requestId": "a4c8b8aacffa58b7",
+        "cpu": 30,
+        "wall": 191,
+        "outcome": "ok",
+        "status": 200,
+        "kind": "players",
+        "cache": "MISS",
+        "streamLogs": 0,
+        "totalLogs": 2
+      },
+      {
+        "label": "after",
+        "requestId": "a4c8b8b4ad9058b7",
+        "cpu": 28,
+        "wall": 403,
+        "outcome": "ok",
+        "status": 200,
+        "kind": "search",
+        "cache": "MISS",
+        "streamLogs": 0,
+        "totalLogs": 2
+      },
+      {
+        "label": "after",
+        "requestId": "a4c8b8b99dd158b7",
+        "cpu": 25,
+        "wall": 195,
+        "outcome": "ok",
+        "status": 200,
+        "kind": "players",
+        "cache": "MISS",
+        "streamLogs": 0,
+        "totalLogs": 2
+      },
+      {
+        "label": "after",
+        "requestId": "a4c8b8bebd0458b7",
+        "cpu": 28,
+        "wall": 370,
+        "outcome": "ok",
+        "status": 200,
+        "kind": "search",
+        "cache": "MISS",
+        "streamLogs": 0,
+        "totalLogs": 2
+      }
+    ],
+    "additionalUnmatchedEvents": [
+      {
+        "label": "after",
+        "requestId": "a4c8b69a6a0358b7",
+        "cpu": 46,
+        "wall": 204,
+        "outcome": "ok",
+        "status": 200,
+        "kind": "players",
+        "cache": "MISS",
+        "streamLogs": 0,
+        "totalLogs": 2
+      }
+    ]
+  },
+  "nativeFetchProbe": [
+    {
+      "variant": "same",
+      "transport": "fetch",
+      "kind": "search",
+      "status": 520,
+      "validJson": false,
+      "colo": "PRG",
+      "bytes": 7359,
+      "canonicalJsonSha256": null
+    },
+    {
+      "variant": "same",
+      "transport": "fetch",
+      "kind": "players",
+      "status": 520,
+      "validJson": false,
+      "colo": "PRG",
+      "bytes": 7359,
+      "canonicalJsonSha256": null
+    },
+    {
+      "variant": "same",
+      "transport": "fetch",
+      "kind": "movie",
+      "status": 520,
+      "validJson": false,
+      "colo": "PRG",
+      "bytes": 7359,
+      "canonicalJsonSha256": null
+    },
+    {
+      "variant": "identity",
+      "transport": "fetch",
+      "kind": "search",
+      "status": 520,
+      "validJson": false,
+      "colo": "PRG",
+      "bytes": 7359,
+      "canonicalJsonSha256": null
+    },
+    {
+      "variant": "identity",
+      "transport": "fetch",
+      "kind": "players",
+      "status": 520,
+      "validJson": false,
+      "colo": "PRG",
+      "bytes": 7359,
+      "canonicalJsonSha256": null
+    },
+    {
+      "variant": "identity",
+      "transport": "fetch",
+      "kind": "movie",
+      "status": 520,
+      "validJson": false,
+      "colo": "PRG",
+      "bytes": 7359,
+      "canonicalJsonSha256": null
+    },
+    {
+      "variant": "minimal",
+      "transport": "fetch",
+      "kind": "search",
+      "status": 520,
+      "validJson": false,
+      "colo": "PRG",
+      "bytes": 16,
+      "canonicalJsonSha256": null
+    },
+    {
+      "variant": "minimal",
+      "transport": "fetch",
+      "kind": "players",
+      "status": 520,
+      "validJson": false,
+      "colo": "PRG",
+      "bytes": 16,
+      "canonicalJsonSha256": null
+    },
+    {
+      "variant": "minimal",
+      "transport": "fetch",
+      "kind": "movie",
+      "status": 520,
+      "validJson": false,
+      "colo": "PRG",
+      "bytes": 16,
+      "canonicalJsonSha256": null
+    },
+    {
+      "variant": "custom",
+      "transport": "custom",
+      "kind": "search",
+      "status": 200,
+      "validJson": true,
+      "colo": "PRG",
+      "bytes": 27101,
+      "canonicalJsonSha256": "047135d77a533f2d92890958b352797ab33285d4191fa4429fe8989cc5a80893"
+    },
+    {
+      "variant": "custom",
+      "transport": "custom",
+      "kind": "players",
+      "status": 200,
+      "validJson": true,
+      "colo": "PRG",
+      "bytes": 13010,
+      "canonicalJsonSha256": "004d1ab11ba2b07c42a4b8251b4969483ca1fe144e2675a34328cc394904ce73"
+    },
+    {
+      "variant": "custom",
+      "transport": "custom",
+      "kind": "movie",
+      "status": 200,
+      "validJson": true,
+      "colo": "PRG",
+      "bytes": 3496,
+      "canonicalJsonSha256": "4cb4935f39b71d5349cfa8d23537256ad7d57e0cdcd9c07139b371935bdabbfa"
+    }
+  ],
+  "localProfile": {
+    "method": {
+      "unit": "Occurrences in cpuprofile.samples; never timeDeltas, CPU milliseconds, or edge CPU accounting.",
+      "classification": "Disjoint priority: idle/program/GC; any debuglog/internal_inspect stack; any TLS ar trace-hex stack; any node internal_buffer stack; named native crypto (probe digest separate); native json; inspected exact bundled function start allowlists; other. Bundled allowlists refer to individual inspected function bodies, not vendor-wide line ranges.",
+      "coordinates": "All lines and columns 1-based. Before source map unavailable; after bundle and after sourcemap inspected; logging native descendants counted only with explicit debuglog/internal_inspect ancestor.",
+      "limitations": [
+        "12 profiles per phase; sampling/order/cold-start variation; no production percent or 10ms inference",
+        "JSON parse/stringify not individually sampled; native json is probe Response.json; cert toJSON stays TLS",
+        "Probe performs its own parse, validation, stringify, SHA256; cannot measure production validated JSON text reuse change"
+      ]
+    },
+    "phases": {
+      "before": {
+        "profiles": 12,
+        "totalSamples": 802,
+        "categories": {
+          "idle": 38,
+          "other": 125,
+          "HPACK_HTTP2_JS": 23,
+          "GC": 23,
+          "program": 27,
+          "crypto": 120,
+          "TLS_ASN1_cert_JS": 268,
+          "byte_ArrayBuffer_helpers": 23,
+          "TLS_trace_hex": 5,
+          "Node_Buffer": 13,
+          "debuglog_internal_inspect": 131,
+          "probe_Response_json": 1,
+          "probe_SHA256": 5
+        },
+        "nativeCrypto": {
+          "generateKey": 10,
+          "exportKey": 4,
+          "importKey": 15,
+          "deriveBits": 4,
+          "digest": 2,
+          "sign": 1,
+          "decrypt": 5,
+          "verify": 54,
+          "encrypt": 1
+        },
+        "verifyAncestors": {
+          "verifyIssued": 47,
+          "CertificateVerify_Kl": 7
+        }
+      },
+      "after": {
+        "profiles": 12,
+        "totalSamples": 615,
+        "categories": {
+          "idle": 34,
+          "other": 70,
+          "HPACK_HTTP2_JS": 30,
+          "GC": 18,
+          "program": 10,
+          "TLS_ASN1_cert_JS": 291,
+          "crypto": 109,
+          "byte_ArrayBuffer_helpers": 42,
+          "Node_Buffer": 7,
+          "probe_Response_json": 2,
+          "probe_SHA256": 2
+        },
+        "nativeCrypto": {
+          "generateKey": 3,
+          "deriveBits": 4,
+          "importKey": 11,
+          "verify": 48,
+          "digest": 4,
+          "encrypt": 2,
+          "decrypt": 9,
+          "sign": 1
+        },
+        "verifyAncestors": {
+          "verifyIssued": 44,
+          "CertificateVerify_Kl": 4
+        }
+      }
+    },
+    "afterSourceChecks": {
+      "debuglogOccurrences": 0,
+      "traceGuardOccurrences": 4,
+      "quietTraceDisabled": true,
+      "noopLoggerLines": [17301, 17303],
+      "hexFormatterLine": 1015,
+      "traceGuardLines": [9960, 9978, 9994, 10002]
+    }
+  },
+  "diagnosticsCleanup": {
+    "temporaryWorkersDeleted": [
+      "reyohoho-cpu-audit-before-20261018",
+      "reyohoho-cpu-audit-after-20261018"
+    ],
+    "previewProcessesStopped": true
+  }
+}
