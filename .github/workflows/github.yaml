@@ -46,6 +46,8 @@ jobs:
           VITE_PRERENDER_MOVIE_PAGES: 'true'
           VITE_WORKER_AUTH_ENABLED: ${{ vars.VITE_WORKER_AUTH_ENABLED || 'false' }}
           VITE_CLOUD_HISTORY_ENABLED: ${{ vars.VITE_CLOUD_HISTORY_ENABLED || 'false' }}
+      - name: Prepare pinned Worker vendor modules
+        run: node workers/kinobox-search/prepare-vendor.mjs
       - name: Validate the checkout used to build this artifact
         run: |
           yarn lint

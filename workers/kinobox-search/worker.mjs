@@ -8,7 +8,7 @@ import { serveTelegramAuth, cleanupAuth } from './telegram-auth.mjs'
 import { serveAccount } from './account.mjs'
 import { publicUpstreamBudget } from './public-budget.mjs'
 
-const VERSION = 'kinobox-content-audit-2026-10-13'
+const VERSION = 'kinobox-har-fix-2026-10-21'
 const ALLOWED = new Set([
   'https://reyhoho.fun',
   'https://www.reyhoho.fun',
@@ -84,7 +84,7 @@ export default {
       url,
       headers,
       caches.default,
-      (options) => requestKinoboxHttp2(options, openTransport),
+      (options, transportOptions) => requestKinoboxHttp2(options, openTransport, transportOptions),
       budget
     )
   }

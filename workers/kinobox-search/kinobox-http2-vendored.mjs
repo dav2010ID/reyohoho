@@ -8,9 +8,8 @@ setCryptoImplementation(webcryptoCrypto)
 globalThis.TLS_ADDITIONAL_ROOT_CA_LIST.length = 0
 const HOST = 'api.kinobox.tv'
 const MAX_BODY = 1024 * 1024
-const quiet = { trace() {}, debug() {}, info() {}, warn() {}, error() {} }
-const UA =
-  'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/154.0.0.0 Safari/537.36 Edg/154.0.0.0'
+const quiet = { traceEnabled: false, trace() {}, debug() {}, info() {}, warn() {}, error() {} }
+const UA = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:158.0) Gecko/20100101 Firefox/158.0'
 
 function frame(type, flags, stream, payload = Buffer.alloc(0)) {
   const header = Buffer.alloc(9)
@@ -84,7 +83,7 @@ export function requestKinoboxHttp2(resource, openTransport, options = {}) {
     }
     function receive(data) {
       if (done) return
-      incoming = Buffer.concat([incoming, Buffer.from(data)])
+      incoming = incoming.length ? Buffer.concat([incoming, data]) : Buffer.from(data)
       while (incoming.length >= 9) {
         const length = incoming.readUIntBE(0, 3)
         if (length > 16384) throw new Error('Oversized HTTP/2 frame')
@@ -134,7 +133,9 @@ export function requestKinoboxHttp2(resource, openTransport, options = {}) {
           }
           bodyLength += payload.length
           if (bodyLength > MAX_BODY) throw new Error('Upstream response too large')
-          bodies.push(Buffer.from(payload))
+          // receive() owns a copy of each input; subarrays remain immutable when
+          // the next frame replaces incoming. Avoid copying every DATA frame.
+          bodies.push(payload)
           if (flags & 1) complete()
         } else if (type === 5) {
           throw new Error('Unexpected server push')
@@ -166,7 +167,9 @@ export function requestKinoboxHttp2(resource, openTransport, options = {}) {
           )
             throw new Error('Unapproved certificate issuer URL')
           const response = await fetch(target, {
-            redirect: 'error',
+            // Workers support manual/follow; reject 3xx via !ok below so an AIA
+            // redirect cannot escape the issuer allowlist.
+            redirect: 'manual',
             signal: AbortSignal.timeout(5000)
           })
           if (!response.ok) throw new Error('Issuer certificate unavailable')
@@ -212,8 +215,16 @@ export function requestKinoboxHttp2(resource, openTransport, options = {}) {
             { name: ':authority', value: HOST },
             { name: ':path', value: url.pathname + url.search },
             { name: 'accept', value: '*/*' },
-            { name: 'accept-encoding', value: 'br' },
-            { name: 'referer', value: 'https://kinobox.in/' },
+            // Upstream resets streams for the old headless UA/encoding profile.
+            // Keep this public request profile aligned with the verified browser HAR.
+            { name: 'accept-language', value: 'ru,en-US;q=0.9,en;q=0.8' },
+            { name: 'accept-encoding', value: 'gzip, deflate, br' },
+            { name: 'referer', value: 'https://kinohost.web.app/' },
+            { name: 'origin', value: 'https://kinohost.web.app' },
+            { name: 'sec-gpc', value: '1' },
+            { name: 'sec-fetch-dest', value: 'empty' },
+            { name: 'sec-fetch-mode', value: 'cors' },
+            { name: 'sec-fetch-site', value: 'cross-site' },
             { name: 'user-agent', value: UA }
           ])
           send(

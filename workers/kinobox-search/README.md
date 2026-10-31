@@ -28,6 +28,14 @@ Generated vendor modules are ignored by Git. Downloads are pinned by version
 and SHA256, and are included at deployment time, not fetched at runtime.
 The trust store is scoped to ISRG Root X1/X2. TLS library supplemental roots
 are cleared before the first handshake.
+Runtime adaptations in `runtime-vendor-patches.mjs` disable the bundled stream
+debug logger and avoid formatting TLS trace payloads when tracing is disabled.
+`prepare-vendor.mjs` verifies both the original and adapted bundles and fails
+if a patch target changes.
+
+The [2026-10-18 CPU audit](../../docs/worker-cpu-audit-2026-10-18.md) includes
+edge measurements, cache behavior and native-fetch compatibility results.
+The current custom TLS path does not reliably fit the Workers Free 10 ms budget.
 
 Public endpoint after deployment:
 `https://api.reyhoho.fun/?query=Матрица`
@@ -45,12 +53,12 @@ player lists. `VITE_KINOBOX_API_URL` overrides the shared base URL;
 Kinobox JSON envelopes are forwarded unchanged. Kinopoisk top responses are
 reduced to public movie cards. Allowlisted routes:
 
-| Route | Parameters | Per-location success cache |
-| --- | --- | --- |
-| `/` or `/api/movies/search/` | `query`, 1–150 characters | 10 minutes |
-| `/api/movies/{id}` | Positive numeric movie ID | 1 hour |
-| `/api/players` | Positive numeric `kinopoisk`, optional `title` up to 300 characters | 1 minute |
-| `/api/kinopoisk/top` | `type=movie` or `series`, positive `page`, `limit=1..50` (default 36), offset below 250 | 1 hour |
+| Route                        | Parameters                                                                              | Per-location success cache |
+| ---------------------------- | --------------------------------------------------------------------------------------- | -------------------------- |
+| `/` or `/api/movies/search/` | `query`, 1–150 characters                                                               | 10 minutes                 |
+| `/api/movies/{id}`           | Positive numeric movie ID                                                               | 6 hours                    |
+| `/api/players`               | Positive numeric `kinopoisk`, optional `title` up to 300 characters                     | 1 minute                   |
+| `/api/kinopoisk/top`         | `type=movie` or `series`, positive `page`, `limit=1..50` (default 36), offset below 250 | 1 hour                     |
 
 ## Kinopoisk top
 
@@ -76,8 +84,12 @@ resource path and validated parameters, not the caller's timestamp.
 Requests have a 15-second deadline and 1 MiB response limit. Browser origins are restricted to
 `reyhoho.fun` and `www.reyhoho.fun` (HTTPS and transitional HTTP), the old
 GitHub Pages origin, and local development; CORS is **not** authentication and
-does not prevent requests made outside browsers. Public catalogue routes have no rate-limit binding. Private auth/account routes
-use their configured rate-limit bindings. Monitor CPU usage/error rates before broader rollout.
+does not prevent requests made outside browsers. Public catalogue routes use
+`PUBLIC_RATE_LIMITER` (120 actual upstream attempts per IP per 60 seconds in the
+template); cache hits and collapsed followers do not consume this budget. The
+limiter is required and fails closed when unavailable. Private auth/account
+routes use their configured rate-limit bindings. Monitor CPU usage/error rates
+before broader rollout.
 
 ## Dependencies
 
@@ -85,7 +97,6 @@ Prepared, opt-in D1 user history and legacy-origin transfer:
 see `../../docs/cloud-history.md` and `../../docs/worker-telegram.md`.
 The tracked configuration is a template: configure D1 and authentication in the
 ignored local configuration before deploying. Private routes fail closed without them.
-Existing Kinobox transport and public cache routes are unchanged.
 
 Pinned `@reclaimprotocol/tls@0.1.4` and `hpack.js@2.1.6` bundles.
 The Reclaim license is included in `LICENSE-reclaim.txt`; dependency license

@@ -24,6 +24,8 @@ jobs:
       - run: yarn install --frozen-lockfile
       - run: yarn lint
       - run: yarn check:encoding
+      - name: Prepare pinned Worker vendor modules
+        run: node workers/kinobox-search/prepare-vendor.mjs
       - run: yarn test:unit --run
       - run: yarn build
 
