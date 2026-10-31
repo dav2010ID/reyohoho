@@ -110,3 +110,18 @@ Read-only bounded probes; no deployment or configuration changes.
 - `node scripts/profile-kinobox-transport.mjs --mode=compare --requests=1 --path=/api/movies/8431006 --inspect-profile=off` from the local machine returned 200 with valid gzip JSON and identical decoded SHA256 (prefix `00a27180fd12`) from vendored TLS/HTTP2, Node native HTTP/2 and Node `fetch()`. Earlier in this investigation Node `fetch()` failed with UND_ERR_SOCKET, so its success is new.
 
 The upstream is reachable locally while the Cloudflare path times out. This does not establish an IP/ASN block; production CPU and the server-side cause of the timeouts were not measured. Next step: retest standard `fetch()` and the current transport from an isolated diagnostic Worker before any production change. Playback and authenticated flows were not checked. Production version is still `f2c9ac6f-ff2f-4cbe-bb0b-3167ebc51656`, unverified against the deployment list today.
+
+### Isolated edge check, October 31: TCP does not open from Cloudflare
+
+Authorized by the user. A temporary Worker `reyohoho-fetch-diagnostic-20261031` (no production routes, D1, secrets or cache; random diagnostic key; compatibility date and `nodejs_compat` as in production; `cpu_ms` 1000) ran 17:32–17:36 UTC in PRG and was then deleted. Each probe used the current HAR-compatible headers and a fresh `ts`.
+
+| Probe | Result |
+| --- | --- |
+| Native `fetch()`, movie/players/search, 2 rounds | 6/6 Cloudflare 520 page in 22–125 ms, `server: cloudflare` |
+| Vendored TLS/HTTP2, movie/players/search, 2 rounds | 6/6 `Upstream timeout` at 15 s |
+| `connect()` to `api.kinobox.tv:443`, `secureTransport: "off"` | 2/2 socket not opened within 10 s |
+| `connect()` with `secureTransport: "on"` | 1/1 not opened within 10 s |
+
+Cloudflare DoH, Google DoH and the local resolver all return 45.133.119.36. From the local machine at the same time TCP connected in 67 ms and TLS in 330 ms to that address, and all three Node transports returned 200 (previous section).
+
+The failure has moved below HTTP/2: earlier edge failures were `RST_STREAM: 1` after TLS, now the TCP connection itself is not established from the tested Cloudflare location, so header or `ts` changes cannot fix it. The 504 after 15 s in production matches this. This is consistent with upstream or intermediate filtering of Cloudflare egress, but only one colo (PRG) was tested and the upstream operator has not confirmed a block. Code changes inside the Worker will not restore connectivity; options are upstream allowlisting or an external transport with a permitted egress. Raw results: ignored `reports-browser/worker-cpu/fetch-20261031/results.jsonl`. Production unchanged.
