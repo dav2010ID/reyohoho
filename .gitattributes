@@ -11,3 +11,6 @@
 *.webp binary
 *.woff binary
 *.woff2 binary
+
+# Pinned vendor bundles are verified by SHA256; keep their bytes exact.
+workers/kinobox-search/vendor-*.mjs -text

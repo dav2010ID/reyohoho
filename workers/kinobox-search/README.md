@@ -35,13 +35,19 @@ npx --yes wrangler@4.147.0 login --scopes account:read user:read workers:write w
 npx --yes wrangler@4.147.0 deploy --config wrangler.local.jsonc
 ```
 
-Generated vendor modules are ignored by Git. Downloads are pinned by version
-and SHA256, and are included at deployment time, not fetched at runtime.
+The adapted vendor modules (`vendor-*.mjs`) are committed, because esm.sh
+rebuilds bundles in place: on 2026-11-01 `hpack.js@2.1.6` changed from 68 KB to
+124 KB at the same URL. `node prepare-vendor.mjs` verifies their size and SHA256
+against `vendor-manifest.json` offline. `node prepare-vendor.mjs --download`
+refetches and re-adapts them and fails if the upstream bundle differs from the
+pinned one; update the manifest only after reviewing a new bundle. Bundled
+license notices are inside `vendor-tls.mjs`/`vendor-crypto.mjs`, in
+`LICENSE-reclaim.txt` and in `LICENSE-hpack.txt`.
 The trust store is scoped to ISRG Root X1/X2. TLS library supplemental roots
 are cleared before the first handshake.
 Runtime adaptations in `runtime-vendor-patches.mjs` disable the bundled stream
 debug logger and avoid formatting TLS trace payloads when tracing is disabled.
-`prepare-vendor.mjs` verifies both the original and adapted bundles and fails
+With `--download`, `prepare-vendor.mjs` verifies both the original and adapted bundles and fails
 if a patch target changes.
 
 The [2026-10-18 CPU audit](../../docs/worker-cpu-audit-2026-10-18.md) includes
