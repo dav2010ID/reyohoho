@@ -122,8 +122,9 @@ export async function serveKinoboxContent(
         event: 'kinobox_response',
         kind: resource.kind,
         status: response.status,
-        protocol: response.tls.selectedAlpn,
-        tls: response.tls.version,
+        source: response.source || 'kinobox',
+        protocol: response.tls?.selectedAlpn,
+        tls: response.tls?.version,
         durationMs: Date.now() - started
       })
     )

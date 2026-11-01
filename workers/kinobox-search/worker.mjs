@@ -2,13 +2,14 @@ import { connect } from 'cloudflare:sockets'
 import { requestKinoboxHttp2 } from './kinobox-http2-vendored.mjs'
 import { resolveKinoboxResource } from './routes.mjs'
 import { serveKinoboxContent } from './kinobox-content.mjs'
+import { requestContent } from './kinopoisk-content.mjs'
 import { resolveKinopoiskTop, serveKinopoiskTop } from './kinopoisk-top.mjs'
 import { serveHistory } from './history.mjs'
 import { serveTelegramAuth, cleanupAuth } from './telegram-auth.mjs'
 import { serveAccount } from './account.mjs'
 import { publicUpstreamBudget } from './public-budget.mjs'
 
-const VERSION = 'kinobox-har-fix-2026-10-21'
+const VERSION = 'kinopoisk-content-2026-11-01'
 const ALLOWED = new Set([
   'https://reyhoho.fun',
   'https://www.reyhoho.fun',
@@ -84,7 +85,10 @@ export default {
       url,
       headers,
       caches.default,
-      (options, transportOptions) => requestKinoboxHttp2(options, openTransport, transportOptions),
+      (options, transportOptions) =>
+        requestContent(options, transportOptions, headers, (o, t) =>
+          requestKinoboxHttp2(o, openTransport, t)
+        ),
       budget
     )
   }

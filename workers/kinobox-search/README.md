@@ -10,6 +10,17 @@ with a browser User-Agent, `Accept-Encoding: br` and a `kinobox.in` Referer
 returns JSON. Workers' `http2.connect()` and TLS `ALPNProtocols` were not
 implemented in the tested runtime. Native `fetch()` returned upstream 520.
 
+## Data sources
+
+Search (`/api/movies/search/`) and movie cards (`/api/movies/{id}`) are loaded
+from Kinopoisk GraphQL with native `fetch()` (`kinopoisk-content.mjs`) and
+returned in the Kinobox response shape the frontend already reads. Kinopoisk
+accepts only its known documents, so `kinopoisk-content-queries.mjs` holds
+exact copies of `backend/graphql/*.graphql`; a test fails if they diverge.
+Ratings and crew are optional sub-requests. If Kinopoisk fails, the request
+falls back to Kinobox. Player lists still come only from Kinobox. The
+`X-Data-Source` response header names the source used.
+
 ## Build and deploy
 
 Copy `wrangler.jsonc` to ignored `wrangler.local.jsonc`, then set your account ID
