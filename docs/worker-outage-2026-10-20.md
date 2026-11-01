@@ -125,3 +125,13 @@ Authorized by the user. A temporary Worker `reyohoho-fetch-diagnostic-20261031` 
 Cloudflare DoH, Google DoH and the local resolver all return 45.133.119.36. From the local machine at the same time TCP connected in 67 ms and TLS in 330 ms to that address, and all three Node transports returned 200 (previous section).
 
 The failure has moved below HTTP/2: earlier edge failures were `RST_STREAM: 1` after TLS, now the TCP connection itself is not established from the tested Cloudflare location, so header or `ts` changes cannot fix it. The 504 after 15 s in production matches this. This is consistent with upstream or intermediate filtering of Cloudflare egress, but only one colo (PRG) was tested and the upstream operator has not confirmed a block. Code changes inside the Worker will not restore connectivity; options are upstream allowlisting or an external transport with a permitted egress. Raw results: ignored `reports-browser/worker-cpu/fetch-20261031/results.jsonl`. Production unchanged.
+
+### Production switch to Kinopoisk GraphQL, November 1
+
+Authorized by the user. Search and movie cards now come from Kinopoisk GraphQL through native `fetch()`; Kinobox remains their fallback and the only player source (see the Worker README). An isolated diagnostic Worker returned 200 from Kinopoisk for search, a film and a series, and 404 for an unknown ID, before deployment; it was then deleted.
+
+Deployed at 08:48 UTC: version `61e60304-c1a6-4a0b-9ec0-619b87a97237`, header `kinopoisk-content-2026-11-01`, with the existing D1, rate-limit, Telegram and cron bindings. Rollback version: `f2c9ac6f-ff2f-4cbe-bb0b-3167ebc51656`.
+
+Post-deploy checks on `api.reyhoho.fun`: search 200 MISS (0.58 s) then HIT (0.10 s); movie 258687 200 MISS then HIT; series 464963 200; top 200; invalid ID 400; denied origin 403. All content responses carried `X-Data-Source: kinopoisk`. Players still return 504 because Kinobox is unreachable. In the browser the Interstellar page that previously showed a server error rendered title, ratings, description, cast and crew, with all 13 Kinopoisk images loaded; an ALLOHA player from the DDBB chain was offered. Video playback was not tested and edge CPU was not measured.
+
+`prepare-vendor.mjs` now fails because esm.sh rebuilt `hpack.js@2.1.6` (124 KB instead of 68 KB, Last-Modified 2026-11-01 08:48 UTC), so its SHA256 no longer matches. The deployed `vendor-hpack.mjs` is the earlier file matching the pinned adapted SHA256. CI steps that run `prepare-vendor.mjs` will fail until the vendor source is pinned to immutable content.
