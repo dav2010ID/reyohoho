@@ -124,7 +124,9 @@ describe('bounded Kinobox HTTP/2 transport', () => {
           frame(0, end === bytes ? 1 : 0, Buffer.alloc(end - offset, 65))
         )
       }
-      if (bytes === 1024 * 1024) expect((await promise).body).toEqual(Buffer.alloc(bytes, 65))
+      // Buffer.equals: toEqual walks 1 MiB element by element and exceeded CI timeouts.
+      if (bytes === 1024 * 1024)
+        expect((await promise).body.equals(Buffer.alloc(bytes, 65))).toBe(true)
       else await expect(promise).rejects.toThrow('Upstream response too large')
       expect(closed()).toBe(true)
     }
