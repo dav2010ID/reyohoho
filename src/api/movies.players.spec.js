@@ -51,3 +51,34 @@ describe('player source aggregation', () => {
     expect(Object.keys(merged)).toEqual(['DDBB>Collaps', 'DDBB>Turbo'])
   })
 })
+
+describe('Vibix embed attributes', () => {
+  const vibix = (iframeUrl, type = 'Vibix') =>
+    toPlayersMap([{ type, iframeUrl }], { sourceLabel: 'DDBB LIVE' })
+
+  it('builds the SDK iframe URL for movies and series without loading the SDK', () => {
+    expect(
+      vibix('data-publisher-id="667718341" data-type="movie" data-id="4469"')['DDBB LIVE>Vibix']
+        .iframe
+    ).toBe('https://river-3-329.kinescopecdn.net/667718341/embed/4469?lang=ru')
+    expect(
+      vibix('data-publisher-id="667718341" data-type="serial" data-id="77"')['DDBB LIVE>Vibix']
+        .iframe
+    ).toBe('https://river-3-329.kinescopecdn.net/667718341/embed-serials/77?lang=ru')
+  })
+
+  it.each([
+    'data-publisher-id="667718341" data-type="movie" data-id="4469 onload=x"',
+    'data-publisher-id="66771834a" data-type="movie" data-id="4469"',
+    'data-publisher-id="667718341" data-type="trailer" data-id="4469"',
+    'data-publisher-id="667718341" data-type="movie"',
+    '<script src="https://evil.test"></script> data-publisher-id="1" data-type="movie" data-id="2"'
+  ])('rejects malformed Vibix attributes: %s', (value) => {
+    expect(vibix(value)).toEqual({})
+  })
+
+  it('keeps attribute text from other providers out of iframes', () => {
+    expect(vibix('data-publisher-id="1" data-type="movie" data-id="2"', 'Alloha')).toEqual({})
+    expect(vibix('/movie/301', 'Collaps')).toEqual({})
+  })
+})

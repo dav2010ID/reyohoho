@@ -23,6 +23,31 @@ const ensureUniqueKey = (obj, baseKey) => {
 
 const normalizePlayerType = (value) => String(value || 'Player').trim()
 
+// Vibix records carry SDK embed attributes instead of a URL. Build the iframe URL
+// that rendex-sdk would create, rather than loading the third-party SDK script.
+const VIBIX_EMBED_ORIGIN =
+  import.meta.env.VITE_VIBIX_EMBED_ORIGIN || 'https://river-3-329.kinescopecdn.net'
+const VIBIX_ATTRIBUTES =
+  /^data-publisher-id="(\d{1,12})" data-type="(movie|serial)" data-id="(\d{1,12})"$/
+const VIBIX_PATHS = { movie: 'embed', serial: 'embed-serials' }
+
+const getVibixIframe = (value) => {
+  const match = VIBIX_ATTRIBUTES.exec(String(value || '').trim())
+  if (!match) return null
+  const [, publisherId, type, id] = match
+  return `${VIBIX_EMBED_ORIGIN}/${publisherId}/${VIBIX_PATHS[type]}/${id}?lang=ru`
+}
+
+// Provider records must carry an absolute URL; relative text would load this site.
+const getProviderIframe = (provider) => {
+  if (normalizePlayerType(provider?.type).toLowerCase() === 'vibix') {
+    const vibix = getVibixIframe(provider?.iframeUrl)
+    if (vibix) return vibix
+  }
+  const value = String(provider?.iframeUrl || '').trim()
+  return /^https?:\/\//i.test(value) ? getSafePlayerUrl(value) : null
+}
+
 const toPlayersMap = (
   providers = [],
   { type = null, source = 'ddbb', sourceLabel = 'DDBB' } = {}
@@ -37,7 +62,7 @@ const toPlayersMap = (
       continue
     }
 
-    const providerBaseIframe = getSafePlayerUrl(provider?.iframeUrl)
+    const providerBaseIframe = getProviderIframe(provider)
     const providerLabel = `${sourceLabel}>${providerType}`
 
     if (providerBaseIframe) {
