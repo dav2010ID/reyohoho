@@ -5,7 +5,7 @@ describe('content provider order', () => {
   it('tries DDBB first and Kinobox as fallback for remote players', () => {
     expect(getPlayerProviderOrder('ddbb')).toEqual(['ddbb', 'kinobox'])
     expect(getPlayerProviderOrder('kinobox')).toEqual(['ddbb', 'kinobox'])
-    expect(getPlayerProviderOrder('ddbb_live')).toEqual(['ddbb', 'ddbb_live', 'kinobox'])
+    expect(getPlayerProviderOrder('ddbb_live')).toEqual(['ddbb_live', 'kinobox'])
   })
 
   it('keeps player requests local when local mode is selected', () => {

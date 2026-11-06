@@ -4,10 +4,7 @@ import { toPlayersMap } from '@/api/movies.ddbb'
 const DDBB_LIVE_BASE_URL = import.meta.env.VITE_DDBB_LIVE_API_URL || 'https://a.ddbb.live'
 
 const api = axios.create({
-  baseURL: DDBB_LIVE_BASE_URL,
-  headers: {
-    'Content-Type': 'application/json'
-  }
+  baseURL: DDBB_LIVE_BASE_URL
 })
 
 const getPlayersRaw = async (kpId, { n = 0, signal, ...options } = {}) => {

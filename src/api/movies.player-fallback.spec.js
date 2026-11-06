@@ -2,6 +2,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
 const mocks = vi.hoisted(() => ({
   ddbb: vi.fn(),
+  live: vi.fn(),
   kinobox: vi.fn(),
   loadProvider: vi.fn(),
   analytics: vi.fn(),
@@ -24,6 +25,7 @@ beforeEach(() => {
   mocks.store.contentApiProvider = 'kinobox'
   mocks.loadProvider.mockImplementation(async (provider) => {
     if (provider === 'ddbb') return { getPlayers: mocks.ddbb }
+    if (provider === 'ddbb_live') return { getPlayers: mocks.live }
     if (provider === 'kinobox') return { getPlayers: mocks.kinobox }
     throw new Error('Unexpected provider: ' + provider)
   })
@@ -36,6 +38,32 @@ afterEach(() => {
 })
 
 describe('player fallback chain', () => {
+  it('requests selected DDBB Live immediately without loading DDBB', async () => {
+    mocks.store.contentApiProvider = 'ddbb_live'
+    mocks.live.mockResolvedValue(primary)
+
+    expect(await getPlayers(301)).toEqual(primary)
+    expect(mocks.live).toHaveBeenCalledWith(
+      301,
+      expect.objectContaining({ signal: expect.any(AbortSignal) })
+    )
+    expect(mocks.loadProvider.mock.calls.map(([provider]) => provider)).toEqual(['ddbb_live'])
+    expect(mocks.ddbb).not.toHaveBeenCalled()
+    expect(mocks.kinobox).not.toHaveBeenCalled()
+  })
+
+  it('falls back from DDBB Live to Kinobox without requesting DDBB', async () => {
+    mocks.store.contentApiProvider = 'ddbb_live'
+    mocks.live.mockRejectedValue(new Error('Live unavailable'))
+
+    expect(await getPlayers(301)).toEqual(fallback)
+    expect(mocks.loadProvider.mock.calls.map(([provider]) => provider)).toEqual([
+      'ddbb_live',
+      'kinobox'
+    ])
+    expect(mocks.ddbb).not.toHaveBeenCalled()
+  })
+
   it('returns DDBB only without requesting Kinobox when DDBB has players', async () => {
     mocks.ddbb.mockResolvedValue(primary)
     expect(await getPlayers(301)).toEqual(primary)

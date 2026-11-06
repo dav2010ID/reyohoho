@@ -125,6 +125,17 @@ describe('Kinobox content proxy routing', () => {
     expect(mocks.get.mock.calls[0][1].signal).toBe(controller.signal)
   })
 
+  it('does not trigger a JSON preflight for DDBB Live GET requests', async () => {
+    const { getPlayersRaw } = await import('./movies.ddbb-live')
+    mocks.get.mockResolvedValue({ data: { data: [] } })
+    await getPlayersRaw(301)
+    const [config] = mocks.create.mock.calls.find(
+      ([options]) => options.baseURL === 'https://a.ddbb.live'
+    )
+    expect(config.headers?.['Content-Type']).toBeUndefined()
+    expect(mocks.get.mock.calls[0][1].headers?.['Content-Type']).toBeUndefined()
+  })
+
   it('supports a separate search endpoint override', async () => {
     vi.stubEnv('VITE_KINOBOX_SEARCH_API_URL', 'https://search.example')
     const { apiSearch } = await import('./movies.kinobox')
