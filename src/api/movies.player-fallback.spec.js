@@ -29,6 +29,8 @@ beforeEach(() => {
     if (provider === 'kinobox') return { getPlayers: mocks.kinobox }
     throw new Error('Unexpected provider: ' + provider)
   })
+  // Default chain starts with DDBB Live; empty by default so DDBB tests reach DDBB.
+  mocks.live.mockResolvedValue({})
   mocks.kinobox.mockResolvedValue(fallback)
   vi.spyOn(console, 'warn').mockImplementation(() => {})
 })
@@ -64,11 +66,29 @@ describe('player fallback chain', () => {
     expect(mocks.ddbb).not.toHaveBeenCalled()
   })
 
+  it('tries DDBB Live first by default and stops when it has players', async () => {
+    mocks.live.mockResolvedValue(primary)
+    expect(await getPlayers(301)).toEqual(primary)
+    expect(mocks.loadProvider.mock.calls.map(([provider]) => provider)).toEqual(['ddbb_live'])
+    expect(mocks.ddbb).not.toHaveBeenCalled()
+    expect(mocks.kinobox).not.toHaveBeenCalled()
+  })
+
+  it('uses DDBB after a DDBB Live error by default', async () => {
+    mocks.live.mockRejectedValue(new Error('Live unavailable'))
+    mocks.ddbb.mockResolvedValue(primary)
+    expect(await getPlayers(301)).toEqual(primary)
+    expect(mocks.kinobox).not.toHaveBeenCalled()
+  })
+
   it('returns DDBB only without requesting Kinobox when DDBB has players', async () => {
     mocks.ddbb.mockResolvedValue(primary)
     expect(await getPlayers(301)).toEqual(primary)
     expect(mocks.kinobox).not.toHaveBeenCalled()
-    expect(mocks.loadProvider).toHaveBeenCalledTimes(1)
+    expect(mocks.loadProvider.mock.calls.map(([provider]) => provider)).toEqual([
+      'ddbb_live',
+      'ddbb'
+    ])
   })
 
   it('does not start Kinobox while DDBB is still pending', async () => {
@@ -165,7 +185,7 @@ describe('player fallback chain', () => {
     expect(mocks.kinobox).not.toHaveBeenCalled()
   })
 
-  it('returns an empty list when neither source has players', async () => {
+  it('returns an empty list when no source has players', async () => {
     mocks.ddbb.mockResolvedValue({})
     mocks.kinobox.mockResolvedValue({})
     expect(await getPlayers(301)).toEqual({})
