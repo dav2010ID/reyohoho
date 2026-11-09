@@ -1,5 +1,7 @@
 import { getMovieSeoPath } from '@/utils/movieSeo'
 
+export const getLegacyShikiId = (hash) => /^#shiki=?(\d+)$/.exec(hash)?.[1]
+
 export const handleHashNavigation = (to) => {
   if (to.hash.startsWith('#/')) {
     const route = to.hash.substring(2)

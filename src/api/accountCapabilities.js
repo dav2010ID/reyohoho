@@ -1,5 +1,6 @@
-export const accountCapabilities = (auth) => ({
-  rated: Boolean(auth.token && !auth.isWorkerSession),
-  sharing: Boolean(auth.token && !auth.isWorkerSession),
-  notifications: Boolean(auth.token && !auth.isWorkerSession)
-})
+import { legacyBackendAvailable } from './backendConfig'
+
+export const accountCapabilities = (auth) => {
+  const available = Boolean(auth.token && !auth.isWorkerSession && legacyBackendAvailable())
+  return { rated: available, sharing: available, notifications: available }
+}

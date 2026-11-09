@@ -10,10 +10,14 @@
         <button :class="{ active: searchType === 'kinopoisk' }" @click="setSearchType('kinopoisk')">
           ID Кинопоиск
         </button>
-        <button :class="{ active: searchType === 'shikimori' }" @click="setSearchType('shikimori')">
+        <button
+          v-if="shikiAvailable"
+          :class="{ active: searchType === 'shikimori' }"
+          @click="setSearchType('shikimori')"
+        >
           ID Shikimori
         </button>
-        <button :class="{ active: searchType === 'imdb' }" @click="setSearchType('imdb')">
+        <button v-if="imdbAvailable" :class="{ active: searchType === 'imdb' }" @click="setSearchType('imdb')">
           ID IMDB
         </button>
         <button class="random-button" :disabled="randomLoading" @click="openRandomMovie">
@@ -161,6 +165,8 @@ import {
   getKpInfo
 } from '@/api/movies'
 import { handleApiError } from '@/constants'
+import { legacyMovieMethodAvailable } from '@/api/movieCapabilities'
+import { getLegacyShikiId } from '@/helpers/hashHandler'
 import { getMyLists, delAllFromList } from '@/api/user'
 import BaseModal from '@/components/BaseModal.vue'
 import DeleteButton from '@/components/buttons/DeleteButton.vue'
@@ -191,6 +197,8 @@ const authStore = useAuthStore()
 const router = useRouter()
 
 const searchType = ref('title')
+const shikiAvailable = computed(() => legacyMovieMethodAvailable('getKpIDfromSHIKI'))
+const imdbAvailable = computed(() => legacyMovieMethodAvailable('getKpIDfromIMDB'))
 const searchTerm = ref('')
 const movies = ref([])
 const loading = ref(false)
@@ -510,6 +518,13 @@ const search = () => {
   }
 }
 
+watch([shikiAvailable, imdbAvailable], () => {
+  if (
+    (searchType.value === 'shikimori' && !shikiAvailable.value) ||
+    (searchType.value === 'imdb' && !imdbAvailable.value)
+  ) setSearchType('title')
+})
+
 const performSearch = async () => {
   const requestId = searchRequestGuard.begin()
   const signal = searchRequestGuard.getSignal(requestId)
@@ -655,17 +670,17 @@ onMounted(() => {
     setupHomeTopInfiniteScroll()
   }
   const hash = window.location.hash
+  const shikiId = getLegacyShikiId(hash)
   if (hash.startsWith('#search=')) {
     const searchQuery = decodeURIComponent(hash.replace('#search=', ''))
     searchTerm.value = searchQuery
     performSearch()
-  } else if (hash.startsWith('#imdb=')) {
+  } else if (imdbAvailable.value && hash.startsWith('#imdb=')) {
     const imdbId = decodeURIComponent(hash.replace('#imdb=', ''))
     setSearchType('imdb')
     searchTerm.value = imdbId
     performSearch()
-  } else if (hash.startsWith('#shiki')) {
-    const shikiId = decodeURIComponent(hash.replace('#shiki', ''))
+  } else if (shikiAvailable.value && shikiId) {
     setSearchType('shikimori')
     searchTerm.value = shikiId
     performSearch()

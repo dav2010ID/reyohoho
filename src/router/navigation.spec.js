@@ -1,5 +1,8 @@
 import { createMemoryHistory, createRouter } from 'vue-router'
-import { describe, expect, it } from 'vitest'
+import { afterEach, describe, expect, it, vi } from 'vitest'
+import { createPinia, setActivePinia } from 'pinia'
+import { useApiStore } from '@/store/api'
+import { useMainStore } from '@/store/main'
 import { routes } from './routes'
 import { installRouterGuards } from './index'
 
@@ -9,6 +12,25 @@ describe('incoming links', () => {
     routes: routes.map((route) => ({ ...route, component: {} }))
   })
   installRouterGuards(router, { isClient: false })
+  afterEach(() => vi.unstubAllEnvs())
+
+  it('handles legacy links before mounting a page that cannot load', async () => {
+    setActivePinia(createPinia())
+    vi.stubEnv('VITE_APP_API_URL', '')
+    for (const path of ['/shiki/123', '/movie/shiki123/title', '/#shiki123', '/#shiki=123', '/#imdb=0198781']) {
+      await router.push(path)
+      expect(router.currentRoute.value.name).toBe('Settings')
+      expect(router.currentRoute.value.query.tab).toBe('api')
+    }
+    useMainStore().contentApiProvider = 'local'
+    await router.push('/shiki/123')
+    expect(router.currentRoute.value.name).toBe('movie-info-shiki')
+    await router.push('/#imdb=0198781')
+    expect(router.currentRoute.value.name).toBe('Settings')
+    useApiStore().$patch({ backendMode: 'local', backendModeUserSelected: true })
+    await router.push('/#imdb=0198781')
+    expect(router.currentRoute.value.fullPath).toBe('/#imdb=0198781')
+  })
 
   it('keeps anchors on their page and resolves numeric legacy links', async () => {
     await router.push('/top#section-test')

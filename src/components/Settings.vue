@@ -96,6 +96,10 @@
 
       <div v-show="activeSettingsTab === 'api'" class="settings-group">
         <h3>Источники данных</h3>
+        <p v-if="unavailableSearch" class="api-note">
+          Для поиска по ID {{ unavailableSearch }} нужен подключённый сервер.
+          Вы также можете <router-link to="/">найти фильм по названию или ID Кинопоиска</router-link>.
+        </p>
         <h4 class="api-subtitle">Сервер приложения</h4>
         <div class="radio-group">
           <label class="radio">
@@ -108,16 +112,16 @@
           </label>
         </div>
         <p class="api-note backend-status" :class="backendStatusClass">
-          {{ backendStatusText }} · {{ apiStore.currentApiUrl || localApiUrl }}
+          {{ backendStatusText }}<template v-if="backendUrl"> · {{ backendUrl }}</template>
         </p>
-        <p class="api-note backend-status" :class="authorizationStatusClass">
+        <p v-if="backendAvailable" class="api-note backend-status" :class="authorizationStatusClass">
           {{ authorizationStatusText }}
         </p>
         <div class="settings-actions">
           <button
             type="button"
             class="reset-button"
-            :disabled="apiStore.isCheckingHealth"
+            :disabled="!backendAvailable || apiStore.isCheckingHealth"
             @click="checkSelectedBackend"
           >
             <i class="fa-solid fa-rotate"></i>
@@ -152,9 +156,8 @@
           </label>
         </div>
         <p class="api-note">
-          Выбранный источник используется первым. Если локальный сервер не отвечает, используются
-          резервные источники. Комментарии, тайминги, рейтинги и другие функции сайта работают через
-          выбранный сервер приложения.
+          Комментарии, заметки, тайминги и поиск по IMDb доступны при подключённом сервере приложения.
+          Для оценок и поиска по Shikimori можно также выбрать локальный источник контента.
         </p>
         <h4 class="api-subtitle">Источник поиска</h4>
         <div class="radio-group">
@@ -225,13 +228,13 @@
         </div>
       </div>
 
-      <div v-show="activeSettingsTab === 'behavior'" class="settings-group">
+      <div v-if="backendAvailable" v-show="activeSettingsTab === 'behavior'" class="settings-group">
         <h3>Комментарии</h3>
         <SliderRound v-model="isCommentsEnabled">Показывать блок комментариев</SliderRound>
         <SliderRound v-model="isAutoShowComments">Автоматически показывать комментарии</SliderRound>
       </div>
 
-      <div v-show="activeSettingsTab === 'player'" class="settings-group">
+      <div v-if="backendAvailable" v-show="activeSettingsTab === 'player'" class="settings-group">
         <h3>Режим стримера</h3>
         <SliderRound v-model="isStreamerMode"
           >Мигание кнопки таймингов для привлечения внимания</SliderRound
@@ -255,6 +258,8 @@ import { useMainStore } from '@/store/main'
 import { usePlayerStore } from '@/store/player'
 import { useTrailerStore } from '@/store/trailer'
 import { LOCAL_API_URL, useApiStore } from '@/store/api'
+import { legacyBackendAvailable } from '@/api/backendConfig'
+import { legacyMovieMethodAvailable } from '@/api/movieCapabilities'
 import { useAuthStore } from '@/store/auth'
 import { getApiAuthorizationState } from '@/utils/apiTrust'
 import { computed, ref, watch } from 'vue'
@@ -270,7 +275,17 @@ const apiStore = useApiStore()
 const authStore = useAuthStore()
 const showModal = ref(false)
 const appVersion = ref(import.meta.env.VITE_APP_VERSION_FULL_VERSION)
-const activeSettingsTab = ref(useRoute().query.tab === 'api' ? 'api' : 'appearance')
+const route = useRoute()
+const activeSettingsTab = ref(route.query.tab === 'api' ? 'api' : 'appearance')
+watch(() => route.fullPath, () => {
+  if (route.query.tab === 'api') activeSettingsTab.value = 'api'
+})
+const backendAvailable = computed(legacyBackendAvailable)
+const unavailableSearch = computed(() => {
+  if (route.query.unavailable === 'shiki' && !legacyMovieMethodAvailable('getShikiInfo')) return 'Shikimori'
+  if (route.query.unavailable === 'imdb' && !legacyMovieMethodAvailable('getKpIDfromIMDB')) return 'IMDb'
+  return ''
+})
 const settingsTabs = [
   { id: 'appearance', label: 'Вид', description: 'Фон, тема и карточки' },
   { id: 'player', label: 'Плеер', description: 'Плеер, трейлеры и режим стримера' },
@@ -281,7 +296,9 @@ const settingsTabs = [
 const activeSettingsSection = computed(
   () => settingsTabs.find((tab) => tab.id === activeSettingsTab.value) || settingsTabs[0]
 )
-const localApiUrl = LOCAL_API_URL
+const backendUrl = computed(() => backendAvailable.value
+  ? (apiStore.backendMode === 'local' ? LOCAL_API_URL : import.meta.env.VITE_APP_API_URL)
+  : null)
 
 const backendMode = computed({
   get: () => apiStore.backendMode,
@@ -290,6 +307,7 @@ const backendMode = computed({
 
 const backendStatusText = computed(() => {
   if (apiStore.isCheckingHealth) return 'Проверяется'
+  if (!backendAvailable.value) return 'Сервер приложения не настроен'
   if (apiStore.backendMode !== 'local') return 'Автоматический выбор активен'
   if (apiStore.localApiHealthy === true) return 'Локальный сервер доступен'
   if (apiStore.localApiHealthy === false) return 'Локальный сервер недоступен'
@@ -303,7 +321,7 @@ const backendStatusClass = computed(() => ({
 
 const authorizationStatus = computed(() =>
   getApiAuthorizationState({
-    baseURL: apiStore.currentApiUrl || localApiUrl,
+    baseURL: backendUrl.value,
     hasToken: Boolean(authStore.token)
   })
 )

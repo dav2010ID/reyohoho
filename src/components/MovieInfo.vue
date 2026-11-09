@@ -89,7 +89,7 @@
         >
           <component
             :is="movieRatingComponent"
-            v-if="clientReady && movieRatingComponent && movieInfo.kinopoisk_id"
+            v-if="clientReady && ratingsAvailable && movieInfo.kinopoisk_id"
             :key="movieInfo.kinopoisk_id"
             :kp-id="movieInfo.kinopoisk_id"
             :show-dash="true"
@@ -229,7 +229,7 @@
             </a>
           </div>
 
-          <span class="action-buttons-group">
+          <span v-if="backendAvailable" class="action-buttons-group">
             <template v-if="movieInfo.imdb_id">
               <button
                 class="nudity-info-btn parents-guide-btn"
@@ -266,7 +266,7 @@
               <span class="mobile-text">Тайминги</span>
             </button>
             <button
-              v-if="authStore.token"
+              v-if="notesAvailable"
               class="nudity-info-btn note-btn"
               :class="{ 'has-note': movieNote }"
               :title="movieNote ? 'Редактировать заметку' : 'Добавить заметку'"
@@ -459,7 +459,7 @@
           />
         </div>
 
-        <div v-if="movieNote && authStore.token" class="movie-note-display">
+        <div v-if="movieNote && notesAvailable" class="movie-note-display">
           <div class="movie-note-header">
             <div class="movie-note-title">
               <i class="fa-solid fa-note-sticky"></i>
@@ -575,7 +575,7 @@
   <Notification ref="notificationRef" />
   <component
     :is="sceneToolsComponent"
-    v-if="sceneToolsComponent && sceneToolsUsed"
+    v-if="backendAvailable && sceneToolsComponent && sceneToolsUsed"
     :key="kp_id"
     :movie-id="kp_id"
     :movie-info="movieInfo"
@@ -589,7 +589,7 @@
   />
 
   <MovieNoteModal
-    v-if="showNoteEditor"
+    v-if="notesAvailable && showNoteEditor"
     v-model="noteText"
     :movie-note="movieNote"
     :is-saving="isSavingNote"
@@ -602,6 +602,8 @@
 
 <script setup>
 import { getKpInfo, getShikiInfo, getMovieNote, saveMovieNote, deleteMovieNote } from '@/api/movies'
+import { legacyBackendAvailable } from '@/api/backendConfig'
+import { legacyMovieMethodAvailable } from '@/api/movieCapabilities'
 import { handleApiError } from '@/constants'
 import { addToList } from '@/api/user'
 import { usePlayerLists } from '@/composables/usePlayerLists'
@@ -647,7 +649,10 @@ const kp_id = ref(route.params.kp_id)
 const errorMessage = ref('')
 const errorCode = ref(null)
 const moviePlayerComponent = shallowRef(null)
-const movieRatingComponent = shallowRef(null)
+const movieRatingComponent = defineAsyncComponent(() => import('@/components/MovieRating.vue'))
+const backendAvailable = computed(legacyBackendAvailable)
+const ratingsAvailable = computed(() => legacyMovieMethodAvailable('getRating'))
+const notesAvailable = computed(() => backendAvailable.value && authStore.token && !authStore.isWorkerSession)
 const getCatalogMovie = (id) => {
   const entry = getMovieSeoEntry(id)
   return entry
@@ -750,7 +755,7 @@ const isInAnyList = computed(() => {
   )
 })
 
-const isCommentsEnabled = computed(() => mainStore.isCommentsEnabled)
+const isCommentsEnabled = computed(() => backendAvailable.value && mainStore.isCommentsEnabled)
 const isDescriptionExpanded = ref(false)
 const countryNames = computed(() =>
   (movieInfo.value?.countries || []).map((item) => item.country).filter(Boolean)
@@ -994,7 +999,7 @@ const fetchMovieInfo = async (updateHistory = true) => {
       }
     }
 
-    if (authStore.token) {
+    if (notesAvailable.value) {
       loadMovieNote()
     }
 
@@ -1148,13 +1153,9 @@ onMounted(async () => {
   window.selectedNudityTimings = []
   window.overlayNudityTimings = []
   const movieInfoPromise = fetchMovieInfo()
-  const [playerModule, ratingModule] = await Promise.all([
-    import('@/components/PlayerComponent.vue'),
-    import('@/components/MovieRating.vue')
-  ])
+  const playerModule = await import('@/components/PlayerComponent.vue')
   if (!active) return
   moviePlayerComponent.value = playerModule.default
-  movieRatingComponent.value = ratingModule.default
   await movieInfoPromise
 })
 

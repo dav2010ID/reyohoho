@@ -1,4 +1,5 @@
-import { beforeEach, describe, expect, it, vi } from 'vitest'
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
+import { createPinia, setActivePinia } from 'pinia'
 
 const mocks = vi.hoisted(() => ({
   auth: { token: 'legacy-session', isWorkerSession: false },
@@ -18,6 +19,8 @@ import {
 } from './notifications'
 
 beforeEach(() => {
+  setActivePinia(createPinia())
+  vi.stubEnv('VITE_APP_API_URL', 'https://configured.example')
   vi.resetAllMocks()
   mocks.auth.token = 'legacy-session'
   mocks.auth.isWorkerSession = false
@@ -27,7 +30,14 @@ beforeEach(() => {
   }
 })
 
+afterEach(() => vi.unstubAllEnvs())
+
 describe('notification request guards', () => {
+  it('does not try legacy notifications without a configured server', async () => {
+    vi.stubEnv('VITE_APP_API_URL', '')
+    await expect(getNotifications()).rejects.toThrow('Уведомления недоступны')
+    expect(mocks.getApi).not.toHaveBeenCalled()
+  })
   it('preserves legacy reads and notification mutations', async () => {
     await expect(getNotifications()).resolves.toEqual({ ok: true })
     await getUnreadNotificationsCount()

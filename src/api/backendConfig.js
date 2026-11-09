@@ -2,6 +2,14 @@ import { useApiStore } from '@/store/api'
 
 let initializationPromise = null
 
+// A saved endpoint from an older build is not configuration. A failed health
+// check, on the other hand, does not revoke an explicitly selected endpoint.
+export const legacyBackendAvailable = () => {
+  if (import.meta.env.VITE_APP_API_URL) return true
+  const store = useApiStore()
+  return store.backendMode === 'local' && store.backendModeUserSelected
+}
+
 // Build-time configuration replaces Remote Config. Do not retain endpoints
 // persisted by a previous deployment or contact a configuration service.
 const initializeEndpoints = async () => {

@@ -44,6 +44,7 @@
           :is="moviePlayerComponent"
           v-if="moviePlayerComponent"
           :key="shiki_id"
+          :kp-id="playerId"
           :movie-info="movieInfo"
           @toggle-list="toggleList"
         />
@@ -218,7 +219,7 @@
           :is="moviePlayerComponent"
           v-if="moviePlayerComponent"
           :key="shiki_id"
-          :kp-id="shiki_id"
+          :kp-id="playerId"
           :movie-info="movieInfo"
           @toggle-list="toggleList"
         />
@@ -269,7 +270,7 @@ import { useNavbarStore } from '@/store/navbar'
 import { useAuthStore } from '@/store/auth'
 import { usePlayerLists } from '@/composables/usePlayerLists'
 import Notification from '@/components/notification/ToastMessage.vue'
-import { onMounted, ref, watch } from 'vue'
+import { computed, onMounted, ref, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { getRatingColor } from '@/utils/ratingUtils'
 import { getShikiInfo } from '@/api/movies'
@@ -278,6 +279,7 @@ const infoLoading = ref(true)
 const backgroundStore = useBackgroundStore()
 const route = useRoute()
 const shiki_id = ref(route.params.shiki_id)
+const playerId = computed(() => 'shiki' + shiki_id.value.replace(/^shiki/, ''))
 const errorMessage = ref('')
 const errorCode = ref(null)
 const movieInfo = ref(null)

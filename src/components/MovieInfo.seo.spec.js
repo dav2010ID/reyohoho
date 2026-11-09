@@ -1,6 +1,6 @@
 import { createTestingPinia } from '@pinia/testing'
 import { flushPromises, shallowMount } from '@vue/test-utils'
-import { beforeEach, describe, expect, it, vi } from 'vitest'
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { reactive } from 'vue'
 
 const useHeadMock = vi.fn()
@@ -123,6 +123,7 @@ vi.mock('@/utils/movieSeo', async () => {
 })
 
 describe('MovieInfo SEO', () => {
+  afterEach(() => vi.unstubAllEnvs())
   beforeEach(async () => {
     await Promise.all([
       import('./PlayerComponent.vue'),
@@ -198,6 +199,26 @@ describe('MovieInfo SEO', () => {
       routeMock.params.kp_id = '125'
       await flushPromises()
       expect(error().exists()).toBe(false)
+    } finally {
+      wrapper.unmount()
+    }
+  })
+
+  it('keeps the player but skips legacy widgets and note lookup without a backend', async () => {
+    vi.stubEnv('VITE_APP_API_URL', '')
+    authMock.token = 'legacy-session'
+    const { getMovieNote } = await import('@/api/movies')
+    getMovieNote.mockClear()
+    const MovieInfo = (await import('./MovieInfo.vue')).default
+    const wrapper = shallowMount(MovieInfo, {
+      global: { plugins: [createTestingPinia({ createSpy: vi.fn })], stubs: { RouterLink: true } }
+    })
+    try {
+      await vi.waitFor(() => expect(wrapper.findComponent({ name: 'PlayerComponent' }).exists()).toBe(true))
+      expect(wrapper.findComponent({ name: 'MovieRating' }).exists()).toBe(false)
+      expect(wrapper.find('.action-buttons-group, #movie-comments, .movie-note-display').exists()).toBe(false)
+      expect(getMovieNote).not.toHaveBeenCalled()
+      expect(wrapper.find('a[href*="kinopoisk.ru/film/"]').exists()).toBe(true)
     } finally {
       wrapper.unmount()
     }
@@ -316,6 +337,7 @@ describe('MovieInfo SEO', () => {
   })
 
   it('mounts scene tools on first use, retains selection while closed and clears it on navigation', async () => {
+    vi.stubEnv('VITE_APP_API_URL', 'https://configured.example')
     const MovieInfo = (await import('./MovieInfo.vue')).default
     const wrapper = shallowMount(MovieInfo, {
       global: {
@@ -364,6 +386,7 @@ describe('MovieInfo SEO', () => {
   })
 
   it('preserves the iframe while refreshing movie timings', async () => {
+    vi.stubEnv('VITE_APP_API_URL', 'https://configured.example')
     const MovieInfo = (await import('./MovieInfo.vue')).default
     const wrapper = shallowMount(MovieInfo, {
       global: {

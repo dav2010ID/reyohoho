@@ -4,6 +4,7 @@ import { nextTick } from 'vue'
 import { createPinia, setActivePinia } from 'pinia'
 import { useAuthStore } from '@/store/auth'
 import { useMainStore } from '@/store/main'
+import { useApiStore } from '@/store/api'
 import MenuNavigation from './MenuNavigation.vue'
 
 const mocks = vi.hoisted(() => ({
@@ -42,6 +43,7 @@ const render = () =>
 
 describe('reactive account navigation', () => {
   it.each([false, true])('updates immediately on login/logout (mobile=%s)', async (mobile) => {
+    useApiStore().$patch({ backendMode: 'local', backendModeUserSelected: true })
     useMainStore().setIsMobile(mobile)
     const auth = useAuthStore()
     wrapper = render()
