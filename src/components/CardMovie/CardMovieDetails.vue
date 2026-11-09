@@ -13,22 +13,28 @@
       <span class="year">{{ movie.year }}</span>
     </div>
 
-    <div v-if="movie.raw_data?.genres?.length" class="genres">
-      <template v-for="genre in movie.raw_data.genres.slice(0, 2)" :key="genre.genre">
-        <span class="genre-tag">{{ genre.genre }}</span>
-      </template>
-      <span v-if="movie.raw_data.genres.length > 2" class="genre-count">
-        +{{ movie.raw_data.genres.length - 2 }}
+    <div v-if="genres.length" class="genres">
+      <span v-for="genre in genres.slice(0, 2)" :key="genre" class="genre-tag">{{ genre }}</span>
+      <span v-if="genres.length > 2" class="genre-count">
+        +{{ genres.length - 2 }}
       </span>
     </div>
   </div>
 </template>
 
 <script setup>
+import { computed } from 'vue'
 const { movie, variant = 'default' } = defineProps({
   movie: Object,
   isHistory: Boolean,
   variant: String
+})
+
+const genres = computed(() => {
+  const items = Array.isArray(movie.genres) && movie.genres.length ? movie.genres : movie.raw_data?.genres
+  return Array.isArray(items)
+    ? [...new Set(items.map((g) => (typeof g === 'string' ? g : g?.genre || g?.name)?.trim()).filter(Boolean))]
+    : []
 })
 
 const removeYearFromTitle = (title) => {

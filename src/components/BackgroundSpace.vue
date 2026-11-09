@@ -51,10 +51,12 @@ const fetchTopMovie = async () => {
   try {
     const topMovies = await getMovies({ activeTime: '24h', limit: 1 })
 
-    if (topMovies?.[0]?.cover) {
+    const top = topMovies?.[0]
+    const url = top?.cover_url || top?.cover || top?.poster_url
+    if (url && backgroundType.value === 'dynamic') {
       const expiresAt = new Date().setHours(24, 0, 0, 0)
-      localStorage.setItem(CACHE_KEY, JSON.stringify({ url: topMovies[0].cover, expiresAt }))
-      backgroundStore.updateTopMoviePoster(topMovies[0].cover)
+      localStorage.setItem(CACHE_KEY, JSON.stringify({ url, expiresAt }))
+      backgroundStore.updateTopMoviePoster(url)
     }
   } catch {
     // Ignore background fetch errors; keep current background.
@@ -87,7 +89,7 @@ onMounted(async () => {
 
   if (route.path.includes('movie')) return
 
-  if (backgroundType.value !== 'disabled') {
+  if (backgroundType.value === 'dynamic') {
     const hasValidCache = checkCachedTopMovie()
 
     if (!hasValidCache && !isFetching.value) {

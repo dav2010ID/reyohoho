@@ -6,7 +6,7 @@ const apiCall = async (callFn) => {
 }
 
 const searchEmotes = async (query) => {
-  const { data } = await apiCall((api) => api.get(`/search_emotes/${query}`))
+  const { data } = await apiCall((api) => api.get(`/search_emotes/${encodeURIComponent(query)}`))
   return data.emotes || []
 }
 
