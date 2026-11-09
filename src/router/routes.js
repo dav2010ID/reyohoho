@@ -16,7 +16,8 @@ export const routes = [
     }
   },
   {
-    path: '/movie/:kp_id/:slug?',
+    path: '/movie/:kp_id([1-9]\\d{0,11}|shiki[1-9]\\d{0,11})/:slug?',
+    sensitive: true,
     component: () => import('@/components/MovieInfo.vue'),
     name: 'movie-info',
     meta: {

@@ -8,14 +8,7 @@ export const handleHashNavigation = (to) => {
     const query = Object.fromEntries(queryParams)
 
     return { path: routePath || '/', query }
-  } else if (to.hash.startsWith('#search=')) {
-    return true
-  } else if (to.hash.startsWith('#imdb=')) {
-    return true
-  } else if (to.hash.startsWith('#shiki')) {
-    return true
-  } else {
-    const hash = to.hash.slice(1)
-    return { path: getMovieSeoPath({ kp_id: hash }) }
   }
+  const legacyId = /^#([1-9]\d{0,11})$/.exec(to.hash)
+  return legacyId ? { path: getMovieSeoPath({ kp_id: legacyId[1] }) } : true
 }
