@@ -8,7 +8,7 @@ import { handleApiError } from '@/constants'
 import { useMainStore } from '@/store/main'
 import { usePlayerStore } from '@/store/player'
 import { trackAnalyticsEvent } from '@/utils/analytics'
-import { computed, ref } from 'vue'
+import { computed, onBeforeUnmount, ref } from 'vue'
 import { KINOBD_ENABLED } from '@/api/providerAvailability'
 import { getSafePlayerUrl } from '@/utils/playerSecurity'
 
@@ -31,6 +31,9 @@ export function usePlayerSources({ props, getProviderDisplayName, onSelectedPlay
   const errorMessage = ref('')
   const errorCode = ref(null)
   const playersEmptyMessage = ref('')
+  const searchingSource = ref('')
+  let currentRequest
+  onBeforeUnmount(() => currentRequest?.abort())
 
   const preferredPlayer = computed(() => playerStore.preferredPlayer)
   const isKinoBdProvider = computed(
@@ -114,7 +117,10 @@ export function usePlayerSources({ props, getProviderDisplayName, onSelectedPlay
     return true
   }
 
-  const fetchPlayers = async () => {
+  const fetchPlayers = async (retryProviders = false) => {
+    currentRequest?.abort()
+    const controller = new AbortController()
+    currentRequest = controller
     const startedAt = Date.now()
     const kpId = String(props.kpId || '')
 
@@ -122,22 +128,32 @@ export function usePlayerSources({ props, getProviderDisplayName, onSelectedPlay
       errorMessage.value = ''
       errorCode.value = null
       playersEmptyMessage.value = ''
+      searchingSource.value = ''
+      playersInternal.value = []
+      setSelectedPlayer(null)
 
       let players
       let source = mainStore.contentApiProvider
 
       if (kpId.startsWith('shiki')) {
         const cleanShikiId = kpId.replace('shiki', '')
-        players = await getShikiPlayers(cleanShikiId)
+        searchingSource.value = 'Shikimori'
+        players = await getShikiPlayers(cleanShikiId, { signal: controller.signal })
         source = 'shiki'
       } else {
         const savedInid = playerStore.kinobdSourceByKpId?.[kpId] || null
         players = await getPlayers(kpId, {
+          signal: controller.signal,
+          retryProviders,
+          onAttempt: (provider) => {
+            searchingSource.value = provider.replace('_', ' ').toUpperCase()
+          },
           mode: 'kp_id',
           usePlayerData: true,
           forceInid: isKinoBdProvider.value ? savedInid : null
         })
       }
+      if (controller.signal.aborted) return
       const hasPlayers = applyPlayersData(players)
       if (!hasPlayers) {
         playersEmptyMessage.value = NO_PLAYERS_MESSAGE
@@ -150,6 +166,7 @@ export function usePlayerSources({ props, getProviderDisplayName, onSelectedPlay
         duration_ms: Date.now() - startedAt
       })
     } catch (error) {
+      if (controller.signal.aborted) return
       const { message, code } = handleApiError(error)
       errorMessage.value = message
       errorCode.value = code
@@ -161,6 +178,11 @@ export function usePlayerSources({ props, getProviderDisplayName, onSelectedPlay
         duration_ms: Date.now() - startedAt
       })
       console.error('Ошибка при загрузке плееров:', error)
+    } finally {
+      if (currentRequest === controller) {
+        currentRequest = null
+        searchingSource.value = ''
+      }
     }
   }
 
@@ -268,6 +290,7 @@ export function usePlayerSources({ props, getProviderDisplayName, onSelectedPlay
     isKinoBdProvider,
     showSourceButton,
     selectedPlayerLabel,
+    searchingSource,
     fetchPlayers,
     openPlayerModal,
     closePlayerModal,

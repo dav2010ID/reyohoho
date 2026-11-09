@@ -14,7 +14,8 @@ import {
 import { KINOBD_ENABLED } from '@/api/providerAvailability'
 import { getSafePlayerUrl } from '@/utils/playerSecurity'
 
-const PLAYER_PROVIDER_TIMEOUT_MS = 15000
+const PLAYER_PROVIDER_TIMEOUT_MS = 8000
+const PLAYER_HEDGE_MS = 2000
 const getCurrentProvider = () => {
   try {
     const mainStore = useMainStore()
@@ -141,64 +142,89 @@ const trackPlayerProviderAttempt = (eventName, params) => {
   }
 }
 
-const getPlayersWithFallback = async (...args) => {
+const providerBackoff = new Map()
+const getPlayersWithFallback = async (contentId, options = {}, ...rest) => {
+  const { signal, onAttempt, retryProviders, ...playerOptions } = options
   const provider = getCurrentProvider()
   const startedAt = Date.now()
-  const [contentId, playerOptions = {}] = args
   const order = getPlayerProviderOrder(provider)
+  const healthy = order.filter((source) => !(providerBackoff.get(source) > startedAt))
+  const candidates = !retryProviders && healthy.length ? healthy : order
+  const group = new AbortController()
 
-  for (const currentProvider of order) {
-    const attemptStartedAt = Date.now()
+  const attempt = async (source) => {
+    const start = Date.now()
+    onAttempt?.(source)
     let players = {}
-    let error = null
+    let error
     try {
-      const providerApi = await loadProvider(currentProvider)
-      players = await withProviderTimeout(
-        (signal) =>
-          providerApi.getPlayers(
-            contentId,
-            {
-              ...playerOptions,
-              signal
-            },
-            ...args.slice(2)
-          ),
-        currentProvider,
-        playerOptions.signal
-      )
-      players = mergePlayerMaps([players])
-    } catch (requestError) {
-      error = requestError
+      players = mergePlayerMaps([await withProviderTimeout(async (attemptSignal) => {
+        const api = await loadProvider(source)
+        if (attemptSignal.aborted) throw attemptSignal.reason
+        return api.getPlayers(contentId, { ...playerOptions, signal: attemptSignal }, ...rest)
+      }, source, group.signal)])
+    } catch (err) {
+      if (group.signal.aborted) throw err
+      rethrowRequestCancellation(err)
+      error = err
     }
-    const duration = Date.now() - attemptStartedAt
-    const isTimeout = error?.name === 'PlayerProviderTimeoutError'
-    const status = error
-      ? isTimeout
-        ? 'timeout'
-        : 'error'
-      : hasPlayers(players)
-        ? 'success'
-        : 'empty'
-    const attemptPayload = {
-      status,
-      kp_id: contentId,
-      configured_source: provider,
-      source: currentProvider,
-      fallback_used: currentProvider !== order[0],
-      duration_ms: Date.now() - startedAt,
-      attempt_duration_ms: duration
+    if (group.signal.aborted) throw group.signal.reason
+    const timeout = error?.name === 'PlayerProviderTimeoutError'
+    if (error) {
+      const status = error.response?.status
+      if (!status || status >= 500 || status === 429)
+        providerBackoff.set(source, Date.now() + 5 * 60_000)
+      console.warn(`[movies] getPlayers failed on ${source}`, error)
+    } else {
+      providerBackoff.delete(source)
     }
-    if (isTimeout) attemptPayload.timeout_ms = PLAYER_PROVIDER_TIMEOUT_MS
-    trackPlayerProviderAttempt(
-      isTimeout ? 'player_provider_timeout' : error ? 'player_provider_error' : null,
-      attemptPayload
-    )
-    if (error) rethrowRequestCancellation(error)
-    if (error) console.warn(`[movies] getPlayers failed on ${currentProvider}`, error)
-    if (!error && hasPlayers(players)) return mergePlayerMaps([players])
+    trackPlayerProviderAttempt(timeout ? 'player_provider_timeout' : error ? 'player_provider_error' : null, {
+      status: timeout ? 'timeout' : error ? 'error' : hasPlayers(players) ? 'success' : 'empty',
+      kp_id: contentId, configured_source: provider, source, fallback_used: source !== order[0],
+      duration_ms: Date.now() - startedAt, attempt_duration_ms: Date.now() - start,
+      ...(timeout ? { timeout_ms: PLAYER_PROVIDER_TIMEOUT_MS } : {})
+    })
+    return players
   }
 
-  return {}
+  let timer
+  const cancel = () => group.abort(signal.reason)
+  if (signal?.aborted) cancel()
+  else signal?.addEventListener('abort', cancel, { once: true })
+  try {
+    if (group.signal.aborted) throw group.signal.reason
+    return await new Promise((resolve, reject) => {
+      group.signal.addEventListener('abort', () => reject(group.signal.reason), { once: true })
+      let next = 0
+      let pending = 0
+      const launch = () => {
+        clearTimeout(timer)
+        if (group.signal.aborted) return
+        if (next === candidates.length) {
+          if (!pending) resolve({})
+          return
+        }
+        const source = candidates[next++]
+        pending++
+        attempt(source).then((players) => {
+          pending--
+          if (group.signal.aborted) return
+          if (hasPlayers(players)) {
+            resolve(players)
+            group.abort()
+          } else {
+            launch()
+          }
+        }, reject)
+        if (next < candidates.length) timer = setTimeout(launch, PLAYER_HEDGE_MS)
+      }
+      launch()
+    })
+  } finally {
+    clearTimeout(timer)
+    group.abort()
+    signal?.removeEventListener('abort', cancel)
+  }
 }
 
 const callWithProvider = async (methodName, ...args) => {

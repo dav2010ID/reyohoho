@@ -15,12 +15,14 @@ vi.mock('@/api/providerRegistry', async (importOriginal) => ({
   loadProvider: mocks.loadProvider
 }))
 
-import { getPlayers } from './movies'
+let getPlayers
 
 const primary = { 'DDBB>Alloha': { iframe: 'https://primary.test/301' } }
 const fallback = { 'KINOBOX>Alloha': { iframe: 'https://fallback.test/301' } }
 
-beforeEach(() => {
+beforeEach(async () => {
+  vi.resetModules()
+  ;({ getPlayers } = await import('./movies'))
   vi.resetAllMocks()
   mocks.store.contentApiProvider = 'kinobox'
   mocks.loadProvider.mockImplementation(async (provider) => {
@@ -120,7 +122,7 @@ describe('player fallback chain', () => {
     expect(await getPlayers(301)).toEqual(fallback)
   })
 
-  it('uses Kinobox after the DDBB timeout', async () => {
+  it('starts Kinobox while DDBB is stalled and aborts the losing request', async () => {
     vi.useFakeTimers()
     let signal
     mocks.ddbb.mockImplementation((_id, options) => {
@@ -128,13 +130,33 @@ describe('player fallback chain', () => {
       return new Promise(() => {})
     })
     const result = getPlayers(301)
-    await vi.advanceTimersByTimeAsync(15000)
+    await vi.advanceTimersByTimeAsync(1999)
+    expect(mocks.kinobox).not.toHaveBeenCalled()
+    await vi.advanceTimersByTimeAsync(1)
     expect(await result).toEqual(fallback)
     expect(signal.aborted).toBe(true)
-    expect(mocks.analytics).toHaveBeenCalledWith(
+    expect(mocks.analytics).not.toHaveBeenCalledWith(
       'player_provider_timeout',
       expect.objectContaining({ source: 'ddbb', status: 'timeout' })
     )
+  })
+
+  it('bounds the wait even when every provider hangs', async () => {
+    vi.useFakeTimers()
+    for (const mock of [mocks.live, mocks.ddbb, mocks.kinobox]) mock.mockImplementation(() => new Promise(() => {}))
+    const result = getPlayers(301)
+    await vi.advanceTimersByTimeAsync(12000)
+    expect(await result).toEqual({})
+    expect(mocks.analytics.mock.calls.filter(([event]) => event === 'player_provider_timeout')).toHaveLength(3)
+  })
+
+  it('skips a failed source on the next film but allows an explicit retry', async () => {
+    mocks.live.mockRejectedValueOnce(new Error('offline')).mockResolvedValue(primary)
+    mocks.ddbb.mockResolvedValue(fallback)
+    expect(await getPlayers(301)).toEqual(fallback)
+    expect(await getPlayers(302)).toEqual(fallback)
+    expect(mocks.live).toHaveBeenCalledTimes(1)
+    expect(await getPlayers(302, { retryProviders: true })).toEqual(primary)
   })
 
   it('propagates caller cancellation without falling back', async () => {

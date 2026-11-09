@@ -52,11 +52,11 @@ const getKpIDfromSHIKI = async (shikiId, requestConfig = {}) => {
   }
 }
 
-const getPlayers = async (kpId) => {
+const getPlayers = async (kpId, { signal } = {}) => {
   const { data } = await localApi.post(
     '/cache',
     new URLSearchParams({ kinopoisk: kpId, type: 'movie' }),
-    { headers: { 'Content-Type': 'application/x-www-form-urlencoded' } }
+    { signal, headers: { 'Content-Type': 'application/x-www-form-urlencoded' } }
   )
   return data
 }
@@ -71,11 +71,11 @@ const setRating = async (kpId, rating) => {
   return data
 }
 
-const getShikiPlayers = async (shikiId) => {
+const getShikiPlayers = async (shikiId, { signal } = {}) => {
   const { data } = await localApi.post(
     '/cache_shiki',
     new URLSearchParams({ shikimori: shikiId, type: 'anime' }),
-    { headers: { 'Content-Type': 'application/x-www-form-urlencoded' } }
+    { signal, headers: { 'Content-Type': 'application/x-www-form-urlencoded' } }
   )
   return data
 }

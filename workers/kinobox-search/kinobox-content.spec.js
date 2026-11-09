@@ -50,6 +50,15 @@ afterEach(() => {
   vi.restoreAllMocks()
 })
 describe('Kinobox public caching', () => {
+  it('includes time already spent in the player discovery deadline', async () => {
+    const load = vi.fn().mockResolvedValue(upstream(200, { data: [] }))
+    const budget = async () => {
+      time += 4000
+      return null
+    }
+    await serve(load, '/api/players?kinopoisk=301', headers, budget)
+    expect(load.mock.calls[0][1].timeoutMs).toBe(2500)
+  })
   it('retries a stream reset once and charges both upstream attempts', async () => {
     const load = vi
       .fn()

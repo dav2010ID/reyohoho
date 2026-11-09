@@ -4,6 +4,7 @@
     <button
       class="player-btn"
       type="button"
+      :disabled="!hasPlayers"
       :aria-label="`Выбрать плеер: ${selectedLabel}`"
       @click="$emit('open-player-modal')"
     >
@@ -23,6 +24,7 @@
 
 <script setup>
 defineProps({
+  hasPlayers: Boolean,
   selectedLabel: {
     type: String,
     required: true

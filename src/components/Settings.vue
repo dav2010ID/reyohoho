@@ -258,6 +258,7 @@ import { LOCAL_API_URL, useApiStore } from '@/store/api'
 import { useAuthStore } from '@/store/auth'
 import { getApiAuthorizationState } from '@/utils/apiTrust'
 import { computed, ref, watch } from 'vue'
+import { useRoute } from 'vue-router'
 import BaseModal from './BaseModal.vue'
 import { historyRequest, isCloudHistoryEnabled } from '@/api/cloudHistory'
 
@@ -269,7 +270,7 @@ const apiStore = useApiStore()
 const authStore = useAuthStore()
 const showModal = ref(false)
 const appVersion = ref(import.meta.env.VITE_APP_VERSION_FULL_VERSION)
-const activeSettingsTab = ref('appearance')
+const activeSettingsTab = ref(useRoute().query.tab === 'api' ? 'api' : 'appearance')
 const settingsTabs = [
   { id: 'appearance', label: 'Вид', description: 'Фон, тема и карточки' },
   { id: 'player', label: 'Плеер', description: 'Плеер, трейлеры и режим стримера' },
@@ -344,7 +345,7 @@ const backgroundType = computed({
 
 // Вычисляемое свойство, определяющее, нужно ли отключать размытие
 const isBlurDisabled = computed(
-  () => backgroundType.value === 'stars' || backgroundType.value === 'disable'
+  () => backgroundType.value === 'stars' || backgroundType.value === 'disabled'
 )
 watch(isBlurDisabled, (newValue) => {
   if (newValue) {

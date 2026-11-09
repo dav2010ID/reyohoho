@@ -91,7 +91,7 @@ const normalizeStaff = (crew = []) => {
     staff_id: item?.person?.id || null,
     name_ru: item?.person?.name || '',
     name_en: item?.person?.originalName || '',
-    description: item?.role || '',
+    description: '',
     poster_url: item?.person?.photoUrl || '',
     profession_text: item?.role || '',
     profession_key: String(item?.role || '').toUpperCase()
@@ -261,7 +261,7 @@ const getPlayersRaw = async (kpId, { title = '', signal } = {}) => {
       }
     },
     30000,
-    (data) => Array.isArray(data?.data)
+    (data) => Array.isArray(data?.data) && data.data.length > 0
   )
 
   return Array.isArray(data?.data) ? data.data : []

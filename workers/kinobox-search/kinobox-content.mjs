@@ -26,6 +26,8 @@ export async function serveKinoboxContent(
   budget = async () => null
 ) {
   const started = Date.now()
+  // Player discovery has an 8 s client timeout, including time spent waiting for a lease.
+  const playerDeadline = resource.kind === 'players' ? started + 6500 : null
   const key = getKinoboxCacheUrl(url.origin, resource, headers['X-Worker-Version'])
   const staleKey = key.replace('/__kinobox-cache?', '/__kinobox-stale?')
   const retryKey = key.replace('/__kinobox-cache?', '/__kinobox-retry?')
@@ -52,6 +54,7 @@ export async function serveKinoboxContent(
   // Wait with this request's own I/O, rather than sharing another request's promise.
   for (let attempt = 0; busy(key) && attempt < 20; attempt++) {
     if (stale) return respond(stale.body, 200, 'STALE')
+    if (playerDeadline && Date.now() + 500 >= playerDeadline) return unavailable()
     await sleep(500)
     const filled = await cacheMatch(cache, key)
     if (filled) return respond(filled.body, 200, 'HIT')
@@ -90,7 +93,8 @@ export async function serveKinoboxContent(
       const fallback = await currentStale()
       return fallback ? respond(fallback.body, 200, 'STALE') : rejected
     }
-    const deadline = Date.now() + 15000
+    const deadline = playerDeadline ?? Date.now() + 15000
+    if (deadline <= Date.now()) return unavailable()
     const load = () =>
       requestUpstream(
         {

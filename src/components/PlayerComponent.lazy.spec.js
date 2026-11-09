@@ -3,6 +3,7 @@ import { createPinia } from 'pinia'
 import { afterEach, describe, expect, it, vi } from 'vitest'
 import { usePlayerStore } from '@/store/player'
 import PlayerComponent from './PlayerComponent.vue'
+import { getPlayers } from '@/api/movies'
 
 const optional = vi.hoisted(() => ({
   overlayEvaluated: vi.fn(),
@@ -64,6 +65,27 @@ describe('PlayerComponent optional runtime boundaries', () => {
     delete window.toggleCompressor
     delete window.toggleMirror
     vi.restoreAllMocks()
+  })
+
+  it('retries an empty result, discards a stale response and cancels on unmount', async () => {
+    let resolveRetry
+    getPlayers.mockResolvedValueOnce({}).mockImplementationOnce(() => new Promise((resolve) => { resolveRetry = resolve }))
+    const { wrapper } = setup(false)
+    await flushPromises()
+    await wrapper.get('.player-empty-state button').trigger('click')
+    const retrySignal = getPlayers.mock.calls.at(-1)[1].signal
+    await wrapper.setProps({ kpId: '456' })
+    await flushPromises()
+    expect(retrySignal.aborted).toBe(true)
+    resolveRetry({})
+    await flushPromises()
+    expect(wrapper.get('iframe').attributes('src')).toBe('https://player.example/embed/123')
+    getPlayers.mockImplementationOnce(() => new Promise(() => {}))
+    await wrapper.setProps({ kpId: '789' })
+    const lastSignal = getPlayers.mock.calls.at(-1)[1].signal
+    wrapper.unmount()
+    wrappers.pop()
+    expect(lastSignal.aborted).toBe(true)
   })
 
   it('keeps web playback light and loads the desktop overlay only on activation', async () => {

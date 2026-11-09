@@ -180,7 +180,9 @@ async function main() {
     })
 
     await recordStep(steps, 'top change filter', async () => {
-      const filter = page.locator('.time-btn', { hasText: '7' }).first()
+      const filter = (await page.locator('.top-tabs').isVisible())
+        ? page.getByRole('button', { name: 'Сериалы', exact: true })
+        : page.getByRole('button', { name: '7 дней', exact: true })
       await filter.click()
       await page.waitForLoadState('networkidle', { timeout: 60000 }).catch(() => {})
       await assertNoNotFound(page, 'top filter')

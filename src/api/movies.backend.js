@@ -23,7 +23,7 @@ const getKpInfo = async (kpId, requestConfig = {}) => {
   return data
 }
 
-const getShikiPlayers = async (shikiId) => {
+const getShikiPlayers = async (shikiId, { signal } = {}) => {
   const { data } = await apiCall((api) =>
     api.post(
       '/cache_shiki',
@@ -31,7 +31,7 @@ const getShikiPlayers = async (shikiId) => {
         shikimori: shikiId,
         type: 'anime'
       }),
-      { headers: { 'Content-Type': 'application/x-www-form-urlencoded' } }
+      { signal, headers: { 'Content-Type': 'application/x-www-form-urlencoded' } }
     )
   )
   return data

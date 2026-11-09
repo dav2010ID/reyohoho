@@ -1,9 +1,10 @@
 <template>
-  <ErrorMessage v-if="errorMessage" :message="errorMessage" :code="errorCode" />
+  <ErrorMessage v-if="errorMessage" :message="errorMessage" :code="errorCode" show-retry @retry="retryPlayers" />
 
   <template v-else>
     <PlayerSelectorBar
       :selected-label="selectedPlayerLabel"
+      :has-players="playersInternal.length > 0"
       :show-source-button="showSourceButton"
       @open-player-modal="openPlayerModal"
       @open-source-modal="openSourceModal"
@@ -53,10 +54,12 @@
         <SpinnerLoading
           v-if="iframeLoading && !playersEmptyMessage"
           class="player-loading-spinner"
-          :text="`Загружается плеер: ${selectedPlayerInternal ? getProviderDisplayName(selectedPlayerInternal) : 'Загружается список плееров'}\nЕсли плеер не грузится, то смените плеер выше или включите VPN`"
+          :text="selectedPlayerInternal ? `Загружается плеер: ${getProviderDisplayName(selectedPlayerInternal)}` : `Поиск плееров${searchingSource ? ': ' + searchingSource : '…'}`"
         />
         <div v-else-if="playersEmptyMessage" class="player-empty-state">
           <p>{{ playersEmptyMessage }}</p>
+          <button type="button" @click="retryPlayers">Повторить</button>
+          <button type="button" @click="router.push('/settings?tab=api')">Сменить источник</button>
           <button v-if="showSourceButton" type="button" @click="openSourceModal">
             Выбрать источник
           </button>
@@ -571,7 +574,7 @@ import {
   ref,
   watch
 } from 'vue'
-import { useRoute, useRouter } from 'vue-router'
+import { useRouter } from 'vue-router'
 import PlayerSelectorBar from '@/components/player/PlayerSelectorBar.vue'
 import { getProviderDisplayName } from '@/utils/playerUtils'
 import { trackAnalyticsEvent } from '@/utils/analytics'
@@ -589,9 +592,7 @@ const PlayerModal = defineAsyncComponent(() => import('@/components/PlayerModal.
 
 const mainStore = useMainStore()
 const playerStore = usePlayerStore()
-const route = useRoute()
 const router = useRouter()
-const kp_id = ref(route.params.kp_id)
 
 const props = defineProps({
   kpId: String,
@@ -601,6 +602,7 @@ const props = defineProps({
   }
 })
 const emit = defineEmits(['update:selectedPlayer', 'toggle-list'])
+const kp_id = computed(() => props.kpId)
 
 const iframeLoading = ref(true)
 const playerIframe = ref(null)
@@ -653,6 +655,7 @@ const {
   playersEmptyMessage,
   showSourceButton,
   selectedPlayerLabel,
+  searchingSource,
   fetchPlayers,
   openPlayerModal,
   closePlayerModal,
@@ -1004,18 +1007,16 @@ watch(selectedPlayerInternal, (newVal) => {
 })
 
 watch(
-  () => route.params.kp_id,
+  kp_id,
   async (newKpId) => {
-    if (newKpId && newKpId !== kp_id.value) {
-      kp_id.value = newKpId
+    if (newKpId) {
       iframeLoading.value = true
       selectedPlayerInternal.value = null
       resetPlayerPlayback()
       await fetchPlayers()
       if (isCentered.value) centerPlayer()
     }
-  },
-  { immediate: true }
+  }
 )
 
 watch(
@@ -1031,6 +1032,13 @@ watch(
 )
 
 const toggleList = (type) => emit('toggle-list', type)
+const retryPlayers = () => {
+  iframeLoading.value = true
+  return fetchPlayers(true)
+}
+const repositionTooltip = () => {
+  if (activeTooltip.value) updateTooltipPosition(activeTooltip.value)
+}
 
 const showFavoriteTooltip = computed(() => playerStore.showFavoriteTooltip)
 
@@ -1044,7 +1052,7 @@ onMounted(() => {
   fetchPlayers()
   updateScaleFactor()
   window.addEventListener('resize', updateScaleFactor)
-  window.addEventListener('resize', updateTooltipPosition)
+  window.addEventListener('resize', repositionTooltip)
   if (isCentered.value) centerPlayer()
 
   window.toggleCompressor = toggleCompressor
@@ -1055,7 +1063,7 @@ onMounted(() => {
 
 onBeforeUnmount(() => {
   window.removeEventListener('resize', updateScaleFactor)
-  window.removeEventListener('resize', updateTooltipPosition)
+  window.removeEventListener('resize', repositionTooltip)
   clearIframeLoadTimeout()
   stopCurrentVideoErrorTracking()
   cleanupPlayerLayout()
