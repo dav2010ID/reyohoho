@@ -19,6 +19,11 @@ const shouldSkipPageViewTracking = (to) => {
 
 export const installRouterGuards = (router, { isClient = typeof window !== 'undefined' } = {}) => {
   router.beforeEach((to) => {
+    if (to.name === 'auth-success' && Object.hasOwn(to.query, 'token')) {
+      const query = { ...to.query }
+      delete query.token
+      return { path: to.path, query, hash: to.hash, replace: true }
+    }
     if (to.meta?.requiresAuth) {
       const authStore = useAuthStore()
 

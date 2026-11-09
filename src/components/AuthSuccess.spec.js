@@ -20,7 +20,7 @@ vi.mock('@/api/movies', () => ({ getKpInfo: mocks.getKpInfo }))
 
 describe('sign-in messages', () => {
   it('does not upload legacy history into a new account after a delayed metadata read', async () => {
-    useAuthStore().setToken('legacy-A')
+    useAuthStore().setToken('legacy.account.A')
     let resolveMetadata
     mocks.getKpInfo.mockReturnValue(new Promise((resolve) => { resolveMetadata = resolve }))
     const wrapper = create()
@@ -83,6 +83,25 @@ describe('sign-in messages', () => {
     vi.useRealTimers()
   })
   const create = () => mount(AuthSuccess, { global: { stubs: { RouterLink: true } } })
+  it.each([null, 'rh1_' + 'x'.repeat(43)])('ignores a URL token with stored session %s', async (token) => {
+    useAuthStore().setToken(token)
+    window.history.replaceState(null, '', '/auth-success?token=rh1_' + 'a'.repeat(43))
+    vi.spyOn(window, 'confirm').mockReturnValue(false)
+    const wrapper = create()
+    await flushPromises()
+    expect(useAuthStore().token).toBe(token)
+    expect(mocks.getUser).toHaveBeenCalledTimes(token ? 1 : 0)
+    window.history.replaceState(null, '', '/')
+    wrapper.unmount()
+  })
+  it('clears the rejected session on a 401 from user lookup', async () => {
+    useAuthStore().setToken('legacy.account.A')
+    mocks.getUser.mockRejectedValue({ response: { status: 401 } })
+    const wrapper = create()
+    await flushPromises()
+    expect(useAuthStore().token).toBeNull()
+    wrapper.unmount()
+  })
   it('asks to sync local history and lists with the cloud, without naming the provider', async () => {
     const confirm = vi.spyOn(window, 'confirm').mockReturnValue(true)
     const wrapper = create()

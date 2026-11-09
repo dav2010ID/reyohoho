@@ -51,7 +51,6 @@ export default {
     const success = ref(false)
     const error = ref(null)
     const syncFailed = ref(false)
-    const base = ref(import.meta.env.VITE_BASE_URL || '/')
     let redirectTimeout = null
     let running = false
     let disposed = false
@@ -62,20 +61,16 @@ export default {
       loading.value = true
       error.value = null
       syncFailed.value = false
+      const token = authStore.token
       try {
         const guestHistory = mainStore.historyOwner === 'guest' ? [...mainStore.history] : []
-        const urlParams = new URLSearchParams(window.location.search)
-        const token = urlParams.get('token') || authStore.token
-
-        if (!token) {
+        if (!authStore.isWorkerSession && !/^[A-Za-z0-9_-]+\.[A-Za-z0-9_-]+\.[A-Za-z0-9_-]+$/.test(token || '')) {
+          if (token) authStore.logout()
           throw new Error('Не удалось подтвердить вход. Войдите через Telegram ещё раз.')
         }
-        authStore.setToken(token)
         const assertCurrent = () => {
           if (disposed || authStore.token !== token) throw new Error('Аккаунт изменился')
         }
-
-        window.history.replaceState({}, document.title, `${base.value}auth-success`)
 
         let user = await getUser()
         assertCurrent()
@@ -230,6 +225,8 @@ export default {
             await router.replace(consumeAuthRedirect())
           }, 2000)
       } catch (err) {
+        if (!disposed && token && authStore.token === token && err.response?.status === 401)
+          authStore.logout()
         console.error('Auth error:', err)
         error.value = 'Не удалось завершить вход. Попробуйте войти через Telegram ещё раз.'
         loading.value = false
