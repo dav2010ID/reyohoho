@@ -149,7 +149,7 @@ describe('MovieInfo SEO', () => {
 
   it('uses the initial SEO entry before client fetch resolves', async () => {
     const MovieInfo = (await import('./MovieInfo.vue')).default
-    shallowMount(MovieInfo, {
+    const wrapper = shallowMount(MovieInfo, {
       global: {
         plugins: [
           createTestingPinia({
@@ -175,7 +175,33 @@ describe('MovieInfo SEO', () => {
 
     expect(head.title).toContain('Seed Movie')
     expect(head.link[0].href).toContain('/movie/123/')
+    wrapper.unmount()
   }, 10000)
+
+  it('shows one player on catalog fallback and clears the error on retry or navigation', async () => {
+    getKpInfoMock.mockRejectedValueOnce(new Error('offline'))
+    const MovieInfo = (await import('./MovieInfo.vue')).default
+    const wrapper = shallowMount(MovieInfo, {
+      global: { plugins: [createTestingPinia({ createSpy: vi.fn })], stubs: { RouterLink: true } }
+    })
+    try {
+      const error = () => wrapper.findComponent({ name: 'ErrorMessage' })
+      await vi.waitFor(() => expect(wrapper.findAllComponents({ name: 'PlayerComponent' })).toHaveLength(1))
+      expect(error().props('showRetry')).toBe(true)
+      error().vm.$emit('retry')
+      await flushPromises()
+      expect(error().exists()).toBe(false)
+      getKpInfoMock.mockRejectedValueOnce(new Error('offline'))
+      routeMock.params.kp_id = '124'
+      await flushPromises()
+      expect(error().exists()).toBe(true)
+      routeMock.params.kp_id = '125'
+      await flushPromises()
+      expect(error().exists()).toBe(false)
+    } finally {
+      wrapper.unmount()
+    }
+  })
 
   it.each([false, true])(
     'keeps the player mounted when toggling favorite (mobile=%s)',

@@ -37,9 +37,9 @@
         </div>
       </div>
 
-      <ErrorMessage v-if="errorMessage" :message="errorMessage" :code="errorCode" />
+      <ErrorMessage v-if="errorMessage" :message="errorMessage" :code="errorCode" show-retry @retry="fetchMovieInfo()" />
 
-      <div v-if="errorMessage && clientReady" class="content-card">
+      <div v-if="errorMessage && clientReady && !movieInfo" class="content-card">
         <component
           :is="moviePlayerComponent"
           v-if="clientReady && moviePlayerComponent"
@@ -648,21 +648,22 @@ const errorMessage = ref('')
 const errorCode = ref(null)
 const moviePlayerComponent = shallowRef(null)
 const movieRatingComponent = shallowRef(null)
-const initialSeoEntry = getMovieSeoEntry(route.params.kp_id)
-const infoLoading = ref(!initialSeoEntry)
-const movieInfo = ref(
-  initialSeoEntry
+const getCatalogMovie = (id) => {
+  const entry = getMovieSeoEntry(id)
+  return entry
     ? {
-        kp_id: initialSeoEntry.kp_id,
-        kinopoisk_id: initialSeoEntry.kp_id,
-        title: initialSeoEntry.title,
-        name_ru: initialSeoEntry.title,
-        year: initialSeoEntry.year,
-        description: initialSeoEntry.description,
-        poster_url: initialSeoEntry.poster
+        kp_id: entry.kp_id,
+        kinopoisk_id: entry.kp_id,
+        title: entry.title,
+        name_ru: entry.title,
+        year: entry.year,
+        description: entry.description,
+        poster_url: entry.poster
       }
     : null
-)
+}
+const movieInfo = ref(getCatalogMovie(kp_id.value))
+const infoLoading = ref(!movieInfo.value)
 const navbarStore = useNavbarStore()
 const trailerStore = useTrailerStore()
 const notificationRef = ref(null)
@@ -957,6 +958,8 @@ const fetchMovieInfo = async (updateHistory = true) => {
   movieInfoRequestController?.abort()
   const controller = new AbortController()
   movieInfoRequestController = controller
+  errorMessage.value = ''
+  errorCode.value = null
   const requestedKpId = kp_id.value
   if (updateHistory || !movieInfo.value) infoLoading.value = true
 
@@ -970,7 +973,7 @@ const fetchMovieInfo = async (updateHistory = true) => {
 
     if (controller.signal.aborted || requestedKpId !== kp_id.value) return false
 
-    if (Array.isArray(response) && response.length === 0) {
+    if (!response || (Array.isArray(response) && response.length === 0)) {
       throw new Error('Данные не найдены. Пожалуйста, повторите поиск.')
     }
 
@@ -1032,9 +1035,7 @@ const fetchMovieInfo = async (updateHistory = true) => {
       }
     }
 
-    const isHistoryAllowed = computed(() => mainStore.isHistoryAllowed)
-
-    if (isHistoryAllowed.value && movieToSave.kp_id && movieToSave.title && updateHistory) {
+    if (mainStore.isHistoryAllowed && movieToSave.kp_id && movieToSave.title && updateHistory) {
       if (authStore.token) {
         mainStore.addToHistory({ ...movieToSave })
         const historyToken = authStore.token
@@ -1068,7 +1069,7 @@ const fetchMovieInfo = async (updateHistory = true) => {
     }
     return true
   } catch (error) {
-    if (isRequestCanceled(error)) return false
+    if (controller.signal.aborted || requestedKpId !== kp_id.value || isRequestCanceled(error)) return false
     const { message, code } = handleApiError(error)
     errorMessage.value = message
     errorCode.value = code
@@ -1180,6 +1181,7 @@ watch(
       window.selectedNudityTimings = []
       window.overlayNudityTimings = []
       kp_id.value = newKpId
+      movieInfo.value = getCatalogMovie(newKpId)
       activeTrailerIndex.value = null
       await fetchMovieInfo()
     }
