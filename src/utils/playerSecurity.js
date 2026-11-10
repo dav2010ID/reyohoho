@@ -25,6 +25,15 @@ export const getSafePlayerUrl = (value, currentOrigin = typeof window !== 'undef
   }
 }
 
+export const PLAYER_IFRAME_SANDBOX =
+  'allow-scripts allow-same-origin allow-forms allow-presentation allow-popups'
+
+// Opt-in: many embedded players detect a sandbox and refuse to play. Enable with
+// VITE_PLAYER_IFRAME_SANDBOX=true only after playback is verified for every provider.
+// null removes the attribute; an empty string would apply the strictest sandbox.
+export const getPlayerIframeSandbox = (env = import.meta.env) =>
+  env.VITE_PLAYER_IFRAME_SANDBOX === 'true' ? PLAYER_IFRAME_SANDBOX : null
+
 export const getReviewedPlayerOrigins = (env = import.meta.env) =>
   new Set([
     ...DEFAULT_REVIEWED_ORIGINS,

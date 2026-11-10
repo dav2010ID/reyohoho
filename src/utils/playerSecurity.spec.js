@@ -1,5 +1,10 @@
 import { describe, expect, it } from 'vitest'
-import { assessPlayerIframe, getPersistablePlayerKey, getSafePlayerUrl } from './playerSecurity'
+import {
+  assessPlayerIframe,
+  getPersistablePlayerKey,
+  getPlayerIframeSandbox,
+  getSafePlayerUrl
+} from './playerSecurity'
 
 describe('player iframe security assessment', () => {
   it.each([
@@ -52,6 +57,19 @@ describe('player iframe security assessment', () => {
         env: {}
       }).status
     ).toBe('insecure')
+  })
+
+  it('keeps the iframe unsandboxed unless the build opts in', () => {
+    // null removes the attribute; '' would silently apply the strictest sandbox.
+    expect(getPlayerIframeSandbox({})).toBeNull()
+    expect(getPlayerIframeSandbox({ VITE_PLAYER_IFRAME_SANDBOX: 'false' })).toBeNull()
+    expect(getPlayerIframeSandbox({ VITE_PLAYER_IFRAME_SANDBOX: '1' })).toBeNull()
+
+    const sandbox = getPlayerIframeSandbox({ VITE_PLAYER_IFRAME_SANDBOX: 'true' })
+    expect(sandbox.split(' ')).toEqual(
+      expect.arrayContaining(['allow-scripts', 'allow-same-origin', 'allow-presentation'])
+    )
+    expect(sandbox).not.toMatch(/allow-top-navigation/)
   })
 
   it('persists only a normalized non-torrent player key', () => {

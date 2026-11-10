@@ -42,7 +42,7 @@
           frameborder="0"
           allow="fullscreen; picture-in-picture; encrypted-media"
           allowfullscreen
-          sandbox="allow-scripts allow-same-origin allow-forms allow-presentation allow-popups"
+          :sandbox="playerIframeSandbox"
           referrerpolicy="strict-origin-when-cross-origin"
           webkitallowfullscreen
           class="responsive-iframe"
@@ -585,6 +585,7 @@ import { debugLog } from '@/utils/logger'
 import {
   assessPlayerIframe,
   getPersistablePlayerKey,
+  getPlayerIframeSandbox,
   getSafePlayerUrl
 } from '@/utils/playerSecurity'
 
@@ -672,6 +673,8 @@ const {
 })
 
 const safeIframeUrl = computed(() => getSafePlayerUrl(selectedPlayerInternal.value?.iframe))
+// Fixed for the page lifetime: a sandbox change applies only to the next iframe navigation.
+const playerIframeSandbox = getPlayerIframeSandbox()
 const activeTooltip = ref(null)
 const tooltipHovered = ref(false)
 let hideTimeout = null

@@ -341,7 +341,9 @@ Auth: `нет` означает публичный route; `опц.` — Bearer �
 
 - `src/utils/playerSecurity.js` классифицирует origins как same-origin/reviewed/unreviewed/insecure,
   но это report-only telemetry.
-- `<iframe>` в `PlayerComponent.vue` не имеет `sandbox` и не блокирует unreviewed origin.
+- `<iframe>` в `PlayerComponent.vue` по умолчанию без `sandbox` и не блокирует unreviewed origin.
+  `VITE_PLAYER_IFRAME_SANDBOX=true` включает sandbox без `allow-top-navigation` для всех плееров
+  сразу; включать только после проверки воспроизведения у каждого провайдера.
 - Same-origin player необходим текущему overlay-коду: компонент читает video DOM, добавляет controls и
   управляет fullscreen. Глобальный sandbox может сломать этот flow.
 - Comments formatting проходит через `src/utils/htmlSanitizer.js`/DOMPurify и formatting composables.
@@ -473,7 +475,8 @@ docker compose up --build
 
 Frontend groups: `VITE_APP_API_URL`, `VITE_LOCAL_API_URL`, `VITE_TRUSTED_API_ORIGINS`,
 `VITE_ALLOWED_API_HOSTS`, provider URLs/tokens, `VITE_BASE_URL`,
-`VITE_SITE_ORIGIN`, `VITE_PRERENDER_MOVIE_PAGES`, `VITE_REVIEWED_PLAYER_ORIGINS`.
+`VITE_SITE_ORIGIN`, `VITE_PRERENDER_MOVIE_PAGES`, `VITE_REVIEWED_PLAYER_ORIGINS`,
+`VITE_PLAYER_IFRAME_SANDBOX`.
 
 Backend groups: database/JWT (`APP_ENV`, `DATABASE_URL`, `JWT_*`), Telegram (`TELEGRAM_*`), provider
 tokens/URLs, CORS (`ALLOWED_ORIGINS`), cache TTL/size, `HOST`, `PORT`, `DEBUG`. Полный factual list

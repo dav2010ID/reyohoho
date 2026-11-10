@@ -17,7 +17,9 @@ permissions:
 
 jobs:
   build:
-    runs-on: ubuntu-latest
+    # Playwright 1.59 has no Chromium build for ubuntu-latest (26.04); the artifact
+    # check below needs it. Raise this together with the Playwright version.
+    runs-on: ubuntu-24.04
 
     steps:
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
@@ -47,6 +49,7 @@ jobs:
           VITE_PRERENDER_MOVIE_PAGES: 'true'
           VITE_WORKER_AUTH_ENABLED: ${{ vars.VITE_WORKER_AUTH_ENABLED || 'false' }}
           VITE_CLOUD_HISTORY_ENABLED: ${{ vars.VITE_CLOUD_HISTORY_ENABLED || 'false' }}
+          VITE_PLAYER_IFRAME_SANDBOX: ${{ vars.VITE_PLAYER_IFRAME_SANDBOX || 'false' }}
       - name: Verify prerendered pages
         run: node scripts/check-seo-pages.js dist
       - name: Install browser for artifact verification
