@@ -2,6 +2,8 @@ export const trackAnalyticsEvent = (event, params = {}) => {
   if (typeof window === 'undefined') return
   if (isAuthCallback(window.location?.pathname)) return
 
+  params = { ...params }
+  delete params.kp_id
   window.dataLayer = window.dataLayer || []
   window.dataLayer.push({
     event,

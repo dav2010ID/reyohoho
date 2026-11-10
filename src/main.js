@@ -39,6 +39,15 @@ export const createApp = ViteSSG(
         if (import.meta.env.DEV) {
           window.__LAST_VITE_PRELOAD_ERROR__ = String(event)
         }
+        try {
+          const key = 'reyohoho:last-chunk-reload'
+          const now = Date.now()
+          if (now - Number(window.sessionStorage.getItem(key) || 0) < 30000) return
+          window.sessionStorage.setItem(key, String(now))
+        } catch {
+          return // Cannot guard against a reload loop when storage is disabled.
+        }
+        event.preventDefault()
         window.location.reload()
       })
 

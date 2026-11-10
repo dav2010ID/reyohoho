@@ -82,9 +82,16 @@
           <div v-if="historyLoading" class="loading-container">
             <SpinnerLoading />
           </div>
-          <div v-else-if="history.length === 0" class="empty-history">
+          <MovieList
+            v-else-if="historyActivated && history.length"
+            :movies-list="history"
+            :is-history="true"
+            :loading="false"
+            @item-deleted="handleItemDeleted"
+          />
+          <div class="empty-history">
             <template v-if="topMovies.length > 0">
-              <p>Здесь пока пусто</p>
+              <p v-if="!history.length && !historyLoading">Здесь пока пусто</p>
               <h2>Популярное сейчас</h2>
               <MovieList :movies-list="topMovies" :is-history="false" :loading="false" />
               <div v-if="canLoadMoreTopMovies" class="home-load-more">
@@ -107,17 +114,10 @@
               <SpinnerLoading />
             </template>
             <template v-else>
-              <span class="material-icons">movie</span>
-              <p>Здесь пока пусто</p>
+              <p v-if="!history.length && !historyLoading">Здесь пока пусто</p>
             </template>
           </div>
-          <MovieList
-            v-else-if="historyActivated"
-            :movies-list="history"
-            :is-history="true"
-            :loading="false"
-            @item-deleted="handleItemDeleted"
-          />
+
         </div>
         <ErrorMessage
           v-if="!searchTerm && errorMessage"
@@ -331,7 +331,6 @@ const loadHomeTopMovies = async () => {
 const canLoadMoreTopMovies = computed(
   () =>
     !searchTerm.value &&
-    history.value.length === 0 &&
     topMovies.value.length > 0 &&
     topMoviesHasMore.value &&
     !topMoviesLoading.value
