@@ -8,6 +8,7 @@ import { serveHistory } from './history.mjs'
 import { serveTelegramAuth, cleanupAuth } from './telegram-auth.mjs'
 import { serveAccount } from './account.mjs'
 import { publicUpstreamBudget } from './public-budget.mjs'
+import { resolveMovieExtras, serveMovieExtras } from './kinoapi.mjs'
 
 const VERSION = 'kinopoisk-content-2026-11-01'
 const ALLOWED = new Set([
@@ -53,7 +54,7 @@ export default {
       'Access-Control-Allow-Headers': 'Content-Type',
       'Access-Control-Max-Age': '600',
       'Access-Control-Expose-Headers':
-        'X-Search-Transport, X-Worker-Version, X-Search-Cache, X-Kinobox-Transport, X-Kinobox-Cache, X-Top-Cache, X-Data-Source',
+        'X-Search-Transport, X-Worker-Version, X-Search-Cache, X-Kinobox-Transport, X-Kinobox-Cache, X-Top-Cache, X-Extras-Cache, X-Data-Source',
       Vary: 'Origin',
       'Cache-Control': 'no-store',
       'X-Search-Transport': 'h2',
@@ -75,9 +76,12 @@ export default {
     if (request.method === 'OPTIONS') return new Response(null, { status: 204, headers })
     if (request.method !== 'GET') return reply({ error: 'Method not allowed' }, 405)
     const url = new URL(request.url)
-    const resource = resolveKinopoiskTop(url) || resolveKinoboxResource(url)
+    const resource =
+      resolveKinopoiskTop(url) || resolveMovieExtras(url) || resolveKinoboxResource(url)
     if (resource.error) return reply({ error: resource.error }, resource.status)
     const budget = publicUpstreamBudget(request, env, headers)
+    if (resource.kind === 'extras')
+      return serveMovieExtras(resource, url, headers, caches.default, env.KinoapiLampac, budget)
     if (resource.kind === 'top')
       return serveKinopoiskTop(resource, url, headers, ctx, caches.default, budget)
     return serveKinoboxContent(

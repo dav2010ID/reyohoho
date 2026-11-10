@@ -4,14 +4,54 @@ import vm from 'node:vm'
 import { describe, expect, it } from 'vitest'
 import { serveHistory } from './history.mjs'
 import { privateReply } from './private-api.mjs'
+import { resolveKinopoiskTop } from './kinopoisk-top.mjs'
+import { resolveKinoboxResource } from './routes.mjs'
+import { resolveMovieExtras, serveMovieExtras } from './kinoapi.mjs'
+import { publicUpstreamBudget } from './public-budget.mjs'
 
 // Exercise the real entrypoint's CORS gate without opening Cloudflare sockets.
 const source = readFileSync(new URL('./worker.mjs', import.meta.url), 'utf8')
   .replace(/^import .*$/gm, '')
   .replace('export default {', 'globalThis.worker = {')
-const context = vm.createContext({ Request, Response, URL, Set, serveHistory })
+const cachedExtras = '{"data":null,"source":"kinoapi"}'
+const context = vm.createContext({
+  Request,
+  Response,
+  URL,
+  Set,
+  serveHistory,
+  resolveKinopoiskTop,
+  resolveKinoboxResource,
+  resolveMovieExtras,
+  serveMovieExtras,
+  publicUpstreamBudget,
+  caches: {
+    default: {
+      match: async (key) => (key.includes('/__kinoapi-extras?') ? new Response(cachedExtras) : null)
+    }
+  }
+})
 vm.runInContext(source, context)
 const worker = context.worker
+
+describe('Worker movie extras route', () => {
+  const get = (path, env = {}) =>
+    worker.fetch(new Request('https://api.reyhoho.fun' + path), env, {})
+  it('stays disabled until the Kino API secret is configured', async () => {
+    const response = await get('/api/movies/301/extras')
+    expect(response.status).toBe(503)
+    expect(response.headers.get('X-Extras-Cache')).toBe('DISABLED')
+  })
+  it('serves extras once the KinoapiLampac secret is present', async () => {
+    const response = await get('/api/movies/301/extras', { KinoapiLampac: 'test-key-value' })
+    expect(response.status).toBe(200)
+    expect(response.headers.get('X-Extras-Cache')).toBe('HIT')
+    expect(await response.text()).toBe(cachedExtras)
+  })
+  it('validates the Kinopoisk ID before any lookup', async () => {
+    expect((await get('/api/movies/abc/extras', { KinoapiLampac: 'k' })).status).toBe(400)
+  })
+})
 
 describe('Worker custom domain origins', () => {
   it('routes authenticated history separately without opening the Kinobox transport', async () => {

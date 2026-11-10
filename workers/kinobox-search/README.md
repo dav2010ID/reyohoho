@@ -76,6 +76,28 @@ reduced to public movie cards. Allowlisted routes:
 | `/api/movies/{id}`           | Positive numeric movie ID                                                               | 6 hours                    |
 | `/api/players`               | Positive numeric `kinopoisk`, optional `title` up to 300 characters                     | 1 minute                   |
 | `/api/kinopoisk/top`         | `type=movie` or `series`, positive `page`, `limit=1..50` (default 36), offset below 250 | 1 hour                     |
+| `/api/movies/{id}/extras`    | Positive numeric movie ID                                                               | 24 hours                   |
+
+## Movie extras (Kino API)
+
+`/api/movies/{id}/extras` adds optional card data from `kinoapi.lampac.dev`
+(`kinoapi.mjs`): IMDb/TMDB IDs, tagline, logo, TMDB/Rotten Tomatoes/Metacritic
+ratings, YouTube trailer IDs and similar titles. The catalogue has no player
+links. The response is the Worker's own reduced shape; only validated fields are
+forwarded, logos only from the Yandex image host.
+
+The API key is the Worker secret `KinoapiLampac` and never reaches the browser:
+
+```powershell
+npx --yes wrangler@4.147.0 secret put KinoapiLampac --config wrangler.local.jsonc
+```
+
+Without the secret the route answers 503 (`X-Extras-Cache: DISABLED`) and makes
+no upstream call. The key is one shared budget for the whole site, so complete
+answers are cached for 24 hours with a 7-day stale copy, a title missing from the
+catalogue for 1 hour, and an answer without similar titles for 10 minutes. HTTP
+429 pauses all upstream calls for 60 seconds, a rejected key (401/403) for 5
+minutes. The frontend loads extras after the card and hides them on any failure.
 
 ## Kinopoisk top
 
