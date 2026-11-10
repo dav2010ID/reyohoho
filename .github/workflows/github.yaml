@@ -8,6 +8,10 @@ on:
     - cron: '0 3 * * 1'
   workflow_dispatch:
 
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
 permissions:
   contents: write
 
@@ -16,9 +20,9 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
 
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
         with:
           node-version: 22
           cache: yarn
@@ -30,12 +34,6 @@ jobs:
         run: yarn seo:prepare
       - name: Check last successful SEO refresh
         run: node scripts/fetch-seo-data.js --check-freshness
-      - name: Build site
-        run: yarn build:github
-        env:
-          VITE_PRERENDER_MOVIE_PAGES: 'true'
-          VITE_WORKER_AUTH_ENABLED: ${{ vars.VITE_WORKER_AUTH_ENABLED || 'false' }}
-          VITE_CLOUD_HISTORY_ENABLED: ${{ vars.VITE_CLOUD_HISTORY_ENABLED || 'false' }}
       - name: Prepare pinned Worker vendor modules
         run: node workers/kinobox-search/prepare-vendor.mjs
       - name: Validate the checkout used to build this artifact
@@ -43,7 +41,14 @@ jobs:
           yarn lint
           yarn check:encoding
           yarn test:unit --run
-          node scripts/check-seo-pages.js dist
+      - name: Build site
+        run: yarn build:github
+        env:
+          VITE_PRERENDER_MOVIE_PAGES: 'true'
+          VITE_WORKER_AUTH_ENABLED: ${{ vars.VITE_WORKER_AUTH_ENABLED || 'false' }}
+          VITE_CLOUD_HISTORY_ENABLED: ${{ vars.VITE_CLOUD_HISTORY_ENABLED || 'false' }}
+      - name: Verify prerendered pages
+        run: node scripts/check-seo-pages.js dist
       - name: Install browser for artifact verification
         run: yarn playwright install --with-deps chromium
       - name: Verify SSG and offline navigation in the final artifact
@@ -61,7 +66,7 @@ jobs:
       - name: Record the revision of the verified artifact
         run: git rev-parse HEAD > dist/build-sha.txt
 
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
         with:
           name: production-files
           path: dist
@@ -71,12 +76,12 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/download-artifact@v4
+      - uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4
         with:
           name: production-files
           path: dist
 
-      - uses: peaceiris/actions-gh-pages@v3
+      - uses: peaceiris/actions-gh-pages@329bcc8f12caed2cefe5a5b80781499a6f3b361b # v4
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           publish_dir: dist
