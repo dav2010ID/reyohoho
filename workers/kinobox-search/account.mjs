@@ -1,4 +1,4 @@
-import { normalizeHistory } from '../../migration/history-transfer/history-data.js'
+import { normalizeHistory } from '../../shared/history-data.js'
 import {
   boundedJson,
   checkLimit,

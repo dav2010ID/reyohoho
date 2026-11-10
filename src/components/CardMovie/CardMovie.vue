@@ -40,7 +40,7 @@ import { getMovieSeoPath } from '@/utils/movieSeo'
 import { useAuthStore } from '@/store/auth'
 import { useRoute } from 'vue-router'
 import { repairCardRatings } from '@/api/user'
-import { cardRatings } from '../../../migration/history-transfer/history-data.js'
+import { cardRatings } from '../../../shared/history-data.js'
 
 const backgroundStore = useBackgroundStore()
 const mainStore = useMainStore()

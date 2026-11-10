@@ -38,7 +38,7 @@ import { getKpInfo } from '@/api/movies'
 import { getLocalList } from '@/utils/localUserLists'
 import { consumeAuthRedirect } from '@/utils/authRedirect'
 import { importCloudHistory } from '@/api/cloudHistory'
-import { normalizeHistory } from '../../migration/history-transfer/history-data.js'
+import { normalizeHistory } from '../../shared/history-data.js'
 import { clearPendingSync, readPendingSync, savePendingSync } from '@/utils/pendingAccountSync'
 export default {
   name: 'AuthSuccess',

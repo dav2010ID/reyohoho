@@ -1,5 +1,5 @@
-import { normalizeHistory } from '../../migration/history-transfer/history-data.js'
-import { CARD_FIELDS } from '../../migration/history-transfer/movie-metadata.js'
+import { normalizeHistory } from '../../shared/history-data.js'
+import { CARD_FIELDS } from '../../shared/movie-metadata.js'
 import { boundedJson } from './private-api.mjs'
 
 // Fill empty fields at write time, not read/merge/write: preserves concurrent edits,

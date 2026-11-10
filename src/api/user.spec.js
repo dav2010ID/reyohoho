@@ -2,7 +2,7 @@ import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { addToList, delFromList, getMyLists, getMovieListStatus, repairCardRatings } from './user'
 import { replaceLocalList } from '@/utils/localUserLists'
 import { getKpInfo } from './movies.kinobox'
-import { normalizeHistory } from '../../migration/history-transfer/history-data.js'
+import { normalizeHistory } from '../../shared/history-data.js'
 
 const mocks = vi.hoisted(() => ({
   auth: { token: 'test-session', isWorkerSession: true, user: { id: 11 } },

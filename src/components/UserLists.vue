@@ -119,7 +119,7 @@ import Notification from '@/components/notification/ToastMessage.vue'
 import BaseModal from '@/components/BaseModal.vue'
 import { useMainStore } from '@/store/main'
 import { logoutAndRedirect } from '@/utils/authSession'
-import { cardRatings } from '../../migration/history-transfer/history-data.js'
+import { cardRatings } from '../../shared/history-data.js'
 import { importCloudHistory, isCloudHistoryEnabled } from '@/api/cloudHistory'
 import { accountCapabilities } from '@/api/accountCapabilities'
 

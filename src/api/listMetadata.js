@@ -1,10 +1,10 @@
 import { getKpInfo } from '@/api/movies.kinobox'
 import { getMovieSeoSlug } from '@/utils/movieSeo'
-import { cardRatings } from '../../migration/history-transfer/history-data.js'
+import { cardRatings } from '../../shared/history-data.js'
 import {
   fillCardMetadata,
   needsCardMetadata
-} from '../../migration/history-transfer/movie-metadata.js'
+} from '../../shared/movie-metadata.js'
 
 const pending = new Map()
 const queue = []

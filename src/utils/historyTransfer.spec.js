@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { mergeHistory, normalizeHistory, readLegacyHistory } from '../../migration/history-transfer/history-data.js'
+import { mergeHistory, normalizeHistory, readLegacyHistory } from '../../shared/history-data.js'
 import { LEGACY_ORIGIN, validateTransferMessage } from './historyTransfer'
 
 describe('history migration', () => {

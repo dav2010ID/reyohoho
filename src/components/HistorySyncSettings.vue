@@ -89,7 +89,7 @@ import {
 import { startHistoryTransfer, TRANSFER_URL } from '@/utils/historyTransfer'
 import { addToList, getMyLists } from '@/api/user'
 import { USER_LIST_TYPES_ENUM } from '@/constants'
-import { mergeHistory, normalizeHistory } from '../../migration/history-transfer/history-data.js'
+import { mergeHistory, normalizeHistory } from '../../shared/history-data.js'
 import { readPendingSync } from '@/utils/pendingAccountSync'
 
 defineProps({ compact: { type: Boolean, default: false } })

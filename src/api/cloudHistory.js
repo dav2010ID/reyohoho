@@ -1,7 +1,7 @@
 import { useAuthStore } from '@/store/auth'
 import { reactive } from 'vue'
 import { useMainStore } from '@/store/main'
-import { normalizeHistory } from '../../migration/history-transfer/history-data.js'
+import { normalizeHistory } from '../../shared/history-data.js'
 import { enrichListMetadata } from './listMetadata'
 
 export const cloudHistoryAvailable =

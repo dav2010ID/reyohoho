@@ -1,4 +1,4 @@
-import { normalizeHistory } from '../../migration/history-transfer/history-data.js'
+import { normalizeHistory } from '../../shared/history-data.js'
 
 export const LEGACY_ORIGIN = 'https://dav2010id.github.io'
 export const TRANSFER_URL = `${LEGACY_ORIGIN}/reyohoho-history-transfer/`

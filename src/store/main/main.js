@@ -3,7 +3,7 @@ import { defineStore } from 'pinia'
 import { MAIN_STORE_NAME } from '../constants'
 import { beforeHydrateMainStore } from '../utils'
 import { resolvePosterByMovie } from '@/utils/mediaUtils'
-import { cardRatings } from '../../../migration/history-transfer/history-data.js'
+import { cardRatings } from '../../../shared/history-data.js'
 import { replaceLocalList } from '@/utils/localUserLists'
 
 export const useMainStore = defineStore(MAIN_STORE_NAME, {

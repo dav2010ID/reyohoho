@@ -1,4 +1,4 @@
-import { readLegacyHistory } from './history-data.js'
+import { readLegacyHistory } from '../../shared/history-data.js'
 
 const targetOrigin = 'https://reyhoho.fun'
 const status = document.querySelector('#status')
