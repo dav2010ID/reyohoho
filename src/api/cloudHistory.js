@@ -32,7 +32,6 @@ export async function historyRequest(path = '', method = 'GET', body) {
     ...(body === undefined ? {} : { body: JSON.stringify(body) })
   })
   // Do not apply data to a different account after an in-flight login/logout.
-  const data = await response.json()
   if (useAuthStore().token !== token) throw new Error('Аккаунт изменился. Повторите операцию')
   if (!response.ok) {
     const error = new Error(
@@ -40,9 +39,11 @@ export async function historyRequest(path = '', method = 'GET', body) {
         ? 'Облачная история пока недоступна. Локальная история сохранена'
         : `Ошибка облачной истории (${response.status})`
     )
-    error.response = { status: response.status, data: { error: error.message } }
+    error.response = { headers: response.headers, status: response.status, data: { error: error.message } }
     throw error
   }
+  const data = await response.json()
+  if (useAuthStore().token !== token) throw new Error('Аккаунт изменился. Повторите операцию')
   return data
 }
 

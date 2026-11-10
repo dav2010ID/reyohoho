@@ -7,14 +7,8 @@
         <button v-if="showRetry" type="button" class="button" @click="emit('retry')">
           Повторить
         </button>
-        <!-- Если код ошибки >= 500, показываем кнопку "Статус" -->
-        <a v-if="code >= 500" :href="statusUrl" class="button">Статус</a>
         <router-link to="/" class="button">На главную</router-link>
       </div>
-    </div>
-    <!-- Если сообщения нет, просто отображаем кнопку "Статус" -->
-    <div v-else class="status-container">
-      <a :href="statusUrl" class="button">Статус</a>
     </div>
   </div>
 </template>
@@ -22,9 +16,7 @@
 <script setup>
 const emit = defineEmits(['retry'])
 
-const statusUrl = 'http://38.180.83.227:8080/status/reyohoho'
-
-const { message, code, showRetry } = defineProps({
+const { message, showRetry } = defineProps({
   message: {
     type: String,
     default: ''

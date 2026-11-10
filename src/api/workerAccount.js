@@ -29,7 +29,6 @@ export async function workerAccountRequest(
     },
     ...(body === undefined ? {} : { body: JSON.stringify(body) })
   })
-  const data = await response.json()
   if (!anonymous && token === undefined && useAuthStore().token !== session)
     throw new Error('Аккаунт изменился. Повторите операцию')
   if (!response.ok) {
@@ -38,9 +37,11 @@ export async function workerAccountRequest(
         ? 'Сервис аккаунта временно недоступен. Попробуйте позже.'
         : `Ошибка аккаунта (${response.status})`
     )
-    error.response = { status: response.status, data: { error: error.message } }
+    error.response = { headers: response.headers, status: response.status, data: { error: error.message } }
     throw error
   }
+  const data = await response.json()
+  if (!anonymous && token === undefined && useAuthStore().token !== session) throw new Error('Аккаунт изменился. Повторите операцию')
   return data
 }
 

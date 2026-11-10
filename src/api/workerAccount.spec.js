@@ -22,6 +22,10 @@ describe('Worker account routing', () => {
       'Сервис аккаунта временно недоступен. Попробуйте позже.'
     )
   })
+  it('preserves the status of an HTML gateway error', async () => {
+    vi.stubGlobal('fetch', vi.fn(async () => new globalThis.Response('<html>Bad Gateway</html>', { status: 502 })))
+    await expect(api.workerAccountRequest('/user')).rejects.toMatchObject({ response: { status: 502 } })
+  })
   it('recognizes own sessions and sends them only to the fixed custom domain', async () => {
     const fetchMock = vi.fn(async () => new globalThis.Response('{"id":"123"}'))
     vi.stubGlobal('fetch', fetchMock)
