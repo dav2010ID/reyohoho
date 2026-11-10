@@ -38,8 +38,9 @@ localStorage разделён по origin, а не пути. Новый сайт
 ### Повторное развёртывание моста
 
 1. Создать в аккаунте dav2010id отдельный репозиторий `reyohoho-history-transfer`.
-2. Скопировать четыре файла из `migration/history-transfer/` в корень:
-   `index.html`, `transfer.js`, `history-data.js`, `style.css`.
+2. Скопировать `index.html`, `transfer.js`, `style.css` из `migration/history-transfer/`
+   и `shared/history-data.js` в корень сайта переноса. В публикуемой копии `transfer.js`
+   заменить импорт `../../shared/history-data.js` на `./history-data.js`.
 3. Включить GitHub Pages из корня ветки. Не задавать custom domain и CNAME.
 4. Проверить URL `https://dav2010id.github.io/reyohoho-history-transfer/`:
    он должен открываться без перенаправления на новый домен. Если у
@@ -69,3 +70,12 @@ localStorage разделён по origin, а не пути. Новый сайт
 Очищенную браузером историю, данные другого профиля или incognito восстановить
 через этот механизм нельзя. История, которая существовала только в прежнем
 backend, требует отдельного экспорта из того аккаунта.
+
+## Active-entry quota migration
+
+Deploy migration `0004_active_history_quota.sql` before the updated account Worker.
+It recalculates counters and atomically limits active history to 5000. Deleting
+an entry frees capacity; restoring a deleted entry checks capacity again. Import
+continues to honor tombstones. List import uses POST /api/list/:type/import,
+up to 40 items and 64 KiB per request, with atomic inserts and no overwrite of
+existing entries. Retrying a batch is safe after an interrupted response.

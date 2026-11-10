@@ -69,7 +69,7 @@ catalog routes, CORS/lifecycle, затем `configure_persistent_api()` из `ba
 
 Авторизация проходит в `backend/auth.py`: request middleware разбирает Bearer JWT, проверяет
 issuer/audience/expiry и загружает `User` в `request.ctx.user`. Frontend выбирает backend через
-`src/store/api/index.js` и Firebase Remote Config. Общий клиент `src/api/axios.js` отправляет JWT
+`src/store/api/index.js`. Общий клиент `src/api/axios.js` отправляет JWT
 только на origin из `src/utils/apiTrust.js`; отдельный `movies.local.js` пока не использует эту
 проверку и рассматривается как исключение trust policy.
 
@@ -94,7 +94,6 @@ persist/localStorage. Notifications сейчас не сохраняются: ba
 | `src/composables/` | Логика comments/player/layout/scroll/notifications | Локальная декомпозиция с теми же входами/выходами | cleanup listeners/timers, same-origin player hooks | colocated composable specs + build |
 | `src/router/` | Routes, auth guard, SEO slug redirect, analytics | Meta title или новая lazy route | route names/paths, catch-all, auth redirect | `src/main.spec.js`, auth redirect specs, build |
 | `src/utils/` | Trust, sanitization, dates, SEO, local lists, analytics | Pure helpers с unit tests | `apiTrust.js`, `playerSecurity.js`, auth/session helpers | соответствующие `*.spec.js` |
-| `src/firebase/` | Remote Config endpoint discovery | Error handling без смены precedence | allowed hosts и runtime endpoint selection | API-store/axios tests, manual endpoint smoke |
 | `src/data/` | SEO/prerender movie catalog | Только через SEO scripts | Ручные большие edits и изменение shape | SEO script specs, build |
 | `scripts/` | SEO generation, encoding и browser smoke/perf utilities | Отдельные tooling changes | generated outputs и browser assumptions | script specs, конкретная npm/yarn command |
 | `public/` | PWA icons, robots, sitemap, static fallback | Статические assets | сгенерированные sitemap/robots/icons | build, generated diff review |
@@ -392,7 +391,7 @@ fallback order, HTTPS origin, desktop/mobile fullscreen и отсутствие 
 | `User` / `users` | unique indexed `telegram_id`; role/allow_comments | auth, `/user`, comments/timings ownership | base identity table |
 | `TelegramLoginSession` | hashed unique token, optional user FK, expiry | Telegram auth routes | expired rows need periodic cleanup |
 | `Movie` / `movies` | PK `kp_id`, unique shiki/imdb IDs, JSON metadata | enrichment, mappings, lists, top/discussed | cache-like persistent metadata; update policy is ad hoc |
-| `ViewEvent` / `view_events` | `kp_id`, timestamp; composite created/kp index | write on movie enrichment, read `/top` | fastest unbounded table; no visitor key/dedup/retention |
+| `ViewEvent` / `view_events` | `kp_id`, timestamp; composite created/kp index | write on movie enrichment, read `/top` | 90-day retention, hourly cleanup; no visitor deduplication |
 | `UserList` / `user_lists` | unique user/content/type/list; user/type index | list/history endpoints | can grow per user; compatibility pagination exists |
 | `Rating` / `ratings` | unique user/kp; kp index | rating + rated list/counters | bounded by user/movie pairs |
 | `Comment` / `comments` | user FK, self parent FK, soft delete; movie/created index | comments/discussed | unpaginated tree; content retained as empty after delete |
@@ -473,7 +472,7 @@ docker compose up --build
 ### Environment contract
 
 Frontend groups: `VITE_APP_API_URL`, `VITE_LOCAL_API_URL`, `VITE_TRUSTED_API_ORIGINS`,
-`VITE_ALLOWED_API_HOSTS`, Firebase `VITE_FIREBASE_*`, provider URLs/tokens, `VITE_BASE_URL`,
+`VITE_ALLOWED_API_HOSTS`, provider URLs/tokens, `VITE_BASE_URL`,
 `VITE_SITE_ORIGIN`, `VITE_PRERENDER_MOVIE_PAGES`, `VITE_REVIEWED_PLAYER_ORIGINS`.
 
 Backend groups: database/JWT (`APP_ENV`, `DATABASE_URL`, `JWT_*`), Telegram (`TELEGRAM_*`), provider
@@ -495,7 +494,7 @@ tokens/URLs, CORS (`ALLOWED_ORIGINS`), cache TTL/size, `HOST`, `PORT`, `DEBUG`. 
 
 Без Docker CLI нельзя считать проверенными image build, Compose health/dependency order и PostgreSQL
 connectivity. Без production secrets нельзя проверить Telegram webhook, paid providers, CORS allowlist,
-Firebase Remote Config rules и provider quotas.
+квоты провайдеров.
 
 ## 14. Generated and third-party code
 
@@ -528,7 +527,7 @@ Axios-клиента, batch timings и compatibility pagination списков �
 | Medium: notification stubs | `routes_core.py` | нет, UX/API decision | add model/migration or explicitly return 501 after coordinated frontend rollout |
 | Medium: unlocked Python ranges | requirements | осторожно | generate constraints/hashes in dependency-only workflow; build/test images |
 | Medium: duplicate backend settings | `config.py`, `kinoserver.py` | осторожно | consolidate one env group at a time with env-contract tests |
-| Low: tracked public `VITE_*` env | `.env`; public key confusion/rule abuse | owner/deployment | treat as public, restrict Firebase key/rules; never put server secrets there |
+| Low: tracked public `VITE_*` env | `.env`; public key confusion/rule abuse | owner/deployment | treat as public, never put server secrets there |
 
 Additional maintainability risk: `MovieInfo.vue`, `PlayerComponent.vue` and `Comments.vue` remain large.
 Decompose only along already-tested boundaries (timings, player overlay, comment editor/thread) while
@@ -585,3 +584,14 @@ verification if only unit tests passed.
 - Provider order: contract tests/normalization → adapter → fallback wiring → optional UI/settings.
 - Before each commit inspect `git diff --cached --name-only` and `git diff --cached`; never stage the whole
   dirty tree blindly.
+
+## Audit implementation 2026-11-10
+
+Shared history/card normalization lives in `shared/`; the migration bridge imports it.
+Main settings no longer serialize history. Per-owner, per-list localStorage keys
+hold one history copy; old main/aggregate-list data migrates on hydration/read.
+Rating repairs are coalesced. Worker list imports use 40-item atomic batches.
+Migration 0004 counts only live history rows; deletion markers still prevent resurrection.
+Scene selection uses an ephemeral module instead of window globals. Large component
+styles moved into adjacent scoped CSS files. KinoBD remains isolated behind KINOBD_ENABLED=false.
+See AUDIT_IMPLEMENTATION_2026-11-10.md for checks and deployment limitations.
