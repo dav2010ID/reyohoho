@@ -155,6 +155,9 @@
 }
 
 .spoiler-warning {
+  width: 100%;
+  font: inherit;
+  color: inherit;
   background: linear-gradient(135deg, #1a1a1b 0%, #2d2d2e 100%);
   border: 1px solid #343536;
   border-radius: 8px;

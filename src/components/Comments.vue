@@ -1,11 +1,11 @@
 <template>
   <div class="comments-section">
-    <div v-if="!showComments" class="spoiler-warning" @click="showComments = true">
+    <button v-if="!showComments" type="button" class="spoiler-warning" @click="showComments = true">
       <div class="spoiler-content">
         <i class="fas fa-eye-slash"></i>
         <h3>Комментарии скрыты</h3>
         <p>Комментарии могут содержать спойлеры. Нажмите, чтобы показать.</p>
-        <div class="comments-count" :class="{ 'no-comments': totalCommentsCount === 0 }">
+        <div v-if="commentsLoaded && !commentsLoading && !commentsLoadError" class="comments-count" :class="{ 'no-comments': totalCommentsCount === 0 }">
           <template v-if="totalCommentsCount === 0"> Комментариев пока нет </template>
           <template v-else>
             {{ totalCommentsCount }}
@@ -13,7 +13,7 @@
           </template>
         </div>
       </div>
-    </div>
+    </button>
 
     <div v-else class="comments-container">
       <div class="comments-header">
@@ -253,6 +253,7 @@ export default {
     const {
       comments,
       commentsLoading,
+      commentsLoaded,
       commentsLoadError,
       loadCommentsData,
       cancelCommentsLoad
@@ -261,7 +262,7 @@ export default {
     const replyTo = ref(null)
     const replyContent = ref('')
     const editingCommentId = ref(null)
-    const currentUser = ref(authStore.user)
+    const currentUser = computed(() => authStore.user)
     const notificationRef = ref(null)
     const commentTextarea = ref(null)
     const showComments = ref(mainStore.isAutoShowComments)
@@ -298,12 +299,14 @@ export default {
     } = useCommentActions()
 
     const groupedComments = computed(() => {
+      const children = new Map()
+      for (const comment of comments.value) {
+        if (!children.has(comment.parent_id)) children.set(comment.parent_id, [])
+        children.get(comment.parent_id).push(comment)
+      }
       const buildCommentTree = (parentId = null) => {
-        const filteredComments = comments.value
-          .filter((comment) => comment.parent_id === parentId)
-          .filter((comment) => {
-            return !comment.is_deleted || (comment.replies && comment.replies.length > 0)
-          })
+        const filteredComments = (children.get(parentId) || []).filter(comment =>
+          !comment.is_deleted || children.has(comment.id))
 
         let sortedComments
         if (parentId === null) {
@@ -409,9 +412,13 @@ export default {
       }
 
       try {
-        await createComment(props.movieId, newComment.value.trim())
+        const movieId = props.movieId
+        const token = authStore.token
+        const created = await createComment(movieId, newComment.value.trim())
+        if (props.movieId !== movieId || authStore.token !== token) return
         newComment.value = ''
-        await loadComments()
+        if (created?.id) comments.value.push(created)
+        else await loadComments()
 
         showComments.value = true
 
@@ -488,10 +495,14 @@ export default {
       }
 
       try {
-        await createComment(props.movieId, replyContent.value.trim(), replyTo.value.id)
+        const movieId = props.movieId
+        const token = authStore.token
+        const created = await createComment(movieId, replyContent.value.trim(), replyTo.value.id)
+        if (props.movieId !== movieId || authStore.token !== token) return
         const parentCommentId = replyTo.value.id
 
-        await loadComments()
+        if (created?.id) comments.value.push(created)
+        else await loadComments()
         replyContent.value = ''
         replyTo.value = null
 
@@ -551,8 +562,9 @@ export default {
       }
 
       try {
+        const item = comments.value.find(comment => comment.id === commentId)
         await updateComment(commentId, newContent.trim())
-        await loadComments()
+        if (item) item.content = newContent.trim()
         editingCommentId.value = null
       } catch (error) {
         console.error('Failed to update comment:', error)
@@ -569,8 +581,9 @@ export default {
       }
 
       try {
+        const item = comments.value.find(comment => comment.id === commentId)
         await deleteComment(commentId)
-        await loadComments()
+        if (item) { item.is_deleted = true; item.content = '' }
       } catch (error) {
         console.error('Failed to delete comment:', error)
         notify(
@@ -586,8 +599,9 @@ export default {
       }
 
       try {
-        await rateComment(commentId, rating)
-        await loadComments()
+        const item = comments.value.find(comment => comment.id === commentId)
+        const result = await rateComment(commentId, rating)
+        if (item) { item.rating = result.rating; item.user_rating = result.user_rating }
       } catch (error) {
         console.error('Failed to rate comment:', error)
         notify('Ошибка при оценке комментария. Попробуйте еще раз.')
@@ -597,14 +611,14 @@ export default {
     const handleCommentKeydown = (event) => {
       if (isInsertingEmoji.value || showEmojiPicker.value) return
 
-      if (event.key === 'Enter' && !event.shiftKey) {
+      if (event.key === 'Enter' && !event.shiftKey && !event.isComposing && !mainStore.isMobile) {
         event.preventDefault()
         submitComment()
       }
     }
 
     const handleReplyKeydown = (event) => {
-      if (event.key === 'Enter' && !event.shiftKey) {
+      if (event.key === 'Enter' && !event.shiftKey && !event.isComposing && !mainStore.isMobile) {
         event.preventDefault()
         submitReply()
       }
@@ -686,6 +700,7 @@ export default {
     return {
       comments,
       commentsLoading,
+      commentsLoaded,
       commentsLoadError,
       loadComments,
       groupedComments,

@@ -2,6 +2,13 @@ import { describe, expect, it, vi } from 'vitest'
 import { useCommentsData } from './useCommentsData'
 
 describe('useCommentsData', () => {
+  it('retains nested replies without duplicating flat entries', async () => {
+    const reply = { id: 2, parent_id: 1, content: 'reply' }
+    const state = useCommentsData({ movieId: () => '301', fetchComments: async () => [{ id: 1, parent_id: null, replies: [reply] }, reply] })
+    await state.loadCommentsData()
+    expect(state.comments.value.map(item => item.id).sort()).toEqual([1, 2])
+    expect(state.commentsLoaded.value).toBe(true)
+  })
   it('ignores late success from a superseded request even if transport ignores abort', async () => {
     const pending = []
     const state = useCommentsData({

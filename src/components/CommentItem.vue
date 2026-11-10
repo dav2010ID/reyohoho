@@ -268,6 +268,7 @@
 </template>
 
 <script>
+import { useConfirmation } from '@/composables/useConfirmation'
 import { ref, computed, onMounted, nextTick, watch } from 'vue'
 import { getBaseURL } from '@/api/axios'
 import { useRouter } from 'vue-router'
@@ -312,12 +313,13 @@ export default {
   },
   emits: ['reply', 'start-edit', 'cancel-edit', 'edit', 'delete', 'rate'],
   setup(props, { emit }) {
+    const askConfirmation = useConfirmation()
     const router = useRouter()
     const isEditing = computed(() => {
       return props.editingCommentId === props.comment?.id
     })
     const editContent = ref(props.comment?.content || '')
-    const userRating = ref(props.comment?.user_rating || 0)
+    const userRating = computed(() => props.comment?.user_rating || 0)
     const avatarUrl = ref(null)
     const editTextarea = ref(null)
 
@@ -406,24 +408,16 @@ export default {
       }
     }
 
-    const confirmDelete = () => {
-      if (confirm('Вы уверены, что хотите удалить этот комментарий?')) {
+    const confirmDelete = async () => {
+      if (await askConfirmation('Вы уверены, что хотите удалить этот комментарий?')) {
         emit('delete', props.comment?.id)
       }
     }
 
-    const rateComment = (rating) => {
-      if (userRating.value === rating) {
-        userRating.value = 0
-        emit('rate', props.comment?.id, rating)
-      } else {
-        userRating.value = rating
-        emit('rate', props.comment?.id, rating)
-      }
-    }
+    const rateComment = (rating) => emit('rate', props.comment?.id, rating)
 
     const handleEditKeydown = (event) => {
-      if (event.key === 'Enter' && !event.shiftKey) {
+      if (event.key === 'Enter' && !event.shiftKey && !event.isComposing && window.matchMedia('(pointer: fine)').matches) {
         event.preventDefault()
         saveEdit()
       }
