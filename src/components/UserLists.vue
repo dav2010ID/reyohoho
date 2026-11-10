@@ -103,6 +103,7 @@
 <script setup>
 import {
   addToList,
+  importWorkerList,
   getMyLists,
   getUserLists,
   delFromList,
@@ -331,10 +332,17 @@ const importServerLists = async (parsedLists) => {
       if (incomingIds.length) await importCloudHistory(incomingIds.map((kp_id) => ({ kp_id })))
       continue
     }
+    if (authStore.isWorkerSession) {
+      addedCount += await importWorkerList(type, incomingIds.filter(id => !currentLists[type].has(id)))
+      continue
+    }
     for (const kpId of incomingIds) {
       if (authStore.token !== token) throw new Error('Аккаунт изменился. Повторите импорт')
       if (currentLists[type].has(kpId)) continue
       try {
+        // Legacy API has no bulk endpoint. Stay below its 180/minute limit.
+        await new Promise(resolve => setTimeout(resolve, 400))
+        if (authStore.token !== token) throw new Error('Аккаунт изменился. Повторите импорт')
         await addToList(kpId, type)
         currentLists[type].add(kpId)
         addedCount += 1

@@ -7,13 +7,15 @@ import { useMainStore } from '@/store/main'
 import { readPendingSync } from '@/utils/pendingAccountSync'
 import { replaceLocalList } from '@/utils/localUserLists'
 
+vi.mock('@/composables/useConfirmation', () => ({ useConfirmation: () => message => window.confirm(message) }))
+
 const mocks = vi.hoisted(() => ({
-  getUser: vi.fn(), getMyLists: vi.fn(), addToList: vi.fn(), importHistory: vi.fn(),
+  importList: vi.fn(), getUser: vi.fn(), getMyLists: vi.fn(), addToList: vi.fn(), importHistory: vi.fn(),
   replace: vi.fn(), getKpInfo: vi.fn()
 }))
 vi.mock('vue-router', () => ({ useRouter: () => ({ replace: mocks.replace }) }))
 vi.mock('@/api/user', () => ({
-  getUser: mocks.getUser, getMyLists: mocks.getMyLists, addToList: mocks.addToList
+  importWorkerList: mocks.importList, getUser: mocks.getUser, getMyLists: mocks.getMyLists, addToList: mocks.addToList
 }))
 vi.mock('@/api/cloudHistory', () => ({ importCloudHistory: mocks.importHistory }))
 vi.mock('@/api/movies', () => ({ getKpInfo: mocks.getKpInfo }))
@@ -35,22 +37,19 @@ describe('sign-in messages', () => {
     expect(useAuthStore().user.id).toBe(2)
     wrapper.unmount()
   })
-  it('keeps failed list items across a remount and retries only unconfirmed writes', async () => {
+  it('retains an unconfirmed batch across remount and retries idempotently', async () => {
     vi.spyOn(window, 'confirm').mockReturnValue(true)
     replaceLocalList('favorite', [{ kp_id: '301' }, { kp_id: '302' }], 'guest')
-    mocks.addToList.mockImplementation(async (id) => {
-      if (id === '302') throw new Error('offline')
-    })
+    mocks.importList.mockRejectedValue(new Error('offline'))
     const first = create()
     await flushPromises()
-    expect(readPendingSync('worker:1').lists.favorite.map((item) => item.kp_id)).toEqual(['302'])
+    expect(readPendingSync('worker:1').lists.favorite.map(item => item.kp_id)).toEqual(['301', '302'])
     first.unmount()
-    mocks.addToList.mockClear()
-    mocks.addToList.mockResolvedValue({ ok: true })
+    mocks.importList.mockClear()
+    mocks.importList.mockResolvedValue(2)
     const second = create()
     await flushPromises()
-    expect(mocks.addToList).toHaveBeenCalledTimes(1)
-    expect(mocks.addToList.mock.calls[0][0]).toBe('302')
+    expect(mocks.importList).toHaveBeenCalledWith('favorite', [{ kp_id: '301' }, { kp_id: '302' }])
     expect(readPendingSync('worker:1')).toBeNull()
     expect(mocks.importHistory).toHaveBeenCalledTimes(1)
     second.unmount()

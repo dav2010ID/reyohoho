@@ -122,6 +122,23 @@ const addToList = async (id, type, metadata = null) => {
   return data
 }
 
+// Import is sequential across bounded batches; retries are idempotent on the server.
+export async function importWorkerList(type, ids) {
+  const auth = useAuthStore()
+  const token = auth.token
+  const owner = listOwner()
+  if (!auth.isWorkerSession) throw new Error('Требуется аккаунт Worker')
+  invalidateList(owner, type)
+  let added = 0
+  for (let i = 0; i < ids.length; i += 40) {
+    if (auth.token !== token) throw new Error('Аккаунт изменился. Повторите импорт')
+    const items = ids.slice(i, i + 40).map(item => typeof item === 'object' ? item : { kp_id: item })
+    const result = await workerAccountRequest(`/list/${type}/import`, 'POST', { items })
+    added += result.added
+  }
+  return added
+}
+
 const delFromList = async (id, type) => {
   assertListCapability(type)
   const token = useAuthStore().token

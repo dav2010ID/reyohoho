@@ -33,6 +33,25 @@ export async function serveAccount(request, env, origin) {
     const path = new URL(request.url).pathname
     const db = primaryDb(env)
     const uid = `worker-tg:${user.id}`
+    const importMatch = /^\/api\/list\/([a-z]+)\/import$/.exec(path)
+    if (importMatch && request.method === 'POST') {
+      const type = importMatch[1]
+      if (!TYPES.has(type) || type === 'history') return reply({ error: 'Invalid list' }, 400)
+      let items
+      try {
+        const body = await boundedJson(request.body, MAX_LIST_BODY_BYTES)
+        if (!Array.isArray(body.items) || body.items.length > 40) throw new Error('Invalid batch')
+        items = normalizeHistory(body.items, 40)
+        if (items.length !== body.items.length) throw new Error('Invalid or duplicate IDs')
+      } catch {
+        return reply({ error: 'Invalid import batch' }, 400)
+      }
+      if (!items.length) return reply({ added: 0 })
+      const results = await db.batch(items.map(item => db.prepare(
+        'INSERT INTO account_lists(user_id,list_type,kp_id,metadata,added_at) VALUES (?,?,?,?,?) ON CONFLICT(user_id,list_type,kp_id) DO NOTHING'
+      ).bind(uid, type, item.kp_id, JSON.stringify(item), item.addedAt)))
+      return reply({ added: results.reduce((sum, result) => sum + result.meta.changes, 0) })
+    }
     const status = /^\/api\/list-status\/([1-9]\d{0,11})$/.exec(path)
     if (status && request.method === 'GET') {
       const { results } = await db

@@ -1,3 +1,4 @@
+import { importWorkerList } from './user'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { addToList, delFromList, getMyLists, getMovieListStatus, repairCardRatings } from './user'
 import { replaceLocalList } from '@/utils/localUserLists'
@@ -58,6 +59,15 @@ beforeEach(() => {
 })
 
 describe('compact cloud list requests', () => {
+  it('batches imports and stops before sending data after an account switch', async () => {
+    mocks.patch.mockResolvedValue({ added: 40 })
+    await importWorkerList('favorite', Array.from({ length: 81 }, (_, i) => String(i + 1)))
+    expect(mocks.patch.mock.calls.map(call => call[2].items.length)).toEqual([40, 40, 1])
+    mocks.patch.mockClear()
+    mocks.patch.mockImplementation(async () => { mocks.auth.token = 'another'; return { added: 40 } })
+    await expect(importWorkerList('favorite', Array.from({ length: 81 }, (_, i) => String(i + 1)))).rejects.toThrow('Аккаунт изменился')
+    expect(mocks.patch).toHaveBeenCalledTimes(1)
+  })
   it.each(['delete', 'account'])('returns cards before metadata and ignores enrichment after %s', async (change) => {
     let finishMetadata
     getKpInfo.mockImplementation(() => new Promise((resolve) => { finishMetadata = resolve }))

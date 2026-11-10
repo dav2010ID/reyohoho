@@ -31,6 +31,22 @@ function request(body, type = 'favorite') {
 }
 
 describe('account list metadata writes', () => {
+  it('imports bounded batches atomically, preserves existing entries and isolates accounts', async () => {
+    const bulk = items => serveAccount(new Request('https://api.reyhoho.fun/api/list/favorite/import', {
+      method: 'POST', headers: { Authorization: 'Bearer ' + token, 'Content-Type': 'application/json' },
+      body: JSON.stringify({ items })
+    }), env, origin)
+    expect(await (await bulk([{ kp_id: '301', title: 'Original' }, { kp_id: '42' }])).json()).toEqual({ added: 2 })
+    expect(await (await bulk([{ kp_id: '301', title: 'Changed' }])).json()).toEqual({ added: 0 })
+    expect(db.sqlite.prepare('SELECT metadata FROM account_lists WHERE kp_id=?').get('301').metadata).toContain('Original')
+    expect((await bulk([{ kp_id: 'invalid' }])).status).toBe(400)
+    expect((await bulk(Array.from({ length: 41 }, (_, i) => ({ kp_id: String(i + 1) })))).status).toBe(400)
+    const insert = db.sqlite.prepare('INSERT INTO account_lists VALUES (?,?,?,?,?)')
+    for (let i = 0; i < 997; i++) insert.run('worker-tg:123', 'favorite', String(10000 + i), '{}', '')
+    expect((await bulk([{ kp_id: '500' }, { kp_id: '501' }])).status).toBe(409)
+    expect(db.sqlite.prepare('SELECT COUNT(*) AS n FROM account_lists').get().n).toBe(999)
+    expect(db.sqlite.prepare('SELECT COUNT(*) AS n FROM account_lists WHERE kp_id=?').get('500').n).toBe(0)
+  })
   it('reads only authenticated movie membership and excludes deleted history', async () => {
     const insert = db.sqlite.prepare('INSERT INTO account_lists VALUES (?,?,?,?,?)')
     for (const type of ['favorite', 'later', 'watching', 'completed', 'abandoned'])

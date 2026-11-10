@@ -28,11 +28,12 @@
 </template>
 
 <script>
+import { useConfirmation } from '@/composables/useConfirmation'
 import { useRouter } from 'vue-router'
 import { useAuthStore } from '@/store/auth'
 import { useMainStore } from '@/store/main'
 import { onBeforeUnmount, onMounted, ref } from 'vue'
-import { getMyLists, addToList, getUser } from '@/api/user'
+import { getMyLists, addToList, getUser, importWorkerList } from '@/api/user'
 import { USER_LIST_TYPES_ENUM } from '@/constants'
 import { getKpInfo } from '@/api/movies'
 import { getLocalList } from '@/utils/localUserLists'
@@ -43,6 +44,7 @@ import { clearPendingSync, readPendingSync, savePendingSync } from '@/utils/pend
 export default {
   name: 'AuthSuccess',
   setup() {
+    const askConfirmation = useConfirmation()
     const router = useRouter()
     const authStore = useAuthStore()
     const mainStore = useMainStore()
@@ -108,10 +110,11 @@ export default {
             if (
               hasLocalData &&
               (pending.approved ||
-                window.confirm(
+                await askConfirmation(
                   'Синхронизировать локальную историю и списки этого браузера с облаком?'
                 ))
             ) {
+              assertCurrent()
               pending.approved = true
               savePendingSync(owner, pending)
               if (localHistory.length) response = await importCloudHistory(localHistory)
@@ -123,15 +126,11 @@ export default {
                   (await getMyLists(type, { fresh: true })).map((item) => String(item.kp_id))
                 )
                 assertCurrent()
-                for (const item of localLists.get(type) || []) {
-                  assertCurrent()
-                  if (!existing.has(String(item.kp_id))) await addToList(item.kp_id, type, item)
-                  assertCurrent()
-                  pending.lists[type] = pending.lists[type].filter(
-                    (entry) => String(entry.kp_id) !== String(item.kp_id)
-                  )
-                  savePendingSync(owner, pending)
-                }
+                const missing = (localLists.get(type) || []).filter(item => !existing.has(String(item.kp_id)))
+                await importWorkerList(type, missing)
+                assertCurrent()
+                pending.lists[type] = []
+                savePendingSync(owner, pending)
                 await getMyLists(type)
               }
               assertCurrent()

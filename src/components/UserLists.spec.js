@@ -13,7 +13,7 @@ vi.mock('@/store/main', () => ({ useMainStore: () => mocks.main }))
 vi.mock('vue-router', () => ({ useRoute: () => mocks.route, useRouter: () => ({ push: vi.fn() }) }))
 vi.mock('@/api/user', () => ({
   getMyLists: mocks.get, getUserLists: mocks.get, getListCounters: mocks.counters,
-  delFromList: mocks.del, delAllFromList: mocks.clear, addToList: mocks.add
+  delFromList: mocks.del, delAllFromList: mocks.clear, importWorkerList: vi.fn(), addToList: mocks.add
 }))
 vi.mock('@/utils/authSession', () => ({ logoutAndRedirect: mocks.logout }))
 vi.mock('@/api/cloudHistory', () => ({ isCloudHistoryEnabled: () => true, importCloudHistory: mocks.importHistory }))
