@@ -55,3 +55,6 @@ kp_info2_*.json
 
 # Generated GraphQL research corpus
 /graphql_extracted/
+
+# Local agent handoff
+/HANDOFF.md
