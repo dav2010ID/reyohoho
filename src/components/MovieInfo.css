@@ -392,7 +392,8 @@
 }
 
 /* Стили для секций с похожими фильмами */
-.related-movies {
+.related-movies,
+.movie-panel {
   box-sizing: border-box;
   max-width: var(--movie-page-max-width);
   min-height: 340px;
@@ -427,7 +428,8 @@
     box-shadow 320ms cubic-bezier(0.22, 1, 0.36, 1);
 }
 
-.related-movies:hover {
+.related-movies:hover,
+.movie-panel:hover {
   border-color: color-mix(in srgb, var(--accent-color) 28%, transparent);
   box-shadow:
     0 20px 58px rgba(0, 0, 0, 0.36),
@@ -436,8 +438,7 @@
     0 0 34px color-mix(in srgb, var(--accent-color) 10%, transparent);
 }
 
-.comments-section,
-.staff-section {
+.comments-section {
   box-sizing: border-box;
   max-width: var(--movie-page-max-width);
   margin: 14px auto 0;
@@ -474,7 +475,8 @@
   margin-bottom: 14px;
 }
 
-.related-movies h2 {
+.related-movies h2,
+.movie-panel-title {
   color: #fff;
   margin: 0;
   font-size: 1.35rem;
@@ -485,7 +487,8 @@
   gap: 10px;
 }
 
-.related-movies h2::before {
+.related-movies h2::before,
+.movie-panel-title::before {
   content: '';
   width: 10px;
   height: 10px;
@@ -1107,110 +1110,218 @@
   }
 }
 
-.staff-section {
-  border-radius: 8px;
+/* Cast and crew panel */
+.movie-panel {
+  min-height: 0;
+  scroll-margin-top: 90px;
 }
 
-.staff-categories {
-  display: flex;
-  flex-direction: column;
-  gap: 20px;
+.movie-panel-title {
+  margin: 0 0 16px;
 }
 
-.staff-category h3 {
-  color: #fff;
-  margin-bottom: 10px;
-  font-size: 18px;
+.movie-panel-count {
+  padding: 2px 9px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.08);
+  color: #aaa;
+  font-size: 0.8rem;
+  font-weight: 600;
+  letter-spacing: 0;
+}
+
+.staff-block + .staff-block {
+  margin-top: 26px;
+  padding-top: 22px;
+  border-top: 1px solid rgba(255, 255, 255, 0.07);
 }
 
 .staff-list {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
-  gap: 15px;
+  grid-template-columns: repeat(auto-fill, minmax(112px, 1fr));
+  gap: 18px 12px;
   align-items: start;
-  margin-bottom: 10px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
 }
 
 .staff-item {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  text-align: center;
-  height: 100%;
+  min-width: 0;
 }
 
 .staff-link {
   display: flex;
   flex-direction: column;
   align-items: center;
-  text-decoration: none;
+  gap: 4px;
+  padding: 8px 4px;
+  border-radius: 14px;
   color: inherit;
-  transition: transform 0.2s;
-  height: 100%;
+  text-align: center;
+  text-decoration: none;
+  transition:
+    background-color 0.2s ease,
+    transform 0.2s ease;
 }
 
-.staff-link:hover {
+.staff-link:hover,
+.staff-link:focus-visible {
+  background: rgba(255, 255, 255, 0.05);
   transform: translateY(-3px);
-  filter: drop-shadow(0 4px 8px var(--accent-semi-transparent));
 }
 
 .staff-photo {
-  width: 80px;
-  height: 80px;
+  box-sizing: border-box;
+  width: 84px;
+  height: 84px;
+  margin-bottom: 6px;
+  flex-shrink: 0;
   border-radius: 50%;
   object-fit: cover;
-  margin-bottom: 8px;
   border: 2px solid rgba(255, 255, 255, 0.1);
-  flex-shrink: 0;
-  transition: all 0.2s ease;
+  background: rgba(255, 255, 255, 0.06);
+  transition:
+    border-color 0.2s ease,
+    box-shadow 0.2s ease;
 }
 
-.staff-link:hover .staff-photo {
+.staff-link:hover .staff-photo,
+.staff-link:focus-visible .staff-photo {
   border-color: var(--accent-color);
-  box-shadow: 0 0 12px var(--accent-semi-transparent);
+  box-shadow: 0 0 14px var(--accent-semi-transparent);
+}
+
+.staff-photo-empty,
+.staff-more-circle {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #888;
+  font-size: 28px;
+}
+
+.staff-more-circle {
+  border-style: dashed;
+  color: #fff;
+  font-size: 22px;
+  font-weight: 700;
 }
 
 .staff-name {
-  font-size: 14px;
+  display: -webkit-box;
+  overflow: hidden;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  line-clamp: 2;
   color: #fff;
-  margin-bottom: 4px;
-  min-height: 2.8em;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  text-align: center;
-  padding: 0 4px;
+  font-size: 14px;
+  line-height: 1.3;
 }
 
 .staff-role {
+  display: -webkit-box;
+  overflow: hidden;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  line-clamp: 2;
+  color: #999;
   font-size: 12px;
-  color: #aaa;
-  min-height: 1.8em;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  text-align: center;
-  padding: 0 4px;
+  line-height: 1.3;
 }
 
-@media (max-width: 600px) {
+.crew-list {
+  display: grid;
+  gap: 14px;
+  margin: 0;
+}
+
+.crew-row {
+  display: grid;
+  grid-template-columns: 130px minmax(0, 1fr);
+  align-items: baseline;
+  gap: 12px;
+}
+
+.crew-row dt {
+  color: #999;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.staff-names-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 0;
+  min-width: 0;
+}
+
+.staff-name-link {
+  padding: 6px 12px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.05);
+  color: #fff;
+  font-size: 14px;
+  text-decoration: none;
+  white-space: nowrap;
+  transition:
+    background-color 0.2s ease,
+    border-color 0.2s ease,
+    box-shadow 0.2s ease;
+}
+
+.staff-name-link:hover,
+.staff-name-link:focus-visible {
+  border-color: var(--accent-color);
+  background: color-mix(in srgb, var(--accent-color) 22%, transparent);
+  box-shadow: 0 4px 12px var(--accent-semi-transparent);
+}
+
+.staff-name-more {
+  color: #aaa;
+  font-weight: 700;
+}
+
+@media (max-width: 620px) {
+  /* Same horizontal row as the related movies on phones. */
   .staff-list {
-    grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+    display: flex;
+    gap: 4px;
+    overflow-x: auto;
+    padding-bottom: 6px;
+    scroll-snap-type: x proximity;
+    scrollbar-width: thin;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .staff-item {
+    flex: 0 0 92px;
+    scroll-snap-align: start;
   }
 
   .staff-photo {
-    width: 60px;
-    height: 60px;
+    width: 68px;
+    height: 68px;
   }
 
   .staff-name {
     font-size: 12px;
-    min-height: 2.4em;
   }
 
   .staff-role {
-    font-size: 10px;
-    min-height: 1.6em;
+    font-size: 11px;
+  }
+
+  .crew-row {
+    grid-template-columns: 1fr;
+    gap: 6px;
+  }
+
+  .staff-name-link {
+    padding: 5px 10px;
+    font-size: 13px;
   }
 }
 
@@ -1226,22 +1337,6 @@
 .show-all-link:hover {
   color: #fff;
   text-decoration: underline;
-}
-.expand-actors-circle-button {
-  width: 80px;
-  height: 80px;
-  border-radius: 50%;
-  background: rgba(255, 255, 255, 0.1);
-  border: none;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-  transition: all 0.2s ease;
-  color: #fff;
-  font-size: 24px;
-  text-decoration: none;
-  flex-shrink: 0;
 }
 
 .expand-circle-button {
@@ -1344,117 +1439,6 @@
   color: #fff;
 }
 
-.staff-names-container {
-  display: flex;
-  align-items: flex-start;
-  gap: 15px;
-  margin-bottom: 15px;
-  width: 100%;
-}
-
-.staff-names-list {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 10px;
-  flex: 1;
-  min-width: 0;
-  align-items: center;
-}
-
-.staff-name-link {
-  color: #fff;
-  text-decoration: none;
-  padding: 5px 10px;
-  background: rgba(255, 255, 255, 0.1);
-  border-radius: 4px;
-  transition: all 0.2s ease;
-  white-space: nowrap;
-  flex-shrink: 0;
-}
-
-.staff-name-link:hover {
-  background: var(--accent-color);
-  color: #fff;
-  transform: translateY(-2px);
-  box-shadow: 0 4px 8px var(--accent-semi-transparent);
-}
-
-.staff-list .expand-actors-circle-button {
-  width: 80px;
-  height: 80px;
-  border-radius: 50%;
-  background: rgba(255, 255, 255, 0.1);
-  border: none;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-  transition: all 0.2s ease;
-  color: #fff;
-  font-size: 24px;
-  text-decoration: none;
-  flex-shrink: 0;
-}
-
-.staff-list .expand-actors-circle-button:hover {
-  background: var(--accent-color);
-  transform: scale(1.05);
-  box-shadow: 0 4px 12px var(--accent-semi-transparent);
-}
-
-.staff-names-list .expand-actors-circle-button {
-  width: 40px;
-  height: 40px;
-  border-radius: 50%;
-  background: rgba(255, 255, 255, 0.1);
-  border: none;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-  transition: all 0.2s ease;
-  color: #fff;
-  font-size: 16px;
-  text-decoration: none;
-  flex-shrink: 0;
-}
-
-.staff-names-list .expand-actors-circle-button:hover {
-  background: var(--accent-color);
-  transform: scale(1.05);
-  box-shadow: 0 4px 12px var(--accent-semi-transparent);
-}
-
-@media (max-width: 600px) {
-  .staff-names-container {
-    flex-direction: row;
-    align-items: flex-start;
-    gap: 10px;
-  }
-
-  .staff-names-list {
-    width: auto;
-    flex: 1;
-  }
-
-  .staff-name-link {
-    font-size: 14px;
-    padding: 4px 8px;
-  }
-
-  .staff-list .expand-actors-circle-button {
-    width: 60px;
-    height: 60px;
-    font-size: 20px;
-  }
-
-  .staff-names-list .expand-actors-circle-button {
-    width: 35px;
-    height: 35px;
-    font-size: 14px;
-  }
-}
-
 .related-movies-list :deep(.grid) {
   position: relative;
   z-index: 1;
@@ -1485,13 +1469,15 @@
 }
 
 @media (max-width: 620px) {
-  .related-movies {
+  .related-movies,
+  .movie-panel {
     margin-top: 24px;
     padding: 14px 10px 10px;
     border-radius: 14px;
   }
 
-  .related-movies h2 {
+  .related-movies h2,
+  .movie-panel-title {
     font-size: 1.15rem;
   }
 

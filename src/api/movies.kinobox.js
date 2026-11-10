@@ -284,6 +284,57 @@ const getKpInfo = async (kpId, requestConfig = {}) => {
   return normalizeKinoboxMovie(movie, kpId)
 }
 
+const YOUTUBE_ID = /^[\w-]{11}$/
+
+// Worker extras in the legacy card fields MovieInfo already reads.
+const normalizeMovieExtras = (extras) => {
+  if (!extras || typeof extras !== 'object') return null
+  const tmdb = toNumberOrNull(extras.ratings?.tmdb?.value)
+  const list = (value) => (Array.isArray(value) ? value : [])
+  const tmdbId = Number.isInteger(extras.ids?.tmdb) && extras.ids.tmdb > 0 ? extras.ids.tmdb : null
+  return {
+    imdb_id: extras.ids?.imdb || null,
+    tmdb_id: tmdbId,
+    tmdb_type: tmdbId && ['movie', 'tv'].includes(extras.type) ? extras.type : null,
+    slogan: extras.tagline || null,
+    logo_url: extras.logoUrl || null,
+    rating_tmdb: tmdb === null ? null : Math.round(tmdb * 10) / 10,
+    rating_rotten_tomatoes: toNumberOrNull(extras.ratings?.rottenTomatoes),
+    rating_metacritic: toNumberOrNull(extras.ratings?.metacritic),
+    similars: list(extras.similar)
+      .filter(
+        (item) =>
+          Number.isInteger(item?.kinopoiskId) &&
+          item.kinopoiskId > 0 &&
+          (item.title?.russian || item.title?.original)
+      )
+      .map((item) => ({
+        film_id: item.kinopoiskId,
+        kp_id: item.kinopoiskId,
+        name_ru: item.title.russian || '',
+        name_original: item.title.original || ''
+      })),
+    // The ID is validated again here because it becomes part of an iframe URL.
+    videos: list(extras.trailers)
+      .filter((videoId) => typeof videoId === 'string' && YOUTUBE_ID.test(videoId))
+      .map((videoId, index) => ({
+        videoId,
+        name: index ? `Трейлер ${index + 1}` : 'Трейлер',
+        iframeUrl: `https://www.youtube.com/embed/${videoId}`
+      }))
+  }
+}
+
+const getMovieExtras = async (kpId, { signal } = {}) => {
+  const { data } = await publicGet(
+    `/api/movies/${kpId}/extras`,
+    { signal, timeout: 12000 },
+    30 * 60000,
+    (data) => Boolean(data) && typeof data === 'object' && 'data' in data
+  )
+  return normalizeMovieExtras(data?.data)
+}
+
 const apiSearch = async (searchTerm, requestConfig = {}) => {
   const { data } = await publicGet(
     '/api/movies/search/',
@@ -344,6 +395,8 @@ const getRandomMovie = async (requestConfig = {}) => {
 export {
   apiSearch,
   getKpInfo,
+  getMovieExtras,
+  normalizeMovieExtras,
   getPlayers,
   getPlayersRaw,
   getTopMovies,

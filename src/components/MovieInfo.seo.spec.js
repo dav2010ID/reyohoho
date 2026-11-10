@@ -6,6 +6,7 @@ import { reactive } from 'vue'
 
 const useHeadMock = vi.fn()
 const getKpInfoMock = vi.fn()
+const getMovieExtrasMock = vi.fn()
 const authMock = { token: '', isWorkerSession: false }
 const routeMock = reactive({ params: { kp_id: '123' }, query: {}, hash: '' })
 const mainMock = {
@@ -47,6 +48,11 @@ vi.mock('@/api/movies', () => ({
   getMovieNote: vi.fn(),
   saveMovieNote: vi.fn(),
   deleteMovieNote: vi.fn()
+}))
+
+vi.mock('@/api/movieExtras', async () => ({
+  ...(await vi.importActual('@/api/movieExtras')),
+  getMovieExtras: getMovieExtrasMock
 }))
 
 vi.mock('@/api/user', () => ({
@@ -139,6 +145,7 @@ describe('MovieInfo SEO', () => {
     mainMock.isHistoryAllowed = false
     useHeadMock.mockReset()
     getKpInfoMock.mockReset()
+    getMovieExtrasMock.mockReset().mockResolvedValue(null)
     getKpInfoMock.mockResolvedValue({
       kp_id: '123',
       kinopoisk_id: '123',
@@ -489,4 +496,143 @@ describe('MovieInfo SEO', () => {
       }
     }
   )
+
+  it('fills in similar titles, tagline and extra ratings when extras arrive after the card', async () => {
+    const card = {
+      kp_id: 123,
+      name_ru: 'Fetched Movie',
+      description: 'Fetched description',
+      slogan: null,
+      similars: [],
+      source: 'kinobox'
+    }
+    getKpInfoMock.mockResolvedValue(card)
+    let deliver
+    getMovieExtrasMock.mockReturnValue(new Promise((resolve) => (deliver = resolve)))
+    const MovieInfo = (await import('./MovieInfo.vue')).default
+    const wrapper = shallowMount(MovieInfo, {
+      global: { plugins: [createTestingPinia({ createSpy: vi.fn })], stubs: { RouterLink: true } }
+    })
+    try {
+      await vi.waitFor(() => expect(wrapper.text()).toContain('Fetched Movie'))
+      expect(wrapper.findComponent({ name: 'MovieList' }).exists()).toBe(false)
+      expect(getMovieExtrasMock.mock.calls[0][0]).toMatchObject({ kp_id: 123, source: 'kinobox' })
+      deliver({
+        slogan: 'Extra tagline',
+        name_ru: 'Must not replace the title',
+        rating_tmdb: 8.4,
+        tmdb_id: 550,
+        tmdb_type: 'movie',
+        rating_rotten_tomatoes: 81,
+        rating_metacritic: 67,
+        similars: [{ film_id: 301, kp_id: 301, name_ru: 'Матрица' }]
+      })
+      await flushPromises()
+      expect(wrapper.text()).toContain('Extra tagline')
+      // Extra ratings sit in the ratings row above the player, not in the details list.
+      const chips = wrapper
+        .findAll('.ratings-links .extra-rating')
+        .map((chip) => [chip.find('img.rating-logo').attributes('alt'), chip.find('.rating-value').text()])
+      expect(chips).toEqual([
+        ['TMDB', '8.4'],
+        ['Rotten Tomatoes', '81%'],
+        ['Metacritic', '67']
+      ])
+      const tmdbLink = wrapper.find('.ratings-links a[href="https://www.themoviedb.org/movie/550"]')
+      expect(tmdbLink.exists()).toBe(true)
+      expect(tmdbLink.attributes('rel')).toBe('noopener noreferrer')
+      expect(wrapper.find('.additional-info').text()).not.toContain('Rotten Tomatoes')
+      expect(wrapper.text()).not.toContain('Must not replace the title')
+      expect(wrapper.findComponent({ name: 'MovieList' }).props('moviesList')).toEqual([
+        expect.objectContaining({ kp_id: 301, title: 'Матрица' })
+      ])
+    } finally {
+      wrapper.unmount()
+    }
+  })
+
+  it('ignores extras that arrive after navigation to another title', async () => {
+    getKpInfoMock.mockImplementation(async (id) => ({
+      kp_id: Number(id),
+      name_ru: 'Movie ' + id,
+      slogan: null,
+      source: 'kinobox'
+    }))
+    let deliverFirst
+    getMovieExtrasMock
+      .mockReturnValueOnce(new Promise((resolve) => (deliverFirst = resolve)))
+      .mockResolvedValue(null)
+    const MovieInfo = (await import('./MovieInfo.vue')).default
+    const wrapper = shallowMount(MovieInfo, {
+      global: { plugins: [createTestingPinia({ createSpy: vi.fn })], stubs: { RouterLink: true } }
+    })
+    try {
+      await vi.waitFor(() => expect(wrapper.text()).toContain('Movie 123'))
+      routeMock.params.kp_id = '124'
+      await vi.waitFor(() => expect(wrapper.text()).toContain('Movie 124'))
+      deliverFirst({ slogan: 'Tagline of the previous title' })
+      await flushPromises()
+      expect(wrapper.text()).not.toContain('Tagline of the previous title')
+    } finally {
+      wrapper.unmount()
+    }
+  })
+
+  it('groups cast and crew into one panel with a link to the full cast', async () => {
+    const person = (id, role) => ({
+      staff_id: id,
+      name_ru: 'Person ' + id,
+      poster_url: '',
+      profession_key: role
+    })
+    getKpInfoMock.mockResolvedValue({
+      kp_id: 123,
+      name_ru: 'Fetched Movie',
+      source: 'kinobox',
+      staff: [
+        ...Array.from({ length: 14 }, (_, index) => person(index + 1, 'ACTOR')),
+        person(100, 'DIRECTOR'),
+        ...Array.from({ length: 7 }, (_, index) => person(200 + index, 'PRODUCER'))
+      ]
+    })
+    const MovieInfo = (await import('./MovieInfo.vue')).default
+    const wrapper = shallowMount(MovieInfo, {
+      global: {
+        plugins: [createTestingPinia({ createSpy: vi.fn })],
+        stubs: { RouterLink: true, teleport: true }
+      }
+    })
+    try {
+      await vi.waitFor(() => expect(wrapper.find('#movie-staff').exists()).toBe(true))
+      const panel = wrapper.find('#movie-staff')
+      expect(panel.findAll('.staff-item:not(.staff-more)')).toHaveLength(12)
+      const more = panel.find('.staff-more a')
+      expect(more.text()).toContain('+2')
+      expect(more.attributes('href')).toBe('https://www.kinopoisk.ru/film/123/cast/')
+      const rows = panel.findAll('.crew-row')
+      expect(rows.map((row) => row.find('dt').text())).toEqual(['Режиссёр', 'Продюсеры'])
+      // Five names and a "+2" link to the full crew.
+      expect(rows[1].findAll('.staff-name-link').map((link) => link.text()).at(-1)).toBe('+2')
+      expect(rows[1].findAll('.staff-name-link')).toHaveLength(6)
+    } finally {
+      wrapper.unmount()
+    }
+  })
+
+  it('does not draw an empty cast panel', async () => {
+    getKpInfoMock.mockResolvedValue({ kp_id: 123, name_ru: 'Fetched Movie', staff: [] })
+    const MovieInfo = (await import('./MovieInfo.vue')).default
+    const wrapper = shallowMount(MovieInfo, {
+      global: {
+        plugins: [createTestingPinia({ createSpy: vi.fn })],
+        stubs: { RouterLink: true, teleport: true }
+      }
+    })
+    try {
+      await vi.waitFor(() => expect(wrapper.text()).toContain('Fetched Movie'))
+      expect(wrapper.find('#movie-staff').exists()).toBe(false)
+    } finally {
+      wrapper.unmount()
+    }
+  })
 })

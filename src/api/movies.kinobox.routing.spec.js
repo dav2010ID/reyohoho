@@ -23,6 +23,17 @@ afterEach(() => {
 })
 
 describe('Kinobox content proxy routing', () => {
+  it('loads movie extras from the Worker and treats a missing title as empty', async () => {
+    const { getMovieExtras } = await import('./movies.kinobox')
+    mocks.get.mockResolvedValue({ data: { data: { tagline: 'Тест' }, source: 'kinoapi' } })
+    expect(await getMovieExtras(301)).toMatchObject({ slogan: 'Тест' })
+    expect(mocks.get).toHaveBeenCalledWith(
+      '/api/movies/301/extras',
+      expect.objectContaining({ timeout: 12000 })
+    )
+    mocks.get.mockResolvedValue({ data: { data: null, source: 'kinoapi' } })
+    expect(await getMovieExtras(302)).toBe(null)
+  })
   it.each([0, 0.999])(
     'selects a film from valid top pages at random boundary %s',
     async (random) => {

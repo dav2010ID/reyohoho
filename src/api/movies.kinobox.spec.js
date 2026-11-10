@@ -1,5 +1,9 @@
 import { describe, expect, it } from 'vitest'
-import { normalizeKinoboxSearchResponse, normalizeKinoboxMovie } from './movies.kinobox'
+import {
+  normalizeKinoboxSearchResponse,
+  normalizeKinoboxMovie,
+  normalizeMovieExtras
+} from './movies.kinobox'
 import { getMovieName } from '@/utils/textUtils'
 
 describe('Kinobox search response normalization', () => {
@@ -103,5 +107,54 @@ describe('Kinobox movie card normalization', () => {
       countries: [{ country: 'США' }],
       genres: [{ genre: 'фантастика' }]
     })
+  })
+})
+
+describe('movie extras normalization', () => {
+  it('maps Worker extras to the card fields the UI already reads', () => {
+    expect(
+      normalizeMovieExtras({
+        ids: { kinopoisk: 361, tmdb: 550, imdb: 'tt0137523' },
+        type: 'movie',
+        tagline: '«Интриги. Хаос. Мыло»',
+        logoUrl: 'https://avatars.mds.yandex.net/get-ott/374297/logo/orig',
+        ratings: { tmdb: { value: 8.438, votes: 32360 }, rottenTomatoes: 81, metacritic: 67 },
+        trailers: ['wPiyAoTY8Ys', 'aaaaaaaaaaa'],
+        similar: [{ kinopoiskId: 301, title: { russian: 'Матрица', original: 'The Matrix' } }]
+      })
+    ).toEqual({
+      imdb_id: 'tt0137523',
+      tmdb_id: 550,
+      tmdb_type: 'movie',
+      slogan: '«Интриги. Хаос. Мыло»',
+      logo_url: 'https://avatars.mds.yandex.net/get-ott/374297/logo/orig',
+      rating_tmdb: 8.4,
+      rating_rotten_tomatoes: 81,
+      rating_metacritic: 67,
+      similars: [{ film_id: 301, kp_id: 301, name_ru: 'Матрица', name_original: 'The Matrix' }],
+      videos: [
+        {
+          videoId: 'wPiyAoTY8Ys',
+          name: 'Трейлер',
+          iframeUrl: 'https://www.youtube.com/embed/wPiyAoTY8Ys'
+        },
+        {
+          videoId: 'aaaaaaaaaaa',
+          name: 'Трейлер 2',
+          iframeUrl: 'https://www.youtube.com/embed/aaaaaaaaaaa'
+        }
+      ]
+    })
+  })
+  it('never builds an embed URL or a card link from malformed identifiers', () => {
+    const extras = normalizeMovieExtras({
+      trailers: ['"><script>', 'x/../../evil'],
+      similar: [{ kinopoiskId: '301/../x', title: { russian: 'Тест' } }, { kinopoiskId: 302 }]
+    })
+    expect(extras.videos).toEqual([])
+    expect(extras.similars).toEqual([])
+  })
+  it('returns nothing for a title missing from the catalogue', () => {
+    expect(normalizeMovieExtras(null)).toBe(null)
   })
 })

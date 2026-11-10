@@ -37,7 +37,13 @@
         </div>
       </div>
 
-      <ErrorMessage v-if="errorMessage" :message="errorMessage" :code="errorCode" show-retry @retry="fetchMovieInfo()" />
+      <ErrorMessage
+        v-if="errorMessage"
+        :message="errorMessage"
+        :code="errorCode"
+        show-retry
+        @retry="fetchMovieInfo()"
+      />
 
       <div v-if="errorMessage && clientReady && !movieInfo" class="content-card">
         <component
@@ -227,6 +233,37 @@
                 height="48"
               />
             </a>
+          </div>
+
+          <!-- Kino API: TMDB, Rotten Tomatoes, Metacritic -->
+          <div v-for="rating in extraRatings" :key="rating.name">
+            <component
+              :is="rating.href ? 'a' : 'span'"
+              :href="rating.href || undefined"
+              :target="rating.href ? '_blank' : undefined"
+              :rel="rating.href ? 'noopener noreferrer' : undefined"
+              class="rating-link extra-rating"
+              :title="rating.title"
+            >
+              <img
+                :src="rating.icon"
+                :alt="rating.name"
+                class="rating-logo"
+                width="20"
+                height="20"
+              />
+              <span class="rating-value" :class="getRatingColor(rating.score)">{{
+                rating.label
+              }}</span>
+              <img
+                v-if="rating.href"
+                src="/src/assets/icon-external-link.png"
+                alt="Внешняя ссылка"
+                class="external-link-icon"
+                width="48"
+                height="48"
+              />
+            </component>
           </div>
 
           <span v-if="backendAvailable" class="action-buttons-group">
@@ -496,47 +533,62 @@
         </div>
 
         <Teleport defer to="#movie-staff-end">
-          <div v-if="movieInfo.staff" id="movie-staff" class="staff-section">
-            <div class="staff-categories">
-              <div v-if="actors.length" class="staff-category">
-                <h3 class="additional-info-title">Актёры</h3>
-                <div class="staff-list">
-                  <div
-                    v-for="person in actors.slice(0, 12)"
-                    :key="person.staff_id"
-                    class="staff-item"
-                  >
-                    <a
-                      :href="`https://www.kinopoisk.ru/name/${person.staff_id}/`"
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      class="staff-link"
-                      :title="person.description || ''"
-                    >
-                      <img :src="person.poster_url" :alt="person.name_ru" class="staff-photo" />
-                      <span class="staff-name">{{ person.name_ru || person.name_en }}</span>
-                      <span v-if="person.description" class="staff-role">{{
-                        person.description
-                      }}</span>
-                    </a>
-                  </div>
+          <section
+            v-if="actors.length || staffNameGroups.length"
+            id="movie-staff"
+            class="staff-section movie-panel"
+          >
+            <div v-if="actors.length" class="staff-block">
+              <h2 class="movie-panel-title">
+                В ролях <span class="movie-panel-count">{{ actors.length }}</span>
+              </h2>
+              <ul class="staff-list">
+                <li v-for="person in actors.slice(0, 12)" :key="person.staff_id" class="staff-item">
                   <a
-                    v-if="actors.length > 12"
-                    class="expand-actors-circle-button"
+                    :href="`https://www.kinopoisk.ru/name/${person.staff_id}/`"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    class="staff-link"
+                    :title="person.description || ''"
+                  >
+                    <img
+                      v-if="person.poster_url"
+                      :src="person.poster_url"
+                      :alt="person.name_ru || person.name_en"
+                      class="staff-photo"
+                      loading="lazy"
+                      decoding="async"
+                    />
+                    <span v-else class="staff-photo staff-photo-empty" aria-hidden="true">
+                      <i class="fas fa-user"></i>
+                    </span>
+                    <span class="staff-name">{{ person.name_ru || person.name_en }}</span>
+                    <span v-if="person.description" class="staff-role">{{
+                      person.description
+                    }}</span>
+                  </a>
+                </li>
+                <li v-if="actors.length > 12" class="staff-item staff-more">
+                  <a
+                    class="staff-link"
                     :href="`https://www.kinopoisk.ru/film/${kp_id}/cast/`"
                     target="_blank"
                     rel="noopener noreferrer"
-                    :title="`Показать всех ${actors.length} актеров`"
+                    :title="`Показать всех ${actors.length} актёров`"
                   >
-                    +{{ actors.length - 12 }}
+                    <span class="staff-photo staff-more-circle">+{{ actors.length - 12 }}</span>
+                    <span class="staff-name">Все актёры</span>
                   </a>
-                </div>
-              </div>
+                </li>
+              </ul>
+            </div>
 
-              <div v-for="group in staffNameGroups" :key="group.key" class="staff-category">
-                <h3 class="additional-info-title">{{ group.title }}</h3>
-                <div class="staff-names-container">
-                  <div class="staff-names-list">
+            <div v-if="staffNameGroups.length" class="staff-block">
+              <h2 class="movie-panel-title">Съёмочная группа</h2>
+              <dl class="crew-list">
+                <div v-for="group in staffNameGroups" :key="group.key" class="crew-row">
+                  <dt>{{ group.people.length === 1 ? group.one : group.title }}</dt>
+                  <dd class="staff-names-list">
                     <a
                       v-for="person in group.people.slice(0, 5)"
                       :key="person.staff_id"
@@ -549,7 +601,7 @@
                     </a>
                     <a
                       v-if="group.people.length > 5"
-                      class="expand-actors-circle-button"
+                      class="staff-name-link staff-name-more"
                       :href="`https://www.kinopoisk.ru/film/${kp_id}/cast/`"
                       target="_blank"
                       rel="noopener noreferrer"
@@ -557,15 +609,19 @@
                     >
                       +{{ group.people.length - 5 }}
                     </a>
-                  </div>
+                  </dd>
                 </div>
-              </div>
+              </dl>
             </div>
-          </div>
+          </section>
         </Teleport>
 
         <div v-if="videos.length && areTrailersActive" class="yt-video-container">
-          <TrailerCarousel :videos="videos" :active-video-index="activeTrailerIndex" />
+          <TrailerCarousel
+            class="movie-panel"
+            :videos="videos"
+            :active-video-index="activeTrailerIndex"
+          />
         </div>
 
         <div id="movie-staff-end"></div>
@@ -604,6 +660,7 @@
 import { useConfirmation } from '@/composables/useConfirmation'
 import { sceneSelection } from '@/utils/sceneSelection'
 import { getKpInfo, getShikiInfo, getMovieNote, saveMovieNote, deleteMovieNote } from '@/api/movies'
+import { getMovieExtras, missingMovieExtras } from '@/api/movieExtras'
 import { legacyBackendAvailable } from '@/api/backendConfig'
 import { legacyMovieMethodAvailable } from '@/api/movieCapabilities'
 import { handleApiError } from '@/constants'
@@ -635,6 +692,9 @@ import {
 import { formatProductionStatus } from '@/utils/movieStatus'
 import { formatMovieDuration } from '@/utils/movieDuration'
 import { isRequestCanceled } from '@/utils/requestCancellation'
+import tmdbIcon from '@/assets/icon-tmdb.svg'
+import rottenTomatoesIcon from '@/assets/icon-rotten-tomatoes.svg'
+import metacriticIcon from '@/assets/icon-metacritic.svg'
 
 const askConfirmation = useConfirmation()
 
@@ -656,7 +716,9 @@ const moviePlayerComponent = shallowRef(null)
 const movieRatingComponent = defineAsyncComponent(() => import('@/components/MovieRating.vue'))
 const backendAvailable = computed(legacyBackendAvailable)
 const ratingsAvailable = computed(() => legacyMovieMethodAvailable('getRating'))
-const notesAvailable = computed(() => backendAvailable.value && authStore.token && !authStore.isWorkerSession)
+const notesAvailable = computed(
+  () => backendAvailable.value && authStore.token && !authStore.isWorkerSession
+)
 const getCatalogMovie = (id) => {
   const entry = getMovieSeoEntry(id)
   return entry
@@ -963,6 +1025,19 @@ const copyMovieMeta = async () => {
 
 let movieInfoRequestController = null
 
+// Optional data that arrives after the card; the card never waits for it.
+const loadMovieExtras = async (requestedKpId, controller) => {
+  const extras = await getMovieExtras(movieInfo.value, { signal: controller.signal })
+  if (!extras || controller.signal.aborted || requestedKpId !== kp_id.value || !movieInfo.value)
+    return
+  // Mutate in place: pending history and list updates compare the card by identity.
+  const added = missingMovieExtras(movieInfo.value, extras)
+  Object.assign(movieInfo.value, added)
+  if (added.logo_url) {
+    navbarStore.setHeaderContent({ text: movieInfo.value.title, imageUrl: added.logo_url })
+  }
+}
+
 const fetchMovieInfo = async (updateHistory = true) => {
   movieInfoRequestController?.abort()
   const controller = new AbortController()
@@ -1011,6 +1086,8 @@ const fetchMovieInfo = async (updateHistory = true) => {
       text: movieInfo.value.title,
       imageUrl: movieInfo.value.logo_url
     })
+
+    if (!import.meta.env.SSR) void loadMovieExtras(requestedKpId, controller)
 
     await syncCanonicalMovieRoute()
     if (controller.signal.aborted || requestedKpId !== kp_id.value) return false
@@ -1078,7 +1155,8 @@ const fetchMovieInfo = async (updateHistory = true) => {
     }
     return true
   } catch (error) {
-    if (controller.signal.aborted || requestedKpId !== kp_id.value || isRequestCanceled(error)) return false
+    if (controller.signal.aborted || requestedKpId !== kp_id.value || isRequestCanceled(error))
+      return false
     const { message, code } = handleApiError(error)
     errorMessage.value = message
     errorCode.value = code
@@ -1102,6 +1180,45 @@ const sequelsAndPrequels = computed(() =>
 
 const similars = computed(() => transformMoviesData(movieInfo.value?.similars))
 
+// Ratings from Kino API, shown in the ratings row above the player. Scores are
+// brought to the 0-10 scale only to pick the same colour as the other ratings.
+const extraRatings = computed(() => {
+  const info = movieInfo.value || {}
+  const ratings = []
+  if (info.rating_tmdb) {
+    ratings.push({
+      name: 'TMDB',
+      icon: tmdbIcon,
+      label: String(info.rating_tmdb),
+      title: `TMDB: ${info.rating_tmdb} из 10`,
+      score: info.rating_tmdb,
+      href:
+        info.tmdb_id && info.tmdb_type
+          ? `https://www.themoviedb.org/${info.tmdb_type}/${info.tmdb_id}`
+          : null
+    })
+  }
+  if (info.rating_rotten_tomatoes != null) {
+    ratings.push({
+      name: 'Rotten Tomatoes',
+      icon: rottenTomatoesIcon,
+      label: `${info.rating_rotten_tomatoes}%`,
+      title: `Rotten Tomatoes: ${info.rating_rotten_tomatoes}% положительных рецензий критиков`,
+      score: info.rating_rotten_tomatoes / 10
+    })
+  }
+  if (info.rating_metacritic != null) {
+    ratings.push({
+      name: 'Metacritic',
+      icon: metacriticIcon,
+      label: String(info.rating_metacritic),
+      title: `Metacritic: ${info.rating_metacritic} из 100`,
+      score: info.rating_metacritic / 10
+    })
+  }
+  return ratings
+})
+
 const staffByProfession = computed(() => {
   const groups = {}
   for (const person of movieInfo.value?.staff || []) {
@@ -1112,8 +1229,8 @@ const staffByProfession = computed(() => {
 const actors = computed(() => staffByProfession.value.ACTOR || [])
 const staffNameGroups = computed(() =>
   [
-    { key: 'DIRECTOR', title: 'Режиссёры', label: 'режиссёров' },
-    { key: 'PRODUCER', title: 'Продюсеры', label: 'продюсеров' }
+    { key: 'DIRECTOR', title: 'Режиссёры', one: 'Режиссёр', label: 'режиссёров' },
+    { key: 'PRODUCER', title: 'Продюсеры', one: 'Продюсер', label: 'продюсеров' }
   ]
     .map((group) => ({ ...group, people: staffByProfession.value[group.key] || [] }))
     .filter((group) => group.people.length)
@@ -1263,7 +1380,7 @@ const handleDeleteNote = async () => {
     return
   }
 
-  if (!await askConfirmation('Вы уверены, что хотите удалить заметку?')) {
+  if (!(await askConfirmation('Вы уверены, что хотите удалить заметку?'))) {
     return
   }
 

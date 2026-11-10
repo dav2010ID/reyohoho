@@ -1,6 +1,8 @@
 <template>
-  <div v-if="availableVideos.length" class="carousel-container">
-    <h2>Трейлеры (YouTube)</h2>
+  <section v-if="availableVideos.length" class="carousel-container">
+    <h2 class="trailers-title">
+      Трейлеры <span class="trailers-count">{{ availableVideos.length }}</span>
+    </h2>
     <div class="carousel-wrapper">
       <!-- Кнопка для прокрутки влево -->
       <button
@@ -14,15 +16,26 @@
 
       <!-- Карусель с кастомным скроллом -->
       <div ref="carousel" class="carousel" @scroll="updateScroll">
-        <div
+        <button
           v-for="(video, index) in availableVideos"
-          :key="index"
+          :key="video.videoId"
+          type="button"
           class="carousel-item"
+          :class="{ 'is-active': index === activeVideoIndex }"
+          :aria-label="`Смотреть: ${video.name}`"
           @click="selectVideo(index)"
         >
-          <img :src="`https://img.youtube.com/vi/${video.videoId}/0.jpg`" :alt="video.name" />
-          <div class="video-name">{{ video.name }}</div>
-        </div>
+          <span class="thumbnail">
+            <img
+              :src="`https://img.youtube.com/vi/${video.videoId}/mqdefault.jpg`"
+              :alt="video.name"
+              loading="lazy"
+              decoding="async"
+            />
+            <span class="play-badge" aria-hidden="true"><i class="fas fa-play"></i></span>
+          </span>
+          <span class="video-name">{{ video.name }}</span>
+        </button>
       </div>
 
       <!-- Кнопка для прокрутки вправо -->
@@ -36,15 +49,15 @@
       </button>
     </div>
     <!-- Встроенный плеер -->
-    <div v-if="activeVideoIndex !== null" class="video-player">
+    <div v-if="activeVideo" class="video-player">
       <iframe
-        :src="videos[activeVideoIndex].iframeUrl"
-        :title="availableVideos[activeVideoIndex]?.name || 'Трейлер YouTube'"
+        :src="activeVideo.iframeUrl"
+        :title="activeVideo.name || 'Трейлер YouTube'"
         frameborder="0"
         allowfullscreen
       ></iframe>
     </div>
-  </div>
+  </section>
 </template>
 
 <script setup>
@@ -92,15 +105,19 @@ const scrollCarousel = (direction) => {
   })
 }
 
+const availableVideos = ref([])
+// Indexes refer to the visible list: unavailable trailers are not shown.
+const activeVideo = computed(() =>
+  activeVideoIndex.value === null ? null : availableVideos.value[activeVideoIndex.value] || null
+)
+
 // Выбор видео для отображения во встроенном плеере
 const selectVideo = (index) => {
   activeVideoIndex.value = index
-  emit('select', props.videos[index])
+  emit('select', availableVideos.value[index])
 }
 
 const handleResize = () => updateScroll()
-
-const availableVideos = ref([])
 
 const checkVideoAvailability = async (videoId) => {
   if (!videoId || videoId === 'undefined') return false
@@ -112,29 +129,22 @@ const checkVideoAvailability = async (videoId) => {
   }
 }
 
-onMounted(async () => {
-  const availabilityChecks = props.videos.map(async (video) => {
-    const isAvailable = await checkVideoAvailability(video.videoId)
-    return isAvailable ? video : null
-  })
-
-  const results = await Promise.all(availabilityChecks)
+const loadAvailableVideos = async (videos) => {
+  const results = await Promise.all(
+    videos.map(async (video) => ((await checkVideoAvailability(video.videoId)) ? video : null))
+  )
   availableVideos.value = results.filter(Boolean)
+}
+
+onMounted(async () => {
+  await loadAvailableVideos(props.videos)
   updateScroll()
   window.addEventListener('resize', handleResize)
 })
 
 watch(
   () => props.videos,
-  async (newVideos) => {
-    const availabilityChecks = newVideos.map(async (video) => {
-      const isAvailable = await checkVideoAvailability(video.videoId)
-      return isAvailable ? video : null
-    })
-
-    const results = await Promise.all(availabilityChecks)
-    availableVideos.value = results.filter(Boolean)
-  }
+  (newVideos) => loadAvailableVideos(newVideos)
 )
 
 watch(
@@ -150,9 +160,34 @@ onBeforeUnmount(() => {
 </script>
 
 <style lang="scss" scoped>
-.carousel-container {
-  margin: 2rem 0;
-  padding: 0;
+.trailers-title {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  margin: 0 0 16px;
+  color: #fff;
+  font-size: 1.35rem;
+  line-height: 1.1;
+  letter-spacing: -0.02em;
+
+  &::before {
+    content: '';
+    width: 10px;
+    height: 10px;
+    border-radius: 999px;
+    background: var(--accent-color);
+    box-shadow: 0 0 10px color-mix(in srgb, var(--accent-color) 55%, transparent);
+  }
+}
+
+.trailers-count {
+  padding: 2px 9px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.08);
+  color: #aaa;
+  font-size: 0.8rem;
+  font-weight: 600;
+  letter-spacing: 0;
 }
 
 .carousel-wrapper {
@@ -167,27 +202,25 @@ onBeforeUnmount(() => {
   overflow-x: auto;
   scroll-snap-type: x mandatory;
   -webkit-overflow-scrolling: touch;
-  padding: 8px 0;
+  padding: 4px 2px 10px;
   user-select: none;
 
   &::-webkit-scrollbar {
-    width: 5px; /* Ширина вертикального скроллбара */
-    height: 5px; /* Высота горизонтального скроллбара */
+    height: 5px;
   }
 
   &::-webkit-scrollbar-track {
-    background: transparent; /* Цвет фона */
-    border-radius: 10px; /* Закругление углов */
+    background: transparent;
+    border-radius: 10px;
   }
 
   &::-webkit-scrollbar-thumb {
-    background: #494949; /* Цвет ползунка */
-    border-radius: 10px; /* Закругление углов */
-    border: 0; /* Отступ вокруг ползунка */
+    background: #494949;
+    border-radius: 10px;
   }
 
   &::-webkit-scrollbar-thumb:hover {
-    background: #555; /* Цвет ползунка при наведении */
+    background: #555;
   }
 }
 
@@ -195,10 +228,10 @@ onBeforeUnmount(() => {
 .scroll-button {
   position: absolute;
   top: 0;
-  bottom: 0;
+  bottom: 10px;
   width: 50px;
   border: none;
-  background: rgba(0, 0, 0, 0.5);
+  background: linear-gradient(90deg, rgba(0, 0, 0, 0.75), transparent);
   color: white;
   cursor: pointer;
   z-index: 10;
@@ -215,77 +248,134 @@ onBeforeUnmount(() => {
   pointer-events: auto;
 }
 
-.scroll-button:hover {
-  background: rgba(0, 0, 0, 0.7);
-}
-
 .scroll-button.left {
   left: 0;
 }
 
 .scroll-button.right {
   right: 0;
+  background: linear-gradient(270deg, rgba(0, 0, 0, 0.75), transparent);
 }
 
-/* Стили карточки трейлера */
+/* Карточка трейлера */
 .carousel-item {
   flex: 0 0 auto;
+  width: 280px;
+  padding: 0;
   scroll-snap-align: start;
-  width: 260px;
-  background: #161616;
-  border-radius: 12px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
-  transition:
-    transform 0.3s ease,
-    box-shadow 0.3s ease;
-  cursor: pointer;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 14px;
   overflow: hidden;
+  background: rgba(255, 255, 255, 0.04);
+  color: inherit;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+  transition:
+    transform 0.25s ease,
+    border-color 0.25s ease,
+    box-shadow 0.25s ease;
 }
 
-.carousel-item:hover {
-  transform: translateY(-5px);
+.carousel-item:hover,
+.carousel-item:focus-visible,
+.carousel-item.is-active {
+  transform: translateY(-4px);
+  border-color: var(--accent-color);
   box-shadow:
-    0 8px 16px rgba(0, 0, 0, 0.3),
-    0 0 20px var(--accent-semi-transparent);
+    0 10px 24px rgba(0, 0, 0, 0.35),
+    0 0 18px var(--accent-semi-transparent);
 }
 
-.carousel-item img {
-  width: 100%;
-  height: auto;
+.thumbnail {
+  position: relative;
+  display: block;
   aspect-ratio: 16 / 9;
+  background: #111;
+}
+
+.thumbnail img {
+  display: block;
+  width: 100%;
+  height: 100%;
   object-fit: cover;
-  border-top-left-radius: 12px;
-  border-top-right-radius: 12px;
+}
+
+.play-badge {
+  position: absolute;
+  inset: 0;
+  margin: auto;
+  width: 52px;
+  height: 52px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  background: rgba(0, 0, 0, 0.6);
+  border: 2px solid rgba(255, 255, 255, 0.85);
+  color: #fff;
+  font-size: 18px;
+  backdrop-filter: blur(2px);
+  transition:
+    background-color 0.25s ease,
+    transform 0.25s ease;
+
+  i {
+    margin-left: 3px;
+  }
+}
+
+.carousel-item:hover .play-badge,
+.carousel-item.is-active .play-badge {
+  background: var(--accent-color);
+  transform: scale(1.08);
 }
 
 .video-name {
-  padding: 12px;
-  background: #202020;
+  display: block;
+  padding: 10px 12px;
   color: #fff;
   font-size: 14px;
-  text-align: center;
+  font-weight: 600;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-  border-bottom-left-radius: 12px;
-  border-bottom-right-radius: 12px;
 }
 
 /* Увеличенный плеер */
 .video-player {
-  margin-top: 20px;
-  max-width: 1200px;
   width: 100%;
+  max-width: 1200px;
   aspect-ratio: 16 / 9;
-  margin: 20px auto 0;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
-  border-radius: 8px;
+  margin: 18px auto 0;
+  border-radius: 12px;
   overflow: hidden;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
 }
 
 .video-player iframe {
   width: 100%;
   height: 100%;
   border: none;
+}
+
+@media (max-width: 620px) {
+  .trailers-title {
+    font-size: 1.15rem;
+  }
+
+  .carousel {
+    gap: 12px;
+  }
+
+  .carousel-item {
+    width: 220px;
+  }
+
+  .play-badge {
+    width: 44px;
+    height: 44px;
+    font-size: 15px;
+  }
 }
 </style>
