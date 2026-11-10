@@ -165,7 +165,7 @@ SSG-код обязан быть SSR-safe: прямой доступ к `window`
 Search order: `kinobox` по умолчанию; `local → kinobox` при явном выборе local.
 Movie-info order: `kinobox`; `local → kinobox` при явном выборе local.
 KinoBD временно отключён: адаптер сохранён, но исключён из registry и fallback order.
-Флаг `KINOBD_ENABLED` также блокирует прямые запросы и обновление SEO-каталога через KinoBD.
+Флаг `KINOBD_ENABLED` блокирует прямые запросы клиента к KinoBD. SEO-каталог обновляется из публичных топов и карточек Worker; KinoBD не используется.
 Player loading выполняет parallel attempts для configured source и aggregate sources, применяет
 15-second provider timeout, затем `mergePlayerMaps()` удаляет duplicate iframe и слабые mirrors при
 наличии предпочтительного source.

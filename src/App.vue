@@ -28,6 +28,7 @@ import { useHead } from '@unhead/vue'
 import { computed, onMounted, onUnmounted, watch } from 'vue'
 import { useRoute } from 'vue-router'
 import { isNewYearPeriod } from '@/utils/dateUtils'
+import { buildStaticCanonicalUrl } from '@/utils/staticSeo'
 import garlandImage from '@/assets/trn-christmas-lights.webp'
 
 const store = useMainStore()
@@ -37,7 +38,13 @@ let stopSidebarPositionWatch = null
 
 // Keep a route-level title entry alive while page-specific SEO head entries mount and unmount.
 // Without this fallback, removing the home page head can restore its old title on another route.
-useHead(() => ({ title: route.meta?.title || 'ReYohoho' }))
+const siteImage = buildStaticCanonicalUrl('/') + 'icons/icon-512x512.png'
+useHead(() => ({
+  title: route.meta?.title || 'ReYohoho',
+  meta: route.name === 'movie-info' || route.name === 'movie-info-shiki'
+    ? []
+    : [{ property: 'og:image', content: siteImage }]
+}))
 
 // Применяем класс sidebar-right на body при смене позиции панели
 const sidebarPosition = computed(() => store.sidebarPosition)
