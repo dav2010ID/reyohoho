@@ -213,7 +213,7 @@ async def fetch_list(
 
 @bp.get("/auth/telegram-login-token")
 async def telegram_login_token(request: Request):
-    limiter.check(f"login-create:{request.ip}", 10, 60)
+    limiter.check(f"login-create:{request.remote_addr or request.ip}", 10, 60)
     token = secrets.token_urlsafe(32)
     token_hash = hashlib.sha256(token.encode()).hexdigest()
     ttl = max(300, min(SETTINGS.telegram_login_ttl_seconds, 600))
@@ -237,7 +237,7 @@ async def check_telegram_auth(request: Request):
     if len(token) < 40 or len(token) > 100:
         raise APIError("INVALID_LOGIN_TOKEN", "Некорректный login token", 422)
     digest = hashlib.sha256(token.encode()).hexdigest()
-    limiter.check(f"login-poll:{request.ip}:{digest[:12]}", 35, 60)
+    limiter.check(f"login-poll:{request.remote_addr or request.ip}:{digest[:12]}", 35, 60)
     session: AsyncSession = request.ctx.db
     now = datetime.now(timezone.utc)
     result = await session.execute(

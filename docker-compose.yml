@@ -5,7 +5,7 @@ services:
     environment:
       POSTGRES_DB: reyohoho
       POSTGRES_USER: reyohoho
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-reyohoho-dev}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?Set POSTGRES_PASSWORD}
     volumes:
       - postgres_data:/var/lib/postgresql/data
     healthcheck:
@@ -21,8 +21,10 @@ services:
     ports:
       - "8000:8000"
     environment:
-      DATABASE_URL: postgresql+asyncpg://reyohoho:${POSTGRES_PASSWORD:-reyohoho-dev}@postgres:5432/reyohoho
-      JWT_SECRET: ${JWT_SECRET:-development-only-change-me-at-least-32-bytes}
+      DATABASE_URL: postgresql+asyncpg://reyohoho:${POSTGRES_PASSWORD:?Set POSTGRES_PASSWORD}@postgres:5432/reyohoho
+      JWT_SECRET: ${JWT_SECRET:?Set JWT_SECRET}
+      PROXIES_COUNT: ${PROXIES_COUNT:-0}
+      REAL_IP_HEADER: ${REAL_IP_HEADER:-}
       ALLOWED_ORIGINS: ${ALLOWED_ORIGINS:-http://localhost:5173}
       TELEGRAM_BOT_USERNAME: ${TELEGRAM_BOT_USERNAME:-}
       TELEGRAM_WEBHOOK_SECRET: ${TELEGRAM_WEBHOOK_SECRET:-}

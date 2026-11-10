@@ -229,6 +229,9 @@ SETTINGS = Settings()
 
 def create_app() -> Sanic:
     app = Sanic("reyohoho")
+    app.config.PROXIES_COUNT = int(os.getenv('PROXIES_COUNT', '0'))
+    if os.getenv('REAL_IP_HEADER'):
+        app.config.REAL_IP_HEADER = os.environ['REAL_IP_HEADER']
     app.ctx.settings = SETTINGS
     app.ctx.cache = TTLCache(int(os.getenv("CACHE_MAX_ENTRIES", "5000")))
     register_lifecycle(app)
@@ -1522,7 +1525,6 @@ async def get_indexed_players(app: Sanic, kp_id: str) -> dict[str, Any]:
                 KINOBOX_PLAYERS_URL,
                 headers=kinobox_headers,
                 params={"kinopoisk": kp_id},
-                ssl=False,
             )
             players = normalize_player_index_payload(payload, source="kinobox", source_label="KINOBOX")
             if players:
@@ -1638,7 +1640,6 @@ async def get_alloha_players(app: Sanic, kp_id: str) -> dict[str, Any]:
             app,
             "https://api.alloha.tv/",
             params={"token": token, "kp": kp_id},
-            ssl=False,
         )
     except Exception as exc:  # noqa: BLE001
         logger.warning("Alloha provider failed for kp_id=%s: %s", kp_id, exc)

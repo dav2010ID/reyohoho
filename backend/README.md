@@ -41,3 +41,17 @@ python -m pytest backend/tests -q
 ```
 
 The complete stack is defined in `docker-compose.yml`; migrations run before the backend starts.
+
+## Runtime constraints (audit 2026-11-09)
+
+The Docker image installs the Linux/Python 3.13 lock in `requirements.lock` and runs
+one worker because the cache and rate limiter are process-local. Regenerate with
+`uv pip compile backend/requirements.txt --python-version 3.13 --python-platform x86_64-unknown-linux-gnu --output-file backend/requirements.lock`.
+Set POSTGRES_PASSWORD and JWT_SECRET before running Compose; it has no default secrets.
+TLS certificate verification is enabled for upstreams. View events older than 90 days
+are pruned at startup and hourly; the all-time chart therefore represents retained events.
+
+Proxy headers are ignored by default. Behind a trusted reverse proxy, set
+PROXIES_COUNT to the exact trusted chain length, or REAL_IP_HEADER to the header
+that the proxy overwrites. Prevent direct access to the backend when trusting those
+headers; never accept client-supplied forwarding headers unmodified.
