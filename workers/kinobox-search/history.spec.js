@@ -8,6 +8,7 @@ import { testDatabase } from './test-db.mjs'
 function database() {
   const sqlite = new DatabaseSync(':memory:')
   sqlite.exec(readFileSync(new URL('./migrations/0001_history.sql', import.meta.url), 'utf8'))
+  sqlite.exec(readFileSync(new URL('./migrations/0004_active_history_quota.sql', import.meta.url), 'utf8'))
   return {
     sqlite,
     prepare(sql) {
@@ -175,6 +176,12 @@ describe('private D1 history', () => {
     expect(
       (await serveHistory(request('/301', 'PUT', { title: 'Existing' }), env, origin)).status
     ).toBe(200)
+    await serveHistory(request('/301', 'DELETE'), env, origin)
+    expect(db.sqlite.prepare('SELECT item_count FROM history_quota').get().item_count).toBe(4999)
+    expect((await serveHistory(request('/42', 'PUT', {}), env, origin)).status).toBe(200)
+    expect((await serveHistory(request('/301', 'PUT', {}), env, origin)).status).toBe(409)
+    await serveHistory(request('/42', 'DELETE'), env, origin)
+    expect((await serveHistory(request('/301', 'PUT', {}), env, origin)).status).toBe(200)
     db.sqlite.close()
   })
   it('rejects invalid authority, unauthorized tokens, oversized bodies and imports', async () => {

@@ -3,7 +3,7 @@ import { readFileSync } from 'node:fs'
 
 export function testDatabase() {
   const sqlite = new DatabaseSync(':memory:')
-  for (const name of ['0001_history.sql', '0002_telegram_auth.sql', '0003_list_lookup_history_page.sql'])
+  for (const name of ['0001_history.sql', '0002_telegram_auth.sql', '0003_list_lookup_history_page.sql', '0004_active_history_quota.sql'])
     sqlite.exec(readFileSync(new URL(`./migrations/${name}`, import.meta.url), 'utf8'))
   return {
     sqlite,
