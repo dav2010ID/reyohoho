@@ -152,6 +152,25 @@ describe('Kino API requests', () => {
     expect(result.data.ids.imdb).toBe('tt0137523')
     expect(result.data.similar).toEqual([])
   })
+  it('marks a missing similar endpoint partial and logs only safe diagnostics', async () => {
+    const logger = vi.spyOn(console, 'error').mockImplementation(() => {})
+    try {
+      const fetcher = vi.fn(async (url) =>
+        String(url).includes('/similar') ? json({}, 404) : json({ data: title() })
+      )
+      const result = await requestMovieExtras('361', KEY, fetcher)
+      expect(result.partial).toBe(true)
+      expect(result.data.similar).toEqual([])
+      expect(JSON.parse(logger.mock.calls[0][0])).toEqual({
+        event: 'kinoapi_similar_error',
+        reason: 'http',
+        upstreamStatus: 404
+      })
+      expect(JSON.stringify(logger.mock.calls)).not.toContain(KEY)
+    } finally {
+      logger.mockRestore()
+    }
+  })
   it('reports a title missing from the catalogue as empty, not as a failure', async () => {
     const result = await requestMovieExtras('361', KEY, async () => json({}, 404))
     expect(result).toEqual({ data: null, partial: false })

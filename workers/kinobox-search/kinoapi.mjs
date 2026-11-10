@@ -5,7 +5,7 @@ import { cacheMatch, cachePut, logPublicCache } from './public-cache.mjs'
 const BASE = 'https://kinoapi.lampac.dev/api/v1'
 const MAX_BYTES = 1024 * 1024
 // Bump to drop cached extras after changing their shape.
-const FORMAT = '1'
+const FORMAT = '2'
 const VALID_ID = /^[1-9]\d{0,11}$/
 const IMDB_ID = /^tt\d{5,10}$/
 const YOUTUBE_ID = /^[\w-]{11}$/
@@ -156,8 +156,16 @@ export async function requestMovieExtras(id, key, fetchImpl = fetch, timeoutMs =
       } catch (error) {
         // Rate limiting and a rejected key concern the whole key, not this block.
         if ([401, 403, 429].includes(error.upstreamStatus)) throw error
+        // Do not log the error itself: transport errors may contain credentials.
+        console.error(
+          JSON.stringify({
+            event: 'kinoapi_similar_error',
+            reason: error.reason || 'connection',
+            upstreamStatus: error.upstreamStatus
+          })
+        )
         similar = []
-        partial = error.upstreamStatus !== 404
+        partial = true
       }
     }
     return { data: toMovieExtras(title, similar), partial }
