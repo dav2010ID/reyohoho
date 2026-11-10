@@ -55,7 +55,7 @@ describe('cloud history client', () => {
     expect(main.history).toEqual([])
     auth.setToken('private-token')
     auth.setUser({ id: 11 })
-    expect(main.history).toMatchObject([{ kp_id: '301' }])
+    expect(main.history).toMatchObject([{ kp_id: 301 }])
   })
   it('keeps local data when storage is unavailable', async () => {
     main.setHistory([{ kp_id: 301 }])

@@ -11,6 +11,16 @@ import {
 describe('local user lists mirror', () => {
   beforeEach(() => localStorage.clear())
 
+  it('migrates one legacy list and does not rewrite unrelated lists', () => {
+    localStorage.setItem('reyohoho-user-lists', JSON.stringify({ favorite: [{ kp_id: '1' }], history: [{ kp_id: '2' }] }))
+    expect(getLocalList('history')).toEqual([{ kp_id: '2' }])
+    expect(JSON.parse(localStorage.getItem('reyohoho-user-lists'))).toEqual({ favorite: [{ kp_id: '1' }] })
+    const spy = vi.spyOn(window.Storage.prototype, 'setItem')
+    replaceLocalList('history', [{ kp_id: '3' }])
+    expect(spy).toHaveBeenCalledTimes(1)
+    expect(spy.mock.calls[0][0]).toBe('reyohoho-user-lists:history')
+    spy.mockRestore()
+  })
   it('keeps guest, worker accounts and legacy accounts isolated while offline', () => {
     addLocalListItem('favorite', 1, { title: 'Guest' })
     addLocalListItem('favorite', 2, { title: 'Worker A' }, 'worker:11')

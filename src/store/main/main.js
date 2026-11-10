@@ -4,7 +4,9 @@ import { MAIN_STORE_NAME } from '../constants'
 import { beforeHydrateMainStore } from '../utils'
 import { resolvePosterByMovie } from '@/utils/mediaUtils'
 import { cardRatings } from '../../../shared/history-data.js'
-import { replaceLocalList } from '@/utils/localUserLists'
+import { getLocalList, replaceLocalList } from '@/utils/localUserLists'
+
+const ratingWrites = new WeakMap()
 
 export const useMainStore = defineStore(MAIN_STORE_NAME, {
   state: () => ({
@@ -28,6 +30,19 @@ export const useMainStore = defineStore(MAIN_STORE_NAME, {
   }),
 
   actions: {
+    patchHistoryRatings(id, ratings) {
+      const item = this.history.find(movie => String(movie.kp_id) === String(id))
+      if (!item || !Object.entries(ratings).some(([key, value]) => item[key] !== value)) return
+      Object.assign(item, ratings)
+      if (ratingWrites.has(this)) return
+      // Coalesce card enrichment; capture the owner so an account switch cannot
+      // persist one user's metadata in another user's history.
+      const owner = this.historyOwner
+      ratingWrites.set(this, setTimeout(() => {
+        ratingWrites.delete(this)
+        if (this.historyOwner === owner) replaceLocalList('history', this.history, owner)
+      }, 100))
+    },
     setHistory(history) {
       this.history = history
       replaceLocalList('history', history, this.historyOwner)
@@ -156,7 +171,6 @@ export const useMainStore = defineStore(MAIN_STORE_NAME, {
   persist: {
     key: MAIN_STORE_NAME,
     pick: [
-      'history',
       'historyOwner',
       'cloudHistoryAccount',
       'isHistoryAllowed',
@@ -172,6 +186,14 @@ export const useMainStore = defineStore(MAIN_STORE_NAME, {
       'sidebarAutoHide',
       'sidebarPosition'
     ],
-    beforeHydrate: beforeHydrateMainStore
+    beforeHydrate: beforeHydrateMainStore,
+    afterHydrate: ({ store }) => {
+      // A failed migration must retain the in-memory history as well as its old copy.
+      try {
+        const previous = JSON.parse(localStorage.getItem(MAIN_STORE_NAME))
+        store.history = Array.isArray(previous?.history)
+          ? previous.history : getLocalList('history', store.historyOwner)
+      } catch { store.history = getLocalList('history', store.historyOwner) }
+    }
   }
 })

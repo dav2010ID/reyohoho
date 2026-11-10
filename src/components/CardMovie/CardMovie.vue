@@ -104,14 +104,7 @@ const loadRatings = async () => {
     // Patch only metadata of an existing entry; never resurrect a deleted history item.
     if (isHistory) {
       const ratings = cardRatings(card)
-      mainStore.setHistory(
-        mainStore.history.map((item) =>
-          String(item.kp_id) === String(original.kp_id) &&
-          Object.entries(ratings).some(([key, value]) => item[key] !== value)
-            ? { ...item, ...ratings }
-            : item
-        )
-      )
+      mainStore.patchHistoryRatings(original.kp_id, ratings)
     }
   } catch {
     /* Keep the card usable when the metadata service is unavailable. */

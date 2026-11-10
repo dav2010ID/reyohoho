@@ -1,4 +1,5 @@
 import { LEGACY_STORE_KEY, LEGACY_STORE_KEY_BACKUP, MAIN_STORE_NAME } from './constants'
+import { replaceLocalList } from '@/utils/localUserLists'
 
 export const CONTENT_PROVIDER_DDBB_DEFAULT_MIGRATION_KEY = 'main:contentApiProviderDefault:ddbb:v1'
 export const CONTENT_PROVIDER_KINOBOX_DEFAULT_MIGRATION_KEY = 'main:contentApiProviderDefault:kinobox:v1'
@@ -92,6 +93,10 @@ export function beforeHydrateMainStore(ctx) {
   if (!raw) return
   try {
     const persisted = JSON.parse(raw)
+    if (Array.isArray(persisted.history)) {
+      if (!replaceLocalList('history', persisted.history, persisted.historyOwner || 'guest')) return
+      delete persisted.history
+    }
     if (['rhserv', 'kinobd', 'kinodb'].includes(persisted.searchApiProvider)) {
       persisted.searchApiProvider = 'kinobox'
     }

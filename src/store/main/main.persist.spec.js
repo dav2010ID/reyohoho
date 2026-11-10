@@ -18,7 +18,6 @@ import {
 import { useMainStore } from './main'
 
 const pickMainPersistedState = (state) => ({
-  history: state.history,
   historyOwner: state.historyOwner,
   cloudHistoryAccount: state.cloudHistoryAccount,
   isHistoryAllowed: state.isHistoryAllowed,
@@ -324,7 +323,6 @@ describe('Тесты миграций на новый способ хранен�
     await flushPromises()
 
     expect(JSON.parse(window.localStorage.getItem(MAIN_STORE_NAME))).toEqual({
-      history: OLD_LOCAL_STORAGE_DATA.history,
       isHistoryAllowed: OLD_LOCAL_STORAGE_DATA.isHistoryAllowed
     })
     expect(JSON.parse(window.localStorage.getItem(PLAYER_STORE_NAME))).toEqual(
@@ -357,7 +355,6 @@ describe('Тесты миграций на новый способ хранен�
         isCardHoverDisabled: false
       },
       main: {
-        history: [],
         historyOwner: 'guest',
         cloudHistoryAccount: null,
         isHistoryAllowed: true,
