@@ -601,6 +601,8 @@
 </template>
 
 <script setup>
+import { useConfirmation } from '@/composables/useConfirmation'
+import { sceneSelection } from '@/utils/sceneSelection'
 import { getKpInfo, getShikiInfo, getMovieNote, saveMovieNote, deleteMovieNote } from '@/api/movies'
 import { legacyBackendAvailable } from '@/api/backendConfig'
 import { legacyMovieMethodAvailable } from '@/api/movieCapabilities'
@@ -633,6 +635,8 @@ import {
 import { formatProductionStatus } from '@/utils/movieStatus'
 import { formatMovieDuration } from '@/utils/movieDuration'
 import { isRequestCanceled } from '@/utils/requestCancellation'
+
+const askConfirmation = useConfirmation()
 
 const TrailerCarousel = defineAsyncComponent(() => import('@/components/TrailerCarousel.vue'))
 const MovieMobileListDropdown = defineAsyncComponent(
@@ -723,7 +727,7 @@ async function toggleScenePanel(mode, event) {
 }
 
 const syncOverlaySelection = (ids) => {
-  window.overlayNudityTimings = ids
+  sceneSelection.overlayNudityTimings = ids
 }
 const refreshMovieTimings = () => fetchMovieInfo(false)
 
@@ -1150,8 +1154,8 @@ onMounted(async () => {
   clientReady.value = true
   document.addEventListener('keydown', onKeyDown)
   document.addEventListener('click', handleClickOutside)
-  window.selectedNudityTimings = []
-  window.overlayNudityTimings = []
+  sceneSelection.selectedNudityTimings = []
+  sceneSelection.overlayNudityTimings = []
   const movieInfoPromise = fetchMovieInfo()
   const playerModule = await import('@/components/PlayerComponent.vue')
   if (!active) return
@@ -1166,8 +1170,8 @@ onUnmounted(() => {
   navbarStore.clearHeaderContent()
   document.removeEventListener('keydown', onKeyDown)
   document.removeEventListener('click', handleClickOutside)
-  delete window.selectedNudityTimings
-  delete window.overlayNudityTimings
+  delete sceneSelection.selectedNudityTimings
+  delete sceneSelection.overlayNudityTimings
 })
 
 watch(
@@ -1179,8 +1183,8 @@ watch(
       scenePanelTrigger.value = null
       sceneToolsUsed.value = false
       guideLoading.value = false
-      window.selectedNudityTimings = []
-      window.overlayNudityTimings = []
+      sceneSelection.selectedNudityTimings = []
+      sceneSelection.overlayNudityTimings = []
       kp_id.value = newKpId
       movieInfo.value = getCatalogMovie(newKpId)
       activeTrailerIndex.value = null
@@ -1259,7 +1263,7 @@ const handleDeleteNote = async () => {
     return
   }
 
-  if (!confirm('Вы уверены, что хотите удалить заметку?')) {
+  if (!await askConfirmation('Вы уверены, что хотите удалить заметку?')) {
     return
   }
 

@@ -1,3 +1,4 @@
+import { sceneSelection } from '@/utils/sceneSelection'
 import { computed, watch } from 'vue'
 import { debugLog } from '@/utils/logger'
 
@@ -25,8 +26,8 @@ export function usePlayerVideoOverlay({
   let lastTimingsCount = 0
 
   const selectedTimingsCount = () =>
-    (Array.isArray(window.overlayNudityTimings) ? window.overlayNudityTimings.length : 0) +
-    (Array.isArray(window.selectedNudityTimings) ? window.selectedNudityTimings.length : 0)
+    (Array.isArray(sceneSelection.overlayNudityTimings) ? sceneSelection.overlayNudityTimings.length : 0) +
+    (Array.isArray(sceneSelection.selectedNudityTimings) ? sceneSelection.selectedNudityTimings.length : 0)
   const needsRuntime = () => videoOverlayEnabled2.value || selectedTimingsCount() > 0
   const releaseRuntime = () => {
     generation++

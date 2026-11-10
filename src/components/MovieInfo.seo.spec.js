@@ -1,3 +1,4 @@
+import { sceneSelection } from '@/utils/sceneSelection'
 import { createTestingPinia } from '@pinia/testing'
 import { flushPromises, shallowMount } from '@vue/test-utils'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
@@ -369,19 +370,19 @@ describe('MovieInfo SEO', () => {
       const instance = scene.vm
       expect(scene.props('mode')).toBe('timings')
       scene.vm.$emit('overlay-selection', [7])
-      expect(window.overlayNudityTimings).toEqual([7])
+      expect(sceneSelection.overlayNudityTimings).toEqual([7])
       await button.trigger('click')
       expect(scene.props('mode')).toBe(null)
       await button.trigger('click')
       expect(wrapper.getComponent({ name: 'MovieSceneTools' }).vm).toBe(instance)
-      expect(window.overlayNudityTimings).toEqual([7])
+      expect(sceneSelection.overlayNudityTimings).toEqual([7])
       routeMock.params.kp_id = '456'
       await flushPromises()
       expect(wrapper.find('.test-scene-tools').exists()).toBe(false)
-      expect(window.overlayNudityTimings).toEqual([])
+      expect(sceneSelection.overlayNudityTimings).toEqual([])
     } finally {
       wrapper.unmount()
-      expect(window.overlayNudityTimings).toBeUndefined()
+      expect(sceneSelection.overlayNudityTimings).toBeUndefined()
     }
   })
 

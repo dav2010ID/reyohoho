@@ -1,3 +1,4 @@
+import { sceneSelection } from '@/utils/sceneSelection'
 import { reactive, ref } from 'vue'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { usePlayerVideoOverlay } from './usePlayerVideoOverlay'
@@ -47,14 +48,14 @@ describe('usePlayerVideoOverlay lazy activation', () => {
   afterEach(() => {
     overlays.splice(0).forEach((overlay) => overlay.dispose())
     delete window.electronAPI
-    delete window.overlayNudityTimings
-    delete window.selectedNudityTimings
+    delete sceneSelection.overlayNudityTimings
+    delete sceneSelection.selectedNudityTimings
     vi.useRealTimers()
     vi.restoreAllMocks()
   })
 
   it('never imports the overlay on web even with persisted overlay settings and timings', async () => {
-    window.overlayNudityTimings = [1]
+    sceneSelection.overlayNudityTimings = [1]
     const { overlay, loader } = setup({ electron: false })
     await overlay.onIframeLoad()
     await vi.advanceTimersByTimeAsync(5000)
@@ -88,14 +89,14 @@ describe('usePlayerVideoOverlay lazy activation', () => {
   it('auto-enables for scene selections and retains timing support while they remain selected', async () => {
     const { overlay, loader, playerStore, runtime } = setup({ enabled: false })
     await overlay.onIframeLoad()
-    window.overlayNudityTimings = [10]
+    sceneSelection.overlayNudityTimings = [10]
     await vi.advanceTimersByTimeAsync(1000)
     expect(playerStore.videoOverlayEnabled2).toBe(true)
     expect(loader).toHaveBeenCalledTimes(1)
     playerStore.updateVideoOverlay(false)
     await vi.advanceTimersByTimeAsync(1000)
     expect(runtime.dispose).not.toHaveBeenCalled()
-    window.overlayNudityTimings = []
+    sceneSelection.overlayNudityTimings = []
     await vi.advanceTimersByTimeAsync(1000)
     expect(runtime.dispose).toHaveBeenCalledTimes(1)
   })

@@ -1,3 +1,4 @@
+import { sceneSelection } from '@/utils/sceneSelection'
 import { computed, ref, watch } from 'vue'
 
 import { parseTimingTextToSeconds, formatSecondsToTime } from '@/utils/dateUtils'
@@ -162,8 +163,8 @@ export function createPlayerVideoOverlayRuntime({
 
       const selectedTimingIds = new Set(
         [
-          ...(Array.isArray(window.selectedNudityTimings) ? window.selectedNudityTimings : []),
-          ...(Array.isArray(window.overlayNudityTimings) ? window.overlayNudityTimings : [])
+          ...(Array.isArray(sceneSelection.selectedNudityTimings) ? sceneSelection.selectedNudityTimings : []),
+          ...(Array.isArray(sceneSelection.overlayNudityTimings) ? sceneSelection.overlayNudityTimings : [])
         ].map((id) => String(id))
       )
 
@@ -206,12 +207,12 @@ export function createPlayerVideoOverlayRuntime({
             const activeTimingIds = []
 
             if (
-              window.overlayNudityTimings &&
-              Array.isArray(window.overlayNudityTimings) &&
-              window.overlayNudityTimings.length > 0
+              sceneSelection.overlayNudityTimings &&
+              Array.isArray(sceneSelection.overlayNudityTimings) &&
+              sceneSelection.overlayNudityTimings.length > 0
             ) {
               for (const timing of props.movieInfo.nudity_timings) {
-                if (window.overlayNudityTimings.includes(timing.id)) {
+                if (sceneSelection.overlayNudityTimings.includes(timing.id)) {
                   const parsedRanges = parseTimingTextToSeconds(timing.timing_text)
 
                   if (parsedRanges && parsedRanges.length > 0) {

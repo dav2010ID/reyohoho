@@ -40,7 +40,10 @@
           :src="safeIframeUrl || undefined"
           :title="movieInfo?.title ? `Плеер для ${movieInfo.title}` : 'Видео-плеер'"
           frameborder="0"
+          allow="fullscreen; picture-in-picture; encrypted-media"
           allowfullscreen
+          sandbox="allow-scripts allow-same-origin allow-forms allow-presentation allow-popups"
+          referrerpolicy="strict-origin-when-cross-origin"
           webkitallowfullscreen
           class="responsive-iframe"
           :class="{

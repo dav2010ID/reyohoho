@@ -1,3 +1,4 @@
+import { sceneSelection } from '@/utils/sceneSelection'
 import { nextTick, reactive, ref } from 'vue'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { createPlayerVideoOverlayRuntime } from './playerVideoOverlayRuntime'
@@ -57,8 +58,8 @@ describe('playerVideoOverlayRuntime', () => {
     document.body.innerHTML = ''
     delete window.iframeLoadTime
     delete window.electronAPI
-    delete window.overlayNudityTimings
-    delete window.selectedNudityTimings
+    delete sceneSelection.overlayNudityTimings
+    delete sceneSelection.selectedNudityTimings
     vi.useRealTimers()
     vi.restoreAllMocks()
   })
@@ -119,7 +120,7 @@ describe('playerVideoOverlayRuntime', () => {
   it('keeps auto-blur support with the visual overlay disabled and releases blur on disposal', async () => {
     const { runtime, video, playerStore, enableBlur, disableBlur } = setup()
     playerStore.updateVideoOverlay(false)
-    window.overlayNudityTimings = [1]
+    sceneSelection.overlayNudityTimings = [1]
     Object.defineProperty(video, 'paused', { value: false })
     video.currentTime = 15
     runtime.start()
@@ -134,7 +135,7 @@ describe('playerVideoOverlayRuntime', () => {
     'applies and releases local blur at the selected scene boundaries from %s',
     async (selection) => {
       const { runtime, video, enableBlur, disableBlur } = setup()
-      window[selection] = ['1']
+      sceneSelection[selection] = ['1']
       Object.defineProperty(video, 'paused', { value: false })
       video.currentTime = 9
       runtime.start()
@@ -159,7 +160,7 @@ describe('playerVideoOverlayRuntime', () => {
 
   it('releases local blur when auto-blur is disabled or the selected scene is cleared', async () => {
     const { runtime, video, playerStore, enableBlur, disableBlur } = setup()
-    window.overlayNudityTimings = [1]
+    sceneSelection.overlayNudityTimings = [1]
     Object.defineProperty(video, 'paused', { value: false })
     video.currentTime = 15
     runtime.start()
@@ -173,7 +174,7 @@ describe('playerVideoOverlayRuntime', () => {
     await vi.advanceTimersByTimeAsync(100)
     expect(enableBlur).toHaveBeenCalledTimes(2)
 
-    window.overlayNudityTimings = []
+    sceneSelection.overlayNudityTimings = []
     await vi.advanceTimersByTimeAsync(100)
     expect(disableBlur).toHaveBeenCalledTimes(2)
   })
