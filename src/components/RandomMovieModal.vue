@@ -1,7 +1,7 @@
 <template>
   <transition name="modal">
     <div v-if="isOpen" class="modal-overlay" @click.self="close">
-      <div class="modal modern-dark-dialog random-movie-modal">
+      <div v-dialog-focus="close" aria-label="Случайный фильм" class="modal modern-dark-dialog random-movie-modal">
         <div class="modal-header">
           <h3>
             <i class="fas fa-dice"></i>

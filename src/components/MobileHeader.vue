@@ -123,6 +123,8 @@ onUnmounted(() => {
 }
 
 .btn--search {
+  min-width: 44px;
+  min-height: 44px;
   border: 0;
   background: none;
   color: var(--text-color);

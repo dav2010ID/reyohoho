@@ -1,6 +1,6 @@
 <template>
   <div class="search" @click="closeModal">
-    <div class="search__content" @click.stop>
+    <div v-dialog-focus="closeModal" aria-label="Поиск фильмов" class="search__content" @click.stop>
       <!-- Поиск -->
       <div class="input-wrapper">
         <input

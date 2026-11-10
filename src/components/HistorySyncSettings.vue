@@ -76,6 +76,7 @@
 </template>
 
 <script setup>
+import { useConfirmation } from '@/composables/useConfirmation'
 import { computed, onBeforeUnmount, onMounted, ref } from 'vue'
 import { useAuthStore } from '@/store/auth'
 import { useMainStore } from '@/store/main'
@@ -93,6 +94,8 @@ import { mergeHistory, normalizeHistory } from '../../shared/history-data.js'
 import { readPendingSync } from '@/utils/pendingAccountSync'
 
 defineProps({ compact: { type: Boolean, default: false } })
+const askConfirmation = useConfirmation()
+
 const emit = defineEmits(['imported'])
 const auth = useAuthStore()
 const main = useMainStore()
@@ -136,8 +139,10 @@ async function run(action) {
     busy.value = false
   }
 }
-function enable() {
-  if (!window.confirm('Синхронизировать локальную историю этого браузера с облаком?')) return
+async function enable() {
+  const confirmedToken = auth.token
+  if (!await askConfirmation('Синхронизировать локальную историю этого браузера с облаком?')) return
+  if (auth.token !== confirmedToken) return
   run(async () => {
     const token = auth.token
     const history = await importCloudHistory(main.history.slice(0, 5000))
@@ -154,11 +159,13 @@ function refresh() {
     main.setHistory(history)
   })
 }
-function uploadLocal() {
+async function uploadLocal() {
+  const confirmedToken = auth.token
   if (
-    !window.confirm('Добавить локальные записи в облако? Ранее удалённые записи не восстановятся.')
+    !await askConfirmation('Добавить локальные записи в облако? Ранее удалённые записи не восстановятся.')
   )
     return
+  if (auth.token !== confirmedToken) return
   run(async () => {
     const token = auth.token
     const history = await importCloudHistory(main.history.slice(0, 5000))
@@ -166,13 +173,15 @@ function uploadLocal() {
     main.setHistory(history)
   })
 }
-function clearCloud() {
+async function clearCloud() {
+  const confirmedToken = auth.token
   if (
-    !window.confirm(
+    !await askConfirmation(
       'Удалить историю в облаке для этого аккаунта? Это действие очистит и локальную историю.'
     )
   )
     return
+  if (auth.token !== confirmedToken) return
   run(async () => {
     const token = auth.token
     await historyRequest('', 'DELETE')

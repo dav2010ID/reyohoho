@@ -17,7 +17,7 @@ export const useMainStore = defineStore(MAIN_STORE_NAME, {
     commentsSortBy: 'rating',
     isMobile: false,
     dimmingEnabled: false,
-    isCtrlFEnabled: true,
+    isCtrlFEnabled: false,
     submitterUsername: '',
     cardSize: 'medium',
     isStreamerMode: true,

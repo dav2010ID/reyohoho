@@ -1,6 +1,6 @@
 <template>
   <div class="modal-overlay" @click="$emit('close')">
-    <div class="modal-content all-timings-modal" @click.stop>
+    <div v-dialog-focus="() => $emit('close')" aria-label="Все тайминги" class="modal-content all-timings-modal" @click.stop>
       <div class="modal-header">
         <h3>Все тайминги</h3>
         <button class="close-modal-btn" type="button" @click="$emit('close')">

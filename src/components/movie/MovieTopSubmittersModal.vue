@@ -1,6 +1,6 @@
 <template>
   <div class="modal-overlay" @click="$emit('close')">
-    <div class="modal-content" @click.stop>
+    <div v-dialog-focus="() => $emit('close')" aria-label="Авторы таймингов" class="modal-content" @click.stop>
       <div class="modal-header">
         <h3>
           Топ авторов таймингов

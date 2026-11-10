@@ -250,6 +250,7 @@
 </template>
 
 <script setup>
+import { useConfirmation } from '@/composables/useConfirmation'
 import SliderRound from '@/components/slider/SliderRound.vue'
 import HistorySyncSettings from '@/components/HistorySyncSettings.vue'
 import ThemeSelector from '@/components/ThemeSelector.vue'
@@ -266,6 +267,8 @@ import { computed, ref, watch } from 'vue'
 import { useRoute } from 'vue-router'
 import BaseModal from './BaseModal.vue'
 import { historyRequest, isCloudHistoryEnabled } from '@/api/cloudHistory'
+
+const askConfirmation = useConfirmation()
 
 const mainStore = useMainStore()
 const backgroundStore = useBackgroundStore()
@@ -347,7 +350,7 @@ const clearAllHistory = async () => {
     try {
       await historyRequest('', 'DELETE')
     } catch (error) {
-      window.alert(error.message)
+      await askConfirmation(error.message)
       return
     }
   }

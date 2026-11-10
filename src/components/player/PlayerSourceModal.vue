@@ -1,6 +1,6 @@
 <template>
   <div class="source-modal-backdrop" @click.self="$emit('close')">
-    <div class="source-modal">
+    <div v-dialog-focus="() => $emit('close')" aria-label="Выбор источника" class="source-modal">
       <div class="source-modal-header">
         <h3>Выбор источника KinoBD</h3>
         <button class="source-close-btn" type="button" @click="$emit('close')">×</button>

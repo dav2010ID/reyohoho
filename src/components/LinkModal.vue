@@ -1,6 +1,6 @@
 <template>
   <div v-if="isVisible" class="link-modal-overlay" @click="closeModal">
-    <div class="link-modal" @click.stop>
+    <div v-dialog-focus="closeModal" aria-label="Добавить ссылку" class="link-modal" @click.stop>
       <div class="link-modal-header">
         <h3>Добавить ссылку</h3>
         <button class="close-button" @click="closeModal">

@@ -364,7 +364,7 @@ describe('Тесты миграций на новый способ хранен�
         isCommentsEnabled: true,
         isAutoShowComments: false,
         commentsSortBy: 'rating',
-        isCtrlFEnabled: true,
+        isCtrlFEnabled: false,
         submitterUsername: '',
         cardSize: 'medium',
         isStreamerMode: true,

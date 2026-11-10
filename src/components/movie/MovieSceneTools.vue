@@ -50,7 +50,7 @@
               </a>
               <span class="acknowledgment-text">— за основу базы таймингов</span>
             </div>
-            <div class="acknowledgment-row clickable" @click="showTopSubmitters">
+            <div class="acknowledgment-row clickable" role="button" tabindex="0" @keydown.enter.prevent="showTopSubmitters" @keydown.space.prevent="showTopSubmitters" @click="showTopSubmitters">
               <div class="community-link">
                 <i class="fa-solid fa-users"></i>
                 <span>Сообщество</span>
@@ -302,6 +302,7 @@
 </template>
 
 <script setup>
+import { useConfirmation } from '@/composables/useConfirmation'
 import { computed, defineAsyncComponent, onMounted, onUnmounted, ref, watch } from 'vue'
 import { useRouter } from 'vue-router'
 import { useAuthStore } from '@/store/auth'
@@ -322,6 +323,8 @@ import {
   voteOnTiming,
   getTimingVote
 } from '@/api/movies'
+
+const askConfirmation = useConfirmation()
 
 const props = defineProps({
   movieId: { type: [String, Number], required: true },
@@ -561,7 +564,7 @@ async function saveTiming() {
   }
 }
 async function deleteTimingHandler(timingId) {
-  if (!confirm('Вы уверены, что хотите удалить этот тайминг?')) return
+  if (!await askConfirmation('Вы уверены, что хотите удалить этот тайминг?')) return
   const isCurrent = requestContext()
   try {
     await deleteTiming(timingId)

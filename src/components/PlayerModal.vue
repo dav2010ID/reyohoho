@@ -1,6 +1,6 @@
 <template>
   <div class="modal" @click.self="$emit('close')">
-    <div class="modal-content" @click.stop>
+    <div v-dialog-focus="() => $emit('close')" aria-label="Выбор плеера" class="modal-content" @click.stop>
       <button class="close" @click="$emit('close')">&times;</button>
 
       <h2 v-if="!activeGroup">Выберите плеер</h2>

@@ -47,7 +47,7 @@
       class="mobile-modal-overlay"
       @click="closeModal"
     >
-      <div class="mobile-modal" @click.stop>
+      <div v-dialog-focus="() => isTooltipVisible = false" aria-label="Оценка фильма" class="mobile-modal" @click.stop>
         <div class="mobile-modal-header">
           <h3>Оценить фильм</h3>
           <button class="close-button" @click="closeModal">&times;</button>

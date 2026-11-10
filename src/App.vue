@@ -1,4 +1,5 @@
 <template>
+  <ConfirmationHost />
   <BackgroundSpace />
   <MobileHeader v-if="isMobile" />
   <MenuNavigation />
@@ -19,6 +20,7 @@
 </template>
 
 <script setup>
+import ConfirmationHost from '@/components/ConfirmationHost.vue'
 import BackgroundSpace from '@/components/BackgroundSpace.vue'
 import MenuNavigation from '@/components/MenuNavigation.vue'
 import MobileHeader from '@/components/MobileHeader.vue'
@@ -61,14 +63,16 @@ const updateIsMobile = () => {
 
 const handleKeyDown = (event) => {
   // Ctrl+F
-  if (event.ctrlKey && event.keyCode === 70 && store.isCtrlFEnabled) {
+  if (!event.target?.closest?.('input,textarea,select,[contenteditable="true"]') &&
+      ((!event.ctrlKey && !event.metaKey && !event.altKey && event.key === '/') ||
+        (event.ctrlKey && event.key.toLowerCase() === 'f' && store.isCtrlFEnabled))) {
     event.preventDefault()
     event.stopPropagation()
     navbarStore.openSearchModal()
   }
 
   // ESC
-  if (event.keyCode === 27 && navbarStore.isModalSearchVisible) {
+  if (event.key === 'Escape' && navbarStore.isModalSearchVisible) {
     event.preventDefault()
     event.stopPropagation()
     navbarStore.closeSearchModal()
@@ -147,5 +151,16 @@ const showGarland = computed(() => isNewYearPeriod())
   overflow: hidden;
   transform: rotate(180deg);
   z-index: 1;
+}
+</style>
+
+<style>
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
 }
 </style>

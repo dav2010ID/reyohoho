@@ -5,6 +5,8 @@ import HistorySyncSettings from './HistorySyncSettings.vue'
 import { useMainStore } from '@/store/main'
 import { useAuthStore } from '@/store/auth'
 
+vi.mock('@/composables/useConfirmation', () => ({ useConfirmation: () => message => window.confirm(message) }))
+
 const mocks = vi.hoisted(() => ({ transfer: vi.fn(), importHistory: vi.fn(), request: vi.fn(), getHistory: vi.fn() }))
 vi.mock('@/utils/historyTransfer', () => ({
   TRANSFER_URL: 'https://dav2010id.github.io/reyohoho-history-transfer/',

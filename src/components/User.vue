@@ -23,7 +23,7 @@
         <div class="info-item">
           <label>Имя:</label>
           <div class="editable-field">
-            <span v-if="!isEditingName" class="editable-text" @click="startEditName">
+            <span v-if="!isEditingName" class="editable-text" role="button" tabindex="0" @keydown.enter.prevent="startEditName" @keydown.space.prevent="startEditName" @click="startEditName">
               {{ user.name }}
               <i class="fas fa-edit edit-icon"></i>
             </span>
