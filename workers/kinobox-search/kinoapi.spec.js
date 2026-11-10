@@ -124,7 +124,7 @@ describe('Kino API requests', () => {
     await requestMovieExtras('361', KEY, fetcher)
     expect(fetcher.mock.calls.map(([url]) => url)).toEqual([
       'https://kinoapi.lampac.dev/api/v1/titles/by/kinopoisk/361?include=images',
-      'https://kinoapi.lampac.dev/api/v1/titles/movie/tt0137523/similar?limit=12'
+      'https://kinoapi.lampac.dev/api/v1/titles/movie/550/similar?limit=12'
     ])
     for (const [url, init] of fetcher.mock.calls) {
       expect(url).not.toContain(KEY)
@@ -132,15 +132,15 @@ describe('Kino API requests', () => {
       expect(init.redirect).toBe('manual')
     }
   })
-  it('looks up similar titles by TMDB ID when the title has no IMDb ID', async () => {
+  it('falls back to IMDb ID when the title has no TMDB ID', async () => {
     const fetcher = vi.fn(async (url) =>
       String(url).includes('/similar')
         ? json({ data: [] })
-        : json({ data: title({ id: { tmdb: 550, kinopoisk: 361, imdb: null } }) })
+        : json({ data: title({ id: { tmdb: null, kinopoisk: 361, imdb: 'tt0137523' } }) })
     )
     await requestMovieExtras('361', KEY, fetcher)
     expect(fetcher.mock.calls[1][0]).toBe(
-      'https://kinoapi.lampac.dev/api/v1/titles/movie/550/similar?limit=12'
+      'https://kinoapi.lampac.dev/api/v1/titles/movie/tt0137523/similar?limit=12'
     )
   })
   it('returns the card data marked partial when similar titles fail', async () => {

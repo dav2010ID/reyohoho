@@ -5,7 +5,7 @@ import { cacheMatch, cachePut, logPublicCache } from './public-cache.mjs'
 const BASE = 'https://kinoapi.lampac.dev/api/v1'
 const MAX_BYTES = 1024 * 1024
 // Bump to drop cached extras after changing their shape.
-const FORMAT = '2'
+const FORMAT = '3'
 const VALID_ID = /^[1-9]\d{0,11}$/
 const IMDB_ID = /^tt\d{5,10}$/
 const YOUTUBE_ID = /^[\w-]{11}$/
@@ -145,8 +145,8 @@ export async function requestMovieExtras(id, key, fetchImpl = fetch, timeoutMs =
     if (Number(title?.id?.kinopoisk) !== Number(id))
       throw upstreamError('Invalid Kino API response', 'schema')
     const type = contentType(title.type)
-    // The docs give an IMDb ID as the example for this method; TMDB is the catalogue's own key.
-    const similarId = IMDB_ID.test(title.id.imdb) ? title.id.imdb : positive(title.id.tmdb)
+    // The live similar endpoint rejects IMDb IDs with HTTP 400 despite its docs.
+    const similarId = positive(title.id.tmdb) || (IMDB_ID.test(title.id.imdb) && title.id.imdb)
     let similar = []
     let partial = false
     if (type && similarId) {
