@@ -39,9 +39,9 @@ describe('top page source semantics', () => {
     mocks.route.query = { time: '24h', type: 'all' }
     wrapper = render()
     await flushPromises()
-    expect(wrapper.find('h1').text()).toBe('Топ-250 Кинопоиска')
+    expect(wrapper.find('h1').text()).toBe('Топ-250')
     expect(wrapper.find('.time-card').exists()).toBe(false)
-    expect(wrapper.find('.top-header h1').text()).toBe('Топ-250 Кинопоиска')
+    expect(wrapper.find('.top-header h1').text()).toBe('Топ-250')
     expect(wrapper.find('.top-tabs').attributes('aria-label')).toBe('Тип подборки')
     expect(wrapper.findAll('.top-tabs button').map((button) => button.attributes('aria-pressed')))
       .toEqual(['true', 'false'])

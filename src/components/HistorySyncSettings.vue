@@ -290,7 +290,7 @@ button,
 label {
   padding: 10px 14px;
   border: 1px solid var(--accent-ui);
-  border-radius: 8px;
+  border-radius: var(--radius-m);
   background: transparent;
   color: inherit;
   font: inherit;

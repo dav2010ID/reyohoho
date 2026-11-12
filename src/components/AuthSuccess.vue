@@ -275,7 +275,7 @@ export default {
 .error-message {
   max-width: 400px;
   padding: 20px;
-  border-radius: 8px;
+  border-radius: var(--radius-m);
 }
 
 .loading-message {
@@ -291,7 +291,7 @@ export default {
   background-color: #1d1d1d;
   color: var(--accent-text);
   border: 1px solid var(--accent-ui);
-  border-radius: 8px;
+  border-radius: var(--radius-m);
 }
 
 .spinner {
@@ -321,7 +321,7 @@ export default {
   background-color: var(--accent-solid);
   color: var(--accent-contrast);
   text-decoration: none;
-  border-radius: 4px;
+  border-radius: var(--radius-s);
   transition: background-color 0.3s;
 }
 

@@ -63,12 +63,12 @@ export const resolvePosterSourcesByMovie = (movie = {}) => {
   }
 }
 
-// Matches MovieList's full-width grid and the 70px desktop sidebar in main.scss.
-// Explicit sizes select the right source before a lazy image has its final layout.
+// Matches MovieList's full-width grid (24px side padding, 16px gaps) and the 80px desktop rail in main.scss.
+// Phones show three columns. Explicit sizes select the right source before a lazy image has its final layout.
 const gridPosterSizes = (minWidth, gap) => {
-  const sizes = ['(max-width: 620px) 100px']
-  const horizontalPadding = 70 + 30
-  for (let columns = 1; columns <= 10; columns++) {
+  const sizes = ['(max-width: 620px) calc((100vw - 44px) / 3)']
+  const horizontalPadding = 80 + 48
+  for (let columns = 1; columns <= 12; columns++) {
     const maxViewport = (minWidth + gap) * (columns + 1) + horizontalPadding - gap - 1
     if (maxViewport <= 620) continue
     sizes.push(
@@ -79,9 +79,9 @@ const gridPosterSizes = (minWidth, gap) => {
 }
 
 export const CARD_POSTER_SIZES = {
-  small: gridPosterSizes(180, 10),
-  medium: gridPosterSizes(240, 15),
-  large: gridPosterSizes(320, 20)
+  small: gridPosterSizes(140, 16),
+  medium: gridPosterSizes(170, 16),
+  large: gridPosterSizes(220, 16)
 }
 
 export const setImageFallback = ({ target: image }) => {

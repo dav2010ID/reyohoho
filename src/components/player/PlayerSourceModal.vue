@@ -57,7 +57,7 @@ defineEmits(['close', 'select'])
   overflow: auto;
   background: #222;
   border: 1px solid #444;
-  border-radius: 10px;
+  border-radius: var(--radius-l);
   padding: 14px;
 }
 
@@ -105,7 +105,7 @@ defineEmits(['close', 'select'])
   background: #333;
   border: 1px solid #4f4f4f;
   color: #fff;
-  border-radius: 8px;
+  border-radius: var(--radius-m);
   padding: 10px;
   cursor: pointer;
   display: flex;

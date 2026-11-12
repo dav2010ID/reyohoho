@@ -81,7 +81,7 @@ const listTypes = USER_LIST_TYPES_ENUM
   background: transparent;
   border: none;
   padding: 12px 15px;
-  border-radius: 8px;
+  border-radius: var(--radius-m);
   color: #fff;
   font-size: 16px;
   cursor: pointer;
@@ -122,7 +122,7 @@ const listTypes = USER_LIST_TYPES_ENUM
   left: 0;
   width: 100%;
   background: rgba(0, 0, 0, 0.95);
-  border-radius: 8px;
+  border-radius: var(--radius-m);
   padding: 10px;
   z-index: 1000;
   box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
@@ -149,7 +149,7 @@ const listTypes = USER_LIST_TYPES_ENUM
   background: transparent;
   border: none;
   padding: 12px 15px;
-  border-radius: 8px;
+  border-radius: var(--radius-m);
   color: #fff;
   font-size: 16px;
   cursor: pointer;

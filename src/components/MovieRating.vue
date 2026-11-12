@@ -229,7 +229,7 @@ onUnmounted(() => {
   padding: 5px 10px;
   margin: 0;
   background: rgba(0, 0, 0, 0.7);
-  border-radius: 5px;
+  border-radius: var(--radius-m);
   cursor: pointer;
   transition: all 0.2s ease;
   gap: 5px;
@@ -240,9 +240,9 @@ onUnmounted(() => {
 .rating-link.has-rating {
   position: relative;
   padding: 5px 10px;
-  border-radius: 5px;
+  border-radius: var(--radius-m);
   background: rgba(0, 0, 0, 0.7);
-  border: 1px solid var(--accent-transparent);
+  border: 1px solid var(--hairline);
 }
 
 .rating-link.has-rating::after {
@@ -288,7 +288,7 @@ onUnmounted(() => {
   margin-top: 8px;
   z-index: 1000;
   background: #1a1a1a;
-  border-radius: 4px;
+  border-radius: var(--radius-s);
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
   padding: 8px;
   opacity: 0;
@@ -485,7 +485,7 @@ onUnmounted(() => {
 
 .mobile-modal {
   background: #1a1a1a;
-  border-radius: 8px;
+  border-radius: var(--radius-m);
   padding: 20px;
   width: 90%;
   max-width: 320px;

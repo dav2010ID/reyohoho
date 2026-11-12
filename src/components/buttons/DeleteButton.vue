@@ -34,7 +34,7 @@ const emit = defineEmits(['click'])
   gap: 3px;
   background-color: transparent;
   border: none;
-  border-radius: 8px;
+  border-radius: var(--radius-m);
   cursor: pointer;
   transition: all 0.2s;
   position: relative;
@@ -64,7 +64,7 @@ const emit = defineEmits(['click'])
   top: -40px;
   background-color: var(--tooltip-color);
   color: white;
-  border-radius: 5px;
+  border-radius: var(--radius-m);
   font-size: 12px;
   padding: 8px 12px;
   font-weight: 600;

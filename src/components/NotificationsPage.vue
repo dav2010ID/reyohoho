@@ -195,7 +195,7 @@ async function deleteNotification(notificationId) {
   color: var(--accent-contrast);
   border: none;
   padding: 10px 16px;
-  border-radius: 8px;
+  border-radius: var(--radius-m);
   cursor: pointer;
   font-size: 0.9rem;
   display: flex;

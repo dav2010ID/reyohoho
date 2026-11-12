@@ -1,12 +1,15 @@
 <template>
   <ConfirmationHost />
   <BackgroundSpace />
-  <MobileHeader v-if="isMobile" />
+  <MobileHeader v-if="showMobileHeader" />
   <MenuNavigation />
 
   <main
     id="main-content"
-    :class="['router-view-container', { 'router-view-container--with-mobile-header': isMobile }]"
+    :class="[
+      'router-view-container',
+      { 'router-view-container--with-mobile-header': showMobileHeader }
+    ]"
   >
     <router-view v-slot="{ Component }">
       <component :is="Component" />
@@ -43,9 +46,10 @@ let stopSidebarPositionWatch = null
 const siteImage = buildStaticCanonicalUrl('/') + 'icons/icon-512x512.png'
 useHead(() => ({
   title: route.meta?.title || 'ReYohoho',
-  meta: route.name === 'movie-info' || route.name === 'movie-info-shiki'
-    ? []
-    : [{ property: 'og:image', content: siteImage }]
+  meta:
+    route.name === 'movie-info' || route.name === 'movie-info-shiki'
+      ? []
+      : [{ property: 'og:image', content: siteImage }]
 }))
 
 // Применяем класс sidebar-right на body при смене позиции панели
@@ -55,6 +59,10 @@ const applySidebarPosition = (pos) => {
 }
 
 const isMobile = computed(() => store.isMobile)
+// Home and the top list open with their own header; the bottom tab bar covers navigation.
+const showMobileHeader = computed(
+  () => isMobile.value && !['home', 'top-movies'].includes(route.name)
+)
 
 // Реактивное состояние для ширины окна
 const updateIsMobile = () => {
@@ -63,9 +71,11 @@ const updateIsMobile = () => {
 
 const handleKeyDown = (event) => {
   // Ctrl+F
-  if (!event.target?.closest?.('input,textarea,select,[contenteditable="true"]') &&
-      ((!event.ctrlKey && !event.metaKey && !event.altKey && event.key === '/') ||
-        (event.ctrlKey && event.key.toLowerCase() === 'f' && store.isCtrlFEnabled))) {
+  if (
+    !event.target?.closest?.('input,textarea,select,[contenteditable="true"]') &&
+    ((!event.ctrlKey && !event.metaKey && !event.altKey && event.key === '/') ||
+      (event.ctrlKey && event.key.toLowerCase() === 'f' && store.isCtrlFEnabled))
+  ) {
     event.preventDefault()
     event.stopPropagation()
     navbarStore.openSearchModal()
@@ -137,7 +147,7 @@ const showGarland = computed(() => isNewYearPeriod())
 
 /* Отступ сверху для мобильного хедера */
 .router-view-container--with-mobile-header {
-  padding-top: 60px; /* Здесь height хедера */
+  padding-top: 56px;
 }
 
 #garland {
@@ -156,7 +166,9 @@ const showGarland = computed(() => isNewYearPeriod())
 
 <style>
 @media (prefers-reduced-motion: reduce) {
-  *, *::before, *::after {
+  *,
+  *::before,
+  *::after {
     animation-duration: 0.01ms !important;
     animation-iteration-count: 1 !important;
     transition-duration: 0.01ms !important;

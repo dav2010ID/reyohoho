@@ -197,12 +197,12 @@ onBeforeUnmount(() => {
 
   &::-webkit-scrollbar-track {
     background: transparent;
-    border-radius: 10px;
+    border-radius: var(--radius-l);
   }
 
   &::-webkit-scrollbar-thumb {
     background: #494949;
-    border-radius: 10px;
+    border-radius: var(--radius-l);
   }
 
   &::-webkit-scrollbar-thumb:hover {
@@ -250,7 +250,7 @@ onBeforeUnmount(() => {
   padding: 0;
   scroll-snap-align: start;
   border: 1px solid transparent;
-  border-radius: 8px;
+  border-radius: var(--radius-m);
   overflow: hidden;
   background: rgba(255, 255, 255, 0.04);
   color: inherit;
@@ -331,7 +331,7 @@ onBeforeUnmount(() => {
   max-width: 1200px;
   aspect-ratio: 16 / 9;
   margin: 18px auto 0;
-  border-radius: 12px;
+  border-radius: var(--radius-l);
   overflow: hidden;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
 }

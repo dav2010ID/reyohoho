@@ -121,7 +121,7 @@ const toggleSpoiler = (event) => {
 .notification-item {
   background: rgba(255, 255, 255, 0.1);
   backdrop-filter: blur(10px);
-  border-radius: 8px;
+  border-radius: var(--radius-m);
   padding: 10px;
   position: relative;
   transition: all 0.3s ease;
@@ -222,7 +222,7 @@ const toggleSpoiler = (event) => {
 
 .comment-preview {
   background: rgba(255, 255, 255, 0.05);
-  border-radius: 6px;
+  border-radius: var(--radius-m);
   padding: 8px;
   margin-bottom: 6px;
   border-left: 2px solid var(--accent-ui);
@@ -296,7 +296,7 @@ const toggleSpoiler = (event) => {
   width: 50px;
   height: 75px;
   object-fit: cover;
-  border-radius: 4px;
+  border-radius: var(--radius-s);
   cursor: pointer;
   transition: transform 0.3s ease;
 }
@@ -316,7 +316,7 @@ const toggleSpoiler = (event) => {
   width: 28px;
   height: 28px;
   border: none;
-  border-radius: 4px;
+  border-radius: var(--radius-s);
   cursor: pointer;
   display: flex;
   align-items: center;

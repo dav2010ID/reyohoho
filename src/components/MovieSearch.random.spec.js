@@ -58,17 +58,17 @@ describe('random film interaction', () => {
   const modal = () => wrapper.findComponent(RandomMovieModal)
   it('shows only ID searches served by the selected configuration', async () => {
     const tabs = () => wrapper.get('.search-type-buttons').text()
-    expect(tabs()).toContain('ID Кинопоиск')
-    expect(tabs()).not.toContain('ID IMDB')
+    expect(tabs()).toContain('ID КП')
+    expect(tabs()).not.toContain('ID IMDb')
     expect(tabs()).not.toContain('ID Shikimori')
     useMainStore().contentApiProvider = 'local'
     await flushPromises()
     expect(tabs()).toContain('ID Shikimori')
-    expect(tabs()).not.toContain('ID IMDB')
+    expect(tabs()).not.toContain('ID IMDb')
     useApiStore().$patch({ backendMode: 'local', backendModeUserSelected: true })
     await flushPromises()
-    expect(tabs()).toContain('ID IMDB')
-    await wrapper.findAll('.search-type-buttons button').find(b => b.text() === 'ID IMDB').trigger('click')
+    expect(tabs()).toContain('ID IMDb')
+    await wrapper.findAll('.search-type-buttons button').find(b => b.text() === 'ID IMDb').trigger('click')
     useApiStore().backendMode = 'auto'
     await flushPromises()
     expect(wrapper.get('.search-type-buttons .active').text()).toBe('Название')

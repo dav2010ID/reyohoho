@@ -3,7 +3,7 @@
     <div class="top-100-page" tabindex="0">
       <header v-if="isKinopoiskTop" class="top-header">
         <div class="top-heading">
-          <h1>Топ-250 Кинопоиска</h1>
+          <h1>Топ-250</h1>
           <p>Лучшие {{ typeFilter === 'series' ? 'сериалы' : 'фильмы' }} по рейтингу зрителей</p>
         </div>
         <div class="top-tabs" role="group" aria-label="Тип подборки">
@@ -62,11 +62,16 @@
         :movies-list="visibleMovies"
         :is-history="false"
         :loading="loading"
+        :show-rank="isKinopoiskTop"
       />
       <div v-if="canShowMore" class="load-more-wrap">
         <div ref="loadMoreSentinel" class="load-more-sentinel" aria-hidden="true"></div>
-        <button class="load-more-btn" type="button" :disabled="loadingMore" @click="showMore">
-          {{ loadingMore ? 'Загружаем...' : 'Показать еще' }}
+        <div v-if="loadingMore" class="skeleton-row" aria-hidden="true">
+          <span v-for="n in 7" :key="n" class="skeleton-poster"></span>
+        </div>
+        <!-- Pages load on scroll; the button only retries a failed page and keeps the list. -->
+        <button v-if="loadMoreFailed" class="load-more-btn" type="button" @click="retryShowMore">
+          Не удалось загрузить. Повторить
         </button>
       </div>
       <ErrorMessage v-if="errorMessage" :message="errorMessage" :code="errorCode" />
@@ -115,6 +120,7 @@ const TOP_MOVIES_PAGE_SIZE = 36
 const page = ref(1)
 const hasMore = ref(true)
 const loadingMore = ref(false)
+const loadMoreFailed = ref(false)
 const loadMoreSentinel = ref(null)
 let loadMoreObserver = null
 
@@ -165,6 +171,7 @@ const dedupeMoviesByKpId = (items = []) => {
 const resetPagination = () => {
   page.value = 1
   hasMore.value = true
+  loadMoreFailed.value = false
 }
 
 const fetchMoviesPage = async (nextPage = 1) => {
@@ -189,11 +196,9 @@ const fetchMoviesPage = async (nextPage = 1) => {
 }
 
 const showMore = async () => {
-  if (loadingMore.value || loading.value || !hasMore.value) return
+  if (loadingMore.value || loading.value || !hasMore.value || loadMoreFailed.value) return
 
   loadingMore.value = true
-  errorMessage.value = ''
-  errorCode.value = null
 
   try {
     const nextMovies = await fetchMoviesPage(page.value + 1)
@@ -203,12 +208,16 @@ const showMore = async () => {
       hasMore.value = false
     }
   } catch (error) {
-    const { message, code } = handleApiError(error)
-    errorMessage.value = message
-    errorCode.value = code
+    console.error('Ошибка догрузки топа:', error)
+    loadMoreFailed.value = true
   } finally {
     loadingMore.value = false
   }
+}
+
+const retryShowMore = () => {
+  loadMoreFailed.value = false
+  showMore()
 }
 
 const disconnectInfiniteScroll = () => {
@@ -289,7 +298,8 @@ if (initialPage && isKinopoiskTop.value) {
 
 onServerPrefetch(async () => {
   await fetchMovies()
-  if (!errorMessage.value) publicPage.save({ movies: movies.value, hasMore: hasMore.value, page: page.value })
+  if (!errorMessage.value)
+    publicPage.save({ movies: movies.value, hasMore: hasMore.value, page: page.value })
 })
 
 watch(canShowMore, (canLoad) => {
@@ -413,7 +423,7 @@ onUnmounted(disconnectInfiniteScroll)
   gap: 4px;
   padding: 4px;
   border: 1px solid rgba(255, 255, 255, 0.1);
-  border-radius: 12px;
+  border-radius: var(--radius-l);
   background: rgba(28, 28, 28, 0.85);
 }
 
@@ -450,7 +460,7 @@ onUnmounted(disconnectInfiniteScroll)
   width: auto;
   background: rgba(37, 37, 37, 0.8);
   backdrop-filter: blur(10px);
-  border-radius: 12px;
+  border-radius: var(--radius-l);
   padding: 6px;
   box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
   transition: all 0.3s ease;
@@ -526,7 +536,7 @@ onUnmounted(disconnectInfiniteScroll)
 .filter-btn {
   padding: 6px 12px;
   border: 1px solid rgba(255, 255, 255, 0.08);
-  border-radius: 8px;
+  border-radius: var(--radius-m);
   background: rgba(45, 45, 45, 0.6);
   color: #e0e0e0;
   cursor: pointer;
@@ -655,22 +665,50 @@ onUnmounted(disconnectInfiniteScroll)
 }
 
 .load-more-btn {
-  border: 1px solid rgba(255, 255, 255, 0.12);
-  border-radius: 8px;
-  background: var(--accent-solid);
-  color: var(--accent-contrast);
-  cursor: pointer;
-  font-weight: 600;
   min-height: 44px;
-  padding: 10px 18px;
+  padding: 0 18px;
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  border-radius: var(--radius-m);
+  background: transparent;
+  color: #fff;
+  font-weight: 600;
+  cursor: pointer;
 }
 
 .load-more-btn:hover {
-  background: var(--accent-solid-hover);
+  background: rgba(255, 255, 255, 0.06);
 }
 
-.load-more-btn:disabled {
-  cursor: not-allowed;
-  opacity: 0.7;
+.skeleton-row {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(170px, 1fr));
+  gap: 28px 16px;
+  box-sizing: border-box;
+  width: 100%;
+  max-height: 300px;
+  padding: 0 24px;
+  overflow: hidden;
+}
+
+.skeleton-poster {
+  aspect-ratio: 2 / 3;
+  border-radius: var(--radius-m);
+  background: linear-gradient(100deg, #141414 30%, #1e1e1e 50%, #141414 70%) 0 0 / 200% 100%;
+  animation: top-skeleton-shimmer 1.4s linear infinite;
+}
+
+@keyframes top-skeleton-shimmer {
+  to {
+    background-position: -200% 0;
+  }
+}
+
+@media (max-width: 620px) {
+  .skeleton-row {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 16px 10px;
+    max-height: 200px;
+    padding: 0 12px;
+  }
 }
 </style>

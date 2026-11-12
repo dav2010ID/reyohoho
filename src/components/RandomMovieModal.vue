@@ -1,7 +1,11 @@
 <template>
   <transition name="modal">
     <div v-if="isOpen" class="modal-overlay" @click.self="close">
-      <div v-dialog-focus="close" aria-label="Случайный фильм" class="modal modern-dark-dialog random-movie-modal">
+      <div
+        v-dialog-focus="close"
+        aria-label="Случайный фильм"
+        class="modal modern-dark-dialog random-movie-modal"
+      >
         <div class="modal-header">
           <h3>
             <i class="fas fa-dice"></i>
@@ -21,13 +25,13 @@
             <p>Подбираем фильм...</p>
           </div>
 
-          <div v-else-if="movie" class="movie-content">
-            <div class="movie-poster-section">
+          <!-- Poster, title, one meta line and a short description; the movie page has the rest. -->
+          <transition v-else-if="movie" name="random-swap" mode="out-in">
+            <div :key="movie.kp_id || movie.title" class="movie-content">
               <img
                 :srcset="posterSources.srcset"
-                :sizes="posterSources.srcset ? '(max-width: 768px) 120px, 180px' : undefined"
+                :sizes="posterSources.srcset ? '(max-width: 768px) 132px, 220px' : undefined"
                 :src="posterSources.src"
-                loading="lazy"
                 decoding="async"
                 :alt="movie.title ? `Постер ${movie.title}` : 'Постер фильма'"
                 class="movie-poster"
@@ -35,98 +39,22 @@
                 height="450"
                 @error="setImageFallback"
               />
-            </div>
 
-            <div class="movie-info-section">
-              <h4 class="movie-title">{{ movie.title }}</h4>
-
-              <div v-if="movie.year" class="movie-year">
-                {{ movie.year }}
-              </div>
-
-              <div v-if="movie.type" class="movie-type">
-                {{ formatType(movie.type) }}
-              </div>
-
-              <div v-if="movie.description" class="movie-description">
-                {{ movie.description }}
-              </div>
-
-              <div v-if="movie.duration" class="movie-duration">
-                <strong>Длительность:</strong> {{ formatDuration(movie.duration) }}
-              </div>
-
-              <div v-if="movie.age_rating" class="movie-age-rating">
-                <strong>Возрастной рейтинг:</strong> {{ movie.age_rating }}
-              </div>
-
-              <div v-if="movie.countries" class="movie-countries">
-                <strong>Страны:</strong> {{ movie.countries }}
-              </div>
-
-              <div v-if="movie.genres" class="movie-genres">
-                <strong>Жанры:</strong> {{ movie.genres }}
-              </div>
-
-              <div v-if="movie.premiere_ru || movie.premiere_world" class="movie-premiere">
-                <strong>Премьера:</strong>
-                <span v-if="movie.premiere_ru"> {{ formatDate(movie.premiere_ru) }} (Россия)</span>
-                <span v-if="movie.premiere_world && !movie.premiere_ru">
-                  {{ formatDate(movie.premiere_world) }} (Мир)
-                </span>
-              </div>
-
-              <div
-                v-if="movie.budget || movie.fees_world || movie.fees_russia"
-                class="movie-finances"
-              >
-                <div v-if="movie.budget"><strong>Бюджет:</strong> {{ movie.budget }}</div>
-                <div v-if="movie.fees_world">
-                  <strong>Сборы в мире:</strong> {{ movie.fees_world }}
-                </div>
-                <div v-if="movie.fees_russia">
-                  <strong>Сборы в России:</strong> {{ movie.fees_russia }}
-                </div>
-              </div>
-
-              <div class="ratings">
-                <div v-if="movie.rating_reyohoho" class="rating rating-our">
-                  <img :src="appLogoUrl" alt="ReYohoho" class="rating-logo" />
-                  {{ movie.rating_reyohoho.toFixed(1) }}
-                </div>
-
-                <div v-if="movie.rating_kp" class="rating rating-kp">
-                  <img :src="kpLogoUrl" alt="КП" class="rating-logo" />
-                  {{ movie.rating_kp }}
-                </div>
-
-                <div v-if="movie.rating_imdb" class="rating rating-imdb">
-                  <img :src="imdbLogoUrl" alt="IMDb" class="rating-logo" />
-                  {{ movie.rating_imdb }}
-                </div>
-              </div>
-
-              <div v-if="movie.total_rating" class="total-ratings">
-                Всего оценок: {{ Number(movie.total_rating).toLocaleString('ru-RU') }}
-              </div>
-
-              <div class="external-links">
-                <a v-if="movie.url_kp" :href="movie.url_kp" target="_blank" class="external-link">
-                  <img :src="kpLogoUrl" alt="КП" />
-                  Кинопоиск
-                </a>
-                <a
-                  v-if="movie.url_imdb"
-                  :href="movie.url_imdb"
-                  target="_blank"
-                  class="external-link"
-                >
-                  <img :src="imdbLogoUrl" alt="IMDb" />
-                  IMDb
-                </a>
+              <div class="movie-info-section">
+                <h4 class="movie-title">{{ movie.title }}</h4>
+                <p v-if="metaParts.length" class="movie-meta">
+                  <span v-for="part in metaParts" :key="part">{{ part }}</span>
+                </p>
+                <p v-if="scores.length" class="movie-scores">
+                  <span v-for="score in scores" :key="score.label" class="movie-score">
+                    <img :src="score.logo" :alt="score.label" class="rating-logo" />
+                    <span :class="scoreTier(score.value)">{{ score.value }}</span>
+                  </span>
+                </p>
+                <p v-if="movie.description" class="movie-description">{{ movie.description }}</p>
               </div>
             </div>
-          </div>
+          </transition>
 
           <div v-else-if="error" class="error-content">
             <i class="fas fa-exclamation-triangle"></i>
@@ -135,19 +63,19 @@
         </div>
 
         <div class="modal-actions">
-          <button class="modern-dark-btn modal-actions__close" @click="close">Закрыть</button>
+          <button class="modern-dark-btn ghost" :disabled="loading" @click="getNewMovie">
+            <i class="fas fa-dice" aria-hidden="true"></i>
+            Ещё раз
+          </button>
           <router-link
             v-if="movie && !loading"
             :to="moviePath"
             class="modern-dark-btn primary"
             @click="close"
           >
-            Посмотреть
+            <i class="fas fa-play" aria-hidden="true"></i>
+            Смотреть
           </router-link>
-          <button class="modern-dark-btn outline" :disabled="loading" @click="getNewMovie">
-            <i class="fas fa-dice"></i>
-            Еще раз
-          </button>
         </div>
       </div>
     </div>
@@ -206,14 +134,38 @@ const formatDuration = (duration) => {
   return `${minutes} мин`
 }
 
-const formatDate = (dateString) => {
-  if (!dateString) return ''
-  const date = new Date(dateString)
-  return date.toLocaleDateString('ru-RU', {
-    year: 'numeric',
-    month: 'long',
-    day: 'numeric'
-  })
+// "1999 · Фильм · 2 ч 16 мин · США · 18+"
+const metaParts = computed(() => {
+  const movie = props.movie || {}
+  return [
+    movie.year && String(movie.year),
+    movie.type && formatType(movie.type),
+    movie.duration && formatDuration(movie.duration),
+    movie.countries,
+    movie.age_rating
+  ].filter(Boolean)
+})
+
+const scores = computed(() => {
+  const movie = props.movie || {}
+  return [
+    movie.rating_kp && { label: 'Кинопоиск', logo: kpLogoUrl, value: movie.rating_kp },
+    movie.rating_imdb && { label: 'IMDb', logo: imdbLogoUrl, value: movie.rating_imdb },
+    movie.rating_reyohoho && {
+      label: 'ReYohoho',
+      logo: appLogoUrl,
+      value: Number(movie.rating_reyohoho).toFixed(1)
+    }
+  ].filter(Boolean)
+})
+
+// White by default; colour flags only weak scores.
+const scoreTier = (value) => {
+  const number = parseFloat(value)
+  if (!Number.isFinite(number)) return ''
+  if (number < 5) return 'is-low'
+  if (number < 7) return 'is-mid'
+  return ''
 }
 </script>
 
@@ -264,7 +216,7 @@ const formatDate = (dateString) => {
 .modern-dark-dialog {
   background-color: #1d1d1d;
   color: #e2e8f0;
-  border-radius: 12px;
+  border-radius: var(--radius-l);
   overflow: hidden;
   box-shadow:
     0 10px 15px -3px rgba(0, 0, 0, 0.3),
@@ -359,151 +311,120 @@ const formatDate = (dateString) => {
 }
 
 .movie-content {
-  display: flex;
-  gap: 20px;
+  display: grid;
+  grid-template-columns: 220px minmax(0, 1fr);
+  gap: 24px;
+  align-items: start;
 }
 
-.movie-poster-section {
-  flex-shrink: 0;
+.random-swap-enter-active,
+.random-swap-leave-active {
+  transition: opacity 0.18s ease;
+}
+
+.random-swap-enter-from,
+.random-swap-leave-to {
+  opacity: 0;
 }
 
 .movie-poster {
-  width: 180px;
-  height: 270px;
+  display: block;
+  width: 220px;
+  height: auto;
+  aspect-ratio: 2 / 3;
   object-fit: cover;
-  border-radius: 8px;
+  border-radius: var(--radius-m);
+  background: rgba(255, 255, 255, 0.04);
 }
 
 .movie-info-section {
-  flex: 1;
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: 10px;
+  min-width: 0;
 }
 
 .movie-title {
-  font-size: 1.3rem;
-  font-weight: 600;
   margin: 0;
-  line-height: 1.3;
+  color: #fff;
+  font-size: var(--fs-2xl);
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  line-height: 1.1;
 }
 
-.movie-year {
-  font-size: 1.1rem;
-  color: #a0a0a0;
-}
-
-.movie-type {
-  background: var(--accent-solid);
-  color: var(--accent-contrast);
-  padding: 4px 8px;
-  border-radius: 4px;
-  font-size: 0.85rem;
-  align-self: flex-start;
-}
-
-.movie-countries,
-.movie-genres,
-.movie-duration,
-.movie-age-rating,
-.movie-premiere,
-.movie-finances {
-  font-size: 0.9rem;
-  line-height: 1.4;
-}
-
-.movie-countries strong,
-.movie-genres strong,
-.movie-duration strong,
-.movie-age-rating strong,
-.movie-premiere strong,
-.movie-finances strong {
-  color: #a0a0a0;
-}
-
-.movie-description {
-  font-size: 0.95rem;
-  line-height: 1.6;
-  color: #d0d0d0;
-  margin: 10px 0;
-  padding: 10px;
-  background: rgba(0, 0, 0, 0.2);
-  border-radius: 6px;
-  border-left: 3px solid var(--accent-ui);
-}
-
-.movie-finances {
+.movie-meta {
   display: flex;
-  flex-direction: column;
-  gap: 4px;
-  font-size: 0.85rem;
-}
-
-.ratings {
-  display: flex;
-  gap: 12px;
   flex-wrap: wrap;
+  margin: 0;
+  color: rgba(255, 255, 255, 0.8);
+  font-size: var(--fs-s);
 }
 
-.rating {
+.movie-meta span + span::before {
+  content: '·';
+  margin: 0 8px;
+  color: rgba(255, 255, 255, 0.4);
+}
+
+.movie-scores {
   display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+  margin: 0;
+}
+
+.movie-score {
+  display: inline-flex;
   align-items: center;
-  gap: 5px;
-  background: rgba(0, 0, 0, 0.3);
-  padding: 6px 10px;
-  border-radius: 6px;
+  gap: 6px;
+  color: #fff;
+  font-size: var(--fs-m);
   font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+
+.movie-score .is-mid {
+  color: #ffc94d;
+}
+
+.movie-score .is-low {
+  color: #ff7b7b;
 }
 
 .rating-logo {
-  width: 20px;
-  height: 20px;
+  width: 18px;
+  height: 18px;
+  object-fit: contain;
 }
 
-.total-ratings {
-  font-size: 0.8rem;
-  opacity: 0.7;
+.movie-description {
+  display: -webkit-box;
+  margin: 4px 0 0;
+  overflow: hidden;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 6;
+  line-clamp: 6;
+  color: rgba(255, 255, 255, 0.86);
+  font-size: var(--fs-m);
+  line-height: 1.6;
 }
 
-.external-links {
-  display: flex;
-  gap: 10px;
-  flex-wrap: wrap;
-}
-
-.external-link {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  padding: 8px 12px;
-  background: rgba(255, 255, 255, 0.1);
-  border-radius: 6px;
-  text-decoration: none;
-  color: #e2e8f0;
-  font-size: 0.9rem;
-  transition: background 0.2s ease;
-}
-
-.external-link:hover {
-  background: rgba(255, 255, 255, 0.2);
-}
-
-.external-link img {
-  width: 16px;
-  height: 16px;
-}
-
+/* "Ещё раз" on the left, "Смотреть" on the right; the header ✕ closes. */
 .modal-actions {
   display: flex;
-  justify-content: flex-end;
+  align-items: center;
+  justify-content: space-between;
   gap: 12px;
   padding: 16px 20px;
-  border-top: 1px solid #333;
+  border-top: 1px solid var(--hairline);
 }
 
 .modern-dark-btn {
-  padding: 10px 16px;
-  border-radius: 6px;
+  min-height: 44px;
+  padding: 0 16px;
+  box-sizing: border-box;
+  border-radius: var(--radius-m);
   border: none;
   background-color: #242424;
   color: #e2e8f0;
@@ -536,15 +457,14 @@ const formatDate = (dateString) => {
   background-color: var(--accent-solid-hover);
 }
 
-.modern-dark-btn.outline {
+.modern-dark-btn.ghost {
   background-color: transparent;
-  box-shadow: inset 0 0 0 1px var(--accent-color);
-  color: var(--accent-light);
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.16);
+  color: #fff;
 }
 
-.modern-dark-btn.outline:hover:not(:disabled) {
-  background-color: var(--accent-solid);
-  color: var(--accent-contrast);
+.modern-dark-btn.ghost:hover:not(:disabled) {
+  background-color: rgba(255, 255, 255, 0.06);
 }
 
 @keyframes modal-in {
@@ -568,43 +488,48 @@ const formatDate = (dateString) => {
     margin: 0 10px;
   }
 
+  /* Phones: title, meta and scores beside the poster; the description runs full width below. */
   .movie-content {
-    flex-direction: column;
-    align-items: center;
-    text-align: center;
+    grid-template-columns: 132px minmax(0, 1fr);
+    /* The third row takes the poster's extra height so the text stays packed at the top. */
+    grid-template-rows: auto auto 1fr auto;
+    gap: 8px 16px;
+  }
+
+  .movie-info-section {
+    display: contents;
   }
 
   .movie-poster {
-    width: 120px;
-    height: 180px;
+    grid-row: 1 / span 3;
   }
 
-  .movie-type {
-    align-self: center;
+  .movie-title,
+  .movie-meta,
+  .movie-scores {
+    grid-column: 2;
   }
 
   .movie-description {
-    text-align: left;
-    max-height: none;
-    overflow-y: visible;
+    grid-column: 1 / -1;
+    margin-top: 8px;
+  }
+
+  .movie-poster {
+    width: 132px;
+  }
+
+  .movie-title {
+    font-size: var(--fs-xl);
   }
 
   .modal-actions {
-    flex-direction: column;
-    gap: 8px;
     padding: 12px 16px;
   }
 
-  /* The header ✕ already closes the dialog; keep the two real actions. */
-  .modal-actions__close {
-    display: none;
-  }
-
-  .modal-actions .modern-dark-btn,
-  .modal-actions a.modern-dark-btn {
-    width: 100%;
+  .modal-actions .modern-dark-btn {
+    flex: 1 1 0;
     justify-content: center;
-    box-sizing: border-box;
   }
 }
 </style>

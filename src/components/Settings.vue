@@ -1,7 +1,8 @@
 <template>
+  <!-- Section list on the left, one column of plain rows on the right; no boxes. -->
   <div class="settings-page">
     <h1>Настройки</h1>
-    <div class="settings-container">
+    <div class="settings-layout">
       <nav class="settings-tabs" aria-label="Разделы настроек">
         <button
           v-for="tab in settingsTabs"
@@ -11,238 +12,289 @@
           :class="{ active: activeSettingsTab === tab.id }"
           @click="activeSettingsTab = tab.id"
         >
-          <span class="settings-tab__label">{{ tab.label }}</span>
-          <span class="settings-tab__description">{{ tab.description }}</span>
+          {{ tab.label }}
         </button>
       </nav>
 
-      <header class="settings-section-header">
-        <p>Раздел настроек</p>
-        <h2>{{ activeSettingsSection.label }}</h2>
-        <span>{{ activeSettingsSection.description }}</span>
-      </header>
-
-      <div v-show="activeSettingsTab === 'appearance'" class="settings-group">
-        <h3 id="settings-background-label">Фон</h3>
-        <div class="radio-group" role="radiogroup" aria-labelledby="settings-background-label">
-          <label class="radio">
-            <input v-model="backgroundType" type="radio" name="background-type" value="dynamic" />
-            <span class="radio-label">Динамический фон</span>
-          </label>
-          <label class="radio">
-            <input v-model="backgroundType" type="radio" name="background-type" value="stars" />
-            <span class="radio-label">Звездный фон</span>
-          </label>
-          <label class="radio">
-            <input v-model="backgroundType" type="radio" name="background-type" value="lava-lamp" />
-            <span class="radio-label">Лава-лампа</span>
-          </label>
-          <label class="radio">
-            <input v-model="backgroundType" type="radio" name="background-type" value="disabled" />
-            <span class="radio-label">Отключить фон</span>
-          </label>
-        </div>
-        <div class="settings-actions">
-          <button class="reset-button" @click="resetBackground">
-            <i class="fa-solid fa-arrow-rotate-left"></i> Сбросить фон
-          </button>
-        </div>
-      </div>
-
-      <div v-show="activeSettingsTab === 'appearance'" class="settings-group">
-        <h3>Тема</h3>
-        <ThemeSelector />
-      </div>
-
-      <div v-show="activeSettingsTab === 'player'" class="settings-group">
-        <h3>Плеер</h3>
-        <SliderRound v-model="isCentered">Автоцентрирование плеера</SliderRound>
-        <SliderRound v-model="showFavoriteTooltip"
-          >Стиль отображения кнопок избранного:
-          {{ showFavoriteTooltip ? 'Всплывающее меню' : 'Все кнопки' }}</SliderRound
-        >
-      </div>
-
-      <div v-show="activeSettingsTab === 'appearance'" class="settings-group">
-        <h3>Карточки</h3>
-        <div class="card-size-group">
-          <span id="settings-card-size-label" class="group-label">Размер карточек:</span>
-          <div class="radio-group" role="radiogroup" aria-labelledby="settings-card-size-label">
-            <label class="radio">
-              <input v-model="cardSize" type="radio" name="card-size" value="small" />
-              <span class="radio-label">Маленький</span>
-            </label>
-            <label class="radio">
-              <input v-model="cardSize" type="radio" name="card-size" value="medium" />
-              <span class="radio-label">Средний</span>
-            </label>
-            <label class="radio">
-              <input v-model="cardSize" type="radio" name="card-size" value="large" />
-              <span class="radio-label">Большой</span>
-            </label>
+      <div class="settings-container">
+        <section v-show="activeSettingsTab === 'appearance'" class="settings-section">
+          <div class="settings-group">
+            <h3 id="settings-background-label">Фон</h3>
+            <div class="bg-tiles" role="radiogroup" aria-labelledby="settings-background-label">
+              <label v-for="option in backgroundOptions" :key="option.value" class="bg-tile">
+                <input
+                  v-model="backgroundType"
+                  type="radio"
+                  name="background-type"
+                  :value="option.value"
+                  class="visually-hidden"
+                />
+                <span
+                  class="bg-tile__preview"
+                  :class="`bg-tile__preview--${option.value}`"
+                  aria-hidden="true"
+                ></span>
+                <span class="bg-tile__label">{{ option.label }}</span>
+              </label>
+            </div>
           </div>
-        </div>
-        <SliderRound v-model="isCardBorder">Окантовка вокруг карточек</SliderRound>
-        <SliderRound v-model="isCardHoverDisabled"
-          >Отключить подъем карточек при наведении</SliderRound
-        >
-      </div>
-
-      <div v-show="activeSettingsTab === 'player'" class="settings-group">
-        <h3>Трейлеры</h3>
-        <SliderRound v-model="areTrailersActive">Активировать трейлеры</SliderRound>
-      </div>
-
-      <div v-show="activeSettingsTab === 'api'" class="settings-group">
-        <h3>Источники данных</h3>
-        <p v-if="unavailableSearch" class="api-note">
-          Для поиска по ID {{ unavailableSearch }} нужен подключённый сервер.
-          Вы также можете <router-link to="/">найти фильм по названию или ID Кинопоиска</router-link>.
-        </p>
-        <h4 id="settings-backend-label" class="api-subtitle">Сервер приложения</h4>
-        <div class="radio-group" role="radiogroup" aria-labelledby="settings-backend-label">
-          <label class="radio">
-            <input v-model="backendMode" type="radio" name="backend-mode" value="auto" />
-            <span class="radio-label">Автоматический выбор сервера</span>
-          </label>
-          <label class="radio">
-            <input v-model="backendMode" type="radio" name="backend-mode" value="local" />
-            <span class="radio-label">Локальный сервер (для самостоятельной настройки)</span>
-          </label>
-        </div>
-        <p class="api-note backend-status" :class="backendStatusClass">
-          {{ backendStatusText }}<template v-if="backendUrl"> · {{ backendUrl }}</template>
-        </p>
-        <p v-if="backendAvailable" class="api-note backend-status" :class="authorizationStatusClass">
-          {{ authorizationStatusText }}
-        </p>
-        <div class="settings-actions">
-          <button
-            type="button"
-            class="reset-button"
-            :disabled="!backendAvailable || apiStore.isCheckingHealth"
-            @click="checkSelectedBackend"
-          >
-            <i class="fa-solid fa-rotate"></i>
-            {{ apiStore.isCheckingHealth ? 'Проверка…' : 'Проверить соединение' }}
-          </button>
-        </div>
-        <h4 id="settings-content-label" class="api-subtitle">Источники контента</h4>
-        <div class="radio-group" role="radiogroup" aria-labelledby="settings-content-label">
-          <label class="radio">
-            <input v-model="contentApiProvider" type="radio" name="content-api-provider" value="local" />
-            <span class="radio-label">Локальный сервер (поиск, информация о фильмах и плееры)</span>
-          </label>
-          <!-- KinoBD temporarily disabled; keep option for reactivation.
+          <div class="settings-group">
+            <h3>Тема</h3>
+            <ThemeSelector />
+          </div>
+          <div class="settings-group">
+            <h3>Карточки</h3>
+            <div class="setting-row">
+              <span id="settings-card-size-label" class="group-label">Размер карточек</span>
+              <div class="segmented" role="radiogroup" aria-labelledby="settings-card-size-label">
+                <label v-for="size in cardSizes" :key="size.value" class="segmented__option">
+                  <input v-model="cardSize" type="radio" name="card-size" :value="size.value" />
+                  <span>{{ size.label }}</span>
+                </label>
+              </div>
+            </div>
+            <SliderRound v-model="isCardBorder">Рамка вокруг постеров</SliderRound>
+            <SliderRound v-model="isCardHoverEnabled">Подъём карточек при наведении</SliderRound>
+          </div>
+        </section>
+        <section v-show="activeSettingsTab === 'player'" class="settings-section">
+          <div class="settings-group">
+            <h3>Плеер</h3>
+            <SliderRound v-model="isCentered">Автоцентрирование плеера</SliderRound>
+            <div class="setting-row">
+              <span id="settings-favorites-label" class="group-label">Кнопки избранного</span>
+              <div class="segmented" role="radiogroup" aria-labelledby="settings-favorites-label">
+                <label class="segmented__option">
+                  <input
+                    v-model="showFavoriteTooltip"
+                    type="radio"
+                    name="favorites-style"
+                    :value="true"
+                  />
+                  <span>Меню</span>
+                </label>
+                <label class="segmented__option">
+                  <input
+                    v-model="showFavoriteTooltip"
+                    type="radio"
+                    name="favorites-style"
+                    :value="false"
+                  />
+                  <span>Все кнопки</span>
+                </label>
+              </div>
+            </div>
+          </div>
+          <div class="settings-group">
+            <h3>Трейлеры</h3>
+            <SliderRound v-model="areTrailersActive">Показывать трейлеры</SliderRound>
+          </div>
+          <div v-if="backendAvailable" class="settings-group">
+            <h3>Режим стримера</h3>
+            <SliderRound v-model="isStreamerMode"
+              >Мигание кнопки таймингов для привлечения внимания</SliderRound
+            >
+          </div>
+        </section>
+        <section v-show="activeSettingsTab === 'behavior'" class="settings-section">
+          <div class="settings-group">
+            <h3>История</h3>
+            <SliderRound v-model="isHistoryAllowed"> Сохранять историю просмотра</SliderRound>
+            <HistorySyncSettings />
+            <div class="settings-actions">
+              <button class="reset-button reset-button--danger" @click="showModal = true">
+                <i class="fa-solid fa-trash-can"></i>
+                Очистить историю просмотра
+              </button>
+              <BaseModal
+                :is-open="showModal"
+                message="Вы уверены, что хотите очистить историю?"
+                @confirm="clearAllHistory"
+                @close="showModal = false"
+              />
+            </div>
+          </div>
+          <div class="settings-group">
+            <h3>Горячие клавиши</h3>
+            <SliderRound v-model="isCtrlFEnabled">Перехватывать Ctrl+F для поиска</SliderRound>
+          </div>
+          <div class="settings-group settings-group--desktop-only">
+            <h3>Боковая панель</h3>
+            <SliderRound v-model="sidebarAutoHide"
+              >Авто-скрытие: скрывать панель и показывать при наведении курсора</SliderRound
+            >
+            <div class="setting-row">
+              <span id="settings-sidebar-position-label" class="group-label"
+                >Расположение панели</span
+              >
+              <div
+                class="segmented"
+                role="radiogroup"
+                aria-labelledby="settings-sidebar-position-label"
+              >
+                <label class="segmented__option">
+                  <input
+                    v-model="sidebarPosition"
+                    type="radio"
+                    name="sidebar-position"
+                    value="left"
+                  />
+                  <span>Слева</span>
+                </label>
+                <label class="segmented__option">
+                  <input
+                    v-model="sidebarPosition"
+                    type="radio"
+                    name="sidebar-position"
+                    value="right"
+                  />
+                  <span>Справа</span>
+                </label>
+              </div>
+            </div>
+          </div>
+          <div v-if="backendAvailable" class="settings-group">
+            <h3>Комментарии</h3>
+            <SliderRound v-model="isCommentsEnabled">Показывать блок комментариев</SliderRound>
+            <SliderRound v-model="isAutoShowComments"
+              >Автоматически показывать комментарии</SliderRound
+            >
+          </div>
+        </section>
+        <section v-show="activeSettingsTab === 'api'" class="settings-section">
+          <div class="settings-group">
+            <h3>Источники данных</h3>
+            <p v-if="unavailableSearch" class="api-note">
+              Для поиска по ID {{ unavailableSearch }} нужен подключённый сервер. Вы также можете
+              <router-link to="/">найти фильм по названию или ID Кинопоиска</router-link>.
+            </p>
+            <h4 id="settings-backend-label" class="api-subtitle">Сервер приложения</h4>
+            <div class="radio-group" role="radiogroup" aria-labelledby="settings-backend-label">
+              <label class="radio">
+                <input v-model="backendMode" type="radio" name="backend-mode" value="auto" />
+                <span class="radio-label">Автоматический выбор сервера</span>
+              </label>
+              <label class="radio">
+                <input v-model="backendMode" type="radio" name="backend-mode" value="local" />
+                <span class="radio-label">Локальный сервер (для самостоятельной настройки)</span>
+              </label>
+            </div>
+            <p class="api-note backend-status" :class="backendStatusClass">
+              {{ backendStatusText }}<template v-if="backendUrl"> · {{ backendUrl }}</template>
+            </p>
+            <p
+              v-if="backendAvailable"
+              class="api-note backend-status"
+              :class="authorizationStatusClass"
+            >
+              {{ authorizationStatusText }}
+            </p>
+            <div class="settings-actions">
+              <button
+                type="button"
+                class="reset-button"
+                :disabled="!backendAvailable || apiStore.isCheckingHealth"
+                @click="checkSelectedBackend"
+              >
+                <i class="fa-solid fa-rotate"></i>
+                {{ apiStore.isCheckingHealth ? 'Проверка…' : 'Проверить соединение' }}
+              </button>
+            </div>
+            <h4 id="settings-content-label" class="api-subtitle">Источники контента</h4>
+            <div class="radio-group" role="radiogroup" aria-labelledby="settings-content-label">
+              <label class="radio">
+                <input
+                  v-model="contentApiProvider"
+                  type="radio"
+                  name="content-api-provider"
+                  value="local"
+                />
+                <span class="radio-label"
+                  >Локальный сервер (поиск, информация о фильмах и плееры)</span
+                >
+              </label>
+              <!-- KinoBD temporarily disabled; keep option for reactivation.
           <label class="radio">
             <input v-model="contentApiProvider" type="radio" name="content-api-provider" value="kinobd" />
             <span class="radio-label">KinoBD (search/cards/players)</span>
           </label>
           -->
-          <label class="radio">
-            <input v-model="contentApiProvider" type="radio" name="content-api-provider" value="kinobox" />
-            <span class="radio-label"
-              >Kinobox (поиск, информация о фильмах и плееры, по умолчанию)</span
-            >
-          </label>
-          <label class="radio">
-            <input v-model="contentApiProvider" type="radio" name="content-api-provider" value="ddbb" />
-            <span class="radio-label">DDBB (плееры)</span>
-          </label>
-          <label class="radio">
-            <input v-model="contentApiProvider" type="radio" name="content-api-provider" value="ddbb_live" />
-            <span class="radio-label">DDBB Live (плееры)</span>
-          </label>
-        </div>
-        <p class="api-note">
-          Комментарии, заметки, тайминги и поиск по IMDb доступны при подключённом сервере приложения.
-          Для оценок и поиска по Shikimori можно также выбрать локальный источник контента.
-        </p>
-        <h4 id="settings-search-label" class="api-subtitle">Источник поиска</h4>
-        <div class="radio-group" role="radiogroup" aria-labelledby="settings-search-label">
-          <label class="radio">
-            <input v-model="searchApiProvider" type="radio" name="search-api-provider" value="local" />
-            <span class="radio-label">Локальный сервер</span>
-          </label>
-          <label class="radio">
-            <input v-model="searchApiProvider" type="radio" name="search-api-provider" value="kinobox" />
-            <span class="radio-label">Kinobox (по умолчанию)</span>
-          </label>
-          <!-- KinoBD temporarily disabled; keep option for reactivation.
+              <label class="radio">
+                <input
+                  v-model="contentApiProvider"
+                  type="radio"
+                  name="content-api-provider"
+                  value="kinobox"
+                />
+                <span class="radio-label"
+                  >Kinobox (поиск, информация о фильмах и плееры, по умолчанию)</span
+                >
+              </label>
+              <label class="radio">
+                <input
+                  v-model="contentApiProvider"
+                  type="radio"
+                  name="content-api-provider"
+                  value="ddbb"
+                />
+                <span class="radio-label">DDBB (плееры)</span>
+              </label>
+              <label class="radio">
+                <input
+                  v-model="contentApiProvider"
+                  type="radio"
+                  name="content-api-provider"
+                  value="ddbb_live"
+                />
+                <span class="radio-label">DDBB Live (плееры)</span>
+              </label>
+            </div>
+            <p class="api-note">
+              Комментарии, заметки, тайминги и поиск по IMDb доступны при подключённом сервере
+              приложения. Для оценок и поиска по Shikimori можно также выбрать локальный источник
+              контента.
+            </p>
+            <h4 id="settings-search-label" class="api-subtitle">Источник поиска</h4>
+            <div class="radio-group" role="radiogroup" aria-labelledby="settings-search-label">
+              <label class="radio">
+                <input
+                  v-model="searchApiProvider"
+                  type="radio"
+                  name="search-api-provider"
+                  value="local"
+                />
+                <span class="radio-label">Локальный сервер</span>
+              </label>
+              <label class="radio">
+                <input
+                  v-model="searchApiProvider"
+                  type="radio"
+                  name="search-api-provider"
+                  value="kinobox"
+                />
+                <span class="radio-label">Kinobox (по умолчанию)</span>
+              </label>
+              <!-- KinoBD temporarily disabled; keep option for reactivation.
           <label class="radio">
             <input v-model="searchApiProvider" type="radio" name="search-api-provider" value="kinobd" />
             <span class="radio-label">KinoBD</span>
           </label>
           -->
-        </div>
-        <p class="api-note">Этот параметр влияет только на поиск по названию.</p>
-        <div class="settings-actions">
-          <button class="reset-button" @click="resetKinoBdSources">
-            <i class="fa-solid fa-arrow-rotate-left"></i>
-            Сбросить выбранные источники KinoBD
-          </button>
-        </div>
-      </div>
-
-      <div v-show="activeSettingsTab === 'behavior'" class="settings-group">
-        <h3>История</h3>
-        <SliderRound v-model="isHistoryAllowed"> Сохранять историю просмотра</SliderRound>
-        <HistorySyncSettings />
-        <div class="settings-actions">
-          <button class="reset-button reset-button--danger" @click="showModal = true">
-            <i class="fa-solid fa-trash-can"></i>
-            Очистить историю просмотра
-          </button>
-          <BaseModal
-            :is-open="showModal"
-            message="Вы уверены, что хотите очистить историю?"
-            @confirm="clearAllHistory"
-            @close="showModal = false"
-          />
-        </div>
-      </div>
-
-      <div v-show="activeSettingsTab === 'behavior'" class="settings-group">
-        <h3>Горячие клавиши</h3>
-        <SliderRound v-model="isCtrlFEnabled">Перехватывать Ctrl+F для поиска</SliderRound>
-      </div>
-
-      <div v-show="activeSettingsTab === 'behavior'" class="settings-group settings-group--desktop-only">
-        <h3>Боковая панель</h3>
-        <SliderRound v-model="sidebarAutoHide"
-          >Авто-скрытие: скрывать панель и показывать при наведении курсора</SliderRound
-        >
-        <div class="sidebar-position-group">
-          <span id="settings-sidebar-position-label" class="group-label">Расположение панели:</span>
-          <div class="radio-group" role="radiogroup" aria-labelledby="settings-sidebar-position-label">
-            <label class="radio">
-              <input v-model="sidebarPosition" type="radio" name="sidebar-position" value="left" />
-              <span class="radio-label">Слева</span>
-            </label>
-            <label class="radio">
-              <input v-model="sidebarPosition" type="radio" name="sidebar-position" value="right" />
-              <span class="radio-label">Справа</span>
-            </label>
+            </div>
+            <p class="api-note">Этот параметр влияет только на поиск по названию.</p>
+            <div class="settings-actions">
+              <button class="reset-button" @click="resetKinoBdSources">
+                <i class="fa-solid fa-arrow-rotate-left"></i>
+                Сбросить выбранные источники KinoBD
+              </button>
+            </div>
           </div>
-        </div>
-      </div>
-
-      <div v-if="backendAvailable" v-show="activeSettingsTab === 'behavior'" class="settings-group">
-        <h3>Комментарии</h3>
-        <SliderRound v-model="isCommentsEnabled">Показывать блок комментариев</SliderRound>
-        <SliderRound v-model="isAutoShowComments">Автоматически показывать комментарии</SliderRound>
-      </div>
-
-      <div v-if="backendAvailable" v-show="activeSettingsTab === 'player'" class="settings-group">
-        <h3>Режим стримера</h3>
-        <SliderRound v-model="isStreamerMode"
-          >Мигание кнопки таймингов для привлечения внимания</SliderRound
-        >
-      </div>
-
-      <div v-show="activeSettingsTab === 'about'" class="settings-group">
-        <h3>Версия сайта</h3>
-        {{ appVersion }}
+        </section>
+        <footer class="settings-footer">
+          <span>Версия {{ appVersion }}</span>
+          <span aria-hidden="true">·</span>
+          <router-link to="/contact">Контакты</router-link>
+        </footer>
       </div>
     </div>
   </div>
@@ -279,28 +331,44 @@ const showModal = ref(false)
 const appVersion = ref(import.meta.env.VITE_APP_VERSION_FULL_VERSION)
 const route = useRoute()
 const activeSettingsTab = ref(route.query.tab === 'api' ? 'api' : 'appearance')
-watch(() => route.fullPath, () => {
-  if (route.query.tab === 'api') activeSettingsTab.value = 'api'
-})
+watch(
+  () => route.fullPath,
+  () => {
+    if (route.query.tab === 'api') activeSettingsTab.value = 'api'
+  }
+)
 const backendAvailable = computed(legacyBackendAvailable)
 const unavailableSearch = computed(() => {
-  if (route.query.unavailable === 'shiki' && !legacyMovieMethodAvailable('getShikiInfo')) return 'Shikimori'
-  if (route.query.unavailable === 'imdb' && !legacyMovieMethodAvailable('getKpIDfromIMDB')) return 'IMDb'
+  if (route.query.unavailable === 'shiki' && !legacyMovieMethodAvailable('getShikiInfo'))
+    return 'Shikimori'
+  if (route.query.unavailable === 'imdb' && !legacyMovieMethodAvailable('getKpIDfromIMDB'))
+    return 'IMDb'
   return ''
 })
 const settingsTabs = [
   { id: 'appearance', label: 'Вид', description: 'Фон, тема и карточки' },
   { id: 'player', label: 'Плеер', description: 'Плеер, трейлеры и режим стримера' },
   { id: 'behavior', label: 'Поведение', description: 'История, навигация и комментарии' },
-  { id: 'api', label: 'Источники', description: 'Данные, поиск и плееры' },
-  { id: 'about', label: 'О сайте', description: 'Версия приложения' }
+  { id: 'api', label: 'Источники', description: 'Данные, поиск и плееры' }
 ]
-const activeSettingsSection = computed(
-  () => settingsTabs.find((tab) => tab.id === activeSettingsTab.value) || settingsTabs[0]
+const backgroundOptions = [
+  { value: 'disabled', label: 'Без фона' },
+  { value: 'dynamic', label: 'Динамический' },
+  { value: 'stars', label: 'Звёзды' },
+  { value: 'lava-lamp', label: 'Лава-лампа' }
+]
+const cardSizes = [
+  { value: 'small', label: 'S' },
+  { value: 'medium', label: 'M' },
+  { value: 'large', label: 'L' }
+]
+const backendUrl = computed(() =>
+  backendAvailable.value
+    ? apiStore.backendMode === 'local'
+      ? LOCAL_API_URL
+      : import.meta.env.VITE_APP_API_URL
+    : null
 )
-const backendUrl = computed(() => backendAvailable.value
-  ? (apiStore.backendMode === 'local' ? LOCAL_API_URL : import.meta.env.VITE_APP_API_URL)
-  : null)
 
 const backendMode = computed({
   get: () => apiStore.backendMode,
@@ -385,9 +453,10 @@ const isCardBorder = computed({
   set: (value) => backgroundStore.toggleCardBorder(value)
 })
 
-const isCardHoverDisabled = computed({
-  get: () => backgroundStore.isCardHoverDisabled,
-  set: (value) => backgroundStore.toggleCardHover(value)
+// The store keeps the negative flag; the switch reads positively.
+const isCardHoverEnabled = computed({
+  get: () => !backgroundStore.isCardHoverDisabled,
+  set: (value) => backgroundStore.toggleCardHover(!value)
 })
 
 const isHistoryAllowed = computed({
@@ -457,10 +526,6 @@ const sidebarPosition = computed({
   set: (value) => mainStore.setSidebarPosition(value)
 })
 
-const resetBackground = () => {
-  backgroundStore.resetBackground()
-}
-
 const resetKinoBdSources = () => {
   playerStore.clearKinoBdSources()
 }
@@ -468,154 +533,257 @@ const resetKinoBdSources = () => {
 
 <style scoped>
 .settings-page {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  padding: 1rem;
-  color: #fff;
+  box-sizing: border-box;
+  max-width: 920px;
   min-height: 100vh;
+  padding: 40px 24px 64px;
+  color: #fff;
 }
 
 h1 {
-  text-align: center;
-  margin-bottom: 2.5rem;
-  color: #ffffff;
-  font-size: 2rem;
+  margin: 0 0 32px;
+  color: #fff;
+  font-size: var(--fs-2xl);
+  font-weight: 800;
+  letter-spacing: -0.02em;
+}
+
+.settings-layout {
+  display: grid;
+  grid-template-columns: 200px minmax(0, 640px);
+  gap: 48px;
+  align-items: start;
+}
+
+/* Section list: plain text rows, a 2px bar marks the current one. */
+.settings-tabs {
+  position: sticky;
+  top: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.settings-tabs button {
+  position: relative;
+  min-height: 44px;
+  padding: 0 12px;
+  border: none;
+  border-radius: var(--radius-s);
+  background: none;
+  color: var(--text-dim);
+  font: inherit;
+  font-size: var(--fs-m);
   font-weight: 500;
+  text-align: left;
+  cursor: pointer;
+}
+
+.settings-tabs button:hover {
+  color: #fff;
+}
+
+.settings-tabs button.active {
+  color: #fff;
+  font-weight: 600;
+}
+
+.settings-tabs button.active::before {
+  content: '';
+  position: absolute;
+  top: 10px;
+  bottom: 10px;
+  left: 0;
+  width: 2px;
+  border-radius: 1px;
+  background: var(--accent-ui);
+}
+
+.settings-tabs button:focus-visible {
+  outline: 2px solid var(--accent-color);
+  outline-offset: -2px;
+}
+
+.settings-container {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
 }
 
 .settings-group {
   display: flex;
   flex-direction: column;
-  gap: 1rem;
-  padding: 1rem;
-  border-radius: 8px;
-  border: 1px solid var(--accent-transparent);
-  background: rgba(255, 255, 255, 0.02);
+  gap: 4px;
+  padding: 0 0 40px;
 }
 
-.back-button {
-  background: none;
-  border: none;
-  color: #fff;
-  font-size: 18px;
-  cursor: pointer;
-}
-
-.settings-container {
-  background: #2a2a2a;
-  padding: 20px;
-  border-radius: 10px;
-  max-width: 860px;
-  width: 100%;
-  box-sizing: border-box;
-  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
-  border: 1px solid var(--accent-transparent);
-  display: flex;
-  flex-direction: column;
-  gap: 18px;
-  margin-bottom: 40px;
-}
-
-.settings-tabs {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(145px, 1fr));
-  gap: 8px;
-  padding: 6px;
-  border-radius: 10px;
-  background: rgba(255, 255, 255, 0.04);
-  border: 1px solid rgba(255, 255, 255, 0.08);
-}
-
-.settings-tabs button {
-  display: flex;
-  flex-direction: column;
-  justify-content: flex-start;
-  min-height: 68px;
-  padding: 10px 12px;
-  border: 0;
-  border-radius: 7px;
-  background: transparent;
-  color: rgba(255, 255, 255, 0.78);
-  cursor: pointer;
-  font: inherit;
-  font-weight: 600;
-  text-align: left;
-}
-
-.settings-tabs button.active {
-  background: var(--accent-solid);
-  color: var(--accent-contrast);
-}
-
-.settings-tabs button:focus-visible {
-  outline: 2px solid #fff;
-  outline-offset: 2px;
-}
-
-.settings-tab__label,
-.settings-tab__description {
-  display: block;
-}
-
-.settings-tab__description {
-  margin-top: 4px;
-  color: rgba(255, 255, 255, 0.58);
-  font-size: 12px;
-  font-weight: 400;
-  line-height: 1.25;
-}
-
-.settings-tabs button.active .settings-tab__description {
-  color: var(--accent-contrast);
-}
-
-.settings-section-header {
-  padding: 4px 2px 10px;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
-}
-
-.settings-section-header p,
-.settings-section-header span {
-  margin: 0;
-  color: rgba(255, 255, 255, 0.68);
-  font-size: 13px;
-}
-
-.settings-section-header h2 {
-  margin: 4px 0;
-  color: #fff;
-  font-size: 22px;
-  font-weight: 600;
-}
-
-.setting-item {
-  display: flex;
-  align-items: center;
-  gap: 10px;
+/* Groups inside a section are separated by a hairline. */
+.settings-group + .settings-group {
+  padding-top: 40px;
+  border-top: 1px solid var(--hairline);
 }
 
 h3 {
-  font-size: 16px;
-  margin-bottom: 10px;
-  margin: 0;
+  margin: 0 0 8px;
+  color: #fff;
+  font-size: var(--fs-l);
+  font-weight: 700;
+}
+
+/* Switch rows: label left, switch right, 52px tall. */
+.settings-group :deep(.toggle) {
+  flex-direction: row-reverse;
+  justify-content: space-between;
+  gap: 16px;
+  min-height: 52px;
+}
+
+.settings-group :deep(.label-text) {
+  font-size: var(--fs-m);
+}
+
+.setting-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 16px;
+  align-items: center;
+  min-height: 52px;
+}
+
+.group-label {
+  font-size: var(--fs-m);
+}
+
+.segmented {
+  display: inline-flex;
+  padding: 3px;
+  border-radius: var(--radius-m);
+  background: rgba(255, 255, 255, 0.06);
+}
+
+.segmented__option {
+  position: relative;
+  cursor: pointer;
+}
+
+.segmented__option input {
+  position: absolute;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.segmented__option span {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 44px;
+  min-height: 38px;
+  padding: 0 12px;
+  box-sizing: border-box;
+  border-radius: var(--radius-s);
+  color: var(--text-dim);
+  font-size: var(--fs-s);
+  font-weight: 600;
+}
+
+.segmented__option input:checked + span {
+  background: rgba(255, 255, 255, 0.14);
+  color: #fff;
+}
+
+.segmented__option input:focus-visible + span {
+  outline: 2px solid var(--accent-color);
+  outline-offset: -2px;
+}
+
+/* Background previews. */
+.bg-tiles {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.bg-tile {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  cursor: pointer;
+}
+
+.bg-tile__preview {
+  display: block;
+  width: 96px;
+  height: 60px;
+  border-radius: var(--radius-m);
+  box-shadow: inset 0 0 0 1px var(--hairline);
+}
+
+.bg-tile__preview--disabled {
+  background: var(--bg-primary);
+}
+
+.bg-tile__preview--dynamic {
+  background:
+    radial-gradient(circle at 30% 30%, rgba(255, 255, 255, 0.22), transparent 55%),
+    linear-gradient(135deg, #3a2f2a, #12161f);
+}
+
+.bg-tile__preview--stars {
+  background:
+    radial-gradient(1px 1px at 20% 30%, #fff, transparent),
+    radial-gradient(1px 1px at 70% 20%, #fff, transparent),
+    radial-gradient(1px 1px at 45% 70%, #fff, transparent),
+    radial-gradient(1px 1px at 85% 65%, #fff, transparent),
+    radial-gradient(1px 1px at 10% 80%, #fff, transparent), #05070d;
+}
+
+.bg-tile__preview--lava-lamp {
+  background:
+    radial-gradient(circle at 30% 70%, #7a2bd9 0 18%, transparent 19%),
+    radial-gradient(circle at 70% 35%, #d92b6a 0 22%, transparent 23%), #120a1c;
+}
+
+.bg-tile__label {
+  color: var(--text-dim);
+  font-size: var(--fs-s);
+}
+
+.bg-tile input:checked ~ .bg-tile__preview {
+  box-shadow:
+    inset 0 0 0 1px rgba(0, 0, 0, 0.6),
+    0 0 0 2px var(--accent-ui);
+}
+
+.bg-tile input:checked ~ .bg-tile__label {
+  color: #fff;
+}
+
+.bg-tile input:focus-visible ~ .bg-tile__preview {
+  outline: 2px solid #fff;
+  outline-offset: 3px;
 }
 
 .radio {
   display: flex;
   align-items: center;
+  box-sizing: border-box;
+  min-height: 44px;
+  cursor: pointer;
 }
 
 .radio-group {
   display: flex;
   flex-direction: column;
-  gap: 10px;
 }
 
 .radio input {
-  margin-right: 10px;
+  margin-right: 12px;
   /* Dark native rendering: unchecked radios are dark rings, so the checked one stands out for every accent. */
   color-scheme: dark;
+}
+
+.radio input:checked {
+  accent-color: var(--accent-ui);
 }
 
 .radio input:focus-visible {
@@ -624,57 +792,40 @@ h3 {
 }
 
 .radio-label {
+  font-size: var(--fs-m);
   cursor: pointer;
 }
 
-/* Switch labels use the same size as the radio options next to them. */
-.settings-group :deep(.label-text) {
-  font-size: 1rem;
-}
-
-/* Touch: every radio row is a full 44px target and rows touch, so there is no dead gap. */
-@media (max-width: 768px), (pointer: coarse) {
-  .radio {
-    box-sizing: border-box;
-    min-height: 44px;
-    padding: 6px 0;
-    cursor: pointer;
-  }
-
-  div.radio-group {
-    gap: 0;
-  }
+.settings-actions {
+  margin-top: 12px;
 }
 
 .reset-button {
-  /* Secondary action: same outline as the history actions; solid fill stays for primary actions. */
-  background: transparent;
-  border: 1px solid var(--accent-ui);
-  min-height: 44px;
-  padding: 10px 16px;
-  color: #fff;
-  font-size: 16px;
-  border-radius: 8px;
-  cursor: pointer;
-  transition: 0.3s;
-  display: flex;
-  gap: 1rem;
+  display: inline-flex;
   align-items: center;
+  gap: 10px;
+  min-height: 44px;
+  padding: 0 16px;
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  border-radius: var(--radius-m);
+  background: transparent;
+  color: #fff;
+  font-size: var(--fs-m);
   text-align: left;
+  cursor: pointer;
 }
 
 .reset-button:hover {
-  background: var(--accent-transparent);
+  background: rgba(255, 255, 255, 0.06);
 }
 
 .reset-button--danger {
-  background: transparent;
-  border: 1px solid #ff8b8b;
+  border-color: rgba(255, 139, 139, 0.6);
   color: #ff8b8b;
 }
 
 .reset-button--danger:hover {
-  background: rgba(255, 139, 139, 0.14);
+  background: rgba(255, 139, 139, 0.1);
 }
 
 .reset-button:disabled {
@@ -682,33 +833,16 @@ h3 {
   opacity: 0.65;
 }
 
-.radio input:checked {
-  accent-color: var(--accent-ui);
-}
-
-.card-size-group,
-.sidebar-position-group {
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-}
-
-.card-size-group > label:first-child,
-.sidebar-position-group > label:first-child {
-  font-weight: 500;
-  margin-bottom: 5px;
-}
-
 .api-note {
   margin: 0;
-  opacity: 0.85;
-  font-size: 13px;
-  line-height: 1.35;
+  color: var(--text-dim);
+  font-size: var(--fs-s);
+  line-height: 1.45;
 }
 
 .api-subtitle {
-  margin: 6px 0 0;
-  font-size: 14px;
+  margin: 20px 0 4px;
+  font-size: var(--fs-m);
   font-weight: 600;
 }
 
@@ -724,31 +858,73 @@ h3 {
   color: #ff8b8b;
 }
 
+.settings-footer {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  padding-top: 24px;
+  border-top: 1px solid var(--hairline);
+  color: var(--text-faint);
+  font-size: var(--fs-xs);
+}
+
+.settings-footer a {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  color: var(--text-dim);
+}
+
+.settings-footer a:hover {
+  color: #fff;
+}
+
 @media (max-width: 599px) {
   .settings-group--desktop-only {
     display: none !important;
   }
 }
 
-@media (max-width: 640px) {
-  .settings-container {
-    padding: 14px;
+@media (max-width: 760px) {
+  .settings-page {
+    padding: 16px 12px 40px;
   }
 
+  h1 {
+    margin-bottom: 16px;
+    font-size: var(--fs-xl);
+  }
+
+  .settings-layout {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 24px;
+  }
+
+  /* Phones: sections as one scrollable row of text tabs. */
   .settings-tabs {
-    grid-template-columns: repeat(2, 1fr);
+    position: static;
+    flex-direction: row;
+    gap: 4px;
+    margin: 0 -12px;
+    padding: 0 12px;
+    overflow-x: auto;
+    border-bottom: 1px solid var(--hairline);
+    scrollbar-width: none;
   }
 
   .settings-tabs button {
-    min-height: 44px;
+    flex-shrink: 0;
+    white-space: nowrap;
   }
 
-  .settings-tabs button:last-child:nth-child(odd) {
-    grid-column: 1 / -1;
-  }
-
-  .settings-tab__description {
-    display: none;
+  .settings-tabs button.active::before {
+    top: auto;
+    right: 12px;
+    bottom: 0;
+    left: 12px;
+    width: auto;
+    height: 2px;
   }
 }
 </style>

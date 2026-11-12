@@ -1,20 +1,24 @@
 <template>
+  <!-- Auto-width chip on the right: the player is a setting, not the headline. -->
   <div class="players-list">
-    <span>Плеер:</span>
+    <span class="players-list__label">Плеер</span>
     <button
       class="player-btn"
       type="button"
       :disabled="!hasPlayers"
       :aria-label="`Выбрать плеер: ${selectedLabel}`"
+      aria-haspopup="dialog"
       @click="$emit('open-player-modal')"
     >
-      {{ selectedLabel }}
+      <span class="player-btn__name">{{ selectedLabel }}</span>
+      <i class="fas fa-chevron-right player-btn__caret" aria-hidden="true"></i>
     </button>
     <button
       v-if="showSourceButton"
       class="source-btn"
       type="button"
       aria-label="Выбрать источник"
+      aria-haspopup="dialog"
       @click="$emit('open-source-modal')"
     >
       Источник
@@ -40,81 +44,88 @@ defineEmits(['open-player-modal', 'open-source-modal'])
 
 <style scoped>
 .players-list {
-  width: 100%;
-  max-width: none;
   display: flex;
   align-items: center;
-  justify-content: center;
-  gap: 10px;
-  margin: 10px auto 18px;
-  padding: 0;
-  border-radius: 0;
-  background: transparent;
-  border: 0;
+  justify-content: flex-end;
+  gap: 8px;
   box-sizing: border-box;
-}
-
-.player-btn {
-  display: flex;
-  align-items: center;
-  justify-content: left;
-  background: rgba(48, 48, 48, 0.92);
-  color: #fff;
-  border: 1px solid rgba(255, 255, 255, 0.18);
-  border-radius: 5px;
-  padding: 10px;
-  font-weight: 600;
-  cursor: pointer;
-  transition: all 0.2s ease-in-out;
   width: 100%;
-  max-width: 440px;
-  text-align: left;
-  font-size: 16px;
+  margin: 0 auto 12px;
+  padding: 0;
 }
 
-.player-btn:hover {
-  background: var(--accent-solid);
-  border-color: var(--accent-solid);
-  color: var(--accent-contrast);
-  box-shadow: 0 0 10px var(--accent-semi-transparent);
-}
-
-.player-btn:active {
-  background: var(--accent-solid);
-  border-color: var(--accent-solid);
-  color: var(--accent-contrast);
-}
-
-.player-btn:focus {
-  outline: none;
-  box-shadow: 0 0 5px var(--accent-color);
-}
-
-.source-btn {
-  padding: 10px 14px;
-  border: 2px solid #505050;
-  border-radius: 5px;
-  background: #2f2f2f;
-  color: #fff;
-  cursor: pointer;
-  font-size: 14px;
+.players-list__label {
+  color: var(--text-faint);
+  font-size: var(--fs-xs);
   font-weight: 600;
-  transition: all 0.2s ease-in-out;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
 }
 
+.player-btn,
+.source-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 44px;
+  padding: 0 14px;
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  border-radius: var(--radius-m);
+  background: var(--surface-raised);
+  color: #fff;
+  font-size: var(--fs-s);
+  font-weight: 600;
+  cursor: pointer;
+  transition:
+    background-color 0.15s ease,
+    border-color 0.15s ease;
+}
+
+.player-btn__name {
+  max-width: 260px;
+  overflow: hidden;
+  letter-spacing: 0.04em;
+  text-overflow: ellipsis;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.player-btn__caret {
+  color: var(--text-dim);
+  font-size: 11px;
+  transform: rotate(90deg);
+}
+
+.player-btn:hover:not(:disabled),
 .source-btn:hover {
-  background: var(--accent-solid);
-  border-color: var(--accent-solid);
-  color: var(--accent-contrast);
+  border-color: rgba(255, 255, 255, 0.3);
+  background: var(--surface-overlay);
+}
+
+.player-btn:disabled {
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+.player-btn:focus-visible,
+.source-btn:focus-visible {
+  outline: 2px solid var(--accent-color);
+  outline-offset: 2px;
 }
 
 @media (max-width: 700px) {
   .players-list {
-    max-width: calc(100vw - 24px);
-    margin-bottom: 10px;
+    padding: 0 10px;
+    margin-bottom: 8px;
   }
 
   .player-btn {
+    flex: 1 1 auto;
+    justify-content: space-between;
+    min-width: 0;
+  }
+
+  .player-btn__name {
     max-width: none;
   }
 }

@@ -112,7 +112,7 @@ const getContributionWidth = (count) => {
   overflow: auto;
   background: #1e1e1e;
   border: 1px solid #444;
-  border-radius: 12px;
+  border-radius: var(--radius-l);
   padding: 20px;
 }
 
@@ -154,7 +154,7 @@ const getContributionWidth = (count) => {
 .show-all-timings-btn {
   gap: 8px;
   border: none;
-  border-radius: 8px;
+  border-radius: var(--radius-m);
   background: var(--accent-solid);
   color: var(--accent-contrast);
   padding: 10px 14px;
@@ -170,7 +170,7 @@ const getContributionWidth = (count) => {
 .top-submitter-item {
   gap: 12px;
   background: rgba(255, 255, 255, 0.04);
-  border-radius: 8px;
+  border-radius: var(--radius-m);
   padding: 10px;
 }
 

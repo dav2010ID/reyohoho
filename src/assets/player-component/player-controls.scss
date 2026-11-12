@@ -7,7 +7,7 @@
   padding: 6px 8px;
   width: fit-content;
   max-width: min(100%, 920px);
-  border-radius: 10px;
+  border-radius: var(--radius-l);
   background: rgba(20, 20, 20, 0.92);
   border: 1px solid #333;
   backdrop-filter: blur(8px);
@@ -32,7 +32,7 @@
   border: 1px solid rgba(255, 255, 255, 0.07);
   padding: 6px 8px;
   font-size: 18px;
-  border-radius: 8px;
+  border-radius: var(--radius-m);
   cursor: pointer;
   transition:
     background-color 0.18s ease,
@@ -117,14 +117,14 @@
   gap: 2px;
   background-color: rgba(30, 30, 30, 0.98);
   border: 1px solid #444;
-  border-radius: 8px;
+  border-radius: var(--radius-m);
 }
 
 .aspect-ratio-option {
   box-sizing: border-box;
   min-width: 0;
   padding: 8px 10px;
-  border-radius: 5px;
+  border-radius: var(--radius-m);
   cursor: pointer;
   transition:
     background-color 0.18s ease,
@@ -196,7 +196,7 @@
     box-sizing: border-box;
     margin: 6px auto 10px;
     padding: 6px;
-    border-radius: 8px;
+    border-radius: var(--radius-m);
   }
 
   .main-controls {
@@ -220,7 +220,7 @@
     flex: 0 0 44px;
     min-width: 44px;
     padding: 0;
-    border-radius: 7px;
+    border-radius: var(--radius-m);
   }
 
   .controls .aspect-ratio-dropdown-btn {

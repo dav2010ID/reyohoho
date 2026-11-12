@@ -160,7 +160,7 @@
   color: inherit;
   background: linear-gradient(135deg, #1a1a1b 0%, #2d2d2e 100%);
   border: 1px solid #343536;
-  border-radius: 8px;
+  border-radius: var(--radius-m);
   padding: 1rem 1.5rem;
   margin-bottom: 1rem;
   cursor: pointer;
@@ -236,7 +236,7 @@
   background: var(--accent-transparent);
   color: var(--accent-text);
   padding: 0.25rem 0.75rem;
-  border-radius: 15px;
+  border-radius: var(--radius-l);
   font-size: 0.75rem;
   font-weight: 500;
   border: 1px solid var(--accent-semi-transparent);
@@ -287,7 +287,7 @@
   gap: 0.5rem;
   background: rgba(255, 255, 255, 0.05);
   border: 1px solid rgba(255, 255, 255, 0.1);
-  border-radius: 6px;
+  border-radius: var(--radius-m);
   padding: 0.5rem 1rem;
   cursor: pointer;
   color: #999;
@@ -330,7 +330,7 @@
   gap: 0.5rem;
   background: rgba(255, 255, 255, 0.05);
   border: 1px solid rgba(255, 255, 255, 0.1);
-  border-radius: 6px;
+  border-radius: var(--radius-m);
   padding: 0.5rem 1rem;
   cursor: pointer;
   color: #999;
@@ -359,7 +359,7 @@
   color: #999;
   background: rgba(0, 0, 0, 0.7);
   padding: 0.25rem 0.5rem;
-  border-radius: 4px;
+  border-radius: var(--radius-s);
 }
 
 .character-counter-inline.near-limit {
@@ -448,7 +448,7 @@
   color: transparent;
   cursor: pointer;
   padding: 0.2em 0.6em;
-  border-radius: 4px;
+  border-radius: var(--radius-s);
   transition: all 0.3s ease;
   user-select: none;
   position: relative;
@@ -522,7 +522,7 @@
 .comments-retry-btn {
   padding: 8px 16px;
   border: 0;
-  border-radius: 6px;
+  border-radius: var(--radius-m);
   background: var(--accent-solid);
   color: var(--accent-contrast);
   cursor: pointer;
@@ -710,7 +710,7 @@
 
 .comment-preview {
   background: rgba(255, 255, 255, 0.05);
-  border-radius: 6px;
+  border-radius: var(--radius-m);
   padding: 8px;
   margin-bottom: 6px;
   border-left: 2px solid var(--accent-ui);
@@ -723,7 +723,7 @@
   color: var(--accent-contrast);
   border: none;
   padding: 0.5rem 1rem;
-  border-radius: 6px;
+  border-radius: var(--radius-m);
   cursor: pointer;
   font-size: 0.9rem;
   transition: all 0.2s ease;

@@ -3,7 +3,11 @@
     <div
       v-show="!loading"
       class="grid"
-      :class="[`card-size-${cardSize}`, `variant-${variant}`]"
+      :class="[
+        `card-size-${cardSize}`,
+        `variant-${variant}`,
+        { 'grid--rows': isRowList, 'grid--ribbon': ribbon && !isMobile }
+      ]"
     >
       <template v-if="(isHistory || isUserList) && isMobile">
         <CardMovieSwipeWrapper
@@ -24,6 +28,7 @@
             :show-delete="showDelete"
             :show-star="showStar"
             :variant="variant"
+            :show-type="isMixed"
             @remove:from-history="removeFromHistory"
             @save:element="(el) => (movieRefs[index] = el)"
           />
@@ -44,6 +49,9 @@
           :show-delete="showDelete"
           :show-star="showStar"
           :variant="variant"
+          :show-type="isMixed"
+          :show-original-title="showOriginalTitle"
+          :rank="showRank ? index + 1 : null"
           @remove:from-history="removeFromHistory"
           @save:element="(el) => (movieRefs[index] = el)"
         />
@@ -79,14 +87,20 @@ const {
   loading = true,
   showDelete = true,
   showStar = false,
-  variant = 'default'
+  variant = 'default',
+  showRank = false,
+  showOriginalTitle = false,
+  ribbon = false
 } = defineProps({
   moviesList: Array,
   isHistory: Boolean,
   loading: Boolean,
   showDelete: Boolean,
   showStar: Boolean,
-  variant: String
+  variant: String,
+  showRank: Boolean,
+  showOriginalTitle: Boolean,
+  ribbon: Boolean
 })
 
 const movieRefs = ref([])
@@ -100,6 +114,15 @@ const isUserList = computed(() => {
     route.name === 'lists' &&
     (!route.params.user_id || String(route.params.user_id) === String(authStore.user?.id))
   )
+})
+
+const isRowList = computed(() => (isHistory || isUserList.value) && isMobile.value)
+// The series badge only carries information when films and series are mixed.
+const isMixed = computed(() => {
+  const kinds = new Set(
+    (moviesList || []).map((movie) => (/SERIES|SHOW|сериал/i.test(String(movie?.type || '')) ? 'series' : 'film'))
+  )
+  return kinds.size > 1
 })
 
 const movieUrl = (movie) => {
@@ -224,43 +247,78 @@ onUnmounted(() => {
 </script>
 
 <style scoped>
+/* Posters are the interface: dense auto-fill grid, text under each poster. */
 .grid {
-  display: grid;
-  gap: 15px;
-  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
-  justify-content: center;
-  margin: 0 auto;
-  width: 100%;
-  padding: 0 15px;
-  box-sizing: border-box;
   position: relative;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(170px, 1fr));
+  gap: 28px 16px;
+  box-sizing: border-box;
+  width: 100%;
   min-height: 300px;
+  margin: 0 auto;
+  padding: 0 24px;
 }
 
 .grid.card-size-small {
-  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
-  gap: 10px;
-}
-
-.grid.card-size-medium {
-  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
-  gap: 15px;
+  grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
 }
 
 .grid.card-size-large {
-  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
-  gap: 20px;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
 }
 
 .grid.variant-related {
   min-height: 0;
 }
 
+/* "Продолжить просмотр": one horizontal ribbon of small posters on desktop. */
+.grid.grid--ribbon {
+  display: flex;
+  gap: 16px;
+  min-height: 0;
+  margin: -8px auto 0;
+  padding: 8px 24px 10px;
+  overflow-x: auto;
+  scroll-padding-inline: 24px;
+  scroll-snap-type: x proximity;
+  scrollbar-width: thin;
+}
+
+.grid.grid--ribbon > :deep(*) {
+  flex: 0 0 96px;
+  width: 96px;
+  scroll-snap-align: start;
+}
+
+.grid.grid--ribbon :deep(.card-meta) {
+  font-size: var(--fs-xs);
+}
+
+.grid.grid--ribbon :deep(.movie-header h3) {
+  font-size: var(--fs-s);
+}
+
+.grid.grid--ribbon :deep(.poster-action) {
+  display: none;
+}
+
 @media (max-width: 620px) {
   .grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 16px 10px;
+    padding: 0 12px;
+  }
+
+  .grid.card-size-small,
+  .grid.card-size-large {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  .grid.grid--rows {
     grid-template-columns: 1fr;
-    gap: 10px;
-    padding: 5px;
+    gap: 8px;
+    min-height: 0;
   }
 }
 </style>

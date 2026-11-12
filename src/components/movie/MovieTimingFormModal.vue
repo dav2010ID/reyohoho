@@ -94,7 +94,7 @@ defineEmits(['update:modelValue', 'close', 'submit'])
 .timing-modal-content {
   background: #1e1e1e;
   border: 1px solid #444;
-  border-radius: 12px;
+  border-radius: var(--radius-l);
   width: min(720px, 100%);
   max-height: 90vh;
   overflow: auto;
@@ -117,7 +117,7 @@ defineEmits(['update:modelValue', 'close', 'submit'])
 .close-modal-btn,
 .submit-timing-btn {
   border: none;
-  border-radius: 8px;
+  border-radius: var(--radius-m);
   color: #fff;
   cursor: pointer;
 }
@@ -135,7 +135,7 @@ defineEmits(['update:modelValue', 'close', 'submit'])
 .timing-textarea {
   min-height: 180px;
   resize: vertical;
-  border-radius: 8px;
+  border-radius: var(--radius-m);
   border: 1px solid #444;
   background: #111;
   color: #fff;
@@ -144,7 +144,7 @@ defineEmits(['update:modelValue', 'close', 'submit'])
 
 .timing-preview {
   border: 1px solid rgba(255, 255, 255, 0.12);
-  border-radius: 8px;
+  border-radius: var(--radius-m);
   padding: 12px;
   background: rgba(255, 255, 255, 0.04);
 }

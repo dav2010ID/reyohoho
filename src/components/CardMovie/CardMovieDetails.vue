@@ -4,30 +4,31 @@
       <h3>{{ removeYearFromTitle(movie.title) }}</h3>
     </div>
 
-    <div v-if="movie.raw_data?.name_en || movie.raw_data?.Name_original" class="original-title">
-      {{ movie.raw_data.name_en || movie.raw_data.Name_original }}
+    <div v-if="showOriginalTitle && originalTitle" class="original-title">
+      {{ originalTitle }}
     </div>
 
-    <!-- Вместо старого места для типа выводим год выпуска -->
-    <div v-if="movie.year" class="meta">
-      <span class="year">{{ movie.year }}</span>
-    </div>
-
-    <div v-if="genres.length" class="genres">
-      <span v-for="genre in genres.slice(0, 2)" :key="genre" class="genre-tag">{{ genre }}</span>
-      <span v-if="genres.length > 2" class="genre-count">
-        +{{ genres.length - 2 }}
-      </span>
-    </div>
+    <p v-if="rank || metaLine" class="card-meta">
+      <span v-if="rank" class="card-rank">№&nbsp;{{ rank }}</span>
+      <span v-if="rank && metaLine" aria-hidden="true"> · </span>
+      <span v-if="metaLine">{{ metaLine }}</span>
+    </p>
   </div>
 </template>
 
 <script setup>
 import { computed } from 'vue'
-const { movie, variant = 'default' } = defineProps({
+const {
+  movie,
+  variant = 'default',
+  rank = null,
+  showOriginalTitle = false
+} = defineProps({
   movie: Object,
   isHistory: Boolean,
-  variant: String
+  variant: String,
+  rank: { type: Number, default: null },
+  showOriginalTitle: Boolean
 })
 
 const genres = computed(() => {
@@ -37,6 +38,16 @@ const genres = computed(() => {
     : []
 })
 
+const originalTitle = computed(() => movie.raw_data?.name_en || movie.raw_data?.Name_original || '')
+
+// One quiet line instead of chips: "1999 · фантастика, драма".
+const metaLine = computed(() => {
+  const parts = []
+  if (movie.year) parts.push(String(movie.year))
+  if (variant !== 'related' && genres.value.length) parts.push(genres.value.slice(0, 2).join(', '))
+  return parts.join(' · ')
+})
+
 const removeYearFromTitle = (title) => {
   return title ? title.replace(/\(\d{4}\)$/, '').trim() : title
 }
@@ -44,200 +55,78 @@ const removeYearFromTitle = (title) => {
 
 <style scoped>
 .movie-details {
-  --movie-details-padding: 15px;
-  --movie-details-gap: 0;
-  --movie-details-bg: transparent;
-  --movie-title-color: inherit;
-  --movie-title-clamp: 3;
-  --movie-title-max-height: 3.6em;
-  --movie-year-color: #ccc;
-  --movie-genre-color: #888;
-  --movie-genre-bg: rgba(136, 136, 136, 0.1);
-  --movie-genre-border: transparent;
-  padding: 15px;
-  padding: var(--movie-details-padding);
-  min-width: 0;
-  flex-grow: 1;
   display: flex;
   flex-direction: column;
-  gap: var(--movie-details-gap);
-  background: var(--movie-details-bg);
-}
-
-.movie-details.variant-related {
-  --movie-details-padding: 10px 2px 0;
-  --movie-details-gap: 4px;
-  --movie-title-clamp: 2;
-  --movie-title-max-height: 2.4em;
-  position: relative;
-  min-height: 0;
-  overflow-wrap: break-word;
-  hyphens: none;
-}
-
-.movie-details.variant-related .movie-header h3 {
-  font-size: 15px;
-  font-weight: 500;
-  text-wrap: balance;
-  hyphens: none;
-  word-break: normal;
-  overflow-wrap: break-word;
-}
-
-.movie-header {
-  display: flex;
+  gap: 4px;
   min-width: 0;
-  justify-content: space-between;
-  align-items: flex-start;
-  margin-bottom: 10px;
+  padding: 8px 0 0;
 }
 
 .movie-header h3 {
-  font-size: 1.1em;
-  margin: 0;
   display: -webkit-box;
-  display: box;
-  -webkit-line-clamp: var(--movie-title-clamp);
-  -moz-line-clamp: var(--movie-title-clamp);
-  line-clamp: var(--movie-title-clamp);
-  -webkit-box-orient: vertical;
-  -moz-box-orient: vertical;
-  box-orient: vertical;
+  margin: 0;
   overflow: hidden;
-  text-overflow: ellipsis;
-  line-height: 1.2;
-  max-height: var(--movie-title-max-height);
-  word-wrap: break-word;
-  word-break: break-word;
-  hyphens: auto;
-  color: var(--movie-title-color);
-}
-
-.movie-details.variant-related .movie-header {
-  margin-bottom: 0;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  line-clamp: 2;
+  color: #fff;
+  font-size: var(--fs-m);
+  font-weight: 600;
+  line-height: 1.3;
+  text-wrap: balance;
+  overflow-wrap: break-word;
+  hyphens: none;
 }
 
 .original-title {
-  font-size: 0.8em;
-  color: #888;
-  margin-bottom: 10px;
-  font-style: italic;
   display: -webkit-box;
-  display: box;
-  -webkit-line-clamp: 2;
-  -moz-line-clamp: 2;
-  line-clamp: 2;
-  -webkit-box-orient: vertical;
-  -moz-box-orient: vertical;
-  box-orient: vertical;
   overflow: hidden;
-  word-wrap: break-word;
-  word-break: break-word;
-  hyphens: auto;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 1;
+  line-clamp: 1;
+  color: var(--text-dim);
+  font-size: var(--fs-s);
+  font-style: italic;
 }
 
-.movie-details.variant-related .original-title {
-  display: none;
-}
-
-.year {
-  font-size: 0.9em;
-  color: var(--movie-year-color);
-}
-
-.meta {
-  margin-bottom: 10px;
-}
-
-.movie-details.variant-related .meta {
-  margin-bottom: 0;
-}
-
-.genres {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 5px;
-  margin-top: 5px;
-  align-items: center;
-}
-
-.movie-details.variant-related .genres {
-  gap: 4px;
-  margin-top: auto;
-}
-
-.genre-tag {
-  font-size: 0.75em;
-  color: var(--movie-genre-color);
-  background-color: var(--movie-genre-bg);
-  border: 1px solid var(--movie-genre-border);
-  padding: 2px 6px;
-  border-radius: 3px;
+.card-meta {
+  margin: 0;
+  overflow: hidden;
+  color: var(--text-dim);
+  font-size: var(--fs-s);
+  font-variant-numeric: tabular-nums;
+  line-height: 1.35;
+  text-overflow: ellipsis;
   white-space: nowrap;
 }
 
-.genre-count {
-  font-size: 0.75em;
-  color: var(--movie-genre-color);
-  background-color: var(--movie-genre-bg);
-  border: 1px solid var(--movie-genre-border);
-  padding: 2px 6px;
-  border-radius: 3px;
-  white-space: nowrap;
+.card-rank {
+  color: var(--accent-text);
+  font-size: var(--fs-xs);
+  font-weight: 700;
 }
 
-@media (max-width: 600px) {
-  .movie-details {
-    padding: 8px;
-    flex-grow: 1;
-    display: flex;
-    flex-direction: column;
-    justify-content: space-between;
-  }
+.movie-details.variant-related .movie-header h3 {
+  font-weight: 500;
+}
 
-  .movie-details.variant-related {
-    --movie-details-padding: 8px 2px 0;
-    padding: var(--movie-details-padding);
-    min-height: 0;
-  }
+/* Compact history rows on phones keep the text next to a small poster. */
+.movie-details.layout-row {
+  justify-content: center;
+  padding: 0 12px;
+}
 
-  .movie-header {
-    margin-bottom: 6px;
-  }
-
+@media (max-width: 620px) {
   .movie-header h3 {
-    font-size: 0.95em;
-    -webkit-line-clamp: 4;
-    -moz-line-clamp: 4;
-    line-clamp: 4;
-    max-height: 4.8em;
-    line-height: 1.2;
-    word-wrap: break-word;
-    word-break: break-word;
-    hyphens: auto;
+    font-size: var(--fs-s);
   }
 
-  .original-title {
-    margin-bottom: 6px;
-    font-size: 0.75em;
+  .card-meta {
+    font-size: var(--fs-xs);
   }
 
-  .meta {
-    margin-bottom: 6px;
-  }
-
-  .year {
-    font-size: 0.9em;
-  }
-
-  .genres {
-    margin-top: 3px;
-  }
-
-  .genre-tag,
-  .genre-count {
-    font-size: 0.7em;
-    padding: 1px 4px;
+  .movie-details.layout-row .movie-header h3 {
+    font-size: var(--fs-m);
   }
 }
 </style>

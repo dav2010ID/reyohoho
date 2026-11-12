@@ -1,6 +1,14 @@
 <template>
   <div class="wrapper">
-    <div class="user-lists-page" tabindex="0">
+    <!-- Logged out, own lists: one clear way in instead of an empty toolbar. -->
+    <div v-if="needsLogin" class="user-lists-page lists-login">
+      <h1 class="lists-login__title">Списки</h1>
+      <p class="lists-login__text">
+        Войдите, чтобы вести списки: избранное, «смотрю», «позже» и просмотренное.
+      </p>
+      <router-link to="/login" class="lists-login__button">Войти</router-link>
+    </div>
+    <div v-else class="user-lists-page" tabindex="0">
       <div class="controls">
         <div class="filter-card type-card">
           <div class="button-group type-buttons">
@@ -144,12 +152,18 @@ const importFileInput = ref(null)
 const isImporting = ref(false)
 let fetchGeneration = 0
 const deletingItems = new Set()
-const captureView = () => ({ token: authStore.token, userId: user_id.value, type: typeFilter.value })
+const captureView = () => ({
+  token: authStore.token,
+  userId: user_id.value,
+  type: typeFilter.value
+})
 const isCurrentView = (view) =>
   authStore.token === view.token && user_id.value === view.userId && typeFilter.value === view.type
 
 const notificationRef = ref(null)
 const capabilities = computed(() => accountCapabilities(authStore))
+// Own lists need an account; a shared list (/lists/:user_id) stays public.
+const needsLogin = computed(() => !user_id.value && !authStore.token)
 const exportableListTypes = computed(() => [
   USER_LIST_TYPES_ENUM.FAVORITE,
   USER_LIST_TYPES_ENUM.LATER,
@@ -337,7 +351,10 @@ const importServerLists = async (parsedLists) => {
       continue
     }
     if (authStore.isWorkerSession) {
-      addedCount += await importWorkerList(type, incomingIds.filter(id => !currentLists[type].has(id)))
+      addedCount += await importWorkerList(
+        type,
+        incomingIds.filter((id) => !currentLists[type].has(id))
+      )
       continue
     }
     for (const kpId of incomingIds) {
@@ -345,7 +362,7 @@ const importServerLists = async (parsedLists) => {
       if (currentLists[type].has(kpId)) continue
       try {
         // Legacy API has no bulk endpoint. Stay below its 180/minute limit.
-        await new Promise(resolve => setTimeout(resolve, 400))
+        await new Promise((resolve) => setTimeout(resolve, 400))
         if (authStore.token !== token) throw new Error('Аккаунт изменился. Повторите импорт')
         await addToList(kpId, type)
         currentLists[type].add(kpId)
@@ -465,6 +482,10 @@ const fetchCounters = async () => {
 
 const fetchMovies = async () => {
   const generation = ++fetchGeneration
+  if (needsLogin.value) {
+    loading.value = false
+    return
+  }
   const view = captureView()
   const current = () => generation === fetchGeneration && isCurrentView(view)
   loading.value = true
@@ -560,7 +581,8 @@ watch(
   ([newType, newUserId]) => {
     user_id.value = newUserId
     typeFilter.value = typeFilters.value.some((type) => type.value === newType)
-      ? newType : USER_LIST_TYPES_ENUM.FAVORITE
+      ? newType
+      : USER_LIST_TYPES_ENUM.FAVORITE
     movies.value = []
     listCounters.value = {}
     showModal.value = false
@@ -569,10 +591,58 @@ watch(
   { immediate: true }
 )
 
-onUnmounted(() => { fetchGeneration++ })
+onUnmounted(() => {
+  fetchGeneration++
+})
 </script>
 
 <style scoped>
+.lists-login {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 12px;
+  max-width: 560px;
+  padding: 64px 24px;
+}
+
+.lists-login__title {
+  margin: 0;
+  color: #fff;
+  font-size: var(--fs-2xl);
+  font-weight: 800;
+  letter-spacing: -0.02em;
+}
+
+.lists-login__text {
+  margin: 0;
+  color: var(--text-dim);
+  font-size: var(--fs-m);
+  line-height: 1.5;
+}
+
+.lists-login__button {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  margin-top: 8px;
+  padding: 0 20px;
+  border-radius: var(--radius-m);
+  background: var(--accent-solid);
+  color: var(--accent-contrast);
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.lists-login__button:hover {
+  background: var(--accent-solid-hover);
+}
+
+.lists-login__button:focus-visible {
+  outline: 2px solid #fff;
+  outline-offset: 2px;
+}
+
 .empty-state {
   display: flex;
   flex-direction: column;
@@ -621,7 +691,7 @@ onUnmounted(() => { fetchGeneration++ })
   width: auto;
   background: rgba(37, 37, 37, 0.8);
   backdrop-filter: blur(10px);
-  border-radius: 12px;
+  border-radius: var(--radius-l);
   padding: 6px;
   box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
   transition: all 0.3s ease;
@@ -689,7 +759,7 @@ onUnmounted(() => { fetchGeneration++ })
 .share-btn {
   padding: 6px;
   border: 1px solid rgba(255, 255, 255, 0.08);
-  border-radius: 8px;
+  border-radius: var(--radius-m);
   background: rgba(45, 45, 45, 0.6);
   color: #e0e0e0;
   cursor: pointer;
@@ -705,7 +775,7 @@ onUnmounted(() => { fetchGeneration++ })
 .clear-btn {
   padding: 6px;
   border: 1px solid rgba(255, 255, 255, 0.08);
-  border-radius: 8px;
+  border-radius: var(--radius-m);
   background: rgba(45, 45, 45, 0.6);
   color: #e0e0e0;
   cursor: pointer;
@@ -733,7 +803,7 @@ onUnmounted(() => { fetchGeneration++ })
 .filter-btn {
   padding: 6px 12px;
   border: 1px solid rgba(255, 255, 255, 0.08);
-  border-radius: 8px;
+  border-radius: var(--radius-m);
   background: rgba(45, 45, 45, 0.6);
   color: #e0e0e0;
   cursor: pointer;
@@ -765,7 +835,7 @@ onUnmounted(() => { fetchGeneration++ })
   margin-left: 6px;
   background: rgba(255, 255, 255, 0.1);
   padding: 2px 6px;
-  border-radius: 10px;
+  border-radius: var(--radius-l);
   font-weight: 500;
   color: #fff;
 }

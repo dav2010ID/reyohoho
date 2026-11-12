@@ -218,9 +218,9 @@ export default {
   margin: 0 auto;
   padding: 2rem;
   text-align: center;
-  border-radius: 10px;
+  border-radius: var(--radius-l);
   box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
-  border: 1px solid var(--accent-transparent);
+  border: 1px solid var(--hairline);
 }
 
 .dark-theme {
@@ -256,7 +256,7 @@ h1 {
   background: var(--accent-solid);
   color: var(--accent-contrast);
   border: none;
-  border-radius: 5px;
+  border-radius: var(--radius-m);
   font-size: 1rem;
   font-weight: 500;
   cursor: pointer;
@@ -307,7 +307,7 @@ h1 {
   background: transparent;
   color: #fff;
   border: 1px solid var(--accent-color);
-  border-radius: 5px;
+  border-radius: var(--radius-m);
   font-size: 1rem;
   font-weight: 500;
   cursor: pointer;
@@ -370,7 +370,7 @@ h1 {
 .modal-content {
   background-color: #1e1e1e;
   padding: 2rem;
-  border-radius: 10px;
+  border-radius: var(--radius-l);
   max-width: 400px;
   width: 100%;
   text-align: center;
@@ -394,7 +394,7 @@ h1 {
 .qr-background {
   background: white;
   padding: 10px;
-  border-radius: 5px;
+  border-radius: var(--radius-m);
   display: inline-block;
 }
 
@@ -415,7 +415,7 @@ h1 {
   margin: 12px auto 0;
   padding: 8px 20px;
   border: 1px solid rgba(255, 255, 255, 0.35);
-  border-radius: 8px;
+  border-radius: var(--radius-m);
   background: transparent;
   color: #fff;
   cursor: pointer;

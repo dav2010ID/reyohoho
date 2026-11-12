@@ -67,8 +67,9 @@ describe('lazy history card ratings', () => {
     expect(repairCardRatings).not.toHaveBeenCalled()
     intersect([{ isIntersecting: true }])
     await flushPromises()
+    // One score per card: Kinopoisk wins over IMDb.
     expect(wrapper.get('.rating-kp').text()).toBe('8.5')
-    expect(wrapper.get('.rating-imdb').text()).toBe('8.7')
+    expect(wrapper.find('.rating-imdb').exists()).toBe(false)
     expect(store.history[0]).toMatchObject({
       rating_kp: 8.5,
       rating_imdb: 8.7,

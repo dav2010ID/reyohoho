@@ -5,7 +5,7 @@
   transform: translate(-50%, -50%);
   background: rgba(14, 14, 16, 0.96);
   border: 1px solid rgba(255, 255, 255, 0.1);
-  border-radius: 10px;
+  border-radius: var(--radius-l);
   padding: 16px;
   width: min(1180px, calc(100vw - 32px));
   z-index: 1000;
@@ -55,7 +55,7 @@
   padding: 7px 10px;
   background: rgba(255, 255, 255, 0.1);
   border: 1px solid rgba(255, 255, 255, 0.1);
-  border-radius: 7px;
+  border-radius: var(--radius-m);
   color: #fff;
   font-size: 13px;
   font-weight: 600;
@@ -160,7 +160,7 @@
 .timings-warning {
   background: rgba(255, 193, 7, 0.08);
   border: 1px solid rgba(255, 193, 7, 0.22);
-  border-radius: 8px;
+  border-radius: var(--radius-m);
   padding: 10px 12px;
   display: flex;
   align-items: center;
@@ -216,7 +216,7 @@
 
 .acknowledgment-table {
   background: rgba(255, 255, 255, 0.05);
-  border-radius: 8px;
+  border-radius: var(--radius-m);
   margin-bottom: 15px;
   overflow: hidden;
   border: 1px solid rgba(255, 255, 255, 0.1);
@@ -272,7 +272,7 @@
   flex-direction: column;
   gap: 12px;
   padding: 14px;
-  border-radius: 14px;
+  border-radius: var(--radius-l);
   background: rgba(255, 255, 255, 0.035);
   border: 1px solid rgba(255, 255, 255, 0.08);
   transition: all 0.22s ease;
@@ -397,7 +397,7 @@
 }
 
 .timing-card-body {
-  border-radius: 10px;
+  border-radius: var(--radius-l);
   background: rgba(0, 0, 0, 0.22);
   border: 1px solid rgba(255, 255, 255, 0.06);
   padding: 12px 14px;
@@ -428,7 +428,7 @@
   color: rgba(255, 255, 255, 0.7);
   background: color-mix(in srgb, var(--accent-color) 8%, transparent);
   border: 1px solid color-mix(in srgb, var(--accent-ui) 16%, transparent);
-  border-radius: 8px;
+  border-radius: var(--radius-m);
   padding: 8px 12px;
 }
 
@@ -437,7 +437,7 @@
   padding: 12px;
   background: rgba(0, 0, 0, 0.22);
   border: 1px solid rgba(255, 255, 255, 0.08);
-  border-radius: 8px;
+  border-radius: var(--radius-m);
   color: #fff;
   font-size: 13px;
 }
@@ -469,7 +469,7 @@
   align-items: center;
   gap: 6px;
   padding: 6px 12px;
-  border-radius: 8px;
+  border-radius: var(--radius-m);
   font-size: 12px;
   font-weight: 500;
   cursor: pointer;
@@ -519,7 +519,7 @@
   align-items: center;
   gap: 5px;
   background: rgba(0, 0, 0, 0.14);
-  border-radius: 9px;
+  border-radius: var(--radius-m);
   padding: 3px;
   border: 1px solid rgba(255, 255, 255, 0.04);
 }
@@ -531,7 +531,7 @@
   padding: 4px 8px;
   background: transparent;
   border: none;
-  border-radius: 6px;
+  border-radius: var(--radius-m);
   color: rgba(255, 255, 255, 0.6);
   cursor: pointer;
   transition: all 0.18s ease;

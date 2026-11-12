@@ -21,37 +21,16 @@
         data-test-id="delete-button"
         @click.stop.prevent="emit('remove:from-history', movie.kp_id)"
       />
-      <div v-if="hasRatings" class="ratings-overlay">
-        <span
-          v-if="displayOurRating"
-          class="rating-our"
-          :class="{
-            'with-star': showStar,
-            [getRatingColor(displayOurRating)]: true
-          }"
-        >
-          <img :src="appLogoUrl" alt="ReYohoho" class="rating-logo" />
-          {{ formatRating(displayOurRating) }}
-        </span>
-        <span v-if="displayKpRating" class="rating-kp" :class="getRatingColor(displayKpRating)">
-          <img :src="kpLogoUrl" alt="КП" class="rating-logo" />
-          {{ formatRating(displayKpRating) }}
-        </span>
-        <span
-          v-if="displayImdbRating"
-          class="rating-imdb"
-          :class="getRatingColor(displayImdbRating)"
-        >
-          <img :src="imdbLogoUrl" alt="IMDb" class="rating-logo" />
-          {{ formatRating(displayImdbRating) }}
-        </span>
-      </div>
-      <div v-if="movie.type && TYPES_ENUM[movie.type]" class="poster-type">
-        {{ TYPES_ENUM[movie.type] ?? '' }}
-      </div>
-      <div v-if="movie.type && !TYPES_ENUM[movie.type]" class="poster-type">
-        {{ movie.type.replace('🎬', '') }}
-      </div>
+      <span
+        v-if="score"
+        class="card-score"
+        :class="[`rating-${score.source}`, scoreTier]"
+        :aria-label="`${score.label} ${formatRating(score.value)}`"
+      >
+        <span v-if="score.source === 'our' && showStar" class="card-score__star" aria-hidden="true">★</span>
+        {{ formatRating(score.value) }}
+      </span>
+      <div v-if="showType && isSeries" class="poster-type">Сериал</div>
       <div class="poster-action" aria-hidden="true">
         <i class="fas fa-play"></i>
         <span>Смотреть</span>
@@ -62,21 +41,16 @@
 
 <script setup>
 import DeleteButton from '@/components/buttons/DeleteButton.vue'
-import { TYPES_ENUM } from '@/constants'
 import { useMainStore } from '@/store/main'
 import {
   CARD_POSTER_SIZES,
   resolvePosterSourcesByMovie,
   setImageFallback
 } from '@/utils/mediaUtils'
-import { getRatingColor } from '@/utils/ratingUtils'
-import imdbLogoUrl from '@/assets/icon-imdb-logo.svg'
-import kpLogoUrl from '@/assets/icon-kp-logo.svg'
 import { computed } from 'vue'
 
 const mainStore = useMainStore()
 const cardSize = computed(() => mainStore.cardSize)
-const appLogoUrl = `${import.meta.env.BASE_URL || '/'}icons/icon-192x192.png`
 
 const {
   movie,
@@ -85,7 +59,8 @@ const {
   showDelete = true,
   showStar = false,
   variant = 'default',
-  priority = false
+  priority = false,
+  showType = false
 } = defineProps({
   movie: Object,
   isMobile: Boolean,
@@ -94,7 +69,8 @@ const {
   showDelete: Boolean,
   showStar: Boolean,
   variant: String,
-  priority: Boolean
+  priority: Boolean,
+  showType: Boolean
 })
 
 const emit = defineEmits(['remove:from-history'])
@@ -121,128 +97,147 @@ const displayKpRating = computed(() =>
 const displayImdbRating = computed(() =>
   toRatingNumber(movie.rating_imdb ?? movie.raw_data?.rating_imdb)
 )
-const hasRatings = computed(
-  () => displayOurRating.value || displayKpRating.value || displayImdbRating.value
-)
+// One score per card: the user's own rating in their lists, otherwise Kinopoisk, then IMDb, then the site rating.
+const score = computed(() => {
+  if (showStar && displayOurRating.value) return { source: 'our', label: 'Ваша оценка', value: displayOurRating.value }
+  if (displayKpRating.value) return { source: 'kp', label: 'Кинопоиск', value: displayKpRating.value }
+  if (displayImdbRating.value) return { source: 'imdb', label: 'IMDb', value: displayImdbRating.value }
+  if (displayOurRating.value) return { source: 'our', label: 'Рейтинг ReYohoho', value: displayOurRating.value }
+  return null
+})
+// White by default; colour only flags weak scores.
+const scoreTier = computed(() => {
+  const value = score.value?.value ?? 0
+  if (value < 5) return 'is-low'
+  if (value < 7) return 'is-mid'
+  return ''
+})
+const SERIES_TYPES = new Set(['TV_SERIES', 'MINI_SERIES', 'TV_SHOW'])
+const isSeries = computed(() => SERIES_TYPES.has(movie.type) || /сериал/i.test(String(movie.type || '')))
 const formatRating = (rating) => rating.toFixed(1).replace(/\.0$/, '')
 </script>
 
 <style scoped>
 .movie-poster-container {
-  --movie-poster-frame-radius: 10px 10px 0 0;
+  --movie-poster-frame-radius: var(--radius-m);
   --movie-poster-frame-bg: rgba(255, 255, 255, 0.04);
-  --movie-poster-overlay: none;
-  --movie-poster-hover-transform: none;
-  --movie-poster-hover-filter: none;
-  --movie-ratings-bg: rgba(0, 0, 0, 0.7);
-  --movie-ratings-border: transparent;
-  --movie-ratings-radius: 5px;
-  --movie-ratings-gap: 10px;
-  --movie-ratings-padding: 5px 10px;
-  --movie-poster-type-bg: rgba(0, 0, 0, 0.7);
-  --movie-poster-type-border: transparent;
-  --movie-poster-type-padding: 3px 8px;
   position: relative;
   flex-shrink: 0;
 }
 
 .movie-poster-container.variant-related {
-  --movie-poster-frame-radius: 8px;
   width: 100%;
 }
 
 .movie-poster-frame {
+  position: relative;
   width: 100%;
   aspect-ratio: 2 / 3;
   overflow: hidden;
   border-radius: var(--movie-poster-frame-radius);
   background: var(--movie-poster-frame-bg);
-  position: relative;
 }
 
-.movie-poster-frame::after {
-  content: '';
-  position: relative;
-  display: block;
-}
-
+/* Hover ring sits on the poster, not on a card box. */
 .movie-poster-frame::before {
   content: '';
   position: absolute;
+  z-index: 1;
   inset: 0;
+  border-radius: inherit;
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0);
   pointer-events: none;
-  background: var(--movie-poster-overlay);
+  transition: box-shadow 0.2s ease;
+}
+
+:deep(.movie-card:hover) .movie-poster-frame::before {
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.3);
 }
 
 .movie-poster {
+  display: block;
   width: 100%;
   height: 100%;
-  display: block;
   object-fit: cover;
-}
-
-:deep(.movie-card:hover) .movie-poster {
-  transform: var(--movie-poster-hover-transform);
-  filter: var(--movie-poster-hover-filter);
 }
 
 .delete-button {
   position: absolute;
-  top: 5px;
-  left: 5px;
+  z-index: 2;
+  top: 6px;
+  left: 6px;
   opacity: 0;
 }
 
 /* No hover on touch: the per-card delete stays visible next to the swipe gesture. */
 @media (hover: none) {
   .delete-button {
-    /* Right corner: the type badge sits top-left. */
     left: auto;
     right: 4px;
     opacity: 1;
   }
 }
 
-.ratings-overlay {
+.card-score {
   position: absolute;
-  bottom: 10px;
-  left: 10px;
-  display: flex;
-  gap: var(--movie-ratings-gap);
-  background: var(--movie-ratings-bg);
-  border: 1px solid var(--movie-ratings-border);
-  padding: var(--movie-ratings-padding);
-  border-radius: var(--movie-ratings-radius);
-  justify-content: center;
+  z-index: 2;
+  bottom: 6px;
+  left: 6px;
+  display: inline-flex;
   align-items: center;
+  gap: 3px;
+  padding: 2px 6px;
+  border-radius: var(--radius-s);
+  background: rgba(0, 0, 0, 0.72);
+  color: #fff;
+  font-size: var(--fs-s);
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  line-height: 1.35;
+}
+
+.card-score.is-mid {
+  color: #ffc94d;
+}
+
+.card-score.is-low {
+  color: #ff7b7b;
+}
+
+.card-score__star {
+  color: var(--accent-text);
+  font-size: 11px;
 }
 
 .poster-type {
   position: absolute;
-  top: 5px;
-  right: 5px;
-  background: var(--movie-poster-type-bg);
+  z-index: 2;
+  top: 6px;
+  right: 6px;
+  padding: 2px 6px;
+  border-radius: var(--radius-s);
+  background: rgba(0, 0, 0, 0.72);
   color: #fff;
-  border: 1px solid var(--movie-poster-type-border);
-  padding: var(--movie-poster-type-padding);
-  border-radius: 3px;
-  font-size: 0.9em;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.06em;
   text-transform: uppercase;
 }
 
 .poster-action {
   position: absolute;
+  z-index: 2;
   left: 50%;
-  bottom: 18px;
+  bottom: 14px;
   display: inline-flex;
   align-items: center;
   gap: 8px;
-  padding: 9px 13px;
-  color: #fff;
-  background: rgba(0, 0, 0, 0.78);
+  padding: 8px 12px;
   border: 1px solid rgba(255, 255, 255, 0.16);
-  border-radius: 8px;
-  font-size: 0.9em;
+  border-radius: var(--radius-m);
+  background: rgba(0, 0, 0, 0.78);
+  color: #fff;
+  font-size: var(--fs-s);
   font-weight: 700;
   opacity: 0;
   transform: translate(-50%, 8px);
@@ -258,185 +253,68 @@ const formatRating = (rating) => rating.toFixed(1).replace(/\.0$/, '')
   transform: translate(-50%, 0);
 }
 
-.rating-kp,
-.rating-imdb,
-.rating-our {
-  font-size: 1.2em;
-  color: #fff;
-  display: flex;
-  align-items: center;
-  gap: 5px;
+/* Compact history rows on phones: 64x96 poster next to the text. */
+.movie-poster-container.layout-row {
+  width: 64px;
 }
 
-.rating-logo {
-  width: 20px;
-  height: auto;
-  display: inline-block;
-}
-
-.rating-our {
-  font-size: 1.2em;
-  color: #fff;
-  display: flex;
-  align-items: center;
-  gap: 5px;
-  position: relative;
-  padding: 2px 6px;
-  border-radius: 4px;
-}
-
-.rating-our.with-star {
-  background: var(--accent-transparent);
-  border: 1px solid var(--accent-transparent);
-}
-
-.rating-our.with-star::after {
-  content: '★';
-  position: absolute;
-  top: -6px;
-  left: -6px;
-  font-size: 12px;
-  color: var(--accent-text);
-  line-height: 1;
-  padding-bottom: 1px;
-}
-
-.rating-kp.low,
-.rating-imdb.low,
-.rating-our.low {
-  color: #ff6b6b !important;
-}
-
-.rating-kp.medium,
-.rating-imdb.medium,
-.rating-our.medium {
-  color: #ffd93d !important;
-}
-
-.rating-kp.high,
-.rating-imdb.high,
-.rating-our.high {
-  color: #51cf66 !important;
+.movie-poster-container.layout-row .poster-type,
+.movie-poster-container.layout-row .poster-action {
+  display: none;
 }
 
 @media (max-width: 620px) {
-  .ratings-overlay {
-    right: 0;
-    bottom: 0;
-    left: 0;
-    gap: 3px;
-    padding: 3px 4px;
-    font-size: 0.68em;
-    border-radius: 0;
-    justify-content: space-around;
-  }
-
-  .movie-poster-container {
-    width: 100px;
-    min-width: 100px;
-  }
-
-  .movie-poster-frame {
-    width: 100px;
-    aspect-ratio: 2 / 3;
-    border-radius: 10px 0 0 10px;
-  }
-
-  .movie-poster-container.variant-related {
-    width: 100%;
-    min-width: 0;
-    align-self: auto;
-  }
-
-  .movie-poster-container.variant-related .movie-poster-frame {
-    width: 100%;
-    border-radius: var(--movie-poster-frame-radius);
-  }
-
-  .delete-button {
-    top: 4px;
-    right: 4px;
-    left: auto;
-    opacity: 1;
-  }
-
-  /* The button root is .delete-button itself; 36px leaves room for the type badge on a 100px poster. */
-  .movie-poster-container .delete-button {
-    width: 36px;
-    height: 36px;
-    border-width: 1px;
-    border-radius: 7px;
-  }
-
-  .rating-logo {
-    width: 12px;
-    height: auto;
-    display: inline-block;
-  }
-
   .poster-action {
     display: none;
   }
 
-  .rating-our {
-    padding: 1px 2px;
-  }
-
-  .rating-kp,
-  .rating-imdb,
-  .rating-our {
-    gap: 2px;
-    min-width: 0;
-    font-size: 1em;
+  .card-score {
+    bottom: 4px;
+    left: 4px;
+    padding: 1px 5px;
+    font-size: var(--fs-xs);
   }
 
   .poster-type {
     top: 4px;
-    right: auto;
-    left: 4px;
-    max-width: calc(100% - 42px);
-    padding: 2px 4px;
-    font-size: 0.62em;
-    line-height: 1.12;
-    text-align: center;
-    overflow-wrap: anywhere;
+    right: 4px;
+    font-size: 9px;
   }
 
-  .rating-our.with-star::after {
-    top: -5px;
-    left: -5px;
-    font-size: 10px;
-    padding-bottom: 1px;
+  /* The button root is .delete-button itself; 36px keeps it inside a 115px poster corner. */
+  .movie-poster-container .delete-button {
+    top: 4px;
+    right: 4px;
+    left: auto;
+    width: 36px;
+    height: 36px;
+    border-width: 1px;
+    border-radius: var(--radius-m);
+    opacity: 1;
   }
-}
 
-.movie-poster-container.card-size-small .ratings-overlay {
-  padding: 3px 6px;
-  gap: 6px;
-  font-size: 0.75em;
-}
+  /* Row layout: the delete button sits at the end of the row (positioned against the card). */
+  .movie-poster-container.layout-row,
+  .movie-poster-container.layout-row .movie-poster-frame {
+    position: static;
+  }
 
-.movie-poster-container.card-size-small .rating-logo {
-  width: 16px;
-}
+  .movie-poster-container.layout-row .movie-poster {
+    border-radius: var(--radius-s);
+  }
 
-.movie-poster-container.card-size-small .poster-type {
-  font-size: 0.75em;
-  padding: 2px 6px;
-}
+  .movie-poster-container.layout-row .delete-button {
+    top: 50%;
+    right: 4px;
+    width: 44px;
+    height: 44px;
+    border-color: rgba(255, 255, 255, 0.2);
+    background: transparent;
+    transform: translateY(-50%);
+  }
 
-.movie-poster-container.card-size-large .ratings-overlay {
-  padding: 8px 12px;
-  gap: 12px;
-  font-size: 1.1em;
-}
-
-.movie-poster-container.card-size-large .rating-logo {
-  width: 24px;
-}
-
-.movie-poster-container.card-size-large .poster-type {
-  font-size: 1em;
-  padding: 4px 10px;
+  .movie-poster-container.layout-row .card-score {
+    display: none;
+  }
 }
 </style>

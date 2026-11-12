@@ -4,6 +4,7 @@ export const useNavbarStore = defineStore('navbar', {
   state: () => ({
     isNavbarVisible: false,
     isModalSearchVisible: false,
+    searchPrefill: '',
     headerContent: null
   }),
   actions: {
@@ -21,9 +22,15 @@ export const useNavbarStore = defineStore('navbar', {
     toggleSearchModal() {
       this.isModalSearchVisible = !this.isModalSearchVisible
     },
-    openSearchModal() {
+    openSearchModal(prefill = '') {
+      this.searchPrefill = typeof prefill === 'string' ? prefill.trim() : ''
       this.isModalSearchVisible = true
       this.isNavbarVisible = false
+    },
+    takeSearchPrefill() {
+      const value = this.searchPrefill
+      this.searchPrefill = ''
+      return value
     },
     closeSearchModal() {
       this.isModalSearchVisible = false

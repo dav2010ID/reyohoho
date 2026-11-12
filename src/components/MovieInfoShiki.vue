@@ -526,7 +526,7 @@ onMounted(() => {
   background: rgba(0, 0, 0, 0.8);
   color: white;
   padding: 0.5rem;
-  border-radius: 4px;
+  border-radius: var(--radius-s);
   font-size: 0.875rem;
   pointer-events: none;
   z-index: 1000;
@@ -549,7 +549,7 @@ onMounted(() => {
   font-weight: bold;
   background: rgba(0, 0, 0, 0.7);
   padding: 5px 10px;
-  border-radius: 5px;
+  border-radius: var(--radius-m);
   gap: 5px;
   transition: all 0.2s ease;
   vertical-align: middle;
@@ -578,7 +578,7 @@ onMounted(() => {
 }
 
 .additional-info {
-  border-radius: 8px;
+  border-radius: var(--radius-m);
   margin-bottom: 20px;
   font-size: 16px;
 }
@@ -598,7 +598,7 @@ onMounted(() => {
 .movie-poster-container {
   flex-shrink: 0;
   width: 200px;
-  border-radius: 12px;
+  border-radius: var(--radius-l);
   overflow: hidden;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
   transition: transform 0.2s ease;
@@ -651,14 +651,14 @@ onMounted(() => {
 .movie-skeleton__header {
   height: 40px;
   background: rgba(255, 255, 255, 0.1);
-  border-radius: 4px;
+  border-radius: var(--radius-s);
   animation: pulse 1.5s infinite;
 }
 
 .movie-skeleton__title {
   height: 32px;
   background: rgba(255, 255, 255, 0.1);
-  border-radius: 4px;
+  border-radius: var(--radius-s);
   animation: pulse 1.5s infinite;
 }
 
@@ -671,14 +671,14 @@ onMounted(() => {
   width: 80px;
   height: 24px;
   background: rgba(255, 255, 255, 0.1);
-  border-radius: 4px;
+  border-radius: var(--radius-s);
   animation: pulse 1.5s infinite;
 }
 
 .movie-skeleton__player {
   height: 400px;
   background: rgba(255, 255, 255, 0.1);
-  border-radius: 8px;
+  border-radius: var(--radius-m);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -695,7 +695,7 @@ onMounted(() => {
   height: 20px;
   width: 150px;
   background: rgba(255, 255, 255, 0.1);
-  border-radius: 4px;
+  border-radius: var(--radius-s);
   animation: pulse 1.5s infinite;
 }
 
@@ -708,7 +708,7 @@ onMounted(() => {
 .movie-skeleton__info-item {
   height: 16px;
   background: rgba(255, 255, 255, 0.1);
-  border-radius: 4px;
+  border-radius: var(--radius-s);
   animation: pulse 1.5s infinite;
 }
 
@@ -721,7 +721,7 @@ onMounted(() => {
 .movie-skeleton__description-line {
   height: 16px;
   background: rgba(255, 255, 255, 0.1);
-  border-radius: 4px;
+  border-radius: var(--radius-s);
   animation: pulse 1.5s infinite;
 }
 

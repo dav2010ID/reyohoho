@@ -31,10 +31,31 @@ const isMobile = computed(() => store.isMobile)
 const baseURL = ref(import.meta.env.VITE_APP_API_URL || '')
 
 // The menu stays mounted during login/logout: derive links from live auth state.
+// `group: 'bottom'` items sit at the foot of the desktop rail and are not tabs on phones.
 const navLinks = computed(() => {
   const authenticated = authStore.isAuthenticated
+  const notifications = authenticated && accountCapabilities(authStore).notifications
   return [
     { to: '/', exact: true, icon: 'fas fa-home', text: 'Главная' },
+    { action: 'search', icon: 'fas fa-search', text: 'Поиск' },
+    {
+      to: '/top',
+      icon: 'fa-solid fa-trophy',
+      text: store.contentApiProvider !== 'local' ? 'Топ-250' : 'Популярное'
+    },
+    { to: '/lists', exact: true, icon: 'fas fa-bookmark', text: 'Списки' },
+    ...(notifications
+      ? [
+          {
+            to: '/notifications',
+            exact: true,
+            icon: 'fas fa-bell',
+            text: 'Уведомления',
+            component: 'NotificationBadge',
+            group: 'bottom'
+          }
+        ]
+      : []),
     {
       to: authenticated ? '/user' : '/login',
       exact: true,
@@ -45,25 +66,8 @@ const navLinks = computed(() => {
         : 'fas fa-right-to-bracket',
       text: authenticated ? 'Профиль' : 'Войти'
     },
-    ...(authenticated
-      ? [
-          {
-            to: '/lists',
-            exact: true,
-            icon: 'fas fa-bookmark',
-            text: 'Мои списки'
-          },
-          ...(accountCapabilities(authStore).notifications ? [{
-            to: '/notifications',
-            exact: true,
-            icon: 'fas fa-bell',
-            text: 'Уведомления',
-            component: 'NotificationBadge'
-          }] : [])
-        ]
-      : []),
-    { to: '/top', icon: 'fa-solid fa-trophy', text: 'Популярное' },
-    { to: '/settings', icon: 'fa-solid fa-gear', text: 'Настройки' }
+    { to: '/settings', icon: 'fa-solid fa-gear', text: 'Настройки', group: 'bottom' },
+    { to: '/contact', icon: 'fas fa-info-circle', text: 'Контакты', group: 'bottom' }
   ]
 })
 
@@ -101,12 +105,6 @@ onMounted(async () => {
 </script>
 
 <style scoped>
-.nav-component {
-  font-family: 'Neucha', sans-serif;
-  font-weight: 400;
-  font-size: 20px;
-}
-
 /* Стили для анимации fade */
 .fade-enter-active {
   transition: opacity 0.3s ease;

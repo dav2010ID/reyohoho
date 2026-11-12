@@ -9,7 +9,7 @@
   background-color: rgba(30, 30, 30, 0.95);
   color: #fff;
   padding: 8px 16px;
-  border-radius: 12px;
+  border-radius: var(--radius-l);
   font-size: 14px;
   white-space: nowrap;
   pointer-events: none;
@@ -64,7 +64,7 @@
   text-align: center;
   min-width: 240px;
   background-color: rgba(30, 30, 30, 0.98);
-  border-radius: 16px;
+  border-radius: var(--radius-l);
   box-shadow: 0 8px 40px rgba(0, 0, 0, 0.35);
   transform: translateX(-50%) translateY(8px);
 }
@@ -92,7 +92,7 @@
   gap: 8px;
   padding: 8px 12px;
   background: rgba(255, 255, 255, 0.05);
-  border-radius: 8px;
+  border-radius: var(--radius-m);
   margin-top: 8px;
   font-size: 13px;
   color: rgba(255, 255, 255, 0.7);

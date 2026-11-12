@@ -143,7 +143,7 @@ defineEmits(['close', 'approve', 'reject', 'mark-clean-text'])
   overflow: auto;
   background: #1e1e1e;
   border: 1px solid #444;
-  border-radius: 12px;
+  border-radius: var(--radius-l);
   padding: 20px;
 }
 
@@ -193,7 +193,7 @@ defineEmits(['close', 'approve', 'reject', 'mark-clean-text'])
 .timing-item {
   background: rgba(255, 255, 255, 0.04);
   border: 1px solid rgba(255, 255, 255, 0.08);
-  border-radius: 8px;
+  border-radius: var(--radius-m);
   padding: 12px;
 }
 
@@ -221,7 +221,7 @@ defineEmits(['close', 'approve', 'reject', 'mark-clean-text'])
 .admin-controls button {
   width: 32px;
   height: 32px;
-  border-radius: 8px;
+  border-radius: var(--radius-m);
 }
 
 .approve-btn {

@@ -45,7 +45,7 @@ const { message, showRetry } = defineProps({
   background-color: var(--accent-solid);
   color: var(--accent-contrast);
   text-decoration: none;
-  border-radius: 5px;
+  border-radius: var(--radius-m);
   font-size: 16px;
   transition: background-color 0.3s;
   border: 0;
@@ -63,7 +63,7 @@ const { message, showRetry } = defineProps({
   padding: 20px;
   font-size: 1.2rem;
   border: 1px solid var(--accent-ui);
-  border-radius: 5px;
+  border-radius: var(--radius-m);
   margin: 20px auto;
   max-width: 500px;
   background: var(--accent-transparent);

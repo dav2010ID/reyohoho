@@ -55,11 +55,11 @@ useHead(
   color: #ffffff;
   /* Same card surface as Settings and Login. */
   background-color: #2a2a2a;
-  border: 1px solid var(--accent-transparent);
+  border: 1px solid var(--hairline);
   box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
   box-sizing: border-box;
   padding: 20px;
-  border-radius: 10px;
+  border-radius: var(--radius-l);
   margin: 0 auto;
   max-width: 800px;
   line-height: 1.6;

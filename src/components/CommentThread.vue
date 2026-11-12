@@ -427,7 +427,7 @@ export default {
   color: #999;
   background: rgba(0, 0, 0, 0.7);
   padding: 0.25rem 0.5rem;
-  border-radius: 4px;
+  border-radius: var(--radius-s);
 }
 
 .character-counter-inline.near-limit {
@@ -534,7 +534,7 @@ export default {
   align-items: center;
   gap: 0.5rem;
   background: rgba(255, 255, 255, 0.05);
-  border: 1px solid var(--accent-transparent);
+  border: 1px solid var(--hairline);
   border-radius: 0.5rem;
   padding: 0.5rem 0.75rem;
   margin: 0.5rem 0;
@@ -646,7 +646,7 @@ export default {
   color: transparent;
   cursor: pointer;
   padding: 0.2em 0.6em;
-  border-radius: 4px;
+  border-radius: var(--radius-s);
   transition: all 0.3s ease;
   user-select: none;
   position: relative;

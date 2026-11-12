@@ -72,7 +72,7 @@ onUnmounted(() => {
   color: inherit;
   background: transparent;
   border: 1px solid currentColor;
-  border-radius: 12px;
+  border-radius: var(--radius-l);
   cursor: pointer;
   font: inherit;
 }

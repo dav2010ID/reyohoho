@@ -80,7 +80,7 @@ function toggle() {
   bottom: 0;
   background-color: #444;
   transition: 0.3s;
-  border-radius: 20px;
+  border-radius: var(--radius-l);
 }
 
 .slider:before {

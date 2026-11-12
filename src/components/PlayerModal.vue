@@ -149,7 +149,7 @@ const groupHasWarning = (group) => groupPlayers(group).some((player) => player.w
 .modal-content {
   background: #2d2d2d;
   padding: 20px;
-  border-radius: 8px;
+  border-radius: var(--radius-m);
   width: 90%;
   max-width: 500px;
   max-height: 80vh;
@@ -203,7 +203,7 @@ h2 {
   padding: 10px;
   background-color: #444;
   border: none;
-  border-radius: 4px;
+  border-radius: var(--radius-s);
   color: #fff;
   font-size: 1rem;
   cursor: pointer;

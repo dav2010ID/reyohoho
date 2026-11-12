@@ -220,7 +220,7 @@ export default {
 .editable-text {
   cursor: pointer;
   padding: 2px 4px;
-  border-radius: 3px;
+  border-radius: var(--radius-s);
   transition: background-color 0.2s;
   display: flex;
   align-items: center;
@@ -253,7 +253,7 @@ export default {
   flex: 1;
   padding: 4px 8px;
   border: 1px solid var(--accent-ui);
-  border-radius: 4px;
+  border-radius: var(--radius-s);
   font-size: 14px;
   background-color: white;
   color: #333;
@@ -263,7 +263,7 @@ export default {
 .cancel-btn {
   padding: 4px 8px;
   border: none;
-  border-radius: 3px;
+  border-radius: var(--radius-s);
   cursor: pointer;
   font-size: 12px;
   transition: background-color 0.2s;
@@ -293,7 +293,7 @@ export default {
   background-color: var(--accent-solid);
   color: var(--accent-contrast);
   border: none;
-  border-radius: 5px;
+  border-radius: var(--radius-m);
   cursor: pointer;
   font-size: 16px;
   transition: background-color 0.3s;
@@ -325,7 +325,7 @@ export default {
 .dialog {
   background-color: white;
   padding: 20px;
-  border-radius: 8px;
+  border-radius: var(--radius-m);
   max-width: 400px;
   width: 100%;
 }
@@ -333,7 +333,7 @@ export default {
 .modern-dark-dialog {
   background-color: #1d1d1d;
   color: #e2e8f0;
-  border-radius: 12px;
+  border-radius: var(--radius-l);
   overflow: hidden;
   width: 320px;
   box-shadow:
@@ -370,7 +370,7 @@ export default {
 
 .modern-dark-btn {
   padding: 8px 16px;
-  border-radius: 6px;
+  border-radius: var(--radius-m);
   border: none;
   background-color: #242424;
   color: #e2e8f0;

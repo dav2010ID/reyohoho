@@ -2,57 +2,73 @@
   <div class="wrapper">
     <div class="mainpage">
       <h1 class="visually-hidden">Поиск фильмов и сериалов онлайн</h1>
-      <!-- Кнопки выбора типа поиска -->
-      <div class="search-type-buttons">
-        <button :class="{ active: searchType === 'title' }" @click="setSearchType('title')">
-          Название
-        </button>
-        <button :class="{ active: searchType === 'kinopoisk' }" @click="setSearchType('kinopoisk')">
-          ID Кинопоиск
-        </button>
-        <button
-          v-if="shikiAvailable"
-          :class="{ active: searchType === 'shikimori' }"
-          @click="setSearchType('shikimori')"
-        >
-          ID Shikimori
-        </button>
-        <button v-if="imdbAvailable" :class="{ active: searchType === 'imdb' }" @click="setSearchType('imdb')">
-          ID IMDB
-        </button>
-        <button class="random-button" :disabled="randomLoading" @click="openRandomMovie">
-          <i class="fas fa-dice"></i>
-          {{ randomLoading ? 'Подбираем...' : 'Случайный фильм' }}
-        </button>
-      </div>
-
-      <!-- Поиск -->
-      <div class="search-container">
-        <div class="input-wrapper">
-          <input
-            ref="searchInput"
-            v-model="searchTerm"
-            :placeholder="getPlaceholder()"
-            class="search-input"
-            :class="{ 'wrong-layout': showLayoutWarning }"
-            :inputmode="searchType === 'title' ? 'text' : 'numeric'"
-            @keydown.enter.prevent="search"
-          @keydown.tab="handleTabKey"
-            @keydown.down.prevent="focusFirstMovieCard"
-            @input="handleInput"
-          />
-          <div class="icons">
+      <!-- Front-page header: wordmark, one search field with its mode switch, random pick. -->
+      <div class="home-top">
+        <span class="home-wordmark" aria-hidden="true">ReYohoho</span>
+        <div class="search-bar" :class="{ 'wrong-layout': showLayoutWarning }" role="search">
+          <div class="search-type-buttons" role="group" aria-label="Искать по">
             <button
-              v-if="searchTerm"
-              class="reset-button"
-              aria-label="Очистить поиск"
-              @click="resetSearch"
+              type="button"
+              :class="{ active: searchType === 'title' }"
+              :aria-pressed="searchType === 'title'"
+              @click="setSearchType('title')"
             >
-              <i class="fas fa-times"></i>
+              Название
             </button>
-            <button class="search-button" aria-label="Найти фильм" @click="search">
-              <i class="fas fa-search"></i>
+            <button
+              type="button"
+              :class="{ active: searchType === 'kinopoisk' }"
+              :aria-pressed="searchType === 'kinopoisk'"
+              @click="setSearchType('kinopoisk')"
+            >
+              ID КП
             </button>
+            <button
+              v-if="shikiAvailable"
+              type="button"
+              :class="{ active: searchType === 'shikimori' }"
+              :aria-pressed="searchType === 'shikimori'"
+              @click="setSearchType('shikimori')"
+            >
+              ID Shikimori
+            </button>
+            <button
+              v-if="imdbAvailable"
+              type="button"
+              :class="{ active: searchType === 'imdb' }"
+              :aria-pressed="searchType === 'imdb'"
+              @click="setSearchType('imdb')"
+            >
+              ID IMDb
+            </button>
+          </div>
+          <div class="input-wrapper">
+            <input
+              ref="searchInput"
+              v-model="searchTerm"
+              :placeholder="getPlaceholder()"
+              aria-label="Поиск фильмов и сериалов"
+              class="search-input"
+              :class="{ 'wrong-layout': showLayoutWarning }"
+              :inputmode="searchType === 'title' ? 'text' : 'numeric'"
+              @keydown.enter.prevent="search"
+              @keydown.tab="handleTabKey"
+              @keydown.down.prevent="focusFirstMovieCard"
+              @input="handleInput"
+            />
+            <div class="icons">
+              <button
+                v-if="searchTerm"
+                class="reset-button"
+                aria-label="Очистить поиск"
+                @click="resetSearch"
+              >
+                <i class="fas fa-times"></i>
+              </button>
+              <button class="search-button" aria-label="Найти фильм" @click="search">
+                <i class="fas fa-search"></i>
+              </button>
+            </div>
           </div>
           <div v-if="showLayoutWarning" class="layout-warning" :class="{ show: showLayoutWarning }">
             <i class="fas fa-keyboard"></i>
@@ -60,6 +76,15 @@
             {{ suggestedLayout }} раскладку
           </div>
         </div>
+        <button
+          class="random-button"
+          type="button"
+          :disabled="randomLoading"
+          @click="openRandomMovie"
+        >
+          <i class="fas fa-dice" aria-hidden="true"></i>
+          {{ randomLoading ? 'Подбираем...' : 'Случайный' }}
+        </button>
       </div>
 
       <!-- Контейнер для истории и результатов -->
@@ -67,46 +92,68 @@
         <HistoryMigrationNotice v-show="!searchTerm" />
         <!-- История просмотра -->
         <div v-show="!searchTerm">
-          <h2>
-            История просмотра
-            <span v-if="history.length > 0">
-              <DeleteButton label="Очистить историю" @click="showModal = true" />
-              <BaseModal
-                :is-open="showModal"
-                message="Вы уверены, что хотите очистить историю?"
-                @confirm="clearAllHistory"
-                @close="showModal = false"
-              />
-            </span>
-          </h2>
-          <div v-if="historyLoading" class="loading-container">
-            <SpinnerLoading />
+          <div class="home-history-block">
+            <div v-if="history.length > 0 || historyLoading" class="home-section-head">
+              <h2>Продолжить просмотр</h2>
+              <template v-if="history.length > 0">
+                <button type="button" class="text-action" @click="showModal = true">
+                  Очистить
+                </button>
+                <RibbonNav
+                  v-if="!isMobile"
+                  container=".home-history-block"
+                  scroller=".grid"
+                  label="Продолжить просмотр"
+                />
+                <BaseModal
+                  :is-open="showModal"
+                  message="Вы уверены, что хотите очистить историю?"
+                  @confirm="clearAllHistory"
+                  @close="showModal = false"
+                />
+              </template>
+            </div>
+            <div v-if="historyLoading" class="loading-container">
+              <SpinnerLoading />
+            </div>
+            <MovieList
+              v-else-if="historyActivated && history.length"
+              class="home-history"
+              :movies-list="history"
+              :is-history="true"
+              :loading="false"
+              ribbon
+              @item-deleted="handleItemDeleted"
+            />
           </div>
-          <MovieList
-            v-else-if="historyActivated && history.length"
-            :movies-list="history"
-            :is-history="true"
-            :loading="false"
-            @item-deleted="handleItemDeleted"
-          />
           <div class="empty-history">
             <template v-if="topMovies.length > 0">
-              <p v-if="!history.length && !historyLoading">Здесь пока пусто</p>
-              <h2>Популярное сейчас</h2>
-              <MovieList :movies-list="topMovies" :is-history="false" :loading="false" />
-              <div v-if="canLoadMoreTopMovies" class="home-load-more">
+              <div class="home-section-head">
+                <h2>{{ topListTitle }}</h2>
+              </div>
+              <MovieList
+                :movies-list="topMovies"
+                :is-history="false"
+                :loading="false"
+                :show-rank="isTopList"
+              />
+              <div v-if="canLoadMoreTopMovies || topMoviesLoadMoreFailed" class="home-load-more">
                 <div
                   ref="homeTopSentinel"
                   class="home-load-more__sentinel"
                   aria-hidden="true"
                 ></div>
+                <div v-if="topMoviesLoadingMore" class="skeleton-row" aria-hidden="true">
+                  <span v-for="n in 7" :key="n" class="skeleton-poster"></span>
+                </div>
+                <!-- The list loads itself on scroll; the button appears only to retry a failed page. -->
                 <button
+                  v-if="topMoviesLoadMoreFailed"
                   class="home-load-more__button"
                   type="button"
-                  :disabled="topMoviesLoadingMore"
-                  @click="loadMoreHomeTopMovies"
+                  @click="retryLoadMoreHomeTopMovies"
                 >
-                  {{ topMoviesLoadingMore ? 'Загружаем...' : 'Показать еще' }}
+                  Не удалось загрузить. Повторить
                 </button>
               </div>
             </template>
@@ -114,10 +161,9 @@
               <SpinnerLoading />
             </template>
             <template v-else>
-              <p v-if="!history.length && !historyLoading">Здесь пока пусто</p>
+              <p v-if="!history.length && !historyLoading" class="home-empty">Здесь пока пусто</p>
             </template>
           </div>
-
         </div>
         <ErrorMessage
           v-if="!searchTerm && errorMessage"
@@ -127,16 +173,32 @@
 
         <!-- Результаты поиска -->
         <div v-if="searchPerformed" ref="searchResults">
-          <h2>Результаты поиска</h2>
+          <div class="home-section-head">
+            <h2>Результаты поиска</h2>
+          </div>
           <MovieList
             v-if="movies.length > 0 || loading"
             :movies-list="movies"
             :is-history="false"
             :loading="loading"
+            show-original-title
           />
           <div v-if="movies.length === 0 && !loading && !errorMessage" class="no-results">
             <span class="material-icons" aria-hidden="true">movie</span>
-            <p>Ничего не найдено</p>
+            <p>Ничего не найдено по «{{ searchTerm }}»</p>
+            <div class="no-results__actions">
+              <button
+                v-if="convertedSearchTerm"
+                type="button"
+                class="no-results__action no-results__action--primary"
+                @click="searchConverted"
+              >
+                Искать «{{ convertedSearchTerm }}»
+              </button>
+              <button type="button" class="no-results__action" @click="openRandomMovie">
+                <i class="fas fa-dice" aria-hidden="true"></i> Случайный фильм
+              </button>
+            </div>
           </div>
           <ErrorMessage v-if="errorMessage" :message="errorMessage" :code="errorCode" />
         </div>
@@ -175,7 +237,7 @@ import { legacyMovieMethodAvailable } from '@/api/movieCapabilities'
 import { getLegacyShikiId } from '@/helpers/hashHandler'
 import { getMyLists, delAllFromList } from '@/api/user'
 import BaseModal from '@/components/BaseModal.vue'
-import DeleteButton from '@/components/buttons/DeleteButton.vue'
+import RibbonNav from '@/components/movie/RibbonNav.vue'
 import ErrorMessage from '@/components/ErrorMessage.vue'
 import { MovieList } from '@/components/MovieList/'
 import { useMainStore } from '@/store/main'
@@ -223,6 +285,10 @@ const topMoviesLoading = ref(false)
 const topMoviesLoadingMore = ref(false)
 const topMoviesPage = ref(1)
 const topMoviesHasMore = ref(true)
+const topMoviesLoadMoreFailed = ref(false)
+// The same list is called the same everywhere: Kinopoisk providers serve the Top-250.
+const isTopList = computed(() => mainStore.contentApiProvider !== 'local')
+const topListTitle = computed(() => (isTopList.value ? 'Топ-250' : 'Популярное'))
 const publicPage = usePublicPageState('home')
 const initialPage = publicPage.read()
 if (initialPage && mainStore.contentApiProvider !== 'local') {
@@ -317,6 +383,7 @@ const loadHomeTopMovies = async () => {
   topMoviesLoading.value = true
   try {
     topMoviesPage.value = 1
+    topMoviesLoadMoreFailed.value = false
     const movies = await getMovies({
       activeTime: DEFAULT_ACTIVE_TIME,
       typeFilter: 'all',
@@ -343,7 +410,13 @@ const canLoadMoreTopMovies = computed(
 )
 
 const loadMoreHomeTopMovies = async () => {
-  if (topMoviesLoadingMore.value || topMoviesLoading.value || !topMoviesHasMore.value) return
+  if (
+    topMoviesLoadingMore.value ||
+    topMoviesLoading.value ||
+    !topMoviesHasMore.value ||
+    topMoviesLoadMoreFailed.value
+  )
+    return
 
   topMoviesLoadingMore.value = true
 
@@ -367,10 +440,15 @@ const loadMoreHomeTopMovies = async () => {
     }
   } catch (error) {
     console.error('Ошибка догрузки топов для главной:', error)
-    topMoviesHasMore.value = false
+    topMoviesLoadMoreFailed.value = true
   } finally {
     topMoviesLoadingMore.value = false
   }
+}
+
+const retryLoadMoreHomeTopMovies = () => {
+  topMoviesLoadMoreFailed.value = false
+  loadMoreHomeTopMovies()
 }
 
 const disconnectHomeTopInfiniteScroll = () => {
@@ -403,7 +481,11 @@ const setupHomeTopInfiniteScroll = async () => {
 
 onServerPrefetch(async () => {
   await loadHomeTopMovies()
-  publicPage.save({ movies: topMovies.value, page: topMoviesPage.value, hasMore: topMoviesHasMore.value })
+  publicPage.save({
+    movies: topMovies.value,
+    page: topMoviesPage.value,
+    hasMore: topMoviesHasMore.value
+  })
 })
 
 watch(canLoadMoreTopMovies, (canLoad) => {
@@ -514,6 +596,20 @@ const resetSearch = () => {
   searchInput.value?.focus()
 }
 
+// Empty results: offer the same query typed in the other keyboard layout.
+const convertedSearchTerm = computed(() => {
+  if (searchType.value !== 'title' || !searchTerm.value) return ''
+  const converted = convertLayout(searchTerm.value)
+  // Offer it only when the result reads as words, not as stray brackets and symbols.
+  const readable = /^[\p{L}\p{N}\s.,:!?'-]+$/u.test(converted)
+  return readable && converted !== searchTerm.value ? converted : ''
+})
+
+const searchConverted = () => {
+  searchTerm.value = convertedSearchTerm.value
+  search()
+}
+
 const search = () => {
   debouncedPerformSearch.cancel()
   if (searchTerm.value) {
@@ -527,7 +623,8 @@ watch([shikiAvailable, imdbAvailable], () => {
   if (
     (searchType.value === 'shikimori' && !shikiAvailable.value) ||
     (searchType.value === 'imdb' && !imdbAvailable.value)
-  ) setSearchType('title')
+  )
+    setSearchType('title')
 })
 
 const performSearch = async () => {
@@ -771,133 +868,131 @@ const fetchRandomMovie = async () => {
 
 .mainpage {
   flex: 1;
-  padding-top: 20px;
   padding-bottom: 40px;
 }
 
-/* Общие стили */
+/* Front-page header: wordmark left, one 48px search field, random pick at the end. */
+.home-top {
+  display: flex;
+  align-items: center;
+  gap: 24px;
+  padding: 28px 24px 0;
+}
+
+.home-wordmark {
+  flex-shrink: 0;
+  color: #fff;
+  font-family: 'Neucha', sans-serif;
+  font-size: var(--fs-2xl);
+  line-height: 1;
+}
+
+.search-bar {
+  position: relative;
+  display: flex;
+  flex: 1 1 auto;
+  align-items: center;
+  max-width: 640px;
+  min-height: 48px;
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  border-radius: var(--radius-m);
+  background: var(--surface-raised);
+  transition: border-color 0.2s ease;
+}
+
+.search-bar:focus-within {
+  border-color: var(--accent-ui);
+}
+
+.search-bar.wrong-layout {
+  border-color: #ff8c00;
+}
+
+/* Segmented mode switch inside the field. */
 .search-type-buttons {
   display: flex;
-  justify-content: center;
-  gap: 20px;
-  padding-top: 10px;
-  margin-bottom: 5px;
-  flex-wrap: wrap;
+  flex-shrink: 0;
+  gap: 2px;
+  margin-left: 4px;
+  padding: 3px;
+  border-radius: var(--radius-s);
+  background: rgba(255, 255, 255, 0.05);
 }
 
 .search-type-buttons button {
-  padding: 5px 10px;
-  min-height: 44px;
-  font-size: 16px;
+  min-height: 34px;
+  padding: 0 10px;
   border: none;
+  border-radius: var(--radius-s);
   background: none;
-  color: #fff;
+  color: var(--text-dim);
+  font-size: var(--fs-s);
+  font-weight: 500;
+  white-space: nowrap;
   cursor: pointer;
-  transition: all 0.3s ease;
-  position: relative;
-}
-
-.search-type-buttons button::after {
-  content: '';
-  position: absolute;
-  left: 0;
-  bottom: -2px;
-  width: 100%;
-  height: 2px;
-  background-color: transparent;
-  transition: background-color 0.3s ease;
-}
-
-.search-type-buttons button.active::after {
-  background-color: var(--accent-color);
+  transition:
+    background-color 0.2s ease,
+    color 0.2s ease;
 }
 
 .search-type-buttons button:hover {
-  color: #ffffff;
+  color: #fff;
 }
 
-.random-button {
-  background: var(--accent-solid) !important;
-  color: var(--accent-contrast) !important;
-  border-radius: 8px;
-  padding: 8px 16px !important;
-  font-weight: 600;
-  transition: all 0.3s ease;
-  display: flex;
-  align-items: center;
-  gap: 6px;
+.search-type-buttons button.active {
+  background: rgba(255, 255, 255, 0.12);
+  color: #fff;
 }
 
-.random-button:hover:not(:disabled) {
-  background: var(--accent-solid-hover) !important;
-  transform: translateY(-1px);
-}
-
-.random-button:disabled {
-  opacity: 0.7;
-  cursor: not-allowed;
-  transform: none;
-}
-
-.random-button::after {
-  display: none;
-}
-
-.search-container {
-  display: flex;
-  justify-content: center;
-  padding: 20px;
+.search-type-buttons button:focus-visible {
+  outline: 2px solid var(--accent-color);
+  outline-offset: -2px;
 }
 
 .input-wrapper {
   position: relative;
-  width: 100%;
-  max-width: 800px;
+  flex: 1 1 auto;
+  min-width: 0;
 }
 
 .search-input {
   box-sizing: border-box;
   width: 100%;
-  padding: 10px 96px 10px 12px;
-  font-size: 16px;
-  border: 1px solid #ccc;
-  border-radius: 10px;
-  background: rgba(30, 30, 30, 0.8);
+  min-height: 46px;
+  padding: 0 96px 0 12px;
+  border: none;
+  background: transparent;
   color: #fff;
-  transition: border-color 0.3s ease;
-  min-height: 44px;
+  font-size: 16px;
+}
+
+.search-input::placeholder {
+  color: var(--text-faint);
 }
 
 .search-input:focus {
   outline: none;
-  border-color: var(--accent-ui);
-  box-shadow: 0 0 0 2px var(--accent-transparent);
-}
-
-.search-input.wrong-layout {
-  border-color: #ff8c00;
-  box-shadow: 0 0 5px rgba(255, 140, 0, 0.2);
 }
 
 .icons {
   position: absolute;
-  right: 10px;
   top: 50%;
-  transform: translateY(-50%);
+  right: 2px;
   display: flex;
-  gap: 8px;
   align-items: center;
+  gap: 0;
+  transform: translateY(-50%);
 }
 
 .reset-button,
 .search-button {
-  background: none;
-  border: none;
-  color: #fff;
-  cursor: pointer;
   width: 44px;
   height: 44px;
   padding: 12px;
+  border: none;
+  background: none;
+  color: #fff;
+  cursor: pointer;
   opacity: 0.7;
   transition: opacity 0.2s ease;
 }
@@ -909,73 +1004,176 @@ const fetchRandomMovie = async () => {
 
 .reset-button i,
 .search-button i {
-  font-size: 18px;
   display: block;
   width: 20px;
   height: 20px;
-}
-
-h2 {
-  display: flex;
-  font-size: 20px;
-  margin-bottom: 20px;
-  justify-content: center;
-  align-items: center;
-  gap: 10px;
-}
-
-/* Сообщение "Ничего не найдено" */
-.no-results {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  width: 100%;
-  padding: 2rem;
-  box-sizing: border-box;
-  text-align: center;
-  color: #fff;
   font-size: 18px;
 }
 
+.random-button {
+  display: inline-flex;
+  flex-shrink: 0;
+  align-items: center;
+  gap: 8px;
+  min-height: 44px;
+  padding: 0 16px;
+  border: 1px solid var(--accent-ui);
+  border-radius: var(--radius-m);
+  background: transparent;
+  color: #fff;
+  font-size: var(--fs-m);
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.random-button i {
+  color: var(--accent-text);
+}
+
+.random-button:hover:not(:disabled) {
+  background: rgba(255, 255, 255, 0.06);
+}
+
+.random-button:disabled {
+  cursor: not-allowed;
+  opacity: 0.7;
+}
+
+.random-button:focus-visible {
+  outline: 2px solid var(--accent-color);
+  outline-offset: 2px;
+}
+
+/* Section heads: left-aligned title with optional actions at the end. */
+.home-section-head {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  box-sizing: border-box;
+  margin: 40px 0 16px;
+  padding: 0 24px;
+}
+
+.home-section-head h2 {
+  margin: 0;
+  color: #fff;
+  font-size: var(--fs-xl);
+  font-weight: 700;
+  letter-spacing: -0.01em;
+}
+
+.home-section-head :deep(.ribbon-nav) {
+  margin-left: auto;
+}
+
+.text-action {
+  min-height: 44px;
+  padding: 0 4px;
+  border: none;
+  background: none;
+  color: var(--text-dim);
+  font-size: var(--fs-s);
+  cursor: pointer;
+}
+
+.text-action:hover {
+  color: #fff;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.text-action:focus-visible {
+  outline: 2px solid var(--accent-color);
+  outline-offset: 2px;
+}
+
+/* Empty search result */
+.no-results {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 12px;
+  width: 100%;
+  padding: 8px 24px 32px;
+  box-sizing: border-box;
+  color: #fff;
+  font-size: var(--fs-l);
+}
+
 .no-results .material-icons {
-  margin-bottom: 1rem;
-  font-size: 3rem;
+  color: var(--text-faint);
+  font-size: 40px;
 }
 
 .no-results p {
   margin: 0;
+  overflow-wrap: anywhere;
 }
 
-/* Подсказка для поиска */
-.search-prompt {
-  text-align: center;
+.no-results__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.no-results__action {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 44px;
+  padding: 0 16px;
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  border-radius: var(--radius-m);
+  background: transparent;
   color: #fff;
-  font-size: 18px;
-  margin-top: 20px;
+  font-size: var(--fs-m);
+  cursor: pointer;
+}
+
+.no-results__action--primary {
+  border-color: var(--accent-solid);
+  background: var(--accent-solid);
+  color: var(--accent-contrast);
+  font-weight: 600;
+}
+
+.no-results__action:hover {
+  background: rgba(255, 255, 255, 0.06);
+}
+
+.no-results__action--primary:hover {
+  background: var(--accent-solid-hover);
+}
+
+.search-prompt {
+  margin-top: 32px;
+  padding: 0 24px;
+  color: var(--text-dim);
+  font-size: var(--fs-m);
 }
 
 .layout-warning {
   position: absolute;
-  bottom: -40px;
-  left: 0;
+  top: calc(100% + 8px);
   right: 0;
-  text-align: center;
-  color: #ff8c00;
-  font-size: 14px;
-  background: rgba(255, 140, 0, 0.15);
-  padding: 8px 12px;
-  border-radius: 5px;
-  pointer-events: none;
-  border: 1px solid rgba(255, 140, 0, 0.5);
+  left: 0;
+  z-index: 1;
   display: flex;
   align-items: center;
-  justify-content: center;
   gap: 8px;
+  padding: 8px 12px;
+  border: 1px solid rgba(255, 140, 0, 0.5);
+  border-radius: var(--radius-m);
+  background: #1e1408;
+  color: #ff8c00;
+  font-size: 14px;
+  pointer-events: none;
   opacity: 0;
-  transform: translateY(-10px);
-  transition: all 0.3s ease;
-  z-index: 1;
-  backdrop-filter: blur(5px);
+  transform: translateY(-6px);
+  transition:
+    opacity 0.2s ease,
+    transform 0.2s ease;
 }
 
 .layout-warning.show {
@@ -984,45 +1182,32 @@ h2 {
 }
 
 .layout-warning i {
+  color: #ff8c00;
   font-size: 16px;
-  color: #ff8c00;
-}
-
-.layout-warning {
-  color: #ff8c00;
 }
 
 .loading-container {
   display: flex;
-  justify-content: center;
   align-items: center;
-  min-height: 200px;
+  justify-content: center;
   width: 100%;
+  min-height: 200px;
 }
 
 .empty-history {
   display: flex;
   flex-direction: column;
-  align-items: center;
-  justify-content: center;
   min-height: 200px;
-  gap: 15px;
-}
-
-.empty-history .material-icons {
-  font-size: 64px;
-  color: #888;
-  opacity: 0.7;
-}
-
-.empty-history p {
-  font-size: 18px;
-  margin: 0;
-  color: #888;
 }
 
 .empty-history > div {
   width: 100%;
+}
+
+.home-empty {
+  margin: 40px 24px 0;
+  color: var(--text-dim);
+  font-size: var(--fs-m);
 }
 
 .home-load-more {
@@ -1039,40 +1224,140 @@ h2 {
 }
 
 .home-load-more__button {
-  border: 1px solid rgba(255, 255, 255, 0.12);
-  border-radius: 8px;
-  background: color-mix(in srgb, var(--accent-color) 70%, #000000);
-  color: #fff;
-  cursor: pointer;
-  font-weight: 600;
-  padding: 10px 18px;
   min-height: 44px;
+  padding: 0 18px;
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  border-radius: var(--radius-m);
+  background: transparent;
+  color: #fff;
+  font-weight: 600;
+  cursor: pointer;
 }
 
 .home-load-more__button:hover {
-  background: color-mix(in srgb, var(--accent-color) 78%, #000000);
+  background: rgba(255, 255, 255, 0.06);
 }
 
-.home-load-more__button:disabled {
-  cursor: not-allowed;
-  opacity: 0.7;
+/* Skeleton posters while the next page loads. */
+.skeleton-row {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(170px, 1fr));
+  gap: 28px 16px;
+  box-sizing: border-box;
+  width: 100%;
+  max-height: 300px;
+  padding: 0 24px;
+  overflow: hidden;
 }
 
-@media (max-width: 600px) {
-  .mainpage {
-    padding-top: 0;
-    min-height: calc(100vh - 30px - 63px);
-    height: auto;
+.skeleton-poster {
+  aspect-ratio: 2 / 3;
+  border-radius: var(--radius-m);
+  background: linear-gradient(100deg, #141414 30%, #1e1e1e 50%, #141414 70%) 0 0 / 200% 100%;
+  animation: skeleton-shimmer 1.4s linear infinite;
+}
+
+@keyframes skeleton-shimmer {
+  to {
+    background-position: -200% 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .skeleton-poster {
+    animation: none;
+  }
+}
+
+@media (max-width: 900px) {
+  .home-top {
+    flex-wrap: wrap;
+    gap: 12px 16px;
   }
 
-  .search-container {
-    padding: 0 8px;
+  .search-bar {
+    flex-basis: 100%;
+    order: 3;
+    max-width: none;
+  }
+}
+
+@media (max-width: 620px) {
+  .home-top {
+    padding: 16px 12px 0;
+  }
+
+  .home-wordmark {
+    font-size: var(--fs-xl);
+  }
+
+  .random-button {
+    margin-left: auto;
+    padding: 0 12px;
+    font-size: var(--fs-s);
+  }
+
+  /* Phones: the mode switch sits above the field so the input keeps its width. */
+  .search-bar {
+    flex-wrap: wrap;
+    gap: 6px;
+    padding: 0;
+    border: none;
+    background: transparent;
   }
 
   .search-type-buttons {
-    padding: 0;
-    row-gap: 8px;
-    margin-bottom: 14px;
+    order: -1;
+    width: 100%;
+    margin: 0;
+    overflow-x: auto;
+    scrollbar-width: none;
+  }
+
+  .search-type-buttons button {
+    flex: 1 0 auto;
+    min-height: 36px;
+  }
+
+  .input-wrapper {
+    flex-basis: 100%;
+    border: 1px solid rgba(255, 255, 255, 0.16);
+    border-radius: var(--radius-m);
+    background: var(--surface-raised);
+  }
+
+  .search-bar:focus-within {
+    border-color: transparent;
+  }
+
+  .search-bar:focus-within .input-wrapper {
+    border-color: var(--accent-ui);
+  }
+
+  .search-bar.wrong-layout .input-wrapper {
+    border-color: #ff8c00;
+  }
+
+  .home-section-head {
+    margin: 28px 0 12px;
+    padding: 0 12px;
+  }
+
+  .home-section-head h2 {
+    font-size: var(--fs-l);
+  }
+
+  .no-results,
+  .search-prompt {
+    padding-right: 12px;
+    padding-left: 12px;
+  }
+
+  .skeleton-row {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 16px 10px;
+    max-height: 200px;
+    padding: 0 12px;
   }
 }
 </style>

@@ -1,258 +1,142 @@
 <template>
-  <transition name="slide">
-    <nav
-      v-if="isNavbarVisible"
-      v-dialog-focus="closeNavbar"
-      aria-label="Меню"
-      class="mobile-navbar"
-      @click.stop
-    >
-      <button
-        class="mobile-navbar__close"
-        type="button"
-        aria-label="Закрыть меню"
-        @click="closeNavbar"
-      >
-        <i class="fas fa-times"></i>
-      </button>
-
-      <div class="nav-links-wrapper">
-        <ul class="nav-links">
-          <li v-for="link in props.links" :key="link.text">
-            <template v-if="link.component === 'NotificationBadge'">
-              <router-link
-                :to="link.to"
-                :exact="link.exact"
-                class="notification-link"
-                :aria-label="link.text"
-                @click="closeNavbar"
-              >
-                <NotificationBadge />
-                <span class="menu-text">{{ link.text }}</span>
-              </router-link>
-            </template>
-
-            <component
-              :is="link.to ? 'router-link' : 'a'"
-              v-else
-              v-bind="
-                link.to ? { to: link.to, exact: link.exact } : { href: link.href, target: '_blank' }
-              "
-              :aria-label="link.text"
-              @click="closeNavbar"
-            >
-              <template v-if="typeof link.icon === 'string' && link.icon.startsWith('fa')">
-                <i :class="link.icon"></i>
-              </template>
-              <template
-                v-else-if="typeof link.icon === 'string' && link.icon.startsWith('https://')"
-              >
-                <img :src="link.icon" alt="icon" class="icon-user" />
-              </template>
-              <template v-else>
-                <img src="@/assets/icon-donut.png" alt="icon" class="icon-donut" />
-              </template>
-              <span class="menu-text">{{ link.text }}</span>
-            </component>
-          </li>
-        </ul>
-      </div>
-    </nav>
-  </transition>
-
-  <div v-if="isNavbarVisible" class="overlay" @click="closeNavbar"></div>
+  <!-- Phones: five tabs at the bottom; settings and contacts live behind the profile page. -->
+  <nav class="tab-bar" aria-label="Основное меню">
+    <ul class="tab-list">
+      <li v-for="link in tabs" :key="link.text">
+        <button
+          v-if="link.action === 'search'"
+          type="button"
+          class="tab"
+          :class="{ 'is-active': navbarStore.isModalSearchVisible }"
+          @click="openSearch"
+        >
+          <i :class="link.icon" aria-hidden="true"></i>
+          <span class="tab-label">{{ link.text }}</span>
+        </button>
+        <router-link
+          v-else
+          :to="link.to"
+          class="tab"
+          :class="{ 'is-active': isActive(link) }"
+          :aria-current="isActive(link) ? 'page' : undefined"
+        >
+          <img
+            v-if="typeof link.icon === 'string' && link.icon.startsWith('http')"
+            :src="link.icon"
+            alt=""
+            class="tab-avatar"
+          />
+          <i v-else :class="link.icon" aria-hidden="true"></i>
+          <span class="tab-label">{{ link.text }}</span>
+        </router-link>
+      </li>
+    </ul>
+  </nav>
 </template>
 
 <script setup>
-import { storeToRefs } from 'pinia'
-import { onBeforeUnmount, watch } from 'vue'
+import { computed } from 'vue'
+import { useRoute } from 'vue-router'
 import { useNavbarStore } from '@/store/navbar'
-import NotificationBadge from '@/components/notification/NotificationBadge.vue'
 
 const props = defineProps({
   links: Array
 })
 
+const route = useRoute()
 const navbarStore = useNavbarStore()
-const { isNavbarVisible } = storeToRefs(navbarStore)
-const { closeNavbar } = navbarStore
 
-// The open drawer covers the page, so the page is also out of the keyboard order (Escape closes via v-dialog-focus).
-const setPageInert = (value) => {
-  const page = document.getElementById('main-content')
-  if (page) page.inert = value
+const tabs = computed(() => (props.links || []).filter((link) => link.group !== 'bottom'))
+
+// Profile owns its sub-pages (settings, notifications, contacts) on phones.
+const PROFILE_CHILDREN = ['/settings', '/notifications', '/contact']
+const isActive = (link) => {
+  if (!link.to) return false
+  if (link.to === '/user' || link.to === '/login') {
+    return route.path === link.to || PROFILE_CHILDREN.includes(route.path)
+  }
+  if (link.exact) return route.path === link.to
+  return route.path === link.to || route.path.startsWith(`${link.to}/`)
 }
-watch(isNavbarVisible, (open) => setPageInert(open), { immediate: true })
-onBeforeUnmount(() => setPageInert(false))
+
+const openSearch = () => navbarStore.openSearchModal()
 </script>
 
 <style scoped>
-/* Стили для мобильного меню и оверлея */
-.mobile-navbar {
+.tab-bar {
   position: fixed;
-  top: 0;
+  right: 0;
+  bottom: 0;
   left: 0;
-  width: min(280px, 76vw);
-  height: 100vh;
-  background: #171717;
-  border-right: 1px solid rgba(255, 255, 255, 0.08);
-  padding-top: 70px;
-  z-index: calc(var(--z-sidebar) + 1);
-  box-shadow: 18px 0 40px rgba(0, 0, 0, 0.5);
-  overflow: hidden;
+  z-index: var(--z-sidebar);
+  box-sizing: border-box;
+  height: var(--app-bottom-bar-height);
+  padding-bottom: env(safe-area-inset-bottom);
+  border-top: 1px solid var(--hairline);
+  background: #111;
 }
 
-.mobile-navbar__close {
-  position: absolute;
-  top: 14px;
-  left: 18px;
-  width: 44px;
-  height: 44px;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  border: 0;
-  border-radius: 8px;
-  background: rgba(255, 255, 255, 0.07);
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  color: #fff;
-  cursor: pointer;
-  font-size: 25px;
-  transition:
-    background 0.24s cubic-bezier(0.22, 1, 0.36, 1),
-    border-color 0.24s cubic-bezier(0.22, 1, 0.36, 1),
-    box-shadow 0.24s cubic-bezier(0.22, 1, 0.36, 1),
-    transform 0.24s cubic-bezier(0.22, 1, 0.36, 1);
+body.theater-mode-active .tab-bar {
+  display: none;
 }
 
-.mobile-navbar__close:active {
-  transform: scale(0.96);
-}
-
-.mobile-navbar__close:hover {
-  background: var(--accent-transparent, rgba(108, 92, 231, 0.15));
-  border-color: color-mix(in srgb, var(--accent-ui) 32%, rgba(255, 255, 255, 0.1));
-  box-shadow: none;
-}
-
-.nav-links-wrapper {
-  flex: 1;
-  overflow-y: auto;
-  padding-bottom: 1rem;
-  height: calc(100vh - 70px);
-}
-
-.nav-links {
-  list-style: none;
-  padding: 0 12px;
+.tab-list {
+  display: grid;
+  grid-auto-columns: minmax(0, 1fr);
+  grid-auto-flow: column;
+  height: 56px;
   margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.tab {
   display: flex;
   flex-direction: column;
-  gap: 7px;
-}
-
-.nav-links li {
-  width: 100%;
-  position: relative;
-}
-
-.nav-links a,
-.nav-links button {
-  display: flex;
   align-items: center;
-  gap: 16px;
-  color: rgba(255, 255, 255, 0.86);
-  text-decoration: none;
-  padding: 12px 14px;
-  transition: all 0.25s ease;
-  min-width: 0;
-  width: 100%;
-  min-height: 44px;
-  box-sizing: border-box;
-  border-radius: 8px;
-}
-
-.nav-links a i,
-.nav-links a img {
-  width: 25px;
-  display: flex;
   justify-content: center;
-  align-items: center;
-}
-
-.menu-text {
-  width: auto;
-  display: inline-block;
-}
-
-.nav-links a:hover {
-  background: var(--accent-transparent, rgba(108, 92, 231, 0.15));
-  color: var(--accent-text, #988dee);
-  transform: translateX(2px);
-}
-
-.nav-links a:active,
-.nav-links a.router-link-active {
-  background: var(--accent-transparent, rgba(108, 92, 231, 0.2));
-  color: var(--accent-text, #988dee);
-}
-
-.notification-link {
-  display: flex;
-  align-items: center;
-  gap: 16px;
-  color: rgba(255, 255, 255, 0.8);
-  text-decoration: none;
-  padding: 12px 14px;
-  transition: all 0.25s ease;
-  min-width: 0;
-  width: 100%;
-  border-radius: 8px;
+  gap: 4px;
   box-sizing: border-box;
+  width: 100%;
+  height: 100%;
+  padding: 0 2px;
+  border: none;
+  background: none;
+  color: var(--text-dim);
+  font: inherit;
+  text-decoration: none;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
 }
 
-.notification-link:hover {
-  background: var(--accent-transparent, rgba(108, 92, 231, 0.15));
-  color: var(--accent-text, #988dee);
-  transform: translateX(2px);
+.tab i {
+  font-size: 20px;
+  line-height: 1;
 }
 
-.notification-link:active,
-.notification-link.router-link-active {
-  background: var(--accent-transparent, rgba(108, 92, 231, 0.2));
-  color: var(--accent-text, #988dee);
-}
-
-.slide-enter-active,
-.slide-leave-active {
-  transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-}
-
-.slide-enter-from,
-.slide-leave-to {
-  transform: translateX(-100%);
-}
-
-.overlay {
-  position: fixed;
-  left: 0;
-  top: 0;
-  width: 100vw;
-  height: 100vh;
-  background: rgba(0, 0, 0, 0.64);
-  z-index: var(--z-sidebar);
-}
-
-.icon-donut {
-  height: 25px;
-  object-fit: contain;
-  width: 25px;
-}
-
-.icon-user {
-  height: 25px;
-  width: 25px;
-  object-fit: contain;
+.tab-avatar {
+  width: 22px;
+  height: 22px;
   border-radius: 50%;
+  object-fit: cover;
+}
+
+.tab-label {
+  max-width: 100%;
+  overflow: hidden;
+  font-size: 11px;
+  font-weight: 500;
+  line-height: 1.2;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.tab.is-active {
+  color: var(--accent-text);
+}
+
+.tab:focus-visible {
+  outline: 2px solid var(--accent-color);
+  outline-offset: -4px;
 }
 </style>

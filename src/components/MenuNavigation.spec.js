@@ -54,11 +54,11 @@ describe('reactive account navigation', () => {
     auth.setToken('test-session')
     await nextTick()
     // A token alone is not a loaded/authenticated profile.
-    expect(wrapper.find('a[href="/lists"]').exists()).toBe(false)
+    expect(wrapper.find('a[href="/user"]').exists()).toBe(false)
     auth.setUser({ id: '123', name: 'Test', photo: null })
     await nextTick()
     expect(wrapper.get('a[href="/user"]').text()).toBe('Профиль')
-    expect(wrapper.get('a[href="/lists"]').text()).toBe('Мои списки')
+    expect(wrapper.get('a[href="/lists"]').text()).toBe('Списки')
     expect(wrapper.get('a[href="/notifications"]').text()).toBe('Уведомления')
     expect(wrapper.find('a[href="/login"]').exists()).toBe(false)
     expect(wrapper.vm.$.uid).toBe(menuInstance)
@@ -68,7 +68,8 @@ describe('reactive account navigation', () => {
     await nextTick()
     expect(wrapper.get('a[href="/login"]').text()).toBe('Войти')
     expect(wrapper.find('a[href="/user"]').exists()).toBe(false)
-    expect(wrapper.find('a[href="/lists"]').exists()).toBe(false)
+    // Lists stay reachable logged out: the page itself offers the login.
+    expect(wrapper.get('a[href="/lists"]').text()).toBe('Списки')
     expect(wrapper.find('a[href="/notifications"]').exists()).toBe(false)
   })
 
