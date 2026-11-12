@@ -853,6 +853,12 @@ h3 {
   font-weight: 600;
 }
 
+.api-subtitle ~ .api-subtitle {
+  margin-top: 32px;
+  padding-top: 28px;
+  border-top: 1px solid var(--hairline);
+}
+
 .backend-status {
   overflow-wrap: anywhere;
 }

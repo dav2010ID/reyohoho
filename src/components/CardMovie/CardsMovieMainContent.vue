@@ -25,12 +25,12 @@
         v-if="score"
         class="card-score"
         :class="[`rating-${score.source}`, scoreTier]"
-        :aria-label="`${score.label} ${formatRating(score.value)}`"
+        :aria-label="`${score.label} ${formatRating(score)}`"
       >
         <span v-if="score.source === 'our' && showStar" class="card-score__star" aria-hidden="true"
           >★</span
         >
-        {{ formatRating(score.value) }}
+        {{ formatRating(score) }}
       </span>
       <div v-if="showType && isSeries" class="poster-type">Сериал</div>
       <div class="poster-action" aria-hidden="true">
@@ -102,7 +102,7 @@ const displayImdbRating = computed(() =>
 // One score per card: the user's own rating in their lists, otherwise Kinopoisk, then IMDb, then the site rating.
 const score = computed(() => {
   if (showStar && displayOurRating.value)
-    return { source: 'our', label: 'Ваша оценка', value: displayOurRating.value }
+    return { source: 'our', own: true, label: 'Ваша оценка', value: displayOurRating.value }
   if (displayKpRating.value)
     return { source: 'kp', label: 'Кинопоиск', value: displayKpRating.value }
   if (displayImdbRating.value)
@@ -122,7 +122,8 @@ const SERIES_TYPES = new Set(['TV_SERIES', 'MINI_SERIES', 'TV_SHOW'])
 const isSeries = computed(
   () => SERIES_TYPES.has(movie.type) || /сериал/i.test(String(movie.type || ''))
 )
-const formatRating = (rating) => rating.toFixed(1).replace(/\.0$/, '')
+const formatRating = ({ value, own }) =>
+  own ? value.toFixed(1).replace(/\.0$/, '') : value.toFixed(1)
 </script>
 
 <style scoped>

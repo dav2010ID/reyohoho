@@ -369,13 +369,30 @@ function download() {
 .history-help summary {
   display: inline-flex;
   align-items: center;
+  gap: 10px;
   min-height: 44px;
+  list-style: none;
   cursor: pointer;
 }
 .history-help summary:focus-visible {
   outline: 2px solid var(--accent-color);
   outline-offset: 2px;
   border-radius: var(--radius-s);
+}
+.history-help summary::-webkit-details-marker {
+  display: none;
+}
+.history-help summary::before {
+  content: '';
+  width: 6px;
+  height: 6px;
+  border-right: 2px solid currentColor;
+  border-bottom: 2px solid currentColor;
+  transform: rotate(-45deg);
+  transition: transform 0.15s ease;
+}
+.history-help[open] summary::before {
+  transform: rotate(45deg);
 }
 .history-help p {
   margin: 0 0 8px;

@@ -444,9 +444,10 @@
           <button
             v-if="kp_id"
             class="mobile-control-btn favorite-btn"
-            :class="{ active: isInAnyList }"
+            :class="{ active: movieInfo?.lists?.isFavorite }"
             type="button"
-            aria-label="Добавить в список"
+            :aria-label="movieInfo?.lists?.isFavorite ? 'Убрать из избранного' : 'В избранное'"
+            :aria-pressed="Boolean(movieInfo?.lists?.isFavorite)"
             @click="toggleList(USER_LIST_TYPES_ENUM.FAVORITE)"
           >
             <span class="material-icons">{{

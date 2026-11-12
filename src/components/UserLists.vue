@@ -620,7 +620,7 @@ onUnmounted(() => {
   flex-direction: column;
   align-items: flex-start;
   gap: 12px;
-  max-width: 560px;
+  max-width: 760px;
   margin: 0;
   padding: var(--page-top) 24px 64px;
 }
@@ -628,7 +628,7 @@ onUnmounted(() => {
 /* Four outlined tiles; each list keeps one colour on its top edge. */
 .lists-preview {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+  grid-template-columns: repeat(4, minmax(0, 1fr));
   gap: 12px;
   align-self: stretch;
   margin: 12px 0;
@@ -661,7 +661,7 @@ onUnmounted(() => {
 }
 
 .lists-preview__tile--watching {
-  --tile-edge: var(--accent-text);
+  --tile-edge: #b69cff;
 }
 
 .lists-preview__tile--later {
@@ -680,7 +680,14 @@ onUnmounted(() => {
   letter-spacing: -0.02em;
 }
 
+@media (max-width: 600px) {
+  .lists-preview {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
 .lists-login__text {
+  max-width: 560px;
   margin: 0;
   color: var(--text-dim);
   font-size: var(--fs-m);

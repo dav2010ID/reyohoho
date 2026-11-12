@@ -135,14 +135,14 @@ const formatType = (type) => {
   return typeMap[type] || type
 }
 
-// "1999 · Фильм · 2 ч. 16 мин. · США" and an age badge, as on the movie page.
+// "1999 · Фильм · США · 2 ч. 16 мин." and an age badge, as on the movie page.
 const metaParts = computed(() => {
   const movie = props.movie || {}
   return [
     movie.year && String(movie.year),
     movie.type && formatType(movie.type),
-    movie.duration && formatMovieDuration(movie.duration),
-    movie.countries
+    movie.countries,
+    movie.duration && formatMovieDuration(movie.duration)
   ].filter(Boolean)
 })
 
@@ -225,7 +225,7 @@ const scoreTier = (value) => {
 
 .modal-header {
   padding: 16px 20px;
-  border-bottom: 1px solid var(--accent-ui);
+  border-bottom: 1px solid var(--hairline);
   display: flex;
   justify-content: space-between;
   align-items: center;

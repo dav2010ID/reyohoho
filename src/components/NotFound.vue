@@ -80,6 +80,8 @@ h1 {
 
 .error-search:focus-within {
   border-color: var(--accent-ui);
+  outline: 2px solid var(--accent-color);
+  outline-offset: 2px;
 }
 
 .error-search__input {

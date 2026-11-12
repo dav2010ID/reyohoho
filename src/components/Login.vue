@@ -7,7 +7,7 @@
         <p>Загрузка данных...</p>
       </div>
 
-      <div v-else class="login-methods">
+      <div v-else-if="authValue" class="login-methods">
         <p v-if="verificationCode">
           Код подтверждения: <strong>{{ verificationCode }}</strong
           >. Сверьте его в боте.
@@ -194,6 +194,7 @@ export default {
       qrSize,
       loading,
       error,
+      authValue,
       loginWithTelegram,
       showModal,
       showQRModal,

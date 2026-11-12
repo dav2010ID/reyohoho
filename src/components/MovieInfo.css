@@ -362,7 +362,7 @@ a.rating-link::after {
 }
 
 .info-people__link + .info-people__link::before {
-  content: ', ';
+  content: ',\00a0';
   color: var(--text-dim);
 }
 
