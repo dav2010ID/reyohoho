@@ -11,7 +11,7 @@
         Трейлеры <span class="trailers-count">{{ availableVideos.length }}</span>
       </template>
     </h2>
-    <div class="carousel-wrapper">
+    <div v-show="!(single && activeVideo)" class="carousel-wrapper">
       <!-- Кнопка для прокрутки влево -->
       <button
         v-show="!isMobile && canScrollLeft"
@@ -57,11 +57,12 @@
       </button>
     </div>
     <!-- Встроенный плеер -->
-    <div v-if="activeVideo" class="video-player">
+    <div v-if="activeVideo" class="video-player" :class="{ 'video-player--inline': single }">
       <iframe
-        :src="activeVideo.iframeUrl"
+        :src="playerSrc"
         :title="activeVideo.name || 'Трейлер YouTube'"
         frameborder="0"
+        allow="autoplay; encrypted-media; picture-in-picture; fullscreen"
         allowfullscreen
       ></iframe>
     </div>
@@ -121,6 +122,13 @@ const activeVideo = computed(() =>
 )
 
 // Выбор видео для отображения во встроенном плеере
+// Inline single trailer: the click already asked to play, so start it.
+const playerSrc = computed(() => {
+  const url = activeVideo.value?.iframeUrl || ''
+  if (!props.single || !url) return url
+  return `${url}${url.includes('?') ? '&' : '?'}autoplay=1`
+})
+
 const selectVideo = (index) => {
   activeVideoIndex.value = index
   emit('select', availableVideos.value[index])
@@ -347,6 +355,12 @@ onBeforeUnmount(() => {
   border-radius: var(--radius-l);
   overflow: hidden;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+}
+
+.video-player--inline {
+  max-width: none;
+  margin: 0;
+  border-radius: var(--radius-m);
 }
 
 .video-player iframe {
