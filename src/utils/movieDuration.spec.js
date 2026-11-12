@@ -5,7 +5,7 @@ describe('movie duration formatting', () => {
   it.each([
     [95, '1 ч. 35 мин.'],
     ['95', '1 ч. 35 мин.'],
-    [45, '0 ч. 45 мин.']
+    [45, '45 мин.']
   ])('formats supported duration %j', (value, expected) => {
     expect(formatMovieDuration(value)).toBe(expected)
   })

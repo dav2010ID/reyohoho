@@ -5,5 +5,6 @@ export const formatMovieDuration = (value) => {
   const roundedMinutes = Math.round(minutes)
   const hours = Math.floor(roundedMinutes / 60)
   const remainingMinutes = roundedMinutes % 60
+  if (hours === 0) return `${remainingMinutes} мин.`
   return `${hours} ч. ${remainingMinutes} мин.`
 }

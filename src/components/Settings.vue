@@ -677,7 +677,7 @@ h3 {
   align-items: center;
   justify-content: center;
   min-width: 44px;
-  min-height: 38px;
+  min-height: 44px;
   padding: 0 12px;
   box-sizing: border-box;
   border-radius: var(--radius-s);

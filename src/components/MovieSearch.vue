@@ -1316,7 +1316,7 @@ const fetchRandomMovie = async () => {
 
   .search-type-buttons button {
     flex: 1 0 auto;
-    min-height: 36px;
+    min-height: 44px;
   }
 
   .input-wrapper {

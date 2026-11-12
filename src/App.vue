@@ -4,13 +4,7 @@
   <MobileHeader v-if="showMobileHeader" />
   <MenuNavigation />
 
-  <main
-    id="main-content"
-    :class="[
-      'router-view-container',
-      { 'router-view-container--with-mobile-header': showMobileHeader }
-    ]"
-  >
+  <main id="main-content" class="router-view-container">
     <router-view v-slot="{ Component }">
       <component :is="Component" />
     </router-view>
@@ -140,14 +134,9 @@ const showGarland = computed(() => isNewYearPeriod())
   z-index: 5;
 }
 
-/* Стиль для страницы с учетом мобильного хедера */
+/* The phone top bar reserves its own height (MobileHeader renders a spacer only when it shows). */
 .router-view-container {
-  padding-top: 0; /* По умолчанию без отступа */
-}
-
-/* Отступ сверху для мобильного хедера */
-.router-view-container--with-mobile-header {
-  padding-top: 56px;
+  padding-top: 0;
 }
 
 #garland {

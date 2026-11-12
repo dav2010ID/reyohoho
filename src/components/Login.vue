@@ -65,8 +65,8 @@
             </div>
             <p class="qr-hint">Используйте любое приложение для сканирования QR-кода</p>
             <p class="qr-hint">
-              Откройте бота и подтвердите вход на сайт. Не отправляйте боту пароль или коды входа
-              в Telegram.
+              Откройте бота и подтвердите вход на сайт. Не отправляйте боту пароль или коды входа в
+              Telegram.
             </p>
           </div>
         </div>
@@ -206,44 +206,48 @@ export default {
 
 <style scoped>
 .login-page {
-  max-width: 1200px;
-  margin: 0 auto;
-  padding: 1rem;
+  box-sizing: border-box;
   min-height: 100vh;
+  padding: 40px 24px 64px;
   color: #e0e0e0;
 }
 
 .login-container {
-  max-width: 450px;
-  margin: 0 auto;
-  padding: 2rem;
-  text-align: center;
+  box-sizing: border-box;
+  max-width: 420px;
+  padding: 24px;
   border-radius: var(--radius-l);
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
-  border: 1px solid var(--hairline);
+  box-shadow: inset 0 0 0 1px var(--hairline);
 }
 
 .dark-theme {
-  background: #2a2a2a;
+  background: var(--surface-raised);
   color: #e0e0e0;
 }
 
 h1 {
-  text-align: center;
-  margin-bottom: 2.5rem;
-  color: #ffffff;
-  font-size: 2rem;
-  font-weight: 500;
+  margin: 0 0 24px;
+  color: #fff;
+  font-size: var(--fs-2xl);
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  line-height: 1.25;
 }
 
 .login-methods {
   display: flex;
   flex-direction: column;
-  gap: 1.5rem;
+  gap: 16px;
+}
+
+.login-methods > p {
+  margin: 0;
+  color: var(--text-dim);
+  font-size: var(--fs-s);
 }
 
 .telegram-btn-container {
-  margin-bottom: 1rem;
+  margin: 0;
 }
 
 .telegram-btn {
@@ -252,7 +256,8 @@ h1 {
   justify-content: center;
   gap: 0.5rem;
   width: 100%;
-  padding: 0.75rem;
+  min-height: 48px;
+  padding: 0 16px;
   background: var(--accent-solid);
   color: var(--accent-contrast);
   border: none;
@@ -277,15 +282,15 @@ h1 {
 .divider {
   display: flex;
   align-items: center;
-  color: #aaa;
-  font-size: 0.9rem;
+  color: var(--text-dim);
+  font-size: var(--fs-s);
 }
 
 .divider::before,
 .divider::after {
   content: '';
   flex: 1;
-  border-bottom: 1px solid #444;
+  border-bottom: 1px solid var(--hairline);
 }
 
 .divider::before {
@@ -302,7 +307,8 @@ h1 {
   justify-content: center;
   gap: 0.5rem;
   width: 100%;
-  padding: 0.75rem;
+  min-height: 48px;
+  padding: 0 16px;
   /* Alternative method after "или": secondary outline, Telegram stays the one primary fill. */
   background: transparent;
   color: #fff;
@@ -365,6 +371,8 @@ h1 {
   display: flex;
   justify-content: center;
   align-items: center;
+  /* Above the rail and the tab bar. */
+  z-index: calc(var(--z-sidebar) + 10);
 }
 
 .modal-content {

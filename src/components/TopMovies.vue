@@ -393,7 +393,7 @@ onUnmounted(disconnectInfiniteScroll)
   justify-content: space-between;
   flex-wrap: wrap;
   gap: 16px 24px;
-  padding: 0 15px;
+  padding: 0 24px;
   margin-bottom: 24px;
 }
 
@@ -403,45 +403,62 @@ onUnmounted(disconnectInfiniteScroll)
 
 .top-heading h1 {
   margin: 0;
-  font-size: clamp(1.4rem, 2.5vw, 2rem);
+  font-size: var(--fs-2xl);
   line-height: 1.25;
-  font-weight: 700;
-  letter-spacing: -0.025em;
+  font-weight: 800;
+  letter-spacing: -0.02em;
   overflow-wrap: anywhere;
 }
 
 .top-heading p {
-  margin: 8px 0 0;
-  color: #a8a8a8;
-  font-size: 0.9rem;
+  margin: 6px 0 0;
+  color: var(--text-dim);
+  font-size: var(--fs-s);
   line-height: 1.5;
 }
 
 .top-tabs {
   display: flex;
   flex-shrink: 0;
-  gap: 4px;
-  padding: 4px;
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  border-radius: var(--radius-l);
-  background: rgba(28, 28, 28, 0.85);
+  gap: 2px;
+  padding: 3px;
+  border-radius: var(--radius-s);
+  background: rgba(255, 255, 255, 0.05);
 }
 
 .top-tabs .type-btn {
-  min-height: 40px;
-  padding: 8px 18px;
-  border-color: transparent;
-  background: transparent;
-  font-size: 0.9rem;
+  min-width: 0;
+  min-height: 38px;
+  padding: 0 16px;
+  border: none;
+  border-radius: var(--radius-s);
+  background: none;
+  box-shadow: none;
+  color: var(--text-dim);
+  font-size: var(--fs-s);
+  font-weight: 500;
+  transform: none;
+}
+
+.top-tabs .type-btn:hover {
+  color: #fff;
+}
+
+.top-tabs .type-btn:hover:not(.active) {
+  background: none;
+  box-shadow: none;
+  transform: none;
 }
 
 .top-tabs .type-btn.active {
-  background: var(--accent-solid);
+  background: rgba(255, 255, 255, 0.12);
+  box-shadow: none;
+  color: #fff;
 }
 
 .top-tabs .type-btn:focus-visible {
-  outline: 2px solid #fff;
-  outline-offset: 2px;
+  outline: 2px solid var(--accent-color);
+  outline-offset: -2px;
 }
 
 .controls {
@@ -617,7 +634,7 @@ onUnmounted(disconnectInfiniteScroll)
 
 @media (max-width: 600px) {
   .top-header {
-    padding: 0 10px;
+    padding: 0 12px;
     margin-bottom: 16px;
   }
 

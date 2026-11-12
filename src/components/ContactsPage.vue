@@ -38,67 +38,83 @@ useHead(
 </script>
 
 <style scoped>
-/* Same page header pattern as Settings and Login: centred title above the card. */
-.contact-page h1 {
-  max-width: 800px;
-  margin: 36px auto 2.5rem;
-  padding: 0 8px;
+/* Same page pattern as Settings, Top-250 and 404: left-aligned 28/800 title, text on the page. */
+.contact-page {
+  box-sizing: border-box;
+  max-width: 760px;
+  padding: 40px 24px 64px;
   color: #fff;
-  font-size: clamp(1.5rem, 4vw, 2rem);
-  font-weight: 500;
+}
+
+.contact-page h1 {
+  margin: 0 0 24px;
+  color: #fff;
+  font-size: var(--fs-2xl);
+  font-weight: 800;
+  letter-spacing: -0.02em;
   line-height: 1.25;
-  text-align: center;
   text-wrap: balance;
 }
 
 .contact-text {
-  color: #ffffff;
-  /* Same card surface as Settings and Login. */
-  background-color: #2a2a2a;
-  border: 1px solid var(--hairline);
-  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
-  box-sizing: border-box;
-  padding: 20px;
-  border-radius: var(--radius-l);
-  margin: 0 auto;
-  max-width: 800px;
+  max-width: 62ch;
+  color: rgba(255, 255, 255, 0.87);
+  font-size: var(--fs-m);
   line-height: 1.6;
 }
 
+.contact-text p {
+  margin: 0 0 16px;
+}
+
+.contact-text p:last-child {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0 4px;
+  margin: 24px 0 0;
+  padding-top: 16px;
+  border-top: 1px solid var(--hairline);
+}
+
+.contact-text a {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  color: var(--accent-light, var(--accent-color));
+  font-weight: 600;
+  text-decoration: none;
+  overflow-wrap: anywhere;
+}
+
+.contact-text a:hover {
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.contact-text a:focus-visible {
+  outline: 2px solid var(--accent-color);
+  outline-offset: 2px;
+  border-radius: var(--radius-s);
+}
+
+.contact-separator {
+  margin: 0 8px;
+  color: var(--text-faint);
+}
+
 @media (max-width: 600px) {
-  .contact-text {
-    margin: 0 8px;
+  .contact-page {
+    padding: 24px 16px 40px;
+  }
+
+  .contact-text p:last-child {
+    flex-direction: column;
+    align-items: flex-start;
   }
 
   .contact-separator {
     display: none;
   }
-
-  .contact-text a {
-    display: block;
-    padding: 4px 0;
-    overflow-wrap: anywhere;
-  }
-}
-
-.contact-text a {
-  color: var(--accent-light, var(--accent-color));
-  text-decoration: none;
-}
-
-.contact-separator {
-  margin: 0 0.5em;
-}
-
-.contact-text a:hover {
-  text-decoration: underline;
-}
-
-.contact-text p:first-child {
-  margin-top: 0;
-}
-
-.contact-text p:last-child {
-  margin-bottom: 0;
 }
 </style>

@@ -8,10 +8,10 @@
       {{ originalTitle }}
     </div>
 
-    <p v-if="rank || metaLine" class="card-meta">
+    <p v-if="rank || movie.year || genreText" class="card-meta">
       <span v-if="rank" class="card-rank">№&nbsp;{{ rank }}</span>
-      <span v-if="rank && metaLine" aria-hidden="true"> · </span>
-      <span v-if="metaLine">{{ metaLine }}</span>
+      <span v-if="movie.year" class="card-meta__part">{{ movie.year }}</span>
+      <span v-if="genreText" class="card-meta__part card-meta__genres">{{ genreText }}</span>
     </p>
   </div>
 </template>
@@ -32,21 +32,25 @@ const {
 })
 
 const genres = computed(() => {
-  const items = Array.isArray(movie.genres) && movie.genres.length ? movie.genres : movie.raw_data?.genres
+  const items =
+    Array.isArray(movie.genres) && movie.genres.length ? movie.genres : movie.raw_data?.genres
   return Array.isArray(items)
-    ? [...new Set(items.map((g) => (typeof g === 'string' ? g : g?.genre || g?.name)?.trim()).filter(Boolean))]
+    ? [
+        ...new Set(
+          items
+            .map((g) => (typeof g === 'string' ? g : g?.genre || g?.name)?.trim())
+            .filter(Boolean)
+        )
+      ]
     : []
 })
 
 const originalTitle = computed(() => movie.raw_data?.name_en || movie.raw_data?.Name_original || '')
 
-// One quiet line instead of chips: "1999 · фантастика, драма".
-const metaLine = computed(() => {
-  const parts = []
-  if (movie.year) parts.push(String(movie.year))
-  if (variant !== 'related' && genres.value.length) parts.push(genres.value.slice(0, 2).join(', '))
-  return parts.join(' · ')
-})
+// One quiet line instead of chips: "№ 1 · 1999 · фантастика, драма".
+const genreText = computed(() =>
+  variant !== 'related' && genres.value.length ? genres.value.slice(0, 2).join(', ') : ''
+)
 
 const removeYearFromTitle = (title) => {
   return title ? title.replace(/\(\d{4}\)$/, '').trim() : title
@@ -100,6 +104,13 @@ const removeYearFromTitle = (title) => {
   white-space: nowrap;
 }
 
+.card-meta > span + span::before {
+  content: '\00a0·\00a0';
+  color: var(--text-dim);
+  font-size: var(--fs-s);
+  font-weight: 400;
+}
+
 .card-rank {
   color: var(--accent-text);
   font-size: var(--fs-xs);
@@ -123,6 +134,14 @@ const removeYearFromTitle = (title) => {
 
   .card-meta {
     font-size: var(--fs-xs);
+  }
+
+  .card-meta > span + span::before {
+    font-size: var(--fs-xs);
+  }
+
+  .movie-details:not(.layout-row) .card-meta__genres {
+    display: none;
   }
 
   .movie-details.layout-row .movie-header h3 {

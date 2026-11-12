@@ -597,13 +597,15 @@ onUnmounted(() => {
 </script>
 
 <style scoped>
-.lists-login {
+/* Starts at the page gutter like Settings and Top-250 (the list page itself is centred). */
+.user-lists-page.lists-login {
   display: flex;
   flex-direction: column;
   align-items: flex-start;
   gap: 12px;
   max-width: 560px;
-  padding: 64px 24px;
+  margin: 0;
+  padding: 40px 24px 64px;
 }
 
 .lists-login__title {

@@ -132,6 +132,7 @@ import { getMovieName } from '@/utils/textUtils'
 import { getMovieSeoPath } from '@/utils/movieSeo'
 import { resolvePosterByMovie, setImageFallback } from '@/utils/mediaUtils'
 import { createLatestRequestGuard } from '@/utils/latestRequest'
+import { useRouter } from 'vue-router'
 
 const navbarStore = useNavbarStore()
 
@@ -230,6 +231,11 @@ const debouncedPerformSearch = debounce(() => {
     movies.value = []
   }
 }, 700)
+
+// Any navigation (a result, the rail, the tab bar, browser back) closes the modal.
+const router = useRouter()
+const removeAfterEach = router?.afterEach(() => navbarStore.closeSearchModal())
+onUnmounted(() => removeAfterEach?.())
 
 const closeModal = (event) => {
   // Escape через v-dialog-focus вызывает без события
@@ -366,7 +372,8 @@ watch(searchTerm, () => {
   display: flex;
   justify-content: center;
   align-items: center;
-  z-index: 30;
+  /* Above the rail and the tab bar, so the backdrop covers the whole app. */
+  z-index: calc(var(--z-sidebar) + 10);
 
   &__content {
     position: relative;
@@ -465,17 +472,20 @@ watch(searchTerm, () => {
     &__title {
       font-size: 15px;
       line-height: 18px;
-      font-weight: 500;
+      font-weight: 600;
       padding: 0;
       margin: 0;
       overflow-wrap: anywhere;
     }
 
+    /* Year, type and score are secondary to the title. */
     &__meta {
       display: flex;
       flex-wrap: wrap;
       gap: 7px;
       margin-top: 3px;
+      color: var(--text-dim);
+      font-size: var(--fs-s);
       line-height: 18px;
     }
 

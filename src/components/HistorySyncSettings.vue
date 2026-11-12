@@ -12,10 +12,7 @@
           : 'Для синхронизации войдите через Telegram и включите облачную историю.'
       }}
     </p>
-    <p v-else-if="!compact">
-      Облачная синхронизация пока недоступна. Вы можете сохранить историю в файл или перенести её со
-      старого сайта.
-    </p>
+    <p v-else-if="!compact">Облачная синхронизация пока недоступна.</p>
     <p v-if="!compact && enabled">
       Фильмы, удалённые из облачной истории, не появятся снова при повторном импорте.
     </p>
@@ -141,7 +138,8 @@ async function run(action) {
 }
 async function enable() {
   const confirmedToken = auth.token
-  if (!await askConfirmation('Синхронизировать локальную историю этого браузера с облаком?')) return
+  if (!(await askConfirmation('Синхронизировать локальную историю этого браузера с облаком?')))
+    return
   if (auth.token !== confirmedToken) return
   run(async () => {
     const token = auth.token
@@ -162,7 +160,9 @@ function refresh() {
 async function uploadLocal() {
   const confirmedToken = auth.token
   if (
-    !await askConfirmation('Добавить локальные записи в облако? Ранее удалённые записи не восстановятся.')
+    !(await askConfirmation(
+      'Добавить локальные записи в облако? Ранее удалённые записи не восстановятся.'
+    ))
   )
     return
   if (auth.token !== confirmedToken) return
@@ -176,9 +176,9 @@ async function uploadLocal() {
 async function clearCloud() {
   const confirmedToken = auth.token
   if (
-    !await askConfirmation(
+    !(await askConfirmation(
       'Удалить историю в облаке для этого аккаунта? Это действие очистит и локальную историю.'
-    )
+    ))
   )
     return
   if (auth.token !== confirmedToken) return

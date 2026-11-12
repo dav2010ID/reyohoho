@@ -1,12 +1,14 @@
 <template>
-  <!-- Phones: back on the left, the page title once scrolled, profile tools on the right. -->
-  <header class="app-header" :class="{ scrolled: isScrolled }">
+  <!-- Phones: back on the left, the page title, profile tools on the right.
+       With none of these the bar is not rendered, so a page opened directly starts at the top. -->
+  <div v-if="hasContent" class="app-header-spacer" aria-hidden="true"></div>
+  <header v-if="hasContent" class="app-header" :class="{ scrolled: isScrolled }">
     <button v-if="canGoBack" type="button" class="header-btn" aria-label="Назад" @click="goBack">
       <i class="fas fa-arrow-left" aria-hidden="true"></i>
     </button>
     <span v-else class="header-spacer" aria-hidden="true"></span>
-    <div class="header-content" :aria-hidden="!isScrolled">
-      <template v-if="isScrolled && navbarStore.headerContent">
+    <div class="header-content">
+      <template v-if="navbarStore.headerContent">
         <img
           v-if="navbarStore.headerContent.imageUrl"
           :src="navbarStore.headerContent.imageUrl"
@@ -60,6 +62,16 @@ const syncBack = () => {
 const removeAfterEach = router.afterEach(() => syncBack())
 const goBack = () => router.back()
 
+// Title pages keep the bar while loading, so the page does not jump when the title arrives.
+const TITLE_ROUTES = ['movie-info', 'movie-info-shiki']
+const hasContent = computed(
+  () =>
+    canGoBack.value ||
+    isProfileRoute.value ||
+    TITLE_ROUTES.includes(route.name) ||
+    Boolean(navbarStore.headerContent)
+)
+
 const isScrolled = ref(false)
 const handleScroll = () => {
   isScrolled.value = window.scrollY > 50
@@ -78,6 +90,10 @@ onUnmounted(() => {
 </script>
 
 <style scoped>
+.app-header-spacer {
+  height: 56px;
+}
+
 .app-header {
   position: fixed;
   top: 0;

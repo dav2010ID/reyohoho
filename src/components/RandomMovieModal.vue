@@ -42,8 +42,18 @@
 
               <div class="movie-info-section">
                 <h4 class="movie-title">{{ movie.title }}</h4>
-                <p v-if="metaParts.length" class="movie-meta">
-                  <span v-for="part in metaParts" :key="part">{{ part }}</span>
+                <p v-if="metaParts.length || movie.age_rating" class="movie-meta">
+                  <template v-for="(part, index) in metaParts" :key="part"
+                    ><span class="meta-part"
+                      >{{ part
+                      }}<span
+                        v-if="index < metaParts.length - 1"
+                        class="meta-sep"
+                        aria-hidden="true"
+                        >&nbsp;·</span
+                      ></span
+                    >{{ ' ' }}</template
+                  ><span v-if="movie.age_rating" class="age-badge">{{ movie.age_rating }}</span>
                 </p>
                 <p v-if="scores.length" class="movie-scores">
                   <span v-for="score in scores" :key="score.label" class="movie-score">
@@ -86,6 +96,7 @@
 import { resolvePosterSourcesByMovie, setImageFallback } from '@/utils/mediaUtils'
 import { computed } from 'vue'
 import { getMovieSeoPath } from '@/utils/movieSeo'
+import { formatMovieDuration } from '@/utils/movieDuration'
 import imdbLogoUrl from '@/assets/icon-imdb-logo.svg'
 import kpLogoUrl from '@/assets/icon-kp-logo.svg'
 
@@ -124,25 +135,14 @@ const formatType = (type) => {
   return typeMap[type] || type
 }
 
-const formatDuration = (duration) => {
-  if (!duration) return ''
-  const hours = Math.floor(duration / 60)
-  const minutes = duration % 60
-  if (hours > 0) {
-    return `${hours} ч ${minutes} мин`
-  }
-  return `${minutes} мин`
-}
-
-// "1999 · Фильм · 2 ч 16 мин · США · 18+"
+// "1999 · Фильм · 2 ч. 16 мин. · США" and an age badge, as on the movie page.
 const metaParts = computed(() => {
   const movie = props.movie || {}
   return [
     movie.year && String(movie.year),
     movie.type && formatType(movie.type),
-    movie.duration && formatDuration(movie.duration),
-    movie.countries,
-    movie.age_rating
+    movie.duration && formatMovieDuration(movie.duration),
+    movie.countries
   ].filter(Boolean)
 })
 
@@ -354,17 +354,30 @@ const scoreTier = (value) => {
 }
 
 .movie-meta {
-  display: flex;
-  flex-wrap: wrap;
   margin: 0;
   color: rgba(255, 255, 255, 0.8);
   font-size: var(--fs-s);
+  line-height: 1.8;
 }
 
-.movie-meta span + span::before {
-  content: '·';
-  margin: 0 8px;
+.meta-part {
+  margin-right: 4px;
+  white-space: nowrap;
+}
+
+.meta-sep {
+  margin-left: 2px;
   color: rgba(255, 255, 255, 0.4);
+}
+
+.age-badge {
+  display: inline-block;
+  padding: 0 6px;
+  border: 1px solid rgba(255, 255, 255, 0.4);
+  border-radius: var(--radius-s);
+  font-size: var(--fs-xs);
+  line-height: 18px;
+  white-space: nowrap;
 }
 
 .movie-scores {

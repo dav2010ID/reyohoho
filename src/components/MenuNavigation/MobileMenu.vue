@@ -110,8 +110,15 @@ body.theater-mode-active .tab-bar {
 }
 
 .tab i {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 56px;
+  height: 28px;
+  border-radius: 14px;
   font-size: 20px;
   line-height: 1;
+  transition: background-color 0.15s ease;
 }
 
 .tab-avatar {
@@ -131,8 +138,20 @@ body.theater-mode-active .tab-bar {
   white-space: nowrap;
 }
 
+/* The current tab gets a pill behind the icon and a heavier white label, not only a colour,
+   so it stays visible with low-chroma accents. */
 .tab.is-active {
   color: var(--accent-text);
+}
+
+.tab.is-active i {
+  background: color-mix(in srgb, var(--accent-ui) 28%, transparent);
+  color: #fff;
+}
+
+.tab.is-active .tab-label {
+  color: #fff;
+  font-weight: 700;
 }
 
 .tab:focus-visible {

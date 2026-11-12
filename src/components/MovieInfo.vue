@@ -86,12 +86,18 @@
               </button>
             </div>
             <p v-if="metaParts.length || ageLabels.length" class="content-meta">
-              <span v-for="part in metaParts" :key="part" class="content-meta__part">{{
-                part
-              }}</span>
-              <span v-for="label in ageLabels" :key="label" class="info-age-badge">{{
-                label
-              }}</span>
+              <span
+                v-for="(part, index) in metaParts"
+                :key="part"
+                class="content-meta__part"
+                :class="{ 'has-sep': index < metaParts.length - 1 }"
+                >{{ part }}</span
+              >
+              <span v-if="ageLabels.length" class="content-meta__badges">
+                <span v-for="label in ageLabels" :key="label" class="info-age-badge">{{
+                  label
+                }}</span>
+              </span>
             </p>
           </div>
 
@@ -110,7 +116,7 @@
                 class="score-primary"
               >
                 <span class="score-primary__value" :class="scoreTier(movieInfo.rating_kinopoisk)">{{
-                  movieInfo.rating_kinopoisk || '—'
+                  formatScore(movieInfo.rating_kinopoisk)
                 }}</span>
                 <span class="score-primary__label"
                   >Кинопоиск<template v-if="movieInfo.rating_kinopoisk_vote_count">
@@ -146,7 +152,7 @@
                 >
                   <img src="/src/assets/icon-imdb-logo.svg" alt="IMDb" class="rating-logo" />
                   <span class="rating-value" :class="scoreTier(movieInfo.rating_imdb)">
-                    {{ movieInfo.rating_imdb ? movieInfo.rating_imdb : '—' }}
+                    {{ formatScore(movieInfo.rating_imdb) }}
                   </span>
                 </a>
               </div>
@@ -266,12 +272,18 @@
           <div class="mobile-movie-summary">
             <h2 class="mobile-movie-title">{{ movieInfo.title }}</h2>
             <p v-if="metaParts.length || ageLabels.length" class="content-meta">
-              <span v-for="part in metaParts" :key="part" class="content-meta__part">{{
-                part
-              }}</span>
-              <span v-for="label in ageLabels" :key="label" class="info-age-badge">{{
-                label
-              }}</span>
+              <span
+                v-for="(part, index) in metaParts"
+                :key="part"
+                class="content-meta__part"
+                :class="{ 'has-sep': index < metaParts.length - 1 }"
+                >{{ part }}</span
+              >
+              <span v-if="ageLabels.length" class="content-meta__badges">
+                <span v-for="label in ageLabels" :key="label" class="info-age-badge">{{
+                  label
+                }}</span>
+              </span>
             </p>
           </div>
           <div class="info-content">
@@ -336,7 +348,6 @@
               />
               <ul
                 v-if="
-                  directorNames ||
                   movieInfo.production_companies ||
                   movieInfo.seasons_count ||
                   movieInfo.episodes_count ||
@@ -344,10 +355,6 @@
                 "
                 class="info-list"
               >
-                <li v-if="directorNames">
-                  <strong>{{ directorLabel }}</strong>
-                  <span class="info-value">{{ directorNames }}</span>
-                </li>
                 <li v-if="movieInfo.production_companies">
                   <strong>Продакшн</strong>
                   <span class="info-value">{{ movieInfo.production_companies }}</span>
@@ -862,6 +869,13 @@ const scoreTier = (value) => {
   return ''
 }
 
+// Ten-point scores always show one decimal ("9.0", not "9"), so neighbours line up.
+const formatScore = (value) => {
+  const number = parseFloat(value)
+  if (!Number.isFinite(number) || number <= 0) return '—'
+  return number.toFixed(1)
+}
+
 // "1999 · Фильм · США · 2 ч 16 мин" under the title.
 const metaParts = computed(() => {
   const info = movieInfo.value
@@ -1126,15 +1140,6 @@ const staffByProfession = computed(() => {
   return groups
 })
 const actors = computed(() => staffByProfession.value.ACTOR || [])
-const directors = computed(() => staffByProfession.value.DIRECTOR || [])
-const directorLabel = computed(() => (directors.value.length > 1 ? 'Режиссёры' : 'Режиссёр'))
-const directorNames = computed(() =>
-  directors.value
-    .slice(0, 2)
-    .map((person) => person.name_ru || person.name_en)
-    .filter(Boolean)
-    .join(', ')
-)
 const staffNameGroups = computed(() =>
   [
     { key: 'DIRECTOR', title: 'Режиссёры', one: 'Режиссёр', label: 'режиссёров' },

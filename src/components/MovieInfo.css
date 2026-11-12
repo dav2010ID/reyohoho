@@ -1,6 +1,8 @@
 .content {
   min-height: 100vh;
   position: relative;
+  /* The backdrop glow is full-bleed; clip it to the page without making a scroll container. */
+  overflow-x: clip;
   --movie-page-max-width: 1440px;
   --movie-page-gutter: 24px;
 }
@@ -10,7 +12,6 @@
   isolation: isolate;
   max-width: var(--movie-page-max-width);
   margin-inline: auto;
-  overflow: hidden;
   padding: 28px var(--movie-page-gutter) 28px;
   color: #e0e0e0;
 }
@@ -20,10 +21,12 @@
   content: '';
   position: absolute;
   z-index: -1;
-  top: -60px;
-  right: -60px;
-  left: -60px;
-  height: 520px;
+  /* Full width of the page area and up behind the phone top bar, so it shows no edges. */
+  top: -116px;
+  left: 50%;
+  width: 100vw;
+  height: 580px;
+  transform: translateX(-50%);
   background: var(--movie-backdrop) center 30% / cover no-repeat;
   filter: blur(60px) saturate(1.3) brightness(0.45);
   opacity: 0.55;
@@ -125,23 +128,33 @@
   line-height: 1.4;
 }
 
-.content-meta__part + .content-meta__part::before {
+.content-meta__part {
+  white-space: nowrap;
+}
+
+.content-meta__part.has-sep::after {
   content: '·';
   margin: 0 8px;
   color: rgba(255, 255, 255, 0.4);
 }
 
+/* The gap before the badges belongs to the last part, so wrapped badges start flush. */
+.content-meta__part:not(.has-sep) {
+  margin-right: 12px;
+}
+
+.content-meta__badges {
+  display: inline-flex;
+  gap: 6px;
+  white-space: nowrap;
+}
+
 .content-meta .info-age-badge {
-  margin-left: 12px;
   padding: 0 6px;
   border: 1px solid rgba(255, 255, 255, 0.35);
   border-radius: var(--radius-s);
   font-size: var(--fs-s);
   line-height: 1.5;
-}
-
-.content-meta .info-age-badge + .info-age-badge {
-  margin-left: 6px;
 }
 
 .header-side {
@@ -451,8 +464,8 @@ a.rating-link::after {
 .movie-panel {
   box-sizing: border-box;
   max-width: var(--movie-page-max-width);
-  margin: 56px auto 0;
-  padding: 40px 0 0;
+  margin: 40px auto 0;
+  padding: 32px 0 0;
   border-top: 1px solid rgba(255, 255, 255, 0.06);
   position: relative;
 }
@@ -1257,7 +1270,7 @@ a.rating-link::after {
     gap: 6px;
   }
 
-  /* Touch: names stay inline (compact secondary content) with 36px-tall targets. */
+  /* Touch: names stay inline (compact secondary content) with 44px-tall targets. */
   .staff-names-list {
     gap: 0;
   }
@@ -1265,7 +1278,7 @@ a.rating-link::after {
   .staff-name-link {
     display: inline-flex;
     align-items: center;
-    min-height: 36px;
+    min-height: 44px;
     font-size: 15px;
   }
 
@@ -1283,7 +1296,7 @@ a.rating-link::after {
   .staff-name-link {
     display: inline-flex;
     align-items: center;
-    min-height: 36px;
+    min-height: 44px;
   }
 }
 
