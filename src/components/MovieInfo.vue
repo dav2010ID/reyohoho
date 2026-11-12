@@ -125,9 +125,7 @@
                   <span class="score-primary__label"
                     >Кинопоиск<template v-if="movieInfo.rating_kinopoisk_vote_count">
                       ·
-                      {{
-                        formatRatingNumber(movieInfo.rating_kinopoisk_vote_count)
-                      }}
+                      {{ formatRatingNumber(movieInfo.rating_kinopoisk_vote_count) }}
                       оценок</template
                     ></span
                   >
@@ -506,7 +504,7 @@
                   :href="`https://www.kinopoisk.ru/film/${kp_id}/cast/`"
                   target="_blank"
                   rel="noopener noreferrer"
-                  >Все актёры →</a
+                  >Все актёры <span class="sym" aria-hidden="true">→</span></a
                 >
                 <RibbonNav container=".staff-block" scroller=".staff-list" label="В ролях" />
               </div>

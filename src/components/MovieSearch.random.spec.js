@@ -68,13 +68,18 @@ describe('random film interaction', () => {
     useApiStore().$patch({ backendMode: 'local', backendModeUserSelected: true })
     await flushPromises()
     expect(tabs()).toContain('ID IMDb')
-    await wrapper.findAll('.search-type-buttons button').find(b => b.text() === 'ID IMDb').trigger('click')
+    await wrapper
+      .findAll('.search-type-buttons button')
+      .find((b) => b.text() === 'ID IMDb')
+      .trigger('click')
     useApiStore().backendMode = 'auto'
     await flushPromises()
     expect(wrapper.get('.search-type-buttons .active').text()).toBe('Название')
   })
+  // The dialog module loads on the first open.
   const open = async () => {
     await wrapper.find('.random-button').trigger('click')
+    await vi.dynamicImportSettled()
     await flushPromises()
   }
   it('creates history on the first reset of a search link and then retains it', async () => {

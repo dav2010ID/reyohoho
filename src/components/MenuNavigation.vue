@@ -17,10 +17,12 @@
 import { useMainStore } from '@/store/main'
 import { useAuthStore } from '@/store/auth'
 import { useNavbarStore } from '@/store/navbar'
-import { computed, ref, onMounted, onBeforeUnmount } from 'vue'
+import { computed, defineAsyncComponent, ref, onMounted, onBeforeUnmount } from 'vue'
 import DesktopMenu from './MenuNavigation/DesktopMenu.vue'
 import MobileMenu from './MenuNavigation/MobileMenu.vue'
-import ModalSearch from './ModalSearch.vue'
+
+// Loaded on first open: most visits never search from the modal.
+const ModalSearch = defineAsyncComponent(() => import('./ModalSearch.vue'))
 import { handleApiError } from '@/constants'
 import { accountCapabilities } from '@/api/accountCapabilities'
 

@@ -112,7 +112,7 @@
             </router-link>
             <router-link :to="allResultsLink" class="search__all" @click="closeModal">
               Все результаты по «{{ searchTerm }}»
-              <span aria-hidden="true">→</span>
+              <span class="sym" aria-hidden="true">→</span>
             </router-link>
           </div>
         </div>

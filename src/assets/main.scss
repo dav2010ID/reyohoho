@@ -108,6 +108,15 @@ body {
   padding: 0 0 0 var(--app-sidebar-collapsed-width);
 }
 
+/* Single glyphs outside Roboto's latin and cyrillic subsets (→ ← ★ ✓ ✕). */
+.sym {
+  font-family:
+    system-ui,
+    -apple-system,
+    'Segoe UI',
+    sans-serif;
+}
+
 html.no-scroll,
 body.no-scroll {
   overflow: hidden;

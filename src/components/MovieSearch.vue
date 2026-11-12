@@ -137,7 +137,7 @@
               <div class="home-section-head">
                 <h2>{{ shelf.title }}</h2>
                 <router-link :to="shelf.link" class="text-action home-shelf__all"
-                  >Весь список&nbsp;→</router-link
+                  >Весь список&nbsp;<span class="sym" aria-hidden="true">→</span></router-link
                 >
                 <RibbonNav
                   v-if="!isMobile"
@@ -220,7 +220,9 @@
         </div>
       </div>
     </div>
-    <RandomMovieModal
+    <component
+      :is="RandomMovieModal"
+      v-if="RandomMovieModal"
       :is-open="showRandomModal"
       :movie="randomMovie"
       :loading="randomLoading"
@@ -254,11 +256,10 @@ import { USER_LIST_TYPES_ENUM, DEFAULT_ACTIVE_TIME } from '@/constants'
 import { hasConsecutiveConsonants, suggestLayout, convertLayout } from '@/utils/keyboardLayout'
 import { normalizeBasePath } from '@/utils/basePath'
 import debounce from 'lodash.debounce'
-import { onMounted, onServerPrefetch, onUnmounted, ref, watch, computed } from 'vue'
+import { computed, onMounted, onServerPrefetch, onUnmounted, ref, shallowRef, watch } from 'vue'
 import { useRouter } from 'vue-router'
 import { useHead } from '@unhead/vue'
 import SpinnerLoading from '@/components/SpinnerLoading.vue'
-import RandomMovieModal from '@/components/RandomMovieModal.vue'
 import HistoryMigrationNotice from '@/components/HistoryMigrationNotice.vue'
 import { getMovieSeoPath } from '@/utils/movieSeo'
 import { debugLog } from '@/utils/logger'
@@ -345,6 +346,16 @@ const dedupeMoviesByKpId = (items = []) => {
 const showLayoutWarning = ref(false)
 const suggestedLayout = ref('')
 
+// Loaded on the first "Случайный", then kept mounted for its transitions.
+const RandomMovieModal = shallowRef(null)
+const loadRandomMovieModal = async () => {
+  if (RandomMovieModal.value) return
+  try {
+    RandomMovieModal.value = (await import('@/components/RandomMovieModal.vue')).default
+  } catch (error) {
+    console.error('Не удалось загрузить окно случайного фильма:', error)
+  }
+}
 const showRandomModal = ref(false)
 const randomMovie = ref(null)
 const randomLoading = ref(false)
@@ -762,6 +773,7 @@ const focusFirstMovieCard = () => {
 }
 
 const openRandomMovie = () => {
+  loadRandomMovieModal()
   showRandomModal.value = true
   fetchRandomMovie()
 }

@@ -27,7 +27,10 @@
         :class="[`rating-${score.source}`, scoreTier]"
         :aria-label="`${score.label} ${formatRating(score)}`"
       >
-        <span v-if="score.source === 'our' && showStar" class="card-score__star" aria-hidden="true"
+        <span
+          v-if="score.source === 'our' && showStar"
+          class="card-score__star sym"
+          aria-hidden="true"
           >★</span
         >
         {{ formatRating(score) }}

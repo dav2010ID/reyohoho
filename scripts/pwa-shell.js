@@ -9,6 +9,8 @@ const shellFiles = new Set([
   'icons/icon-192x192.png',
   'icons/icon-512x512.png'
 ])
+// Imported by the entry but shown only when enabled; runtime-cached on first use.
+const optionalAssets = /(?:^|\/)(?:image-back-stars|trn-christmas-lights)-[\w-]+\.webp$/
 
 // Keep the offline screens and SW registration client, not every lazy feature.
 export function createPwaShell() {
@@ -57,7 +59,9 @@ export function createPwaShell() {
       const required = new Set(JSON.parse(await fs.readFile(graphPath, 'utf8')))
       if (!required.size) throw new Error('Offline shell dependency graph was not generated')
       return {
-        manifest: entries.filter(({ url }) => shellFiles.has(url) || required.has(url)),
+        manifest: entries.filter(
+          ({ url }) => shellFiles.has(url) || (required.has(url) && !optionalAssets.test(url))
+        ),
         warnings: []
       }
     }

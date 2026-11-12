@@ -1,11 +1,18 @@
 <template>
   <div class="modal" @click.self="$emit('close')">
-    <div v-dialog-focus="() => $emit('close')" aria-label="Выбор плеера" class="modal-content" @click.stop>
+    <div
+      v-dialog-focus="() => $emit('close')"
+      aria-label="Выбор плеера"
+      class="modal-content"
+      @click.stop
+    >
       <button class="close" @click="$emit('close')">&times;</button>
 
       <h2 v-if="!activeGroup">Выберите плеер</h2>
       <h2 v-else>
-        <button class="back-btn" @click="collapseGroup">← Назад</button>
+        <button class="back-btn" @click="collapseGroup">
+          <span class="sym" aria-hidden="true">←</span> Назад
+        </button>
         {{ activeGroup }}
       </h2>
 

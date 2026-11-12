@@ -83,8 +83,7 @@
 </template>
 
 <script>
-import { ref, onBeforeUnmount, onMounted } from 'vue'
-import QrcodeVue from 'qrcode.vue'
+import { defineAsyncComponent, ref, onBeforeUnmount, onMounted } from 'vue'
 import { generateToken, getTGAuthResult } from '@/api/user'
 import { createTelegramAuthPoller } from '@/utils/telegramAuthPoller'
 import { saveAuthRedirect } from '@/utils/authRedirect'
@@ -94,7 +93,8 @@ import { useAuthStore } from '@/store/auth'
 
 export default {
   components: {
-    QrcodeVue
+    // Only the QR dialog draws it.
+    QrcodeVue: defineAsyncComponent(() => import('qrcode.vue'))
   },
   setup() {
     const qrValue = ref('')

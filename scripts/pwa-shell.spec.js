@@ -31,7 +31,15 @@ describe('offline shell dependency selection', () => {
     const bundle = {
       'entry.js': chunk('entry.js', ['shared.js'], {
         isEntry: true,
-        dynamicImports: ['workbox.js']
+        dynamicImports: ['workbox.js'],
+        viteMetadata: {
+          importedCss: new Set(),
+          // Opt-in decorations: in the graph, left to the runtime cache.
+          importedAssets: new Set([
+            'assets/immutable/image-back-stars-AbC123.webp',
+            'assets/immutable/trn-christmas-lights-x_Y9.webp'
+          ])
+        }
       }),
       'shared.js': chunk('shared.js', ['entry.js']),
       'workbox.js': chunk('workbox.js', ['workbox-helper.js'], {
@@ -90,6 +98,8 @@ describe('offline shell dependency selection', () => {
       'movie.js',
       'movie.css',
       'poster.webp',
+      'assets/immutable/image-back-stars-AbC123.webp',
+      'assets/immutable/trn-christmas-lights-x_Y9.webp',
       'comments.js',
       'comments.css',
       'dialog.js',
