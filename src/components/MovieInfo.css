@@ -13,7 +13,7 @@
   isolation: isolate;
   max-width: var(--movie-page-max-width);
   margin-inline: auto;
-  padding: 28px var(--movie-page-gutter) 28px;
+  padding: 20px var(--movie-page-gutter) 28px;
   color: #e0e0e0;
 }
 
@@ -43,7 +43,7 @@
   gap: 16px 40px;
   flex-wrap: wrap;
   max-width: var(--movie-page-max-width);
-  margin: 0 auto 24px;
+  margin: 0 auto 16px;
 }
 
 .content-heading {
@@ -58,7 +58,7 @@
 .content-logo {
   display: block;
   max-width: min(100%, 420px);
-  max-height: 64px;
+  max-height: 56px;
   object-fit: contain;
   object-position: left center;
 }
@@ -73,7 +73,7 @@
 .content-title {
   margin: 0;
   color: #fff;
-  font-size: var(--fs-title);
+  font-size: clamp(28px, 2.4vw, 40px);
   font-weight: 800;
   letter-spacing: -0.02em;
   line-height: 1.05;
@@ -160,9 +160,14 @@
 
 .header-side {
   display: flex;
-  flex-direction: column;
-  align-items: flex-end;
-  gap: 12px;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 12px 24px;
+}
+
+.player-chip-slot:empty {
+  display: none;
 }
 
 .ratings-links {
@@ -286,10 +291,10 @@ a.rating-link::after {
 }
 
 /* Poster / description / facts; all three scale with the full-width page,
-   the facts column (and a single trailer in it) takes 40%. */
+   the facts column (and a single trailer in it) takes 34%. */
 .info-content {
   display: grid;
-  grid-template-columns: clamp(200px, 12vw, 320px) minmax(0, 1fr) minmax(240px, 40%);
+  grid-template-columns: clamp(200px, 12vw, 320px) minmax(0, 1fr) minmax(280px, 34%);
   gap: 40px;
   align-items: start;
 }
@@ -319,6 +324,70 @@ a.rating-link::after {
 
 .facts-trailer :deep(.carousel-item) {
   width: 100%;
+}
+
+.info-content > .movie-poster-container {
+  width: 100%;
+}
+
+/* Director and leads under the synopsis: 13px label, 15px names. */
+.info-people {
+  display: grid;
+  gap: 10px;
+  max-width: 65ch;
+  margin: 20px 0 0;
+}
+
+.info-people__row {
+  display: grid;
+  grid-template-columns: 140px minmax(0, 1fr);
+  gap: 12px;
+  align-items: baseline;
+}
+
+.info-people dt {
+  color: var(--text-faint);
+  font-size: var(--fs-s);
+}
+
+.info-people dd {
+  margin: 0;
+  color: #fff;
+  font-size: var(--fs-m);
+}
+
+.info-people__link {
+  color: inherit;
+  text-decoration: none;
+}
+
+.info-people__link + .info-people__link::before {
+  content: ', ';
+  color: var(--text-dim);
+}
+
+.info-people__link:hover {
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.info-people__link:focus-visible {
+  outline: 2px solid var(--accent-color);
+  outline-offset: 2px;
+  border-radius: var(--radius-s);
+}
+
+@media (max-width: 600px) {
+  .info-people__row {
+    grid-template-columns: 1fr;
+    gap: 2px;
+  }
+
+  .info-people__link {
+    display: inline-flex;
+    align-items: center;
+    min-height: 44px;
+  }
 }
 
 .movie-poster-container {
@@ -466,8 +535,8 @@ a.rating-link::after {
 .movie-panel {
   box-sizing: border-box;
   max-width: var(--movie-page-max-width);
-  margin: 40px auto 0;
-  padding: 32px 0 0;
+  margin: 28px auto 0;
+  padding: 28px 0 0;
   border-top: 1px solid rgba(255, 255, 255, 0.06);
   position: relative;
 }
@@ -531,35 +600,35 @@ a.rating-link::after {
     padding: 0 var(--movie-page-gutter) 16px;
   }
 
-  /* Phones: the title moves under the player; scores stay above it. */
+  /* Phones: the player comes first; title, meta, scores and tools sit in one block
+     under it (the scores are teleported into .mobile-movie-summary). */
   .content-heading {
     display: none;
   }
 
   .content-header {
-    margin: 8px 0 12px;
-    padding: 0 10px;
+    display: none;
   }
 
   .header-side {
+    flex-direction: column;
     align-items: stretch;
+    gap: 12px;
     width: 100%;
+    margin-top: 12px;
   }
 
   .ratings-links {
     justify-content: flex-start;
+    gap: 8px 16px;
   }
 
   .score-primary__value {
-    font-size: var(--fs-xl);
+    font-size: 22px;
   }
 
   .content-card.has-backdrop::before {
     height: 360px;
-  }
-
-  .ratings-links {
-    gap: 8px 16px;
   }
 
   .rating-link {
@@ -575,9 +644,9 @@ a.rating-link::after {
 
   .action-buttons-group {
     width: 100%;
-    justify-content: center;
-    gap: 10px;
-    margin-top: 10px;
+    justify-content: flex-start;
+    flex-wrap: wrap;
+    gap: 8px;
   }
 
   .action-buttons-group .nudity-info-btn {
@@ -627,11 +696,11 @@ a.rating-link::after {
 
   .mobile-movie-title {
     margin: 0;
-    color: rgba(255, 255, 255, 0.96);
-    font-size: clamp(22px, 6vw, 26px);
+    color: #fff;
+    font-size: clamp(22px, 6.4vw, 26px);
     line-height: 1.15;
-    font-weight: 600;
-    letter-spacing: 0;
+    font-weight: 700;
+    letter-spacing: -0.01em;
   }
 
   .details-container {
@@ -1235,7 +1304,7 @@ a.rating-link::after {
 
 @media (max-width: 620px) {
   /* Align the player row text with the card content below it. */
-  .content-card :deep(.players-list) {
+  .content-card :deep(.players-list:not(.players-list--inline)) {
     padding: 0 10px;
   }
 
@@ -1461,8 +1530,8 @@ a.rating-link::after {
   /* Inset the box (not its content) so section and sub-block dividers share the 12px gutter. */
   .related-movies,
   .movie-panel {
-    margin: 36px 12px 0;
-    padding: 28px 0 0;
+    margin: 24px 12px 0;
+    padding: 20px 0 0;
   }
 
   .related-movies h2,

@@ -37,12 +37,10 @@ const openSearch = () => navbarStore.openSearchModal(query.value)
   display: flex;
   flex-direction: column;
   align-items: flex-start;
-  justify-content: center;
   gap: 16px;
   box-sizing: border-box;
   max-width: 640px;
-  min-height: 80vh;
-  padding: 48px 24px;
+  padding: var(--page-top) 24px 64px;
   color: #fff;
 }
 

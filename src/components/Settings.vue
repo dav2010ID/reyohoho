@@ -101,7 +101,7 @@
             <h3>История</h3>
             <SliderRound v-model="isHistoryAllowed"> Сохранять историю просмотра</SliderRound>
             <HistorySyncSettings />
-            <div class="settings-actions">
+            <div class="settings-actions settings-actions--danger">
               <button class="reset-button reset-button--danger" @click="showModal = true">
                 <i class="fa-solid fa-trash-can"></i>
                 Очистить историю просмотра
@@ -536,7 +536,7 @@ const resetKinoBdSources = () => {
   box-sizing: border-box;
   max-width: 920px;
   min-height: 100vh;
-  padding: 40px 24px 64px;
+  padding: var(--page-top) 24px 64px;
   color: #fff;
 }
 
@@ -800,6 +800,13 @@ h3 {
   margin-top: 12px;
 }
 
+/* Clearing history is destructive: it comes last, behind a hairline. */
+.settings-actions--danger {
+  margin-top: 20px;
+  padding-top: 20px;
+  border-top: 1px solid var(--hairline);
+}
+
 .reset-button {
   display: inline-flex;
   align-items: center;
@@ -888,7 +895,7 @@ h3 {
 
 @media (max-width: 760px) {
   .settings-page {
-    padding: 16px 12px 40px;
+    padding: var(--page-top) 12px 40px;
   }
 
   h1 {

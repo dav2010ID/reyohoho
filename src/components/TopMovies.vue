@@ -66,7 +66,12 @@
       />
       <div v-if="canShowMore" class="load-more-wrap">
         <div ref="loadMoreSentinel" class="load-more-sentinel" aria-hidden="true"></div>
-        <div v-if="loadingMore" class="skeleton-row" aria-hidden="true">
+        <div
+          v-if="loadingMore"
+          class="skeleton-row"
+          :class="`skeleton-row--${mainStore.cardSize}`"
+          aria-hidden="true"
+        >
           <span v-for="n in 7" :key="n" class="skeleton-poster"></span>
         </div>
         <!-- Pages load on scroll; the button only retries a failed page and keeps the list. -->
@@ -381,7 +386,7 @@ onUnmounted(disconnectInfiniteScroll)
 .top-100-page {
   flex: 1;
   min-width: 0;
-  padding-top: 20px;
+  padding-top: var(--page-top);
   padding-bottom: 40px;
   width: 100%;
   margin: 0 auto;
@@ -707,6 +712,14 @@ onUnmounted(disconnectInfiniteScroll)
   overflow: hidden;
 }
 
+.skeleton-row--small {
+  grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+}
+
+.skeleton-row--large {
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+}
+
 .skeleton-poster {
   aspect-ratio: 2 / 3;
   border-radius: var(--radius-m);
@@ -726,6 +739,12 @@ onUnmounted(disconnectInfiniteScroll)
     gap: 16px 10px;
     max-height: 200px;
     padding: 0 12px;
+  }
+
+  .skeleton-row--large {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 16px 12px;
+    max-height: 280px;
   }
 }
 </style>

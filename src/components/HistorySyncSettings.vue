@@ -16,39 +16,62 @@
     <p v-if="!compact && enabled">
       Фильмы, удалённые из облачной истории, не появятся снова при повторном импорте.
     </p>
-    <div class="history-actions">
-      <router-link v-if="hasPendingSync" to="/auth-success"
+    <div
+      v-if="
+        hasPendingSync || (!compact && (enabled || (cloudHistoryAvailable && auth.isAuthenticated)))
+      "
+      class="history-actions"
+    >
+      <router-link v-if="hasPendingSync" to="/auth-success" class="history-action"
         >Продолжить незавершённую синхронизацию</router-link
       >
       <button
         v-if="!compact && cloudHistoryAvailable && auth.isAuthenticated && !enabled"
+        class="history-action"
         :disabled="busy"
         @click="enable"
       >
         Включить синхронизацию истории
       </button>
-      <button v-if="!compact && enabled" :disabled="busy" @click="refresh">
+      <button v-if="!compact && enabled" class="history-action" :disabled="busy" @click="refresh">
         Загрузить из облака
       </button>
-      <button v-if="!compact && enabled" :disabled="busy" @click="uploadLocal">
+      <button
+        v-if="!compact && enabled"
+        class="history-action"
+        :disabled="busy"
+        @click="uploadLocal"
+      >
         Добавить локальную историю в облако
       </button>
       <button
         v-if="!compact && enabled && !auth.isWorkerSession"
+        class="history-action"
         :disabled="busy"
         @click="main.cloudHistoryAccount = null"
       >
         Отключить синхронизацию
       </button>
-      <button v-if="!compact && enabled" :disabled="busy" @click="clearCloud">
-        Удалить облачную историю
+    </div>
+    <!-- The main way in stands alone; the two file actions are a pair. -->
+    <div class="history-actions">
+      <button class="history-action" :disabled="busy" @click="transfer">
+        Перенести со старого сайта
       </button>
-      <button :disabled="busy" @click="transfer">Перенести со старого сайта</button>
-      <button v-if="!compact && guestBackup.length" :disabled="busy" @click="pending = guestBackup">
+      <button
+        v-if="!compact && guestBackup.length"
+        class="history-action"
+        :disabled="busy"
+        @click="pending = guestBackup"
+      >
         Восстановить историю до входа в аккаунт
       </button>
-      <button v-if="!compact" @click="download">Сохранить историю в файл</button>
-      <label class="history-file"
+    </div>
+    <div class="history-actions">
+      <button v-if="!compact" class="history-action" @click="download">
+        Сохранить историю в файл
+      </button>
+      <label class="history-action history-file"
         >Загрузить историю из файла
         <input type="file" accept=".json,application/json" :disabled="busy" @change="readFile"
       /></label>
@@ -58,17 +81,30 @@
         Найдено {{ pending.length }} фильмов. Импорт добавит их к текущей истории, не удаляя её.
       </p>
       <p v-if="auth.isAuthenticated">История также будет сохранена в вашем аккаунте.</p>
-      <button :disabled="busy" @click="acceptImport">Подтвердить импорт</button>
-      <button :disabled="busy" @click="pending = null">Отмена</button>
+      <div class="history-actions">
+        <button class="history-action" :disabled="busy" @click="acceptImport">
+          Подтвердить импорт
+        </button>
+        <button class="history-action" :disabled="busy" @click="pending = null">Отмена</button>
+      </div>
     </div>
     <p role="status">{{ message }}</p>
-    <p>
-      Переносите историю в том же браузере и профиле, где пользовались старым сайтом. Если
-      всплывающее окно заблокировано, разрешите его или
-      <a :href="TRANSFER_URL" target="_blank" rel="noopener noreferrer"
-        >откройте страницу переноса</a
-      >, скачайте файл истории и выберите «Загрузить историю из файла».
-    </p>
+    <details class="history-help">
+      <summary>Если перенос не работает</summary>
+      <p>
+        Переносите историю в том же браузере и профиле, где пользовались старым сайтом. Если
+        всплывающее окно заблокировано, разрешите его или
+        <a :href="TRANSFER_URL" target="_blank" rel="noopener noreferrer"
+          >откройте страницу переноса</a
+        >, скачайте файл истории и выберите «Загрузить историю из файла».
+      </p>
+    </details>
+    <!-- Destructive: last, behind a hairline. -->
+    <div v-if="!compact && enabled" class="history-actions history-actions--danger">
+      <button class="history-action history-action--danger" :disabled="busy" @click="clearCloud">
+        Удалить облачную историю
+      </button>
+    </div>
   </section>
 </template>
 
@@ -286,19 +322,63 @@ function download() {
   flex-wrap: wrap;
   gap: 10px;
 }
-button,
-label {
-  padding: 10px 14px;
-  border: 1px solid var(--accent-ui);
+.history-actions + .history-actions {
+  margin-top: 10px;
+}
+.history-actions--danger {
+  margin-top: 20px;
+  padding-top: 20px;
+  border-top: 1px solid var(--hairline);
+}
+.history-action {
+  display: inline-flex;
+  align-items: center;
+  box-sizing: border-box;
+  min-height: 44px;
+  padding: 0 14px;
+  border: 1px solid rgba(255, 255, 255, 0.16);
   border-radius: var(--radius-m);
   background: transparent;
-  color: inherit;
+  color: #fff;
   font: inherit;
+  text-decoration: none;
   cursor: pointer;
 }
-button:disabled {
+.history-sync a.history-action {
+  color: #fff;
+}
+.history-action:hover:not(:disabled) {
+  background: rgba(255, 255, 255, 0.06);
+}
+.history-action:focus-visible {
+  outline: 2px solid var(--accent-color);
+  outline-offset: 2px;
+}
+.history-action--danger {
+  border-color: rgba(255, 123, 123, 0.4);
+  color: #ff7b7b;
+}
+.history-action:disabled {
   opacity: 0.5;
   cursor: wait;
+}
+.history-help {
+  margin-top: 4px;
+  color: var(--text-dim);
+}
+.history-help summary {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  cursor: pointer;
+}
+.history-help summary:focus-visible {
+  outline: 2px solid var(--accent-color);
+  outline-offset: 2px;
+  border-radius: var(--radius-s);
+}
+.history-help p {
+  margin: 0 0 8px;
 }
 .history-file {
   position: relative;
@@ -311,7 +391,7 @@ button:disabled {
   margin-top: 0;
 }
 .history-file:focus-within {
-  outline: 2px solid var(--accent-ui);
+  outline: 2px solid var(--accent-color);
   outline-offset: 2px;
 }
 .history-file input {

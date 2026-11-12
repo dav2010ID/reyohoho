@@ -1,7 +1,15 @@
 <template>
-  <section v-if="availableVideos.length" class="carousel-container">
+  <section
+    v-if="availableVideos.length"
+    class="carousel-container"
+    :class="{ 'carousel-container--single': single }"
+  >
+    <!-- One trailer: "Трейлер", no count and no caption repeating the word. -->
     <h2 class="trailers-title">
-      Трейлеры <span class="trailers-count">{{ availableVideos.length }}</span>
+      <template v-if="single">Трейлер</template>
+      <template v-else>
+        Трейлеры <span class="trailers-count">{{ availableVideos.length }}</span>
+      </template>
     </h2>
     <div class="carousel-wrapper">
       <!-- Кнопка для прокрутки влево -->
@@ -76,7 +84,8 @@ const props = defineProps({
   activeVideoIndex: {
     type: Number,
     default: null
-  }
+  },
+  single: Boolean
 })
 
 const emit = defineEmits(['select'])
@@ -312,6 +321,10 @@ onBeforeUnmount(() => {
   background: var(--accent-solid);
   color: var(--accent-contrast);
   transform: scale(1.08);
+}
+
+.carousel-container--single .video-name {
+  display: none;
 }
 
 .video-name {

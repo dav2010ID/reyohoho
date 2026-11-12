@@ -1,6 +1,6 @@
 <template>
   <!-- Auto-width chip on the right: the player is a setting, not the headline. -->
-  <div class="players-list">
+  <div class="players-list" :class="{ 'players-list--inline': inline }">
     <span class="players-list__label">Плеер</span>
     <button
       class="player-btn"
@@ -29,6 +29,8 @@
 <script setup>
 defineProps({
   hasPlayers: Boolean,
+  // Inline: part of a row (movie header, phone tool row), no own margins or full width.
+  inline: Boolean,
   selectedLabel: {
     type: String,
     required: true
@@ -113,20 +115,44 @@ defineEmits(['open-player-modal', 'open-source-modal'])
   outline-offset: 2px;
 }
 
+.players-list--inline {
+  width: auto;
+  margin: 0;
+  justify-content: flex-start;
+}
+
 @media (max-width: 700px) {
-  .players-list {
+  .players-list:not(.players-list--inline) {
     padding: 0 10px;
     margin-bottom: 8px;
   }
 
-  .player-btn {
+  .players-list:not(.players-list--inline) .player-btn {
     flex: 1 1 auto;
     justify-content: space-between;
     min-width: 0;
   }
 
-  .player-btn__name {
+  .players-list:not(.players-list--inline) .player-btn__name {
     max-width: none;
+  }
+
+  /* Phone tool row: no label, the chip shrinks before the tools do. */
+  .players-list--inline {
+    flex: 0 1 auto;
+    min-width: 0;
+  }
+
+  .players-list--inline .players-list__label {
+    display: none;
+  }
+
+  .players-list--inline .player-btn {
+    min-width: 0;
+  }
+
+  .players-list--inline .player-btn__name {
+    max-width: 40vw;
   }
 }
 </style>

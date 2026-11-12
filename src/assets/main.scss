@@ -70,7 +70,9 @@
   --surface-raised: #141414;
   --surface-overlay: #1e1e1e;
   --hairline: rgba(255, 255, 255, 0.08);
-  --text-dim: rgba(255, 255, 255, 0.6);
+  /* Where every page's content starts below the top edge. */
+  --page-top: 28px;
+  --text-dim: rgba(255, 255, 255, 0.72);
   --text-faint: rgba(255, 255, 255, 0.55);
   --radius-s: 4px;
   --radius-m: 8px;
@@ -212,5 +214,11 @@ textarea:focus-visible {
 
   body.theater-mode-active {
     padding-bottom: 0;
+  }
+}
+
+@media (max-width: 600px) {
+  :root {
+    --page-top: 16px;
   }
 }

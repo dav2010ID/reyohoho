@@ -62,9 +62,10 @@
         :class="{ 'has-backdrop': backdropStyle }"
         :style="backdropStyle"
       >
-        <!-- Left-aligned header: title and one meta line; scores and tools on the right. -->
+        <!-- Desktop: one row, title and meta on the left; scores, tools and the player chip
+             on the right. Phones: the scores and tools are teleported under the player. -->
         <div class="content-header">
-          <div class="content-heading">
+          <div v-if="!mainStore.isMobile" class="content-heading">
             <div class="content-title-row">
               <img
                 v-if="movieInfo.logo_url"
@@ -101,152 +102,160 @@
             </p>
           </div>
 
-          <div class="header-side">
-            <div class="ratings-links">
-              <!-- Kinopoisk leads: one large score with its vote count. -->
-              <a
-                v-if="movieInfo.kinopoisk_id || movieInfo.title"
-                :href="
-                  movieInfo.kinopoisk_id
-                    ? `https://www.kinopoisk.ru/film/${movieInfo.kinopoisk_id}`
-                    : `https://www.kinopoisk.ru/index.php?kp_query=${encodeURIComponent(movieInfo.title + (movieInfo.year ? ' ' + movieInfo.year : ''))}`
-                "
-                target="_blank"
-                rel="noopener noreferrer"
-                class="score-primary"
-              >
-                <span class="score-primary__value" :class="scoreTier(movieInfo.rating_kinopoisk)">{{
-                  formatScore(movieInfo.rating_kinopoisk)
-                }}</span>
-                <span class="score-primary__label"
-                  >Кинопоиск<template v-if="movieInfo.rating_kinopoisk_vote_count">
-                    ·
-                    {{ formatRatingNumber(movieInfo.rating_kinopoisk_vote_count) }} оценок</template
-                  ></span
-                >
-              </a>
-
-              <component
-                :is="movieRatingComponent"
-                v-if="clientReady && ratingsAvailable && movieInfo.kinopoisk_id"
-                :key="movieInfo.kinopoisk_id"
-                :kp-id="movieInfo.kinopoisk_id"
-                :show-dash="true"
-              />
-
-              <div v-if="movieInfo.imdb_id || movieInfo.title">
+          <Teleport defer to="#mobile-summary-side" :disabled="!mainStore.isMobile">
+            <div class="header-side">
+              <div class="ratings-links">
+                <!-- Kinopoisk leads: one large score with its vote count. -->
                 <a
+                  v-if="movieInfo.kinopoisk_id || movieInfo.title"
                   :href="
-                    movieInfo.imdb_id
-                      ? `https://www.imdb.com/title/${movieInfo.imdb_id}`
-                      : `https://www.imdb.com/find/?q=${encodeURIComponent(movieInfo.title + (movieInfo.year ? ' ' + movieInfo.year : ''))}`
+                    movieInfo.kinopoisk_id
+                      ? `https://www.kinopoisk.ru/film/${movieInfo.kinopoisk_id}`
+                      : `https://www.kinopoisk.ru/index.php?kp_query=${encodeURIComponent(movieInfo.title + (movieInfo.year ? ' ' + movieInfo.year : ''))}`
                   "
                   target="_blank"
                   rel="noopener noreferrer"
-                  class="rating-link"
-                  :title="
-                    movieInfo.rating_imdb_vote_count
-                      ? `IMDb, оценок: ${formatRatingNumber(movieInfo.rating_imdb_vote_count)}`
-                      : 'IMDb'
-                  "
+                  class="score-primary"
                 >
-                  <img src="/src/assets/icon-imdb-logo.svg" alt="IMDb" class="rating-logo" />
-                  <span class="rating-value" :class="scoreTier(movieInfo.rating_imdb)">
-                    {{ formatScore(movieInfo.rating_imdb) }}
-                  </span>
-                </a>
-              </div>
-
-              <!-- Shikimori -->
-              <div v-if="movieInfo.shikimori_id">
-                <a
-                  :href="`https://shikimori.one/animes/${movieInfo.shikimori_id}`"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  class="rating-link"
-                >
-                  <img src="/src/assets/icon-shikimori.svg" alt="Shiki" class="rating-logo" />
                   <span
-                    v-if="movieInfo.rating_shikimori"
-                    class="rating-value"
-                    :class="scoreTier(movieInfo.rating_shikimori)"
+                    class="score-primary__value"
+                    :class="scoreTier(movieInfo.rating_kinopoisk)"
+                    >{{ formatScore(movieInfo.rating_kinopoisk) }}</span
                   >
-                    {{ movieInfo.rating_shikimori }}
-                  </span>
+                  <span class="score-primary__label"
+                    >Кинопоиск<template v-if="movieInfo.rating_kinopoisk_vote_count">
+                      ·
+                      {{
+                        formatRatingNumber(movieInfo.rating_kinopoisk_vote_count)
+                      }}
+                      оценок</template
+                    ></span
+                  >
                 </a>
-              </div>
 
-              <!-- Kino API: TMDB, Rotten Tomatoes, Metacritic -->
-              <div v-for="rating in extraRatings" :key="rating.name">
                 <component
-                  :is="rating.href ? 'a' : 'span'"
-                  :href="rating.href || undefined"
-                  :target="rating.href ? '_blank' : undefined"
-                  :rel="rating.href ? 'noopener noreferrer' : undefined"
-                  class="rating-link extra-rating"
-                  :title="rating.title"
-                >
-                  <img
-                    :src="rating.icon"
-                    :alt="rating.name"
-                    class="rating-logo"
-                    width="20"
-                    height="20"
-                  />
-                  <span class="rating-value" :class="scoreTier(rating.score)">{{
-                    rating.label
-                  }}</span>
-                </component>
+                  :is="movieRatingComponent"
+                  v-if="clientReady && ratingsAvailable && movieInfo.kinopoisk_id"
+                  :key="movieInfo.kinopoisk_id"
+                  :kp-id="movieInfo.kinopoisk_id"
+                  :show-dash="true"
+                />
+
+                <div v-if="movieInfo.imdb_id || movieInfo.title">
+                  <a
+                    :href="
+                      movieInfo.imdb_id
+                        ? `https://www.imdb.com/title/${movieInfo.imdb_id}`
+                        : `https://www.imdb.com/find/?q=${encodeURIComponent(movieInfo.title + (movieInfo.year ? ' ' + movieInfo.year : ''))}`
+                    "
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    class="rating-link"
+                    :title="
+                      movieInfo.rating_imdb_vote_count
+                        ? `IMDb, оценок: ${formatRatingNumber(movieInfo.rating_imdb_vote_count)}`
+                        : 'IMDb'
+                    "
+                  >
+                    <img src="/src/assets/icon-imdb-logo.svg" alt="IMDb" class="rating-logo" />
+                    <span class="rating-value" :class="scoreTier(movieInfo.rating_imdb)">
+                      {{ formatScore(movieInfo.rating_imdb) }}
+                    </span>
+                  </a>
+                </div>
+
+                <!-- Shikimori -->
+                <div v-if="movieInfo.shikimori_id">
+                  <a
+                    :href="`https://shikimori.one/animes/${movieInfo.shikimori_id}`"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    class="rating-link"
+                  >
+                    <img src="/src/assets/icon-shikimori.svg" alt="Shiki" class="rating-logo" />
+                    <span
+                      v-if="movieInfo.rating_shikimori"
+                      class="rating-value"
+                      :class="scoreTier(movieInfo.rating_shikimori)"
+                    >
+                      {{ movieInfo.rating_shikimori }}
+                    </span>
+                  </a>
+                </div>
+
+                <!-- Kino API: TMDB, Rotten Tomatoes, Metacritic -->
+                <div v-for="rating in extraRatings" :key="rating.name">
+                  <component
+                    :is="rating.href ? 'a' : 'span'"
+                    :href="rating.href || undefined"
+                    :target="rating.href ? '_blank' : undefined"
+                    :rel="rating.href ? 'noopener noreferrer' : undefined"
+                    class="rating-link extra-rating"
+                    :title="rating.title"
+                  >
+                    <img
+                      :src="rating.icon"
+                      :alt="rating.name"
+                      class="rating-logo"
+                      width="20"
+                      height="20"
+                    />
+                    <span class="rating-value" :class="scoreTier(rating.score)">{{
+                      rating.label
+                    }}</span>
+                  </component>
+                </div>
               </div>
-            </div>
-            <span v-if="backendAvailable" class="action-buttons-group">
-              <template v-if="movieInfo.imdb_id">
+              <span v-if="backendAvailable" class="action-buttons-group">
+                <template v-if="movieInfo.imdb_id">
+                  <button
+                    class="nudity-info-btn parents-guide-btn"
+                    :title="
+                      scenePanel === 'guide'
+                        ? 'Скрыть информацию'
+                        : 'Показать Parents Guide и информацию о сценах'
+                    "
+                    @click="toggleScenePanel('guide', $event)"
+                    @mousedown.middle.prevent="toggleScenePanel('guide', $event)"
+                  >
+                    <span class="desktop-text">Parents Guide</span>
+                    <span class="mobile-text">PG</span>
+                    <i v-if="!sceneGuideLoading" class="fa-regular fa-face-grin-wink"></i>
+                    <i v-else class="fas fa-spinner fa-spin"></i>
+                  </button>
+                </template>
                 <button
-                  class="nudity-info-btn parents-guide-btn"
+                  class="nudity-info-btn"
                   :title="
-                    scenePanel === 'guide'
-                      ? 'Скрыть информацию'
-                      : 'Показать Parents Guide и информацию о сценах'
+                    scenePanel === 'timings'
+                      ? 'Скрыть тайминги'
+                      : 'Показать тайминги сцен 18+(для твича, мигание отключается в настройках)'
                   "
-                  @click="toggleScenePanel('guide', $event)"
-                  @mousedown.middle.prevent="toggleScenePanel('guide', $event)"
+                  @click="toggleScenePanel('timings', $event)"
                 >
-                  <span class="desktop-text">Parents Guide</span>
-                  <span class="mobile-text">PG</span>
-                  <i v-if="!sceneGuideLoading" class="fa-regular fa-face-grin-wink"></i>
-                  <i v-else class="fas fa-spinner fa-spin"></i>
+                  <i
+                    class="fa-regular fa-clock"
+                    :class="{
+                      'text-red': shouldShowRedTimings,
+                      'text-red-blink': shouldBlinkRedTimings
+                    }"
+                  ></i>
+                  <span class="mobile-text">Тайминги</span>
                 </button>
-              </template>
-              <button
-                class="nudity-info-btn"
-                :title="
-                  scenePanel === 'timings'
-                    ? 'Скрыть тайминги'
-                    : 'Показать тайминги сцен 18+(для твича, мигание отключается в настройках)'
-                "
-                @click="toggleScenePanel('timings', $event)"
-              >
-                <i
-                  class="fa-regular fa-clock"
-                  :class="{
-                    'text-red': shouldShowRedTimings,
-                    'text-red-blink': shouldBlinkRedTimings
-                  }"
-                ></i>
-                <span class="mobile-text">Тайминги</span>
-              </button>
-              <button
-                v-if="notesAvailable"
-                class="nudity-info-btn note-btn"
-                :class="{ 'has-note': movieNote }"
-                :title="movieNote ? 'Редактировать заметку' : 'Добавить заметку'"
-                @click="toggleNoteEditor"
-              >
-                <i class="fa-regular fa-note-sticky"></i>
-                <span class="mobile-text">Заметка</span>
-              </button>
-            </span>
-          </div>
+                <button
+                  v-if="notesAvailable"
+                  class="nudity-info-btn note-btn"
+                  :class="{ 'has-note': movieNote }"
+                  :title="movieNote ? 'Редактировать заметку' : 'Добавить заметку'"
+                  @click="toggleNoteEditor"
+                >
+                  <i class="fa-regular fa-note-sticky"></i>
+                  <span class="mobile-text">Заметка</span>
+                </button>
+              </span>
+              <div v-if="!mainStore.isMobile" id="movie-player-chip" class="player-chip-slot"></div>
+            </div>
+          </Teleport>
         </div>
 
         <!-- Интеграция компонента плеера -->
@@ -256,6 +265,7 @@
           :key="kp_id"
           :kp-id="kp_id"
           :movie-info="movieInfo"
+          selector-target="#movie-player-chip"
           @toggle-list="toggleList"
         />
 
@@ -270,7 +280,9 @@
 
         <div id="movie-details" class="additional-info">
           <div class="mobile-movie-summary">
-            <h2 class="mobile-movie-title">{{ movieInfo.title }}</h2>
+            <component :is="mainStore.isMobile ? 'h1' : 'h2'" class="mobile-movie-title">{{
+              movieInfo.title
+            }}</component>
             <p v-if="metaParts.length || ageLabels.length" class="content-meta">
               <span
                 v-for="(part, index) in metaParts"
@@ -285,6 +297,7 @@
                 }}</span>
               </span>
             </p>
+            <div id="mobile-summary-side"></div>
           </div>
           <div class="info-content">
             <div v-if="moviePosterUrl" class="movie-poster-container desktop-only">
@@ -338,11 +351,42 @@
                   </button>
                 </div>
               </div>
+              <dl v-if="leadDirectors.length || leadActors.length" class="info-people">
+                <div v-if="leadDirectors.length" class="info-people__row">
+                  <dt>{{ leadDirectors.length > 1 ? 'Режиссёры' : 'Режиссёр' }}</dt>
+                  <dd>
+                    <a
+                      v-for="person in leadDirectors"
+                      :key="person.staff_id"
+                      :href="`https://www.kinopoisk.ru/name/${person.staff_id}/`"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      class="info-people__link"
+                      >{{ person.name_ru || person.name_en }}</a
+                    >
+                  </dd>
+                </div>
+                <div v-if="leadActors.length" class="info-people__row">
+                  <dt>В главных ролях</dt>
+                  <dd>
+                    <a
+                      v-for="person in leadActors"
+                      :key="person.staff_id"
+                      :href="`https://www.kinopoisk.ru/name/${person.staff_id}/`"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      class="info-people__link"
+                      >{{ person.name_ru || person.name_en }}</a
+                    >
+                  </dd>
+                </div>
+              </dl>
             </div>
             <aside class="facts-column">
               <TrailerCarousel
                 v-if="videos.length === 1 && areTrailersActive"
                 class="facts-trailer"
+                single
                 :videos="videos"
                 :active-video-index="activeTrailerIndex"
               />
@@ -1140,6 +1184,11 @@ const staffByProfession = computed(() => {
   return groups
 })
 const actors = computed(() => staffByProfession.value.ACTOR || [])
+const named = (person) => person?.staff_id && (person.name_ru || person.name_en)
+const leadDirectors = computed(() =>
+  (staffByProfession.value.DIRECTOR || []).filter(named).slice(0, 2)
+)
+const leadActors = computed(() => actors.value.filter(named).slice(0, 3))
 const staffNameGroups = computed(() =>
   [
     { key: 'DIRECTOR', title: 'Режиссёры', one: 'Режиссёр', label: 'режиссёров' },

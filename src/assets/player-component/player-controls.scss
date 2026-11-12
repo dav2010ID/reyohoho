@@ -180,7 +180,11 @@
 }
 
 .electron-only:hover {
-  background-color: color-mix(in srgb, var(--accent-color) 26%, rgba(255, 255, 255, 0.08)) !important;
+  background-color: color-mix(
+    in srgb,
+    var(--accent-color) 26%,
+    rgba(255, 255, 255, 0.08)
+  ) !important;
   border-color: color-mix(in srgb, var(--accent-ui) 48%, rgba(255, 255, 255, 0.12)) !important;
   opacity: 0.9;
   transform: translateY(-2px) scale(1.04) !important;
@@ -191,17 +195,25 @@
 
 @media (max-width: 600px) {
   .controls {
-    width: calc(100% - 16px);
+    flex-direction: row;
+    justify-content: space-between;
+    gap: 8px;
+    width: 100%;
     max-width: none;
     box-sizing: border-box;
-    margin: 6px auto 10px;
-    padding: 6px;
-    border-radius: var(--radius-m);
+    margin: 8px 0 4px;
+    padding: 0 10px;
+    border: none;
+    border-radius: 0;
+    background: none;
+    box-shadow: none;
+    backdrop-filter: none;
   }
 
   .main-controls {
-    width: 100%;
-    justify-content: center;
+    width: auto;
+    min-width: 0;
+    justify-content: flex-end;
     overflow-x: auto;
     flex-wrap: nowrap;
     gap: 6px;

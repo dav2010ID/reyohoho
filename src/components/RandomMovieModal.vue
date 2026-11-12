@@ -214,8 +214,8 @@ const scoreTier = (value) => {
 }
 
 .modern-dark-dialog {
-  background-color: #1d1d1d;
-  color: #e2e8f0;
+  background-color: var(--surface-overlay);
+  color: #fff;
   border-radius: var(--radius-l);
   overflow: hidden;
   box-shadow:
@@ -243,7 +243,7 @@ const scoreTier = (value) => {
 .close-btn {
   background: none;
   border: none;
-  color: #e2e8f0;
+  color: #fff;
   font-size: 1.2rem;
   cursor: pointer;
   min-width: 44px;
@@ -267,7 +267,7 @@ const scoreTier = (value) => {
 
 .selection-note {
   margin: 0 0 16px;
-  color: #a0a0a0;
+  color: var(--text-dim);
   font-size: 0.85rem;
 }
 
@@ -440,7 +440,7 @@ const scoreTier = (value) => {
   border-radius: var(--radius-m);
   border: none;
   background-color: #242424;
-  color: #e2e8f0;
+  color: #fff;
   cursor: pointer;
   font: inherit;
   font-size: 0.95rem;

@@ -1,7 +1,7 @@
 import { sceneSelection } from '@/utils/sceneSelection'
 import { createTestingPinia } from '@pinia/testing'
-import { flushPromises, shallowMount } from '@vue/test-utils'
-import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
+import { config, flushPromises, shallowMount } from '@vue/test-utils'
+import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it, vi } from 'vitest'
 import { reactive } from 'vue'
 
 const useHeadMock = vi.fn()
@@ -130,6 +130,14 @@ vi.mock('@/utils/movieSeo', async () => {
 })
 
 describe('MovieInfo SEO', () => {
+  // The header facts sit in a Teleport (moved to the summary on phones); render its content in place.
+  const teleportStub = config.global.stubs.teleport
+  beforeAll(() => {
+    config.global.stubs.teleport = true
+  })
+  afterAll(() => {
+    config.global.stubs.teleport = teleportStub
+  })
   afterEach(() => vi.unstubAllEnvs())
   beforeEach(async () => {
     await Promise.all([
@@ -195,7 +203,9 @@ describe('MovieInfo SEO', () => {
     })
     try {
       const error = () => wrapper.findComponent({ name: 'ErrorMessage' })
-      await vi.waitFor(() => expect(wrapper.findAllComponents({ name: 'PlayerComponent' })).toHaveLength(1))
+      await vi.waitFor(() =>
+        expect(wrapper.findAllComponents({ name: 'PlayerComponent' })).toHaveLength(1)
+      )
       expect(error().props('showRetry')).toBe(true)
       error().vm.$emit('retry')
       await flushPromises()
@@ -222,9 +232,13 @@ describe('MovieInfo SEO', () => {
       global: { plugins: [createTestingPinia({ createSpy: vi.fn })], stubs: { RouterLink: true } }
     })
     try {
-      await vi.waitFor(() => expect(wrapper.findComponent({ name: 'PlayerComponent' }).exists()).toBe(true))
+      await vi.waitFor(() =>
+        expect(wrapper.findComponent({ name: 'PlayerComponent' }).exists()).toBe(true)
+      )
       expect(wrapper.findComponent({ name: 'MovieRating' }).exists()).toBe(false)
-      expect(wrapper.find('.action-buttons-group, #movie-comments, .movie-note-display').exists()).toBe(false)
+      expect(
+        wrapper.find('.action-buttons-group, #movie-comments, .movie-note-display').exists()
+      ).toBe(false)
       expect(getMovieNote).not.toHaveBeenCalled()
       expect(wrapper.find('a[href*="kinopoisk.ru/film/"]').exists()).toBe(true)
     } finally {
@@ -532,7 +546,10 @@ describe('MovieInfo SEO', () => {
       // Extra ratings sit in the ratings row above the player, not in the details list.
       const chips = wrapper
         .findAll('.ratings-links .extra-rating')
-        .map((chip) => [chip.find('img.rating-logo').attributes('alt'), chip.find('.rating-value').text()])
+        .map((chip) => [
+          chip.find('img.rating-logo').attributes('alt'),
+          chip.find('.rating-value').text()
+        ])
       expect(chips).toEqual([
         ['TMDB', '8.4'],
         ['Rotten Tomatoes', '81%'],
@@ -612,7 +629,12 @@ describe('MovieInfo SEO', () => {
       const rows = panel.findAll('.crew-row')
       expect(rows.map((row) => row.find('dt').text())).toEqual(['Режиссёр', 'Продюсеры'])
       // Five names and an "и ещё 2" link to the full crew.
-      expect(rows[1].findAll('.staff-name-link').map((link) => link.text()).at(-1)).toBe('и ещё 2')
+      expect(
+        rows[1]
+          .findAll('.staff-name-link')
+          .map((link) => link.text())
+          .at(-1)
+      ).toBe('и ещё 2')
       expect(rows[1].findAll('.staff-name-link')).toHaveLength(6)
     } finally {
       wrapper.unmount()

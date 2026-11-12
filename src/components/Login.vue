@@ -208,7 +208,7 @@ export default {
 .login-page {
   box-sizing: border-box;
   min-height: 100vh;
-  padding: 40px 24px 64px;
+  padding: var(--page-top) 24px 64px;
   color: #e0e0e0;
 }
 

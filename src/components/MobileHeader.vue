@@ -9,12 +9,12 @@
     <span v-else class="header-spacer" aria-hidden="true"></span>
     <div class="header-content">
       <template v-if="navbarStore.headerContent">
+        <span v-if="navbarStore.headerContent.text">{{ navbarStore.headerContent.text }}</span>
         <img
-          v-if="navbarStore.headerContent.imageUrl"
+          v-else-if="navbarStore.headerContent.imageUrl"
           :src="navbarStore.headerContent.imageUrl"
-          :alt="navbarStore.headerContent.text || 'Логотип'"
+          alt="Логотип"
         />
-        <span v-else-if="navbarStore.headerContent.text">{{ navbarStore.headerContent.text }}</span>
       </template>
     </div>
     <div class="header-actions">

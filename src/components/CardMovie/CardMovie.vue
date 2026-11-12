@@ -70,7 +70,8 @@ const {
   variant = 'default',
   showType = false,
   showOriginalTitle = false,
-  rank = null
+  rank = null,
+  rowLayout = false
 } = defineProps({
   movie: Object,
   isHistory: Boolean,
@@ -84,14 +85,18 @@ const {
   variant: String,
   showType: Boolean,
   showOriginalTitle: Boolean,
-  rank: { type: Number, default: null }
+  rank: { type: Number, default: null },
+  // A row (small poster beside the text) at any width: the desktop "continue watching" tiles.
+  rowLayout: Boolean
 })
 
 const emit = defineEmits(['remove:from-history', 'save:element'])
 const element = useTemplateRef('element')
 const moviePath = computed(() => getMovieSeoPath(movie))
 // Phones keep history and lists as compact rows so swipe-to-delete still works.
-const isRowLayout = computed(() => isMobile && (isHistory || isUserList) && variant !== 'related')
+const isRowLayout = computed(
+  () => rowLayout || (isMobile && (isHistory || isUserList) && variant !== 'related')
+)
 const authStore = useAuthStore()
 const route = useRoute()
 const enrichedMovie = ref(null)
@@ -204,18 +209,33 @@ onUnmounted(() => {
   height: auto;
 }
 
+/* Rows: a 64x96 poster beside the text, the delete button at the end. */
+.movie-card.layout-row {
+  flex-direction: row;
+  align-items: center;
+  min-height: 96px;
+  padding-right: 52px;
+  box-sizing: border-box;
+}
+
+/* Desktop resume tiles sit on a raised surface. */
+@media (min-width: 621px) {
+  .movie-card.layout-row {
+    padding: 8px 52px 8px 8px;
+    border-radius: var(--radius-m);
+    background: var(--surface-raised);
+    box-shadow: inset 0 0 0 1px var(--hairline);
+  }
+
+  .movie-card.layout-row:hover {
+    transform: none;
+    background: var(--surface-overlay);
+  }
+}
+
 @media (max-width: 620px) {
   .movie-card:hover {
     transform: none;
-  }
-
-  /* History and lists on phones: 96px rows with a 64x96 poster. */
-  .movie-card.layout-row {
-    flex-direction: row;
-    align-items: center;
-    min-height: 96px;
-    padding-right: 52px;
-    box-sizing: border-box;
   }
 }
 </style>

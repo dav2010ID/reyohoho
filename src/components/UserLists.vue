@@ -6,6 +6,17 @@
       <p class="lists-login__text">
         Войдите, чтобы вести списки: избранное, «смотрю», «позже» и просмотренное.
       </p>
+      <!-- Preview of the lists (not interactive); icons are the ones the player's list buttons use. -->
+      <ul class="lists-preview" aria-hidden="true">
+        <li
+          v-for="tile in LOGIN_PREVIEW_TILES"
+          :key="tile.label"
+          :class="`lists-preview__tile--${tile.key}`"
+        >
+          <span class="material-icons">{{ tile.icon }}</span>
+          {{ tile.label }}
+        </li>
+      </ul>
       <router-link to="/login" class="lists-login__button">Войти</router-link>
     </div>
     <div v-else class="user-lists-page" tabindex="0">
@@ -139,6 +150,12 @@ import { accountCapabilities } from '@/api/accountCapabilities'
 const movies = ref([])
 const loading = ref(true)
 const typeFilter = ref(USER_LIST_TYPES_ENUM.FAVORITE)
+const LOGIN_PREVIEW_TILES = [
+  { key: 'favorite', label: 'Избранное', icon: 'favorite' },
+  { key: 'watching', label: 'Смотрю', icon: 'visibility' },
+  { key: 'later', label: 'Позже', icon: 'watch_later' },
+  { key: 'completed', label: 'Просмотрено', icon: 'check_circle' }
+]
 const errorMessage = ref('')
 const errorCode = ref(null)
 const authStore = useAuthStore()
@@ -605,7 +622,54 @@ onUnmounted(() => {
   gap: 12px;
   max-width: 560px;
   margin: 0;
-  padding: 40px 24px 64px;
+  padding: var(--page-top) 24px 64px;
+}
+
+/* Four outlined tiles; each list keeps one colour on its top edge. */
+.lists-preview {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+  gap: 12px;
+  align-self: stretch;
+  margin: 12px 0;
+  padding: 0;
+  list-style: none;
+}
+
+.lists-preview li {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  box-sizing: border-box;
+  height: 96px;
+  padding: 14px;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-top: 2px solid var(--tile-edge);
+  border-radius: var(--radius-m);
+  color: #fff;
+  font-size: var(--fs-m);
+  font-weight: 600;
+}
+
+.lists-preview .material-icons {
+  color: var(--tile-edge);
+  font-size: 22px;
+}
+
+.lists-preview__tile--favorite {
+  --tile-edge: #ff7b7b;
+}
+
+.lists-preview__tile--watching {
+  --tile-edge: var(--accent-text);
+}
+
+.lists-preview__tile--later {
+  --tile-edge: #ffc94d;
+}
+
+.lists-preview__tile--completed {
+  --tile-edge: #7ab8ff;
 }
 
 .lists-login__title {

@@ -3,9 +3,13 @@ import { computed, nextTick, ref } from 'vue'
 const aspectRatios = ['16:9', '12:5', '4:3']
 const THEATER_MODE_BODY_CLASS = 'theater-mode-active'
 
+// Desktop: the viewport minus the one-row movie header (about 110px) and a 16px margin.
+const DESKTOP_CHROME_HEIGHT = 136
+
 const getViewportPlayerHeight = () => {
   if (typeof window === 'undefined') return 720
-  return window.innerHeight * (window.innerWidth < 700 ? 0.6 : 0.985)
+  if (window.innerWidth < 700) return window.innerHeight * 0.6
+  return Math.max(320, window.innerHeight - DESKTOP_CHROME_HEIGHT)
 }
 
 const isMobileViewport = () => {
@@ -43,12 +47,8 @@ export const usePlayerLayout = ({ mainStore, playerStore, containerRef, playerIf
 
   const containerStyle = computed(() => {
     if (theaterMode.value) return {}
-    const [w, h] = aspectRatio.value.split(':').map(Number)
-    const maxWidth = maxPlayerHeightValue.value * (w / h)
     return {
       width: '100%',
-      maxWidth: `${maxWidth}px`,
-      maxHeight: maxPlayerHeight.value,
       margin: '0 auto',
       overflow: 'hidden'
     }
@@ -59,7 +59,8 @@ export const usePlayerLayout = ({ mainStore, playerStore, containerRef, playerIf
     return {
       position: 'relative',
       width: '100%',
-      paddingTop: `${(h / w) * 100}%`
+      aspectRatio: `${w} / ${h}`,
+      maxHeight: maxPlayerHeight.value
     }
   })
 

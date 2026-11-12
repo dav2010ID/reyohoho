@@ -6,7 +6,11 @@
       :class="[
         `card-size-${cardSize}`,
         `variant-${variant}`,
-        { 'grid--rows': isRowList, 'grid--ribbon': ribbon && !isMobile }
+        {
+          'grid--rows': isRowList,
+          'grid--ribbon': ribbonKind && !(isMobile && ribbonKind === 'resume'),
+          [`grid--ribbon-${ribbonKind}`]: ribbonKind
+        }
       ]"
     >
       <template v-if="(isHistory || isUserList) && isMobile">
@@ -52,6 +56,7 @@
           :show-type="isMixed"
           :show-original-title="showOriginalTitle"
           :rank="showRank ? index + 1 : null"
+          :row-layout="ribbonKind === 'resume'"
           @remove:from-history="removeFromHistory"
           @save:element="(el) => (movieRefs[index] = el)"
         />
@@ -100,8 +105,11 @@ const {
   variant: String,
   showRank: Boolean,
   showOriginalTitle: Boolean,
-  ribbon: Boolean
+  // true or 'resume': "continue watching" row tiles; 'posters': a horizontal poster shelf.
+  ribbon: { type: [Boolean, String], default: false }
 })
+
+const ribbonKind = computed(() => (ribbon === true ? 'resume' : ribbon || ''))
 
 const movieRefs = ref([])
 const deletingIds = ref(new Set())
@@ -120,7 +128,9 @@ const isRowList = computed(() => (isHistory || isUserList.value) && isMobile.val
 // The series badge only carries information when films and series are mixed.
 const isMixed = computed(() => {
   const kinds = new Set(
-    (moviesList || []).map((movie) => (/SERIES|SHOW|сериал/i.test(String(movie?.type || '')) ? 'series' : 'film'))
+    (moviesList || []).map((movie) =>
+      /SERIES|SHOW|сериал/i.test(String(movie?.type || '')) ? 'series' : 'film'
+    )
   )
   return kinds.size > 1
 })
@@ -172,8 +182,9 @@ const removeFromHistory = async (kp_id) => {
 const handleKeyDown = (event) => {
   if (!moviesList?.length) return
 
-  const focusedCard =
-    event.target?.classList?.contains('movie-card') ? event.target : document.activeElement
+  const focusedCard = event.target?.classList?.contains('movie-card')
+    ? event.target
+    : document.activeElement
 
   if (!focusedCard?.classList?.contains('movie-card')) {
     return
@@ -272,7 +283,7 @@ onUnmounted(() => {
   min-height: 0;
 }
 
-/* "Продолжить просмотр": one horizontal ribbon of small posters on desktop. */
+/* Horizontal ribbons: resume tiles ("Продолжить просмотр") and poster shelves. */
 .grid.grid--ribbon {
   display: flex;
   gap: 16px;
@@ -286,20 +297,24 @@ onUnmounted(() => {
 }
 
 .grid.grid--ribbon > :deep(*) {
-  flex: 0 0 96px;
-  width: 96px;
   scroll-snap-align: start;
 }
 
-.grid.grid--ribbon :deep(.card-meta) {
-  font-size: var(--fs-xs);
+.grid.grid--ribbon.grid--ribbon-resume > :deep(*) {
+  flex: 0 0 280px;
+  width: 280px;
 }
 
-.grid.grid--ribbon :deep(.movie-header h3) {
-  font-size: var(--fs-s);
+.grid.grid--ribbon-posters {
+  gap: 16px;
 }
 
-.grid.grid--ribbon :deep(.poster-action) {
+.grid.grid--ribbon-posters > :deep(*) {
+  flex: 0 0 168px;
+  width: 168px;
+}
+
+.grid.grid--ribbon.grid--ribbon-resume :deep(.poster-action) {
   display: none;
 }
 
@@ -310,15 +325,44 @@ onUnmounted(() => {
     padding: 0 12px;
   }
 
-  .grid.card-size-small,
-  .grid.card-size-large {
+  .grid.card-size-small {
     grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  /* L on phones: two columns, 15px titles, 13px meta with genres. */
+  .grid.card-size-large {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 16px 12px;
+  }
+
+  .grid.card-size-large :deep(.movie-header h3) {
+    font-size: var(--fs-m);
+  }
+
+  .grid.card-size-large :deep(.card-meta),
+  .grid.card-size-large :deep(.card-meta > span + span::before) {
+    font-size: var(--fs-s);
+  }
+
+  .grid.grid.card-size-large :deep(.card-meta__genres) {
+    display: inline;
   }
 
   .grid.grid--rows {
     grid-template-columns: 1fr;
     gap: 8px;
     min-height: 0;
+  }
+
+  .grid.grid--ribbon {
+    gap: 10px;
+    padding: 8px 12px 10px;
+    scroll-padding-inline: 12px;
+  }
+
+  .grid.grid--ribbon-posters > :deep(*) {
+    flex: 0 0 118px;
+    width: 118px;
   }
 }
 </style>

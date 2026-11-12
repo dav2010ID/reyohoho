@@ -27,7 +27,9 @@
         :class="[`rating-${score.source}`, scoreTier]"
         :aria-label="`${score.label} ${formatRating(score.value)}`"
       >
-        <span v-if="score.source === 'our' && showStar" class="card-score__star" aria-hidden="true">★</span>
+        <span v-if="score.source === 'our' && showStar" class="card-score__star" aria-hidden="true"
+          >★</span
+        >
         {{ formatRating(score.value) }}
       </span>
       <div v-if="showType && isSeries" class="poster-type">Сериал</div>
@@ -99,10 +101,14 @@ const displayImdbRating = computed(() =>
 )
 // One score per card: the user's own rating in their lists, otherwise Kinopoisk, then IMDb, then the site rating.
 const score = computed(() => {
-  if (showStar && displayOurRating.value) return { source: 'our', label: 'Ваша оценка', value: displayOurRating.value }
-  if (displayKpRating.value) return { source: 'kp', label: 'Кинопоиск', value: displayKpRating.value }
-  if (displayImdbRating.value) return { source: 'imdb', label: 'IMDb', value: displayImdbRating.value }
-  if (displayOurRating.value) return { source: 'our', label: 'Рейтинг ReYohoho', value: displayOurRating.value }
+  if (showStar && displayOurRating.value)
+    return { source: 'our', label: 'Ваша оценка', value: displayOurRating.value }
+  if (displayKpRating.value)
+    return { source: 'kp', label: 'Кинопоиск', value: displayKpRating.value }
+  if (displayImdbRating.value)
+    return { source: 'imdb', label: 'IMDb', value: displayImdbRating.value }
+  if (displayOurRating.value)
+    return { source: 'our', label: 'Рейтинг ReYohoho', value: displayOurRating.value }
   return null
 })
 // White by default; colour only flags weak scores.
@@ -113,7 +119,9 @@ const scoreTier = computed(() => {
   return ''
 })
 const SERIES_TYPES = new Set(['TV_SERIES', 'MINI_SERIES', 'TV_SHOW'])
-const isSeries = computed(() => SERIES_TYPES.has(movie.type) || /сериал/i.test(String(movie.type || '')))
+const isSeries = computed(
+  () => SERIES_TYPES.has(movie.type) || /сериал/i.test(String(movie.type || ''))
+)
 const formatRating = (rating) => rating.toFixed(1).replace(/\.0$/, '')
 </script>
 
@@ -292,29 +300,34 @@ const formatRating = (rating) => rating.toFixed(1).replace(/\.0$/, '')
     border-radius: var(--radius-m);
     opacity: 1;
   }
+}
 
-  /* Row layout: the delete button sits at the end of the row (positioned against the card). */
-  .movie-poster-container.layout-row,
-  .movie-poster-container.layout-row .movie-poster-frame {
-    position: static;
-  }
+/* Row layout: the delete button sits at the end of the row (positioned against the card). */
+.movie-poster-container.layout-row,
+.movie-poster-container.layout-row .movie-poster-frame {
+  position: static;
+}
 
-  .movie-poster-container.layout-row .movie-poster {
-    border-radius: var(--radius-s);
-  }
+.movie-poster-container.layout-row {
+  flex-shrink: 0;
+}
 
-  .movie-poster-container.layout-row .delete-button {
-    top: 50%;
-    right: 4px;
-    width: 44px;
-    height: 44px;
-    border-color: rgba(255, 255, 255, 0.2);
-    background: transparent;
-    transform: translateY(-50%);
-  }
+.movie-poster-container.layout-row .movie-poster {
+  border-radius: var(--radius-s);
+}
 
-  .movie-poster-container.layout-row .card-score {
-    display: none;
-  }
+.movie-poster-container.layout-row .delete-button {
+  top: 50%;
+  right: 4px;
+  left: auto;
+  width: 44px;
+  height: 44px;
+  border-color: rgba(255, 255, 255, 0.2);
+  background: transparent;
+  transform: translateY(-50%);
+}
+
+.movie-poster-container.layout-row .card-score {
+  display: none;
 }
 </style>

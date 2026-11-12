@@ -1,14 +1,25 @@
 <template>
-  <ErrorMessage v-if="errorMessage" :message="errorMessage" :code="errorCode" show-retry @retry="retryPlayers" />
+  <ErrorMessage
+    v-if="errorMessage"
+    :message="errorMessage"
+    :code="errorCode"
+    show-retry
+    @retry="retryPlayers"
+  />
 
   <template v-else>
-    <PlayerSelectorBar
-      :selected-label="selectedPlayerLabel"
-      :has-players="playersInternal.length > 0"
-      :show-source-button="showSourceButton"
-      @open-player-modal="openPlayerModal"
-      @open-source-modal="openSourceModal"
-    />
+    <!-- Desktop: the chip sits in the movie header row (selectorTarget), otherwise above
+         the player. Phones: it leads the tool row under the player. -->
+    <Teleport v-if="!isMobile" defer :to="selectorTarget || 'body'" :disabled="!selectorTarget">
+      <PlayerSelectorBar
+        :inline="Boolean(selectorTarget)"
+        :selected-label="selectedPlayerLabel"
+        :has-players="playersInternal.length > 0"
+        :show-source-button="showSourceButton"
+        @open-player-modal="openPlayerModal"
+        @open-source-modal="openSourceModal"
+      />
+    </Teleport>
     <!-- Модальное окно выбора плеера -->
     <PlayerModal
       v-if="showPlayerModal"
@@ -57,7 +68,11 @@
         <SpinnerLoading
           v-if="iframeLoading && !playersEmptyMessage"
           class="player-loading-spinner"
-          :text="selectedPlayerInternal ? `Загружается плеер: ${getProviderDisplayName(selectedPlayerInternal)}` : `Поиск плееров${searchingSource ? ': ' + searchingSource : '…'}`"
+          :text="
+            selectedPlayerInternal
+              ? `Загружается плеер: ${getProviderDisplayName(selectedPlayerInternal)}`
+              : `Поиск плееров${searchingSource ? ': ' + searchingSource : '…'}`
+          "
         />
         <div v-else-if="playersEmptyMessage" class="player-empty-state">
           <p>{{ playersEmptyMessage }}</p>
@@ -89,6 +104,15 @@
 
     <!-- Кнопки управления -->
     <div v-if="!theaterMode" class="controls">
+      <PlayerSelectorBar
+        v-if="isMobile"
+        inline
+        :selected-label="selectedPlayerLabel"
+        :has-players="playersInternal.length > 0"
+        :show-source-button="showSourceButton"
+        @open-player-modal="openPlayerModal"
+        @open-source-modal="openSourceModal"
+      />
       <div class="main-controls">
         <div
           v-if="!isMobile && kp_id"
@@ -603,6 +627,11 @@ const props = defineProps({
   movieInfo: {
     type: Object,
     default: () => ({})
+  },
+  // CSS selector of a header slot for the player chip on desktop.
+  selectorTarget: {
+    type: String,
+    default: ''
   }
 })
 const emit = defineEmits(['update:selectedPlayer', 'toggle-list'])
@@ -1012,18 +1041,15 @@ watch(selectedPlayerInternal, (newVal) => {
   }
 })
 
-watch(
-  kp_id,
-  async (newKpId) => {
-    if (newKpId) {
-      iframeLoading.value = true
-      selectedPlayerInternal.value = null
-      resetPlayerPlayback()
-      await fetchPlayers()
-      if (isCentered.value) centerPlayer()
-    }
+watch(kp_id, async (newKpId) => {
+  if (newKpId) {
+    iframeLoading.value = true
+    selectedPlayerInternal.value = null
+    resetPlayerPlayback()
+    await fetchPlayers()
+    if (isCentered.value) centerPlayer()
   }
-)
+})
 
 watch(
   () => mainStore.contentApiProvider,

@@ -42,7 +42,7 @@ useHead(
 .contact-page {
   box-sizing: border-box;
   max-width: 760px;
-  padding: 40px 24px 64px;
+  padding: var(--page-top) 24px 64px;
   color: #fff;
 }
 
@@ -105,7 +105,7 @@ useHead(
 
 @media (max-width: 600px) {
   .contact-page {
-    padding: 24px 16px 40px;
+    padding: var(--page-top) 16px 40px;
   }
 
   .contact-text p:last-child {

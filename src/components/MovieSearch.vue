@@ -126,43 +126,51 @@
               @item-deleted="handleItemDeleted"
             />
           </div>
-          <div class="empty-history">
-            <template v-if="topMovies.length > 0">
+          <!-- Shelves: the Top-250 films and series as ribbons; the full lists live on /top. -->
+          <div class="home-shelves">
+            <section
+              v-for="shelf in topShelves"
+              :key="shelf.key"
+              class="home-shelf"
+              :class="`home-shelf--${shelf.key}`"
+            >
               <div class="home-section-head">
-                <h2>{{ topListTitle }}</h2>
+                <h2>{{ shelf.title }}</h2>
+                <router-link :to="shelf.link" class="text-action home-shelf__all"
+                  >Весь список&nbsp;→</router-link
+                >
+                <RibbonNav
+                  v-if="!isMobile"
+                  :container="`.home-shelf--${shelf.key}`"
+                  scroller=".grid"
+                  :label="shelf.title"
+                />
               </div>
               <MovieList
-                :movies-list="topMovies"
+                :movies-list="shelf.movies"
                 :is-history="false"
                 :loading="false"
                 :show-rank="isTopList"
+                ribbon="posters"
               />
-              <div v-if="canLoadMoreTopMovies || topMoviesLoadMoreFailed" class="home-load-more">
-                <div
-                  ref="homeTopSentinel"
-                  class="home-load-more__sentinel"
-                  aria-hidden="true"
-                ></div>
-                <div v-if="topMoviesLoadingMore" class="skeleton-row" aria-hidden="true">
-                  <span v-for="n in 7" :key="n" class="skeleton-poster"></span>
-                </div>
-                <!-- The list loads itself on scroll; the button appears only to retry a failed page. -->
-                <button
-                  v-if="topMoviesLoadMoreFailed"
-                  class="home-load-more__button"
-                  type="button"
-                  @click="retryLoadMoreHomeTopMovies"
-                >
-                  Не удалось загрузить. Повторить
-                </button>
+            </section>
+            <div v-if="topShelvesLoading" class="home-shelf" aria-hidden="true">
+              <div class="home-section-head"><span class="skeleton-title"></span></div>
+              <div class="skeleton-row skeleton-row--ribbon">
+                <span v-for="n in 8" :key="n" class="skeleton-poster"></span>
               </div>
-            </template>
-            <template v-else-if="topMoviesLoading">
-              <SpinnerLoading />
-            </template>
-            <template v-else>
-              <p v-if="!history.length && !historyLoading" class="home-empty">Здесь пока пусто</p>
-            </template>
+            </div>
+            <div v-else-if="topShelvesFailed" class="home-load-more">
+              <button class="home-load-more__button" type="button" @click="loadHomeShelves">
+                Не удалось загрузить. Повторить
+              </button>
+            </div>
+            <p
+              v-else-if="!topShelves.length && !history.length && !historyLoading"
+              class="home-empty"
+            >
+              Здесь пока пусто
+            </p>
           </div>
         </div>
         <ErrorMessage
@@ -246,7 +254,7 @@ import { USER_LIST_TYPES_ENUM, DEFAULT_ACTIVE_TIME } from '@/constants'
 import { hasConsecutiveConsonants, suggestLayout, convertLayout } from '@/utils/keyboardLayout'
 import { normalizeBasePath } from '@/utils/basePath'
 import debounce from 'lodash.debounce'
-import { nextTick, onMounted, onServerPrefetch, onUnmounted, ref, watch, computed } from 'vue'
+import { onMounted, onServerPrefetch, onUnmounted, ref, watch, computed } from 'vue'
 import { useRouter } from 'vue-router'
 import { useHead } from '@unhead/vue'
 import SpinnerLoading from '@/components/SpinnerLoading.vue'
@@ -280,25 +288,43 @@ const history = ref([])
 // Personal history is client data. Mount its cards only after the first display.
 const historyActivated = ref(false)
 const deletedHistoryIds = ref(new Set())
-const topMovies = ref([])
-const topMoviesLoading = ref(false)
-const topMoviesLoadingMore = ref(false)
-const topMoviesPage = ref(1)
-const topMoviesHasMore = ref(true)
-const topMoviesLoadMoreFailed = ref(false)
+const HOME_SHELF_SIZE = 20
+const topShelves = ref([])
+const topShelvesLoading = ref(false)
+const topShelvesFailed = ref(false)
 // The same list is called the same everywhere: Kinopoisk providers serve the Top-250.
 const isTopList = computed(() => mainStore.contentApiProvider !== 'local')
 const topListTitle = computed(() => (isTopList.value ? 'Топ-250' : 'Популярное'))
+const shelfDefinitions = computed(() =>
+  isTopList.value
+    ? [
+        {
+          key: 'movie',
+          title: 'Топ-250 · Фильмы',
+          link: '/top',
+          params: { activeTime: 'top250', typeFilter: 'movie' }
+        },
+        {
+          key: 'series',
+          title: 'Топ-250 · Сериалы',
+          link: '/top?type=series',
+          params: { activeTime: 'top250', typeFilter: 'series' }
+        }
+      ]
+    : [
+        {
+          key: 'popular',
+          title: topListTitle.value,
+          link: '/top',
+          params: { activeTime: DEFAULT_ACTIVE_TIME, typeFilter: 'all' }
+        }
+      ]
+)
 const publicPage = usePublicPageState('home')
 const initialPage = publicPage.read()
-if (initialPage && mainStore.contentApiProvider !== 'local') {
-  topMovies.value = initialPage.movies
-  topMoviesPage.value = initialPage.page
-  topMoviesHasMore.value = initialPage.hasMore
+if (Array.isArray(initialPage?.shelves) && mainStore.contentApiProvider !== 'local') {
+  topShelves.value = initialPage.shelves
 }
-const homeTopSentinel = ref(null)
-const HOME_TOP_PAGE_SIZE = 24
-let homeTopObserver = null
 const searchRequestGuard = createLatestRequestGuard()
 const randomRequestGuard = createLatestRequestGuard()
 
@@ -379,121 +405,33 @@ useHead({
   ]
 })
 
-const loadHomeTopMovies = async () => {
-  topMoviesLoading.value = true
-  try {
-    topMoviesPage.value = 1
-    topMoviesLoadMoreFailed.value = false
-    const movies = await getMovies({
-      activeTime: DEFAULT_ACTIVE_TIME,
-      typeFilter: 'all',
-      page: 1,
-      limit: HOME_TOP_PAGE_SIZE
-    })
-    topMoviesHasMore.value = Array.isArray(movies) && movies.length === HOME_TOP_PAGE_SIZE
-    topMovies.value = dedupeMoviesByKpId(Array.isArray(movies) ? movies : [])
-  } catch (error) {
-    console.error('Ошибка загрузки топов для главной:', error)
-    topMovies.value = []
-    topMoviesHasMore.value = false
-  } finally {
-    topMoviesLoading.value = false
-  }
-}
-
-const canLoadMoreTopMovies = computed(
-  () =>
-    !searchTerm.value &&
-    topMovies.value.length > 0 &&
-    topMoviesHasMore.value &&
-    !topMoviesLoading.value
-)
-
-const loadMoreHomeTopMovies = async () => {
-  if (
-    topMoviesLoadingMore.value ||
-    topMoviesLoading.value ||
-    !topMoviesHasMore.value ||
-    topMoviesLoadMoreFailed.value
+const loadHomeShelves = async () => {
+  topShelvesLoading.value = true
+  topShelvesFailed.value = false
+  const definitions = shelfDefinitions.value
+  const results = await Promise.allSettled(
+    definitions.map((shelf) => getMovies({ ...shelf.params, page: 1, limit: HOME_SHELF_SIZE }))
   )
-    return
-
-  topMoviesLoadingMore.value = true
-
-  try {
-    const nextPage = topMoviesPage.value + 1
-    const movies = await getMovies({
-      activeTime: DEFAULT_ACTIVE_TIME,
-      typeFilter: 'all',
-      page: nextPage,
-      limit: HOME_TOP_PAGE_SIZE
-    })
-    const nextMovies = dedupeMoviesByKpId(Array.isArray(movies) ? movies : [])
-
-    topMoviesHasMore.value = Array.isArray(movies) && movies.length === HOME_TOP_PAGE_SIZE
-    topMoviesPage.value = nextPage
-
-    if (nextMovies.length > 0) {
-      topMovies.value = dedupeMoviesByKpId([...topMovies.value, ...nextMovies])
-    } else {
-      topMoviesHasMore.value = false
-    }
-  } catch (error) {
-    console.error('Ошибка догрузки топов для главной:', error)
-    topMoviesLoadMoreFailed.value = true
-  } finally {
-    topMoviesLoadingMore.value = false
-  }
-}
-
-const retryLoadMoreHomeTopMovies = () => {
-  topMoviesLoadMoreFailed.value = false
-  loadMoreHomeTopMovies()
-}
-
-const disconnectHomeTopInfiniteScroll = () => {
-  homeTopObserver?.disconnect()
-  homeTopObserver = null
-}
-
-const setupHomeTopInfiniteScroll = async () => {
-  if (typeof window === 'undefined' || !('IntersectionObserver' in window)) return
-
-  await nextTick()
-  disconnectHomeTopInfiniteScroll()
-
-  if (!homeTopSentinel.value) return
-
-  homeTopObserver = new window.IntersectionObserver(
-    (entries) => {
-      if (entries.some((entry) => entry.isIntersecting)) {
-        loadMoreHomeTopMovies()
-      }
-    },
-    {
-      rootMargin: '900px 0px',
-      threshold: 0
-    }
-  )
-
-  homeTopObserver.observe(homeTopSentinel.value)
+  topShelves.value = definitions
+    .map((shelf, index) => ({
+      key: shelf.key,
+      title: shelf.title,
+      link: shelf.link,
+      movies:
+        results[index].status === 'fulfilled' && Array.isArray(results[index].value)
+          ? dedupeMoviesByKpId(results[index].value).slice(0, HOME_SHELF_SIZE)
+          : []
+    }))
+    .filter((shelf) => shelf.movies.length > 0)
+  const rejected = results.filter((result) => result.status === 'rejected')
+  rejected.forEach((result) => console.error('Ошибка загрузки полки главной:', result.reason))
+  topShelvesFailed.value = topShelves.value.length === 0 && rejected.length > 0
+  topShelvesLoading.value = false
 }
 
 onServerPrefetch(async () => {
-  await loadHomeTopMovies()
-  publicPage.save({
-    movies: topMovies.value,
-    page: topMoviesPage.value,
-    hasMore: topMoviesHasMore.value
-  })
-})
-
-watch(canLoadMoreTopMovies, (canLoad) => {
-  if (canLoad) {
-    setupHomeTopInfiniteScroll()
-  } else {
-    disconnectHomeTopInfiniteScroll()
-  }
+  await loadHomeShelves()
+  publicPage.save({ shelves: topShelves.value })
 })
 
 watch(
@@ -727,8 +665,8 @@ const clearAllHistory = async () => {
       deletedHistoryIds.value.clear()
       mainStore.clearAllHistory()
       history.value = []
-      if (!topMovies.value.length) {
-        loadHomeTopMovies()
+      if (!topShelves.value.length) {
+        loadHomeShelves()
       }
       historyLoading.value = false
       showModal.value = false
@@ -746,8 +684,8 @@ const clearAllHistory = async () => {
   } else {
     mainStore.clearAllHistory()
     history.value = []
-    if (!topMovies.value.length) {
-      loadHomeTopMovies()
+    if (!topShelves.value.length) {
+      loadHomeShelves()
     }
     historyLoading.value = false
     showModal.value = false
@@ -766,11 +704,7 @@ const debouncedPerformSearch = debounce(() => {
 }, 700)
 
 onMounted(() => {
-  if (!topMovies.value.length) {
-    loadHomeTopMovies().then(setupHomeTopInfiniteScroll)
-  } else {
-    setupHomeTopInfiniteScroll()
-  }
+  if (!topShelves.value.length) loadHomeShelves()
   const hash = window.location.hash
   const shikiId = getLegacyShikiId(hash)
   if (hash.startsWith('#search=')) {
@@ -788,14 +722,25 @@ onMounted(() => {
     performSearch()
   }
   if (!searchTerm.value) historyActivated.value = true
-  searchInput.value?.focus()
+  // On phones focus would open the keyboard over the shelves (App sets isMobile after this mounts).
+  if (window.innerWidth >= 600) searchInput.value?.focus()
+})
+
+// "Все результаты по «…»" in the search modal links here with #search= while home is open.
+const removeSearchHashHook = router.afterEach?.((to) => {
+  if (to.name !== 'home' || !to.hash?.startsWith('#search=')) return
+  const query = decodeURIComponent(to.hash.replace('#search=', ''))
+  if (!query || query === searchTerm.value) return
+  setSearchType('title')
+  searchTerm.value = query
+  performSearch()
 })
 
 onUnmounted(() => {
+  removeSearchHashHook?.()
   randomRequestGuard.invalidate()
   debouncedPerformSearch.cancel()
   searchRequestGuard.invalidate()
-  disconnectHomeTopInfiniteScroll()
 })
 
 // Автопоиск с задержкой (только для поиска по названию)
@@ -876,7 +821,7 @@ const fetchRandomMovie = async () => {
   display: flex;
   align-items: center;
   gap: 24px;
-  padding: 28px 24px 0;
+  padding: var(--page-top) 24px 0;
 }
 
 .home-wordmark {
@@ -1017,7 +962,7 @@ const fetchRandomMovie = async () => {
   gap: 8px;
   min-height: 44px;
   padding: 0 16px;
-  border: 1px solid var(--accent-ui);
+  border: 1px solid rgba(255, 255, 255, 0.16);
   border-radius: var(--radius-m);
   background: transparent;
   color: #fff;
@@ -1194,14 +1139,33 @@ const fetchRandomMovie = async () => {
   min-height: 200px;
 }
 
-.empty-history {
-  display: flex;
-  flex-direction: column;
+.home-shelves {
   min-height: 200px;
 }
 
-.empty-history > div {
-  width: 100%;
+.home-shelf__all {
+  display: inline-flex;
+  align-items: center;
+  margin-left: auto;
+  color: var(--text-dim);
+  text-decoration: none;
+  white-space: nowrap;
+}
+
+.home-shelf__all:hover,
+.home-shelf__all:focus-visible {
+  color: #fff;
+}
+
+.home-shelf .home-section-head :deep(.ribbon-nav) {
+  margin-left: 0;
+}
+
+.skeleton-title {
+  width: 220px;
+  height: 24px;
+  border-radius: var(--radius-s);
+  background: #141414;
 }
 
 .home-empty {
@@ -1216,11 +1180,6 @@ const fetchRandomMovie = async () => {
   align-items: center;
   width: 100%;
   padding: 20px 0 10px;
-}
-
-.home-load-more__sentinel {
-  width: 100%;
-  height: 1px;
 }
 
 .home-load-more__button {
@@ -1248,6 +1207,17 @@ const fetchRandomMovie = async () => {
   max-height: 300px;
   padding: 0 24px;
   overflow: hidden;
+}
+
+/* Shelf placeholder: the same 168px posters in one row. */
+.skeleton-row--ribbon {
+  display: flex;
+  gap: 16px;
+  max-height: none;
+}
+
+.skeleton-row--ribbon .skeleton-poster {
+  flex: 0 0 168px;
 }
 
 .skeleton-poster {
@@ -1284,7 +1254,7 @@ const fetchRandomMovie = async () => {
 
 @media (max-width: 620px) {
   .home-top {
-    padding: 16px 12px 0;
+    padding: var(--page-top) 12px 0;
   }
 
   .home-wordmark {
@@ -1358,6 +1328,14 @@ const fetchRandomMovie = async () => {
     gap: 16px 10px;
     max-height: 200px;
     padding: 0 12px;
+  }
+
+  .skeleton-row--ribbon {
+    gap: 10px;
+  }
+
+  .skeleton-row--ribbon .skeleton-poster {
+    flex-basis: 118px;
   }
 }
 </style>

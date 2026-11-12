@@ -1,24 +1,30 @@
 <template>
   <div class="search" @click="closeModal">
     <div v-dialog-focus="closeModal" aria-label="Поиск фильмов" class="search__content" @click.stop>
-      <!-- Поиск -->
-      <div class="input-wrapper">
-        <input
-          ref="searchInput"
-          v-model="searchTerm"
-          placeholder="Введите название фильма"
-          class="search-input"
-          :class="{ 'wrong-layout': showLayoutWarning }"
-          @keydown.enter="search"
-          @keydown.tab="handleTabKey"
-          @keydown.down.prevent="focusFirstMovieCard"
-          @input="handleInput"
-        />
-        <div v-if="showLayoutWarning" class="layout-warning" :class="{ show: showLayoutWarning }">
-          <i class="fas fa-keyboard"></i>
-          Возможно, вы используете неправильную раскладку. Нажмите Tab для переключения на
-          {{ suggestedLayout }} раскладку
+      <!-- One header row: the field and the close button. -->
+      <div class="search__head">
+        <div class="input-wrapper">
+          <input
+            ref="searchInput"
+            v-model="searchTerm"
+            aria-label="Поиск фильмов"
+            placeholder="Введите название фильма"
+            class="search-input"
+            :class="{ 'wrong-layout': showLayoutWarning }"
+            @keydown.enter="search"
+            @keydown.tab="handleTabKey"
+            @keydown.down.prevent="focusFirstMovieCard"
+            @input="handleInput"
+          />
+          <div v-if="showLayoutWarning" class="layout-warning" :class="{ show: showLayoutWarning }">
+            <i class="fas fa-keyboard"></i>
+            Возможно, вы используете неправильную раскладку. Нажмите Tab для переключения на
+            {{ suggestedLayout }} раскладку
+          </div>
         </div>
+        <button class="btn--close" type="button" aria-label="Закрыть" @click="closeModal">
+          <i class="fas fa-close" aria-hidden="true"></i>
+        </button>
       </div>
 
       <!-- Результаты поиска -->
@@ -67,7 +73,7 @@
           </template>
 
           <div v-else-if="movies.length === 0 && !loading" class="no-results">
-            Для просмотра ничего не найдено
+            Ничего не найдено по «{{ searchTerm }}»
           </div>
 
           <div v-else>
@@ -94,7 +100,7 @@
                   {{ getMovieName(movie.raw_data) }}
                 </div>
                 <div class="movie__meta">
-                  <span class="movie__rating" :class="getRatingColor(movie.raw_data?.rating)">
+                  <span class="movie__rating" :class="scoreTier(movie.raw_data?.rating)">
                     {{ movie.raw_data?.rating !== 'null' ? (movie.raw_data?.rating ?? '-') : '-' }}
                   </span>
                   <span class="movie__type"> {{ TYPES_ENUM[movie.raw_data?.type] ?? '-' }}, </span>
@@ -104,15 +110,15 @@
                 </div>
               </div>
             </router-link>
+            <router-link :to="allResultsLink" class="search__all" @click="closeModal">
+              Все результаты по «{{ searchTerm }}»
+              <span aria-hidden="true">→</span>
+            </router-link>
           </div>
         </div>
       </div>
 
       <ErrorMessage v-if="errorMessage" :message="errorMessage" :code="errorCode" />
-
-      <button class="btn--close" type="button" aria-label="Закрыть" @click="closeModal">
-        <i class="fas fa-close"></i>
-      </button>
     </div>
   </div>
 </template>
@@ -127,7 +133,6 @@ import { hasConsecutiveConsonants, suggestLayout, convertLayout } from '@/utils/
 import debounce from 'lodash.debounce'
 import { ref, watch, nextTick, onMounted, onUnmounted, computed } from 'vue'
 import { useMainStore } from '@/store/main'
-import { getRatingColor } from '@/utils/ratingUtils'
 import { getMovieName } from '@/utils/textUtils'
 import { getMovieSeoPath } from '@/utils/movieSeo'
 import { resolvePosterByMovie, setImageFallback } from '@/utils/mediaUtils'
@@ -237,6 +242,21 @@ const router = useRouter()
 const removeAfterEach = router?.afterEach(() => navbarStore.closeSearchModal())
 onUnmounted(() => removeAfterEach?.())
 
+// Same score colours as the cards: white from 7, amber from 5, red below.
+const scoreTier = (value) => {
+  const number = parseFloat(value)
+  if (!Number.isFinite(number) || number <= 0) return ''
+  if (number < 5) return 'is-low'
+  if (number < 7) return 'is-mid'
+  return ''
+}
+
+// The full result grid on home, which reads #search= on load and on hash change.
+const allResultsLink = computed(() => ({
+  path: '/',
+  hash: `#search=${encodeURIComponent(searchTerm.value || '')}`
+}))
+
 const closeModal = (event) => {
   // Escape через v-dialog-focus вызывает без события
   const isPlainClick = !event || (event.button === 0 && !event.ctrlKey && !event.metaKey)
@@ -331,10 +351,8 @@ watch(searchTerm, () => {
 
 <style lang="scss" scoped>
 .btn--close {
-  position: absolute;
-  top: -6px;
-  right: -7px;
   display: flex;
+  flex-shrink: 0;
   align-items: center;
   justify-content: center;
   min-width: 44px;
@@ -371,7 +389,14 @@ watch(searchTerm, () => {
   background-color: rgba(0, 0, 0, 0.6);
   display: flex;
   justify-content: center;
-  align-items: center;
+  /* Top-anchored: the field stays put while results arrive. */
+  align-items: flex-start;
+  box-sizing: border-box;
+  padding-top: 12vh;
+
+  @media screen and (max-width: 600px) {
+    padding-top: 8px;
+  }
   /* Above the rail and the tab bar, so the backdrop covers the whole app. */
   z-index: calc(var(--z-sidebar) + 10);
 
@@ -380,32 +405,57 @@ watch(searchTerm, () => {
     display: flex;
     flex-direction: column;
     box-sizing: border-box;
-    background: rgba(30, 30, 30, 0.96);
-    padding: 20px;
-    border-radius: var(--radius-m);
-    width: min(800px, calc(100vw - 32px));
-    max-height: 90vh;
-    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    background: var(--surface-overlay);
+    padding: 12px;
+    border-radius: var(--radius-l);
+    width: min(640px, calc(100vw - 32px));
+    max-height: calc(88vh - 16px);
+    box-shadow:
+      inset 0 0 0 1px var(--hairline),
+      0 24px 48px rgba(0, 0, 0, 0.5);
 
     @media screen and (max-width: 600px) {
       width: calc(100vw - 24px);
-      padding: 14px;
+      max-height: calc(100dvh - 16px);
+      padding: 10px;
+    }
+  }
+
+  &__head {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  &__all {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    min-height: 44px;
+    margin: 4px 4px 4px 0;
+    padding: 0 14px;
+    border-radius: var(--radius-m);
+    color: var(--accent-light);
+    font-size: var(--fs-s);
+    font-weight: 600;
+    text-decoration: none;
+
+    &:hover,
+    &:focus-visible {
+      background: rgba(255, 255, 255, 0.06);
     }
 
-    @media (min-width: 768px) {
-      width: min(600px, calc(100vw - 32px));
-    }
-
-    @media (min-width: 1200px) {
-      width: min(800px, calc(100vw - 32px));
+    &:focus-visible {
+      outline: 2px solid var(--accent-color);
+      outline-offset: -2px;
     }
   }
 
   &__results-wrapper {
     flex: 1;
+    min-height: 0;
     overflow-y: auto; // Прокрутка только для результатов
-    margin-top: 20px;
-    max-height: calc(90vh - 120px); // Ограничение высоты (учитывая высоту инпута и отступы)
+    margin-top: 12px;
   }
 
   &__results {
@@ -425,9 +475,10 @@ watch(searchTerm, () => {
 
     .no-results {
       width: 100%;
+      margin: 16px auto;
+      color: var(--text-dim);
+      font-size: var(--fs-m);
       text-align: center;
-      font-size: 18px;
-      margin: 20px auto;
     }
   }
 
@@ -490,16 +541,15 @@ watch(searchTerm, () => {
     }
 
     &__rating {
-      &.low {
-        color: #ff6b6b;
+      color: #fff;
+      font-weight: 600;
+
+      &.is-mid {
+        color: #ffc94d;
       }
 
-      &.medium {
-        color: #ffd93d;
-      }
-
-      &.high {
-        color: #51cf66;
+      &.is-low {
+        color: #ff7b7b;
       }
     }
   }
@@ -507,25 +557,30 @@ watch(searchTerm, () => {
 
 .input-wrapper {
   position: relative;
-  width: 100%;
-  margin-top: 20px;
+  flex: 1 1 auto;
+  min-width: 0;
 }
 
+/* The same field as home search. */
 .search-input {
   box-sizing: border-box;
   width: 100%;
-  padding: 10px;
+  height: 48px;
+  padding: 0 14px;
   font-size: 16px;
-  border: 1px solid #ccc;
-  border-radius: var(--radius-l);
-  background: rgba(30, 30, 30, 0.8);
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  border-radius: var(--radius-m);
+  background: var(--surface-raised);
   color: #fff;
-  transition: all 0.3s ease;
+  transition: border-color 0.15s ease;
+
+  &::placeholder {
+    color: var(--text-faint);
+  }
 
   &:focus {
     outline: none;
     border-color: var(--accent-ui);
-    box-shadow: 0 0 0 2px var(--accent-transparent);
   }
 
   &.wrong-layout {

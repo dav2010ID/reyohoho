@@ -8,7 +8,14 @@
       {{ originalTitle }}
     </div>
 
-    <p v-if="rank || movie.year || genreText" class="card-meta">
+    <template v-if="isHistory">
+      <p v-if="typeLabel || movie.year" class="card-meta">
+        <span v-if="typeLabel" class="card-meta__part">{{ typeLabel }}</span>
+        <span v-if="movie.year" class="card-meta__part">{{ movie.year }}</span>
+      </p>
+      <p v-if="watchedLabel" class="card-meta card-meta--watched">{{ watchedLabel }}</p>
+    </template>
+    <p v-else-if="rank || movie.year || genreText" class="card-meta">
       <span v-if="rank" class="card-rank">№&nbsp;{{ rank }}</span>
       <span v-if="movie.year" class="card-meta__part">{{ movie.year }}</span>
       <span v-if="genreText" class="card-meta__part card-meta__genres">{{ genreText }}</span>
@@ -18,8 +25,11 @@
 
 <script setup>
 import { computed } from 'vue'
+import { TYPES_ENUM } from '@/constants'
+import { formatWatchedAgo } from '@/utils/watchedAgo'
 const {
   movie,
+  isHistory = false,
   variant = 'default',
   rank = null,
   showOriginalTitle = false
@@ -44,6 +54,12 @@ const genres = computed(() => {
       ]
     : []
 })
+
+const typeLabel = computed(() => {
+  const type = String(movie.type || '').replace(/^FilmType\./, '')
+  return TYPES_ENUM[type] || ''
+})
+const watchedLabel = computed(() => (isHistory ? formatWatchedAgo(movie.addedAt) : ''))
 
 const originalTitle = computed(() => movie.raw_data?.name_en || movie.raw_data?.Name_original || '')
 
@@ -111,6 +127,10 @@ const removeYearFromTitle = (title) => {
   font-weight: 400;
 }
 
+.card-meta--watched {
+  color: var(--text-faint);
+}
+
 .card-rank {
   color: var(--accent-text);
   font-size: var(--fs-xs);
@@ -121,10 +141,19 @@ const removeYearFromTitle = (title) => {
   font-weight: 500;
 }
 
-/* Compact history rows on phones keep the text next to a small poster. */
+/* Rows keep the text next to a small poster. */
 .movie-details.layout-row {
   justify-content: center;
+  min-width: 0;
   padding: 0 12px;
+}
+
+.movie-details.layout-row .movie-header h3 {
+  font-size: var(--fs-m);
+}
+
+.movie-details.layout-row .card-meta {
+  font-size: var(--fs-xs);
 }
 
 @media (max-width: 620px) {

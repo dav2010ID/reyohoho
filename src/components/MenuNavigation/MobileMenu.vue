@@ -48,11 +48,12 @@ const navbarStore = useNavbarStore()
 
 const tabs = computed(() => (props.links || []).filter((link) => link.group !== 'bottom'))
 
-// Profile owns its sub-pages (settings, notifications, contacts) on phones.
+// The signed-in profile owns its sub-pages (settings, notifications, contacts) on phones.
 const PROFILE_CHILDREN = ['/settings', '/notifications', '/contact']
 const isActive = (link) => {
-  if (!link.to) return false
-  if (link.to === '/user' || link.to === '/login') {
+  if (!link.to || navbarStore.isModalSearchVisible) return false
+  if (link.to === '/login') return route.path === '/login'
+  if (link.to === '/user') {
     return route.path === link.to || PROFILE_CHILDREN.includes(route.path)
   }
   if (link.exact) return route.path === link.to
