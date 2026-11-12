@@ -222,7 +222,7 @@ export default {
 
 .link-input:focus {
   outline: none;
-  border-color: var(--accent-color);
+  border-color: var(--accent-ui);
 }
 
 .link-input::placeholder {
@@ -256,8 +256,8 @@ export default {
 
 .submit-button {
   padding: 0.5rem 1rem;
-  background: var(--accent-color);
-  color: white;
+  background: var(--accent-solid);
+  color: var(--accent-contrast);
   border: none;
   border-radius: 0.375rem;
   cursor: pointer;

@@ -45,7 +45,7 @@
 
 .comment-textarea:focus {
   outline: none;
-  border-color: var(--accent-color);
+  border-color: var(--accent-ui);
 }
 
 .comment-textarea:disabled {
@@ -57,8 +57,8 @@
 
 .submit-button {
   padding: 0.25rem 0.5rem;
-  background: var(--accent-color);
-  color: white;
+  background: var(--accent-solid);
+  color: var(--accent-contrast);
   border: none;
   border-radius: 0.25rem;
   cursor: pointer;
@@ -144,7 +144,7 @@
 }
 
 .auth-link {
-  color: var(--accent-color);
+  color: var(--accent-text);
   cursor: pointer;
   text-decoration: underline;
   transition: color 0.2s ease;
@@ -189,7 +189,7 @@
 .spoiler-warning:hover {
   transform: translateY(-1px);
   box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
-  border-color: var(--accent-color);
+  border-color: var(--accent-ui);
 }
 
 .spoiler-warning:hover:before {
@@ -208,7 +208,7 @@
 
 .spoiler-content i {
   font-size: 1.5rem;
-  color: var(--accent-color);
+  color: var(--accent-text);
   margin-bottom: 0.25rem;
   transition: all 0.3s ease;
 }
@@ -234,7 +234,7 @@
 
 .comments-count {
   background: var(--accent-transparent);
-  color: var(--accent-color);
+  color: var(--accent-text);
   padding: 0.25rem 0.75rem;
   border-radius: 15px;
   font-size: 0.75rem;
@@ -298,8 +298,8 @@
 
 .sort-button:hover {
   background: rgba(255, 255, 255, 0.1);
-  border-color: var(--accent-color);
-  color: var(--accent-color);
+  border-color: var(--accent-ui);
+  color: var(--accent-text);
   transform: translateY(-1px);
 }
 
@@ -313,15 +313,15 @@
 }
 
 .sort-button.active {
-  background: var(--accent-color);
-  border-color: var(--accent-color);
-  color: white;
+  background: var(--accent-solid);
+  border-color: var(--accent-ui);
+  color: var(--accent-contrast);
 }
 
 .sort-button.active:hover {
-  background: var(--accent-hover);
-  border-color: var(--accent-hover);
-  color: white;
+  background: var(--accent-solid-hover);
+  border-color: var(--accent-solid-hover);
+  color: var(--accent-contrast);
 }
 
 .hide-comments-btn {
@@ -404,7 +404,7 @@
 }
 
 .emoji-button-inline.active {
-  color: var(--accent-color);
+  color: var(--accent-text);
 }
 
 .emoji-button-inline:disabled {
@@ -495,7 +495,7 @@
 }
 
 :deep(.spoiler-text.revealed a) {
-  color: var(--accent-color) !important;
+  color: var(--accent-text) !important;
   text-decoration: none !important;
   border-bottom: 1px solid transparent !important;
   transition:
@@ -523,8 +523,8 @@
   padding: 8px 16px;
   border: 0;
   border-radius: 6px;
-  background: var(--accent-color);
-  color: #fff;
+  background: var(--accent-solid);
+  color: var(--accent-contrast);
   cursor: pointer;
 }
 
@@ -570,8 +570,8 @@
 
 .show-more-btn {
   padding: 0.5rem 1rem;
-  background: var(--accent-color);
-  color: white;
+  background: var(--accent-solid);
+  color: var(--accent-contrast);
   border: none;
   border-radius: 0.25rem;
   cursor: pointer;
@@ -713,14 +713,14 @@
   border-radius: 6px;
   padding: 8px;
   margin-bottom: 6px;
-  border-left: 2px solid var(--accent-color);
+  border-left: 2px solid var(--accent-ui);
   cursor: pointer;
   transition: all 0.2s ease;
 }
 
 .reply-btn {
-  background: var(--accent-color);
-  color: white;
+  background: var(--accent-solid);
+  color: var(--accent-contrast);
   border: none;
   padding: 0.5rem 1rem;
   border-radius: 6px;

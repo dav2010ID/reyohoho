@@ -2,13 +2,12 @@
   <div class="settings-page">
     <h1>Настройки</h1>
     <div class="settings-container">
-      <nav class="settings-tabs" role="tablist" aria-label="Разделы настроек">
+      <nav class="settings-tabs" aria-label="Разделы настроек">
         <button
           v-for="tab in settingsTabs"
           :key="tab.id"
           type="button"
-          role="tab"
-          :aria-selected="activeSettingsTab === tab.id"
+          :aria-current="activeSettingsTab === tab.id ? 'true' : undefined"
           :class="{ active: activeSettingsTab === tab.id }"
           @click="activeSettingsTab = tab.id"
         >
@@ -24,22 +23,22 @@
       </header>
 
       <div v-show="activeSettingsTab === 'appearance'" class="settings-group">
-        <h3>Фон</h3>
-        <div class="radio-group">
+        <h3 id="settings-background-label">Фон</h3>
+        <div class="radio-group" role="radiogroup" aria-labelledby="settings-background-label">
           <label class="radio">
-            <input v-model="backgroundType" type="radio" value="dynamic" />
+            <input v-model="backgroundType" type="radio" name="background-type" value="dynamic" />
             <span class="radio-label">Динамический фон</span>
           </label>
           <label class="radio">
-            <input v-model="backgroundType" type="radio" value="stars" />
+            <input v-model="backgroundType" type="radio" name="background-type" value="stars" />
             <span class="radio-label">Звездный фон</span>
           </label>
           <label class="radio">
-            <input v-model="backgroundType" type="radio" value="lava-lamp" />
+            <input v-model="backgroundType" type="radio" name="background-type" value="lava-lamp" />
             <span class="radio-label">Лава-лампа</span>
           </label>
           <label class="radio">
-            <input v-model="backgroundType" type="radio" value="disabled" />
+            <input v-model="backgroundType" type="radio" name="background-type" value="disabled" />
             <span class="radio-label">Отключить фон</span>
           </label>
         </div>
@@ -58,10 +57,6 @@
       <div v-show="activeSettingsTab === 'player'" class="settings-group">
         <h3>Плеер</h3>
         <SliderRound v-model="isCentered">Автоцентрирование плеера</SliderRound>
-        <SliderRound v-model="isCardBorder">Окантовка вокруг карточек</SliderRound>
-        <SliderRound v-model="isCardHoverDisabled"
-          >Отключить подъем карточек при наведении</SliderRound
-        >
         <SliderRound v-model="showFavoriteTooltip"
           >Стиль отображения кнопок избранного:
           {{ showFavoriteTooltip ? 'Всплывающее меню' : 'Все кнопки' }}</SliderRound
@@ -71,22 +66,26 @@
       <div v-show="activeSettingsTab === 'appearance'" class="settings-group">
         <h3>Карточки</h3>
         <div class="card-size-group">
-          <label>Размер карточек:</label>
-          <div class="radio-group">
+          <span id="settings-card-size-label" class="group-label">Размер карточек:</span>
+          <div class="radio-group" role="radiogroup" aria-labelledby="settings-card-size-label">
             <label class="radio">
-              <input v-model="cardSize" type="radio" value="small" />
+              <input v-model="cardSize" type="radio" name="card-size" value="small" />
               <span class="radio-label">Маленький</span>
             </label>
             <label class="radio">
-              <input v-model="cardSize" type="radio" value="medium" />
+              <input v-model="cardSize" type="radio" name="card-size" value="medium" />
               <span class="radio-label">Средний</span>
             </label>
             <label class="radio">
-              <input v-model="cardSize" type="radio" value="large" />
+              <input v-model="cardSize" type="radio" name="card-size" value="large" />
               <span class="radio-label">Большой</span>
             </label>
           </div>
         </div>
+        <SliderRound v-model="isCardBorder">Окантовка вокруг карточек</SliderRound>
+        <SliderRound v-model="isCardHoverDisabled"
+          >Отключить подъем карточек при наведении</SliderRound
+        >
       </div>
 
       <div v-show="activeSettingsTab === 'player'" class="settings-group">
@@ -100,14 +99,14 @@
           Для поиска по ID {{ unavailableSearch }} нужен подключённый сервер.
           Вы также можете <router-link to="/">найти фильм по названию или ID Кинопоиска</router-link>.
         </p>
-        <h4 class="api-subtitle">Сервер приложения</h4>
-        <div class="radio-group">
+        <h4 id="settings-backend-label" class="api-subtitle">Сервер приложения</h4>
+        <div class="radio-group" role="radiogroup" aria-labelledby="settings-backend-label">
           <label class="radio">
-            <input v-model="backendMode" type="radio" value="auto" />
+            <input v-model="backendMode" type="radio" name="backend-mode" value="auto" />
             <span class="radio-label">Автоматический выбор сервера</span>
           </label>
           <label class="radio">
-            <input v-model="backendMode" type="radio" value="local" />
+            <input v-model="backendMode" type="radio" name="backend-mode" value="local" />
             <span class="radio-label">Локальный сервер (для самостоятельной настройки)</span>
           </label>
         </div>
@@ -128,30 +127,30 @@
             {{ apiStore.isCheckingHealth ? 'Проверка…' : 'Проверить соединение' }}
           </button>
         </div>
-        <h4 class="api-subtitle">Источники контента</h4>
-        <div class="radio-group">
+        <h4 id="settings-content-label" class="api-subtitle">Источники контента</h4>
+        <div class="radio-group" role="radiogroup" aria-labelledby="settings-content-label">
           <label class="radio">
-            <input v-model="contentApiProvider" type="radio" value="local" />
+            <input v-model="contentApiProvider" type="radio" name="content-api-provider" value="local" />
             <span class="radio-label">Локальный сервер (поиск, информация о фильмах и плееры)</span>
           </label>
           <!-- KinoBD temporarily disabled; keep option for reactivation.
           <label class="radio">
-            <input v-model="contentApiProvider" type="radio" value="kinobd" />
+            <input v-model="contentApiProvider" type="radio" name="content-api-provider" value="kinobd" />
             <span class="radio-label">KinoBD (search/cards/players)</span>
           </label>
           -->
           <label class="radio">
-            <input v-model="contentApiProvider" type="radio" value="kinobox" />
+            <input v-model="contentApiProvider" type="radio" name="content-api-provider" value="kinobox" />
             <span class="radio-label"
               >Kinobox (поиск, информация о фильмах и плееры, по умолчанию)</span
             >
           </label>
           <label class="radio">
-            <input v-model="contentApiProvider" type="radio" value="ddbb" />
+            <input v-model="contentApiProvider" type="radio" name="content-api-provider" value="ddbb" />
             <span class="radio-label">DDBB (плееры)</span>
           </label>
           <label class="radio">
-            <input v-model="contentApiProvider" type="radio" value="ddbb_live" />
+            <input v-model="contentApiProvider" type="radio" name="content-api-provider" value="ddbb_live" />
             <span class="radio-label">DDBB Live (плееры)</span>
           </label>
         </div>
@@ -159,19 +158,19 @@
           Комментарии, заметки, тайминги и поиск по IMDb доступны при подключённом сервере приложения.
           Для оценок и поиска по Shikimori можно также выбрать локальный источник контента.
         </p>
-        <h4 class="api-subtitle">Источник поиска</h4>
-        <div class="radio-group">
+        <h4 id="settings-search-label" class="api-subtitle">Источник поиска</h4>
+        <div class="radio-group" role="radiogroup" aria-labelledby="settings-search-label">
           <label class="radio">
-            <input v-model="searchApiProvider" type="radio" value="local" />
+            <input v-model="searchApiProvider" type="radio" name="search-api-provider" value="local" />
             <span class="radio-label">Локальный сервер</span>
           </label>
           <label class="radio">
-            <input v-model="searchApiProvider" type="radio" value="kinobox" />
+            <input v-model="searchApiProvider" type="radio" name="search-api-provider" value="kinobox" />
             <span class="radio-label">Kinobox (по умолчанию)</span>
           </label>
           <!-- KinoBD temporarily disabled; keep option for reactivation.
           <label class="radio">
-            <input v-model="searchApiProvider" type="radio" value="kinobd" />
+            <input v-model="searchApiProvider" type="radio" name="search-api-provider" value="kinobd" />
             <span class="radio-label">KinoBD</span>
           </label>
           -->
@@ -190,7 +189,7 @@
         <SliderRound v-model="isHistoryAllowed"> Сохранять историю просмотра</SliderRound>
         <HistorySyncSettings />
         <div class="settings-actions">
-          <button class="reset-button" @click="showModal = true">
+          <button class="reset-button reset-button--danger" @click="showModal = true">
             <i class="fa-solid fa-trash-can"></i>
             Очистить историю просмотра
           </button>
@@ -208,20 +207,20 @@
         <SliderRound v-model="isCtrlFEnabled">Перехватывать Ctrl+F для поиска</SliderRound>
       </div>
 
-      <div v-show="activeSettingsTab === 'behavior'" class="settings-group">
+      <div v-show="activeSettingsTab === 'behavior'" class="settings-group settings-group--desktop-only">
         <h3>Боковая панель</h3>
         <SliderRound v-model="sidebarAutoHide"
           >Авто-скрытие: скрывать панель и показывать при наведении курсора</SliderRound
         >
         <div class="sidebar-position-group">
-          <label>Расположение панели:</label>
-          <div class="radio-group">
+          <span id="settings-sidebar-position-label" class="group-label">Расположение панели:</span>
+          <div class="radio-group" role="radiogroup" aria-labelledby="settings-sidebar-position-label">
             <label class="radio">
-              <input v-model="sidebarPosition" type="radio" value="left" />
+              <input v-model="sidebarPosition" type="radio" name="sidebar-position" value="left" />
               <span class="radio-label">Слева</span>
             </label>
             <label class="radio">
-              <input v-model="sidebarPosition" type="radio" value="right" />
+              <input v-model="sidebarPosition" type="radio" name="sidebar-position" value="right" />
               <span class="radio-label">Справа</span>
             </label>
           </div>
@@ -509,6 +508,7 @@ h1 {
   border-radius: 10px;
   max-width: 860px;
   width: 100%;
+  box-sizing: border-box;
   box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
   border: 1px solid var(--accent-transparent);
   display: flex;
@@ -528,6 +528,9 @@ h1 {
 }
 
 .settings-tabs button {
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
   min-height: 68px;
   padding: 10px 12px;
   border: 0;
@@ -541,8 +544,8 @@ h1 {
 }
 
 .settings-tabs button.active {
-  background: var(--accent-color);
-  color: #fff;
+  background: var(--accent-solid);
+  color: var(--accent-contrast);
 }
 
 .settings-tabs button:focus-visible {
@@ -564,7 +567,7 @@ h1 {
 }
 
 .settings-tabs button.active .settings-tab__description {
-  color: rgba(255, 255, 255, 0.82);
+  color: var(--accent-contrast);
 }
 
 .settings-section-header {
@@ -611,28 +614,67 @@ h3 {
 
 .radio input {
   margin-right: 10px;
+  /* Dark native rendering: unchecked radios are dark rings, so the checked one stands out for every accent. */
+  color-scheme: dark;
+}
+
+.radio input:focus-visible {
+  outline: 2px solid var(--accent-light);
+  outline-offset: 2px;
 }
 
 .radio-label {
   cursor: pointer;
 }
 
+/* Switch labels use the same size as the radio options next to them. */
+.settings-group :deep(.label-text) {
+  font-size: 1rem;
+}
+
+/* Touch: every radio row is a full 44px target and rows touch, so there is no dead gap. */
+@media (max-width: 768px), (pointer: coarse) {
+  .radio {
+    box-sizing: border-box;
+    min-height: 44px;
+    padding: 6px 0;
+    cursor: pointer;
+  }
+
+  div.radio-group {
+    gap: 0;
+  }
+}
+
 .reset-button {
-  background: var(--accent-color);
-  border: none;
-  padding: 10px 20px;
+  /* Secondary action: same outline as the history actions; solid fill stays for primary actions. */
+  background: transparent;
+  border: 1px solid var(--accent-ui);
+  min-height: 44px;
+  padding: 10px 16px;
   color: #fff;
   font-size: 16px;
-  border-radius: 5px;
+  border-radius: 8px;
   cursor: pointer;
   transition: 0.3s;
   display: flex;
   gap: 1rem;
-  align-items: baseline;
+  align-items: center;
+  text-align: left;
 }
 
 .reset-button:hover {
-  background: var(--accent-hover);
+  background: var(--accent-transparent);
+}
+
+.reset-button--danger {
+  background: transparent;
+  border: 1px solid #ff8b8b;
+  color: #ff8b8b;
+}
+
+.reset-button--danger:hover {
+  background: rgba(255, 139, 139, 0.14);
 }
 
 .reset-button:disabled {
@@ -641,16 +683,18 @@ h3 {
 }
 
 .radio input:checked {
-  accent-color: var(--accent-color);
+  accent-color: var(--accent-ui);
 }
 
-.card-size-group {
+.card-size-group,
+.sidebar-position-group {
   display: flex;
   flex-direction: column;
   gap: 10px;
 }
 
-.card-size-group label:first-child {
+.card-size-group > label:first-child,
+.sidebar-position-group > label:first-child {
   font-weight: 500;
   margin-bottom: 5px;
 }
@@ -680,13 +724,31 @@ h3 {
   color: #ff8b8b;
 }
 
+@media (max-width: 599px) {
+  .settings-group--desktop-only {
+    display: none !important;
+  }
+}
+
 @media (max-width: 640px) {
   .settings-container {
     padding: 14px;
   }
 
   .settings-tabs {
-    grid-template-columns: 1fr;
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .settings-tabs button {
+    min-height: 44px;
+  }
+
+  .settings-tabs button:last-child:nth-child(odd) {
+    grid-column: 1 / -1;
+  }
+
+  .settings-tab__description {
+    display: none;
   }
 }
 </style>

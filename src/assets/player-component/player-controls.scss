@@ -48,7 +48,7 @@
 .controls button:hover {
   background-color: color-mix(in srgb, var(--accent-color) 32%, rgba(255, 255, 255, 0.08));
   color: #fff;
-  border-color: color-mix(in srgb, var(--accent-color) 58%, rgba(255, 255, 255, 0.14));
+  border-color: color-mix(in srgb, var(--accent-ui) 58%, rgba(255, 255, 255, 0.14));
   transform: translateY(-2px) scale(1.04);
   box-shadow:
     0 10px 22px rgba(0, 0, 0, 0.34),
@@ -57,7 +57,7 @@
 
 .controls button:active {
   background-color: color-mix(in srgb, var(--accent-color) 42%, rgba(255, 255, 255, 0.08));
-  border-color: color-mix(in srgb, var(--accent-color) 70%, rgba(255, 255, 255, 0.16));
+  border-color: color-mix(in srgb, var(--accent-ui) 70%, rgba(255, 255, 255, 0.16));
   transform: translateY(0) scale(0.98);
   box-shadow:
     0 0 10px color-mix(in srgb, var(--accent-color) 18%, transparent),
@@ -66,7 +66,7 @@
 
 .controls button.active {
   background-color: color-mix(in srgb, var(--accent-color) 48%, rgba(255, 255, 255, 0.08));
-  border-color: color-mix(in srgb, var(--accent-color) 76%, rgba(255, 255, 255, 0.16));
+  border-color: color-mix(in srgb, var(--accent-ui) 76%, rgba(255, 255, 255, 0.16));
   color: #fff;
   box-shadow:
     0 0 18px color-mix(in srgb, var(--accent-color) 26%, transparent),
@@ -75,7 +75,7 @@
 
 .controls .theater-mode-btn.active {
   background: var(--accent-transparent);
-  border-color: var(--accent-color);
+  border-color: var(--accent-ui);
   color: #fff;
 }
 
@@ -100,7 +100,7 @@
 }
 
 .controls button:focus-visible {
-  outline: 2px solid color-mix(in srgb, var(--accent-color) 72%, #fff);
+  outline: 2px solid color-mix(in srgb, var(--accent-ui) 72%, #fff);
   outline-offset: 2px;
 }
 
@@ -138,13 +138,14 @@
 }
 
 .aspect-ratio-option:hover {
-  background-color: var(--accent-color);
+  background-color: var(--accent-solid);
+  color: var(--accent-contrast);
   box-shadow: 0 0 8px var(--accent-semi-transparent);
 }
 
 .aspect-ratio-option.active {
-  background-color: var(--accent-color);
-  color: white;
+  background-color: var(--accent-solid);
+  color: var(--accent-contrast);
   font-weight: 500;
   box-shadow: none;
 }
@@ -180,7 +181,7 @@
 
 .electron-only:hover {
   background-color: color-mix(in srgb, var(--accent-color) 26%, rgba(255, 255, 255, 0.08)) !important;
-  border-color: color-mix(in srgb, var(--accent-color) 48%, rgba(255, 255, 255, 0.12)) !important;
+  border-color: color-mix(in srgb, var(--accent-ui) 48%, rgba(255, 255, 255, 0.12)) !important;
   opacity: 0.9;
   transform: translateY(-2px) scale(1.04) !important;
   box-shadow:

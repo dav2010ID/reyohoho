@@ -42,8 +42,8 @@ const { message, showRetry } = defineProps({
 .button {
   display: inline-block;
   padding: 10px 20px;
-  background-color: var(--accent-color);
-  color: #fff;
+  background-color: var(--accent-solid);
+  color: var(--accent-contrast);
   text-decoration: none;
   border-radius: 5px;
   font-size: 16px;
@@ -54,15 +54,15 @@ const { message, showRetry } = defineProps({
 }
 
 .button:hover {
-  background-color: var(--accent-hover);
+  background-color: var(--accent-solid-hover);
 }
 
 .error-message {
-  color: var(--accent-color);
+  color: var(--accent-text);
   text-align: center;
   padding: 20px;
   font-size: 1.2rem;
-  border: 1px solid var(--accent-color);
+  border: 1px solid var(--accent-ui);
   border-radius: 5px;
   margin: 20px auto;
   max-width: 500px;

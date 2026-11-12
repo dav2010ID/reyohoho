@@ -15,8 +15,9 @@
         @error="setImageFallback"
       />
       <DeleteButton
-        v-if="!isMobile && (isHistory || isUserList) && showDelete"
+        v-if="(isHistory || isUserList) && showDelete"
         class="delete-button"
+        :label="isHistory ? 'Удалить из истории' : 'Удалить из списка'"
         data-test-id="delete-button"
         @click.stop.prevent="emit('remove:from-history', movie.kp_id)"
       />
@@ -79,7 +80,6 @@ const appLogoUrl = `${import.meta.env.BASE_URL || '/'}icons/icon-192x192.png`
 
 const {
   movie,
-  isMobile = false,
   isHistory = false,
   isUserList = false,
   showDelete = true,
@@ -147,6 +147,7 @@ const formatRating = (rating) => rating.toFixed(1).replace(/\.0$/, '')
 }
 
 .movie-poster-container.variant-related {
+  --movie-poster-frame-radius: 8px;
   width: 100%;
 }
 
@@ -190,6 +191,16 @@ const formatRating = (rating) => rating.toFixed(1).replace(/\.0$/, '')
   top: 5px;
   left: 5px;
   opacity: 0;
+}
+
+/* No hover on touch: the per-card delete stays visible next to the swipe gesture. */
+@media (hover: none) {
+  .delete-button {
+    /* Right corner: the type badge sits top-left. */
+    left: auto;
+    right: 4px;
+    opacity: 1;
+  }
 }
 
 .ratings-overlay {
@@ -285,7 +296,7 @@ const formatRating = (rating) => rating.toFixed(1).replace(/\.0$/, '')
   top: -6px;
   left: -6px;
   font-size: 12px;
-  color: var(--accent-color);
+  color: var(--accent-text);
   line-height: 1;
   padding-bottom: 1px;
 }
@@ -339,6 +350,7 @@ const formatRating = (rating) => rating.toFixed(1).replace(/\.0$/, '')
 
   .movie-poster-container.variant-related .movie-poster-frame {
     width: 100%;
+    border-radius: var(--movie-poster-frame-radius);
   }
 
   .delete-button {
@@ -348,9 +360,10 @@ const formatRating = (rating) => rating.toFixed(1).replace(/\.0$/, '')
     opacity: 1;
   }
 
-  .delete-button :deep(.deleteButton) {
-    width: 30px;
-    height: 30px;
+  /* The button root is .delete-button itself; 36px leaves room for the type badge on a 100px poster. */
+  .movie-poster-container .delete-button {
+    width: 36px;
+    height: 36px;
     border-width: 1px;
     border-radius: 7px;
   }

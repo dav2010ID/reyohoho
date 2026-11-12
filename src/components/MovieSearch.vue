@@ -70,7 +70,7 @@
           <h2>
             История просмотра
             <span v-if="history.length > 0">
-              <DeleteButton @click="showModal = true" />
+              <DeleteButton label="Очистить историю" @click="showModal = true" />
               <BaseModal
                 :is-open="showModal"
                 message="Вы уверены, что хотите очистить историю?"
@@ -128,9 +128,15 @@
         <!-- Результаты поиска -->
         <div v-if="searchPerformed" ref="searchResults">
           <h2>Результаты поиска</h2>
-          <MovieList :movies-list="movies" :is-history="false" :loading="loading" />
+          <MovieList
+            v-if="movies.length > 0 || loading"
+            :movies-list="movies"
+            :is-history="false"
+            :loading="loading"
+          />
           <div v-if="movies.length === 0 && !loading && !errorMessage" class="no-results">
-            Ничего не найдено
+            <span class="material-icons" aria-hidden="true">movie</span>
+            <p>Ничего не найдено</p>
           </div>
           <ErrorMessage v-if="errorMessage" :message="errorMessage" :code="errorCode" />
         </div>
@@ -811,8 +817,8 @@ const fetchRandomMovie = async () => {
 }
 
 .random-button {
-  background: color-mix(in srgb, var(--accent-color) 70%, #000000) !important;
-  color: white !important;
+  background: var(--accent-solid) !important;
+  color: var(--accent-contrast) !important;
   border-radius: 8px;
   padding: 8px 16px !important;
   font-weight: 600;
@@ -823,7 +829,7 @@ const fetchRandomMovie = async () => {
 }
 
 .random-button:hover:not(:disabled) {
-  background: color-mix(in srgb, var(--accent-color) 78%, #000000) !important;
+  background: var(--accent-solid-hover) !important;
   transform: translateY(-1px);
 }
 
@@ -864,7 +870,7 @@ const fetchRandomMovie = async () => {
 
 .search-input:focus {
   outline: none;
-  border-color: var(--accent-color);
+  border-color: var(--accent-ui);
   box-shadow: 0 0 0 2px var(--accent-transparent);
 }
 
@@ -889,9 +895,9 @@ const fetchRandomMovie = async () => {
   border: none;
   color: #fff;
   cursor: pointer;
-  width: 40px;
-  height: 40px;
-  padding: 10px;
+  width: 44px;
+  height: 44px;
+  padding: 12px;
   opacity: 0.7;
   transition: opacity 0.2s ease;
 }
@@ -920,11 +926,24 @@ h2 {
 
 /* Сообщение "Ничего не найдено" */
 .no-results {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
   width: 100%;
+  padding: 2rem;
+  box-sizing: border-box;
   text-align: center;
   color: #fff;
   font-size: 18px;
-  margin-top: 20px;
+}
+
+.no-results .material-icons {
+  margin-bottom: 1rem;
+  font-size: 3rem;
+}
+
+.no-results p {
+  margin: 0;
 }
 
 /* Подсказка для поиска */
@@ -987,7 +1006,6 @@ h2 {
   align-items: center;
   justify-content: center;
   min-height: 200px;
-  color: #888;
   gap: 15px;
 }
 
@@ -1047,9 +1065,14 @@ h2 {
     height: auto;
   }
 
-  .search-container,
+  .search-container {
+    padding: 0 8px;
+  }
+
   .search-type-buttons {
     padding: 0;
+    row-gap: 8px;
+    margin-bottom: 14px;
   }
 }
 </style>

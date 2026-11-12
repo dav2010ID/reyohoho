@@ -89,6 +89,14 @@
         {{ activeTooltip === links?.length ? 'Поиск (Ctrl+F)' : links[activeTooltip]?.text }}
       </div>
     </nav>
+    <!-- The expanded panel overlays the page; dim it so the overlay is explicit. -->
+    <Teleport to="body">
+      <div
+        v-if="isSidebarOpen && !sidebarAutoHide"
+        class="side-panel-backdrop"
+        aria-hidden="true"
+      ></div>
+    </Teleport>
   </aside>
 </template>
 
@@ -286,8 +294,14 @@ const updateNavigationHistory = (to) => {
 }
 
 // Добавляем и удаляем обработчики событий при монтировании/размонтировании компонента
+// The expanded panel is an overlay, so Escape dismisses it like a dialog.
+const handleEscape = (event) => {
+  if (event.key === 'Escape' && isSidebarOpen.value) isSidebarOpen.value = false
+}
+
 onMounted(() => {
   document.addEventListener('click', handleClickOutside)
+  document.addEventListener('keydown', handleEscape)
   document.addEventListener('mousemove', handleMouseMove, { passive: true })
   document.addEventListener('mouseleave', handleDocumentMouseLeave)
   window.addEventListener('blur', hideSidebarPeek)
@@ -298,6 +312,7 @@ onMounted(() => {
 
 onBeforeUnmount(() => {
   document.removeEventListener('click', handleClickOutside)
+  document.removeEventListener('keydown', handleEscape)
   if (clickOutsideTimeout) {
     window.cancelAnimationFrame(clickOutsideTimeout)
   }
@@ -316,6 +331,17 @@ watch(() => route.fullPath, () => updateNavigationHistory(route))
 watch(sidebarAutoHide, (enabled) => {
   if (!enabled) hideSidebarPeek()
 })
+
+// While the expanded panel overlays the page, the covered page is not reachable by keyboard either.
+const setPageInert = (value) => {
+  const page = document.getElementById('main-content')
+  if (page) page.inert = value
+}
+watch(
+  () => isSidebarOpen.value && !sidebarAutoHide.value,
+  (overlay) => setPageInert(overlay)
+)
+onBeforeUnmount(() => setPageInert(false))
 </script>
 
 <style lang="scss" scoped>
@@ -339,6 +365,20 @@ watch(sidebarAutoHide, (enabled) => {
   z-index: var(--z-sidebar);
   will-change: width, transform;
   overflow: hidden;
+}
+
+.side-panel-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: calc(var(--z-sidebar) - 1);
+  background: rgba(0, 0, 0, 0.5);
+  animation: side-panel-backdrop-in 0.2s ease;
+}
+
+@keyframes side-panel-backdrop-in {
+  from {
+    opacity: 0;
+  }
 }
 
 .side-panel.collapsed {
@@ -407,8 +447,8 @@ watch(sidebarAutoHide, (enabled) => {
 }
 .toggle-sidebar-btn:hover {
   background: var(--accent-transparent, rgba(108, 92, 231, 0.15));
-  color: var(--accent-color, #6c5ce7);
-  border-left-color: var(--accent-color, #6c5ce7);
+  color: var(--accent-text, #988dee);
+  border-left-color: var(--accent-ui, #6c5ce7);
   box-shadow: none;
 }
 
@@ -560,8 +600,8 @@ watch(sidebarAutoHide, (enabled) => {
 .nav-links button:hover,
 .notification-link:hover {
   background: var(--accent-transparent, rgba(108, 92, 231, 0.15));
-  color: var(--accent-color, #6c5ce7);
-  border-left: 3px solid var(--accent-color, #6c5ce7);
+  color: var(--accent-text, #988dee);
+  border-left: 3px solid var(--accent-ui, #6c5ce7);
   transform: translateX(3px);
 }
 
@@ -571,8 +611,8 @@ watch(sidebarAutoHide, (enabled) => {
 .notification-link:active,
 .notification-link.router-link-active {
   background: var(--accent-transparent, rgba(108, 92, 231, 0.2));
-  color: var(--accent-color, #6c5ce7);
-  border-left: 3px solid var(--accent-color, #6c5ce7);
+  color: var(--accent-text, #988dee);
+  border-left: 3px solid var(--accent-ui, #6c5ce7);
 }
 
 .search-toggle-btn {
@@ -591,16 +631,16 @@ watch(sidebarAutoHide, (enabled) => {
 .search-toggle-btn:hover,
 .search-toggle-btn:active {
   background: var(--accent-transparent, rgba(108, 92, 231, 0.15));
-  color: var(--accent-color, #6c5ce7);
+  color: var(--accent-text, #988dee);
   transform: translateX(3px);
-  border-left: 3px solid var(--accent-color, #6c5ce7);
+  border-left: 3px solid var(--accent-ui, #6c5ce7);
 }
 
 .search-toggle-btn:focus-visible {
   outline: none;
   background: var(--accent-transparent, rgba(108, 92, 231, 0.15));
-  color: var(--accent-color, #6c5ce7);
-  border-left: 3px solid var(--accent-color, #6c5ce7);
+  color: var(--accent-text, #988dee);
+  border-left: 3px solid var(--accent-ui, #6c5ce7);
 }
 
 .icon-user {
@@ -622,7 +662,7 @@ watch(sidebarAutoHide, (enabled) => {
   background: rgba(35, 35, 35, 0.98);
   color: #fff;
   padding: 8px 11px;
-  border: 1px solid color-mix(in srgb, var(--accent-color) 22%, rgba(255, 255, 255, 0.08));
+  border: 1px solid color-mix(in srgb, var(--accent-ui) 22%, rgba(255, 255, 255, 0.08));
   border-radius: 9px;
   white-space: nowrap;
   box-shadow: 0 10px 24px rgba(0, 0, 0, 0.38);
@@ -648,7 +688,7 @@ a {
 }
 
 .back-btn:hover {
-  color: var(--accent-color, #6c5ce7);
+  color: var(--accent-text, #988dee);
   background: var(--accent-transparent, rgba(108, 92, 231, 0.15));
   transform: translateX(-2px);
   box-shadow: none;
@@ -732,7 +772,7 @@ a {
   .nav-links button:hover,
   .notification-link:hover {
     border-left: none;
-    border-right: 3px solid var(--accent-color, #6c5ce7);
+    border-right: 3px solid var(--accent-ui, #6c5ce7);
     transform: translateX(-3px);
   }
 
@@ -742,7 +782,7 @@ a {
   .notification-link:active,
   .notification-link.router-link-active {
     border-left: none;
-    border-right: 3px solid var(--accent-color, #6c5ce7);
+    border-right: 3px solid var(--accent-ui, #6c5ce7);
   }
 
   .toggle-sidebar-btn {
@@ -755,7 +795,7 @@ a {
 
   .toggle-sidebar-btn:hover {
     border-left: none;
-    border-right-color: var(--accent-color, #6c5ce7);
+    border-right-color: var(--accent-ui, #6c5ce7);
   }
 
   .search-toggle-btn {
@@ -766,7 +806,7 @@ a {
   .search-toggle-btn:hover,
   .search-toggle-btn:active {
     border-left: none;
-    border-right: 3px solid var(--accent-color, #6c5ce7);
+    border-right: 3px solid var(--accent-ui, #6c5ce7);
     transform: translateX(-3px);
   }
 

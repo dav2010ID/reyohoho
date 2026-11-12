@@ -51,7 +51,7 @@
         Восстановить историю до входа в аккаунт
       </button>
       <button v-if="!compact" @click="download">Сохранить историю в файл</button>
-      <label
+      <label class="history-file"
         >Загрузить историю из файла
         <input type="file" accept=".json,application/json" :disabled="busy" @change="readFile"
       /></label>
@@ -267,8 +267,15 @@ function download() {
 
 <style scoped>
 .history-sync {
-  margin-top: 24px;
+  margin-top: 16px;
+  font-size: 14px;
   text-align: left;
+}
+.history-sync a {
+  color: var(--accent-light, var(--accent-color));
+}
+.history-sync p[role='status']:empty {
+  margin: 0;
 }
 .history-sync p {
   line-height: 1.5;
@@ -282,7 +289,7 @@ function download() {
 button,
 label {
   padding: 10px 14px;
-  border: 1px solid var(--accent-color);
+  border: 1px solid var(--accent-ui);
   border-radius: 8px;
   background: transparent;
   color: inherit;
@@ -293,9 +300,26 @@ button:disabled {
   opacity: 0.5;
   cursor: wait;
 }
-input {
-  display: block;
-  max-width: 100%;
-  margin-top: 8px;
+.history-file {
+  position: relative;
+}
+.history-file:has(input:disabled) {
+  opacity: 0.5;
+  cursor: wait;
+}
+.history-sync h4 {
+  margin-top: 0;
+}
+.history-file:focus-within {
+  outline: 2px solid var(--accent-ui);
+  outline-offset: 2px;
+}
+.history-file input {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  opacity: 0;
+  cursor: pointer;
 }
 </style>

@@ -24,7 +24,7 @@
       <!-- Результаты поиска -->
       <div v-if="!errorMessage" class="search__results-wrapper">
         <div class="search__results">
-          <div v-if="searchTerm?.length < 3" class="no-results">
+          <div v-if="!searchTerm || searchTerm.length < 2" class="no-results">
             Здесь появятся результаты поиска
           </div>
 
@@ -80,7 +80,7 @@
 
       <ErrorMessage v-if="errorMessage" :message="errorMessage" :code="errorCode" />
 
-      <button class="btn--close" @click="closeModal">
+      <button class="btn--close" type="button" aria-label="Закрыть" @click="closeModal">
         <i class="fas fa-close"></i>
       </button>
     </div>
@@ -194,13 +194,11 @@ const debouncedPerformSearch = debounce(() => {
 }, 700)
 
 const closeModal = (event) => {
-  const isLeftClick = event.button === 0
+  // Escape через v-dialog-focus вызывает без события
+  const isPlainClick = !event || (event.button === 0 && !event.ctrlKey && !event.metaKey)
 
-  // Проверяем, что не зажаты Ctrl или Cmd
-  const isNotModified = !event.ctrlKey && !event.metaKey
-
-  // Если это обычный клик, скрываем попап
-  if ((isLeftClick && isNotModified) || !event) {
+  // Если это обычный клик или Escape, скрываем попап
+  if (isPlainClick) {
     navbarStore.closeSearchModal() // Используем метод из хранилища для закрытия модалки
     resetSearch()
   }
@@ -290,8 +288,13 @@ watch(searchTerm, () => {
 <style lang="scss" scoped>
 .btn--close {
   position: absolute;
-  top: 8px;
-  right: 6px;
+  top: -6px;
+  right: -7px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 44px;
+  min-height: 44px;
   border: 0;
   background: none;
   color: var(--text-color);
@@ -313,6 +316,9 @@ watch(searchTerm, () => {
 }
 
 .search {
+  /* Mounted inside the navigation, which uses the handwritten menu font. */
+  font-family: 'Roboto', sans-serif;
+  font-size: 16px;
   position: fixed;
   top: 0;
   left: 0;
@@ -461,7 +467,7 @@ watch(searchTerm, () => {
 
   &:focus {
     outline: none;
-    border-color: var(--accent-color);
+    border-color: var(--accent-ui);
     box-shadow: 0 0 0 2px var(--accent-transparent);
   }
 
@@ -574,10 +580,10 @@ watch(searchTerm, () => {
 }
 
 .filter-select:focus {
-  border-color: var(--accent-color);
+  border-color: var(--accent-ui);
 }
 
 .status.completed {
-  color: var(--accent-color);
+  color: var(--accent-text);
 }
 </style>

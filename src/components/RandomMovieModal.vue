@@ -7,7 +7,7 @@
             <i class="fas fa-dice"></i>
             Случайный фильм
           </h3>
-          <button class="close-btn" @click="close">
+          <button class="close-btn" type="button" aria-label="Закрыть" @click="close">
             <i class="fas fa-times"></i>
           </button>
         </div>
@@ -107,7 +107,7 @@
               </div>
 
               <div v-if="movie.total_rating" class="total-ratings">
-                Всего оценок: {{ movie.total_rating }}
+                Всего оценок: {{ Number(movie.total_rating).toLocaleString('ru-RU') }}
               </div>
 
               <div class="external-links">
@@ -135,7 +135,7 @@
         </div>
 
         <div class="modal-actions">
-          <button class="modern-dark-btn" @click="close">Закрыть</button>
+          <button class="modern-dark-btn modal-actions__close" @click="close">Закрыть</button>
           <router-link
             v-if="movie && !loading"
             :to="moviePath"
@@ -144,7 +144,7 @@
           >
             Посмотреть
           </router-link>
-          <button class="modern-dark-btn primary" :disabled="loading" @click="getNewMovie">
+          <button class="modern-dark-btn outline" :disabled="loading" @click="getNewMovie">
             <i class="fas fa-dice"></i>
             Еще раз
           </button>
@@ -252,7 +252,13 @@ const formatDate = (dateString) => {
   width: 700px;
   max-width: 95vw;
   max-height: 90vh;
-  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+}
+
+.random-movie-modal .modal-header,
+.random-movie-modal .modal-actions {
+  flex-shrink: 0;
 }
 
 .modern-dark-dialog {
@@ -267,7 +273,7 @@ const formatDate = (dateString) => {
 
 .modal-header {
   padding: 16px 20px;
-  border-bottom: 1px solid var(--accent-color);
+  border-bottom: 1px solid var(--accent-ui);
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -288,6 +294,9 @@ const formatDate = (dateString) => {
   color: #e2e8f0;
   font-size: 1.2rem;
   cursor: pointer;
+  min-width: 44px;
+  min-height: 44px;
+  margin: -8px -12px -8px 0;
   padding: 4px;
   opacity: 0.7;
   transition: opacity 0.2s ease;
@@ -299,7 +308,8 @@ const formatDate = (dateString) => {
 
 .modal-content {
   padding: 20px;
-  max-height: 60vh;
+  flex: 1 1 auto;
+  min-height: 0;
   overflow-y: auto;
 }
 
@@ -321,7 +331,7 @@ const formatDate = (dateString) => {
   width: 40px;
   height: 40px;
   border: 3px solid #333;
-  border-top: 3px solid var(--accent-color);
+  border-top: 3px solid var(--accent-ui);
   border-radius: 50%;
   animation: spin 1s linear infinite;
 }
@@ -384,8 +394,8 @@ const formatDate = (dateString) => {
 }
 
 .movie-type {
-  background: var(--accent-color);
-  color: white;
+  background: var(--accent-solid);
+  color: var(--accent-contrast);
   padding: 4px 8px;
   border-radius: 4px;
   font-size: 0.85rem;
@@ -419,9 +429,7 @@ const formatDate = (dateString) => {
   padding: 10px;
   background: rgba(0, 0, 0, 0.2);
   border-radius: 6px;
-  border-left: 3px solid var(--accent-color);
-  max-height: 150px;
-  overflow-y: auto;
+  border-left: 3px solid var(--accent-ui);
 }
 
 .movie-finances {
@@ -500,6 +508,8 @@ const formatDate = (dateString) => {
   background-color: #242424;
   color: #e2e8f0;
   cursor: pointer;
+  font: inherit;
+  font-size: 0.95rem;
   font-weight: 500;
   transition: all 0.2s ease;
   text-decoration: none;
@@ -518,12 +528,23 @@ const formatDate = (dateString) => {
 }
 
 .modern-dark-btn.primary {
-  background-color: var(--accent-color);
-  color: white;
+  background-color: var(--accent-solid);
+  color: var(--accent-contrast);
 }
 
 .modern-dark-btn.primary:hover {
-  background-color: var(--accent-hover-color);
+  background-color: var(--accent-solid-hover);
+}
+
+.modern-dark-btn.outline {
+  background-color: transparent;
+  box-shadow: inset 0 0 0 1px var(--accent-color);
+  color: var(--accent-light);
+}
+
+.modern-dark-btn.outline:hover:not(:disabled) {
+  background-color: var(--accent-solid);
+  color: var(--accent-contrast);
 }
 
 @keyframes modal-in {
@@ -558,10 +579,25 @@ const formatDate = (dateString) => {
     height: 180px;
   }
 
+  .movie-type {
+    align-self: center;
+  }
+
+  .movie-description {
+    text-align: left;
+    max-height: none;
+    overflow-y: visible;
+  }
+
   .modal-actions {
     flex-direction: column;
     gap: 8px;
-    padding: 16px 20px;
+    padding: 12px 16px;
+  }
+
+  /* The header ✕ already closes the dialog; keep the two real actions. */
+  .modal-actions__close {
+    display: none;
   }
 
   .modal-actions .modern-dark-btn,

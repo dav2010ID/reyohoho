@@ -426,7 +426,7 @@ onUnmounted(disconnectInfiniteScroll)
 }
 
 .top-tabs .type-btn.active {
-  background: var(--accent-color);
+  background: var(--accent-solid);
 }
 
 .top-tabs .type-btn:focus-visible {
@@ -552,16 +552,16 @@ onUnmounted(disconnectInfiniteScroll)
 }
 
 .time-btn.active {
-  background: var(--accent-color);
+  background: var(--accent-solid);
   border-color: transparent;
-  color: white;
+  color: var(--accent-contrast);
   box-shadow: 0 2px 8px var(--accent-transparent);
 }
 
 .type-btn.active {
-  background: var(--accent-color);
+  background: var(--accent-solid);
   border-color: transparent;
-  color: white;
+  color: var(--accent-contrast);
   box-shadow: 0 2px 8px var(--accent-transparent);
 }
 
@@ -657,15 +657,16 @@ onUnmounted(disconnectInfiniteScroll)
 .load-more-btn {
   border: 1px solid rgba(255, 255, 255, 0.12);
   border-radius: 8px;
-  background: var(--accent-color);
-  color: #fff;
+  background: var(--accent-solid);
+  color: var(--accent-contrast);
   cursor: pointer;
   font-weight: 600;
+  min-height: 44px;
   padding: 10px 18px;
 }
 
 .load-more-btn:hover {
-  background: var(--accent-hover);
+  background: var(--accent-solid-hover);
 }
 
 .load-more-btn:disabled {

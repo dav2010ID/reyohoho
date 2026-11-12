@@ -99,8 +99,8 @@ onUnmounted(() => {
   position: absolute;
   top: -3px;
   right: -3px;
-  background: var(--accent-color);
-  color: white;
+  background: var(--accent-solid);
+  color: var(--accent-contrast);
   font-size: 9px;
   font-weight: 600;
   padding: 2px;

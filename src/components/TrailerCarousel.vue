@@ -161,33 +161,19 @@ onBeforeUnmount(() => {
 
 <style lang="scss" scoped>
 .trailers-title {
-  display: inline-flex;
-  align-items: center;
-  gap: 10px;
-  margin: 0 0 16px;
+  margin: 0 0 20px;
   color: #fff;
-  font-size: 1.35rem;
-  line-height: 1.1;
-  letter-spacing: -0.02em;
-
-  &::before {
-    content: '';
-    width: 10px;
-    height: 10px;
-    border-radius: 999px;
-    background: var(--accent-color);
-    box-shadow: 0 0 10px color-mix(in srgb, var(--accent-color) 55%, transparent);
-  }
+  font-size: 1.4rem;
+  font-weight: 600;
+  line-height: 1.2;
+  letter-spacing: -0.01em;
 }
 
 .trailers-count {
-  padding: 2px 9px;
-  border-radius: 999px;
-  background: rgba(255, 255, 255, 0.08);
-  color: #aaa;
-  font-size: 0.8rem;
-  font-weight: 600;
-  letter-spacing: 0;
+  margin-left: 6px;
+  color: rgba(255, 255, 255, 0.5);
+  font-size: 1rem;
+  font-weight: 500;
 }
 
 .carousel-wrapper {
@@ -263,8 +249,8 @@ onBeforeUnmount(() => {
   width: 280px;
   padding: 0;
   scroll-snap-align: start;
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  border-radius: 14px;
+  border: 1px solid transparent;
+  border-radius: 8px;
   overflow: hidden;
   background: rgba(255, 255, 255, 0.04);
   color: inherit;
@@ -280,11 +266,7 @@ onBeforeUnmount(() => {
 .carousel-item:hover,
 .carousel-item:focus-visible,
 .carousel-item.is-active {
-  transform: translateY(-4px);
-  border-color: var(--accent-color);
-  box-shadow:
-    0 10px 24px rgba(0, 0, 0, 0.35),
-    0 0 18px var(--accent-semi-transparent);
+  border-color: var(--accent-ui);
 }
 
 .thumbnail {
@@ -327,7 +309,8 @@ onBeforeUnmount(() => {
 
 .carousel-item:hover .play-badge,
 .carousel-item.is-active .play-badge {
-  background: var(--accent-color);
+  background: var(--accent-solid);
+  color: var(--accent-contrast);
   transform: scale(1.08);
 }
 

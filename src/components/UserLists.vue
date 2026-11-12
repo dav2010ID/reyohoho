@@ -23,6 +23,7 @@
               class="share-btn"
               :disabled="loading"
               title="Поделиться списком"
+              aria-label="Поделиться списком"
               @click="copyShareLink()"
             >
               <span class="material-icons">{{ 'share' }}</span>
@@ -32,6 +33,7 @@
               class="share-btn"
               :disabled="loading"
               title="Экспортировать"
+              aria-label="Экспортировать"
               @click="exportListsAndHistory"
             >
               <span class="material-icons">{{ 'download' }}</span>
@@ -41,6 +43,7 @@
               class="share-btn"
               :disabled="loading || isImporting"
               title="Импортировать"
+              aria-label="Импортировать"
               @click="openImportDialog"
             >
               <span class="material-icons">{{ isImporting ? 'hourglass_top' : 'upload' }}</span>
@@ -53,6 +56,7 @@
               }"
               :disabled="!movies.length || typeFilter === USER_LIST_TYPES_ENUM.RATED || loading"
               title="Очистить список"
+              aria-label="Очистить список"
               @click="
                 movies.length && typeFilter !== USER_LIST_TYPES_ENUM.RATED && (showModal = true)
               "
@@ -750,9 +754,9 @@ onUnmounted(() => { fetchGeneration++ })
 }
 
 .type-btn.active {
-  background: var(--accent-color);
+  background: var(--accent-solid);
   border-color: transparent;
-  color: white;
+  color: var(--accent-contrast);
   box-shadow: 0 2px 8px var(--accent-transparent);
 }
 
@@ -792,6 +796,15 @@ onUnmounted(() => { fetchGeneration++ })
     flex-wrap: wrap;
     justify-content: center;
     gap: 4px;
+  }
+}
+
+@media (max-width: 900px) {
+  .share-btn,
+  .clear-btn,
+  .filter-btn {
+    min-width: 40px;
+    min-height: 40px;
   }
 }
 

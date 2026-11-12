@@ -87,7 +87,7 @@ function closeOnBackdrop(event) {
 }
 .migration-entry__button:focus-visible,
 .migration-notice__dismiss:focus-visible {
-  outline: 2px solid var(--accent-color);
+  outline: 2px solid var(--accent-ui);
   outline-offset: 3px;
 }
 .migration-dialog {
@@ -137,7 +137,7 @@ function closeOnBackdrop(event) {
   background: rgba(255, 255, 255, 0.1);
 }
 .migration-dialog :deep(.history-sync) { margin-top: 20px; }
-.migration-dialog :deep(a) { color: var(--accent-color); }
+.migration-dialog :deep(a) { color: var(--accent-text); }
 .migration-dialog :deep(.history-actions) { align-items: center; }
 .migration-dialog :deep(.history-actions > *) { box-sizing: border-box; max-width: 100%; }
 @media (max-width: 600px) {

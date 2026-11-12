@@ -65,12 +65,23 @@ const removeYearFromTitle = (title) => {
 }
 
 .movie-details.variant-related {
-  --movie-details-padding: 10px 10px 12px;
+  --movie-details-padding: 10px 2px 0;
   --movie-details-gap: 4px;
   --movie-title-clamp: 2;
   --movie-title-max-height: 2.4em;
   position: relative;
-  min-height: 64px;
+  min-height: 0;
+  overflow-wrap: break-word;
+  hyphens: none;
+}
+
+.movie-details.variant-related .movie-header h3 {
+  font-size: 15px;
+  font-weight: 500;
+  text-wrap: balance;
+  hyphens: none;
+  word-break: normal;
+  overflow-wrap: break-word;
 }
 
 .movie-header {
@@ -185,8 +196,9 @@ const removeYearFromTitle = (title) => {
   }
 
   .movie-details.variant-related {
-    --movie-details-padding: 8px 8px 10px;
-    min-height: 58px;
+    --movie-details-padding: 8px 2px 0;
+    padding: var(--movie-details-padding);
+    min-height: 0;
   }
 
   .movie-header {

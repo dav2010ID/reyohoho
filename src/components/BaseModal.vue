@@ -148,7 +148,7 @@ const close = () => {
 
 .modal-header {
   padding: 16px 20px;
-  border-bottom: 1px solid var(--accent-color);
+  border-bottom: 1px solid var(--accent-ui);
 }
 
 .modal-header h3 {

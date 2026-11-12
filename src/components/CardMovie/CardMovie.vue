@@ -174,7 +174,7 @@ onUnmounted(() => {
 }
 
 .has-border {
-  border: 1px solid var(--accent-color);
+  border: 1px solid var(--accent-ui);
 }
 
 .movie-card:hover {
@@ -195,7 +195,8 @@ onUnmounted(() => {
   cursor: pointer;
 }
 
-.movie-card:hover :deep(.delete-button) {
+.movie-card:hover :deep(.delete-button),
+.movie-card:focus-within :deep(.delete-button) {
   opacity: 1;
 }
 
@@ -252,7 +253,13 @@ onUnmounted(() => {
 }
 
 .movie-card.variant-related {
+  --card-bg: transparent;
+  --card-radius: 8px;
+  --card-shadow: none;
+  --card-hover-shadow: none;
+  --card-hover-scale: 1;
   height: auto;
+  overflow: visible;
 }
 
 /* Мобильная версия */

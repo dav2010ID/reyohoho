@@ -605,14 +605,14 @@ describe('MovieInfo SEO', () => {
     try {
       await vi.waitFor(() => expect(wrapper.find('#movie-staff').exists()).toBe(true))
       const panel = wrapper.find('#movie-staff')
-      expect(panel.findAll('.staff-item:not(.staff-more)')).toHaveLength(12)
-      const more = panel.find('.staff-more a')
-      expect(more.text()).toContain('+2')
+      expect(panel.findAll('.staff-item')).toHaveLength(12)
+      const more = panel.find('.movie-panel-link')
+      expect(more.text()).toContain('Все актёры')
       expect(more.attributes('href')).toBe('https://www.kinopoisk.ru/film/123/cast/')
       const rows = panel.findAll('.crew-row')
       expect(rows.map((row) => row.find('dt').text())).toEqual(['Режиссёр', 'Продюсеры'])
-      // Five names and a "+2" link to the full crew.
-      expect(rows[1].findAll('.staff-name-link').map((link) => link.text()).at(-1)).toBe('+2')
+      // Five names and an "и ещё 2" link to the full crew.
+      expect(rows[1].findAll('.staff-name-link').map((link) => link.text()).at(-1)).toBe('и ещё 2')
       expect(rows[1].findAll('.staff-name-link')).toHaveLength(6)
     } finally {
       wrapper.unmount()

@@ -453,8 +453,8 @@ export default {
 
 .submit-button {
   padding: 0.25rem 0.5rem;
-  background: var(--accent-color);
-  color: white;
+  background: var(--accent-solid);
+  color: var(--accent-contrast);
   border: none;
   border-radius: 0.25rem;
   cursor: pointer;
@@ -495,7 +495,7 @@ export default {
 
 .comment-textarea:focus {
   outline: none;
-  border-color: var(--accent-color);
+  border-color: var(--accent-ui);
 }
 
 .comment-textarea:disabled {
@@ -520,7 +520,7 @@ export default {
 }
 
 .emoji-button-inline.active {
-  color: var(--accent-color);
+  color: var(--accent-text);
 }
 
 .emoji-button-inline:disabled {
@@ -560,7 +560,7 @@ export default {
   align-items: center;
   justify-content: center;
   transition: transform 0.3s ease;
-  color: var(--accent-color);
+  color: var(--accent-text);
 }
 
 .collapse-icon.expanded {

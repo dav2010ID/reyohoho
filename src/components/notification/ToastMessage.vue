@@ -92,7 +92,7 @@ defineExpose({ showNotification })
 }
 
 :deep(a) {
-  color: var(--accent-color);
+  color: var(--accent-text);
   text-decoration: underline;
   cursor: pointer;
   transition: color 0.2s ease;
@@ -103,6 +103,6 @@ defineExpose({ showNotification })
 }
 
 .success-icon {
-  color: var(--accent-color);
+  color: var(--accent-text);
 }
 </style>

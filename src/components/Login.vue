@@ -253,8 +253,8 @@ h1 {
   gap: 0.5rem;
   width: 100%;
   padding: 0.75rem;
-  background: var(--accent-color);
-  color: white;
+  background: var(--accent-solid);
+  color: var(--accent-contrast);
   border: none;
   border-radius: 5px;
   font-size: 1rem;
@@ -264,7 +264,7 @@ h1 {
 }
 
 .telegram-btn:hover {
-  background: var(--accent-hover);
+  background: var(--accent-solid-hover);
   transform: translateY(-1px);
 }
 
@@ -303,9 +303,10 @@ h1 {
   gap: 0.5rem;
   width: 100%;
   padding: 0.75rem;
-  background: var(--accent-color);
-  color: white;
-  border: none;
+  /* Alternative method after "или": secondary outline, Telegram stays the one primary fill. */
+  background: transparent;
+  color: #fff;
+  border: 1px solid var(--accent-color);
   border-radius: 5px;
   font-size: 1rem;
   font-weight: 500;
@@ -314,7 +315,7 @@ h1 {
 }
 
 .qr-btn:hover {
-  background: var(--accent-hover);
+  background: var(--accent-transparent);
   transform: translateY(-1px);
 }
 
@@ -401,15 +402,24 @@ h1 {
   margin: 0 auto;
 }
 
+.error-message {
+  margin-top: 12px;
+  color: #ff8b8b;
+  font-size: 14px;
+  text-align: center;
+}
+
 .retry-btn {
   display: block;
+  min-height: 44px;
   margin: 12px auto 0;
-  padding: 8px 16px;
-  border: 0;
-  border-radius: 5px;
-  background: var(--accent-color);
+  padding: 8px 20px;
+  border: 1px solid rgba(255, 255, 255, 0.35);
+  border-radius: 8px;
+  background: transparent;
   color: #fff;
   cursor: pointer;
+  font: inherit;
 }
 
 .retry-btn:disabled {

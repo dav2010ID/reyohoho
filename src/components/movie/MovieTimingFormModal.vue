@@ -172,7 +172,8 @@ defineEmits(['update:modelValue', 'close', 'submit'])
 }
 
 .submit-timing-btn {
-  background: var(--accent-color);
+  background: var(--accent-solid);
+  color: var(--accent-contrast);
   padding: 10px 16px;
   font-weight: 600;
 }

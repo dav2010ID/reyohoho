@@ -6,7 +6,7 @@
     </div>
 
     <div class="color-picker-section">
-      <div class="color-picker-wrapper">
+      <label class="color-picker-wrapper">
         <input
           v-model="customColorValue"
           type="color"
@@ -14,7 +14,7 @@
           @change="addCustomColor"
         />
         <span class="color-picker-label">Добавить цвет</span>
-      </div>
+      </label>
     </div>
 
     <div class="theme-selector__colors">
@@ -27,7 +27,12 @@
         :title="color.name"
         @click="selectColor(color.value)"
       >
-        <i v-if="themeStore.accentColor === color.value" class="material-icons">check</i>
+        <i
+          v-if="themeStore.accentColor === color.value"
+          class="material-icons"
+          :style="{ color: checkColor(color.value) }"
+          >check</i
+        >
         <button
           v-if="color.isCustom"
           class="remove-color"
@@ -44,6 +49,7 @@
 <script>
 import { useThemeStore } from '@/store/theme'
 import { ref } from 'vue'
+import { contrastRatio } from '@/utils/accentContrast'
 
 export default {
   name: 'ThemeSelector',
@@ -63,12 +69,20 @@ export default {
       themeStore.removeCustomColor(color)
     }
 
+    // The check mark sits on the swatch itself: white on dark swatches, dark on light ones (3:1 for icons).
+    const checkColor = (hex) => {
+      const rgb = themeStore.hexToRgb(hex)
+      if (!rgb) return '#fff'
+      return contrastRatio([rgb.r, rgb.g, rgb.b], [255, 255, 255]) >= 3 ? '#fff' : '#1a1a1a'
+    }
+
     return {
       themeStore,
       customColorValue,
       selectColor,
       addCustomColor,
-      removeCustomColor
+      removeCustomColor,
+      checkColor
     }
   }
 }
@@ -95,7 +109,7 @@ export default {
 
 .theme-selector__header i {
   font-size: 18px;
-  color: var(--accent-color);
+  color: var(--accent-text);
 }
 
 .color-picker-section {
@@ -103,14 +117,15 @@ export default {
 }
 
 .color-picker-wrapper {
-  display: flex;
+  display: inline-flex;
   align-items: center;
-  gap: 8px;
+  gap: 10px;
+  cursor: pointer;
 }
 
 .color-picker {
-  width: 36px;
-  height: 36px;
+  width: 44px;
+  height: 44px;
   border: 2px solid #444;
   border-radius: 8px;
   cursor: pointer;
@@ -137,19 +152,19 @@ export default {
 
 .color-picker-label {
   color: #fff;
-  font-size: 12px;
-  opacity: 0.8;
+  font-size: 14px;
+  opacity: 0.85;
 }
 
 .theme-selector__colors {
   display: grid;
-  grid-template-columns: repeat(5, 1fr);
-  gap: 8px;
+  grid-template-columns: repeat(auto-fill, 44px);
+  gap: 10px;
 }
 
 .color-option {
-  width: 36px;
-  height: 36px;
+  width: 44px;
+  height: 44px;
   border: 2px solid transparent;
   border-radius: 8px;
   cursor: pointer;
@@ -220,19 +235,9 @@ export default {
     margin-bottom: 12px;
   }
 
-  .color-picker {
-    width: 32px;
-    height: 32px;
-  }
-
   .theme-selector__colors {
-    grid-template-columns: repeat(5, 1fr);
-    gap: 6px;
-  }
-
-  .color-option {
-    width: 32px;
-    height: 32px;
+    grid-template-columns: repeat(auto-fill, 44px);
+    gap: 10px;
   }
 
   .color-option i {

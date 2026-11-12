@@ -173,7 +173,8 @@ defineEmits(['update:modelValue', 'close', 'save', 'delete'])
 }
 
 .submit-timing-btn {
-  background: var(--accent-color);
+  background: var(--accent-solid);
+  color: var(--accent-contrast);
 }
 
 .delete-note-btn {

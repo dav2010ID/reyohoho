@@ -80,15 +80,15 @@
   border: 0;
   border-radius: 6px;
   padding: 10px 16px;
-  background: var(--accent-color);
-  color: #fff;
+  background: var(--accent-solid);
+  color: var(--accent-contrast);
   font-weight: 600;
   cursor: pointer;
   transition: background-color 0.2s ease;
 }
 
 .player-empty-state button:hover {
-  background: var(--accent-hover);
+  background: var(--accent-solid-hover);
 }
 
 .fullscreen {

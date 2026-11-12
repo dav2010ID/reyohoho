@@ -191,8 +191,8 @@ async function deleteNotification(notificationId) {
 }
 
 .btn {
-  background: var(--accent-color);
-  color: white;
+  background: var(--accent-solid);
+  color: var(--accent-contrast);
   border: none;
   padding: 10px 16px;
   border-radius: 8px;

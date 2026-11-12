@@ -57,7 +57,9 @@ function toggle() {
   border: none;
   cursor: pointer;
   font-size: 30px;
-  margin: 10px;
+  min-width: 44px;
+  min-height: 44px;
+  margin: 4px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -68,15 +70,15 @@ function toggle() {
 }
 
 .toggle[aria-expanded='true'] {
-  color: var(--accent-color, #ff6b35);
+  color: var(--accent-text, #988dee);
 }
 
 .mobile-badge {
   position: absolute;
   top: 5px;
   right: 5px;
-  background: var(--accent-color);
-  color: white;
+  background: var(--accent-solid);
+  color: var(--accent-contrast);
   font-size: 8px;
   font-weight: 600;
   padding: 2px;

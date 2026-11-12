@@ -127,7 +127,7 @@ export default {
         logout(true)
       }
 
-      if (user.value.photo) {
+      if (user.value?.photo) {
         const baseURL = await getBaseURL()
         photoURL.value = `${baseURL}${user.value.photo}`
       }
@@ -175,7 +175,7 @@ export default {
   width: 150px;
   height: 150px;
   border-radius: 50%;
-  border: 2px solid var(--accent-color);
+  border: 2px solid var(--accent-ui);
   overflow: hidden;
   background-color: #f0f0f0;
   display: flex;
@@ -240,7 +240,7 @@ export default {
 
 .editable-text:hover .edit-icon {
   opacity: 1;
-  color: var(--accent-color);
+  color: var(--accent-text);
 }
 
 .edit-input-container {
@@ -252,7 +252,7 @@ export default {
 .edit-input {
   flex: 1;
   padding: 4px 8px;
-  border: 1px solid var(--accent-color);
+  border: 1px solid var(--accent-ui);
   border-radius: 4px;
   font-size: 14px;
   background-color: white;
@@ -290,8 +290,8 @@ export default {
 .logout-btn {
   margin-top: 30px;
   padding: 10px 20px;
-  background-color: var(--accent-color);
-  color: white;
+  background-color: var(--accent-solid);
+  color: var(--accent-contrast);
   border: none;
   border-radius: 5px;
   cursor: pointer;
@@ -300,7 +300,7 @@ export default {
 }
 
 .logout-btn:hover {
-  background-color: var(--accent-hover);
+  background-color: var(--accent-solid-hover);
 }
 
 .loading {
@@ -343,7 +343,7 @@ export default {
 
 .dialog-header {
   padding: 16px 20px;
-  border-bottom: 1px solid var(--accent-color);
+  border-bottom: 1px solid var(--accent-ui);
 }
 
 .dialog-header h3 {

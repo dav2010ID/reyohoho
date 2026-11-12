@@ -503,7 +503,7 @@ onMounted(() => {
 
 .content-title:hover {
   text-shadow: 0 0 20px var(--accent-color);
-  color: var(--accent-color);
+  color: var(--accent-text);
 }
 
 .content-logo {
@@ -557,7 +557,7 @@ onMounted(() => {
 
 .rating-link:hover {
   background: rgba(255, 255, 255, 0.1);
-  border-color: var(--accent-color);
+  border-color: var(--accent-ui);
   box-shadow: 0 0 10px var(--accent-semi-transparent);
 }
 

@@ -33,14 +33,15 @@
 }
 
 .list-button-item button:hover {
-  background-color: var(--accent-color);
+  background-color: var(--accent-solid);
+  color: var(--accent-contrast);
   transform: translateX(4px);
   box-shadow: 0 2px 8px var(--accent-semi-transparent);
 }
 
 .list-button-item button.active {
-  background-color: var(--accent-color);
-  color: white;
+  background-color: var(--accent-solid);
+  color: var(--accent-contrast);
   box-shadow: 0 2px 12px var(--accent-semi-transparent);
 }
 
@@ -97,7 +98,8 @@
 }
 
 .favorite-btn:hover {
-  background-color: var(--accent-color);
+  background-color: var(--accent-solid);
+  color: var(--accent-contrast);
   transform: translateY(-3px);
   box-shadow: 0 4px 10px var(--accent-semi-transparent);
 }
@@ -114,7 +116,7 @@
 
 .dropdown-arrow.highlighted {
   opacity: 1;
-  color: var(--accent-color);
+  color: var(--accent-text);
   text-shadow: 0 0 8px var(--accent-semi-transparent);
 }
 

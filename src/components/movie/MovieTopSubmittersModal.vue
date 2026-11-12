@@ -155,8 +155,8 @@ const getContributionWidth = (count) => {
   gap: 8px;
   border: none;
   border-radius: 8px;
-  background: var(--accent-color);
-  color: #fff;
+  background: var(--accent-solid);
+  color: var(--accent-contrast);
   padding: 10px 14px;
   cursor: pointer;
   margin-bottom: 16px;

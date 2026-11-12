@@ -112,7 +112,7 @@ const listTypes = USER_LIST_TYPES_ENUM
 }
 
 .mobile-list-toggle .material-icons.active {
-  color: var(--accent-color);
+  color: var(--accent-text);
   text-shadow: 0 0 8px var(--accent-semi-transparent);
 }
 
@@ -177,7 +177,7 @@ const listTypes = USER_LIST_TYPES_ENUM
 }
 
 .mobile-list-btn .material-icons.active {
-  color: var(--accent-color);
+  color: var(--accent-text);
   text-shadow: 0 0 8px var(--accent-semi-transparent);
 }
 

@@ -73,14 +73,16 @@ defineEmits(['open-player-modal', 'open-source-modal'])
 }
 
 .player-btn:hover {
-  background: var(--accent-color);
-  border-color: var(--accent-color);
+  background: var(--accent-solid);
+  border-color: var(--accent-solid);
+  color: var(--accent-contrast);
   box-shadow: 0 0 10px var(--accent-semi-transparent);
 }
 
 .player-btn:active {
-  background: var(--accent-color);
-  border-color: var(--accent-color);
+  background: var(--accent-solid);
+  border-color: var(--accent-solid);
+  color: var(--accent-contrast);
 }
 
 .player-btn:focus {
@@ -101,13 +103,14 @@ defineEmits(['open-player-modal', 'open-source-modal'])
 }
 
 .source-btn:hover {
-  background: var(--accent-color);
-  border-color: var(--accent-color);
+  background: var(--accent-solid);
+  border-color: var(--accent-solid);
+  color: var(--accent-contrast);
 }
 
 @media (max-width: 700px) {
   .players-list {
-    max-width: calc(100vw - 12px);
+    max-width: calc(100vw - 24px);
     margin-bottom: 10px;
   }
 

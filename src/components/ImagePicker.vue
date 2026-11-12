@@ -242,8 +242,8 @@ export default {
 }
 
 .login-button {
-  background: var(--accent-color);
-  color: white;
+  background: var(--accent-solid);
+  color: var(--accent-contrast);
   border: none;
   border-radius: 0.375rem;
   padding: 0.5rem 1.5rem;
@@ -253,7 +253,7 @@ export default {
 }
 
 .login-button:hover {
-  background: var(--accent-hover);
+  background: var(--accent-solid-hover);
 }
 
 .image-picker-header {
@@ -275,7 +275,7 @@ export default {
 
 .image-search-input:focus {
   outline: none;
-  border-color: var(--accent-color);
+  border-color: var(--accent-ui);
 }
 
 .image-search-input::placeholder {
@@ -301,7 +301,7 @@ export default {
   width: 32px;
   height: 32px;
   border: 3px solid #444;
-  border-top: 3px solid var(--accent-color);
+  border-top: 3px solid var(--accent-ui);
   border-radius: 50%;
   animation: spin 1s linear infinite;
   margin-bottom: 1rem;

@@ -1,4 +1,5 @@
 import { defineStore } from 'pinia'
+import { contrastRatio, getAccentSolid, getAccentText, getAccentUi } from '@/utils/accentContrast'
 
 const createNoopStorage = () => ({
   getItem: () => null,
@@ -99,20 +100,39 @@ export const useThemeStore = defineStore('theme', {
       const root = document.documentElement
       const currentColor = this.currentAccentColor
 
-      root.style.setProperty('--accent-color', currentColor.value)
+      // Every remaining raw-accent use (rings, bars, tracks, glows) gets the version visible on dark
+      // surfaces; mid and light accents are unchanged, very dark ones are lightened to 3:1.
+      const accentUi = getAccentUi(currentColor.value)
+      root.style.setProperty('--accent-color', accentUi)
       root.style.setProperty('--accent-hover', currentColor.hover)
 
-      const accentRgb = this.hexToRgb(currentColor.value)
+      const accentRgb = this.hexToRgb(accentUi)
       const lighterShade = this.lightenColor(currentColor.value, 20)
       const darkerShade = this.darkenColor(currentColor.value, 20)
 
       if (accentRgb) {
         root.style.setProperty('--accent-color-rgb', `${accentRgb.r}, ${accentRgb.g}, ${accentRgb.b}`)
       }
-      root.style.setProperty('--accent-light', lighterShade)
+      const accentText = getAccentText(currentColor.value)
+      root.style.setProperty('--accent-text', accentText)
+      root.style.setProperty('--accent-light', this.readableOrFallback(lighterShade, accentText))
       root.style.setProperty('--accent-dark', darkerShade)
-      root.style.setProperty('--accent-transparent', `${currentColor.value}30`)
-      root.style.setProperty('--accent-semi-transparent', `${currentColor.value}80`)
+      root.style.setProperty('--accent-ui', accentUi)
+      root.style.setProperty('--accent-transparent', `${accentUi}30`)
+      root.style.setProperty('--accent-semi-transparent', `${accentUi}80`)
+
+      const solid = getAccentSolid(currentColor.value)
+      root.style.setProperty('--accent-solid', solid.fill)
+      root.style.setProperty('--accent-solid-hover', solid.hover)
+      root.style.setProperty('--accent-contrast', solid.text)
+    },
+
+    // Осветлённый оттенок остаётся, если он читается на тёмном фоне, иначе берётся --accent-text.
+    readableOrFallback(rgbString, fallbackHex) {
+      const parts = /rgb\((\d+), (\d+), (\d+)\)/.exec(rgbString)
+      if (!parts) return fallbackHex
+      const rgb = [Number(parts[1]), Number(parts[2]), Number(parts[3])]
+      return contrastRatio(rgb, [45, 45, 45]) >= 4.5 ? rgbString : fallbackHex
     },
 
     hexToRgb(hex) {

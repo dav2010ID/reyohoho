@@ -118,13 +118,6 @@
               <span class="rating-value" :class="getRatingColor(movieInfo.rating_kinopoisk)">
                 {{ movieInfo.rating_kinopoisk ? movieInfo.rating_kinopoisk : '—' }}
               </span>
-              <img
-                src="/src/assets/icon-external-link.png"
-                alt="Внешняя ссылка"
-                class="external-link-icon"
-                width="48"
-                height="48"
-              />
             </a>
           </div>
 
@@ -145,13 +138,6 @@
               <span class="rating-value" :class="getRatingColor(movieInfo.rating_kinopoisk)">
                 {{ movieInfo.rating_kinopoisk ? movieInfo.rating_kinopoisk : '—' }}
               </span>
-              <img
-                src="/src/assets/icon-external-link.png"
-                alt="Внешняя ссылка"
-                class="external-link-icon"
-                width="48"
-                height="48"
-              />
             </a>
           </div>
 
@@ -172,13 +158,6 @@
               <span class="rating-value" :class="getRatingColor(movieInfo.rating_imdb)">
                 {{ movieInfo.rating_imdb ? movieInfo.rating_imdb : '—' }}
               </span>
-              <img
-                src="/src/assets/icon-external-link.png"
-                alt="Внешняя ссылка"
-                class="external-link-icon"
-                width="48"
-                height="48"
-              />
             </a>
           </div>
 
@@ -199,13 +178,6 @@
               <span class="rating-value" :class="getRatingColor(movieInfo.rating_imdb)">
                 {{ movieInfo.rating_imdb ? movieInfo.rating_imdb : '—' }}
               </span>
-              <img
-                src="/src/assets/icon-external-link.png"
-                alt="Внешняя ссылка"
-                class="external-link-icon"
-                width="48"
-                height="48"
-              />
             </a>
           </div>
 
@@ -225,13 +197,6 @@
               >
                 {{ movieInfo.rating_shikimori }}
               </span>
-              <img
-                src="/src/assets/icon-external-link.png"
-                alt="Внешняя ссылка"
-                class="external-link-icon"
-                width="48"
-                height="48"
-              />
             </a>
           </div>
 
@@ -255,14 +220,6 @@
               <span class="rating-value" :class="getRatingColor(rating.score)">{{
                 rating.label
               }}</span>
-              <img
-                v-if="rating.href"
-                src="/src/assets/icon-external-link.png"
-                alt="Внешняя ссылка"
-                class="external-link-icon"
-                width="48"
-                height="48"
-              />
             </component>
           </div>
 
@@ -337,17 +294,6 @@
         <div id="movie-details" class="additional-info">
           <div class="mobile-movie-summary">
             <h2 class="mobile-movie-title">{{ movieInfo.title }}</h2>
-            <div class="mobile-movie-chips">
-              <span v-for="chip in mobileSummaryChips" :key="chip" class="mobile-summary-chip">
-                {{ chip }}
-              </span>
-              <span
-                v-if="movieInfo.rating_age_limits"
-                :class="['mobile-age-chip', getAgeRatingClass(movieInfo.rating_age_limits)]"
-              >
-                {{ getAgeRatingLabel(movieInfo.rating_age_limits) }}
-              </span>
-            </div>
           </div>
           <div class="info-content">
             <div v-if="moviePosterUrl" class="movie-poster-container desktop-only">
@@ -376,43 +322,58 @@
               </a>
             </div>
             <div class="details-container">
-              <ul class="info-list">
-                <li v-if="movieInfo.type && TYPES_ENUM[movieInfo.type]" class="info-row-type">
-                  <strong>Тип:</strong>
-                  <span class="info-value">{{ TYPES_ENUM[movieInfo.type] }}</span>
-                </li>
-                <li v-if="movieInfo.year" class="info-row-year">
-                  <strong>Год выпуска:</strong>
-                  <span class="info-value">{{ movieInfo.year }}</span>
-                </li>
-                <li v-if="movieInfo.title" class="info-row-title">
-                  <strong>Название:</strong>
-                  <span class="info-value">{{ movieInfo.title }}</span>
-                </li>
-                <li v-if="movieInfo.name_original">
-                  <strong>Оригинальное название:</strong>
-                  <span class="info-value">{{ movieInfo.name_original }}</span>
-                </li>
-                <li v-if="movieInfo.slogan">
-                  <strong>Слоган:</strong>
-                  <span class="info-value">{{ movieInfo.slogan }}</span>
-                </li>
+              <div class="info-head">
+                <p class="info-meta-line">
+                  <span v-if="movieInfo.year">{{ movieInfo.year }}</span>
+                  <span v-if="movieInfo.type && TYPES_ENUM[movieInfo.type]">{{
+                    TYPES_ENUM[movieInfo.type]
+                  }}</span>
+                  <span v-if="countryNames.length">{{ countryNames.join(', ') }}</span>
+                  <span
+                    v-if="movieInfo.rating_age_limits"
+                    class="info-age-badge"
+                    :title="`Возрастное ограничение ${getAgeRatingLabel(movieInfo.rating_age_limits)}`"
+                    >{{ getAgeRatingLabel(movieInfo.rating_age_limits) }}</span
+                  >
+                  <span v-if="movieInfo.rating_mpaa" class="info-age-badge" title="MPAA">{{
+                    movieInfo.rating_mpaa.toUpperCase()
+                  }}</span>
+                </p>
+                <p v-if="genreNames.length" class="info-genres-line">{{ genreNames.join(' · ') }}</p>
+                <p v-if="movieInfo.name_original" class="info-original-title">
+                  {{ movieInfo.name_original }}
+                </p>
+                <p v-if="movieInfo.slogan" class="info-slogan">«{{ movieInfo.slogan }}»</p>
+              </div>
+              <div v-if="movieInfo.description" class="content-info info-description-row">
+                <div class="content-description">
+                  <p class="content-description-text">
+                    {{ visibleDescription
+                    }}<span v-if="shouldCollapseDescription && !isDescriptionExpanded">...</span>
+                  </p>
+                  <button
+                    v-if="shouldCollapseDescription"
+                    type="button"
+                    class="description-toggle"
+                    @click="isDescriptionExpanded = !isDescriptionExpanded"
+                  >
+                    {{ isDescriptionExpanded ? 'Свернуть' : 'Показать полностью' }}
+                  </button>
+                </div>
+              </div>
+              <ul
+                v-if="
+                  movieInfo.production_companies ||
+                  formattedDuration ||
+                  movieInfo.seasons_count ||
+                  movieInfo.episodes_count ||
+                  productionStatusLabel
+                "
+                class="info-list"
+              >
                 <li v-if="movieInfo.production_companies">
                   <strong>Продакшн:</strong>
                   <span class="info-value">{{ movieInfo.production_companies }}</span>
-                </li>
-                <li v-if="movieInfo.countries?.length" class="info-row-countries">
-                  <strong>Страна производства:</strong>
-                  <span class="info-value">{{ countryNames.join(', ') }}</span>
-                </li>
-                <li v-if="movieInfo.genres?.length" class="info-row-genres">
-                  <strong>Жанры:</strong>
-                  <span class="info-value desktop-genres-text">{{ genreNames.join(', ') }}</span>
-                  <div class="mobile-genre-chips">
-                    <span v-for="genre in genreNames" :key="genre" class="mobile-genre-chip">
-                      {{ genre }}
-                    </span>
-                  </div>
                 </li>
                 <li v-if="formattedDuration">
                   <strong>{{ movieInfo.serial ? 'Время серии:' : 'Продолжительность:' }}</strong>
@@ -430,49 +391,17 @@
                   <strong>Статус:</strong>
                   <span class="info-value">{{ productionStatusLabel }}</span>
                 </li>
-                <li
-                  v-if="movieInfo.rating_mpaa || movieInfo.rating_age_limits"
-                  :class="['rating-boxes', getAgeRatingClass(movieInfo.rating_age_limits)]"
-                >
-                  <strong>Возраст:</strong>
-                  <div class="rating-boxes-values">
-                    <div v-if="movieInfo.rating_mpaa" class="rating-box mpaa">
-                      <strong>MPAA</strong>
-                      <span>{{ movieInfo.rating_mpaa.toUpperCase() }}</span>
-                    </div>
-                    <div
-                      v-if="movieInfo.rating_age_limits"
-                      :class="['rating-box age', getAgeRatingClass(movieInfo.rating_age_limits)]"
-                    >
-                      <strong>{{ movieInfo.rating_age_limits.replace('age', '') }}+</strong>
-                    </div>
-                  </div>
-                </li>
               </ul>
-              <div v-if="movieInfo.description" class="content-info info-description-row">
-                <strong>Описание:</strong>
-                <div class="content-description">
-                  <p class="content-description-text">
-                    {{ visibleDescription
-                    }}<span v-if="shouldCollapseDescription && !isDescriptionExpanded">...</span>
-                  </p>
-                  <button
-                    v-if="shouldCollapseDescription"
-                    type="button"
-                    class="description-toggle"
-                    @click="isDescriptionExpanded = !isDescriptionExpanded"
-                  >
-                    {{ isDescriptionExpanded ? 'Свернуть' : 'Показать полностью' }}
-                  </button>
-                </div>
-              </div>
             </div>
           </div>
         </div>
 
         <div v-if="sequelsAndPrequels.length" class="related-movies">
           <div class="related-movies-header">
-            <h2>Сиквелы и приквелы</h2>
+            <h2>
+              Сиквелы и приквелы <span class="movie-panel-count">{{ sequelsAndPrequels.length }}</span>
+            </h2>
+            <RibbonNav container=".related-movies" scroller=".grid" label="Сиквелы и приквелы" />
           </div>
           <MovieList
             :movies-list="sequelsAndPrequels"
@@ -485,7 +414,10 @@
 
         <div v-if="similars.length" class="related-movies">
           <div class="related-movies-header">
-            <h2>Похожие</h2>
+            <h2>
+              Похожие <span class="movie-panel-count">{{ similars.length }}</span>
+            </h2>
+            <RibbonNav container=".related-movies" scroller=".grid" label="Похожие" />
           </div>
           <MovieList
             :movies-list="similars"
@@ -539,9 +471,20 @@
             class="staff-section movie-panel"
           >
             <div v-if="actors.length" class="staff-block">
-              <h2 class="movie-panel-title">
-                В ролях <span class="movie-panel-count">{{ actors.length }}</span>
-              </h2>
+              <div class="movie-panel-heading">
+                <h2 class="movie-panel-title">
+                  В ролях <span class="movie-panel-count">{{ actors.length }}</span>
+                </h2>
+                <a
+                  v-if="actors.length > 12"
+                  class="movie-panel-link"
+                  :href="`https://www.kinopoisk.ru/film/${kp_id}/cast/`"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  >Все актёры →</a
+                >
+                <RibbonNav container=".staff-block" scroller=".staff-list" label="В ролях" />
+              </div>
               <ul class="staff-list">
                 <li v-for="person in actors.slice(0, 12)" :key="person.staff_id" class="staff-item">
                   <a
@@ -568,23 +511,11 @@
                     }}</span>
                   </a>
                 </li>
-                <li v-if="actors.length > 12" class="staff-item staff-more">
-                  <a
-                    class="staff-link"
-                    :href="`https://www.kinopoisk.ru/film/${kp_id}/cast/`"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    :title="`Показать всех ${actors.length} актёров`"
-                  >
-                    <span class="staff-photo staff-more-circle">+{{ actors.length - 12 }}</span>
-                    <span class="staff-name">Все актёры</span>
-                  </a>
-                </li>
               </ul>
             </div>
 
             <div v-if="staffNameGroups.length" class="staff-block">
-              <h2 class="movie-panel-title">Съёмочная группа</h2>
+              <h3 class="movie-panel-subtitle">Съёмочная группа</h3>
               <dl class="crew-list">
                 <div v-for="group in staffNameGroups" :key="group.key" class="crew-row">
                   <dt>{{ group.people.length === 1 ? group.one : group.title }}</dt>
@@ -607,7 +538,7 @@
                       rel="noopener noreferrer"
                       :title="`Показать всех ${group.people.length} ${group.label}`"
                     >
-                      +{{ group.people.length - 5 }}
+                      и ещё {{ group.people.length - 5 }}
                     </a>
                   </dd>
                 </div>
@@ -668,6 +599,7 @@ import { addToList } from '@/api/user'
 import { usePlayerLists } from '@/composables/usePlayerLists'
 import { cardRatings } from '../../shared/history-data.js'
 import { MovieList } from '@/components/MovieList/'
+import RibbonNav from '@/components/movie/RibbonNav.vue'
 import ErrorMessage from '@/components/ErrorMessage.vue'
 import SpinnerLoading from '@/components/SpinnerLoading.vue'
 import { TYPES_ENUM, USER_LIST_TYPES_ENUM } from '@/constants'
@@ -833,17 +765,6 @@ const productionStatusLabel = computed(() =>
   formatProductionStatus(movieInfo.value?.production_status)
 )
 const formattedDuration = computed(() => formatMovieDuration(movieInfo.value?.film_length))
-const mobileSummaryChips = computed(() => {
-  const chips = []
-  const typeLabel = movieInfo.value?.type ? TYPES_ENUM[movieInfo.value.type] : ''
-
-  if (movieInfo.value?.year) chips.push(String(movieInfo.value.year))
-  if (typeLabel) chips.push(typeLabel)
-  if (countryNames.value[0]) chips.push(countryNames.value[0])
-  if (genreNames.value[0]) chips.push(genreNames.value[0])
-
-  return chips
-})
 const normalizedDescription = computed(() => movieInfo.value?.description?.trim() || '')
 const shouldCollapseDescription = computed(
   () => normalizedDescription.value.length > DESCRIPTION_PREVIEW_LIMIT
@@ -970,28 +891,6 @@ const transformMoviesData = (movies) => {
     poster: resolvePosterByMovie(movie),
     title: movie.name_ru || movie.name_en || movie.name_original
   }))
-}
-
-const getAgeRatingClass = (ratingAgeLimits) => {
-  const age = Number(String(ratingAgeLimits || '').replace(/\D/g, ''))
-
-  if (!age) {
-    return 'age-rating-neutral'
-  }
-
-  if (age <= 6) {
-    return 'age-rating-soft'
-  }
-
-  if (age <= 12) {
-    return 'age-rating-caution'
-  }
-
-  if (age <= 16) {
-    return 'age-rating-mature'
-  }
-
-  return 'age-rating-adult'
 }
 
 const getAgeRatingLabel = (ratingAgeLimits) => {

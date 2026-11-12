@@ -35,7 +35,7 @@
 
 .nudity-info-loading i {
   font-size: 20px;
-  color: var(--accent-color);
+  color: var(--accent-text);
 }
 
 .nudity-info-actions {
@@ -103,7 +103,7 @@
   display: flex;
   align-items: center;
   gap: 8px;
-  color: var(--accent-color);
+  color: var(--accent-text);
   font-weight: 500;
 }
 
@@ -191,7 +191,7 @@
 }
 
 .twitch-link {
-  color: var(--accent-color);
+  color: var(--accent-text);
   text-decoration: none;
   cursor: pointer;
   transition: all 0.2s ease;
@@ -230,11 +230,11 @@
   gap: 8px;
   font-weight: 500;
   color: #fff;
-  border-bottom: 1px solid color-mix(in srgb, var(--accent-color) 20%, transparent);
+  border-bottom: 1px solid color-mix(in srgb, var(--accent-ui) 20%, transparent);
 }
 
 .acknowledgment-header i {
-  color: var(--accent-color);
+  color: var(--accent-text);
 }
 
 .acknowledgment-content {
@@ -427,7 +427,7 @@
   font-size: 12px;
   color: rgba(255, 255, 255, 0.7);
   background: color-mix(in srgb, var(--accent-color) 8%, transparent);
-  border: 1px solid color-mix(in srgb, var(--accent-color) 16%, transparent);
+  border: 1px solid color-mix(in srgb, var(--accent-ui) 16%, transparent);
   border-radius: 8px;
   padding: 8px 12px;
 }
@@ -487,7 +487,7 @@
 
 .timing-btn-action.overlay-active {
   background: color-mix(in srgb, var(--accent-color) 16%, transparent);
-  border-color: color-mix(in srgb, var(--accent-color) 36%, transparent);
+  border-color: color-mix(in srgb, var(--accent-ui) 36%, transparent);
   color: var(--accent-light);
 }
 

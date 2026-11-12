@@ -222,7 +222,8 @@ h2 {
 
 .player-item.active,
 .group-item.active {
-  background-color: var(--accent-color);
+  background-color: var(--accent-solid);
+  color: var(--accent-contrast);
   box-shadow: 0 0 5px var(--accent-semi-transparent);
 }
 

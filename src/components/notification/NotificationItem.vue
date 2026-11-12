@@ -135,7 +135,7 @@ const toggleSpoiler = (event) => {
 
 .notification-item.unread {
   background: rgba(255, 255, 255, 0.1);
-  border-color: var(--accent-color);
+  border-color: var(--accent-ui);
 }
 
 .notification-content {
@@ -225,7 +225,7 @@ const toggleSpoiler = (event) => {
   border-radius: 6px;
   padding: 8px;
   margin-bottom: 6px;
-  border-left: 2px solid var(--accent-color);
+  border-left: 2px solid var(--accent-ui);
 }
 
 .original-comment,
@@ -277,7 +277,7 @@ const toggleSpoiler = (event) => {
 }
 
 .comment-text :deep(.comment-link) {
-  color: var(--accent-color);
+  color: var(--accent-text);
   text-decoration: none;
   transition: color 0.2s ease;
 }
@@ -326,12 +326,12 @@ const toggleSpoiler = (event) => {
 }
 
 .mark-read-btn {
-  background: var(--accent-color);
-  color: white;
+  background: var(--accent-solid);
+  color: var(--accent-contrast);
 }
 
 .mark-read-btn:hover {
-  background: var(--accent-hover);
+  background: var(--accent-solid-hover);
 }
 
 .delete-btn {

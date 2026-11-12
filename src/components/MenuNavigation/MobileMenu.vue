@@ -1,6 +1,12 @@
 <template>
   <transition name="slide">
-    <nav v-if="isNavbarVisible" class="mobile-navbar" @click.stop>
+    <nav
+      v-if="isNavbarVisible"
+      v-dialog-focus="closeNavbar"
+      aria-label="Меню"
+      class="mobile-navbar"
+      @click.stop
+    >
       <button
         class="mobile-navbar__close"
         type="button"
@@ -59,6 +65,7 @@
 
 <script setup>
 import { storeToRefs } from 'pinia'
+import { onBeforeUnmount, watch } from 'vue'
 import { useNavbarStore } from '@/store/navbar'
 import NotificationBadge from '@/components/notification/NotificationBadge.vue'
 
@@ -69,6 +76,14 @@ const props = defineProps({
 const navbarStore = useNavbarStore()
 const { isNavbarVisible } = storeToRefs(navbarStore)
 const { closeNavbar } = navbarStore
+
+// The open drawer covers the page, so the page is also out of the keyboard order (Escape closes via v-dialog-focus).
+const setPageInert = (value) => {
+  const page = document.getElementById('main-content')
+  if (page) page.inert = value
+}
+watch(isNavbarVisible, (open) => setPageInert(open), { immediate: true })
+onBeforeUnmount(() => setPageInert(false))
 </script>
 
 <style scoped>
@@ -91,8 +106,8 @@ const { closeNavbar } = navbarStore
   position: absolute;
   top: 14px;
   left: 18px;
-  width: 42px;
-  height: 42px;
+  width: 44px;
+  height: 44px;
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -116,7 +131,7 @@ const { closeNavbar } = navbarStore
 
 .mobile-navbar__close:hover {
   background: var(--accent-transparent, rgba(108, 92, 231, 0.15));
-  border-color: color-mix(in srgb, var(--accent-color) 32%, rgba(255, 255, 255, 0.1));
+  border-color: color-mix(in srgb, var(--accent-ui) 32%, rgba(255, 255, 255, 0.1));
   box-shadow: none;
 }
 
@@ -172,14 +187,14 @@ const { closeNavbar } = navbarStore
 
 .nav-links a:hover {
   background: var(--accent-transparent, rgba(108, 92, 231, 0.15));
-  color: var(--accent-color, #6c5ce7);
+  color: var(--accent-text, #988dee);
   transform: translateX(2px);
 }
 
 .nav-links a:active,
 .nav-links a.router-link-active {
   background: var(--accent-transparent, rgba(108, 92, 231, 0.2));
-  color: var(--accent-color, #6c5ce7);
+  color: var(--accent-text, #988dee);
 }
 
 .notification-link {
@@ -198,14 +213,14 @@ const { closeNavbar } = navbarStore
 
 .notification-link:hover {
   background: var(--accent-transparent, rgba(108, 92, 231, 0.15));
-  color: var(--accent-color, #6c5ce7);
+  color: var(--accent-text, #988dee);
   transform: translateX(2px);
 }
 
 .notification-link:active,
 .notification-link.router-link-active {
   background: var(--accent-transparent, rgba(108, 92, 231, 0.2));
-  color: var(--accent-color, #6c5ce7);
+  color: var(--accent-text, #988dee);
 }
 
 .slide-enter-active,

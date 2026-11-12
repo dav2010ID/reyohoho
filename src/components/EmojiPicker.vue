@@ -325,7 +325,7 @@ export default {
 
 .category-btn.active {
   background: var(--accent-transparent);
-  color: var(--accent-color);
+  color: var(--accent-text);
 }
 
 .emoji-grid {

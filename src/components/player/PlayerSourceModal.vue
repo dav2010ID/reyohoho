@@ -114,7 +114,7 @@ defineEmits(['close', 'select'])
 }
 
 .source-candidate-btn:hover {
-  border-color: var(--accent-color);
+  border-color: var(--accent-ui);
   background: #3a3a3a;
 }
 
