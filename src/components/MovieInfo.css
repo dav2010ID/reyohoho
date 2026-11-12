@@ -3,7 +3,8 @@
   position: relative;
   /* The backdrop glow is full-bleed; clip it to the page without making a scroll container. */
   overflow-x: clip;
-  --movie-page-max-width: 1440px;
+  /* No cap: the header, the player and every section use the full page width. */
+  --movie-page-max-width: none;
   --movie-page-gutter: 24px;
 }
 /* Стили для информации о фильме */
@@ -284,10 +285,11 @@ a.rating-link::after {
   display: none;
 }
 
-/* Poster / description / facts. */
+/* Poster / description / facts; all three scale with the full-width page,
+   the facts column (and a single trailer in it) takes 40%. */
 .info-content {
   display: grid;
-  grid-template-columns: 200px minmax(0, 62ch) minmax(240px, 1fr);
+  grid-template-columns: clamp(200px, 12vw, 320px) minmax(0, 1fr) minmax(240px, 40%);
   gap: 40px;
   align-items: start;
 }
