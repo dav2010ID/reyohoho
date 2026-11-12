@@ -305,13 +305,23 @@ onUnmounted(() => {
   width: 280px;
 }
 
+/* Shelf posters follow the card size setting: S 140, M 168, L 220 (phones 96 / 118 / 156). */
 .grid.grid--ribbon-posters {
+  --shelf-card: 168px;
   gap: 16px;
 }
 
+.grid.grid--ribbon-posters.card-size-small {
+  --shelf-card: 140px;
+}
+
+.grid.grid--ribbon-posters.card-size-large {
+  --shelf-card: 220px;
+}
+
 .grid.grid--ribbon-posters > :deep(*) {
-  flex: 0 0 168px;
-  width: 168px;
+  flex: 0 0 var(--shelf-card);
+  width: var(--shelf-card);
 }
 
 .grid.grid--ribbon.grid--ribbon-resume :deep(.poster-action) {
@@ -360,9 +370,16 @@ onUnmounted(() => {
     scroll-padding-inline: 12px;
   }
 
-  .grid.grid--ribbon-posters > :deep(*) {
-    flex: 0 0 118px;
-    width: 118px;
+  .grid.grid--ribbon-posters {
+    --shelf-card: 118px;
+  }
+
+  .grid.grid--ribbon-posters.card-size-small {
+    --shelf-card: 96px;
+  }
+
+  .grid.grid--ribbon-posters.card-size-large {
+    --shelf-card: 156px;
   }
 }
 </style>

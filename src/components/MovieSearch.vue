@@ -156,7 +156,10 @@
             </section>
             <div v-if="topShelvesLoading" class="home-shelf" aria-hidden="true">
               <div class="home-section-head"><span class="skeleton-title"></span></div>
-              <div class="skeleton-row skeleton-row--ribbon">
+              <div
+                class="skeleton-row skeleton-row--ribbon"
+                :class="`skeleton-row--${mainStore.cardSize}`"
+              >
                 <span v-for="n in 8" :key="n" class="skeleton-poster"></span>
               </div>
             </div>
@@ -1221,15 +1224,24 @@ const fetchRandomMovie = async () => {
   overflow: hidden;
 }
 
-/* Shelf placeholder: the same 168px posters in one row. */
+/* Shelf placeholder: the same posters in one row, sized like the shelf. */
 .skeleton-row--ribbon {
+  --shelf-card: 168px;
   display: flex;
   gap: 16px;
   max-height: none;
 }
 
+.skeleton-row--ribbon.skeleton-row--small {
+  --shelf-card: 140px;
+}
+
+.skeleton-row--ribbon.skeleton-row--large {
+  --shelf-card: 220px;
+}
+
 .skeleton-row--ribbon .skeleton-poster {
-  flex: 0 0 168px;
+  flex: 0 0 var(--shelf-card);
 }
 
 .skeleton-poster {
@@ -1343,11 +1355,16 @@ const fetchRandomMovie = async () => {
   }
 
   .skeleton-row--ribbon {
+    --shelf-card: 118px;
     gap: 10px;
   }
 
-  .skeleton-row--ribbon .skeleton-poster {
-    flex-basis: 118px;
+  .skeleton-row--ribbon.skeleton-row--small {
+    --shelf-card: 96px;
+  }
+
+  .skeleton-row--ribbon.skeleton-row--large {
+    --shelf-card: 156px;
   }
 }
 </style>
