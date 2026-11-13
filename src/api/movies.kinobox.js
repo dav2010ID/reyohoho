@@ -381,6 +381,43 @@ const getTopMovies = async (
   })
 }
 
+// Newest releases from the Kino API catalogue (through the Worker, which holds the key).
+const getLatestReleases = async ({ limit = 20 } = {}, requestConfig = {}) => {
+  const { data } = await publicGet(
+    '/api/kinoapi/latest',
+    { ...requestConfig, params: { limit }, timeout: 15000 },
+    10 * 60000,
+    (data) => Array.isArray(data?.data?.items) && data.data.items.length > 0
+  )
+  if (!Array.isArray(data?.data?.items)) throw new Error('Invalid latest releases response')
+  const names = (list) => (Array.isArray(list) ? list.map((name) => ({ name })) : [])
+  return data.data.items
+    .filter((item) => Number.isInteger(item?.kinopoiskId) && item.kinopoiskId > 0)
+    .map((item) => ({
+      ...normalizeKinoboxMovie({
+        id: item.kinopoiskId,
+        type: item.type === 'tv' ? 'TV_SERIES' : 'FILM',
+        title: { russian: item.title?.russian || '', original: item.title?.original || '' },
+        // Without a TMDB poster the card falls back to the Kinopoisk poster by ID.
+        gallery: {
+          posterUrl:
+            typeof item.posterUrl === 'string' &&
+            item.posterUrl.startsWith('https://image.tmdb.org/t/p/w342/')
+              ? item.posterUrl
+              : ''
+        },
+        rating: {
+          kinopoisk: { value: item.rating?.kinopoisk },
+          imdb: { value: item.rating?.imdb }
+        },
+        year: item.year,
+        genres: names(item.genres),
+        countries: names(item.countries)
+      }),
+      source: 'kinoapi'
+    }))
+}
+
 // The proxy exposes a 250-film rating list, not a random/all-cinema endpoint.
 // Equal-sized pages keep selection uniform and reuse the proxy's cached top pages.
 const getRandomMovie = async (requestConfig = {}) => {
@@ -400,6 +437,7 @@ export {
   getPlayers,
   getPlayersRaw,
   getTopMovies,
+  getLatestReleases,
   getRandomMovie,
   normalizeKinoboxMovie,
   normalizeKinoboxSearchResponse

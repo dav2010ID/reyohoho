@@ -141,7 +141,7 @@
             >
               <div class="home-section-head">
                 <h2>{{ shelf.title }}</h2>
-                <router-link :to="shelf.link" class="text-action home-shelf__all"
+                <router-link v-if="shelf.link" :to="shelf.link" class="text-action home-shelf__all"
                   >Весь список&nbsp;<span class="sym" aria-hidden="true">→</span></router-link
                 >
                 <RibbonNav
@@ -155,7 +155,7 @@
                 :movies-list="shelf.movies"
                 :is-history="false"
                 :loading="false"
-                :show-rank="isTopList"
+                :show-rank="isTopList && shelf.key !== 'latest'"
                 ribbon="posters"
               />
             </section>
@@ -246,6 +246,7 @@ import {
   apiSearch,
   getKpIDfromIMDB,
   getKpIDfromSHIKI,
+  getLatestReleases,
   getMovies,
   getRandomMovie,
   getKpInfo
@@ -304,9 +305,15 @@ const topShelvesFailed = ref(false)
 // The same list is called the same everywhere: Kinopoisk providers serve the Top-250.
 const isTopList = computed(() => mainStore.contentApiProvider !== 'local')
 const topListTitle = computed(() => (isTopList.value ? 'Топ-250' : 'Популярное'))
+// Shelves in order; a shelf without "load" reads the content provider's top list.
 const shelfDefinitions = computed(() =>
   isTopList.value
     ? [
+        {
+          key: 'latest',
+          title: 'Последние релизы',
+          load: () => getLatestReleases({ limit: HOME_SHELF_SIZE })
+        },
         {
           key: 'movie',
           title: 'Топ-250 · Фильмы',
@@ -429,7 +436,9 @@ const loadHomeShelves = async () => {
   topShelvesFailed.value = false
   const definitions = shelfDefinitions.value
   const results = await Promise.allSettled(
-    definitions.map((shelf) => getMovies({ ...shelf.params, page: 1, limit: HOME_SHELF_SIZE }))
+    definitions.map((shelf) =>
+      shelf.load ? shelf.load() : getMovies({ ...shelf.params, page: 1, limit: HOME_SHELF_SIZE })
+    )
   )
   topShelves.value = definitions
     .map((shelf, index) => ({

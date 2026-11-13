@@ -158,11 +158,17 @@ const getPlayersWithFallback = async (contentId, options = {}, ...rest) => {
     let players = {}
     let error
     try {
-      players = mergePlayerMaps([await withProviderTimeout(async (attemptSignal) => {
-        const api = await loadProvider(source)
-        if (attemptSignal.aborted) throw attemptSignal.reason
-        return api.getPlayers(contentId, { ...playerOptions, signal: attemptSignal }, ...rest)
-      }, source, group.signal)])
+      players = mergePlayerMaps([
+        await withProviderTimeout(
+          async (attemptSignal) => {
+            const api = await loadProvider(source)
+            if (attemptSignal.aborted) throw attemptSignal.reason
+            return api.getPlayers(contentId, { ...playerOptions, signal: attemptSignal }, ...rest)
+          },
+          source,
+          group.signal
+        )
+      ])
     } catch (err) {
       if (group.signal.aborted) throw err
       rethrowRequestCancellation(err)
@@ -178,12 +184,19 @@ const getPlayersWithFallback = async (contentId, options = {}, ...rest) => {
     } else {
       providerBackoff.delete(source)
     }
-    trackPlayerProviderAttempt(timeout ? 'player_provider_timeout' : error ? 'player_provider_error' : null, {
-      status: timeout ? 'timeout' : error ? 'error' : hasPlayers(players) ? 'success' : 'empty',
-      kp_id: contentId, configured_source: provider, source, fallback_used: source !== order[0],
-      duration_ms: Date.now() - startedAt, attempt_duration_ms: Date.now() - start,
-      ...(timeout ? { timeout_ms: PLAYER_PROVIDER_TIMEOUT_MS } : {})
-    })
+    trackPlayerProviderAttempt(
+      timeout ? 'player_provider_timeout' : error ? 'player_provider_error' : null,
+      {
+        status: timeout ? 'timeout' : error ? 'error' : hasPlayers(players) ? 'success' : 'empty',
+        kp_id: contentId,
+        configured_source: provider,
+        source,
+        fallback_used: source !== order[0],
+        duration_ms: Date.now() - startedAt,
+        attempt_duration_ms: Date.now() - start,
+        ...(timeout ? { timeout_ms: PLAYER_PROVIDER_TIMEOUT_MS } : {})
+      }
+    )
     return players
   }
 
@@ -412,6 +425,9 @@ const getTopTimingSubmitters = async (...args) =>
   callWithProvider('getTopTimingSubmitters', ...args)
 const getAllTimingSubmissions = async (...args) =>
   callWithProvider('getAllTimingSubmissions', ...args)
+// The Kino API catalogue is served by the Worker whatever the content provider is.
+const getLatestReleases = async (...args) =>
+  (await loadProvider(CONTENT_PROVIDERS.KINOBOX)).getLatestReleases(...args)
 const getRandomMovie = async (...args) => {
   const provider = getCurrentProvider()
   if (provider === CONTENT_PROVIDERS.LOCAL || provider === CONTENT_PROVIDERS.BACKEND) {
@@ -454,6 +470,7 @@ export {
   reportTiming,
   getTopTimingSubmitters,
   getAllTimingSubmissions,
+  getLatestReleases,
   getRandomMovie,
   approveTiming,
   rejectTiming,

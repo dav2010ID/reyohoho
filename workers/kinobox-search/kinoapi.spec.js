@@ -1,9 +1,13 @@
 // @vitest-environment node
 import { describe, expect, it, vi } from 'vitest'
 import {
+  resolveLatestReleases,
   resolveMovieExtras,
+  toLatestReleases,
   toMovieExtras,
+  requestLatestReleases,
   requestMovieExtras,
+  serveLatestReleases,
   serveMovieExtras
 } from './kinoapi.mjs'
 
@@ -266,6 +270,121 @@ describe('movie extras endpoint', () => {
       expect(response.status).toBe(200)
       expect(response.headers.get('X-Extras-Cache')).toBe('STALE')
       expect(JSON.stringify(logger.mock.calls)).not.toContain(KEY)
+    } finally {
+      logger.mockRestore()
+    }
+  })
+})
+
+const release = (kinopoisk, overrides = {}) =>
+  title({
+    id: { tmdb: kinopoisk + 1000, kinopoisk },
+    title: { ru: 'Новинка ' + kinopoisk, original: 'Release ' + kinopoisk },
+    release: { year: 2026, date: '2026-11-10' },
+    genres: ['драма', 'триллер'],
+    countries: ['США'],
+    ratings: { kinopoisk: { value: 7.1, votes: 1200 }, imdb: { value: 6.9, votes: 800 } },
+    images: { poster: 'https://image.tmdb.org/t/p/original/new-' + kinopoisk + '.jpg' },
+    ...overrides
+  })
+const latestUrl = (limit) =>
+  new URL(`https://proxy.test/api/kinoapi/latest${limit ? `?limit=${limit}` : ''}`)
+const serveLatest = (cache, fetchImpl, { limit = '20', key = KEY } = {}) =>
+  serveLatestReleases(
+    resolveLatestReleases(latestUrl(limit)),
+    latestUrl(limit),
+    { 'X-Worker-Version': 'test' },
+    cache,
+    key,
+    undefined,
+    fetchImpl
+  )
+
+describe('latest releases route', () => {
+  it('accepts a limit from 1 to 50 and defaults to 24', () => {
+    expect(resolveLatestReleases(latestUrl())).toMatchObject({ params: { limit: '24' } })
+    expect(resolveLatestReleases(latestUrl('50')).params.limit).toBe('50')
+    for (const bad of ['0', '51', '100', 'abc', '01', '-1'])
+      expect(resolveLatestReleases(latestUrl(bad)).status).toBe(400)
+    expect(resolveLatestReleases(new URL('https://proxy.test/api/kinoapi/other'))).toBeNull()
+  })
+})
+
+describe('latest releases normalization', () => {
+  it('forwards only validated public fields with a small TMDB poster', () => {
+    expect(toLatestReleases([release(5001)])).toEqual([
+      {
+        kinopoiskId: 5001,
+        type: 'movie',
+        title: { russian: 'Новинка 5001', original: 'Release 5001' },
+        year: 2026,
+        releaseDate: '2026-11-10',
+        posterUrl: 'https://image.tmdb.org/t/p/w342/new-5001.jpg',
+        rating: { kinopoisk: 7.1, imdb: 6.9 },
+        genres: ['драма', 'триллер'],
+        countries: ['США']
+      }
+    ])
+  })
+  it('drops titles without a Kinopoisk page, duplicates and untrusted posters', () => {
+    const releases = toLatestReleases([
+      release(5001),
+      release(5001),
+      release(0),
+      { ...release(5002), id: { tmdb: 1 } },
+      release(5003, {
+        images: { poster: 'https://evil.test/p.jpg' },
+        ratings: { kinopoisk: { value: 42 } }
+      })
+    ])
+    expect(releases.map((item) => item.kinopoiskId)).toEqual([5001, 5003])
+    expect(releases[1].posterUrl).toBeUndefined()
+    expect(releases[1].rating.kinopoisk).toBeUndefined()
+  })
+})
+
+describe('latest releases endpoint', () => {
+  it('sends the key only in a header and caches the list for an hour', async () => {
+    const cache = memoryCache()
+    const fetcher = vi.fn(async () => json({ data: [release(5001), release(5002)] }))
+    const first = await serveLatest(cache, fetcher)
+    expect(first.status).toBe(200)
+    expect(first.headers.get('X-Latest-Cache')).toBe('MISS')
+    expect((await first.json()).data.items.map((item) => item.kinopoiskId)).toEqual([5001, 5002])
+    const [url, init] = fetcher.mock.calls[0]
+    expect(url).toBe('https://kinoapi.lampac.dev/api/v1/titles/latest?limit=20')
+    expect(url).not.toContain(KEY)
+    expect(init.headers['X-API-Key']).toBe(KEY)
+    expect(init.redirect).toBe('manual')
+    const fresh = cache.put.mock.calls.find(([key]) => key.includes('/__kinoapi-latest?'))
+    expect(fresh[1].headers.get('Cache-Control')).toBe('public, max-age=3600')
+    expect((await serveLatest(cache, fetcher)).headers.get('X-Latest-Cache')).toBe('HIT')
+    expect(fetcher).toHaveBeenCalledTimes(1)
+  })
+  it('fails closed without a key and rejects a malformed answer', async () => {
+    const logger = vi.spyOn(console, 'error').mockImplementation(() => {})
+    try {
+      const fetcher = vi.fn(async () => json({ data: { not: 'a list' } }))
+      expect((await serveLatest(memoryCache(), fetcher, { key: '' })).status).toBe(503)
+      expect(fetcher).not.toHaveBeenCalled()
+      await expect(requestLatestReleases('20', KEY, fetcher)).rejects.toMatchObject({
+        reason: 'schema'
+      })
+      expect((await serveLatest(memoryCache(), fetcher)).status).toBe(502)
+    } finally {
+      logger.mockRestore()
+    }
+  })
+  it('shares the key-wide pause with card extras', async () => {
+    const logger = vi.spyOn(console, 'error').mockImplementation(() => {})
+    try {
+      const cache = memoryCache()
+      const fetcher = vi.fn(async () => json({}, 429))
+      expect((await serveLatest(cache, fetcher)).status).toBe(502)
+      const extras = await serve(cache, fetcher)
+      expect(extras.status).toBe(503)
+      expect(extras.headers.get('X-Extras-Cache')).toBe('BACKOFF')
+      expect(fetcher).toHaveBeenCalledTimes(1)
     } finally {
       logger.mockRestore()
     }

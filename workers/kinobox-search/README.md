@@ -77,6 +77,7 @@ reduced to public movie cards. Allowlisted routes:
 | `/api/players`               | Positive numeric `kinopoisk`, optional `title` up to 300 characters                     | 1 minute                   |
 | `/api/kinopoisk/top`         | `type=movie` or `series`, positive `page`, `limit=1..50` (default 36), offset below 250 | 1 hour                     |
 | `/api/movies/{id}/extras`    | Positive numeric movie ID                                                               | 24 hours                   |
+| `/api/kinoapi/latest`        | `limit=1..50` (default 24)                                                              | 1 hour                     |
 
 ## Movie extras (Kino API)
 
@@ -98,6 +99,11 @@ answers are cached for 24 hours with a 7-day stale copy, a title missing from th
 catalogue for 1 hour, and an answer without similar titles for 10 minutes. HTTP
 429 pauses all upstream calls for 60 seconds, a rejected key (401/403) for 5
 minutes. The frontend loads extras after the card and hides them on any failure.
+
+`/api/kinoapi/latest` serves the home shelf "Последние релизы" from the catalogue's
+`/titles/latest` with the same key, cache and backoff rules (fresh copy 1 hour,
+stale copy 7 days). Only titles with a Kinopoisk ID are forwarded, with a 342px
+TMDB poster; the shelf is hidden when the route fails.
 
 ## Kinopoisk top
 

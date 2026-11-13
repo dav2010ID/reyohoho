@@ -6,12 +6,18 @@ import { serveHistory } from './history.mjs'
 import { privateReply } from './private-api.mjs'
 import { resolveKinopoiskTop } from './kinopoisk-top.mjs'
 import { resolveKinoboxResource } from './routes.mjs'
-import { resolveMovieExtras, serveMovieExtras } from './kinoapi.mjs'
+import {
+  resolveLatestReleases,
+  resolveMovieExtras,
+  serveLatestReleases,
+  serveMovieExtras
+} from './kinoapi.mjs'
 import { publicUpstreamBudget } from './public-budget.mjs'
 
 // Exercise the real entrypoint's CORS gate without opening Cloudflare sockets.
 const source = readFileSync(new URL('./worker.mjs', import.meta.url), 'utf8')
-  .replace(/^import .*$/gm, '')
+  // Single- and multi-line imports alike.
+  .replace(/^import [^;]*? from '[^']+'$/gm, '')
   .replace('export default {', 'globalThis.worker = {')
 const cachedExtras = '{"data":null,"source":"kinoapi"}'
 const context = vm.createContext({
@@ -24,10 +30,15 @@ const context = vm.createContext({
   resolveKinoboxResource,
   resolveMovieExtras,
   serveMovieExtras,
+  resolveLatestReleases,
+  serveLatestReleases,
   publicUpstreamBudget,
   caches: {
     default: {
-      match: async (key) => (key.includes('/__kinoapi-extras?') ? new Response(cachedExtras) : null)
+      match: async (key) =>
+        key.includes('/__kinoapi-extras?') || key.includes('/__kinoapi-latest?')
+          ? new Response(cachedExtras)
+          : null
     }
   }
 })
@@ -50,6 +61,15 @@ describe('Worker movie extras route', () => {
   })
   it('validates the Kinopoisk ID before any lookup', async () => {
     expect((await get('/api/movies/abc/extras', { KinoapiLampac: 'k' })).status).toBe(400)
+  })
+  it('serves the latest releases through the same secret and validates the limit', async () => {
+    expect((await get('/api/kinoapi/latest?limit=20')).headers.get('X-Latest-Cache')).toBe(
+      'DISABLED'
+    )
+    const response = await get('/api/kinoapi/latest?limit=20', { KinoapiLampac: 'k' })
+    expect(response.status).toBe(200)
+    expect(response.headers.get('X-Latest-Cache')).toBe('HIT')
+    expect((await get('/api/kinoapi/latest?limit=500', { KinoapiLampac: 'k' })).status).toBe(400)
   })
 })
 
