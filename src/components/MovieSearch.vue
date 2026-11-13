@@ -99,6 +99,11 @@
                 <button type="button" class="text-action" @click="showModal = true">
                   Очистить
                 </button>
+                <router-link
+                  :to="{ name: 'lists', query: { type: USER_LIST_TYPES_ENUM.HISTORY } }"
+                  class="text-action home-shelf__all"
+                  >Весь список&nbsp;<span class="sym" aria-hidden="true">→</span></router-link
+                >
                 <RibbonNav
                   v-if="!isMobile"
                   container=".home-history-block"
@@ -1172,7 +1177,7 @@ const fetchRandomMovie = async () => {
   color: #fff;
 }
 
-.home-shelf .home-section-head :deep(.ribbon-nav) {
+.home-shelf__all ~ :deep(.ribbon-nav) {
   margin-left: 0;
 }
 

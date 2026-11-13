@@ -18,6 +18,11 @@
         </li>
       </ul>
       <router-link to="/login" class="lists-login__button">Войти</router-link>
+      <router-link
+        :to="{ query: { type: USER_LIST_TYPES_ENUM.HISTORY } }"
+        class="lists-login__history"
+        >История просмотра <span class="sym" aria-hidden="true">→</span></router-link
+      >
     </div>
     <div v-else class="user-lists-page" tabindex="0">
       <div class="controls">
@@ -33,12 +38,10 @@
               @click="changeTypeFilter(btn.value)"
             >
               {{ btn.label }}
-              <span v-if="listCounters[btn.value]" class="counter">{{
-                listCounters[btn.value]
-              }}</span>
+              <span v-if="counterFor(btn.value)" class="counter">{{ counterFor(btn.value) }}</span>
             </button>
             <button
-              v-if="capabilities.sharing"
+              v-if="capabilities.sharing && !isHistoryView"
               class="share-btn"
               :disabled="loading"
               title="Поделиться списком"
@@ -48,7 +51,7 @@
               <span class="material-icons">{{ 'share' }}</span>
             </button>
             <button
-              v-if="canManageOwnLists"
+              v-if="canManageOwnLists && authStore.token"
               class="share-btn"
               :disabled="loading"
               title="Экспортировать"
@@ -58,7 +61,7 @@
               <span class="material-icons">{{ 'download' }}</span>
             </button>
             <button
-              v-if="canManageOwnLists"
+              v-if="canManageOwnLists && authStore.token"
               class="share-btn"
               :disabled="loading || isImporting"
               title="Импортировать"
@@ -71,13 +74,13 @@
               v-if="!user_id || String(user_id) === String(authStore.user?.id)"
               class="clear-btn"
               :class="{
-                disabled: !movies.length || typeFilter === USER_LIST_TYPES_ENUM.RATED || loading
+                disabled: !listMovies.length || typeFilter === USER_LIST_TYPES_ENUM.RATED || loading
               }"
-              :disabled="!movies.length || typeFilter === USER_LIST_TYPES_ENUM.RATED || loading"
-              title="Очистить список"
-              aria-label="Очистить список"
+              :disabled="!listMovies.length || typeFilter === USER_LIST_TYPES_ENUM.RATED || loading"
+              :title="isHistoryView ? 'Очистить историю' : 'Очистить список'"
+              :aria-label="isHistoryView ? 'Очистить историю' : 'Очистить список'"
               @click="
-                movies.length && typeFilter !== USER_LIST_TYPES_ENUM.RATED && (showModal = true)
+                listMovies.length && typeFilter !== USER_LIST_TYPES_ENUM.RATED && (showModal = true)
               "
             >
               <span class="material-icons">{{ 'delete_sweep' }}</span>
@@ -94,15 +97,16 @@
         @change="handleImportFileSelect"
       />
 
-      <div v-if="movies.length === 0 && !loading && !errorMessage" class="empty-state">
-        <span class="material-icons">movie</span>
-        <p>Нет фильмов для отображения</p>
+      <div v-if="listMovies.length === 0 && !loading && !errorMessage" class="empty-state">
+        <span class="material-icons">{{ isHistoryView ? 'history' : 'movie' }}</span>
+        <p>{{ isHistoryView ? 'История просмотра пуста' : 'Нет фильмов для отображения' }}</p>
       </div>
 
+      <!-- History: MovieList deletes from the history itself (local and account), as on home. -->
       <MovieList
         v-else-if="!errorMessage"
-        :movies-list="movies"
-        :is-history="false"
+        :movies-list="listMovies"
+        :is-history="isHistoryView"
         :is-mobile="mainStore.isMobile"
         :is-user-list="true"
         :show-delete="typeFilter !== USER_LIST_TYPES_ENUM.RATED"
@@ -117,7 +121,11 @@
   <Notification ref="notificationRef" />
   <BaseModal
     :is-open="showModal"
-    message="Вы уверены, что хотите очистить список?"
+    :message="
+      isHistoryView
+        ? 'Вы уверены, что хотите очистить историю?'
+        : 'Вы уверены, что хотите очистить список?'
+    "
     @confirm="clearList"
     @close="showModal = false"
   />
@@ -179,8 +187,12 @@ const isCurrentView = (view) =>
 
 const notificationRef = ref(null)
 const capabilities = computed(() => accountCapabilities(authStore))
-// Own lists need an account; a shared list (/lists/:user_id) stays public.
-const needsLogin = computed(() => !user_id.value && !authStore.token)
+const isHistoryView = computed(() => typeFilter.value === USER_LIST_TYPES_ENUM.HISTORY)
+// Own lists need an account; a shared list (/lists/:user_id) stays public. The watch history
+// also lives on the device, so it opens without an account.
+const needsLogin = computed(() => !user_id.value && !authStore.token && !isHistoryView.value)
+// The history view reads the store, so deletions from the cards show at once.
+const listMovies = computed(() => (isHistoryView.value ? mainStore.history : movies.value))
 const exportableListTypes = computed(() => [
   USER_LIST_TYPES_ENUM.FAVORITE,
   USER_LIST_TYPES_ENUM.LATER,
@@ -481,8 +493,13 @@ const typeFilters = computed(() => [
   { label: 'Позже', value: USER_LIST_TYPES_ENUM.LATER },
   { label: 'Просмотрено', value: USER_LIST_TYPES_ENUM.COMPLETED },
   { label: 'Брошено', value: USER_LIST_TYPES_ENUM.ABANDONED },
-  ...(capabilities.value.rated ? [{ label: 'Оценено', value: USER_LIST_TYPES_ENUM.RATED }] : [])
+  ...(capabilities.value.rated ? [{ label: 'Оценено', value: USER_LIST_TYPES_ENUM.RATED }] : []),
+  // Only the viewer's own history: it is never part of a shared list.
+  ...(canManageOwnLists.value ? [{ label: 'История', value: USER_LIST_TYPES_ENUM.HISTORY }] : [])
 ])
+
+const counterFor = (type) =>
+  type === USER_LIST_TYPES_ENUM.HISTORY ? mainStore.history.length : listCounters.value[type]
 
 const fetchCounters = async () => {
   const view = captureView()
@@ -505,16 +522,21 @@ const fetchMovies = async () => {
   }
   const view = captureView()
   const current = () => generation === fetchGeneration && isCurrentView(view)
-  loading.value = true
   errorMessage.value = ''
   errorCode.value = null
+  if (view.type === USER_LIST_TYPES_ENUM.HISTORY && !view.token) {
+    loading.value = false
+    return
+  }
+  loading.value = view.type !== USER_LIST_TYPES_ENUM.HISTORY || mainStore.history.length === 0
 
   try {
     const result = view.userId
       ? await getUserLists(view.type, view.userId)
       : await getMyLists(view.type)
     if (!current()) return
-    movies.value = result
+    if (view.type === USER_LIST_TYPES_ENUM.HISTORY) mainStore.setHistory(result)
+    else movies.value = result
     await fetchCounters()
   } catch (error) {
     if (!current()) return
@@ -538,15 +560,25 @@ const changeTypeFilter = (value) => {
 }
 
 const clearList = async () => {
-  if (!canManageOwnLists.value || !authStore.token || loading.value) return
+  if (!canManageOwnLists.value || loading.value) return
+  if (isHistoryView.value && !authStore.token) {
+    mainStore.clearAllHistory()
+    showModal.value = false
+    notificationRef.value.showNotification('История очищена')
+    return
+  }
+  if (!authStore.token) return
   const view = captureView()
   loading.value = true
   if (authStore.token) {
     try {
       await delAllFromList(view.type)
+      if (view.type === USER_LIST_TYPES_ENUM.HISTORY) mainStore.clearAllHistory()
       if (!isCurrentView(view)) return
       movies.value = []
-      notificationRef.value.showNotification('Список очищен')
+      notificationRef.value.showNotification(
+        view.type === USER_LIST_TYPES_ENUM.HISTORY ? 'История очищена' : 'Список очищен'
+      )
       await fetchCounters()
     } catch (error) {
       if (!isCurrentView(view)) return
@@ -566,6 +598,8 @@ const clearList = async () => {
 }
 
 const handleItemDeleted = async (deletedItemId) => {
+  // History cards were already removed by MovieList (store and account).
+  if (isHistoryView.value) return
   if (!canManageOwnLists.value || !authStore.token) return
   const view = captureView()
   const key = `${view.token}:${view.type}:${deletedItemId}`
@@ -684,6 +718,26 @@ onUnmounted(() => {
   .lists-preview {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
+}
+
+.lists-login__history {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  color: var(--text-dim);
+  font-size: var(--fs-s);
+  text-decoration: none;
+}
+
+.lists-login__history:hover {
+  color: #fff;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.lists-login__history:focus-visible {
+  outline: 2px solid var(--accent-color);
+  outline-offset: 2px;
 }
 
 .lists-login__text {
