@@ -43,7 +43,8 @@ export function resolveLatestReleases(url) {
   const limit = url.searchParams.get('limit') || '24'
   if (!/^(?:[1-9]|[1-4]\d|50)$/.test(limit))
     return { error: 'Invalid latest parameters', status: 400 }
-  return { kind: 'latest', params: { limit }, cacheTtl: 3600 }
+  // "list" is part of the cache key: answers built from /titles/latest are not reused.
+  return { kind: 'latest', params: { limit, list: 'popular-recent' }, cacheTtl: 3600 }
 }
 
 const TMDB_POSTER = /^https:\/\/image\.tmdb\.org\/t\/p\/original(\/[\w-]+\.(?:jpe?g|png|webp))$/
@@ -186,18 +187,31 @@ const kinoGet = async (path, key, fetchImpl, signal) => {
   return (await readBoundedJson(response))?.data
 }
 
-export async function requestLatestReleases(limit, key, fetchImpl = fetch, timeoutMs = 10000) {
+// The catalogue's own /titles/latest starts with far-future placeholders (2099-12-31) that
+// have no Kinopoisk ID yet. So the shelf takes this and last year's most popular titles and
+// keeps the ones already out, newest release first.
+export const latestCatalogPath = (now = new Date()) => {
+  const year = now.getUTCFullYear()
+  return `/titles?yearFrom=${year - 1}&yearTo=${year}&sort=popularity&order=desc&limit=100`
+}
+
+export async function requestLatestReleases(
+  limit,
+  key,
+  fetchImpl = fetch,
+  timeoutMs = 10000,
+  now = new Date()
+) {
   const controller = new AbortController()
   const timeout = setTimeout(() => controller.abort(), timeoutMs)
   try {
-    const items = await kinoGet(
-      `/titles/latest?limit=${Number(limit)}`,
-      key,
-      fetchImpl,
-      controller.signal
-    )
+    const items = await kinoGet(latestCatalogPath(now), key, fetchImpl, controller.signal)
     if (!Array.isArray(items)) throw upstreamError('Invalid Kino API response', 'schema')
+    const today = now.toISOString().slice(0, 10)
     const releases = toLatestReleases(items)
+      .filter((item) => item.releaseDate && item.releaseDate <= today)
+      .sort((a, b) => (a.releaseDate < b.releaseDate ? 1 : a.releaseDate > b.releaseDate ? -1 : 0))
+      .slice(0, Number(limit))
     return { data: releases.length ? { items: releases } : null, partial: false }
   } catch (error) {
     if (controller.signal.aborted) throw upstreamError('Kino API upstream timeout', 'timeout')

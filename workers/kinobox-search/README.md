@@ -101,7 +101,9 @@ catalogue for 1 hour, and an answer without similar titles for 10 minutes. HTTP
 minutes. The frontend loads extras after the card and hides them on any failure.
 
 `/api/kinoapi/latest` serves the home shelf "Последние релизы" from the catalogue's
-`/titles/latest` with the same key, cache and backoff rules (fresh copy 1 hour,
+`/titles` (this and last year, by popularity, 100 titles; only titles already out and with a
+Kinopoisk ID, newest release first; the catalogue's `/titles/latest` leads with far-future
+placeholders without Kinopoisk IDs) with the same key, cache and backoff rules (fresh copy 1 hour,
 stale copy 7 days). Only titles with a Kinopoisk ID are forwarded, with a 342px
 TMDB poster; the shelf is hidden when the route fails.
 

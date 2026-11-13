@@ -5,6 +5,7 @@ import {
   resolveMovieExtras,
   toLatestReleases,
   toMovieExtras,
+  latestCatalogPath,
   requestLatestReleases,
   requestMovieExtras,
   serveLatestReleases,
@@ -352,7 +353,7 @@ describe('latest releases endpoint', () => {
     expect(first.headers.get('X-Latest-Cache')).toBe('MISS')
     expect((await first.json()).data.items.map((item) => item.kinopoiskId)).toEqual([5001, 5002])
     const [url, init] = fetcher.mock.calls[0]
-    expect(url).toBe('https://kinoapi.lampac.dev/api/v1/titles/latest?limit=20')
+    expect(url).toBe('https://kinoapi.lampac.dev/api/v1' + latestCatalogPath())
     expect(url).not.toContain(KEY)
     expect(init.headers['X-API-Key']).toBe(KEY)
     expect(init.redirect).toBe('manual')
@@ -360,6 +361,34 @@ describe('latest releases endpoint', () => {
     expect(fresh[1].headers.get('Cache-Control')).toBe('public, max-age=3600')
     expect((await serveLatest(cache, fetcher)).headers.get('X-Latest-Cache')).toBe('HIT')
     expect(fetcher).toHaveBeenCalledTimes(1)
+  })
+  it('asks for popular titles of this and last year', () => {
+    expect(latestCatalogPath(new Date('2026-11-13T12:00:00Z'))).toBe(
+      '/titles?yearFrom=2025&yearTo=2026&sort=popularity&order=desc&limit=100'
+    )
+  })
+  it('keeps titles already out, newest first, up to the limit', async () => {
+    const dated = (id, date) => release(id, { release: { year: 2026, date } })
+    const fetcher = vi.fn(async () =>
+      json({
+        data: [
+          dated(6001, '2026-03-01'),
+          dated(6002, '2099-12-31'),
+          dated(6003, '2026-11-13'),
+          release(6004, { release: { year: 2026 } }),
+          dated(6005, '2026-10-01'),
+          dated(6006, '2026-11-14')
+        ]
+      })
+    )
+    const result = await requestLatestReleases(
+      '2',
+      KEY,
+      fetcher,
+      10000,
+      new Date('2026-11-13T09:00:00Z')
+    )
+    expect(result.data.items.map((item) => item.kinopoiskId)).toEqual([6003, 6005])
   })
   it('fails closed without a key and rejects a malformed answer', async () => {
     const logger = vi.spyOn(console, 'error').mockImplementation(() => {})
