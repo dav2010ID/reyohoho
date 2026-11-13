@@ -28,7 +28,6 @@
             :is-user-list="isUserList"
             :index
             :is-card-border="isCardBorder"
-            :active-movie-index
             :show-delete="showDelete"
             :show-star="showStar"
             :variant="variant"
@@ -49,7 +48,6 @@
           :is-user-list="isUserList"
           :index
           :is-card-border="isCardBorder"
-          :active-movie-index
           :show-delete="showDelete"
           :show-star="showStar"
           :variant="variant"
