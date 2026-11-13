@@ -275,8 +275,10 @@ onUnmounted(() => {
   grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
 }
 
+/* L is the size main has always had: 320px columns, 20px gaps, one column on phones. */
 .grid.card-size-large {
-  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  column-gap: 20px;
 }
 
 .grid.variant-related {
@@ -305,7 +307,7 @@ onUnmounted(() => {
   width: 280px;
 }
 
-/* Shelf posters follow the card size setting: S 140, M 168, L 220 (phones 96 / 118 / 156). */
+/* Shelf posters follow the card size setting: S 140, M 168, L 320 (phones 96 / 118 / 240). */
 .grid.grid--ribbon-posters {
   --shelf-card: 168px;
   gap: 16px;
@@ -316,7 +318,7 @@ onUnmounted(() => {
 }
 
 .grid.grid--ribbon-posters.card-size-large {
-  --shelf-card: 220px;
+  --shelf-card: 320px;
 }
 
 .grid.grid--ribbon-posters > :deep(*) {
@@ -339,10 +341,10 @@ onUnmounted(() => {
     grid-template-columns: repeat(3, minmax(0, 1fr));
   }
 
-  /* L on phones: two columns, 15px titles, 13px meta with genres. */
+  /* L on phones: one column, 15px titles, 13px meta with genres. */
   .grid.card-size-large {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 16px 12px;
+    grid-template-columns: minmax(0, 1fr);
+    gap: 20px;
   }
 
   .grid.card-size-large :deep(.movie-header h3) {
@@ -379,7 +381,7 @@ onUnmounted(() => {
   }
 
   .grid.grid--ribbon-posters.card-size-large {
-    --shelf-card: 156px;
+    --shelf-card: 240px;
   }
 }
 </style>

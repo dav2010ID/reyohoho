@@ -1516,8 +1516,8 @@ a.rating-link::after {
 }
 
 .related-movies-list :deep(.grid.card-size-large > *) {
-  flex-basis: 188px;
-  width: 188px;
+  flex-basis: 320px;
+  width: 320px;
 }
 
 .related-movies .expand-circle-button {
@@ -1565,8 +1565,8 @@ a.rating-link::after {
   }
 
   .related-movies-list :deep(.grid.card-size-large > *) {
-    flex-basis: 172px;
-    width: 172px;
+    flex-basis: 240px;
+    width: 240px;
   }
 }
 

@@ -1242,7 +1242,7 @@ const fetchRandomMovie = async () => {
 }
 
 .skeleton-row--ribbon.skeleton-row--large {
-  --shelf-card: 220px;
+  --shelf-card: 320px;
 }
 
 .skeleton-row--ribbon .skeleton-poster {
@@ -1369,7 +1369,7 @@ const fetchRandomMovie = async () => {
   }
 
   .skeleton-row--ribbon.skeleton-row--large {
-    --shelf-card: 156px;
+    --shelf-card: 240px;
   }
 }
 </style>

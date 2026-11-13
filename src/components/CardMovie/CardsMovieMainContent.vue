@@ -83,7 +83,7 @@ const posterSources = computed(() => resolvePosterSourcesByMovie(movie))
 const posterSrc = computed(() => posterSources.value.src)
 const posterSizes = computed(() =>
   variant === 'related'
-    ? `(max-width: 620px) ${{ small: 132, medium: 156, large: 172 }[cardSize.value] || 156}px, 200px`
+    ? `(max-width: 620px) ${{ small: 132, medium: 156, large: 240 }[cardSize.value] || 156}px, ${cardSize.value === 'large' ? 320 : 200}px`
     : CARD_POSTER_SIZES[cardSize.value] || CARD_POSTER_SIZES.medium
 )
 const imageLoading = computed(() => (priority ? 'eager' : 'lazy'))

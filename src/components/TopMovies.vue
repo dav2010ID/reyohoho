@@ -717,7 +717,8 @@ onUnmounted(disconnectInfiniteScroll)
 }
 
 .skeleton-row--large {
-  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  column-gap: 20px;
 }
 
 .skeleton-poster {
@@ -742,9 +743,9 @@ onUnmounted(disconnectInfiniteScroll)
   }
 
   .skeleton-row--large {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 16px 12px;
-    max-height: 280px;
+    grid-template-columns: minmax(0, 1fr);
+    gap: 20px;
+    max-height: 560px;
   }
 }
 </style>
