@@ -19,7 +19,7 @@
       <div class="settings-container">
         <section v-show="activeSettingsTab === 'appearance'" class="settings-section">
           <div class="settings-group">
-            <h3 id="settings-background-label">Фон</h3>
+            <h2 id="settings-background-label">Фон</h2>
             <div class="bg-tiles" role="radiogroup" aria-labelledby="settings-background-label">
               <label v-for="option in backgroundOptions" :key="option.value" class="bg-tile">
                 <input
@@ -39,11 +39,11 @@
             </div>
           </div>
           <div class="settings-group">
-            <h3>Тема</h3>
+            <h2>Тема</h2>
             <ThemeSelector />
           </div>
           <div class="settings-group">
-            <h3>Карточки</h3>
+            <h2>Карточки</h2>
             <div class="setting-row">
               <span id="settings-card-size-label" class="group-label">Размер карточек</span>
               <div class="segmented" role="radiogroup" aria-labelledby="settings-card-size-label">
@@ -59,7 +59,7 @@
         </section>
         <section v-show="activeSettingsTab === 'player'" class="settings-section">
           <div class="settings-group">
-            <h3>Плеер</h3>
+            <h2>Плеер</h2>
             <SliderRound v-model="isCentered">Автоцентрирование плеера</SliderRound>
             <div class="setting-row">
               <span id="settings-favorites-label" class="group-label">Кнопки избранного</span>
@@ -86,11 +86,11 @@
             </div>
           </div>
           <div class="settings-group">
-            <h3>Трейлеры</h3>
+            <h2>Трейлеры</h2>
             <SliderRound v-model="areTrailersActive">Показывать трейлеры</SliderRound>
           </div>
           <div v-if="backendAvailable" class="settings-group">
-            <h3>Режим стримера</h3>
+            <h2>Режим стримера</h2>
             <SliderRound v-model="isStreamerMode"
               >Мигание кнопки таймингов для привлечения внимания</SliderRound
             >
@@ -98,7 +98,7 @@
         </section>
         <section v-show="activeSettingsTab === 'behavior'" class="settings-section">
           <div class="settings-group">
-            <h3>История</h3>
+            <h2>История</h2>
             <SliderRound v-model="isHistoryAllowed"> Сохранять историю просмотра</SliderRound>
             <HistorySyncSettings />
             <div class="settings-actions settings-actions--danger">
@@ -115,11 +115,11 @@
             </div>
           </div>
           <div class="settings-group">
-            <h3>Горячие клавиши</h3>
+            <h2>Горячие клавиши</h2>
             <SliderRound v-model="isCtrlFEnabled">Перехватывать Ctrl+F для поиска</SliderRound>
           </div>
           <div class="settings-group settings-group--desktop-only">
-            <h3>Боковая панель</h3>
+            <h2>Боковая панель</h2>
             <SliderRound v-model="sidebarAutoHide"
               >Авто-скрытие: скрывать панель и показывать при наведении курсора</SliderRound
             >
@@ -154,7 +154,7 @@
             </div>
           </div>
           <div v-if="backendAvailable" class="settings-group">
-            <h3>Комментарии</h3>
+            <h2>Комментарии</h2>
             <SliderRound v-model="isCommentsEnabled">Показывать блок комментариев</SliderRound>
             <SliderRound v-model="isAutoShowComments"
               >Автоматически показывать комментарии</SliderRound
@@ -163,12 +163,12 @@
         </section>
         <section v-show="activeSettingsTab === 'api'" class="settings-section">
           <div class="settings-group">
-            <h3>Источники данных</h3>
+            <h2>Источники данных</h2>
             <p v-if="unavailableSearch" class="api-note">
               Для поиска по ID {{ unavailableSearch }} нужен подключённый сервер. Вы также можете
               <router-link to="/">найти фильм по названию или ID Кинопоиска</router-link>.
             </p>
-            <h4 id="settings-backend-label" class="api-subtitle">Сервер приложения</h4>
+            <h3 id="settings-backend-label" class="api-subtitle">Сервер приложения</h3>
             <div class="radio-group" role="radiogroup" aria-labelledby="settings-backend-label">
               <label class="radio">
                 <input v-model="backendMode" type="radio" name="backend-mode" value="auto" />
@@ -200,7 +200,7 @@
                 {{ apiStore.isCheckingHealth ? 'Проверка…' : 'Проверить соединение' }}
               </button>
             </div>
-            <h4 id="settings-content-label" class="api-subtitle">Источники контента</h4>
+            <h3 id="settings-content-label" class="api-subtitle">Источники контента</h3>
             <div class="radio-group" role="radiogroup" aria-labelledby="settings-content-label">
               <label class="radio">
                 <input
@@ -254,7 +254,7 @@
               приложения. Для оценок и поиска по Shikimori можно также выбрать локальный источник
               контента.
             </p>
-            <h4 id="settings-search-label" class="api-subtitle">Источник поиска</h4>
+            <h3 id="settings-search-label" class="api-subtitle">Источник поиска</h3>
             <div class="radio-group" role="radiogroup" aria-labelledby="settings-search-label">
               <label class="radio">
                 <input
@@ -623,7 +623,7 @@ h1 {
   border-top: 1px solid var(--hairline);
 }
 
-h3 {
+h2 {
   margin: 0 0 8px;
   color: #fff;
   font-size: var(--fs-l);

@@ -627,6 +627,11 @@ a.rating-link::after {
     font-size: 22px;
   }
 
+  .score-primary {
+    justify-content: center;
+    min-height: 44px;
+  }
+
   .content-card.has-backdrop::before {
     height: 360px;
   }

@@ -191,6 +191,40 @@ input {
   font-family: 'Roboto', sans-serif;
 }
 
+/* Hidden until a keyboard user tabs to it; it is the first Tab stop on every page. */
+.skip-link {
+  position: fixed;
+  top: 8px;
+  left: 8px;
+  z-index: 10000;
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  padding: 0 16px;
+  border-radius: var(--radius-m);
+  background: var(--accent-solid);
+  color: var(--accent-contrast);
+  font-weight: 600;
+  text-decoration: none;
+  transform: translateY(calc(-100% - 16px));
+}
+
+.skip-link:focus,
+.skip-link:focus-visible {
+  transform: none;
+  outline: 2px solid #fff;
+  outline-offset: 2px;
+}
+
+#main-content:focus {
+  outline: none;
+}
+
+/* Press feedback for every button; "scale" composes with each component's own transform. */
+button:not(:disabled):active {
+  scale: 0.97;
+}
+
 a:focus-visible,
 button:focus-visible,
 input:focus-visible,

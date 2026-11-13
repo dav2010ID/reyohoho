@@ -1,6 +1,6 @@
 <template>
   <div class="wrapper">
-    <div class="top-100-page" tabindex="0">
+    <div class="top-100-page">
       <header v-if="isKinopoiskTop" class="top-header">
         <div class="top-heading">
           <h1>Топ-250</h1>

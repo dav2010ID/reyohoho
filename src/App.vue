@@ -1,10 +1,11 @@
 <template>
+  <a class="skip-link" href="#main-content">Перейти к содержимому</a>
   <ConfirmationHost />
   <BackgroundSpace />
   <MobileHeader v-if="showMobileHeader" />
   <MenuNavigation />
 
-  <main id="main-content" class="router-view-container">
+  <main id="main-content" class="router-view-container" tabindex="-1">
     <router-view v-slot="{ Component }">
       <component :is="Component" />
     </router-view>

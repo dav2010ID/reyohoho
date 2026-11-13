@@ -12,6 +12,7 @@ vi.mock('@/api/movies', () => ({
   getRandomMovie: mocks.random,
   getKpInfo: mocks.info,
   getMovies: mocks.top,
+  getLatestReleases: vi.fn(async () => []),
   apiSearch: mocks.search,
   getKpIDfromIMDB: vi.fn(),
   getKpIDfromSHIKI: vi.fn()

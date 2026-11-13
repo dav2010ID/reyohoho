@@ -1,6 +1,6 @@
 <template>
   <section class="history-sync">
-    <h4 v-if="!compact">Облачная история и перенос</h4>
+    <h3 v-if="!compact">Облачная история и перенос</h3>
     <p v-if="!compact">
       Без входа история сохраняется только в этом браузере. Её можно перенести со старого сайта или
       сохранить в файл.
@@ -404,7 +404,7 @@ function download() {
   opacity: 0.5;
   cursor: wait;
 }
-.history-sync h4 {
+.history-sync h3 {
   margin-top: 0;
 }
 .history-file:focus-within {

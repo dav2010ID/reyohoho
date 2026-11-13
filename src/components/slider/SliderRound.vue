@@ -78,7 +78,7 @@ function toggle() {
   left: 0;
   right: 0;
   bottom: 0;
-  background-color: #444;
+  background-color: #6b6b6b;
   transition: 0.3s;
   border-radius: var(--radius-l);
 }

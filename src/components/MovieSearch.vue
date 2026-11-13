@@ -876,6 +876,7 @@ const fetchRandomMovie = async () => {
 
 .search-bar:focus-within {
   border-color: var(--accent-ui);
+  box-shadow: 0 0 0 1px var(--accent-ui);
 }
 
 .search-bar.wrong-layout {
@@ -1338,8 +1339,13 @@ const fetchRandomMovie = async () => {
     border-color: transparent;
   }
 
+  .search-bar:focus-within {
+    box-shadow: none;
+  }
+
   .search-bar:focus-within .input-wrapper {
     border-color: var(--accent-ui);
+    box-shadow: 0 0 0 1px var(--accent-ui);
   }
 
   .search-bar.wrong-layout .input-wrapper {
