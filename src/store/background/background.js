@@ -6,12 +6,12 @@ import { beforeHydrateLegacyVuex } from '../utils'
 
 export const useBackgroundStore = defineStore(BACKGROUND_STORE_NAME, {
   state: () => ({
-    // Solid page by default; stars, lava lamp and dynamic stay available in settings.
-    backgroundUrl: '',
+    // Stars by default, as on main; a solid page, lava lamp and dynamic stay in settings.
+    backgroundUrl: starsBackground,
     topMoviePoster: '',
     moviePoster: '',
     isBlurActive: false,
-    backgroundType: 'disabled',
+    backgroundType: 'stars',
     defaultBackground: starsBackground,
     isCardBorder: false,
     isCardHoverDisabled: false

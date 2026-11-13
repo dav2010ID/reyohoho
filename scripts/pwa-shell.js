@@ -10,7 +10,8 @@ const shellFiles = new Set([
   'icons/icon-512x512.png'
 ])
 // Imported by the entry but shown only when enabled; runtime-cached on first use.
-const optionalAssets = /(?:^|\/)(?:image-back-stars|trn-christmas-lights)-[\w-]+\.webp$/
+// The stars background is the default, so it stays in the precache.
+const optionalAssets = /(?:^|\/)trn-christmas-lights-[\w-]+\.webp$/
 
 // Keep the offline screens and SW registration client, not every lazy feature.
 export function createPwaShell() {

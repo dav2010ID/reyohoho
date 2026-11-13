@@ -167,9 +167,12 @@ onUnmounted(() => {
 </script>
 
 <style scoped>
-/* Chrome-less card: the poster is the card; text sits under it on the page surface. */
+/* Chrome-less card: the poster is the card; text sits under it on the page surface.
+   Hover lift uses main's values: up 3px, scale 1.01, a 14/30 shadow (here on the poster). */
 .movie-card {
   --card-hover-translate: -3px;
+  --card-hover-scale: 1.01;
+  --card-hover-shadow: 0 14px 30px rgba(0, 0, 0, 0.32);
   position: relative;
   display: flex;
   flex-direction: column;
@@ -182,17 +185,38 @@ onUnmounted(() => {
   transition: transform 0.2s ease;
 }
 
+.movie-card :deep(.movie-poster-frame) {
+  transition: box-shadow 0.2s ease;
+}
+
 .has-border :deep(.movie-poster-frame) {
   box-shadow: 0 0 0 1px var(--accent-ui);
 }
 
 .movie-card:hover {
-  transform: translateY(var(--card-hover-translate));
+  transform: translateY(var(--card-hover-translate)) scale(var(--card-hover-scale));
 }
 
-.hover-disabled:hover,
-.movie-card.variant-related:hover {
+.movie-card:hover :deep(.movie-poster-frame) {
+  box-shadow: var(--card-hover-shadow);
+}
+
+.movie-card.has-border:hover :deep(.movie-poster-frame) {
+  box-shadow:
+    0 0 0 1px var(--accent-ui),
+    var(--card-hover-shadow);
+}
+
+.hover-disabled:hover {
   transform: none;
+}
+
+.hover-disabled:hover :deep(.movie-poster-frame) {
+  box-shadow: none;
+}
+
+.hover-disabled.has-border:hover :deep(.movie-poster-frame) {
+  box-shadow: 0 0 0 1px var(--accent-ui);
 }
 
 .movie-card:focus-visible {
@@ -230,6 +254,10 @@ onUnmounted(() => {
   .movie-card.layout-row:hover {
     transform: none;
     background: var(--surface-overlay);
+  }
+
+  .movie-card.layout-row:hover :deep(.movie-poster-frame) {
+    box-shadow: none;
   }
 }
 

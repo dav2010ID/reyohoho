@@ -17,11 +17,11 @@ describe('Тесты store background', () => {
   it('Имеет начальное состояние по умолчанию', () => {
     const store = useBackgroundStore()
 
-    expect(store.backgroundUrl).toBe('')
+    expect(store.backgroundUrl).toBe(starsBackground)
     expect(store.topMoviePoster).toBe('')
     expect(store.moviePoster).toBe('')
     expect(store.isBlurActive).toBe(false)
-    expect(store.backgroundType).toBe('disabled')
+    expect(store.backgroundType).toBe('stars')
     expect(store.defaultBackground).toBe(starsBackground)
     expect(store.isCardBorder).toBe(false)
     expect(store.isCardHoverDisabled).toBe(false)

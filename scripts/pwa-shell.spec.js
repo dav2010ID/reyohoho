@@ -34,7 +34,8 @@ describe('offline shell dependency selection', () => {
         dynamicImports: ['workbox.js'],
         viteMetadata: {
           importedCss: new Set(),
-          // Opt-in decorations: in the graph, left to the runtime cache.
+          // The default stars background is precached; the opt-in garland is left to the
+          // runtime cache.
           importedAssets: new Set([
             'assets/immutable/image-back-stars-AbC123.webp',
             'assets/immutable/trn-christmas-lights-x_Y9.webp'
@@ -124,7 +125,8 @@ describe('offline shell dependency selection', () => {
       'workbox-helper.js',
       'movie.js',
       'movie.css',
-      'poster.webp'
+      'poster.webp',
+      'assets/immutable/image-back-stars-AbC123.webp'
     ])
     expect(transformed.manifest.every(({ revision }) => revision === 'final-ssg-revision')).toBe(
       true
