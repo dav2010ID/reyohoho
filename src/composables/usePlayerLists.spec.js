@@ -101,6 +101,22 @@ describe('movie list toggles without reloading the card', () => {
     expect(state.getListStatus(type)).toBe(false)
   })
 
+  it('keeps one viewing status and leaves the other lists alone', async () => {
+    const state = setup()
+    Object.assign(state.movieInfo.value.lists, { isWatching: true, isAbandoned: true, isFavorite: true })
+    expect(await state.toggleList('completed')).toBe(true)
+    expect(state.movieInfo.value.lists).toMatchObject({
+      isCompleted: true,
+      isWatching: false,
+      isAbandoned: false,
+      isFavorite: true,
+      isLater: true
+    })
+    // Removing a status does not touch anything else.
+    expect(await state.toggleList('completed')).toBe(true)
+    expect(state.movieInfo.value.lists).toMatchObject({ isCompleted: false, isFavorite: true })
+  })
+
   it('leaves flags unchanged on failure and allows retry', async () => {
     const state = setup()
     addToList.mockRejectedValueOnce(new Error('offline'))

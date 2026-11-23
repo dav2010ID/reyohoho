@@ -123,7 +123,7 @@ import {
 import { startHistoryTransfer, TRANSFER_URL } from '@/utils/historyTransfer'
 import { addToList, getMyLists } from '@/api/user'
 import { USER_LIST_TYPES_ENUM } from '@/constants'
-import { mergeHistory, normalizeHistory } from '../../shared/history-data.js'
+import { HISTORY_CAPACITY, mergeHistory, normalizeHistory } from '../../shared/history-data.js'
 import { readPendingSync } from '@/utils/pendingAccountSync'
 
 defineProps({ compact: { type: Boolean, default: false } })
@@ -151,7 +151,7 @@ const hasPendingSync = computed(() => {
 onMounted(() => {
   try {
     const backup = JSON.parse(localStorage.getItem('reyohoho-guest-history-backup') || '[]')
-    guestBackup.value = normalizeHistory(backup, 5000)
+    guestBackup.value = normalizeHistory(backup, HISTORY_CAPACITY)
   } catch {
     guestBackup.value = []
   }
@@ -179,7 +179,7 @@ async function enable() {
   if (auth.token !== confirmedToken) return
   run(async () => {
     const token = auth.token
-    const history = await importCloudHistory(main.history.slice(0, 5000))
+    const history = await importCloudHistory(main.history.slice(0, HISTORY_CAPACITY))
     if (auth.token !== token) throw new Error('Аккаунт изменился. Повторите операцию')
     main.cloudHistoryAccount = String(auth.user.id)
     main.setHistory(history)
@@ -204,7 +204,7 @@ async function uploadLocal() {
   if (auth.token !== confirmedToken) return
   run(async () => {
     const token = auth.token
-    const history = await importCloudHistory(main.history.slice(0, 5000))
+    const history = await importCloudHistory(main.history.slice(0, HISTORY_CAPACITY))
     if (auth.token !== token) throw new Error('Аккаунт изменился. Повторите операцию')
     main.setHistory(history)
   })
@@ -250,7 +250,7 @@ async function readFile(event) {
         'Не удалось прочитать файл истории. Выберите файл, сохранённый на странице переноса или в настройках сайта.'
       )
     }
-    pending.value = normalizeHistory(Array.isArray(data) ? data : data.history, 5000)
+    pending.value = normalizeHistory(Array.isArray(data) ? data : data.history, HISTORY_CAPACITY)
   } catch (error) {
     message.value = error.message
   }
@@ -288,7 +288,7 @@ function download() {
       : main.history
     if (auth.token !== token) throw new Error('Аккаунт изменился. Повторите экспорт')
     const url = URL.createObjectURL(
-      new window.Blob([JSON.stringify({ version: 1, history: normalizeHistory(history, 5000) })], {
+      new window.Blob([JSON.stringify({ version: 1, history: normalizeHistory(history, HISTORY_CAPACITY) })], {
         type: 'application/json'
       })
     )

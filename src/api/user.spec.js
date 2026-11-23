@@ -173,7 +173,7 @@ describe('compact cloud list requests', () => {
   })
   it('keeps cloud history PUT compact', async () => {
     await addToList('843831', 'history', movie)
-    expect(mocks.history).toHaveBeenCalledWith('/843831', 'PUT', normalizeHistory([movie])[0])
+    expect(mocks.history).toHaveBeenCalledWith('/843831', 'PUT', { ...normalizeHistory([movie])[0], viewedAt: expect.any(String) })
     expect(mocks.worker.put).not.toHaveBeenCalled()
   })
   it('strips full provider data from metadata repair PATCH requests', async () => {
@@ -187,5 +187,83 @@ describe('compact cloud list requests', () => {
     expect(payload.metadata).not.toHaveProperty('description')
     expect(payload.metadata).not.toHaveProperty('raw_data')
     expect(byteLength(payload)).toBeLessThan(8192)
+  })
+})
+
+describe('history outbox', () => {
+  beforeEach(() => localStorage.clear())
+  const offline = () => Object.assign(new TypeError('Failed to fetch'), {})
+  const httpError = (status, code) => Object.assign(new Error('fail'), { code, response: { status } })
+
+  it('keeps a failed viewing and replays it on top of the next server snapshot', async () => {
+    mocks.history.mockRejectedValueOnce(offline())
+    await expect(addToList('843831', 'history', movie)).rejects.toThrow()
+    mocks.history.mockImplementation(async (path, method) =>
+      method === 'PUT' ? { ok: true } : { history: [{ kp_id: '42', title: 'Server', addedAt: '2020-01-01T00:00:00.000Z' }] }
+    )
+    const history = await getMyLists('history')
+    expect(history.map((item) => item.kp_id)).toEqual(['843831', '42'])
+    expect(history[0].title).toBe('Сноуден')
+    await vi.waitFor(() => expect(localStorage.getItem('reyohoho-history-outbox:worker%3A11')).toBeNull())
+    const replay = mocks.history.mock.calls.find(([path, method]) => path === '/843831' && method === 'PUT')
+    expect(replay[2]).not.toHaveProperty('description')
+    expect(Date.parse(replay[2].viewedAt)).toBeLessThanOrEqual(Date.now())
+  })
+  it('hides a queued deletion from the server snapshot until it is sent', async () => {
+    mocks.history.mockRejectedValueOnce(httpError(503))
+    await expect(delFromList('42', 'history')).rejects.toThrow()
+    let releaseDelete
+    mocks.history.mockImplementation((path, method) =>
+      method === 'DELETE' ? new Promise((resolve) => { releaseDelete = resolve }) : Promise.resolve({ history: [{ kp_id: '42' }, { kp_id: '7' }] })
+    )
+    expect((await getMyLists('history')).map((item) => item.kp_id)).toEqual(['7'])
+    releaseDelete({ ok: true })
+    await vi.waitFor(() => expect(localStorage.getItem('reyohoho-history-outbox:worker%3A11')).toBeNull())
+  })
+  it('drops writes the server can never accept and keeps the newest operation per title', async () => {
+    mocks.history.mockRejectedValueOnce(httpError(400))
+    await expect(addToList('843831', 'history', movie)).rejects.toThrow()
+    expect(localStorage.getItem('reyohoho-history-outbox:worker%3A11')).toBeNull()
+    mocks.history.mockRejectedValue(offline())
+    await expect(addToList('301', 'history', movie)).rejects.toThrow()
+    await expect(delFromList('301', 'history')).rejects.toThrow()
+    const queued = JSON.parse(localStorage.getItem('reyohoho-history-outbox:worker%3A11'))
+    expect(queued.map((entry) => [entry.kpId, entry.op])).toEqual([['301', 'del']])
+  })
+  it('keeps queues separate per account', async () => {
+    mocks.history.mockRejectedValue(offline())
+    await expect(addToList('301', 'history', movie)).rejects.toThrow()
+    mocks.auth.user = { id: 22 }
+    mocks.history.mockResolvedValue({ history: [] })
+    expect(await getMyLists('history')).toEqual([])
+    expect(localStorage.getItem('reyohoho-history-outbox:worker%3A11')).not.toBeNull()
+  })
+})
+
+describe('exclusive viewing statuses', () => {
+  it('drops the title from the other local status lists after a status write', async () => {
+    const { removeLocalListItem } = await import('@/utils/localUserLists')
+    await addToList('843831', 'completed', movie)
+    expect(removeLocalListItem.mock.calls.map((call) => call[0]).sort()).toEqual(['abandoned', 'watching'])
+    removeLocalListItem.mockClear()
+    await addToList('843831', 'favorite', movie)
+    expect(removeLocalListItem).not.toHaveBeenCalled()
+  })
+})
+
+describe('list import batching', () => {
+  it('splits by bytes and reports a full list instead of failing silently', async () => {
+    const items = Array.from({ length: 40 }, (_, i) => ({ kp_id: String(i + 1), title: 'Я'.repeat(299), poster: 'https://example.com/' + 'p'.repeat(2000) }))
+    mocks.patch.mockResolvedValue({ added: 1, rejected: 0 })
+    await importWorkerList('favorite', items)
+    const sizes = mocks.patch.mock.calls.map((call) => byteLength(call[2]))
+    expect(mocks.patch.mock.calls.length).toBeGreaterThan(1)
+    for (const size of sizes) expect(size).toBeLessThanOrEqual(60 * 1024)
+    mocks.patch.mockReset()
+    mocks.patch
+      .mockResolvedValueOnce({ added: 30, rejected: 10 })
+      .mockRejectedValueOnce(Object.assign(new Error('full'), { code: 'list_capacity', response: { status: 409 } }))
+    const error = await importWorkerList('favorite', Array.from({ length: 41 }, (_, i) => String(i + 1))).catch((caught) => caught)
+    expect(error).toMatchObject({ code: 'list_capacity', added: 30, rejected: 11 })
   })
 })

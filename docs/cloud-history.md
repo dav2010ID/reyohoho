@@ -5,16 +5,25 @@
 Гостевая история хранится локально. Выход отключает доступ к истории аккаунта.
 
 Импорт объединяет записи, сохраняя существующие данные и отметки удаления.
-GET, экспорт и импорт ограничены 1000 фильмами; импорт отправляется пакетами
-по 40. На аккаунт допустимо 5000 уникальных ID, включая отметки удаления.
+Лимит истории один везде — 5000 записей (`HISTORY_CAPACITY` в
+`shared/history-data.js`): гостевая история, мост, файл и квота D1 по активным
+записям. GET отдаёт страницы по 1000 с `nextCursor`. Импорт идёт пакетами
+не больше 40 записей и ~390 КБ; что не поместилось в квоту, не откатывает пакет,
+а возвращается как `rejected`, и клиент показывает, сколько записей не перенесено.
+Объединение сверх лимита не обрезает историю молча, а просит удалить лишнее.
 При удалении метаданные стираются, ID сохраняется, чтобы старый импорт не
 восстановил удалённый фильм. Для полного стирания администратор удаляет записи
 аккаунта из `user_history` и `history_quota`; после этого старый импорт сможет
 восстановить фильмы.
 
-Новые просмотры и удаления отправляются при действии пользователя; загрузка
-доступна на главной странице и в настройках. Offline-очереди и синхронизации
-позиции видео нет. Неотправленные локальные записи можно импортировать позже.
+Новые просмотры и удаления аккаунта сначала попадают в локальную очередь
+(`src/utils/historyOutbox.js`, ключ `reyohoho-history-outbox:<owner>`), затем
+отправляются. Запись удаляется из очереди только после 2xx или ответа, который
+нельзя повторить (400/404/409/413). Каждый снимок с сервера накладывается на
+очередь, поэтому обновление не стирает неотправленный просмотр. Очередь
+повторяется при следующей загрузке истории, и время просмотра сохраняется
+(`viewedAt`, не старше 90 дней). Более старый повтор не сдвигает новую запись
+назад. Синхронизации позиции видео нет.
 История и bearer-токены не должны попадать в общий cache, URL или логи.
 
 Для прежнего backend опциональная D1-история включается отдельно через
@@ -52,7 +61,8 @@ localStorage разделён по origin, а не пути. Новый сайт
 фильмов. Пользователь нажимает «Перенести на reyhoho.fun» и подтверждает импорт
 на новом сайте. Для Worker-аккаунта записи добавляются в D1, для гостя — локально.
 Импорт в прежний аккаунт использует его backend. Существующие записи сохраняются.
-При достижении лимита 1000 фильмов текущие локальные записи имеют приоритет.
+Если вместе с текущими записями выходит больше 5000, импорт не выполняется, и
+пользователь видит, сколько записей нужно удалить.
 На главной странице до 9 ноября 2026 (UTC) показывается неброская кнопка переноса.
 Она открывает модальное окно с инструкциями, popup и импортом JSON без перехода
 в настройки. Окно закрывается крестиком, Escape или нажатием на фон; история
@@ -77,5 +87,18 @@ Deploy migration `0004_active_history_quota.sql` before the updated account Work
 It recalculates counters and atomically limits active history to 5000. Deleting
 an entry frees capacity; restoring a deleted entry checks capacity again. Import
 continues to honor tombstones. List import uses POST /api/list/:type/import,
-up to 40 items and 64 KiB per request, with atomic inserts and no overwrite of
-existing entries. Retrying a batch is safe after an interrupted response.
+up to 40 items and 64 KiB per request (the client splits by UTF-8 bytes),
+inserts only what fits under the 1000-item list capacity and reports the rest as
+`rejected`; a full list answers 409 `{error:"list_capacity"}`. Existing entries
+are never overwritten and duplicate IDs collapse. Retrying a batch is safe.
+
+## Viewing statuses and the login switch
+
+`watching`, `completed` and `abandoned` are mutually exclusive: a PUT to one
+removes the title from the other two in the same D1 batch, and import skips a
+title that already has a status. Rows that conflicted before this change are not
+migrated; the next status click resolves them.
+
+`TELEGRAM_AUTH_ENABLED` gates only NEW logins (token, poll, webhook). Existing
+`rh1_` sessions, lists, history and logout keep working while it is `false`,
+as long as `HISTORY_DB` is bound.

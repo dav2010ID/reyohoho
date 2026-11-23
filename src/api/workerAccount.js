@@ -1,4 +1,5 @@
 import { useAuthStore } from '@/store/auth'
+import { accountError } from './accountErrors'
 
 export const workerAuthEnabled = import.meta.env.VITE_WORKER_AUTH_ENABLED === 'true'
 
@@ -31,15 +32,12 @@ export async function workerAccountRequest(
   })
   if (!anonymous && token === undefined && useAuthStore().token !== session)
     throw new Error('Аккаунт изменился. Повторите операцию')
-  if (!response.ok) {
-    const error = new Error(
-      response.status === 503
+  if (!response.ok)
+    throw await accountError(response, (status) =>
+      status === 503
         ? 'Сервис аккаунта временно недоступен. Попробуйте позже.'
-        : `Ошибка аккаунта (${response.status})`
+        : `Ошибка аккаунта (${status})`
     )
-    error.response = { headers: response.headers, status: response.status, data: { error: error.message } }
-    throw error
-  }
   const data = await response.json()
   if (!anonymous && token === undefined && useAuthStore().token !== session) throw new Error('Аккаунт изменился. Повторите операцию')
   return data

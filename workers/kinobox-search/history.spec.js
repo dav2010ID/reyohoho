@@ -172,7 +172,18 @@ describe('private D1 history', () => {
       origin
     )
     expect(response.status).toBe(409)
+    expect(await response.json()).toEqual({ error: 'history_capacity', changed: 0, rejected: 2, remaining: 0 })
     expect(db.sqlite.prepare('SELECT COUNT(*) AS n FROM user_history').get().n).toBe(1)
+    db.sqlite.exec('UPDATE history_quota SET item_count = 4999')
+    const partial = await serveHistory(
+      request('/import', 'POST', { history: [{ kp_id: 42, addedAt: '2026-01-02' }, { kp_id: 43, addedAt: '2026-01-01' }, { kp_id: 301 }] }),
+      env,
+      origin
+    )
+    // Only the newest missing entry fits; the existing one is not charged.
+    expect(await partial.json()).toEqual({ ok: true, changed: 1, rejected: 1 })
+    db.sqlite.exec("DELETE FROM user_history WHERE kp_id = '42'")
+    db.sqlite.exec('UPDATE history_quota SET item_count = 5000')
     expect(
       (await serveHistory(request('/301', 'PUT', { title: 'Existing' }), env, origin)).status
     ).toBe(200)
@@ -182,6 +193,27 @@ describe('private D1 history', () => {
     expect((await serveHistory(request('/301', 'PUT', {}), env, origin)).status).toBe(409)
     await serveHistory(request('/42', 'DELETE'), env, origin)
     expect((await serveHistory(request('/301', 'PUT', {}), env, origin)).status).toBe(200)
+    db.sqlite.close()
+  })
+  it('keeps the real time of a replayed viewing and never moves a newer one back', async () => {
+    const db = database()
+    vi.stubGlobal('fetch', vi.fn(async () => Response.json({ id: 11 })))
+    const env = envFor(db)
+    const recent = new Date(Date.now() - 60000).toISOString()
+    const older = new Date(Date.now() - 3600000).toISOString()
+    const row = () => db.sqlite.prepare('SELECT added_at, metadata FROM user_history').get()
+    expect((await serveHistory(request('/301', 'PUT', { title: 'A', viewedAt: recent }), env, origin)).status).toBe(200)
+    expect(row().added_at).toBe(recent)
+    const stale = await serveHistory(request('/301', 'PUT', { title: 'B', viewedAt: older }), env, origin)
+    expect(await stale.json()).toEqual({ ok: true, changed: 0, stale: true })
+    expect(JSON.parse(row().metadata).title).toBe('A')
+    // Implausible client times fall back to the server clock.
+    await serveHistory(request('/301', 'PUT', { title: 'C', viewedAt: '2099-01-01T00:00:00Z' }), env, origin)
+    expect(Date.parse(row().added_at)).toBeLessThanOrEqual(Date.now())
+    expect(JSON.parse(row().metadata).title).toBe('C')
+    // The list alias wraps metadata like the other lists.
+    await serveHistory(request('/302', 'PUT', { metadata: { title: 'Wrapped' } }), env, origin)
+    expect(JSON.parse(db.sqlite.prepare("SELECT metadata FROM user_history WHERE kp_id='302'").get().metadata).title).toBe('Wrapped')
     db.sqlite.close()
   })
   it('rejects invalid authority, unauthorized tokens, oversized bodies and imports', async () => {

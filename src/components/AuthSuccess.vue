@@ -39,7 +39,7 @@ import { getKpInfo } from '@/api/movies'
 import { getLocalList } from '@/utils/localUserLists'
 import { consumeAuthRedirect } from '@/utils/authRedirect'
 import { importCloudHistory } from '@/api/cloudHistory'
-import { normalizeHistory } from '../../shared/history-data.js'
+import { HISTORY_CAPACITY, normalizeHistory } from '../../shared/history-data.js'
 import { clearPendingSync, readPendingSync, savePendingSync } from '@/utils/pendingAccountSync'
 export default {
   name: 'AuthSuccess',
@@ -88,7 +88,7 @@ export default {
         let pending = readPendingSync(owner)
         if (!pending) {
           pending = {
-            history: normalizeHistory(guestHistory, 5000),
+            history: normalizeHistory(guestHistory, HISTORY_CAPACITY),
             lists: Object.fromEntries(
               syncedListTypes.map((type) => [type, [...getLocalList(type, 'guest')]])
             ),
@@ -140,7 +140,7 @@ export default {
               if (localHistory.length)
                 localStorage.setItem(
                   'reyohoho-guest-history-backup',
-                  JSON.stringify(normalizeHistory(localHistory, 5000))
+                  JSON.stringify(normalizeHistory(localHistory, HISTORY_CAPACITY))
                 )
               for (const type of syncedListTypes) await getMyLists(type)
             }

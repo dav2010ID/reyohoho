@@ -1,8 +1,19 @@
-import { normalizeHistory } from '../../shared/history-data.js'
+import { HISTORY_CAPACITY, normalizeHistory } from '../../shared/history-data.js'
 import { boundedJson, checkLimit, verifyWorkerSession } from './private-api.mjs'
 import { metadataUpdate, readMetadataPatch } from './metadata.mjs'
 
-export async function serveHistory(request, env, origin) {
+// `verifiedUserId` is set only by the account router after it has already
+// authenticated and rate-limited this request (the /api/list/history alias).
+const REPLAY_WINDOW_MS = 90 * 24 * 60 * 60 * 1000
+// Queued clients replay a viewing later; keep its real time if it is plausible.
+function viewedAt(value, now = Date.now()) {
+  const time = Date.parse(value)
+  return Number.isFinite(time) && time <= now + 5 * 60 * 1000 && time >= now - REPLAY_WINDOW_MS
+    ? new Date(time).toISOString()
+    : new Date(now).toISOString()
+}
+
+export async function serveHistory(request, env, origin, verifiedUserId) {
   const headers = {
     'Content-Type': 'application/json; charset=utf-8',
     'Access-Control-Allow-Origin': origin || 'https://reyhoho.fun',
@@ -35,13 +46,15 @@ export async function serveHistory(request, env, origin) {
     )
   )
     return reply({ error: 'Method not allowed' }, 405)
-  if (!env.HISTORY_DB || (!env.HISTORY_AUTH_USER_URL && env.TELEGRAM_AUTH_ENABLED !== 'true'))
-    return reply({ error: 'History not configured' }, 503)
+  // Sessions stay valid while new logins are switched off (TELEGRAM_AUTH_ENABLED).
+  if (!env.HISTORY_DB) return reply({ error: 'History not configured' }, 503)
   const authorization = request.headers.get('Authorization') || ''
-  if (!/^Bearer [^\s]{1,4096}$/.test(authorization))
+  if (!verifiedUserId && !/^Bearer [^\s]{1,4096}$/.test(authorization))
     return reply({ error: 'Authentication required' }, 401)
-  let userId
-  if (authorization.startsWith('Bearer rh1_')) {
+  let userId = verifiedUserId
+  if (userId) {
+    /* Already authenticated by the caller. */
+  } else if (authorization.startsWith('Bearer rh1_')) {
     try {
       if (
         !(await checkLimit(
@@ -150,12 +163,40 @@ export async function serveHistory(request, env, origin) {
       const body = await boundedJson(request.body, importing ? 400000 : 8192)
       if (importing && (!Array.isArray(body.history) || body.history.length > 40))
         throw new Error('Import batch limit')
+      // The /api/list/history alias sends `{ metadata }` like the other lists.
+      const single = body?.metadata && typeof body.metadata === 'object' ? body.metadata : body
       items = normalizeHistory(
-        importing ? body.history : [{ ...body, kp_id: id, addedAt: new Date().toISOString() }]
+        importing
+          ? body.history
+          : [{ ...single, kp_id: id, addedAt: viewedAt(body?.viewedAt) }]
       )
       if (!items.length) throw new Error('Empty history')
     } catch {
       return reply({ error: 'Invalid history payload (maximum 40 items per import)' }, 400)
+    }
+    let rejected = 0
+    if (importing) {
+      // Import only what fits instead of rolling the whole batch back on the
+      // capacity trigger. Existing rows and tombstones are skipped anyway.
+      const ids = items.map((item) => item.kp_id)
+      const [{ results: present }, { results: quota }] = await Promise.all([
+        db
+          .prepare(
+            `SELECT kp_id FROM user_history WHERE user_id = ? AND kp_id IN (${ids.map(() => '?').join(',')})`
+          )
+          .bind(userId, ...ids)
+          .all(),
+        db.prepare('SELECT item_count FROM history_quota WHERE user_id = ?').bind(userId).all()
+      ])
+      const known = new Set(present.map((row) => String(row.kp_id)))
+      const fresh = items.filter((item) => !known.has(item.kp_id))
+      const room = Math.max(0, HISTORY_CAPACITY - Number(quota[0]?.item_count || 0))
+      rejected = Math.max(0, fresh.length - room)
+      items = fresh.slice(0, room)
+      if (!items.length)
+        return rejected
+          ? reply({ error: 'history_capacity', changed: 0, rejected, remaining: 0 }, 409)
+          : reply({ ok: true, changed: 0, rejected: 0 })
     }
     // Atomic batch, parameterized SQL, no client-selected user_id.
     // Import preserves existing records AND deletion tombstones. PUT is an explicit new viewing.
@@ -166,19 +207,22 @@ export async function serveHistory(request, env, origin) {
        ON CONFLICT(user_id,kp_id) ${
          importing
            ? 'DO NOTHING'
-           : 'DO UPDATE SET metadata=excluded.metadata, added_at=excluded.added_at, deleted=0'
+           : // A replayed older viewing must not move a newer one back in time.
+             `DO UPDATE SET metadata=excluded.metadata, added_at=excluded.added_at, deleted=0
+              WHERE user_history.deleted <> 0 OR excluded.added_at >= user_history.added_at`
        }`
         )
         .bind(userId, item.kp_id, JSON.stringify(item), item.addedAt)
     )
     const result = await db.batch(statements)
+    // No change on PUT means a newer viewing already exists (capacity raises instead).
     if (!importing && !result.some((entry) => entry.meta.changes > 0))
-      return reply({ error: 'History capacity reached' }, 409)
-    return reply({ ok: true, changed: result.reduce((sum, entry) => sum + entry.meta.changes, 0) })
+      return reply({ ok: true, changed: 0, stale: true })
+    const changed = result.reduce((sum, entry) => sum + entry.meta.changes, 0)
+    return reply({ ok: true, changed, rejected })
   } catch (error) {
-    return reply(
-      { error: 'History storage unavailable' },
-      /history_capacity/.test(error.message) ? 409 : 503
-    )
+    return /history_capacity/.test(error.message)
+      ? reply({ error: 'history_capacity', remaining: 0 }, 409)
+      : reply({ error: 'History storage unavailable' }, 503)
   }
 }

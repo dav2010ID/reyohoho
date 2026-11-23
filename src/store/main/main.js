@@ -3,7 +3,7 @@ import { defineStore } from 'pinia'
 import { MAIN_STORE_NAME } from '../constants'
 import { beforeHydrateMainStore } from '../utils'
 import { resolvePosterByMovie } from '@/utils/mediaUtils'
-import { cardRatings } from '../../../shared/history-data.js'
+import { cardRatings, HISTORY_CAPACITY } from '../../../shared/history-data.js'
 import { getLocalList, replaceLocalList } from '@/utils/localUserLists'
 
 const ratingWrites = new WeakMap()
@@ -99,6 +99,8 @@ export const useMainStore = defineStore(MAIN_STORE_NAME, {
           addedAt: new Date().toISOString()
         }
         this.history.unshift(movieWithDate)
+        // Rolling history: the oldest viewing leaves once the shared capacity is reached.
+        if (this.history.length > HISTORY_CAPACITY) this.history.length = HISTORY_CAPACITY
       }
       replaceLocalList('history', this.history, this.historyOwner)
     },

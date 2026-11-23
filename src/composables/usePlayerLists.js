@@ -10,6 +10,12 @@ const statusKeys = {
   [USER_LIST_TYPES_ENUM.ABANDONED]: 'isAbandoned',
   [USER_LIST_TYPES_ENUM.WATCHING]: 'isWatching'
 }
+// A title has one viewing status; choosing one clears the other two.
+const exclusiveStatuses = [
+  USER_LIST_TYPES_ENUM.WATCHING,
+  USER_LIST_TYPES_ENUM.COMPLETED,
+  USER_LIST_TYPES_ENUM.ABANDONED
+]
 const listNames = {
   [USER_LIST_TYPES_ENUM.FAVORITE]: 'избранное',
   [USER_LIST_TYPES_ENUM.HISTORY]: 'историю',
@@ -126,7 +132,13 @@ export function usePlayerLists({
       if (!isCurrent()) return false
 
       // Do not refetch the card: toggling infoLoading would destroy the iframe.
-      movie.lists = { ...movie.lists, [statusKeys[type]]: active }
+      const cleared =
+        active && exclusiveStatuses.includes(type)
+          ? Object.fromEntries(
+              exclusiveStatuses.filter((other) => other !== type).map((other) => [statusKeys[other], false])
+            )
+          : {}
+      movie.lists = { ...movie.lists, ...cleared, [statusKeys[type]]: active }
       notificationRef.value?.showNotification(
         `${active ? 'Добавлено в' : 'Удалено из'} ${listNames[type]}`
       )

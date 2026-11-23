@@ -15,6 +15,19 @@ import {
   removeLocalListItem,
   replaceLocalList
 } from '@/utils/localUserLists'
+import { chunkByBytes } from '@/utils/importBatches'
+import {
+  ackHistoryWrite,
+  applyHistoryOutbox,
+  clearHistoryOutbox,
+  enqueueHistoryWrite,
+  isPermanentFailure,
+  pendingHistoryWrites
+} from '@/utils/historyOutbox'
+
+// Worker limits for POST /api/list/:type/import (workers/kinobox-search/account.mjs).
+const LIST_IMPORT_ITEMS = 40
+const LIST_IMPORT_BYTES = 60 * 1024
 
 const apiCall = async (callFn) => {
   const auth = useAuthStore()
@@ -99,11 +112,94 @@ export async function repairCardRatings(item, type, isCurrent = () => true) {
   return result
 }
 
+const HISTORY = USER_LIST_TYPES_ENUM.HISTORY
+const STATUS_TYPES = [
+  USER_LIST_TYPES_ENUM.WATCHING,
+  USER_LIST_TYPES_ENUM.COMPLETED,
+  USER_LIST_TYPES_ENUM.ABANDONED
+]
+const isAccount = (owner) => owner !== 'guest'
+
+// One history write to the server, without touching the outbox.
+const sendHistory = async (entry) => {
+  if (isCloudHistoryEnabled()) {
+    return entry.op === 'add'
+      ? historyRequest(`/${entry.kpId}`, 'PUT', { ...entry.metadata, viewedAt: entry.at })
+      : historyRequest(`/${entry.kpId}`, 'DELETE')
+  }
+  const payload = useAuthStore().isWorkerSession
+    ? { metadata: entry.metadata, viewedAt: entry.at }
+    : entry.metadata
+      ? { metadata: entry.metadata }
+      : undefined
+  const { data } = await apiCall((api) =>
+    entry.op === 'add'
+      ? api.put(`/list/${HISTORY}/${entry.kpId}`, payload)
+      : api.delete(`/list/${HISTORY}/${entry.kpId}`)
+  )
+  return data
+}
+
+// History writes go through a durable outbox: queued before the request,
+// acknowledged after a 2xx, dropped only when a retry can never succeed.
+const writeHistory = async (owner, op, id, metadata) => {
+  const entry = enqueueHistoryWrite(
+    owner,
+    op,
+    id,
+    op === 'add' ? normalizeHistory([{ ...metadata, kp_id: id }])[0] : null
+  )
+  try {
+    const data = await sendHistory(entry)
+    ackHistoryWrite(owner, entry)
+    return data
+  } catch (error) {
+    if (isPermanentFailure(error)) ackHistoryWrite(owner, entry)
+    throw error
+  }
+}
+
+const flushing = new Map()
+// Replay queued history writes for the current account, oldest first.
+export function flushHistoryOutbox() {
+  let owner
+  try {
+    owner = listOwner()
+  } catch {
+    return Promise.resolve(0)
+  }
+  if (!isAccount(owner)) return Promise.resolve(0)
+  if (flushing.has(owner)) return flushing.get(owner)
+  const token = useAuthStore().token
+  const task = (async () => {
+    let sent = 0
+    for (const entry of pendingHistoryWrites(owner).reverse()) {
+      if (useAuthStore().token !== token) break
+      try {
+        await sendHistory(entry)
+        ackHistoryWrite(owner, entry)
+        sent++
+      } catch (error) {
+        if (!isPermanentFailure(error)) break
+        ackHistoryWrite(owner, entry)
+      }
+    }
+    return sent
+  })().finally(() => flushing.delete(owner))
+  flushing.set(owner, task)
+  return task
+}
+
 const addToList = async (id, type, metadata = null) => {
   assertListCapability(type)
   const token = useAuthStore().token
   const owner = listOwner()
   invalidateList(owner, type)
+  if (type === HISTORY && isAccount(owner)) {
+    const data = await writeHistory(owner, 'add', id, metadata || {})
+    if (useAuthStore().token === token) addLocalListItem(type, id, metadata || {}, owner)
+    return data
+  }
   // Cloud lists store cards, not full provider responses (cast, trailers, raw_data).
   // Preserve the legacy backend payload contract.
   const payload = useAuthStore().isWorkerSession
@@ -111,30 +207,57 @@ const addToList = async (id, type, metadata = null) => {
     : metadata
       ? { metadata }
       : undefined
-  if (type === USER_LIST_TYPES_ENUM.HISTORY && isCloudHistoryEnabled()) {
-    const [item] = normalizeHistory([{ ...metadata, kp_id: id }])
-    const data = await historyRequest(`/${encodeURIComponent(id)}`, 'PUT', item)
-    if (useAuthStore().token === token) addLocalListItem(type, id, metadata || {}, owner)
-    return data
-  }
   const { data } = await apiCall((api) => api.put(`/list/${type}/${id}`, payload))
-  if (useAuthStore().token === token) addLocalListItem(type, id, metadata || {}, owner)
+  if (useAuthStore().token === token) {
+    addLocalListItem(type, id, metadata || {}, owner)
+    // The Worker moved the title out of the other status lists in the same write.
+    if (useAuthStore().isWorkerSession && STATUS_TYPES.includes(type))
+      for (const other of STATUS_TYPES.filter((status) => status !== type)) {
+        invalidateList(owner, other)
+        removeLocalListItem(other, id, owner)
+      }
+  }
   return data
 }
 
 // Import is sequential across bounded batches; retries are idempotent on the server.
+// Batches respect the Worker's item AND byte limits; a full list is reported, not hidden.
 export async function importWorkerList(type, ids) {
   const auth = useAuthStore()
   const token = auth.token
   const owner = listOwner()
   if (!auth.isWorkerSession) throw new Error('Требуется аккаунт Worker')
   invalidateList(owner, type)
+  const items = ids
+    .map((item) => (typeof item === 'object' ? item : { kp_id: item }))
+    .map((item) => normalizeHistory([item])[0])
+    .filter(Boolean)
+  const batches = chunkByBytes(items, {
+    maxItems: LIST_IMPORT_ITEMS,
+    maxBytes: LIST_IMPORT_BYTES,
+    envelope: (batch) => ({ items: batch })
+  })
   let added = 0
-  for (let i = 0; i < ids.length; i += 40) {
+  let rejected = 0
+  for (const batch of batches) {
     if (auth.token !== token) throw new Error('Аккаунт изменился. Повторите импорт')
-    const items = ids.slice(i, i + 40).map(item => typeof item === 'object' ? item : { kp_id: item })
-    const result = await workerAccountRequest(`/list/${type}/import`, 'POST', { items })
-    added += result.added
+    try {
+      const result = await workerAccountRequest(`/list/${type}/import`, 'POST', { items: batch })
+      added += Number(result.added) || 0
+      rejected += Number(result.rejected) || 0
+    } catch (error) {
+      if (error.code !== 'list_capacity') throw error
+      rejected += batch.length
+    }
+  }
+  if (rejected) {
+    const error = new Error(
+      `Список заполнен (не больше 1000 фильмов): перенесено ${added}, не поместилось ${rejected}. Удалите лишние и повторите.`
+    )
+    error.code = 'list_capacity'
+    error.added = added
+    error.rejected = rejected
+    throw error
   }
   return added
 }
@@ -144,8 +267,8 @@ const delFromList = async (id, type) => {
   const token = useAuthStore().token
   const owner = listOwner()
   invalidateList(owner, type)
-  if (type === USER_LIST_TYPES_ENUM.HISTORY && isCloudHistoryEnabled()) {
-    const data = await historyRequest(`/${encodeURIComponent(id)}`, 'DELETE')
+  if (type === HISTORY && isAccount(owner)) {
+    const data = await writeHistory(owner, 'del', id)
     if (useAuthStore().token === token) removeLocalListItem(type, id, owner)
     return data
   }
@@ -159,12 +282,14 @@ const delAllFromList = async (type) => {
   const token = useAuthStore().token
   const owner = listOwner()
   invalidateList(owner, type)
-  if (type === USER_LIST_TYPES_ENUM.HISTORY && isCloudHistoryEnabled()) {
+  if (type === HISTORY && isCloudHistoryEnabled()) {
     const data = await historyRequest('', 'DELETE')
+    clearHistoryOutbox(owner)
     if (useAuthStore().token === token) clearLocalList(type, owner)
     return data
   }
   const { data } = await apiCall((api) => api.delete(`/list/${type}`))
+  if (type === HISTORY) clearHistoryOutbox(owner)
   if (useAuthStore().token === token) clearLocalList(type, owner)
   return data
 }
@@ -209,8 +334,14 @@ const getMyLists = async (type, { fresh = false, awaitMetadata = false } = {}) =
     void task.then(() => { if (current()) replaceLocalList(type, cards, owner) }).catch(() => {})
     return cards
   }
-  if (type === USER_LIST_TYPES_ENUM.HISTORY && isCloudHistoryEnabled()) {
-    const history = await hydrate(await getCloudHistory())
+  // A server snapshot never erases history writes that are still queued.
+  const withOutbox = (items) => {
+    if (type !== HISTORY || !isAccount(owner)) return items
+    void flushHistoryOutbox().catch(() => {})
+    return applyHistoryOutbox(owner, items)
+  }
+  if (type === HISTORY && isCloudHistoryEnabled()) {
+    const history = await hydrate(withOutbox(await getCloudHistory()))
     storeList(history)
     return history
   }
@@ -218,9 +349,11 @@ const getMyLists = async (type, { fresh = false, awaitMetadata = false } = {}) =
     const { data } = await apiCall((api) => api.get(`/list/${type}`))
     if (!Array.isArray(data)) throw new Error('Неполный ответ списка')
     const normalized = await hydrate(
-      await normalizeMovieListResponse(data, {
-        enrichMissingSeo: false
-      })
+      withOutbox(
+        await normalizeMovieListResponse(data, {
+          enrichMissingSeo: false
+        })
+      )
     )
     storeList(normalized)
     return normalized

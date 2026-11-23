@@ -1,7 +1,7 @@
 // @vitest-environment node
 import { afterEach, describe, expect, it, vi } from 'vitest'
 import { serveTelegramAuth, cleanupAuth } from './telegram-auth.mjs'
-import { verifyWorkerSession } from './private-api.mjs'
+import { sha256, verifyWorkerSession } from './private-api.mjs'
 import { serveAccount } from './account.mjs'
 import { serveHistory } from './history.mjs'
 import { testDatabase } from './test-db.mjs'
@@ -134,6 +134,21 @@ describe('Telegram Worker auth', () => {
       response.token
     )
     await authCall(env, 'logout', {}, bearer)
+    expect(await verifyWorkerSession(request('/user', {}, 'GET', bearer), env)).toBeNull()
+    db.sqlite.close()
+  })
+  it('blocks new logins when switched off but keeps sessions and logout working', async () => {
+    const db = testDatabase()
+    const env = { ...envFor(db), TELEGRAM_AUTH_ENABLED: 'false' }
+    const access = 'rh1_' + 'b'.repeat(43)
+    db.sqlite.prepare('INSERT INTO tg_users VALUES (?,?)').run('123', 'Test')
+    db.sqlite
+      .prepare('INSERT INTO tg_sessions VALUES (?,?,?,?)')
+      .run(await sha256(access), '123', Math.floor(Date.now() / 1000) + 3600, 0)
+    const bearer = { Authorization: `Bearer ${access}` }
+    expect((await authCall(env, 'telegram-login-token')).status).toBe(503)
+    expect((await verifyWorkerSession(request('/user', {}, 'GET', bearer), env)).id).toBe('123')
+    expect((await authCall(env, 'logout', {}, bearer)).status).toBe(200)
     expect(await verifyWorkerSession(request('/user', {}, 'GET', bearer), env)).toBeNull()
     db.sqlite.close()
   })

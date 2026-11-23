@@ -15,6 +15,7 @@
   <div v-if="dimmingEnabled" class="dimming-overlay" @click="toggleDimming"></div>
 
   <div v-if="showGarland" id="garland" :style="{ backgroundImage: `url(${garlandImage})` }"></div>
+  <ToastMessage ref="storageToast" />
 </template>
 
 <script setup>
@@ -22,10 +23,12 @@ import ConfirmationHost from '@/components/ConfirmationHost.vue'
 import BackgroundSpace from '@/components/BackgroundSpace.vue'
 import MenuNavigation from '@/components/MenuNavigation.vue'
 import MobileHeader from '@/components/MobileHeader.vue'
+import ToastMessage from '@/components/notification/ToastMessage.vue'
+import { STORAGE_ERROR_EVENT } from '@/utils/storageErrors'
 import { useMainStore } from '@/store/main'
 import { useNavbarStore } from '@/store/navbar'
 import { useHead } from '@unhead/vue'
-import { computed, onMounted, onUnmounted, watch } from 'vue'
+import { computed, onMounted, onUnmounted, ref, watch } from 'vue'
 import { useRoute } from 'vue-router'
 import { isNewYearPeriod } from '@/utils/dateUtils'
 import { buildStaticCanonicalUrl } from '@/utils/staticSeo'
@@ -35,6 +38,12 @@ const store = useMainStore()
 const navbarStore = useNavbarStore()
 const route = useRoute()
 let stopSidebarPositionWatch = null
+const storageToast = ref(null)
+const showStorageError = () =>
+  storageToast.value?.showNotification(
+    'Браузер не сохранил изменения: память сайта заполнена или запрещена. Освободите место или разрешите хранение данных.',
+    8000
+  )
 
 // Keep a route-level title entry alive while page-specific SEO head entries mount and unmount.
 // Without this fallback, removing the home page head can restore its old title on another route.
@@ -89,6 +98,7 @@ onMounted(() => {
   stopSidebarPositionWatch = watch(sidebarPosition, applySidebarPosition, { immediate: true })
   window.addEventListener('resize', updateIsMobile)
   document.addEventListener('keydown', handleKeyDown, true)
+  window.addEventListener(STORAGE_ERROR_EVENT, showStorageError)
 })
 
 onUnmounted(() => {
@@ -98,6 +108,7 @@ onUnmounted(() => {
   }
   window.removeEventListener('resize', updateIsMobile)
   document.removeEventListener('keydown', handleKeyDown, true)
+  window.removeEventListener(STORAGE_ERROR_EVENT, showStorageError)
 })
 
 const dimmingEnabled = computed(() => store.dimmingEnabled)

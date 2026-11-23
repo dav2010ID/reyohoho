@@ -65,7 +65,9 @@ export function randomToken() {
 }
 
 export async function verifyWorkerSession(request, env) {
-  if (env.TELEGRAM_AUTH_ENABLED !== 'true' || !env.HISTORY_DB) return null
+  // TELEGRAM_AUTH_ENABLED only gates NEW logins. Turning it off must not sign
+  // everyone out or hide their lists, history and logout.
+  if (!env.HISTORY_DB) return null
   const header = request.headers.get('Authorization') || ''
   if (!/^Bearer rh1_[A-Za-z0-9_-]{43}$/.test(header)) return null
   return primaryDb(env)

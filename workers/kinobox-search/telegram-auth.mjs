@@ -182,6 +182,28 @@ export async function serveTelegramAuth(request, env, origin) {
   )
     return reply({ error: 'Not found' }, 404)
   if (request.method !== 'POST') return reply({ error: 'Method not allowed' }, 405)
+  // Logout needs only the session store, so it keeps working while logins are off.
+  if (path === '/api/auth/logout') {
+    if (!env.HISTORY_DB) return reply({ error: 'Telegram auth not configured' }, 503)
+    try {
+      if (
+        !(await checkLimit(
+          env.AUTH_RATE_LIMITER,
+          `${path}:${request.headers.get('CF-Connecting-IP') || 'local'}`
+        ))
+      )
+        return reply({ error: 'Too many requests' }, 429)
+      const user = await verifyWorkerSession(request, env)
+      if (!user) return reply({ error: 'Invalid session' }, 401)
+      await primaryDb(env)
+        .prepare('DELETE FROM tg_sessions WHERE token_hash=?')
+        .bind(await sha256(request.headers.get('Authorization').slice(7)))
+        .run()
+      return reply({ ok: true })
+    } catch {
+      return reply({ error: 'Telegram auth unavailable' }, 503)
+    }
+  }
   if (
     env.TELEGRAM_AUTH_ENABLED !== 'true' ||
     !env.HISTORY_DB ||
@@ -201,15 +223,6 @@ export async function serveTelegramAuth(request, env, origin) {
       return reply({ error: 'Too many requests' }, 429)
     const db = primaryDb(env)
     const now = Math.floor(Date.now() / 1000)
-    if (path === '/api/auth/logout') {
-      const user = await verifyWorkerSession(request, env)
-      if (!user) return reply({ error: 'Invalid session' }, 401)
-      await db
-        .prepare('DELETE FROM tg_sessions WHERE token_hash=?')
-        .bind(await sha256(request.headers.get('Authorization').slice(7)))
-        .run()
-      return reply({ ok: true })
-    }
     if (!(request.headers.get('Content-Type') || '').startsWith('application/json'))
       return reply({ error: 'JSON required' }, 400)
     if (path === '/api/auth/telegram-login-token') {
