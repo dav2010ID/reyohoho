@@ -43,7 +43,7 @@ backend одновременно проксирует внешние providers �
 | Backend tests | pytest, pytest-asyncio, sanic-testing; `backend/tests/` |
 | Quality | ESLint, encoding check, Ruff, compileall, production build |
 | CI/CD | GitHub Actions, GitLab Pages, GitHub Pages, Render static site, Vercel rewrite |
-| Containers | Frontend dev Dockerfile; backend Dockerfile; PostgreSQL + оба приложения в `docker-compose.yml` |
+| Containers | Frontend dev `Dockerfile.dev`; backend Dockerfile; PostgreSQL + оба приложения в `docker-compose.yml` |
 
 В проекте нет TypeScript typecheck: frontend написан на JavaScript. Старый `vuex.d.ts` удалён;
 состояние хранится в Pinia. PWA формируется как часть production build.
@@ -487,11 +487,11 @@ tokens/URLs, CORS (`ALLOWED_ORIGINS`), cache TTL/size, `HOST`, `PORT`, `DEBUG`. 
 - `.github/workflows/quality.yaml`: Node 22 frontend full gate; Python 3.13 Ruff/compileall/pytest.
 - `.github/workflows/github.yaml`: build/deploy GitHub Pages on `main`; weekly SEO generation may
   commit and push generated files with bot credentials.
-- `.gitlab-ci.yml`: quality + build Pages only for branch `vue`.
-- `render.yaml`: static frontend build/publish only.
-- `vercel.json`: SPA rewrite only.
+- Production: GitHub Pages from `.github/workflows/github.yaml`; planned move to
+  `workers/site` (see `docs/cloudflare-site.md`). GitLab Pages, Render and Vercel
+  configs were removed: they built without the SEO and artifact checks.
 - `backend/Dockerfile`: migrations then two-worker Sanic production-like process.
-- root `Dockerfile`: frontend Vite dev server, не production static server.
+- `Dockerfile.dev`: frontend Vite dev server, не production static server.
 - `docker-compose.yml`: PostgreSQL, backend и frontend dev; содержит dev defaults и не должен
   использоваться как production deployment без hardening.
 

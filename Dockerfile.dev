@@ -1,3 +1,4 @@
+# Local Vite dev server only. Production is the static build (see docs/release.md).
 FROM node:lts-trixie-slim
 
 ENV HOST=${HOST}
