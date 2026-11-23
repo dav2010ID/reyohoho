@@ -140,7 +140,7 @@ const guestBackup = ref([])
 const hasPendingSync = computed(() => {
   if (!auth.isAuthenticated) return false
   try {
-    const data = readPendingSync(`${auth.isWorkerSession ? 'worker' : 'legacy'}:${auth.user.id}`)
+    const data = readPendingSync(`worker:${auth.user.id}`)
     return (
       !!data && (data.history.length || Object.values(data.lists).some((items) => items.length))
     )

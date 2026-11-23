@@ -4,43 +4,21 @@ import { trackAnalyticsEvent } from '@/utils/analytics'
 import { rethrowRequestCancellation } from '@/utils/requestCancellation'
 import { getSearchProviderOrder } from '@/api/searchProviderOrder'
 import { getMovieInfoProviderOrder, getPlayerProviderOrder } from '@/api/contentProviderOrder'
-import {
-  CONTENT_PROVIDERS,
-  KINOBD_SUPPORTED_METHODS,
-  LOCAL_SUPPORTED_METHODS,
-  loadProvider
-} from '@/api/providerRegistry'
-
-import { KINOBD_ENABLED } from '@/api/providerAvailability'
+import { CONTENT_PROVIDERS, loadProvider } from '@/api/providerRegistry'
 import { getSafePlayerUrl } from '@/utils/playerSecurity'
 
 const PLAYER_PROVIDER_TIMEOUT_MS = 8000
 const PLAYER_HEDGE_MS = 2000
 const getCurrentProvider = () => {
   try {
-    const mainStore = useMainStore()
-    const provider = mainStore.contentApiProvider || CONTENT_PROVIDERS.KINOBOX
-    return provider === CONTENT_PROVIDERS.KINOBD && !KINOBD_ENABLED
-      ? CONTENT_PROVIDERS.KINOBOX
-      : provider
+    const provider = useMainStore().contentApiProvider
+    return Object.values(CONTENT_PROVIDERS).includes(provider)
+      ? provider
+      : CONTENT_PROVIDERS.KINOBOX
   } catch {
     return CONTENT_PROVIDERS.KINOBOX
   }
 }
-
-const getCurrentSearchProvider = () => {
-  try {
-    const mainStore = useMainStore()
-    return mainStore.searchApiProvider || CONTENT_PROVIDERS.KINOBOX
-  } catch {
-    return CONTENT_PROVIDERS.KINOBOX
-  }
-}
-
-const searchKinoBDPlayerCandidates = async (...args) =>
-  (await loadProvider('kinobd')).searchPlayerCandidates(...args)
-const getKinoBDPlayerDataByInid = async (...args) =>
-  (await loadProvider('kinobd')).getPlayerDataByInid(...args)
 
 const hasPlayers = (players) => {
   if (Array.isArray(players)) return players.length > 0
@@ -240,40 +218,9 @@ const getPlayersWithFallback = async (contentId, options = {}, ...rest) => {
   }
 }
 
-const callWithProvider = async (methodName, ...args) => {
-  const provider = getCurrentProvider()
-
-  if (provider === CONTENT_PROVIDERS.LOCAL && LOCAL_SUPPORTED_METHODS.has(methodName)) {
-    try {
-      const local = await loadProvider(CONTENT_PROVIDERS.LOCAL)
-      return await local[methodName](...args)
-    } catch (error) {
-      rethrowRequestCancellation(error)
-      throw error
-    }
-  }
-
-  if (
-    KINOBD_ENABLED &&
-    provider === CONTENT_PROVIDERS.KINOBD &&
-    KINOBD_SUPPORTED_METHODS.has(methodName)
-  ) {
-    try {
-      const kinobd = await loadProvider('kinobd')
-      return await kinobd[methodName](...args)
-    } catch (error) {
-      rethrowRequestCancellation(error)
-      throw error
-    }
-  }
-
-  const backend = await loadProvider(CONTENT_PROVIDERS.BACKEND)
-  return await backend[methodName](...args)
-}
-
 const apiSearch = async (...args) => {
-  const configuredProvider = getCurrentSearchProvider()
-  const order = getSearchProviderOrder(configuredProvider)
+  const configuredProvider = CONTENT_PROVIDERS.KINOBOX
+  const order = getSearchProviderOrder()
   let lastError = null
   let successfulSearch = false
 
@@ -316,8 +263,8 @@ const hasKpInfo = (movieInfo) => {
 
 const getKpInfoWithFallback = async (...args) => {
   const [kpId] = args
-  const configuredProvider = getCurrentProvider()
-  const order = getMovieInfoProviderOrder(configuredProvider)
+  const configuredProvider = CONTENT_PROVIDERS.KINOBOX
+  const order = getMovieInfoProviderOrder()
   let lastError = null
 
   for (const provider of order) {
@@ -344,140 +291,19 @@ const getKpInfoWithFallback = async (...args) => {
   if (lastError) throw lastError
   return null
 }
-const getShikiInfo = async (...args) => callWithProvider('getShikiInfo', ...args)
 const getKpInfo = async (...args) => getKpInfoWithFallback(...args)
 const getPlayers = async (...args) => getPlayersWithFallback(...args)
-const getShikiPlayers = async (...args) => callWithProvider('getShikiPlayers', ...args)
 const shouldEnrichListSeo = import.meta.env.SSR
-// KinoBD code is preserved; remote top lists now use the Worker's fixed Kinopoisk query.
-const getMovies = async (...args) => {
-  if (getCurrentProvider() === CONTENT_PROVIDERS.LOCAL) {
-    try {
-      return await normalizeMovieListResponse(
-        await (await loadProvider('local')).getMovies(...args),
-        { enrichMissingSeo: shouldEnrichListSeo }
-      )
-    } catch (error) {
-      rethrowRequestCancellation(error)
-      console.warn('[movies] getMovies failed on local backend', error)
-      // Do not silently present a rating top as local day/week popularity.
-      if (!KINOBD_ENABLED) throw error
-    }
-  }
-  if (!KINOBD_ENABLED) {
-    return normalizeMovieListResponse(
-      await (await loadProvider(CONTENT_PROVIDERS.KINOBOX)).getTopMovies(...args),
-      { enrichMissingSeo: shouldEnrichListSeo }
-    )
-  }
-  try {
-    return await normalizeMovieListResponse(
-      await (await loadProvider('kinobd')).getMovies(...args),
-      {
-        enrichMissingSeo: shouldEnrichListSeo
-      }
-    )
-  } catch (error) {
-    rethrowRequestCancellation(error)
-    console.warn('[movies] getMovies failed on KinoBD', error)
-    return []
-  }
-}
-const getDiscussedMovies = async (...args) => {
-  if (getCurrentProvider() === CONTENT_PROVIDERS.LOCAL) {
-    try {
-      return await normalizeMovieListResponse(
-        await (await loadProvider(CONTENT_PROVIDERS.LOCAL)).getDiscussedMovies(...args),
-        { enrichMissingSeo: shouldEnrichListSeo }
-      )
-    } catch (error) {
-      rethrowRequestCancellation(error)
-      console.warn('[movies] getDiscussedMovies failed on local backend', error)
-    }
-  }
-  if (!KINOBD_ENABLED) return []
-  try {
-    return await normalizeMovieListResponse(
-      await (await loadProvider(CONTENT_PROVIDERS.KINOBD)).getDiscussedMovies(...args),
-      { enrichMissingSeo: shouldEnrichListSeo }
-    )
-  } catch (error) {
-    rethrowRequestCancellation(error)
-    console.warn('[movies] getDiscussedMovies failed on KinoBD', error)
-    return []
-  }
-}
-const getKpIDfromIMDB = async (...args) => callWithProvider('getKpIDfromIMDB', ...args)
-const getNudityInfoFromIMDB = async (...args) => callWithProvider('getNudityInfoFromIMDB', ...args)
-const getKpIDfromSHIKI = async (...args) => callWithProvider('getKpIDfromSHIKI', ...args)
-const getRating = async (...args) => callWithProvider('getRating', ...args)
-const setRating = async (...args) => callWithProvider('setRating', ...args)
-const getComments = async (...args) => callWithProvider('getComments', ...args)
-const createComment = async (...args) => callWithProvider('createComment', ...args)
-const updateComment = async (...args) => callWithProvider('updateComment', ...args)
-const deleteComment = async (...args) => callWithProvider('deleteComment', ...args)
-const rateComment = async (...args) => callWithProvider('rateComment', ...args)
-const submitTiming = async (...args) => callWithProvider('submitTiming', ...args)
-const updateTiming = async (...args) => callWithProvider('updateTiming', ...args)
-const deleteTiming = async (...args) => callWithProvider('deleteTiming', ...args)
-const reportTiming = async (...args) => callWithProvider('reportTiming', ...args)
-const getTopTimingSubmitters = async (...args) =>
-  callWithProvider('getTopTimingSubmitters', ...args)
-const getAllTimingSubmissions = async (...args) =>
-  callWithProvider('getAllTimingSubmissions', ...args)
-// The Kino API catalogue is served by the Worker whatever the content provider is.
+// Top lists use the Worker's fixed Kinopoisk query.
+const getMovies = async (...args) =>
+  normalizeMovieListResponse(
+    await (await loadProvider(CONTENT_PROVIDERS.KINOBOX)).getTopMovies(...args),
+    { enrichMissingSeo: shouldEnrichListSeo }
+  )
+// The Kino API catalogue is served by the Worker whatever the player source is.
 const getLatestReleases = async (...args) =>
   (await loadProvider(CONTENT_PROVIDERS.KINOBOX)).getLatestReleases(...args)
-const getRandomMovie = async (...args) => {
-  const provider = getCurrentProvider()
-  if (provider === CONTENT_PROVIDERS.LOCAL || provider === CONTENT_PROVIDERS.BACKEND) {
-    return callWithProvider('getRandomMovie', ...args)
-  }
-  return (await loadProvider(CONTENT_PROVIDERS.KINOBOX)).getRandomMovie(...args)
-}
-const approveTiming = async (...args) => callWithProvider('approveTiming', ...args)
-const rejectTiming = async (...args) => callWithProvider('rejectTiming', ...args)
-const markAsCleanText = async (...args) => callWithProvider('markAsCleanText', ...args)
-const voteOnTiming = async (...args) => callWithProvider('voteOnTiming', ...args)
-const getTimingVote = async (...args) => callWithProvider('getTimingVote', ...args)
-const getMovieNote = async (...args) => callWithProvider('getMovieNote', ...args)
-const saveMovieNote = async (...args) => callWithProvider('saveMovieNote', ...args)
-const deleteMovieNote = async (...args) => callWithProvider('deleteMovieNote', ...args)
+const getRandomMovie = async (...args) =>
+  (await loadProvider(CONTENT_PROVIDERS.KINOBOX)).getRandomMovie(...args)
 
-export {
-  searchKinoBDPlayerCandidates,
-  getKinoBDPlayerDataByInid,
-  apiSearch,
-  getShikiInfo,
-  getKpInfo,
-  getPlayers,
-  getShikiPlayers,
-  getMovies,
-  getDiscussedMovies,
-  getKpIDfromIMDB,
-  getKpIDfromSHIKI,
-  getRating,
-  setRating,
-  getNudityInfoFromIMDB,
-  getComments,
-  createComment,
-  updateComment,
-  deleteComment,
-  rateComment,
-  submitTiming,
-  updateTiming,
-  deleteTiming,
-  reportTiming,
-  getTopTimingSubmitters,
-  getAllTimingSubmissions,
-  getLatestReleases,
-  getRandomMovie,
-  approveTiming,
-  rejectTiming,
-  markAsCleanText,
-  voteOnTiming,
-  getTimingVote,
-  getMovieNote,
-  saveMovieNote,
-  deleteMovieNote
-}
+export { apiSearch, getKpInfo, getPlayers, getMovies, getLatestReleases, getRandomMovie }

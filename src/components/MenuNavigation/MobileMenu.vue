@@ -20,13 +20,7 @@
           :class="{ 'is-active': isActive(link) }"
           :aria-current="isActive(link) ? 'page' : undefined"
         >
-          <img
-            v-if="typeof link.icon === 'string' && link.icon.startsWith('http')"
-            :src="link.icon"
-            alt=""
-            class="tab-avatar"
-          />
-          <i v-else :class="link.icon" aria-hidden="true"></i>
+          <i :class="link.icon" aria-hidden="true"></i>
           <span class="tab-label">{{ link.text }}</span>
         </router-link>
       </li>
@@ -49,7 +43,7 @@ const navbarStore = useNavbarStore()
 const tabs = computed(() => (props.links || []).filter((link) => link.group !== 'bottom'))
 
 // The signed-in profile owns its sub-pages (settings, notifications, contacts) on phones.
-const PROFILE_CHILDREN = ['/settings', '/notifications', '/contact']
+const PROFILE_CHILDREN = ['/settings', '/contact']
 const isActive = (link) => {
   if (!link.to || navbarStore.isModalSearchVisible) return false
   if (link.to === '/login') return route.path === '/login'

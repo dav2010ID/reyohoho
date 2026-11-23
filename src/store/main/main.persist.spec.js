@@ -129,7 +129,7 @@ describe('Базовы persist тесты для main', () => {
     )
     const store = useMainStore()
     expect(store.contentApiProvider).toBe('kinobox')
-    expect(store.searchApiProvider).toBe('kinobox')
+    expect(store.$state).not.toHaveProperty('searchApiProvider')
   })
 
   it('Один раз меняет старый дефолт DDBB на Kinobox', () => {
@@ -247,7 +247,6 @@ describe('Тесты миграций на новый способ хранен�
       isCentered: false,
       preferredPlayer: 'ALLOHA',
       showFavoriteTooltip: true,
-      kinobdSourceByKpId: {},
       compressorEnabled: false,
       mirrorEnabled: false,
       videoOverlayEnabled2: true,
@@ -358,15 +357,9 @@ describe('Тесты миграций на новый способ хранен�
         historyOwner: 'guest',
         cloudHistoryAccount: null,
         isHistoryAllowed: true,
-        isCommentsEnabled: true,
-        isAutoShowComments: false,
-        commentsSortBy: 'rating',
         isCtrlFEnabled: false,
-        submitterUsername: '',
         cardSize: 'medium',
-        isStreamerMode: true,
         contentApiProvider: 'kinobox',
-        searchApiProvider: 'kinobox',
         sidebarAutoHide: false,
         sidebarPosition: 'left'
       }

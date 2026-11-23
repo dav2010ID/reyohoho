@@ -102,11 +102,11 @@ try {
   })
   assert(
     !precacheUrls.some((url) =>
-      ['Comments', 'PlayerModal', 'Settings', 'MovieSceneTools', 'playerVideoOverlayRuntime'].some(
+      ['PlayerModal', 'Settings', 'RandomMovieModal', 'playerVideoOverlayRuntime'].some(
         (name) => url.includes('/' + name + '-')
       )
     ),
-    'optional comments, dialogs, routes and movie tools must not enter the initial precache'
+    'optional dialogs, routes and movie tools must not enter the initial precache'
   )
   assert(
     precacheUrls.some((url) => url.includes('/workbox-window') && url.endsWith('.js')),

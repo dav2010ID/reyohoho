@@ -57,7 +57,6 @@ describe('Базовы persist тесты для player', () => {
         aspectRatio: '4:3',
         isCentered: true,
         showFavoriteTooltip: false,
-        kinobdSourceByKpId: { 123: 'saved-source' },
         compressorEnabled: true,
         mirrorEnabled: true,
         videoOverlayEnabled2: false,

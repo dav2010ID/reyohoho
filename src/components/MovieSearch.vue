@@ -23,24 +23,6 @@
             >
               ID КП
             </button>
-            <button
-              v-if="shikiAvailable"
-              type="button"
-              :class="{ active: searchType === 'shikimori' }"
-              :aria-pressed="searchType === 'shikimori'"
-              @click="setSearchType('shikimori')"
-            >
-              ID Shikimori
-            </button>
-            <button
-              v-if="imdbAvailable"
-              type="button"
-              :class="{ active: searchType === 'imdb' }"
-              :aria-pressed="searchType === 'imdb'"
-              @click="setSearchType('imdb')"
-            >
-              ID IMDb
-            </button>
           </div>
           <div class="input-wrapper">
             <input
@@ -155,7 +137,7 @@
                 :movies-list="shelf.movies"
                 :is-history="false"
                 :loading="false"
-                :show-rank="isTopList && shelf.key !== 'latest'"
+                :show-rank="shelf.key !== 'latest'"
                 ribbon="posters"
               />
             </section>
@@ -244,16 +226,12 @@
 <script setup>
 import {
   apiSearch,
-  getKpIDfromIMDB,
-  getKpIDfromSHIKI,
   getLatestReleases,
   getMovies,
   getRandomMovie,
   getKpInfo
 } from '@/api/movies'
 import { handleApiError } from '@/constants'
-import { legacyMovieMethodAvailable } from '@/api/movieCapabilities'
-import { getLegacyShikiId } from '@/helpers/hashHandler'
 import { getMyLists, delAllFromList } from '@/api/user'
 import BaseModal from '@/components/BaseModal.vue'
 import RibbonNav from '@/components/movie/RibbonNav.vue'
@@ -261,7 +239,7 @@ import ErrorMessage from '@/components/ErrorMessage.vue'
 import { MovieList } from '@/components/MovieList/'
 import { useMainStore } from '@/store/main'
 import { useAuthStore } from '@/store/auth'
-import { USER_LIST_TYPES_ENUM, DEFAULT_ACTIVE_TIME } from '@/constants'
+import { USER_LIST_TYPES_ENUM } from '@/constants'
 import { hasConsecutiveConsonants, suggestLayout, convertLayout } from '@/utils/keyboardLayout'
 import { normalizeBasePath } from '@/utils/basePath'
 import debounce from 'lodash.debounce'
@@ -271,7 +249,6 @@ import { useHead } from '@unhead/vue'
 import SpinnerLoading from '@/components/SpinnerLoading.vue'
 import HistoryMigrationNotice from '@/components/HistoryMigrationNotice.vue'
 import { getMovieSeoPath } from '@/utils/movieSeo'
-import { debugLog } from '@/utils/logger'
 import { createLatestRequestGuard } from '@/utils/latestRequest'
 import { normalizeRandomMovie } from '@/utils/randomMovie'
 import { isRequestCanceled } from '@/utils/requestCancellation'
@@ -283,8 +260,6 @@ const authStore = useAuthStore()
 const router = useRouter()
 
 const searchType = ref('title')
-const shikiAvailable = computed(() => legacyMovieMethodAvailable('getKpIDfromSHIKI'))
-const imdbAvailable = computed(() => legacyMovieMethodAvailable('getKpIDfromIMDB'))
 const searchTerm = ref('')
 const movies = ref([])
 const loading = ref(false)
@@ -302,43 +277,29 @@ const HOME_SHELF_SIZE = 20
 const topShelves = ref([])
 const topShelvesLoading = ref(false)
 const topShelvesFailed = ref(false)
-// The same list is called the same everywhere: Kinopoisk providers serve the Top-250.
-const isTopList = computed(() => mainStore.contentApiProvider !== 'local')
-const topListTitle = computed(() => (isTopList.value ? 'Топ-250' : 'Популярное'))
-// Shelves in order; a shelf without "load" reads the content provider's top list.
-const shelfDefinitions = computed(() =>
-  isTopList.value
-    ? [
-        {
-          key: 'latest',
-          title: 'Последние релизы',
-          load: () => getLatestReleases({ limit: HOME_SHELF_SIZE })
-        },
-        {
-          key: 'movie',
-          title: 'Топ-250 · Фильмы',
-          link: '/top',
-          params: { activeTime: 'top250', typeFilter: 'movie' }
-        },
-        {
-          key: 'series',
-          title: 'Топ-250 · Сериалы',
-          link: '/top?type=series',
-          params: { activeTime: 'top250', typeFilter: 'series' }
-        }
-      ]
-    : [
-        {
-          key: 'popular',
-          title: topListTitle.value,
-          link: '/top',
-          params: { activeTime: DEFAULT_ACTIVE_TIME, typeFilter: 'all' }
-        }
-      ]
-)
+// Shelves in order; a shelf without "load" reads the Worker's Top-250.
+const shelfDefinitions = [
+  {
+    key: 'latest',
+    title: 'Последние релизы',
+    load: () => getLatestReleases({ limit: HOME_SHELF_SIZE })
+  },
+  {
+    key: 'movie',
+    title: 'Топ-250 · Фильмы',
+    link: '/top',
+    params: { activeTime: 'top250', typeFilter: 'movie' }
+  },
+  {
+    key: 'series',
+    title: 'Топ-250 · Сериалы',
+    link: '/top?type=series',
+    params: { activeTime: 'top250', typeFilter: 'series' }
+  }
+]
 const publicPage = usePublicPageState('home')
 const initialPage = publicPage.read()
-if (Array.isArray(initialPage?.shelves) && mainStore.contentApiProvider !== 'local') {
+if (Array.isArray(initialPage?.shelves)) {
   topShelves.value = initialPage.shelves
 }
 const searchRequestGuard = createLatestRequestGuard()
@@ -434,7 +395,7 @@ useHead({
 const loadHomeShelves = async () => {
   topShelvesLoading.value = true
   topShelvesFailed.value = false
-  const definitions = shelfDefinitions.value
+  const definitions = shelfDefinitions
   const results = await Promise.allSettled(
     definitions.map((shelf) =>
       shelf.load ? shelf.load() : getMovies({ ...shelf.params, page: 1, limit: HOME_SHELF_SIZE })
@@ -542,9 +503,7 @@ const getPlaceholder = () => {
   return (
     {
       title: 'Введите название фильма',
-      kinopoisk: 'Пример: 301 (Матрица)',
-      shikimori: 'Пример: 28171 (Повар-боец Сома)',
-      imdb: 'Пример: 0198781 (Корпорация монстров)'
+      kinopoisk: 'Пример: 301 (Матрица)'
     }[searchType.value] || 'Введите название фильма'
   )
 }
@@ -585,14 +544,6 @@ const search = () => {
   }
 }
 
-watch([shikiAvailable, imdbAvailable], () => {
-  if (
-    (searchType.value === 'shikimori' && !shikiAvailable.value) ||
-    (searchType.value === 'imdb' && !imdbAvailable.value)
-  )
-    setSearchType('title')
-})
-
 const performSearch = async () => {
   const requestId = searchRequestGuard.begin()
   const signal = searchRequestGuard.getSignal(requestId)
@@ -610,55 +561,6 @@ const performSearch = async () => {
       return
     }
 
-    if (searchType.value === 'imdb') {
-      if (!/^\d+$/.test(searchTerm.value)) {
-        searchTerm.value = searchTerm.value.replace(/\D/g, '')
-      }
-
-      let response = null
-      try {
-        response = await getKpIDfromIMDB(requestedTerm, { signal })
-        if (!searchRequestGuard.isLatest(requestId)) return
-      } catch (error) {
-        if (!searchRequestGuard.isLatest(requestId)) return
-        if (error.response?.status === 404) {
-          errorMessage.value = 'IMDb ID не найден'
-          errorCode.value = 404
-          return
-        }
-        throw error
-      }
-
-      if (response.id_kp) {
-        router.push(getMovieSeoPath({ kp_id: `${response.id_kp}` }))
-      } else {
-        errorMessage.value = 'IMDb ID не найден'
-        errorCode.value = 404
-      }
-      return
-    }
-
-    if (searchType.value === 'shikimori') {
-      if (!/^\d+$/.test(searchTerm.value)) {
-        searchTerm.value = searchTerm.value.replace(/\D/g, '')
-      }
-
-      try {
-        const response = await getKpIDfromSHIKI(requestedTerm, { signal })
-        if (!searchRequestGuard.isLatest(requestId)) return
-        const kpId = response?.id_kp || response?.kinopoisk_id
-        if (kpId) {
-          router.push(getMovieSeoPath({ kp_id: `${kpId}` }))
-          return
-        }
-      } catch (e) {
-        debugLog('Switch to kodik', e)
-      }
-
-      if (!searchRequestGuard.isLatest(requestId)) return
-      router.push({ name: 'movie-info-shiki', params: { shiki_id: requestedTerm } })
-      return
-    }
     if (searchType.value === 'title') {
       const response = await apiSearch(requestedTerm, { signal })
       if (!searchRequestGuard.isLatest(requestId)) return
@@ -734,19 +636,9 @@ const debouncedPerformSearch = debounce(() => {
 onMounted(() => {
   if (!topShelves.value.length) loadHomeShelves()
   const hash = window.location.hash
-  const shikiId = getLegacyShikiId(hash)
   if (hash.startsWith('#search=')) {
     const searchQuery = decodeURIComponent(hash.replace('#search=', ''))
     searchTerm.value = searchQuery
-    performSearch()
-  } else if (imdbAvailable.value && hash.startsWith('#imdb=')) {
-    const imdbId = decodeURIComponent(hash.replace('#imdb=', ''))
-    setSearchType('imdb')
-    searchTerm.value = imdbId
-    performSearch()
-  } else if (shikiAvailable.value && shikiId) {
-    setSearchType('shikimori')
-    searchTerm.value = shikiId
     performSearch()
   }
   if (!searchTerm.value) historyActivated.value = true

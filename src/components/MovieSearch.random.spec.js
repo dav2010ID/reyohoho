@@ -5,7 +5,6 @@ import MovieSearch from './MovieSearch.vue'
 import RandomMovieModal from './RandomMovieModal.vue'
 import { MovieList } from './MovieList'
 import { useMainStore } from '@/store/main'
-import { useApiStore } from '@/store/api'
 
 const mocks = vi.hoisted(() => ({ random: vi.fn(), info: vi.fn(), top: vi.fn(), search: vi.fn() }))
 vi.mock('@/api/movies', () => ({
@@ -57,25 +56,15 @@ describe('random film interaction', () => {
     vi.restoreAllMocks()
   })
   const modal = () => wrapper.findComponent(RandomMovieModal)
-  it('shows only ID searches served by the selected configuration', async () => {
+  it('offers only title and Kinopoisk ID searches', async () => {
     const tabs = () => wrapper.get('.search-type-buttons').text()
-    expect(tabs()).toContain('ID КП')
-    expect(tabs()).not.toContain('ID IMDb')
-    expect(tabs()).not.toContain('ID Shikimori')
-    useMainStore().contentApiProvider = 'local'
-    await flushPromises()
-    expect(tabs()).toContain('ID Shikimori')
-    expect(tabs()).not.toContain('ID IMDb')
-    useApiStore().$patch({ backendMode: 'local', backendModeUserSelected: true })
-    await flushPromises()
-    expect(tabs()).toContain('ID IMDb')
-    await wrapper
-      .findAll('.search-type-buttons button')
-      .find((b) => b.text() === 'ID IMDb')
-      .trigger('click')
-    useApiStore().backendMode = 'auto'
-    await flushPromises()
-    expect(wrapper.get('.search-type-buttons .active').text()).toBe('Название')
+    for (const provider of ['kinobox', 'local']) {
+      useMainStore().contentApiProvider = provider
+      await flushPromises()
+      expect(tabs()).toContain('ID КП')
+      expect(tabs()).not.toContain('ID IMDb')
+      expect(tabs()).not.toContain('ID Shikimori')
+    }
   })
   // The dialog module loads on the first open.
   const open = async () => {

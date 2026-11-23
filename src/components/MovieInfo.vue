@@ -131,14 +131,6 @@
                   >
                 </a>
 
-                <component
-                  :is="movieRatingComponent"
-                  v-if="clientReady && ratingsAvailable && movieInfo.kinopoisk_id"
-                  :key="movieInfo.kinopoisk_id"
-                  :kp-id="movieInfo.kinopoisk_id"
-                  :show-dash="true"
-                />
-
                 <div v-if="movieInfo.imdb_id || movieInfo.title">
                   <a
                     :href="
@@ -204,53 +196,6 @@
                   </component>
                 </div>
               </div>
-              <span v-if="backendAvailable" class="action-buttons-group">
-                <template v-if="movieInfo.imdb_id">
-                  <button
-                    class="nudity-info-btn parents-guide-btn"
-                    :title="
-                      scenePanel === 'guide'
-                        ? 'Скрыть информацию'
-                        : 'Показать Parents Guide и информацию о сценах'
-                    "
-                    @click="toggleScenePanel('guide', $event)"
-                    @mousedown.middle.prevent="toggleScenePanel('guide', $event)"
-                  >
-                    <span class="desktop-text">Parents Guide</span>
-                    <span class="mobile-text">PG</span>
-                    <i v-if="!sceneGuideLoading" class="fa-regular fa-face-grin-wink"></i>
-                    <i v-else class="fas fa-spinner fa-spin"></i>
-                  </button>
-                </template>
-                <button
-                  class="nudity-info-btn"
-                  :title="
-                    scenePanel === 'timings'
-                      ? 'Скрыть тайминги'
-                      : 'Показать тайминги сцен 18+(для твича, мигание отключается в настройках)'
-                  "
-                  @click="toggleScenePanel('timings', $event)"
-                >
-                  <i
-                    class="fa-regular fa-clock"
-                    :class="{
-                      'text-red': shouldShowRedTimings,
-                      'text-red-blink': shouldBlinkRedTimings
-                    }"
-                  ></i>
-                  <span class="mobile-text">Тайминги</span>
-                </button>
-                <button
-                  v-if="notesAvailable"
-                  class="nudity-info-btn note-btn"
-                  :class="{ 'has-note': movieNote }"
-                  :title="movieNote ? 'Редактировать заметку' : 'Добавить заметку'"
-                  @click="toggleNoteEditor"
-                >
-                  <i class="fa-regular fa-note-sticky"></i>
-                  <span class="mobile-text">Заметка</span>
-                </button>
-              </span>
               <div v-if="!mainStore.isMobile" id="movie-player-chip" class="player-chip-slot"></div>
             </div>
           </Teleport>
@@ -451,42 +396,6 @@
           />
         </div>
 
-        <div v-if="movieNote && notesAvailable" class="movie-note-display">
-          <div class="movie-note-header">
-            <div class="movie-note-title">
-              <i class="fa-solid fa-note-sticky"></i>
-              <h3>Моя заметка</h3>
-            </div>
-            <div class="movie-note-actions">
-              <button class="note-edit-btn" title="Редактировать" @click="toggleNoteEditor">
-                <i class="fas fa-edit"></i>
-              </button>
-            </div>
-          </div>
-          <div class="movie-note-content">
-            {{ movieNote.note_text }}
-          </div>
-          <div class="movie-note-footer">
-            <span class="note-date">
-              <i class="far fa-calendar"></i>
-              Обновлено:
-              {{
-                new Date(movieNote.updated_at).toLocaleDateString('ru-RU', {
-                  day: 'numeric',
-                  month: 'long',
-                  year: 'numeric',
-                  hour: '2-digit',
-                  minute: '2-digit'
-                })
-              }}
-            </span>
-          </div>
-        </div>
-
-        <div v-if="clientReady && isCommentsEnabled" id="movie-comments" class="comments-section">
-          <DeferredComments :key="kp_id" :movie-id="kp_id" />
-        </div>
-
         <Teleport defer to="#movie-staff-end">
           <section
             v-if="actors.length || staffNameGroups.length"
@@ -583,40 +492,11 @@
     </div>
   </div>
   <Notification ref="notificationRef" />
-  <component
-    :is="sceneToolsComponent"
-    v-if="backendAvailable && sceneToolsComponent && sceneToolsUsed"
-    :key="kp_id"
-    :movie-id="kp_id"
-    :movie-info="movieInfo"
-    :mode="scenePanel"
-    :trigger="scenePanelTrigger"
-    :notify="notify"
-    :refresh-movie="refreshMovieTimings"
-    @close="scenePanel = null"
-    @guide-loading="guideLoading = $event"
-    @overlay-selection="syncOverlaySelection"
-  />
-
-  <MovieNoteModal
-    v-if="notesAvailable && showNoteEditor"
-    v-model="noteText"
-    :movie-note="movieNote"
-    :is-saving="isSavingNote"
-    :is-deleting="isDeletingNote"
-    @close="cancelNoteEdit"
-    @save="handleSaveNote"
-    @delete="handleDeleteNote"
-  />
 </template>
 
 <script setup>
-import { useConfirmation } from '@/composables/useConfirmation'
-import { sceneSelection } from '@/utils/sceneSelection'
-import { getKpInfo, getShikiInfo, getMovieNote, saveMovieNote, deleteMovieNote } from '@/api/movies'
+import { getKpInfo } from '@/api/movies'
 import { getMovieExtras, missingMovieExtras } from '@/api/movieExtras'
-import { legacyBackendAvailable } from '@/api/backendConfig'
-import { legacyMovieMethodAvailable } from '@/api/movieCapabilities'
 import { handleApiError } from '@/constants'
 import { addToList } from '@/api/user'
 import { usePlayerLists } from '@/composables/usePlayerLists'
@@ -635,7 +515,6 @@ import { useRoute, useRouter } from 'vue-router'
 import { useHead } from '@unhead/vue'
 import Notification from '@/components/notification/ToastMessage.vue'
 import { useTrailerStore } from '@/store/trailer'
-import DeferredComments from '@/components/DeferredComments.vue'
 import { buildMovieSeo, getMovieSeoEntry, getMovieSeoPath, getMovieSeoSlug } from '@/utils/movieSeo'
 import {
   optimizePosterUrl,
@@ -650,13 +529,11 @@ import tmdbIcon from '@/assets/icon-tmdb.svg'
 import rottenTomatoesIcon from '@/assets/icon-rotten-tomatoes.svg'
 import metacriticIcon from '@/assets/icon-metacritic.svg'
 
-const askConfirmation = useConfirmation()
 
 const TrailerCarousel = defineAsyncComponent(() => import('@/components/TrailerCarousel.vue'))
 const MovieMobileListDropdown = defineAsyncComponent(
   () => import('@/components/movie/MovieMobileListDropdown.vue')
 )
-const MovieNoteModal = defineAsyncComponent(() => import('@/components/movie/MovieNoteModal.vue'))
 
 const mainStore = useMainStore()
 const authStore = useAuthStore()
@@ -667,12 +544,6 @@ const kp_id = ref(route.params.kp_id)
 const errorMessage = ref('')
 const errorCode = ref(null)
 const moviePlayerComponent = shallowRef(null)
-const movieRatingComponent = defineAsyncComponent(() => import('@/components/MovieRating.vue'))
-const backendAvailable = computed(legacyBackendAvailable)
-const ratingsAvailable = computed(() => legacyMovieMethodAvailable('getRating'))
-const notesAvailable = computed(
-  () => backendAvailable.value && authStore.token && !authStore.isWorkerSession
-)
 const getCatalogMovie = (id) => {
   const entry = getMovieSeoEntry(id)
   return entry
@@ -702,68 +573,14 @@ const DESCRIPTION_PREVIEW_LIMIT = 500
 
 const areTrailersActive = computed(() => trailerStore.areTrailersActive)
 const activeTrailerIndex = ref(null)
-
-const sceneToolsComponent = shallowRef(null)
-const sceneToolsUsed = ref(false)
-const scenePanel = ref(null)
-const scenePanelTrigger = shallowRef(null)
-const sceneToolsLoading = ref(false)
-const guideLoading = ref(false)
-const sceneGuideLoading = computed(
-  () => scenePanel.value === 'guide' && (sceneToolsLoading.value || guideLoading.value)
-)
-let sceneToolsPromise = null
 let active = true
 
-const notify = (...args) => notificationRef.value?.showNotification(...args)
-
-async function toggleScenePanel(mode, event) {
-  scenePanel.value = scenePanel.value === mode ? null : mode
-  scenePanelTrigger.value = event.currentTarget
-  if (!scenePanel.value) return
-  sceneToolsUsed.value = true
-  if (sceneToolsComponent.value) return
-  if (!sceneToolsPromise) {
-    sceneToolsLoading.value = true
-    sceneToolsPromise = import('@/components/movie/MovieSceneTools.vue')
-      .then((module) => {
-        if (active) sceneToolsComponent.value = module.default
-      })
-      .catch(() => {
-        if (!active) return
-        scenePanel.value = null
-        notify('Не удалось загрузить панель. Попробуйте ещё раз.')
-      })
-      .finally(() => {
-        sceneToolsPromise = null
-        if (active) sceneToolsLoading.value = false
-      })
-  }
-  await sceneToolsPromise
-}
-
-const syncOverlaySelection = (ids) => {
-  sceneSelection.overlayNudityTimings = ids
-}
-const refreshMovieTimings = () => fetchMovieInfo(false)
 
 const isListExpanded = ref(false)
 
-const movieNote = ref(null)
-const showNoteEditor = ref(false)
-const noteText = ref('')
-const isSavingNote = ref(false)
-const isDeletingNote = ref(false)
 const moviePosterSources = computed(() => resolvePosterSourcesByMovie(movieInfo.value || {}))
 const moviePosterUrl = computed(() => moviePosterSources.value.src)
 
-const shouldShowRedTimings = computed(() => {
-  return Array.isArray(movieInfo.value?.nudity_timings) && movieInfo.value.nudity_timings.length > 0
-})
-
-const shouldBlinkRedTimings = computed(
-  () => shouldShowRedTimings.value && mainStore.isStreamerMode && !mainStore.isMobile
-)
 
 const isInAnyList = computed(() => {
   return (
@@ -775,7 +592,6 @@ const isInAnyList = computed(() => {
   )
 })
 
-const isCommentsEnabled = computed(() => backendAvailable.value && mainStore.isCommentsEnabled)
 const isDescriptionExpanded = ref(false)
 const countryNames = computed(() =>
   (movieInfo.value?.countries || []).map((item) => item.country).filter(Boolean)
@@ -804,7 +620,7 @@ watch(normalizedDescription, () => {
 })
 
 const syncCanonicalMovieRoute = async () => {
-  if (kp_id.value.startsWith('shiki') || !movieInfo.value) {
+  if (!movieInfo.value) {
     return
   }
 
@@ -1003,12 +819,7 @@ const fetchMovieInfo = async (updateHistory = true) => {
   if (updateHistory || !movieInfo.value) infoLoading.value = true
 
   try {
-    let response
-    if (requestedKpId.startsWith('shiki')) {
-      response = await getShikiInfo(requestedKpId, { signal: controller.signal })
-    } else {
-      response = await getKpInfo(requestedKpId, { signal: controller.signal })
-    }
+    const response = await getKpInfo(requestedKpId, { signal: controller.signal })
 
     if (controller.signal.aborted || requestedKpId !== kp_id.value) return false
 
@@ -1018,23 +829,10 @@ const fetchMovieInfo = async (updateHistory = true) => {
 
     movieInfo.value = response
 
-    if (requestedKpId.startsWith('shiki')) {
-      movieInfo.value = {
-        ...movieInfo.value,
-        title: movieInfo.value.name_ru || movieInfo.value.name_en,
-        name_original: movieInfo.value.name_en,
-        short_description: movieInfo.value.slogan
-      }
-    } else {
-      movieInfo.value = {
-        ...movieInfo.value,
-        title: movieInfo.value.name_ru || movieInfo.value.name_en || movieInfo.value.name_original,
-        kinopoisk_id: requestedKpId
-      }
-    }
-
-    if (notesAvailable.value) {
-      loadMovieNote()
+    movieInfo.value = {
+      ...movieInfo.value,
+      title: movieInfo.value.name_ru || movieInfo.value.name_en || movieInfo.value.name_original,
+      kinopoisk_id: requestedKpId
     }
 
     navbarStore.setHeaderContent({
@@ -1061,20 +859,7 @@ const fetchMovieInfo = async (updateHistory = true) => {
       type: movieInfo.value?.type
     }
 
-    // Устанавливаем фон фильма через новый метод
-    if (requestedKpId.startsWith('shiki')) {
-      if (movieInfo.value.screenshots && movieInfo.value.screenshots.length > 0) {
-        const randomIndex = Math.floor(Math.random() * movieInfo.value.screenshots.length)
-        const randomScreenshot = movieInfo.value.screenshots[randomIndex]
-        backgroundStore.updateMoviePoster(randomScreenshot)
-      } else if (movieToSave.poster) {
-        backgroundStore.updateMoviePoster(movieToSave.poster)
-      }
-    } else {
-      if (movieToSave.poster) {
-        backgroundStore.updateMoviePoster(movieToSave.poster)
-      }
-    }
+    if (movieToSave.poster) backgroundStore.updateMoviePoster(movieToSave.poster)
 
     if (mainStore.isHistoryAllowed && movieToSave.kp_id && movieToSave.title && updateHistory) {
       if (authStore.token) {
@@ -1231,8 +1016,6 @@ onMounted(async () => {
   clientReady.value = true
   document.addEventListener('keydown', onKeyDown)
   document.addEventListener('click', handleClickOutside)
-  sceneSelection.selectedNudityTimings = []
-  sceneSelection.overlayNudityTimings = []
   const movieInfoPromise = fetchMovieInfo()
   const playerModule = await import('@/components/PlayerComponent.vue')
   if (!active) return
@@ -1247,8 +1030,6 @@ onUnmounted(() => {
   navbarStore.clearHeaderContent()
   document.removeEventListener('keydown', onKeyDown)
   document.removeEventListener('click', handleClickOutside)
-  delete sceneSelection.selectedNudityTimings
-  delete sceneSelection.overlayNudityTimings
 })
 
 watch(
@@ -1256,12 +1037,6 @@ watch(
   async (newKpId) => {
     if (newKpId && newKpId !== kp_id.value) {
       navbarStore.clearHeaderContent()
-      scenePanel.value = null
-      scenePanelTrigger.value = null
-      sceneToolsUsed.value = false
-      guideLoading.value = false
-      sceneSelection.selectedNudityTimings = []
-      sceneSelection.overlayNudityTimings = []
       kp_id.value = newKpId
       movieInfo.value = getCatalogMovie(newKpId)
       activeTrailerIndex.value = null
@@ -1270,103 +1045,6 @@ watch(
   },
   { immediate: true }
 )
-
-const loadMovieNote = async () => {
-  if (!authStore.isAuthenticated || !kp_id.value) return
-
-  try {
-    const response = await getMovieNote(kp_id.value)
-    movieNote.value = response.note
-    if (movieNote.value) {
-      noteText.value = movieNote.value.note_text
-    } else {
-      noteText.value = ''
-    }
-  } catch {
-    movieNote.value = null
-    noteText.value = ''
-  }
-}
-
-const toggleNoteEditor = () => {
-  if (!authStore.token) {
-    notificationRef.value.showNotification(
-      'Необходимо <a class="auth-link">авторизоваться</a> для создания заметок',
-      5000,
-      { onClick: () => router.push('/login') }
-    )
-    return
-  }
-  showNoteEditor.value = !showNoteEditor.value
-}
-
-const handleSaveNote = async () => {
-  if (!authStore.token) {
-    notificationRef.value.showNotification(
-      'Необходимо <a class="auth-link">авторизоваться</a>',
-      5000,
-      { onClick: () => router.push('/login') }
-    )
-    return
-  }
-
-  if (!noteText.value.trim()) {
-    notificationRef.value.showNotification('Заметка не может быть пустой')
-    return
-  }
-
-  if (noteText.value.length > 10000) {
-    notificationRef.value.showNotification('Заметка слишком длинная (максимум 10000 символов)')
-    return
-  }
-
-  try {
-    isSavingNote.value = true
-    const response = await saveMovieNote(kp_id.value, noteText.value)
-    movieNote.value = response.note
-    noteText.value = response.note.note_text
-    notificationRef.value.showNotification('Заметка сохранена')
-    showNoteEditor.value = false
-  } catch (error) {
-    const { message } = handleApiError(error)
-    notificationRef.value.showNotification(message, 5000)
-  } finally {
-    isSavingNote.value = false
-  }
-}
-
-const handleDeleteNote = async () => {
-  if (!authStore.token) {
-    return
-  }
-
-  if (!(await askConfirmation('Вы уверены, что хотите удалить заметку?'))) {
-    return
-  }
-
-  try {
-    isDeletingNote.value = true
-    await deleteMovieNote(kp_id.value)
-    movieNote.value = null
-    noteText.value = ''
-    showNoteEditor.value = false
-    notificationRef.value.showNotification('Заметка удалена')
-  } catch (error) {
-    const { message } = handleApiError(error)
-    notificationRef.value.showNotification(message, 5000)
-  } finally {
-    isDeletingNote.value = false
-  }
-}
-
-const cancelNoteEdit = () => {
-  if (movieNote.value) {
-    noteText.value = movieNote.value.note_text
-  } else {
-    noteText.value = ''
-  }
-  showNoteEditor.value = false
-}
 </script>
 
 <style scoped src="./MovieInfo.css"></style>

@@ -33,10 +33,10 @@ describe('account history ownership', () => {
     auth.logout()
     expect(main.history.map((item) => item.kp_id)).toEqual(['10'])
     expect(getLocalList('history', 'worker:2').map((item) => item.kp_id)).toEqual(['12'])
-    auth.setToken('legacy-A')
+    auth.setToken('rh1_' + 'a'.repeat(43))
     auth.setUser({ id: 1 })
-    expect(main.historyOwner).toBe('legacy:1')
-    expect(main.history).toEqual([])
+    expect(main.historyOwner).toBe('worker:1')
+    expect(main.history.map((item) => item.kp_id)).toEqual(['11'])
   })
 
   it.each([

@@ -1,7 +1,7 @@
 <template>
   <div class="wrapper">
     <div class="top-100-page">
-      <header v-if="isKinopoiskTop" class="top-header">
+      <header class="top-header">
         <div class="top-heading">
           <h1>Топ-250</h1>
           <p>Лучшие {{ typeFilter === 'series' ? 'сериалы' : 'фильмы' }} по рейтингу зрителей</p>
@@ -20,49 +20,13 @@
           </button>
         </div>
       </header>
-      <h1 v-else class="visually-hidden">Популярные фильмы и сериалы</h1>
-      <div v-if="!isKinopoiskTop" class="controls">
-        <div v-if="!isKinopoiskTop" class="filter-card time-card">
-          <div class="button-group time-buttons">
-            <i class="material-icons card-icon">schedule</i>
-            <template v-for="(btn, idx) in timeFilters" :key="idx">
-              <div v-if="btn.type === 'separator'" class="filter-separator"></div>
-              <button
-                v-else
-                class="filter-btn time-btn"
-                :class="{ active: activeTimeFilter === btn.apiUrl, disabled: loading }"
-                :disabled="loading"
-                @click="changeTimeFilter(btn.apiUrl)"
-              >
-                {{ btn.label }}
-              </button>
-            </template>
-          </div>
-        </div>
-
-        <div class="filter-card type-card">
-          <div class="button-group type-buttons">
-            <i class="material-icons card-icon">movie</i>
-            <button
-              v-for="(btn, idx) in currentTypeFilters"
-              :key="idx"
-              class="filter-btn type-btn"
-              :class="{ active: typeFilter === btn.value, disabled: loading }"
-              :disabled="loading"
-              @click="changeTypeFilter(btn.value)"
-            >
-              {{ btn.label }}
-            </button>
-          </div>
-        </div>
-      </div>
 
       <MovieList
         v-if="!errorMessage"
         :movies-list="visibleMovies"
         :is-history="false"
         :loading="loading"
-        :show-rank="isKinopoiskTop"
+        :show-rank="true"
       />
       <div v-if="canShowMore" class="load-more-wrap">
         <div ref="loadMoreSentinel" class="load-more-sentinel" aria-hidden="true"></div>
@@ -85,7 +49,7 @@
 </template>
 
 <script setup>
-import { getDiscussedMovies, getMovies } from '@/api/movies'
+import { getMovies } from '@/api/movies'
 import ErrorMessage from '@/components/ErrorMessage.vue'
 import { MovieList } from '@/components/MovieList'
 import { handleApiError } from '@/constants'
@@ -93,30 +57,20 @@ import { computed, nextTick, onMounted, onServerPrefetch, onUnmounted, ref, watc
 import { useRoute, useRouter } from 'vue-router'
 import { useHead } from '@unhead/vue'
 import { buildStaticPageHead } from '@/utils/staticSeo'
-import { useMainStore } from '@/store/main'
 import { usePublicPageState } from '@/composables/usePublicPageState'
-
-const mainStore = useMainStore()
-const isKinopoiskTop = computed(() => mainStore.contentApiProvider !== 'local')
 
 useHead(() =>
   buildStaticPageHead({
     routePath: '/top',
-    title: isKinopoiskTop.value
-      ? 'Топ-250 фильмов и сериалов Кинопоиска - ReYohoho'
-      : 'Популярные фильмы и сериалы онлайн - ReYohoho',
-    description: isKinopoiskTop.value
-      ? '250 лучших фильмов и сериалов по рейтингу Кинопоиска. Русские названия, постеры и рейтинги.'
-      : 'Популярные фильмы и сериалы за сутки, неделю, месяц и всё время. Фильтры по типу и обсуждаемости на ReYohoho.'
+    title: 'Топ-250 фильмов и сериалов Кинопоиска - ReYohoho',
+    description:
+      '250 лучших фильмов и сериалов по рейтингу Кинопоиска. Русские названия, постеры и рейтинги.'
   })
 )
 
 const movies = ref([])
 const loading = ref(false)
-import { DEFAULT_ACTIVE_TIME } from '@/constants'
-const activeTimeFilter = ref(DEFAULT_ACTIVE_TIME)
-const typeFilter = ref('all')
-const lastNormalTypeFilter = ref('all')
+const typeFilter = ref('movie')
 const errorMessage = ref('')
 const errorCode = ref(null)
 const route = useRoute()
@@ -129,33 +83,11 @@ const loadMoreFailed = ref(false)
 const loadMoreSentinel = ref(null)
 let loadMoreObserver = null
 
-const timeFilters = [
-  { label: '24 часа', apiUrl: '24h' },
-  { label: '7 дней', apiUrl: '7d' },
-  { label: '30 дней', apiUrl: '30d' },
-  { label: 'Всё время', apiUrl: 'all' },
-  { label: '---', apiUrl: 'separator', type: 'separator' },
-  { label: 'Обсуждаемое', apiUrl: 'discussed' }
-]
 
-const normalTypeFilters = [
-  { label: 'Все', value: 'all' },
+const currentTypeFilters = [
   { label: 'Фильмы', value: 'movie' },
   { label: 'Сериалы', value: 'series' }
 ]
-
-const discussedTypeFilters = [
-  { label: 'Горячее', value: 'hot' },
-  { label: 'Недавнее', value: 'recent' }
-]
-
-const currentTypeFilters = computed(() =>
-  isKinopoiskTop.value
-    ? normalTypeFilters.filter((filter) => filter.value !== 'all')
-    : activeTimeFilter.value === 'discussed'
-      ? discussedTypeFilters
-      : normalTypeFilters
-)
 const visibleMovies = computed(() => movies.value)
 const canShowMore = computed(() => !loading.value && hasMore.value && !errorMessage.value)
 
@@ -180,20 +112,12 @@ const resetPagination = () => {
 }
 
 const fetchMoviesPage = async (nextPage = 1) => {
-  const request =
-    activeTimeFilter.value === 'discussed'
-      ? getDiscussedMovies(typeFilter.value, {
-          page: nextPage,
-          limit: TOP_MOVIES_PAGE_SIZE
-        })
-      : getMovies({
-          activeTime: activeTimeFilter.value,
-          typeFilter: typeFilter.value,
-          page: nextPage,
-          limit: TOP_MOVIES_PAGE_SIZE
-        })
-
-  const nextMovies = await request
+  const nextMovies = await getMovies({
+    activeTime: 'top250',
+    typeFilter: typeFilter.value,
+    page: nextPage,
+    limit: TOP_MOVIES_PAGE_SIZE
+  })
   hasMore.value = Array.isArray(nextMovies) && nextMovies.length === TOP_MOVIES_PAGE_SIZE
   page.value = nextPage
 
@@ -254,24 +178,7 @@ const setupInfiniteScroll = async () => {
 }
 
 const applyRouteFilters = (query) => {
-  if (isKinopoiskTop.value) {
-    activeTimeFilter.value = 'top250'
-    typeFilter.value = query.type === 'series' ? 'series' : 'movie'
-    lastNormalTypeFilter.value = typeFilter.value
-    return
-  }
-  const nextTime = typeof query.time === 'string' && query.time ? query.time : DEFAULT_ACTIVE_TIME
-  const nextType = typeof query.type === 'string' && query.type ? query.type : null
-
-  activeTimeFilter.value = nextTime
-
-  if (nextTime === 'discussed') {
-    typeFilter.value = nextType || 'hot'
-    return
-  }
-
-  typeFilter.value = nextType || 'all'
-  lastNormalTypeFilter.value = typeFilter.value
+  typeFilter.value = query.type === 'series' ? 'series' : 'movie'
 }
 
 const fetchMovies = async () => {
@@ -295,7 +202,7 @@ const fetchMovies = async () => {
 applyRouteFilters(route.query)
 const publicPage = usePublicPageState(`top:${route.fullPath}`)
 const initialPage = publicPage.read()
-if (initialPage && isKinopoiskTop.value) {
+if (initialPage) {
   movies.value = initialPage.movies
   hasMore.value = initialPage.hasMore
   page.value = initialPage.page
@@ -315,33 +222,8 @@ watch(canShowMore, (canLoad) => {
   }
 })
 
-const changeTimeFilter = (apiUrl) => {
-  const previousTimeFilter = activeTimeFilter.value
-  activeTimeFilter.value = apiUrl
-
-  if (apiUrl === 'discussed') {
-    if (previousTimeFilter !== 'discussed') {
-      lastNormalTypeFilter.value = typeFilter.value
-    }
-    typeFilter.value = 'hot'
-  } else if (previousTimeFilter === 'discussed') {
-    typeFilter.value = lastNormalTypeFilter.value
-  }
-
-  router.push({
-    query: {
-      ...route.query,
-      time: activeTimeFilter.value,
-      type: typeFilter.value
-    }
-  })
-}
-
 const changeTypeFilter = (value) => {
   typeFilter.value = value
-  if (activeTimeFilter.value !== 'discussed') {
-    lastNormalTypeFilter.value = value
-  }
 
   router.push({
     query: {
@@ -354,7 +236,7 @@ const changeTypeFilter = (value) => {
 watch(
   () => route.query,
   (newQuery, oldQuery) => {
-    if (newQuery.time === oldQuery?.time && newQuery.type === oldQuery?.type) {
+    if (newQuery.type === oldQuery?.type) {
       return
     }
 
@@ -365,8 +247,7 @@ watch(
 
 onMounted(() => {
   applyRouteFilters(route.query)
-  // Prerendered cards use the default remote provider, not persisted local preferences.
-  if (!isKinopoiskTop.value || (!movies.value.length && !errorMessage.value)) {
+  if (!movies.value.length && !errorMessage.value) {
     fetchMovies().then(setupInfiniteScroll)
   } else {
     setupInfiniteScroll()

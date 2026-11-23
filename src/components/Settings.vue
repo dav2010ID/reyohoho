@@ -89,12 +89,6 @@
             <h2>Трейлеры</h2>
             <SliderRound v-model="areTrailersActive">Показывать трейлеры</SliderRound>
           </div>
-          <div v-if="backendAvailable" class="settings-group">
-            <h2>Режим стримера</h2>
-            <SliderRound v-model="isStreamerMode"
-              >Мигание кнопки таймингов для привлечения внимания</SliderRound
-            >
-          </div>
         </section>
         <section v-show="activeSettingsTab === 'behavior'" class="settings-section">
           <div class="settings-group">
@@ -153,72 +147,15 @@
               </div>
             </div>
           </div>
-          <div v-if="backendAvailable" class="settings-group">
-            <h2>Комментарии</h2>
-            <SliderRound v-model="isCommentsEnabled">Показывать блок комментариев</SliderRound>
-            <SliderRound v-model="isAutoShowComments"
-              >Автоматически показывать комментарии</SliderRound
-            >
-          </div>
         </section>
         <section v-show="activeSettingsTab === 'api'" class="settings-section">
           <div class="settings-group">
-            <h2>Источники данных</h2>
-            <p v-if="unavailableSearch" class="api-note">
-              Для поиска по ID {{ unavailableSearch }} нужен подключённый сервер. Вы также можете
-              <router-link to="/">найти фильм по названию или ID Кинопоиска</router-link>.
-            </p>
-            <h3 id="settings-backend-label" class="api-subtitle">Сервер приложения</h3>
-            <div class="radio-group" role="radiogroup" aria-labelledby="settings-backend-label">
-              <label class="radio">
-                <input v-model="backendMode" type="radio" name="backend-mode" value="auto" />
-                <span class="radio-label">Автоматический выбор сервера</span>
-              </label>
-              <label class="radio">
-                <input v-model="backendMode" type="radio" name="backend-mode" value="local" />
-                <span class="radio-label">Локальный сервер (для самостоятельной настройки)</span>
-              </label>
-            </div>
-            <p class="api-note backend-status" :class="backendStatusClass">
-              {{ backendStatusText }}<template v-if="backendUrl"> · {{ backendUrl }}</template>
-            </p>
-            <p
-              v-if="backendAvailable"
-              class="api-note backend-status"
-              :class="authorizationStatusClass"
+            <h2>Источник плееров</h2>
+            <div
+              class="radio-group"
+              role="radiogroup"
+              aria-label="Источник плееров"
             >
-              {{ authorizationStatusText }}
-            </p>
-            <div class="settings-actions">
-              <button
-                type="button"
-                class="reset-button"
-                :disabled="!backendAvailable || apiStore.isCheckingHealth"
-                @click="checkSelectedBackend"
-              >
-                <i class="fa-solid fa-rotate"></i>
-                {{ apiStore.isCheckingHealth ? 'Проверка…' : 'Проверить соединение' }}
-              </button>
-            </div>
-            <h3 id="settings-content-label" class="api-subtitle">Источники контента</h3>
-            <div class="radio-group" role="radiogroup" aria-labelledby="settings-content-label">
-              <label class="radio">
-                <input
-                  v-model="contentApiProvider"
-                  type="radio"
-                  name="content-api-provider"
-                  value="local"
-                />
-                <span class="radio-label"
-                  >Локальный сервер (поиск, информация о фильмах и плееры)</span
-                >
-              </label>
-              <!-- KinoBD temporarily disabled; keep option for reactivation.
-          <label class="radio">
-            <input v-model="contentApiProvider" type="radio" name="content-api-provider" value="kinobd" />
-            <span class="radio-label">KinoBD (search/cards/players)</span>
-          </label>
-          -->
               <label class="radio">
                 <input
                   v-model="contentApiProvider"
@@ -226,9 +163,7 @@
                   name="content-api-provider"
                   value="kinobox"
                 />
-                <span class="radio-label"
-                  >Kinobox (поиск, информация о фильмах и плееры, по умолчанию)</span
-                >
+                <span class="radio-label">Kinobox (по умолчанию)</span>
               </label>
               <label class="radio">
                 <input
@@ -237,7 +172,7 @@
                   name="content-api-provider"
                   value="ddbb"
                 />
-                <span class="radio-label">DDBB (плееры)</span>
+                <span class="radio-label">DDBB</span>
               </label>
               <label class="radio">
                 <input
@@ -246,48 +181,13 @@
                   name="content-api-provider"
                   value="ddbb_live"
                 />
-                <span class="radio-label">DDBB Live (плееры)</span>
+                <span class="radio-label">DDBB Live</span>
               </label>
             </div>
             <p class="api-note">
-              Комментарии, заметки, тайминги и поиск по IMDb доступны при подключённом сервере
-              приложения. Для оценок и поиска по Shikimori можно также выбрать локальный источник
-              контента.
+              Поиск и карточки фильмов всегда загружаются через сервер сайта. Если выбранный
+              источник не нашёл плееров, остальные проверяются автоматически.
             </p>
-            <h3 id="settings-search-label" class="api-subtitle">Источник поиска</h3>
-            <div class="radio-group" role="radiogroup" aria-labelledby="settings-search-label">
-              <label class="radio">
-                <input
-                  v-model="searchApiProvider"
-                  type="radio"
-                  name="search-api-provider"
-                  value="local"
-                />
-                <span class="radio-label">Локальный сервер</span>
-              </label>
-              <label class="radio">
-                <input
-                  v-model="searchApiProvider"
-                  type="radio"
-                  name="search-api-provider"
-                  value="kinobox"
-                />
-                <span class="radio-label">Kinobox (по умолчанию)</span>
-              </label>
-              <!-- KinoBD temporarily disabled; keep option for reactivation.
-          <label class="radio">
-            <input v-model="searchApiProvider" type="radio" name="search-api-provider" value="kinobd" />
-            <span class="radio-label">KinoBD</span>
-          </label>
-          -->
-            </div>
-            <p class="api-note">Этот параметр влияет только на поиск по названию.</p>
-            <div class="settings-actions">
-              <button class="reset-button" @click="resetKinoBdSources">
-                <i class="fa-solid fa-arrow-rotate-left"></i>
-                Сбросить выбранные источники KinoBD
-              </button>
-            </div>
           </div>
         </section>
         <footer class="settings-footer">
@@ -309,11 +209,6 @@ import { useBackgroundStore } from '@/store/background'
 import { useMainStore } from '@/store/main'
 import { usePlayerStore } from '@/store/player'
 import { useTrailerStore } from '@/store/trailer'
-import { LOCAL_API_URL, useApiStore } from '@/store/api'
-import { legacyBackendAvailable } from '@/api/backendConfig'
-import { legacyMovieMethodAvailable } from '@/api/movieCapabilities'
-import { useAuthStore } from '@/store/auth'
-import { getApiAuthorizationState } from '@/utils/apiTrust'
 import { computed, ref, watch } from 'vue'
 import { useRoute } from 'vue-router'
 import BaseModal from './BaseModal.vue'
@@ -325,8 +220,6 @@ const mainStore = useMainStore()
 const backgroundStore = useBackgroundStore()
 const playerStore = usePlayerStore()
 const trailerStore = useTrailerStore()
-const apiStore = useApiStore()
-const authStore = useAuthStore()
 const showModal = ref(false)
 const appVersion = ref(import.meta.env.VITE_APP_VERSION_FULL_VERSION)
 const route = useRoute()
@@ -337,19 +230,11 @@ watch(
     if (route.query.tab === 'api') activeSettingsTab.value = 'api'
   }
 )
-const backendAvailable = computed(legacyBackendAvailable)
-const unavailableSearch = computed(() => {
-  if (route.query.unavailable === 'shiki' && !legacyMovieMethodAvailable('getShikiInfo'))
-    return 'Shikimori'
-  if (route.query.unavailable === 'imdb' && !legacyMovieMethodAvailable('getKpIDfromIMDB'))
-    return 'IMDb'
-  return ''
-})
 const settingsTabs = [
   { id: 'appearance', label: 'Вид', description: 'Фон, тема и карточки' },
-  { id: 'player', label: 'Плеер', description: 'Плеер, трейлеры и режим стримера' },
-  { id: 'behavior', label: 'Поведение', description: 'История, навигация и комментарии' },
-  { id: 'api', label: 'Источники', description: 'Данные, поиск и плееры' }
+  { id: 'player', label: 'Плеер', description: 'Плеер и трейлеры' },
+  { id: 'behavior', label: 'Поведение', description: 'История и навигация' },
+  { id: 'api', label: 'Источники', description: 'Источник плееров' }
 ]
 const backgroundOptions = [
   { value: 'disabled', label: 'Без фона' },
@@ -362,55 +247,6 @@ const cardSizes = [
   { value: 'medium', label: 'M' },
   { value: 'large', label: 'L' }
 ]
-const backendUrl = computed(() =>
-  backendAvailable.value
-    ? apiStore.backendMode === 'local'
-      ? LOCAL_API_URL
-      : import.meta.env.VITE_APP_API_URL
-    : null
-)
-
-const backendMode = computed({
-  get: () => apiStore.backendMode,
-  set: (value) => void apiStore.setBackendMode(value)
-})
-
-const backendStatusText = computed(() => {
-  if (apiStore.isCheckingHealth) return 'Проверяется'
-  if (!backendAvailable.value) return 'Сервер приложения не настроен'
-  if (apiStore.backendMode !== 'local') return 'Автоматический выбор активен'
-  if (apiStore.localApiHealthy === true) return 'Локальный сервер доступен'
-  if (apiStore.localApiHealthy === false) return 'Локальный сервер недоступен'
-  return 'Локальный сервер ещё не проверен'
-})
-
-const backendStatusClass = computed(() => ({
-  'backend-status--ok': apiStore.backendMode === 'local' && apiStore.localApiHealthy === true,
-  'backend-status--error': apiStore.backendMode === 'local' && apiStore.localApiHealthy === false
-}))
-
-const authorizationStatus = computed(() =>
-  getApiAuthorizationState({
-    baseURL: backendUrl.value,
-    hasToken: Boolean(authStore.token)
-  })
-)
-
-const authorizationStatusText = computed(
-  () =>
-    ({
-      anonymous: 'Вы не вошли в аккаунт',
-      allowed: 'Выбранному серверу разрешено получать данные входа',
-      blocked: 'Данные входа не передаются: выбранный сервер не входит в список доверенных'
-    })[authorizationStatus.value]
-)
-
-const authorizationStatusClass = computed(() => ({
-  'backend-status--ok': authorizationStatus.value === 'allowed',
-  'backend-status--error': authorizationStatus.value === 'blocked'
-}))
-
-const checkSelectedBackend = () => apiStore.recheckSelectedEndpoint()
 
 const clearAllHistory = async () => {
   if (isCloudHistoryEnabled()) {
@@ -481,10 +317,6 @@ const contentApiProvider = computed({
   set: (value) => mainStore.setContentApiProvider(value)
 })
 
-const searchApiProvider = computed({
-  get: () => mainStore.searchApiProvider,
-  set: (value) => mainStore.setSearchApiProvider(value)
-})
 
 const isCtrlFEnabled = computed({
   get: () => mainStore.isCtrlFEnabled,
@@ -496,25 +328,12 @@ const showFavoriteTooltip = computed({
   set: (value) => playerStore.setFavoriteTooltip(value)
 })
 
-const isCommentsEnabled = computed({
-  get: () => mainStore.isCommentsEnabled,
-  set: (value) => mainStore.setCommentsEnabled(value)
-})
-
-const isAutoShowComments = computed({
-  get: () => mainStore.isAutoShowComments,
-  set: (value) => mainStore.setAutoShowComments(value)
-})
 
 const cardSize = computed({
   get: () => mainStore.cardSize,
   set: (value) => mainStore.updateCardSize(value)
 })
 
-const isStreamerMode = computed({
-  get: () => mainStore.isStreamerMode,
-  set: (value) => mainStore.setStreamerMode(value)
-})
 
 const sidebarAutoHide = computed({
   get: () => mainStore.sidebarAutoHide,
@@ -525,10 +344,6 @@ const sidebarPosition = computed({
   get: () => mainStore.sidebarPosition,
   set: (value) => mainStore.setSidebarPosition(value)
 })
-
-const resetKinoBdSources = () => {
-  playerStore.clearKinoBdSources()
-}
 </script>
 
 <style scoped>

@@ -6,15 +6,7 @@
 
     <div v-if="user" class="profile-content">
       <div class="profile-photo">
-        <img
-          v-if="user.photo && photoURL"
-          :src="photoURL"
-          loading="lazy"
-          decoding="async"
-          alt="Profile Photo"
-          @error="setImageFallback"
-        />
-        <div v-else class="photo-placeholder">
+        <div class="photo-placeholder">
           {{ String.fromCodePoint(user.name.codePointAt(0)).toLocaleUpperCase() }}
         </div>
       </div>
@@ -82,9 +74,7 @@
 import { ref, onMounted, nextTick } from 'vue'
 import { useAuthStore } from '@/store/auth'
 import { useRouter } from 'vue-router'
-import { getBaseURL } from '@/api/axios'
 import { logoutAndRedirect } from '@/utils/authSession'
-import { setImageFallback } from '@/utils/mediaUtils'
 
 export default {
   name: 'ProfilePage',
@@ -94,7 +84,6 @@ export default {
     const authStore = useAuthStore()
     const router = useRouter()
     const user = ref(authStore.user)
-    const photoURL = ref(null)
     const isEditingName = ref(false)
     const editingName = ref('')
     const nameInput = ref(null)
@@ -134,15 +123,8 @@ export default {
       editingName.value = ''
     }
 
-    onMounted(async () => {
-      if (!user.value) {
-        logout(true)
-      }
-
-      if (user.value?.photo) {
-        const baseURL = await getBaseURL()
-        photoURL.value = `${baseURL}${user.value.photo}`
-      }
+    onMounted(() => {
+      if (!user.value) logout(true)
     })
 
     return {
@@ -150,14 +132,12 @@ export default {
       showDialog,
       confirmLogout,
       logout,
-      photoURL,
       isEditingName,
       editingName,
       nameInput,
       startEditName,
       saveName,
-      cancelEditName,
-      setImageFallback
+      cancelEditName
     }
   }
 }

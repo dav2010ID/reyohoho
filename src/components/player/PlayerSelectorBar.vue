@@ -13,16 +13,6 @@
       <span class="player-btn__name">{{ selectedLabel }}</span>
       <i class="fas fa-chevron-right player-btn__caret" aria-hidden="true"></i>
     </button>
-    <button
-      v-if="showSourceButton"
-      class="source-btn"
-      type="button"
-      aria-label="Выбрать источник"
-      aria-haspopup="dialog"
-      @click="$emit('open-source-modal')"
-    >
-      Источник
-    </button>
   </div>
 </template>
 
@@ -34,14 +24,10 @@ defineProps({
   selectedLabel: {
     type: String,
     required: true
-  },
-  showSourceButton: {
-    type: Boolean,
-    default: false
   }
 })
 
-defineEmits(['open-player-modal', 'open-source-modal'])
+defineEmits(['open-player-modal'])
 </script>
 
 <style scoped>

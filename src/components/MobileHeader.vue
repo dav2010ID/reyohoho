@@ -19,14 +19,6 @@
     </div>
     <div class="header-actions">
       <template v-if="isProfileRoute">
-        <router-link
-          v-if="notificationsAvailable"
-          to="/notifications"
-          class="header-btn"
-          aria-label="Уведомления"
-        >
-          <NotificationBadge />
-        </router-link>
         <router-link to="/settings" class="header-btn" aria-label="Настройки">
           <i class="fa-solid fa-gear" aria-hidden="true"></i>
         </router-link>
@@ -40,19 +32,12 @@
 import { computed, ref, onMounted, onUnmounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useNavbarStore } from '@/store/navbar'
-import { useAuthStore } from '@/store/auth'
-import { accountCapabilities } from '@/api/accountCapabilities'
-import NotificationBadge from '@/components/notification/NotificationBadge.vue'
 
 const navbarStore = useNavbarStore()
-const authStore = useAuthStore()
 const route = useRoute()
 const router = useRouter()
 
 const isProfileRoute = computed(() => route.name === 'user' || route.name === 'login')
-const notificationsAvailable = computed(
-  () => authStore.isAuthenticated && accountCapabilities(authStore).notifications
-)
 
 // vue-router keeps the previous in-app entry in history.state.back.
 const canGoBack = ref(false)
@@ -63,7 +48,7 @@ const removeAfterEach = router.afterEach(() => syncBack())
 const goBack = () => router.back()
 
 // Title pages keep the bar while loading, so the page does not jump when the title arrives.
-const TITLE_ROUTES = ['movie-info', 'movie-info-shiki']
+const TITLE_ROUTES = ['movie-info']
 const hasContent = computed(
   () =>
     canGoBack.value ||

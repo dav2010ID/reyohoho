@@ -165,12 +165,6 @@ describe('compact cloud list requests', () => {
     await addToList('843831', 'favorite')
     expect(mocks.worker.put.mock.calls[0][1].metadata.kp_id).toBe('843831')
   })
-  it('preserves the legacy backend payload', async () => {
-    mocks.auth.isWorkerSession = false
-    await addToList('843831', 'favorite', movie)
-    expect(mocks.legacy.put).toHaveBeenCalledWith('/list/favorite/843831', { metadata: movie })
-    expect(mocks.worker.put).not.toHaveBeenCalled()
-  })
   it('keeps cloud history PUT compact', async () => {
     await addToList('843831', 'history', movie)
     expect(mocks.history).toHaveBeenCalledWith('/843831', 'PUT', { ...normalizeHistory([movie])[0], viewedAt: expect.any(String) })

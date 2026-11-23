@@ -39,13 +39,7 @@
             class="rail-item"
             :class="{ 'is-active': isActive(link) }"
           >
-            <img
-              v-if="typeof link.icon === 'string' && link.icon.startsWith('http')"
-              :src="link.icon"
-              alt=""
-              class="rail-avatar"
-            />
-            <i v-else :class="link.icon" aria-hidden="true"></i>
+            <i :class="link.icon" aria-hidden="true"></i>
             <span class="rail-label">{{ link.text }}</span>
           </router-link>
         </li>
@@ -53,8 +47,7 @@
       <ul class="rail-list rail-list--bottom">
         <li v-for="link in bottomLinks" :key="link.text">
           <router-link :to="link.to" class="rail-item" :class="{ 'is-active': isActive(link) }">
-            <NotificationBadge v-if="link.component === 'NotificationBadge'" />
-            <i v-else :class="link.icon" aria-hidden="true"></i>
+            <i :class="link.icon" aria-hidden="true"></i>
             <span class="rail-label">{{ link.text }}</span>
           </router-link>
         </li>
@@ -68,7 +61,6 @@ import { ref, onMounted, onBeforeUnmount, computed, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useNavbarStore } from '@/store/navbar'
 import { useMainStore } from '@/store/main'
-import NotificationBadge from '@/components/notification/NotificationBadge.vue'
 
 const props = defineProps({
   links: Array

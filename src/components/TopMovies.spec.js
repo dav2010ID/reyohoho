@@ -57,6 +57,15 @@ describe('top page source semantics', () => {
     })
     expect(mocks.getDiscussedMovies).not.toHaveBeenCalled()
   })
+  it('ignores retired time filters from old links', async () => {
+    mocks.store.contentApiProvider = 'local'
+    mocks.route.query = { time: '7d', type: 'all' }
+    wrapper = render()
+    await flushPromises()
+    expect(wrapper.find('.time-card').exists()).toBe(false)
+    expect(wrapper.text()).not.toContain('Обсуждаемое')
+    expect(mocks.getMovies).toHaveBeenCalledWith(expect.objectContaining({ activeTime: 'top250' }))
+  })
   it('loads the series list for a series route', async () => {
     mocks.route.query = { type: 'series' }
     wrapper = render()
@@ -64,14 +73,5 @@ describe('top page source semantics', () => {
     expect(mocks.getMovies).toHaveBeenCalledWith(
       expect.objectContaining({ typeFilter: 'series', activeTime: 'top250' })
     )
-  })
-  it('preserves the local backend time filters', async () => {
-    mocks.store.contentApiProvider = 'local'
-    mocks.route.query = { time: '7d', type: 'all' }
-    wrapper = render()
-    await flushPromises()
-    expect(wrapper.find('.time-card').exists()).toBe(true)
-    expect(wrapper.text()).toContain('Обсуждаемое')
-    expect(mocks.getMovies).toHaveBeenCalledWith(expect.objectContaining({ activeTime: '7d' }))
   })
 })

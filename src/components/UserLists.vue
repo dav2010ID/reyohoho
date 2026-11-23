@@ -41,16 +41,6 @@
               <span v-if="counterFor(btn.value)" class="counter">{{ counterFor(btn.value) }}</span>
             </button>
             <button
-              v-if="capabilities.sharing && !isHistoryView"
-              class="share-btn"
-              :disabled="loading"
-              title="Поделиться списком"
-              aria-label="Поделиться списком"
-              @click="copyShareLink()"
-            >
-              <span class="material-icons">{{ 'share' }}</span>
-            </button>
-            <button
               v-if="canManageOwnLists && authStore.token"
               class="share-btn"
               :disabled="loading"
@@ -74,13 +64,13 @@
               v-if="!user_id || String(user_id) === String(authStore.user?.id)"
               class="clear-btn"
               :class="{
-                disabled: !listMovies.length || typeFilter === USER_LIST_TYPES_ENUM.RATED || loading
+                disabled: !listMovies.length || loading
               }"
-              :disabled="!listMovies.length || typeFilter === USER_LIST_TYPES_ENUM.RATED || loading"
+              :disabled="!listMovies.length || loading"
               :title="isHistoryView ? 'Очистить историю' : 'Очистить список'"
               :aria-label="isHistoryView ? 'Очистить историю' : 'Очистить список'"
               @click="
-                listMovies.length && typeFilter !== USER_LIST_TYPES_ENUM.RATED && (showModal = true)
+                listMovies.length && (showModal = true)
               "
             >
               <span class="material-icons">{{ 'delete_sweep' }}</span>
@@ -109,8 +99,7 @@
         :is-history="isHistoryView"
         :is-mobile="mainStore.isMobile"
         :is-user-list="true"
-        :show-delete="typeFilter !== USER_LIST_TYPES_ENUM.RATED"
-        :show-star="typeFilter === USER_LIST_TYPES_ENUM.RATED"
+        :show-delete="true"
         :loading="loading"
         @item-deleted="handleItemDeleted"
       />
@@ -133,7 +122,6 @@
 
 <script setup>
 import {
-  addToList,
   importWorkerList,
   getMyLists,
   getUserLists,
@@ -151,9 +139,8 @@ import Notification from '@/components/notification/ToastMessage.vue'
 import BaseModal from '@/components/BaseModal.vue'
 import { useMainStore } from '@/store/main'
 import { logoutAndRedirect } from '@/utils/authSession'
-import { cardRatings } from '../../shared/history-data.js'
+import { cardRatings, HISTORY_CAPACITY, HistoryCapacityError } from '../../shared/history-data.js'
 import { importCloudHistory, isCloudHistoryEnabled } from '@/api/cloudHistory'
-import { accountCapabilities } from '@/api/accountCapabilities'
 
 const movies = ref([])
 const loading = ref(true)
@@ -186,7 +173,6 @@ const isCurrentView = (view) =>
   authStore.token === view.token && user_id.value === view.userId && typeFilter.value === view.type
 
 const notificationRef = ref(null)
-const capabilities = computed(() => accountCapabilities(authStore))
 const isHistoryView = computed(() => typeFilter.value === USER_LIST_TYPES_ENUM.HISTORY)
 // Own lists need an account; a shared list (/lists/:user_id) stays public. The watch history
 // also lives on the device, so it opens without an account.
@@ -199,7 +185,6 @@ const exportableListTypes = computed(() => [
   USER_LIST_TYPES_ENUM.WATCHING,
   USER_LIST_TYPES_ENUM.COMPLETED,
   USER_LIST_TYPES_ENUM.ABANDONED,
-  ...(capabilities.value.rated ? [USER_LIST_TYPES_ENUM.RATED] : []),
   USER_LIST_TYPES_ENUM.HISTORY
 ])
 
@@ -254,6 +239,8 @@ const mergeHistory = (currentHistory, importedHistory) => {
 
   normalizeHistoryItems(currentHistory).forEach(put)
   normalizeHistoryItems(importedHistory).forEach(put)
+  // Same limit as everywhere else; never drop entries silently.
+  if (merged.size > HISTORY_CAPACITY) throw new HistoryCapacityError(merged.size)
 
   return Array.from(merged.values()).sort((a, b) => Date.parse(b.addedAt) - Date.parse(a.addedAt))
 }
@@ -379,27 +366,10 @@ const importServerLists = async (parsedLists) => {
       if (incomingIds.length) await importCloudHistory(incomingIds.map((kp_id) => ({ kp_id })))
       continue
     }
-    if (authStore.isWorkerSession) {
-      addedCount += await importWorkerList(
-        type,
-        incomingIds.filter((id) => !currentLists[type].has(id))
-      )
-      continue
-    }
-    for (const kpId of incomingIds) {
-      if (authStore.token !== token) throw new Error('Аккаунт изменился. Повторите импорт')
-      if (currentLists[type].has(kpId)) continue
-      try {
-        // Legacy API has no bulk endpoint. Stay below its 180/minute limit.
-        await new Promise((resolve) => setTimeout(resolve, 400))
-        if (authStore.token !== token) throw new Error('Аккаунт изменился. Повторите импорт')
-        await addToList(kpId, type)
-        currentLists[type].add(kpId)
-        addedCount += 1
-      } catch {
-        failedCount += 1
-      }
-    }
+    addedCount += await importWorkerList(
+      type,
+      incomingIds.filter((id) => !currentLists[type].has(id))
+    )
   }
 
   return { addedCount, failedCount }
@@ -463,27 +433,17 @@ const handleImportFileSelect = async (event) => {
     notificationRef.value.showNotification(
       summary.length ? `Импорт завершен (${summary.join(', ')})` : 'Импорт завершен'
     )
-  } catch {
+  } catch (error) {
+    // Capacity errors already say what was saved and what to remove.
     notificationRef.value.showNotification(
-      'Не удалось импортировать списки. Проверьте соединение и выберите файл, сохранённый через экспорт списков на сайте.'
+      error?.code === 'list_capacity' || error?.code === 'history_capacity'
+        ? error.message
+        : 'Не удалось импортировать списки. Проверьте соединение и выберите файл, сохранённый через экспорт списков на сайте.',
+      8000
     )
   } finally {
     isImporting.value = false
     loading.value = false
-  }
-}
-
-const copyShareLink = async () => {
-  try {
-    const baseUrl = window.location.origin + window.location.pathname.split('/lists')[0] + '/lists'
-    const userId = user_id.value || authStore.user?.id
-    const type = route.query.type || typeFilter.value
-    const url = userId ? `${baseUrl}/${userId}?type=${type}` : `${baseUrl}?type=${type}`
-
-    await navigator.clipboard.writeText(url)
-    notificationRef.value.showNotification('Скопировано')
-  } catch (err) {
-    console.error('Ошибка копирования:', err)
   }
 }
 
@@ -493,7 +453,6 @@ const typeFilters = computed(() => [
   { label: 'Позже', value: USER_LIST_TYPES_ENUM.LATER },
   { label: 'Просмотрено', value: USER_LIST_TYPES_ENUM.COMPLETED },
   { label: 'Брошено', value: USER_LIST_TYPES_ENUM.ABANDONED },
-  ...(capabilities.value.rated ? [{ label: 'Оценено', value: USER_LIST_TYPES_ENUM.RATED }] : []),
   // Only the viewer's own history: it is never part of a shared list.
   ...(canManageOwnLists.value ? [{ label: 'История', value: USER_LIST_TYPES_ENUM.HISTORY }] : [])
 ])

@@ -1,36 +1,15 @@
+// Production content comes from the site's Worker (Kinobox/Kinopoisk) and the
+// two DDBB player sources. The optional legacy backend and KinoBD are gone.
 export const CONTENT_PROVIDERS = {
-  BACKEND: 'backend',
-  KINOBD: 'kinobd',
   KINOBOX: 'kinobox',
   DDBB: 'ddbb',
-  DDBB_LIVE: 'ddbb_live',
-  LOCAL: 'local'
+  DDBB_LIVE: 'ddbb_live'
 }
 
-export const KINOBD_SUPPORTED_METHODS = new Set([
-  'apiSearch',
-  'getKpInfo',
-  'getMovies',
-  'getDiscussedMovies',
-  'getKpIDfromIMDB',
-  'getRandomMovie'
-])
-export const LOCAL_SUPPORTED_METHODS = new Set([
-  'getShikiInfo',
-  'getShikiPlayers',
-  'getKpIDfromSHIKI',
-  'getRating',
-  'setRating',
-  'getRandomMovie'
-])
-
 const defaultImporters = {
-  backend: () => import('@/api/movies.backend'),
-  // Temporarily disabled: kinobd: () => import('@/api/movies.kinobd'),
   kinobox: () => import('@/api/movies.kinobox'),
   ddbb: () => import('@/api/movies.ddbb'),
-  ddbb_live: () => import('@/api/movies.ddbb-live'),
-  local: () => import('@/api/movies.local')
+  ddbb_live: () => import('@/api/movies.ddbb-live')
 }
 
 export const createProviderRegistry = (importers = defaultImporters) => {

@@ -60,7 +60,7 @@ describe('offline shell dependency selection', () => {
       'comments.js': chunk('comments.js'),
       'dialog.js': chunk('dialog.js'),
       'scenes.js': chunk('scenes.js', [], {
-        facadeModuleId: '/repo/src/components/movie/MovieSceneTools.vue'
+        facadeModuleId: '/repo/src/components/RandomMovieModal.vue'
       }),
       'overlay.js': chunk('overlay.js', [], {
         facadeModuleId: '/repo/src/utils/playerVideoOverlayRuntime.js'

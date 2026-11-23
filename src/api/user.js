@@ -1,4 +1,3 @@
-import { getApi } from '@/api/axios'
 import { reactive } from 'vue'
 import { normalizeMovieListResponse } from '@/api/movieSeoNormalizer'
 import { USER_LIST_TYPES_ENUM } from '@/constants'
@@ -7,7 +6,6 @@ import { normalizeHistory } from '../../shared/history-data.js'
 import { useAuthStore } from '@/store/auth'
 import { workerAccountAdapter, workerAccountRequest, workerAuthEnabled } from './workerAccount'
 import { enrichListMetadata } from './listMetadata'
-import { accountCapabilities } from './accountCapabilities'
 import {
   addLocalListItem,
   clearLocalList,
@@ -32,18 +30,15 @@ const LIST_IMPORT_BYTES = 60 * 1024
 const apiCall = async (callFn) => {
   const auth = useAuthStore()
   const token = auth.token
-  const api = auth.isWorkerSession ? workerAccountAdapter : await getApi()
-  if (auth.token !== token) throw new Error('Аккаунт изменился. Повторите операцию')
-  const response = await callFn(api)
+  if (token && !auth.isWorkerSession) throw new Error('Войдите заново через Telegram')
+  const response = await callFn(workerAccountAdapter)
   if (auth.token !== token) throw new Error('Аккаунт изменился. Повторите операцию')
   return response
 }
 const listOwner = () => {
   const auth = useAuthStore()
   if (auth.token && !auth.user?.id) throw new Error('Дождитесь подтверждения аккаунта')
-  return auth.token && auth.user?.id
-    ? `${auth.isWorkerSession ? 'worker' : 'legacy'}:${auth.user.id}`
-    : 'guest'
+  return auth.token && auth.user?.id ? `worker:${auth.user.id}` : 'guest'
 }
 const listVersions = new Map()
 const listKey = (owner, type) => `${owner}:${type}`
@@ -53,9 +48,9 @@ const invalidateList = (owner, type) => {
   listVersions.set(key, version)
   return version
 }
+const LIST_TYPES = new Set(['favorite', 'later', 'watching', 'completed', 'abandoned', 'history'])
 const assertListCapability = (type) => {
-  if (type === USER_LIST_TYPES_ENUM.RATED && !accountCapabilities(useAuthStore()).rated)
-    throw new Error('Оценки недоступны для этого аккаунта')
+  if (!LIST_TYPES.has(type)) throw new Error('Неизвестный список')
 }
 
 export async function getMovieListStatus(id) {
@@ -127,11 +122,7 @@ const sendHistory = async (entry) => {
       ? historyRequest(`/${entry.kpId}`, 'PUT', { ...entry.metadata, viewedAt: entry.at })
       : historyRequest(`/${entry.kpId}`, 'DELETE')
   }
-  const payload = useAuthStore().isWorkerSession
-    ? { metadata: entry.metadata, viewedAt: entry.at }
-    : entry.metadata
-      ? { metadata: entry.metadata }
-      : undefined
+  const payload = { metadata: entry.metadata, viewedAt: entry.at }
   const { data } = await apiCall((api) =>
     entry.op === 'add'
       ? api.put(`/list/${HISTORY}/${entry.kpId}`, payload)
@@ -201,17 +192,12 @@ const addToList = async (id, type, metadata = null) => {
     return data
   }
   // Cloud lists store cards, not full provider responses (cast, trailers, raw_data).
-  // Preserve the legacy backend payload contract.
-  const payload = useAuthStore().isWorkerSession
-    ? { metadata: normalizeHistory([{ ...metadata, kp_id: id }])[0] }
-    : metadata
-      ? { metadata }
-      : undefined
+  const payload = { metadata: normalizeHistory([{ ...metadata, kp_id: id }])[0] }
   const { data } = await apiCall((api) => api.put(`/list/${type}/${id}`, payload))
   if (useAuthStore().token === token) {
     addLocalListItem(type, id, metadata || {}, owner)
     // The Worker moved the title out of the other status lists in the same write.
-    if (useAuthStore().isWorkerSession && STATUS_TYPES.includes(type))
+    if (STATUS_TYPES.includes(type))
       for (const other of STATUS_TYPES.filter((status) => status !== type)) {
         invalidateList(owner, other)
         removeLocalListItem(other, id, owner)
@@ -304,7 +290,7 @@ const getMyLists = async (type, { fresh = false, awaitMetadata = false } = {}) =
     auth.token === token &&
     (!token ||
       (auth.user?.id &&
-        `${auth.isWorkerSession ? 'worker' : 'legacy'}:${auth.user.id}` === owner)) &&
+        `worker:${auth.user.id}` === owner)) &&
     listVersions.get(listKey(owner, type)) === version
   const storeList = (items) => {
     if (!current()) throw new Error('Список изменился. Повторите операцию')
@@ -383,18 +369,18 @@ const getUser = async () => {
   return data
 }
 
+const assertLoginEnabled = () => {
+  if (!workerAuthEnabled) throw new Error('Вход временно недоступен')
+}
+
 const generateToken = async () => {
-  if (workerAuthEnabled)
-    return workerAccountRequest('/auth/telegram-login-token', 'POST', {}, { anonymous: true })
-  const { data } = await apiCall((api) => api.get('/auth/telegram-login-token'))
-  return data
+  assertLoginEnabled()
+  return workerAccountRequest('/auth/telegram-login-token', 'POST', {}, { anonymous: true })
 }
 
 const getTGAuthResult = async (token) => {
-  if (workerAuthEnabled)
-    return workerAccountRequest('/auth/check-telegram-auth', 'POST', { token }, { anonymous: true })
-  const { data } = await apiCall((api) => api.get(`/auth/check-telegram-auth?token=${token}`))
-  return data
+  assertLoginEnabled()
+  return workerAccountRequest('/auth/check-telegram-auth', 'POST', { token }, { anonymous: true })
 }
 
 const updateUserName = async (name) => {

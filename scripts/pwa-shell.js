@@ -18,7 +18,7 @@ export function createPwaShell() {
   let graphPath
   let isSsr = false
   const screens =
-    /\/src\/components\/(?:MovieSearch|TopMovies|MovieInfo|PlayerComponent|MovieRating|NotFound)\.vue$/
+    /\/src\/components\/(?:MovieSearch|TopMovies|MovieInfo|PlayerComponent|NotFound)\.vue$/
   return {
     plugin: {
       name: 'pwa-shell-dependencies',

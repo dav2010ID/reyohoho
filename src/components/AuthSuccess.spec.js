@@ -21,22 +21,6 @@ vi.mock('@/api/cloudHistory', () => ({ importCloudHistory: mocks.importHistory }
 vi.mock('@/api/movies', () => ({ getKpInfo: mocks.getKpInfo }))
 
 describe('sign-in messages', () => {
-  it('does not upload legacy history into a new account after a delayed metadata read', async () => {
-    useAuthStore().setToken('legacy.account.A')
-    let resolveMetadata
-    mocks.getKpInfo.mockReturnValue(new Promise((resolve) => { resolveMetadata = resolve }))
-    const wrapper = create()
-    await flushPromises()
-    expect(mocks.getKpInfo).toHaveBeenCalledWith('301')
-    useAuthStore().setToken('legacy-B')
-    useAuthStore().setUser({ id: 2 })
-    resolveMetadata({ name_ru: 'Matrix', poster_url: '/poster.jpg' })
-    await flushPromises()
-    expect(mocks.addToList).not.toHaveBeenCalled()
-    expect(readPendingSync('legacy:1').history.map((item) => item.kp_id)).toEqual(['301'])
-    expect(useAuthStore().user.id).toBe(2)
-    wrapper.unmount()
-  })
   it('retains an unconfirmed batch across remount and retries idempotently', async () => {
     vi.spyOn(window, 'confirm').mockReturnValue(true)
     replaceLocalList('favorite', [{ kp_id: '301' }, { kp_id: '302' }], 'guest')

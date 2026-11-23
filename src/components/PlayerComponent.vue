@@ -15,9 +15,7 @@
         :inline="Boolean(selectorTarget)"
         :selected-label="selectedPlayerLabel"
         :has-players="playersInternal.length > 0"
-        :show-source-button="showSourceButton"
         @open-player-modal="openPlayerModal"
-        @open-source-modal="openSourceModal"
       />
     </Teleport>
     <!-- Модальное окно выбора плеера -->
@@ -27,15 +25,6 @@
       :selected-player="selectedPlayerInternal"
       @close="closePlayerModal"
       @select="handlePlayerSelect"
-    />
-
-    <PlayerSourceModal
-      v-if="showSourceModal"
-      :candidates="sourceCandidates"
-      :loading="sourceLoading"
-      :error="sourceError"
-      @close="closeSourceModal"
-      @select="applySourceCandidate"
     />
 
     <!-- Единый контейнер плеера -->
@@ -78,9 +67,6 @@
           <p>{{ playersEmptyMessage }}</p>
           <button type="button" @click="retryPlayers">Повторить</button>
           <button type="button" @click="router.push('/settings?tab=api')">Сменить источник</button>
-          <button v-if="showSourceButton" type="button" @click="openSourceModal">
-            Выбрать источник
-          </button>
         </div>
       </div>
 
@@ -109,9 +95,7 @@
         inline
         :selected-label="selectedPlayerLabel"
         :has-players="playersInternal.length > 0"
-        :show-source-button="showSourceButton"
         @open-player-modal="openPlayerModal"
-        @open-source-modal="openSourceModal"
       />
       <div class="main-controls">
         <div
@@ -614,9 +598,6 @@ import {
   getSafePlayerUrl
 } from '@/utils/playerSecurity'
 
-const PlayerSourceModal = defineAsyncComponent(
-  () => import('@/components/player/PlayerSourceModal.vue')
-)
 const PlayerModal = defineAsyncComponent(() => import('@/components/PlayerModal.vue'))
 
 const mainStore = useMainStore()
@@ -680,22 +661,14 @@ const {
   playersInternal,
   selectedPlayerInternal,
   showPlayerModal,
-  showSourceModal,
-  sourceCandidates,
-  sourceLoading,
-  sourceError,
   errorMessage,
   errorCode,
   playersEmptyMessage,
-  showSourceButton,
   selectedPlayerLabel,
   searchingSource,
   fetchPlayers,
   openPlayerModal,
-  closePlayerModal,
-  openSourceModal,
-  closeSourceModal,
-  applySourceCandidate
+  closePlayerModal
 } = usePlayerSources({
   props,
   getProviderDisplayName,

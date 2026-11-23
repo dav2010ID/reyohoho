@@ -27,7 +27,7 @@ beforeEach(() => {
 })
 
 describe('random film routing', () => {
-  it.each(['kinobox', 'ddbb', 'ddbb_live', 'kinobd'])(
+  it.each(['kinobox', 'ddbb', 'ddbb_live', 'kinobd', 'local', 'backend'])(
     'uses the proxy for %s without the legacy backend',
     async (provider) => {
       mocks.store.contentApiProvider = provider
@@ -38,12 +38,6 @@ describe('random film routing', () => {
       expect(mocks.loadProvider).toHaveBeenCalledWith('kinobox')
     }
   )
-  it.each(['local', 'backend'])('preserves explicitly selected %s /chance', async (provider) => {
-    mocks.store.contentApiProvider = provider
-    mocks[provider].mockResolvedValue({ kp_id: 42 })
-    expect(await getRandomMovie()).toEqual({ kp_id: 42 })
-    expect(mocks.random).not.toHaveBeenCalled()
-  })
   it('does not fall back to an unconfigured backend on proxy errors or cancellation', async () => {
     const error = Object.assign(new Error('Canceled'), { code: 'ERR_CANCELED' })
     mocks.random.mockRejectedValue(error)

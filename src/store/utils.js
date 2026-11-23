@@ -97,12 +97,15 @@ export function beforeHydrateMainStore(ctx) {
       if (!replaceLocalList('history', persisted.history, persisted.historyOwner || 'guest')) return
       delete persisted.history
     }
-    if (['rhserv', 'kinobd', 'kinodb'].includes(persisted.searchApiProvider)) {
-      persisted.searchApiProvider = 'kinobox'
-    }
-    if (['rhserv', 'kinobd', 'kinodb'].includes(persisted.contentApiProvider)) {
+    // Only the Worker and the two DDBB sources remain; older choices
+    // (local backend, KinoBD, rhserv) fall back to the default.
+    if (
+      'contentApiProvider' in persisted &&
+      !['kinobox', 'ddbb', 'ddbb_live'].includes(persisted.contentApiProvider)
+    ) {
       persisted.contentApiProvider = 'kinobox'
     }
+    delete persisted.searchApiProvider
     localStorage.setItem(MAIN_STORE_NAME, JSON.stringify(persisted))
   } catch (error) {
     console.warn('Не удалось обновить источник поиска:', error)

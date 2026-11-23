@@ -66,7 +66,6 @@ yarn build:github
 node scripts/browser-analytics-check.js dist
 node scripts/browser-responsive-poster-check.js dist
 node scripts/browser-deferred-movie-check.js dist
-node scripts/browser-movie-scenes-check.js dist
 node scripts/browser-artifact-check.js dist
 yarn test:unit run
 yarn lint

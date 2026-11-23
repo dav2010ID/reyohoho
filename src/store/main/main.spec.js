@@ -177,7 +177,8 @@ describe('Тесты хранилища main', () => {
     store.setContentApiProvider('ddbb_live')
     expect(store.contentApiProvider).toBe('ddbb_live')
 
+    // Retired providers are ignored.
     store.setContentApiProvider('local')
-    expect(store.contentApiProvider).toBe('local')
+    expect(store.contentApiProvider).toBe('kinobox')
   })
 })

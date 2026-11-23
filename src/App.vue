@@ -51,7 +51,7 @@ const siteImage = buildStaticCanonicalUrl('/') + 'icons/icon-512x512.png'
 useHead(() => ({
   title: route.meta?.title || 'ReYohoho',
   meta:
-    route.name === 'movie-info' || route.name === 'movie-info-shiki'
+    route.name === 'movie-info'
       ? []
       : [{ property: 'og:image', content: siteImage }]
 }))

@@ -26,28 +26,11 @@ beforeEach(() => {
 })
 
 describe('top list dispatch', () => {
-  it('uses the fixed Kinopoisk top through the shared proxy for remote mode', async () => {
+  it.each(['kinobox', 'ddbb', 'local'])('uses the fixed Kinopoisk top through the shared proxy (%s)', async (provider) => {
+    mocks.store.contentApiProvider = provider
     const options = { typeFilter: 'series', page: 2, limit: 36 }
     expect(await getMovies(options)).toEqual([])
     expect(mocks.top).toHaveBeenCalledWith(options)
     expect(mocks.loadProvider).toHaveBeenCalledWith('kinobox')
-  })
-  it('preserves local backend list requests', async () => {
-    mocks.store.contentApiProvider = 'local'
-    const options = { activeTime: '7d', typeFilter: 'all' }
-    await getMovies(options)
-    expect(mocks.local).toHaveBeenCalledWith(options)
-    expect(mocks.top).not.toHaveBeenCalled()
-  })
-  it('does not misrepresent a rating top as local popularity when local fails', async () => {
-    mocks.store.contentApiProvider = 'local'
-    mocks.local.mockRejectedValue(new Error('Unavailable'))
-    const warn = vi.spyOn(console, 'warn').mockImplementation(() => {})
-    try {
-      await expect(getMovies({ activeTime: '7d' })).rejects.toThrow('Unavailable')
-      expect(mocks.top).not.toHaveBeenCalled()
-    } finally {
-      warn.mockRestore()
-    }
   })
 })

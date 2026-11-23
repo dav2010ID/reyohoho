@@ -78,7 +78,6 @@ source. The local ignored baseline for these results is
 $env:VITE_PRERENDER_MOVIE_PAGES = 'true'
 yarn build:github
 node scripts/browser-deferred-movie-check.js dist reports-browser/component-split-before
-node scripts/browser-movie-scenes-check.js dist
 node scripts/browser-artifact-check.js dist
 yarn test:unit run
 yarn lint
@@ -120,4 +119,4 @@ Unit tests exercise deferred Electron overlay lifecycle, local scene blur, and
 preservation of player preferences with controlled fakes. Native Electron
 fullscreen overlays still require an integration run in the desktop app.
 Local raw reports and screenshots are under the ignored `reports-browser/`
-directory (`component-sizes.json`, `deferred-movie.json`, `movie-scenes.json`).
+directory (`component-sizes.json`, `deferred-movie.json`).

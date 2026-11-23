@@ -1,4 +1,3 @@
-import { sceneSelection } from '@/utils/sceneSelection'
 import { createTestingPinia } from '@pinia/testing'
 import { config, flushPromises, shallowMount } from '@vue/test-utils'
 import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it, vi } from 'vitest'
@@ -10,8 +9,6 @@ const getMovieExtrasMock = vi.fn()
 const authMock = { token: '', isWorkerSession: false }
 const routeMock = reactive({ params: { kp_id: '123' }, query: {}, hash: '' })
 const mainMock = {
-  isCommentsEnabled: true,
-  isStreamerMode: false,
   isMobile: false,
   isHistoryAllowed: false,
   contentApiProvider: 'kinobox',
@@ -31,23 +28,7 @@ vi.mock('vue-router', () => ({
 }))
 
 vi.mock('@/api/movies', () => ({
-  getKpInfo: getKpInfoMock,
-  getShikiInfo: vi.fn(),
-  getNudityInfoFromIMDB: vi.fn(),
-  submitTiming: vi.fn(),
-  updateTiming: vi.fn(),
-  deleteTiming: vi.fn(),
-  reportTiming: vi.fn(),
-  getTopTimingSubmitters: vi.fn(),
-  getAllTimingSubmissions: vi.fn(),
-  approveTiming: vi.fn(),
-  rejectTiming: vi.fn(),
-  markAsCleanText: vi.fn(),
-  voteOnTiming: vi.fn(),
-  getTimingVote: vi.fn(),
-  getMovieNote: vi.fn(),
-  saveMovieNote: vi.fn(),
-  deleteMovieNote: vi.fn()
+  getKpInfo: getKpInfoMock
 }))
 
 vi.mock('@/api/movieExtras', async () => ({
@@ -111,10 +92,6 @@ vi.mock('@/store/trailer', () => ({
   })
 }))
 
-vi.mock('@/utils/ratingUtils', () => ({
-  getRatingColor: vi.fn()
-}))
-
 vi.mock('@/utils/movieSeo', async () => {
   const actual = await vi.importActual('@/utils/movieSeo')
   return {
@@ -142,7 +119,6 @@ describe('MovieInfo SEO', () => {
   beforeEach(async () => {
     await Promise.all([
       import('./PlayerComponent.vue'),
-      import('./MovieRating.vue'),
       import('./movie/MovieMobileListDropdown.vue')
     ])
     authMock.token = ''
@@ -180,7 +156,6 @@ describe('MovieInfo SEO', () => {
           SpinnerLoading: true,
           Notification: true,
           TrailerCarousel: true,
-          Comments: true,
           RouterLink: true
         }
       }
@@ -222,11 +197,8 @@ describe('MovieInfo SEO', () => {
     }
   })
 
-  it('keeps the player but skips legacy widgets and note lookup without a backend', async () => {
-    vi.stubEnv('VITE_APP_API_URL', '')
-    authMock.token = 'legacy-session'
-    const { getMovieNote } = await import('@/api/movies')
-    getMovieNote.mockClear()
+  it('renders the player and Kinopoisk link without backend-only widgets', async () => {
+    authMock.token = `rh1_${'a'.repeat(43)}`
     const MovieInfo = (await import('./MovieInfo.vue')).default
     const wrapper = shallowMount(MovieInfo, {
       global: { plugins: [createTestingPinia({ createSpy: vi.fn })], stubs: { RouterLink: true } }
@@ -235,11 +207,9 @@ describe('MovieInfo SEO', () => {
       await vi.waitFor(() =>
         expect(wrapper.findComponent({ name: 'PlayerComponent' }).exists()).toBe(true)
       )
-      expect(wrapper.findComponent({ name: 'MovieRating' }).exists()).toBe(false)
       expect(
         wrapper.find('.action-buttons-group, #movie-comments, .movie-note-display').exists()
       ).toBe(false)
-      expect(getMovieNote).not.toHaveBeenCalled()
       expect(wrapper.find('a[href*="kinopoisk.ru/film/"]').exists()).toBe(true)
     } finally {
       wrapper.unmount()
@@ -266,12 +236,10 @@ describe('MovieInfo SEO', () => {
               template:
                 '<div><iframe src="about:blank"></iframe><button type="button" @click="$emit(\'toggle-list\', \'favorite\')">Favorite</button></div>'
             },
-            MovieRating: true,
-            Notification: { template: '<div />', methods: { showNotification: vi.fn() } },
+              Notification: { template: '<div />', methods: { showNotification: vi.fn() } },
             MovieList: true,
             TrailerCarousel: true,
-            Comments: true,
-            RouterLink: true
+              RouterLink: true
           }
         }
       })
@@ -331,11 +299,9 @@ describe('MovieInfo SEO', () => {
             props: ['movieInfo'],
             template: '<iframe src="about:blank" />'
           },
-          MovieRating: true,
           MovieList: true,
           Notification: true,
           TrailerCarousel: true,
-          Comments: true,
           RouterLink: true
         }
       }
@@ -358,113 +324,6 @@ describe('MovieInfo SEO', () => {
     }
   })
 
-  it('mounts scene tools on first use, retains selection while closed and clears it on navigation', async () => {
-    vi.stubEnv('VITE_APP_API_URL', 'https://configured.example')
-    const MovieInfo = (await import('./MovieInfo.vue')).default
-    const wrapper = shallowMount(MovieInfo, {
-      global: {
-        plugins: [createTestingPinia({ createSpy: vi.fn })],
-        stubs: {
-          PlayerComponent: { name: 'PlayerComponent', template: '<iframe src="about:blank" />' },
-          MovieSceneTools: {
-            name: 'MovieSceneTools',
-            props: ['mode', 'movieId', 'refreshMovie'],
-            emits: ['overlay-selection', 'close'],
-            template: '<div class="test-scene-tools" />'
-          },
-          MovieRating: true,
-          MovieList: true,
-          Notification: true,
-          TrailerCarousel: true,
-          Comments: true,
-          RouterLink: true
-        }
-      }
-    })
-    try {
-      await vi.waitFor(() => expect(wrapper.find('iframe').exists()).toBe(true))
-      expect(wrapper.find('.test-scene-tools').exists()).toBe(false)
-      const button = wrapper.get('button[title^="Показать тайминги"]')
-      await button.trigger('click')
-      await vi.waitFor(() => expect(wrapper.find('.test-scene-tools').exists()).toBe(true))
-      const scene = wrapper.getComponent({ name: 'MovieSceneTools' })
-      const instance = scene.vm
-      expect(scene.props('mode')).toBe('timings')
-      scene.vm.$emit('overlay-selection', [7])
-      expect(sceneSelection.overlayNudityTimings).toEqual([7])
-      await button.trigger('click')
-      expect(scene.props('mode')).toBe(null)
-      await button.trigger('click')
-      expect(wrapper.getComponent({ name: 'MovieSceneTools' }).vm).toBe(instance)
-      expect(sceneSelection.overlayNudityTimings).toEqual([7])
-      routeMock.params.kp_id = '456'
-      await flushPromises()
-      expect(wrapper.find('.test-scene-tools').exists()).toBe(false)
-      expect(sceneSelection.overlayNudityTimings).toEqual([])
-    } finally {
-      wrapper.unmount()
-      expect(sceneSelection.overlayNudityTimings).toBeUndefined()
-    }
-  })
-
-  it('preserves the iframe while refreshing movie timings', async () => {
-    vi.stubEnv('VITE_APP_API_URL', 'https://configured.example')
-    const MovieInfo = (await import('./MovieInfo.vue')).default
-    const wrapper = shallowMount(MovieInfo, {
-      global: {
-        plugins: [createTestingPinia({ createSpy: vi.fn })],
-        stubs: {
-          PlayerComponent: {
-            name: 'PlayerComponent',
-            props: ['movieInfo'],
-            template: '<iframe src="about:blank" />'
-          },
-          MovieSceneTools: {
-            name: 'MovieSceneTools',
-            props: ['refreshMovie'],
-            template: '<div class="test-scene-tools" />'
-          },
-          MovieRating: true,
-          MovieList: true,
-          Notification: true,
-          TrailerCarousel: true,
-          Comments: true,
-          RouterLink: true
-        }
-      }
-    })
-    let finishRefresh
-    try {
-      await vi.waitFor(() => expect(wrapper.find('iframe').exists()).toBe(true))
-      const player = wrapper.getComponent({ name: 'PlayerComponent' }).vm
-      const iframe = wrapper.get('iframe').element
-      await wrapper.get('button[title^="Показать тайминги"]').trigger('click')
-      await vi.waitFor(() => expect(wrapper.find('.test-scene-tools').exists()).toBe(true))
-      const info = {
-        ...wrapper.getComponent({ name: 'PlayerComponent' }).props('movieInfo'),
-        nudity_timings: [{ id: 7 }]
-      }
-      getKpInfoMock.mockImplementationOnce(
-        () =>
-          new Promise((resolve) => {
-            finishRefresh = resolve
-          })
-      )
-      const refresh = wrapper.getComponent({ name: 'MovieSceneTools' }).props('refreshMovie')()
-      await flushPromises()
-      expect(wrapper.find('.movie-skeleton').exists()).toBe(false)
-      expect(wrapper.get('iframe').element).toBe(iframe)
-      finishRefresh(info)
-      await refresh
-      await flushPromises()
-      expect(wrapper.get('iframe').element).toBe(iframe)
-      expect(wrapper.getComponent({ name: 'PlayerComponent' }).vm).toBe(player)
-    } finally {
-      finishRefresh?.({})
-      wrapper.unmount()
-    }
-  })
-
   it.each([false, true])(
     'keeps the loading layout while movie data arrives before the player chunk (mobile=%s)',
     async (mobile) => {
@@ -483,12 +342,10 @@ describe('MovieInfo SEO', () => {
           plugins: [createTestingPinia({ createSpy: vi.fn })],
           stubs: {
             PlayerComponent: { name: 'PlayerComponent', template: '<div class="test-player" />' },
-            MovieRating: true,
-            MovieList: true,
+              MovieList: true,
             Notification: true,
             TrailerCarousel: true,
-            Comments: true,
-            RouterLink: true
+              RouterLink: true
           }
         }
       })
