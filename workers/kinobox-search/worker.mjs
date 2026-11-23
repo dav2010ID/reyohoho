@@ -75,7 +75,7 @@ export default {
       return serveCspReport(request, allowedOrigin(origin, env))
     if (origin && !allowedOrigin(origin, env)) return reply({ error: 'Origin not allowed' }, 403)
     const privatePath = new URL(request.url).pathname
-    if (privatePath.startsWith('/api/auth/')) return serveTelegramAuth(request, env, origin)
+    if (privatePath.startsWith('/api/auth/')) return serveTelegramAuth(request, env, origin, ctx)
     if (
       /^\/api\/(?:user(?:\/|$)|list(?:-status)?\/|user-list(?:-counters)?\/|notifications(?:\/|$))/.test(
         privatePath

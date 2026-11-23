@@ -8,6 +8,7 @@ import {
   sha256,
   verifyWorkerSession
 } from './private-api.mjs'
+import { describeClient, requestAge } from './login-context.mjs'
 
 export const LOGIN_TTL = 600
 const SESSION_TTL = 30 * 86400
@@ -65,6 +66,29 @@ async function telegramCall(env, method, payload) {
   }
 }
 
+const REVOKE_ALL = 'rva'
+// callback_data is limited to 64 bytes: 160 bits of the session hash identify it.
+const revokeData = (sessionHash) => `rv:${sessionHash.slice(0, 40)}`
+
+// After a session is issued: tell the owner which device received it and let
+// them end it. A forwarded login link then shows up immediately.
+async function notifyLogin(env, telegramId, sessionHash, client) {
+  try {
+    await telegramCall(env, 'sendMessage', {
+      chat_id: telegramId,
+      text: `Выполнен вход на reyhoho.fun: ${client.device}, ${client.place}.\nЕсли это были не вы, завершите этот вход.`,
+      reply_markup: {
+        inline_keyboard: [
+          [{ text: 'Завершить этот вход', callback_data: revokeData(sessionHash) }],
+          [{ text: 'Завершить все входы', callback_data: REVOKE_ALL }]
+        ]
+      }
+    })
+  } catch {
+    // telegramCall already logged it; the login itself stands.
+  }
+}
+
 async function handleWebhook(request, env, reply) {
   if (
     !(await equalSecret(
@@ -107,8 +131,8 @@ async function handleWebhook(request, env, reply) {
       .run()
     const login = await db
       .prepare(
-        `SELECT code FROM tg_login WHERE start_hash=? AND candidate_id=?
-       AND status='pending' AND expires_at>?`
+        `SELECT code,expires_at,request_device,request_place FROM tg_login
+       WHERE start_hash=? AND candidate_id=? AND status='pending' AND expires_at>?`
       )
       .bind(startHash, id, now)
       .first()
@@ -121,16 +145,23 @@ async function handleWebhook(request, env, reply) {
     }
     await telegramCall(env, 'sendMessage', {
       chat_id: id,
-      text: `Вход на reyhoho.fun\nКод: ${login.code}\nПодтверждайте только свой запрос. Если вы не открывали сайт — не нажимайте кнопку. Не передавайте эту ссылку другим.`,
+      text: [
+        'Вход на reyhoho.fun',
+        `Код: ${login.code}`,
+        `Запрос создан ${requestAge(now - (login.expires_at - LOGIN_TTL))}: ${login.request_device || 'неизвестное устройство'}, ${login.request_place || 'место не определено'}.`,
+        'Подтверждайте, только если это ваш запрос: код совпадает с кодом на сайте, а устройство и место — ваши. Если ссылку прислал кто-то другой, не нажимайте кнопку.'
+      ].join('\n'),
       reply_markup: {
         inline_keyboard: [[{ text: 'Подтвердить вход', callback_data: `ok:${match[1]}` }]]
       }
     })
   } else if (callback) {
-    const match = /^ok:([A-Za-z0-9_-]{43})$/.exec(String(callback.data || ''))
+    const data = String(callback.data || '')
+    const match = /^ok:([A-Za-z0-9_-]{43})$/.exec(data)
+    const revoke = /^rv:([0-9a-f]{40})$/.exec(data)
     const id = String(callback.from?.id || '')
     if (
-      !match ||
+      !(match || revoke || data === REVOKE_ALL) ||
       !validId(id) ||
       callback.from?.is_bot ||
       callback.message?.chat?.type !== 'private' ||
@@ -139,6 +170,28 @@ async function handleWebhook(request, env, reply) {
       callback.id.length > 128
     )
       return reply({ ok: true })
+    // Sessions are bound to the Telegram user who presses the button.
+    if (!match) {
+      const removed = await db
+        .prepare(
+          revoke
+            ? 'DELETE FROM tg_sessions WHERE telegram_id=? AND substr(token_hash,1,40)=?'
+            : 'DELETE FROM tg_sessions WHERE telegram_id=?'
+        )
+        .bind(...(revoke ? [id, revoke[1]] : [id]))
+        .run()
+      const changes = Number(removed.meta?.changes || 0)
+      await telegramCall(env, 'answerCallbackQuery', {
+        callback_query_id: callback.id,
+        show_alert: true,
+        text: revoke
+          ? changes
+            ? 'Вход завершён: это устройство вышло из аккаунта.'
+            : 'Этот вход уже завершён.'
+          : `Завершено входов: ${changes}. Войдите заново на своих устройствах.`
+      })
+      return reply({ ok: true })
+    }
     const startHash = await sha256(match[1])
     const results = await db.batch([
       db
@@ -167,7 +220,7 @@ async function handleWebhook(request, env, reply) {
   return reply({ ok: true })
 }
 
-export async function serveTelegramAuth(request, env, origin) {
+export async function serveTelegramAuth(request, env, origin, ctx) {
   const reply = privateReply(origin)
   if (!secureOrigin(origin, env)) return reply({ error: 'HTTPS required' }, 403)
   if (request.method === 'OPTIONS') return reply(null, 204)
@@ -237,9 +290,20 @@ export async function serveTelegramAuth(request, env, origin) {
       const poll = randomToken()
       const start = randomToken()
       const code = (await sha256(start)).slice(0, 6).toUpperCase()
+      const client = describeClient(request)
       await db
-        .prepare('INSERT INTO tg_login(poll_hash,start_hash,code,expires_at) VALUES (?,?,?,?)')
-        .bind(await sha256(poll), await sha256(start), code, now + LOGIN_TTL)
+        .prepare(
+          `INSERT INTO tg_login(poll_hash,start_hash,code,expires_at,request_device,request_place)
+         VALUES (?,?,?,?,?,?)`
+        )
+        .bind(
+          await sha256(poll),
+          await sha256(start),
+          code,
+          now + LOGIN_TTL,
+          client.device,
+          client.place
+        )
         .run()
       return reply({
         token: poll,
@@ -290,7 +354,18 @@ export async function serveTelegramAuth(request, env, origin) {
         )
         .bind(pollHash)
     ])
-    if (results[0].meta.changes > 0) return reply({ authenticated: true, token: access })
+    if (results[0].meta.changes > 0) {
+      const owner = await db
+        .prepare('SELECT candidate_id FROM tg_login WHERE poll_hash=?')
+        .bind(pollHash)
+        .first()
+      if (owner?.candidate_id) {
+        const notice = notifyLogin(env, owner.candidate_id, sessionHash, describeClient(request))
+        if (ctx?.waitUntil) ctx.waitUntil(notice)
+        else await notice
+      }
+      return reply({ authenticated: true, token: access })
+    }
     const login = await db
       .prepare('SELECT status,expires_at FROM tg_login WHERE poll_hash=?')
       .bind(pollHash)
