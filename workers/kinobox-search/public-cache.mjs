@@ -21,14 +21,16 @@ export async function cacheMatch(cache, key) {
   }
 }
 
-export async function cachePut(cache, key, body, ttl) {
+export async function cachePut(cache, key, body, ttl, source) {
   try {
     await cache.put(
       key,
       new Response(body, {
         headers: {
           'Content-Type': 'application/json; charset=utf-8',
-          'Cache-Control': `public, max-age=${ttl}`
+          'Cache-Control': `public, max-age=${ttl}`,
+          // Keep provenance with the body so a cache HIT reports the real source.
+          ...(source ? { 'X-Data-Source': source } : {})
         }
       })
     )

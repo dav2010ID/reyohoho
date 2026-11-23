@@ -62,8 +62,8 @@ export default {
         'X-Search-Transport, X-Worker-Version, X-Search-Cache, X-Kinobox-Transport, X-Kinobox-Cache, X-Top-Cache, X-Extras-Cache, X-Latest-Cache, X-Data-Source',
       Vary: 'Origin',
       'Cache-Control': 'no-store',
-      'X-Search-Transport': 'h2',
-      'X-Kinobox-Transport': 'h2',
+      // Transport/source headers are set only by the code path that actually served
+      // the body (see requestContent and the cache entries), never as a default.
       'X-Worker-Version': VERSION
     }
     const reply = (data, status = 200) => new Response(JSON.stringify(data), { status, headers })

@@ -231,6 +231,18 @@ describe('Kinopoisk GraphQL content', () => {
     expect(fetchImpl).toHaveBeenCalledTimes(4)
   })
 
+  it('does not wait for a hanging optional query until the shared deadline', async () => {
+    const fetchImpl = kinopoiskFetch({ MovieDetailsMobileMainCrewMembers: () => new Promise(() => {}) })
+    const started = Date.now()
+    const response = await requestKinopoiskContent(
+      { path: '/api/movies/301', params: { ts: 1 } },
+      { timeoutMs: 5000, optionalTimeoutMs: 20 },
+      fetchImpl
+    )
+    expect(Date.now() - started).toBeLessThan(2000)
+    expect(JSON.parse(response.body.toString()).data.movie.crew).toEqual([])
+  })
+
   it('classifies required upstream failures', async () => {
     const cases = [
       [
@@ -317,6 +329,7 @@ describe('content source selection', () => {
     expect(await requestContent(options, { timeoutMs: 15000 }, headers, kinobox, kinopoisk)).toBe(
       kinoboxResponse
     )
+    expect(kinopoisk).toHaveBeenCalledWith(options, { timeoutMs: 9000 })
     expect(kinobox).toHaveBeenCalledWith(options, { timeoutMs: 11000 })
     expect(headers['X-Data-Source']).toBe('kinobox')
     expect(JSON.parse(console.error.mock.calls[0][0])).toMatchObject({
@@ -324,6 +337,20 @@ describe('content source selection', () => {
       reason: 'http',
       upstreamStatus: 403
     })
+  })
+
+  it('keeps a real fallback budget after the primary used its whole share', async () => {
+    vi.spyOn(console, 'error').mockImplementation(() => {})
+    let now = 1000
+    vi.spyOn(Date, 'now').mockImplementation(() => now)
+    const kinobox = vi.fn(async () => kinoboxResponse)
+    const kinopoisk = vi.fn(async (_options, { timeoutMs }) => {
+      now += timeoutMs + 500
+      throw Object.assign(new Error('timeout'), { reason: 'timeout' })
+    })
+    const options = { path: '/api/movies/301' }
+    await requestContent(options, { timeoutMs: 15000 }, {}, kinobox, kinopoisk)
+    expect(kinobox.mock.calls[0][1].timeoutMs).toBe(6000)
   })
 
   it('keeps player lists on Kinobox', async () => {
@@ -354,8 +381,11 @@ describe('content source selection', () => {
     expect(first.headers.get('X-Kinobox-Cache')).toBe('MISS')
     expect(first.headers.get('X-Data-Source')).toBe('kinopoisk')
     expect((await first.json()).data.movie.title.russian).toBe('Матрица')
-    const second = await serveKinoboxContent(resolveKinoboxResource(url), url, headers, cache, load)
+    // A fresh request reads provenance from the cache entry, not from shared state.
+    const second = await serveKinoboxContent(resolveKinoboxResource(url), url, { 'X-Worker-Version': 'test' }, cache, load)
     expect(second.headers.get('X-Kinobox-Cache')).toBe('HIT')
+    expect(second.headers.get('X-Data-Source')).toBe('kinopoisk')
+    expect(second.headers.has('X-Kinobox-Transport')).toBe(false)
     expect(fetchImpl).toHaveBeenCalledTimes(4)
     expect(JSON.parse(console.log.mock.calls[0][0])).toMatchObject({
       event: 'kinobox_response',

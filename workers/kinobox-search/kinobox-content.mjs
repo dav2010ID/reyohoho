@@ -31,12 +31,14 @@ export async function serveKinoboxContent(
   const key = getKinoboxCacheUrl(url.origin, resource, headers['X-Worker-Version'])
   const staleKey = key.replace('/__kinobox-cache?', '/__kinobox-stale?')
   const retryKey = key.replace('/__kinobox-cache?', '/__kinobox-retry?')
-  const respond = (body, status, state, retry = false) => {
+  const respond = (body, status, state, retry = false, entry) => {
     logPublicCache(resource.kind, state, started, status)
+    const source = entry?.headers?.get?.('X-Data-Source')
     return new Response(body, {
       status,
       headers: {
         ...headers,
+        ...(entry ? { 'X-Data-Source': source || 'unknown' } : {}),
         'X-Search-Cache': state,
         'X-Kinobox-Cache': state,
         ...(retry ? { 'Retry-After': String(RETRY_TTL) } : {})
@@ -46,18 +48,18 @@ export async function serveKinoboxContent(
   const unavailable = () =>
     respond(JSON.stringify({ error: 'Upstream temporarily unavailable' }), 503, 'BACKOFF', true)
   const cached = await cacheMatch(cache, key)
-  if (cached) return respond(cached.body, 200, 'HIT')
+  if (cached) return respond(cached.body, 200, 'HIT', false, cached)
   const retry = await cacheMatch(cache, retryKey)
   if (retry && (await retry.text()) === 'invalid') return unavailable()
   const stale = resource.kind === 'movie' ? await cacheMatch(cache, staleKey) : undefined
-  if (retry) return stale ? respond(stale.body, 200, 'STALE') : unavailable()
+  if (retry) return stale ? respond(stale.body, 200, 'STALE', false, stale) : unavailable()
   // Wait with this request's own I/O, rather than sharing another request's promise.
   for (let attempt = 0; busy(key) && attempt < 20; attempt++) {
-    if (stale) return respond(stale.body, 200, 'STALE')
+    if (stale) return respond(stale.body, 200, 'STALE', false, stale)
     if (playerDeadline && Date.now() + 500 >= playerDeadline) return unavailable()
     await sleep(500)
     const filled = await cacheMatch(cache, key)
-    if (filled) return respond(filled.body, 200, 'HIT')
+    if (filled) return respond(filled.body, 200, 'HIT', false, filled)
     if (await cacheMatch(cache, retryKey)) return unavailable()
   }
   for (const existing of leases.keys()) busy(existing)
@@ -84,14 +86,14 @@ export async function serveKinoboxContent(
     if (ownsLease()) await cachePut(cache, retryKey, '{}', RETRY_TTL)
     const fallback = await currentStale()
     return fallback
-      ? respond(fallback.body, 200, 'STALE')
+      ? respond(fallback.body, 200, 'STALE', false, fallback)
       : respond(JSON.stringify({ error }), status, 'MISS', true)
   }
   try {
     const rejected = await budget()
     if (rejected) {
       const fallback = await currentStale()
-      return fallback ? respond(fallback.body, 200, 'STALE') : rejected
+      return fallback ? respond(fallback.body, 200, 'STALE', false, fallback) : rejected
     }
     const deadline = playerDeadline ?? Date.now() + 15000
     if (deadline <= Date.now()) return unavailable()
@@ -113,7 +115,7 @@ export async function serveKinoboxContent(
       const retryRejected = await budget()
       if (retryRejected) {
         const fallback = await currentStale()
-        return fallback ? respond(fallback.body, 200, 'STALE') : retryRejected
+        return fallback ? respond(fallback.body, 200, 'STALE', false, fallback) : retryRejected
       }
       if (deadline - Date.now() < 750) throw error
       console.log(
@@ -176,8 +178,10 @@ export async function serveKinoboxContent(
     // Finish the cache write before releasing the lease to avoid another cold miss.
     if (ownsLease())
       await Promise.all([
-        cachePut(cache, key, body, resource.cacheTtl),
-        ...(resource.kind === 'movie' ? [cachePut(cache, staleKey, body, STALE_TTL)] : [])
+        cachePut(cache, key, body, resource.cacheTtl, response.source || 'kinobox'),
+        ...(resource.kind === 'movie'
+          ? [cachePut(cache, staleKey, body, STALE_TTL, response.source || 'kinobox')]
+          : [])
       ])
     return respond(body, 200, 'MISS')
   } catch (error) {
