@@ -13,6 +13,7 @@
     "seo:prepare": "node scripts/fetch-seo-data.js && node scripts/generate-seo-assets.js",
     "postbuild:gh-pages": "node scripts/postbuild-gh-pages.js",
     "build": "vite-ssg build && node scripts/postbuild-gh-pages.js",
+    "check:release": "node scripts/check-release.mjs",
     "build:github": "cross-env VITE_BASE_URL=/ vite-ssg build --mode github && cross-env VITE_BASE_URL=/ BUILD_MODE=github node scripts/postbuild-gh-pages.js",
     "preview": "vite preview",
     "test:unit": "cross-env NODE_OPTIONS=--no-experimental-webstorage vitest",

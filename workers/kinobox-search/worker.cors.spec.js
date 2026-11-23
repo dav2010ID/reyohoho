@@ -14,6 +14,7 @@ import {
 } from './kinoapi.mjs'
 import { publicUpstreamBudget } from './public-budget.mjs'
 import { serveCspReport } from './csp-report.mjs'
+import { serveHealth } from './health.mjs'
 
 // Exercise the real entrypoint's CORS gate without opening Cloudflare sockets.
 const source = readFileSync(new URL('./worker.mjs', import.meta.url), 'utf8')
@@ -35,6 +36,7 @@ const context = vm.createContext({
   serveLatestReleases,
   publicUpstreamBudget,
   serveCspReport,
+  serveHealth,
   caches: {
     default: {
       match: async (key) =>

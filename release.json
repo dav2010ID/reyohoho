@@ -1,0 +1,4 @@
+{
+  "apiContract": 2,
+  "d1Migration": "0005_login_context.sql"
+}

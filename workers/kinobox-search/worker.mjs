@@ -9,6 +9,7 @@ import { serveTelegramAuth, cleanupAuth } from './telegram-auth.mjs'
 import { serveAccount } from './account.mjs'
 import { publicUpstreamBudget } from './public-budget.mjs'
 import { serveCspReport } from './csp-report.mjs'
+import { serveHealth } from './health.mjs'
 import {
   resolveLatestReleases,
   resolveMovieExtras,
@@ -87,6 +88,7 @@ export default {
     if (request.method === 'OPTIONS') return new Response(null, { status: 204, headers })
     if (request.method !== 'GET') return reply({ error: 'Method not allowed' }, 405)
     const url = new URL(request.url)
+    if (url.pathname === '/api/health') return serveHealth(env, headers, VERSION)
     const resource =
       resolveKinopoiskTop(url) ||
       resolveMovieExtras(url) ||

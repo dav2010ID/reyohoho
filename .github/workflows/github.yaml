@@ -49,6 +49,7 @@ jobs:
         run: |
           yarn lint
           yarn check:encoding
+          yarn check:release
           yarn test:unit --run
       - name: Build site
         run: yarn build:github
@@ -73,6 +74,9 @@ jobs:
             git commit -m "chore: update weekly SEO assets [skip ci]"
             git push
           fi
+      # Site last: the live D1 migration and API Worker must already match release.json.
+      - name: Check that the live API Worker is ready for this site
+        run: node scripts/check-release.mjs --live "${{ vars.VITE_WORKER_API_URL || 'https://api.reyhoho.fun' }}"
       - name: Record the revision of the verified artifact
         run: git rev-parse HEAD > dist/build-sha.txt
 
