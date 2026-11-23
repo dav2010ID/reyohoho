@@ -169,7 +169,7 @@ async function handleWebhook(request, env, reply) {
 
 export async function serveTelegramAuth(request, env, origin) {
   const reply = privateReply(origin)
-  if (!secureOrigin(origin)) return reply({ error: 'HTTPS required' }, 403)
+  if (!secureOrigin(origin, env)) return reply({ error: 'HTTPS required' }, 403)
   if (request.method === 'OPTIONS') return reply(null, 204)
   const path = new URL(request.url).pathname
   if (

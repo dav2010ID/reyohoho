@@ -3,6 +3,7 @@ import vue from '@vitejs/plugin-vue'
 import { VitePWA } from 'vite-plugin-pwa'
 import eslintPlugin from 'vite-plugin-eslint'
 import { createPwaShell } from './scripts/pwa-shell.js'
+import { moveStateToJson } from './src/utils/ssgState.js'
 
 const base = process.env.VITE_BASE_URL || '/'
 
@@ -169,7 +170,8 @@ export default defineConfig(({ mode }) => {
       }
     },
     ssgOptions: {
-      dirStyle: 'nested'
+      dirStyle: 'nested',
+      onPageRendered: (_route, html) => moveStateToJson(html)
     }
   }
 })

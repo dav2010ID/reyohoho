@@ -7,8 +7,11 @@ import { installRouterGuards } from './router'
 import { buildMoviePath, getPrerenderMovieSeoEntries } from './utils/movieSeo'
 import { trackElectronClientDetected } from './utils/analytics'
 import App from './App.vue'
+import { restoreSsgState } from './utils/ssgState'
 
 const shouldPrerenderMoviePages = () => import.meta.env.VITE_PRERENDER_MOVIE_PAGES === 'true'
+
+if (!import.meta.env.SSR) restoreSsgState()
 
 export const createApp = ViteSSG(
   App,

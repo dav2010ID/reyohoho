@@ -5,6 +5,7 @@ import { HISTORY_CAPACITY, HistoryCapacityError, normalizeHistory } from '../../
 import { chunkByBytes } from '@/utils/importBatches'
 import { accountError } from './accountErrors'
 import { enrichListMetadata } from './listMetadata'
+import { WORKER_API_URL } from '@/api/workerOrigin'
 
 // Worker limits for POST /api/history/import (workers/kinobox-search/history.mjs).
 const HISTORY_IMPORT_ITEMS = 40
@@ -28,7 +29,7 @@ export async function historyRequest(path = '', method = 'GET', body) {
   if (!cloudHistoryAvailable || !auth.isAuthenticated)
     throw new Error('Войдите в аккаунт для облачной истории')
   const token = auth.token
-  const response = await fetch(`https://api.reyhoho.fun/api/history${path}`, {
+  const response = await fetch(`${WORKER_API_URL}/api/history${path}`, {
     method,
     credentials: 'omit',
     redirect: 'error',

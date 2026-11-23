@@ -1,7 +1,8 @@
 import axios from 'axios'
 import { createPublicDataCache } from './publicDataCache'
+import { WORKER_API_URL } from '@/api/workerOrigin'
 
-const KINOBOX_BASE_URL = import.meta.env.VITE_KINOBOX_API_URL || 'https://api.reyhoho.fun'
+const KINOBOX_BASE_URL = import.meta.env.VITE_KINOBOX_API_URL || WORKER_API_URL
 // All Kinobox content uses the same Worker; a separate search override remains supported.
 const KINOBOX_SEARCH_BASE_URL = import.meta.env.VITE_KINOBOX_SEARCH_API_URL || KINOBOX_BASE_URL
 

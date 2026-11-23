@@ -39,11 +39,13 @@ export function privateReply(origin) {
     new Response(status === 204 ? null : JSON.stringify(data), { status, headers })
 }
 
-export function secureOrigin(origin) {
+// Bearer credentials need HTTPS; a local dev server only where the Worker opts in.
+export function secureOrigin(origin, env) {
   return (
     !origin ||
     origin.startsWith('https://') ||
-    /^http:\/\/(localhost|127\.0\.0\.1):5173$/.test(origin)
+    (env?.ALLOW_DEV_ORIGINS === 'true' &&
+      /^http:\/\/(localhost|127\.0\.0\.1):5173$/.test(origin))
   )
 }
 

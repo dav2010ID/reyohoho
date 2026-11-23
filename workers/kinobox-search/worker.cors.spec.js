@@ -13,6 +13,7 @@ import {
   serveMovieExtras
 } from './kinoapi.mjs'
 import { publicUpstreamBudget } from './public-budget.mjs'
+import { serveCspReport } from './csp-report.mjs'
 
 // Exercise the real entrypoint's CORS gate without opening Cloudflare sockets.
 const source = readFileSync(new URL('./worker.mjs', import.meta.url), 'utf8')
@@ -33,6 +34,7 @@ const context = vm.createContext({
   resolveLatestReleases,
   serveLatestReleases,
   publicUpstreamBudget,
+  serveCspReport,
   caches: {
     default: {
       match: async (key) =>
@@ -93,9 +95,7 @@ describe('Worker custom domain origins', () => {
     'https://www.reyhoho.fun',
     'http://reyhoho.fun',
     'http://www.reyhoho.fun',
-    'https://dav2010id.github.io',
-    'http://127.0.0.1:5173',
-    'http://localhost:5173'
+    'https://dav2010id.github.io'
   ])('accepts preflight from %s with the exact origin', async (origin) => {
     const response = await worker.fetch(
       new Request('https://proxy.example/api/movies/301', {
@@ -110,6 +110,22 @@ describe('Worker custom domain origins', () => {
     expect(response.headers.get('Vary')).toBe('Origin')
     expect(response.headers.get('Access-Control-Max-Age')).toBe('600')
     expect(response.headers.get('Cache-Control')).toBe('no-store')
+  })
+
+  it('accepts a local dev server only where the Worker opts in', async () => {
+    const preflight = (env) =>
+      worker.fetch(
+        new Request('https://proxy.example/api/movies/301', {
+          method: 'OPTIONS',
+          headers: { Origin: 'http://localhost:5173' }
+        }),
+        env,
+        {}
+      )
+    expect((await preflight({})).status).toBe(403)
+    const staging = await preflight({ ALLOW_DEV_ORIGINS: 'true' })
+    expect(staging.status).toBe(204)
+    expect(staging.headers.get('Access-Control-Allow-Origin')).toBe('http://localhost:5173')
   })
 
   it.each(['https://reyhoho.fun.evil.example', 'https://evil.example'])(

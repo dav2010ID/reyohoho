@@ -1,5 +1,6 @@
 import { useAuthStore } from '@/store/auth'
 import { accountError } from './accountErrors'
+import { WORKER_API_URL } from '@/api/workerOrigin'
 
 export const workerAuthEnabled = import.meta.env.VITE_WORKER_AUTH_ENABLED === 'true'
 
@@ -18,7 +19,7 @@ export async function workerAccountRequest(
   const session = token ?? useAuthStore().token
   if (!anonymous && !/^rh1_[A-Za-z0-9_-]{43}$/.test(session || ''))
     throw new Error('Требуется вход через Telegram')
-  const response = await fetch(`https://api.reyhoho.fun/api${path}`, {
+  const response = await fetch(`${WORKER_API_URL}/api${path}`, {
     method,
     credentials: 'omit',
     redirect: 'error',

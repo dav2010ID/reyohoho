@@ -22,7 +22,7 @@ const capacityReply = (reply, extra = {}) =>
 
 export async function serveAccount(request, env, origin) {
   const reply = privateReply(origin)
-  if (!secureOrigin(origin)) return reply({ error: 'HTTPS required' }, 403)
+  if (!secureOrigin(origin, env)) return reply({ error: 'HTTPS required' }, 403)
   if (request.method === 'OPTIONS') return reply(null, 204)
   // Sessions stay valid while new logins are switched off (TELEGRAM_AUTH_ENABLED).
   if (!env.HISTORY_DB) return reply({ error: 'Accounts not configured' }, 503)

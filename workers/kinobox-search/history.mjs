@@ -1,5 +1,5 @@
 import { HISTORY_CAPACITY, normalizeHistory } from '../../shared/history-data.js'
-import { boundedJson, checkLimit, verifyWorkerSession } from './private-api.mjs'
+import { boundedJson, checkLimit, secureOrigin, verifyWorkerSession } from './private-api.mjs'
 import { metadataUpdate, readMetadataPatch } from './metadata.mjs'
 
 // `verifiedUserId` is set only by the account router after it has already
@@ -26,12 +26,7 @@ export async function serveHistory(request, env, origin, verifiedUserId) {
   }
   const reply = (data, status = 200) => new Response(JSON.stringify(data), { status, headers })
   // History never accepts bearer credentials over an insecure browser origin.
-  if (
-    origin &&
-    !origin.startsWith('https://') &&
-    !/^http:\/\/(localhost|127\.0\.0\.1):5173$/.test(origin)
-  )
-    return reply({ error: 'HTTPS required' }, 403)
+  if (!secureOrigin(origin, env)) return reply({ error: 'HTTPS required' }, 403)
   if (request.method === 'OPTIONS') return new Response(null, { status: 204, headers })
   const path = new URL(request.url).pathname
   const id = path.match(/^\/api\/history\/([1-9]\d{0,11})$/)?.[1]

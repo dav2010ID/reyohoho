@@ -8,6 +8,7 @@ import { serveHistory } from './history.mjs'
 import { serveTelegramAuth, cleanupAuth } from './telegram-auth.mjs'
 import { serveAccount } from './account.mjs'
 import { publicUpstreamBudget } from './public-budget.mjs'
+import { serveCspReport } from './csp-report.mjs'
 import {
   resolveLatestReleases,
   resolveMovieExtras,
@@ -21,10 +22,12 @@ const ALLOWED = new Set([
   'https://www.reyhoho.fun',
   'http://reyhoho.fun',
   'http://www.reyhoho.fun',
-  'https://dav2010id.github.io',
-  'http://127.0.0.1:5173',
-  'http://localhost:5173'
+  'https://dav2010id.github.io'
 ])
+// A local Vite dev server is trusted only by Workers that opt in (staging/local).
+const DEV_ORIGINS = new Set(['http://127.0.0.1:5173', 'http://localhost:5173'])
+const allowedOrigin = (origin, env) =>
+  ALLOWED.has(origin) || (env?.ALLOW_DEV_ORIGINS === 'true' && DEV_ORIGINS.has(origin))
 
 async function openTransport(hostname, port) {
   const socket = connect({ hostname, port }, { secureTransport: 'off' })
@@ -54,7 +57,7 @@ export default {
     const origin = request.headers.get('Origin')
     const headers = {
       'Content-Type': 'application/json; charset=utf-8',
-      'Access-Control-Allow-Origin': ALLOWED.has(origin) ? origin : 'https://reyhoho.fun',
+      'Access-Control-Allow-Origin': allowedOrigin(origin, env) ? origin : 'https://reyhoho.fun',
       'Access-Control-Allow-Methods': 'GET, OPTIONS',
       'Access-Control-Allow-Headers': 'Content-Type',
       'Access-Control-Max-Age': '600',
@@ -67,7 +70,10 @@ export default {
       'X-Worker-Version': VERSION
     }
     const reply = (data, status = 200) => new Response(JSON.stringify(data), { status, headers })
-    if (origin && !ALLOWED.has(origin)) return reply({ error: 'Origin not allowed' }, 403)
+    // Browsers post CSP reports cross-origin with their own preflight.
+    if (new URL(request.url).pathname === '/api/csp-report')
+      return serveCspReport(request, allowedOrigin(origin, env))
+    if (origin && !allowedOrigin(origin, env)) return reply({ error: 'Origin not allowed' }, 403)
     const privatePath = new URL(request.url).pathname
     if (privatePath.startsWith('/api/auth/')) return serveTelegramAuth(request, env, origin)
     if (
