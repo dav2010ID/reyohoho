@@ -1,8 +1,8 @@
 import { connect } from 'cloudflare:sockets'
-import { requestKinoboxHttp2 } from './kinobox-http2-vendored.mjs'
 import { resolveKinoboxResource } from './routes.mjs'
 import { serveKinoboxContent } from './kinobox-content.mjs'
-import { requestContent } from './kinopoisk-content.mjs'
+import { requestContent, requestKinopoiskContent } from './kinopoisk-content.mjs'
+import { guardUpstream } from './upstream-guard.mjs'
 import { resolveKinopoiskTop, serveKinopoiskTop } from './kinopoisk-top.mjs'
 import { serveHistory } from './history.mjs'
 import { serveTelegramAuth, cleanupAuth } from './telegram-auth.mjs'
@@ -29,6 +29,11 @@ const ALLOWED = new Set([
 const DEV_ORIGINS = new Set(['http://127.0.0.1:5173', 'http://localhost:5173'])
 const allowedOrigin = (origin, env) =>
   ALLOWED.has(origin) || (env?.ALLOW_DEV_ORIGINS === 'true' && DEV_ORIGINS.has(origin))
+
+// The vendored TLS 1.3/HTTP2 stack (~0.5 MB) is evaluated only when a request
+// actually goes to Kinobox, never for account, history or cached routes.
+let kinoboxHttp2
+const loadKinoboxHttp2 = () => (kinoboxHttp2 ||= import('./kinobox-http2-vendored.mjs'))
 
 async function openTransport(hostname, port) {
   const socket = connect({ hostname, port }, { secureTransport: 'off' })
@@ -108,8 +113,15 @@ export default {
       headers,
       caches.default,
       (options, transportOptions) =>
-        requestContent(options, transportOptions, headers, (o, t) =>
-          requestKinoboxHttp2(o, openTransport, t)
+        requestContent(
+          options,
+          transportOptions,
+          headers,
+          (o, t) =>
+            guardUpstream('kinobox', env, async () =>
+              (await loadKinoboxHttp2()).requestKinoboxHttp2(o, openTransport, t)
+            ),
+          (o, t) => guardUpstream('kinopoisk', env, () => requestKinopoiskContent(o, t))
         ),
       budget
     )

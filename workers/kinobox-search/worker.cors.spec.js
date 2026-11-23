@@ -15,6 +15,8 @@ import {
 import { publicUpstreamBudget } from './public-budget.mjs'
 import { serveCspReport } from './csp-report.mjs'
 import { serveHealth } from './health.mjs'
+import { guardUpstream } from './upstream-guard.mjs'
+import { requestContent, requestKinopoiskContent } from './kinopoisk-content.mjs'
 
 // Exercise the real entrypoint's CORS gate without opening Cloudflare sockets.
 const source = readFileSync(new URL('./worker.mjs', import.meta.url), 'utf8')
@@ -37,6 +39,9 @@ const context = vm.createContext({
   publicUpstreamBudget,
   serveCspReport,
   serveHealth,
+  guardUpstream,
+  requestContent,
+  requestKinopoiskContent,
   caches: {
     default: {
       match: async (key) =>

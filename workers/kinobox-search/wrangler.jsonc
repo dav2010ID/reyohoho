@@ -32,6 +32,12 @@
       "simple": { "limit": 120, "period": 60 }
     },
     {
+      // Shared per upstream (key upstream:<name>), counted per Cloudflare location.
+      "name": "UPSTREAM_RATE_LIMITER",
+      "namespace_id": "610081005",
+      "simple": { "limit": 600, "period": 60 }
+    },
+    {
       "name": "LOGIN_RATE_LIMITER",
       "namespace_id": "610081001",
       "simple": {
@@ -91,6 +97,7 @@
       },
       "ratelimits": [
         { "name": "PUBLIC_RATE_LIMITER", "namespace_id": "610082004", "simple": { "limit": 120, "period": 60 } },
+        { "name": "UPSTREAM_RATE_LIMITER", "namespace_id": "610082005", "simple": { "limit": 600, "period": 60 } },
         { "name": "LOGIN_RATE_LIMITER", "namespace_id": "610082001", "simple": { "limit": 10, "period": 60 } },
         { "name": "AUTH_RATE_LIMITER", "namespace_id": "610082002", "simple": { "limit": 120, "period": 60 } },
         { "name": "ACCOUNT_RATE_LIMITER", "namespace_id": "610082003", "simple": { "limit": 180, "period": 60 } }

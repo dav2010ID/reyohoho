@@ -148,3 +148,21 @@ ignored local configuration before deploying. Private routes fail closed without
 Pinned `@reclaimprotocol/tls@0.1.4` and `hpack.js@2.1.6` bundles.
 The Reclaim license is included in `LICENSE-reclaim.txt`; dependency license
 notices are retained in the generated bundles.
+
+## Upstream protection
+
+`upstream-guard.mjs` wraps the Kinopoisk and Kinobox requests:
+
+- **Circuit breaker:** after 5 failures (timeouts, 5xx, 429) an upstream is
+  skipped for 30 s in that isolate. Missing titles do not count.
+- **Shared budget:** the optional `UPSTREAM_RATE_LIMITER` binding (key
+  `upstream:<name>`) caps calls per upstream across all IPs, on top of the
+  per-IP `PUBLIC_RATE_LIMITER`. If the binding fails, requests are allowed.
+- **Kill switch:** `KINOBOX_TRANSPORT=off` turns the vendored TLS/HTTP2 transport
+  off. Players then fail fast and serve stale cache when it exists; catalogue
+  requests use Kinopoisk only.
+
+The TLS stack is loaded with a dynamic import, the first time a request
+actually goes to Kinobox. Account, history and cached routes never evaluate it.
+`GET /api/health` reports the API contract and the applied D1 migration (see
+`docs/release.md`).
