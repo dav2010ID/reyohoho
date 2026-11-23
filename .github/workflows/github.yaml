@@ -7,6 +7,11 @@ on:
   schedule:
     - cron: '0 3 * * 1'
   workflow_dispatch:
+    inputs:
+      allow_stale_seo:
+        description: 'Emergency release: ship the last verified SEO snapshot even if it is older than 14 days'
+        type: boolean
+        default: false
 
 concurrency:
   group: pages
@@ -36,6 +41,8 @@ jobs:
         run: yarn seo:prepare
       - name: Check last successful SEO refresh
         run: node scripts/fetch-seo-data.js --check-freshness
+        env:
+          ALLOW_STALE_SEO: ${{ github.event_name == 'workflow_dispatch' && inputs.allow_stale_seo && 'true' || 'false' }}
       - name: Prepare pinned Worker vendor modules
         run: node workers/kinobox-search/prepare-vendor.mjs
       - name: Validate the checkout used to build this artifact
