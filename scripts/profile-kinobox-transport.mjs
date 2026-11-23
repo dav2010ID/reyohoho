@@ -415,7 +415,9 @@ function describeResponse(response, automaticDecompression = false) {
   let validJson = false
   try {
     validJson = isKinoboxResponseValid(resource.kind, JSON.parse(decoded.toString('utf8')))
-  } catch {}
+  } catch {
+    // An unparsable body counts as an invalid response below.
+  }
   return {
     success: response.status === 200 && validJson,
     status: response.status,
