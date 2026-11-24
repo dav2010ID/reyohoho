@@ -34,8 +34,10 @@
       :style="!theaterMode ? containerStyle : {}"
     >
       <div class="iframe-wrapper" :style="!theaterMode ? iframeWrapperStyle : {}">
+        <!-- Sandbox flags apply when the frame is created: a change gets a new frame. -->
         <iframe
           v-show="!iframeLoading && safeIframeUrl"
+          :key="playerIframeSandbox ? 'sandboxed' : 'plain'"
           ref="playerIframe"
           :src="safeIframeUrl || undefined"
           :title="movieInfo?.title ? `Плеер для ${movieInfo.title}` : 'Видео-плеер'"
@@ -676,8 +678,9 @@ const {
 })
 
 const safeIframeUrl = computed(() => getSafePlayerUrl(selectedPlayerInternal.value?.iframe))
-// Fixed for the page lifetime: a sandbox change applies only to the next iframe navigation.
-const playerIframeSandbox = getPlayerIframeSandbox()
+const playerIframeSandbox = computed(() =>
+  getPlayerIframeSandbox(import.meta.env, safeIframeUrl.value)
+)
 const activeTooltip = ref(null)
 const tooltipHovered = ref(false)
 let hideTimeout = null

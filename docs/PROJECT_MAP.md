@@ -476,7 +476,9 @@ docker compose up --build
 Frontend groups: `VITE_APP_API_URL`, `VITE_LOCAL_API_URL`, `VITE_TRUSTED_API_ORIGINS`,
 `VITE_ALLOWED_API_HOSTS`, provider URLs/tokens, `VITE_BASE_URL`,
 `VITE_SITE_ORIGIN`, `VITE_PRERENDER_MOVIE_PAGES`, `VITE_REVIEWED_PLAYER_ORIGINS`,
-`VITE_PLAYER_IFRAME_SANDBOX`.
+`VITE_PLAYER_IFRAME_SANDBOX`, `VITE_PLAYER_SANDBOX_ORIGINS` (sandbox only for providers
+verified to play sandboxed: staged rollout), `VITE_WORKER_API_URL` (API Worker origin;
+staging/forks).
 
 Backend groups: database/JWT (`APP_ENV`, `DATABASE_URL`, `JWT_*`), Telegram (`TELEGRAM_*`), provider
 tokens/URLs, CORS (`ALLOWED_ORIGINS`), cache TTL/size, `HOST`, `PORT`, `DEBUG`. Полный factual list

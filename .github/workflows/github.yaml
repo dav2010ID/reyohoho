@@ -58,6 +58,7 @@ jobs:
           VITE_WORKER_AUTH_ENABLED: ${{ vars.VITE_WORKER_AUTH_ENABLED || 'false' }}
           VITE_CLOUD_HISTORY_ENABLED: ${{ vars.VITE_CLOUD_HISTORY_ENABLED || 'false' }}
           VITE_PLAYER_IFRAME_SANDBOX: ${{ vars.VITE_PLAYER_IFRAME_SANDBOX || 'false' }}
+          VITE_PLAYER_SANDBOX_ORIGINS: ${{ vars.VITE_PLAYER_SANDBOX_ORIGINS || '' }}
       - name: Verify prerendered pages
         run: node scripts/check-seo-pages.js dist
       - name: Install browser for artifact verification

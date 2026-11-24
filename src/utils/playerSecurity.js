@@ -28,17 +28,31 @@ export const getSafePlayerUrl = (value, currentOrigin = typeof window !== 'undef
 export const PLAYER_IFRAME_SANDBOX =
   'allow-scripts allow-same-origin allow-forms allow-presentation allow-popups'
 
-// Opt-in: many embedded players detect a sandbox and refuse to play. Enable with
-// VITE_PLAYER_IFRAME_SANDBOX=true only after playback is verified for every provider.
+const originList = (value) =>
+  new Set(
+    String(value || '')
+      .split(',')
+      .map((item) => toOrigin(item.trim()))
+      .filter(Boolean)
+  )
+
+// Opt-in: many embedded players detect a sandbox and refuse to play. Roll it out
+// per provider with VITE_PLAYER_SANDBOX_ORIGINS (origins verified to play
+// sandboxed), or for all with VITE_PLAYER_IFRAME_SANDBOX=true.
 // null removes the attribute; an empty string would apply the strictest sandbox.
-export const getPlayerIframeSandbox = (env = import.meta.env) =>
-  env.VITE_PLAYER_IFRAME_SANDBOX === 'true' ? PLAYER_IFRAME_SANDBOX : null
+export const getPlayerIframeSandbox = (env = import.meta.env, iframeUrl = '') => {
+  if (env.VITE_PLAYER_IFRAME_SANDBOX === 'true') return PLAYER_IFRAME_SANDBOX
+  const origin = toOrigin(iframeUrl)
+  return origin && originList(env.VITE_PLAYER_SANDBOX_ORIGINS).has(origin)
+    ? PLAYER_IFRAME_SANDBOX
+    : null
+}
 
 export const getReviewedPlayerOrigins = (env = import.meta.env) =>
   new Set([
-    ...DEFAULT_REVIEWED_ORIGINS,
-    ...(env.VITE_REVIEWED_PLAYER_ORIGINS || '').split(',')
-  ].map((value) => toOrigin(value.trim())).filter(Boolean))
+    ...originList(DEFAULT_REVIEWED_ORIGINS.join(',')),
+    ...originList(env.VITE_REVIEWED_PLAYER_ORIGINS)
+  ])
 
 export const assessPlayerIframe = ({
   iframeUrl,
