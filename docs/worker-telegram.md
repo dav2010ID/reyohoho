@@ -8,8 +8,8 @@ Worker обслуживает вход через Telegram, профиль, пр
 
 1. Создать бота через @BotFather. Записать `TELEGRAM_BOT_TOKEN` и
    `TELEGRAM_BOT_USERNAME` в игнорируемый `backend/.env`.
-2. Скопировать `workers/kinobox-search/wrangler.jsonc` в
-   `workers/kinobox-search/wrangler.local.jsonc`. Локальный файл исключён из Git
+2. Скопировать `workers/api/wrangler.jsonc` в
+   `workers/api/wrangler.local.jsonc`. Локальный файл исключён из Git
    и Docker-контекста. Заполнить `account_id` и `database_id` binding `HISTORY_DB`
    настоящими значениями из Cloudflare; при необходимости изменить имя Worker
    и базы. Шаблон не содержит ID инфраструктуры и имеет выключенную авторизацию.
@@ -24,7 +24,7 @@ Worker обслуживает вход через Telegram, профиль, пр
 root `.env`, VITE-переменные, документацию или исходники.
 
 Не запускать long polling Python-бота одновременно с webhook для того же бота.
-Для остальных Wrangler-команд также использовать `--config workers/kinobox-search/wrangler.local.jsonc`.
+Для остальных Wrangler-команд также использовать `--config workers/api/wrangler.local.jsonc`.
 При обновлении существующего локального конфига перенести из шаблона binding
 `PUBLIC_RATE_LIMITER` (namespace `610081004`, 120 запросов за 60 секунд),
 сохранив действующие ID базы, остальные bindings и переменные авторизации.

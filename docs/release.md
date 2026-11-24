@@ -1,6 +1,6 @@
 # Release order
 
-The site, the API Worker (`workers/kinobox-search`) and its D1 schema are
+The site, the API Worker (`workers/api`) and its D1 schema are
 released separately, always in this order: **D1 migration → API Worker → site**.
 The new Worker runs for a while with the site that is still live, so every
 Worker change must keep the previous site working (see "Compatibility" below).
@@ -20,7 +20,7 @@ Worker change must keep the previous site working (see "Compatibility" below).
    node scripts/browser-artifact-check.js dist
    ```
 
-2. Reconcile `workers/kinobox-search/wrangler.local.jsonc` (ignored by Git: it
+2. Reconcile `workers/api/wrangler.local.jsonc` (ignored by Git: it
    holds the real account and D1 IDs) with the tracked `wrangler.jsonc`. Every
    binding in the template must exist locally, with the production values:
    - `account_id`, `HISTORY_DB` `database_id`;
@@ -30,10 +30,10 @@ Worker change must keep the previous site working (see "Compatibility" below).
      `LOGIN_RATE_LIMITER`, `AUTH_RATE_LIMITER`, `ACCOUNT_RATE_LIMITER`;
    - no `ALLOW_DEV_ORIGINS` in production.
 
-   Check with `npx wrangler deploy --dry-run --config workers/kinobox-search/wrangler.local.jsonc`:
+   Check with `npx wrangler deploy --dry-run --config workers/api/wrangler.local.jsonc`:
    the binding list must include all five rate limiters.
 3. Secrets must already be set on the production Worker (`npx wrangler secret list
-   --config workers/kinobox-search/wrangler.local.jsonc`): `TELEGRAM_BOT_TOKEN`,
+   --config workers/api/wrangler.local.jsonc`): `TELEGRAM_BOT_TOKEN`,
    `TELEGRAM_WEBHOOK_SECRET`, `KinoapiLampac`.
 4. Optional but recommended: rehearse on staging (below).
 
@@ -41,16 +41,16 @@ Worker change must keep the previous site working (see "Compatibility" below).
 
 1. **Backup point.** Note the current D1 bookmark so the database can be
    restored with Time Travel:
-   `npx wrangler d1 time-travel info HISTORY_DB --config workers/kinobox-search/wrangler.local.jsonc`.
+   `npx wrangler d1 time-travel info HISTORY_DB --config workers/api/wrangler.local.jsonc`.
 2. **D1 migration.**
-   `npx wrangler d1 migrations list HISTORY_DB --remote --config workers/kinobox-search/wrangler.local.jsonc`
+   `npx wrangler d1 migrations list HISTORY_DB --remote --config workers/api/wrangler.local.jsonc`
    shows what is pending, then
-   `npx wrangler d1 migrations apply HISTORY_DB --remote --config workers/kinobox-search/wrangler.local.jsonc`.
+   `npx wrangler d1 migrations apply HISTORY_DB --remote --config workers/api/wrangler.local.jsonc`.
    `0004_active_history_quota.sql` rebuilds the quota triggers and recounts
    active history rows (writes wait during the recount); `0005_login_context.sql`
    adds two nullable columns. Both rely on Wrangler's migration ledger: never
    run them by hand a second time.
-3. **API Worker.** `npx wrangler deploy --config workers/kinobox-search/wrangler.local.jsonc`, then
+3. **API Worker.** `npx wrangler deploy --config workers/api/wrangler.local.jsonc`, then
    `node scripts/check-release.mjs --live https://api.reyhoho.fun`. It must
    pass with `schemaReady: true`. Check a Telegram login and the history page on
    the site that is still live.
@@ -60,7 +60,7 @@ Worker change must keep the previous site working (see "Compatibility" below).
    `main` commit.
 
 Rollback: redeploy the previous Worker version
-(`npx wrangler rollback --config workers/kinobox-search/wrangler.local.jsonc`) —
+(`npx wrangler rollback --config workers/api/wrangler.local.jsonc`) —
 the migrations are additive and the old Worker works with them. Restore D1 with Time
 Travel only for data damage, not for a code problem.
 
@@ -70,7 +70,7 @@ Travel only for data damage, not for a code problem.
 
 | Field | Meaning |
 | --- | --- |
-| `d1Migration` | newest file in `workers/kinobox-search/migrations` |
+| `d1Migration` | newest file in `workers/api/migrations` |
 | `apiContract` | API version the site relies on |
 
 Bump `apiContract` whenever the site starts depending on new Worker behaviour,

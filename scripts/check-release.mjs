@@ -6,7 +6,7 @@ import path from 'node:path'
 import { pathToFileURL } from 'node:url'
 
 const ROOT = process.cwd()
-const MIGRATIONS = path.join(ROOT, 'workers', 'kinobox-search', 'migrations')
+const MIGRATIONS = path.join(ROOT, 'workers', 'api', 'migrations')
 
 export const readRelease = async (root = ROOT) =>
   JSON.parse(await fs.readFile(path.join(root, 'release.json'), 'utf8'))

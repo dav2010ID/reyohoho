@@ -32,7 +32,7 @@ jobs:
         env:
           WRANGLER_SEND_METRICS: 'false'
         run: |
-          npx wrangler deploy --dry-run --outdir "$RUNNER_TEMP/api" --config workers/kinobox-search/wrangler.jsonc
+          npx wrangler deploy --dry-run --outdir "$RUNNER_TEMP/api" --config workers/api/wrangler.jsonc
           npx wrangler deploy --dry-run --outdir "$RUNNER_TEMP/site" --config workers/site/wrangler.jsonc
 
   backend:

@@ -12,7 +12,7 @@ ReYohoho — Vue-приложение для поиска фильмов и се
 iframe-плеера. Production состоит из трёх частей:
 
 - **статический сайт** (vite-ssg + PWA), собирается `yarn build:github`;
-- **API Worker** `workers/kinobox-search` на `https://api.reyhoho.fun`: каталог
+- **API Worker** `workers/api` на `https://api.reyhoho.fun`: каталог
   (Kinopoisk, kinoapi), Telegram-вход, аккаунт, списки и история в D1 (`HISTORY_DB`);
 - **site Worker** `workers/site` (Workers Static Assets) — плановый хостинг `reyhoho.fun`
   с security headers и маршрутизацией фильмов; сейчас сайт публикуется на GitHub Pages.
@@ -74,7 +74,7 @@ Browser / PWA
 | `src/router/` | routes, auth guard, SEO slug redirect, analytics | route names | `router/*.spec.js`, `main.spec.js` |
 | `src/utils/` | сессия, SEO, локальные списки, outbox, `ssgState.js`, `playerSecurity.js` | auth/session, sandbox | `*.spec.js` |
 | `shared/` | нормализация истории и карточек (общая с мостом) | `history-data.js` копируется в мост вручную | `shared/*.spec.js`, bridge spec |
-| `workers/kinobox-search/` | API Worker и миграции D1 | auth, CORS, лимиты | Worker specs, `wrangler deploy --dry-run` |
+| `workers/api/` | API Worker и миграции D1 | auth, CORS, лимиты | Worker specs, `wrangler deploy --dry-run` |
 | `workers/site/` | site Worker: роутинг и заголовки | `generated/` создаёт postbuild | `router.spec.js`, dry-run |
 | `migration/history-transfer/` | мост переноса со старого origin | публикуется из отдельного репозитория | bridge spec |
 | `scripts/` | SEO, postbuild, security headers, release check, browser checks | generated outputs | script specs |
@@ -150,7 +150,7 @@ SSG-код должен быть SSR-safe. Страницы фильмов prere
 Защита: allowlist Origin (`localhost:5173` только при `ALLOW_DEV_ORIGINS=true`, то есть в
 staging), per-IP бюджет, `ACCOUNT_RATE_LIMITER`, `UPSTREAM_RATE_LIMITER`, circuit breaker на
 upstream (`upstream-guard.mjs`). Миграции D1 —
-`workers/kinobox-search/migrations/0001…0005`. Подробнее — README Worker и
+`workers/api/migrations/0001…0005`. Подробнее — README Worker и
 [worker-telegram.md](worker-telegram.md).
 
 Устаревшая ветка: `history.mjs` всё ещё принимает внешние токены через `HISTORY_AUTH_USER_URL`
@@ -211,13 +211,13 @@ node scripts/browser-artifact-check.js dist
 | `public/sitemap.xml`, `public/robots.txt` | `yarn seo:assets` | не смешивать с runtime |
 | `public/icons/*` | `yarn icons*` | отдельный commit |
 | `dist/`, `workers/site/generated/` | build/postbuild | не коммитить |
-| `workers/kinobox-search/vendor-*.mjs` | `prepare-vendor.mjs` | не редактировать вручную |
+| `workers/api/vendor-*.mjs` | `prepare-vendor.mjs` | не редактировать вручную |
 | `yarn.lock` | Yarn | только dependency-коммиты |
 
 ## 11. Правила для агентов
 
 1. `git status --short --branch`; не трогать чужие изменения.
-2. Сверять docs с кодом: маршруты — `src/router/routes.js` и `workers/kinobox-search/worker.mjs`.
+2. Сверять docs с кодом: маршруты — `src/router/routes.js` и `workers/api/worker.mjs`.
 3. Сохранять формы ответов API, имена маршрутов, props/events и persisted keys без
    согласованной миграции.
 4. Новая миграция D1 — новый файл и обновление `release.json`; применённые не менять.
