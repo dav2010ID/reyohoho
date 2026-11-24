@@ -41,7 +41,7 @@ export function buildCsp({ scriptHashes, apiOrigin, connectOrigins = [] }) {
     'media-src': ["'self'", 'blob:', 'https:'],
     'connect-src': unique([
       "'self'",
-      apiOrigin,
+      new URL(apiOrigin).origin,
       ...connectOrigins,
       'https://img.youtube.com',
       'https://reyohoho.goatcounter.com',

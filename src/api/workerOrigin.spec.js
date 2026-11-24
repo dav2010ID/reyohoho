@@ -6,8 +6,11 @@ describe('Worker API origin', () => {
     expect(parseWorkerApiUrl('')).toBe('https://api.reyhoho.fun')
     expect(parseWorkerApiUrl('https://staging.example/')).toBe('https://staging.example')
     expect(parseWorkerApiUrl('http://localhost:8787')).toBe('http://localhost:8787')
+    expect(parseWorkerApiUrl('http://127.0.0.1:4178/__profile/api/')).toBe(
+      'http://127.0.0.1:4178/__profile/api'
+    )
   })
-  it.each(['http://api.example', 'https://api.example/api', 'https://api.example/?x=1'])(
+  it.each(['http://api.example', 'https://api.example/?x=1', 'https://u:p@api.example'])(
     'rejects %s',
     (value) => expect(() => parseWorkerApiUrl(value)).toThrow()
   )
