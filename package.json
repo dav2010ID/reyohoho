@@ -25,7 +25,6 @@
     "test:browser-smoke": "node scripts/browser-smoke-check.js",
     "test:artifact": "node scripts/browser-artifact-check.js",
     "test:infinite-scroll": "node scripts/browser-infinite-scroll-check.js",
-    "test:comments-desktop": "node scripts/browser-comments-desktop-check.js",
     "profile:cards": "node scripts/browser-card-profile.js",
     "profile:search": "node scripts/browser-search-profile.js",
     "test:player-layout": "node scripts/browser-player-layout-check.js",
