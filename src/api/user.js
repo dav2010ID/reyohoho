@@ -131,6 +131,25 @@ const sendHistory = async (entry) => {
   return data
 }
 
+// Clearing the history must win over writes already in flight: it bumps the
+// owner's generation (an older replay stops) and waits for sent requests.
+const historyGeneration = new Map()
+const historyInFlight = new Map()
+const sendHistoryTracked = (owner, entry) => {
+  const sending = sendHistory(entry)
+  const pending = historyInFlight.get(owner) || new Set()
+  historyInFlight.set(owner, pending)
+  pending.add(sending)
+  const settle = () => pending.delete(sending)
+  sending.then(settle, settle)
+  return sending
+}
+const stopHistoryWrites = async (owner) => {
+  historyGeneration.set(owner, (historyGeneration.get(owner) || 0) + 1)
+  clearHistoryOutbox(owner)
+  await Promise.allSettled([...(historyInFlight.get(owner) || [])])
+}
+
 // History writes go through a durable outbox: queued before the request,
 // acknowledged after a 2xx, dropped only when a retry can never succeed.
 const writeHistory = async (owner, op, id, metadata) => {
@@ -141,7 +160,7 @@ const writeHistory = async (owner, op, id, metadata) => {
     op === 'add' ? normalizeHistory([{ ...metadata, kp_id: id }])[0] : null
   )
   try {
-    const data = await sendHistory(entry)
+    const data = await sendHistoryTracked(owner, entry)
     ackHistoryWrite(owner, entry)
     return data
   } catch (error) {
@@ -162,12 +181,15 @@ export function flushHistoryOutbox() {
   if (!isAccount(owner)) return Promise.resolve(0)
   if (flushing.has(owner)) return flushing.get(owner)
   const token = useAuthStore().token
+  const generation = historyGeneration.get(owner) || 0
   const task = (async () => {
     let sent = 0
     for (const entry of pendingHistoryWrites(owner).reverse()) {
       if (useAuthStore().token !== token) break
+      // The history was cleared meanwhile: the rest of this snapshot is void.
+      if ((historyGeneration.get(owner) || 0) !== generation) break
       try {
-        await sendHistory(entry)
+        await sendHistoryTracked(owner, entry)
         ackHistoryWrite(owner, entry)
         sent++
       } catch (error) {
@@ -271,6 +293,7 @@ const delAllFromList = async (type) => {
   const token = useAuthStore().token
   const owner = listOwner()
   invalidateList(owner, type)
+  if (type === HISTORY) await stopHistoryWrites(owner)
   if (type === HISTORY && isCloudHistoryEnabled()) {
     const data = await historyRequest('', 'DELETE')
     clearHistoryOutbox(owner)

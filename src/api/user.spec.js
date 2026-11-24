@@ -1,6 +1,14 @@
 import { importWorkerList } from './user'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
-import { addToList, delFromList, getMyLists, getMovieListStatus, repairCardRatings } from './user'
+import {
+  addToList,
+  delAllFromList,
+  delFromList,
+  flushHistoryOutbox,
+  getMyLists,
+  getMovieListStatus,
+  repairCardRatings
+} from './user'
 import { replaceLocalList } from '@/utils/localUserLists'
 import { getKpInfo } from './movies.kinobox'
 import { normalizeHistory } from '../../shared/history-data.js'
@@ -223,6 +231,33 @@ describe('history outbox', () => {
     await expect(delFromList('301', 'history')).rejects.toThrow()
     const queued = JSON.parse(localStorage.getItem('reyohoho-history-outbox:worker%3A11'))
     expect(queued.map((entry) => [entry.kpId, entry.op])).toEqual([['301', 'del']])
+  })
+  it('does not let a replay in flight bring titles back after clearing the history', async () => {
+    mocks.history.mockRejectedValue(offline())
+    await expect(addToList('301', 'history', movie)).rejects.toThrow()
+    await expect(addToList('302', 'history', movie)).rejects.toThrow()
+    const calls = []
+    let releaseFirst
+    mocks.history.mockImplementation((path, method) => {
+      calls.push(`${method} ${path || '/'}`)
+      if (method === 'PUT' && !releaseFirst)
+        return new Promise((resolve) => {
+          releaseFirst = () => resolve({ ok: true })
+        })
+      return Promise.resolve({ ok: true })
+    })
+    const replay = flushHistoryOutbox()
+    await vi.waitFor(() => expect(releaseFirst).toBeTypeOf('function'))
+    const clearing = delAllFromList('history')
+    // The DELETE waits for the request already sent ...
+    await Promise.resolve()
+    expect(calls).toEqual(['PUT /301'])
+    releaseFirst()
+    await clearing
+    await replay
+    // ... and the rest of the old snapshot is never sent.
+    expect(calls).toEqual(['PUT /301', 'DELETE /'])
+    expect(localStorage.getItem('reyohoho-history-outbox:worker%3A11')).toBeNull()
   })
   it('keeps queues separate per account', async () => {
     mocks.history.mockRejectedValue(offline())
