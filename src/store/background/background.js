@@ -6,6 +6,7 @@ import { beforeHydrateLegacyVuex } from '../utils'
 
 export const useBackgroundStore = defineStore(BACKGROUND_STORE_NAME, {
   state: () => ({
+    // Stars by default, as on main; a solid page, lava lamp and dynamic stay in settings.
     backgroundUrl: starsBackground,
     topMoviePoster: '',
     moviePoster: '',
@@ -63,7 +64,7 @@ export const useBackgroundStore = defineStore(BACKGROUND_STORE_NAME, {
 
     resetBackground() {
       this.SET_BLUR(false)
-      this.SET_BACKGROUND_TYPE('stars')
+      this.SET_BACKGROUND_TYPE('disabled')
     },
 
     SET_BLUR(isActive) {

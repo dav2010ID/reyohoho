@@ -16,20 +16,12 @@ export const routes = [
     }
   },
   {
-    path: '/movie/:kp_id([1-9]\\d{0,11}|shiki[1-9]\\d{0,11})/:slug?',
+    path: '/movie/:kp_id([1-9]\\d{0,11})/:slug?',
     sensitive: true,
     component: () => import('@/components/MovieInfo.vue'),
     name: 'movie-info',
     meta: {
       title: 'ReYohoho - Просмотр фильма'
-    }
-  },
-  {
-    path: '/shiki/:shiki_id',
-    component: () => import('@/components/MovieInfoShiki.vue'),
-    name: 'movie-info-shiki',
-    meta: {
-      title: 'ReYohoho - Просмотр аниме'
     }
   },
   {
@@ -46,15 +38,6 @@ export const routes = [
     component: () => import('@/components/Settings.vue'),
     meta: {
       title: 'ReYohoho - Настройки'
-    }
-  },
-  {
-    path: '/notifications',
-    name: 'notifications',
-    component: () => import('@/components/NotificationsPage.vue'),
-    meta: {
-      title: 'ReYohoho - Уведомления',
-      requiresAuth: true
     }
   },
   {

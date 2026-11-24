@@ -50,8 +50,7 @@ debug logger and avoid formatting TLS trace payloads when tracing is disabled.
 With `--download`, `prepare-vendor.mjs` verifies both the original and adapted bundles and fails
 if a patch target changes.
 
-The [2026-10-18 CPU audit](../../docs/worker-cpu-audit-2026-10-18.md) includes
-edge measurements, cache behavior and native-fetch compatibility results.
+A 2026-10-18 CPU audit (in git history) measured this path at the edge.
 The current custom TLS path does not reliably fit the Workers Free 10 ms budget.
 
 Public endpoint after deployment:
@@ -77,6 +76,7 @@ reduced to public movie cards. Allowlisted routes:
 | `/api/players`               | Positive numeric `kinopoisk`, optional `title` up to 300 characters                     | 1 minute                   |
 | `/api/kinopoisk/top`         | `type=movie` or `series`, positive `page`, `limit=1..50` (default 36), offset below 250 | 1 hour                     |
 | `/api/movies/{id}/extras`    | Positive numeric movie ID                                                               | 24 hours                   |
+| `/api/kinoapi/latest`        | `limit=1..50` (default 24)                                                              | 1 hour                     |
 
 ## Movie extras (Kino API)
 
@@ -98,6 +98,13 @@ answers are cached for 24 hours with a 7-day stale copy, a title missing from th
 catalogue for 1 hour, and an answer without similar titles for 10 minutes. HTTP
 429 pauses all upstream calls for 60 seconds, a rejected key (401/403) for 5
 minutes. The frontend loads extras after the card and hides them on any failure.
+
+`/api/kinoapi/latest` serves the home shelf "Последние релизы" from the catalogue's
+`/titles` (this and last year, by popularity, 100 titles; only titles already out and with a
+Kinopoisk ID, newest release first; the catalogue's `/titles/latest` leads with far-future
+placeholders without Kinopoisk IDs) with the same key, cache and backoff rules (fresh copy 1 hour,
+stale copy 7 days). Only titles with a Kinopoisk ID are forwarded, with a 342px
+TMDB poster; the shelf is hidden when the route fails.
 
 ## Kinopoisk top
 
@@ -140,3 +147,21 @@ ignored local configuration before deploying. Private routes fail closed without
 Pinned `@reclaimprotocol/tls@0.1.4` and `hpack.js@2.1.6` bundles.
 The Reclaim license is included in `LICENSE-reclaim.txt`; dependency license
 notices are retained in the generated bundles.
+
+## Upstream protection
+
+`upstream-guard.mjs` wraps the Kinopoisk and Kinobox requests:
+
+- **Circuit breaker:** after 5 failures (timeouts, 5xx, 429) an upstream is
+  skipped for 30 s in that isolate. Missing titles do not count.
+- **Shared budget:** the optional `UPSTREAM_RATE_LIMITER` binding (key
+  `upstream:<name>`) caps calls per upstream across all IPs, on top of the
+  per-IP `PUBLIC_RATE_LIMITER`. If the binding fails, requests are allowed.
+- **Kill switch:** `KINOBOX_TRANSPORT=off` turns the vendored TLS/HTTP2 transport
+  off. Players then fail fast and serve stale cache when it exists; catalogue
+  requests use Kinopoisk only.
+
+The TLS stack is loaded with a dynamic import, the first time a request
+actually goes to Kinobox. Account, history and cached routes never evaluate it.
+`GET /api/health` reports the API contract and the applied D1 migration (see
+`docs/release.md`).

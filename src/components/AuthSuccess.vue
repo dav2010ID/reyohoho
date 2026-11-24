@@ -33,13 +33,12 @@ import { useRouter } from 'vue-router'
 import { useAuthStore } from '@/store/auth'
 import { useMainStore } from '@/store/main'
 import { onBeforeUnmount, onMounted, ref } from 'vue'
-import { getMyLists, addToList, getUser, importWorkerList } from '@/api/user'
+import { getMyLists, getUser, importWorkerList } from '@/api/user'
 import { USER_LIST_TYPES_ENUM } from '@/constants'
-import { getKpInfo } from '@/api/movies'
 import { getLocalList } from '@/utils/localUserLists'
 import { consumeAuthRedirect } from '@/utils/authRedirect'
 import { importCloudHistory } from '@/api/cloudHistory'
-import { normalizeHistory } from '../../shared/history-data.js'
+import { HISTORY_CAPACITY, normalizeHistory } from '../../shared/history-data.js'
 import { clearPendingSync, readPendingSync, savePendingSync } from '@/utils/pendingAccountSync'
 export default {
   name: 'AuthSuccess',
@@ -66,7 +65,7 @@ export default {
       const token = authStore.token
       try {
         const guestHistory = mainStore.historyOwner === 'guest' ? [...mainStore.history] : []
-        if (!authStore.isWorkerSession && !/^[A-Za-z0-9_-]+\.[A-Za-z0-9_-]+\.[A-Za-z0-9_-]+$/.test(token || '')) {
+        if (!authStore.isWorkerSession) {
           if (token) authStore.logout()
           throw new Error('Не удалось подтвердить вход. Войдите через Telegram ещё раз.')
         }
@@ -77,7 +76,7 @@ export default {
         let user = await getUser()
         assertCurrent()
         authStore.setUser(user)
-        const owner = `${authStore.isWorkerSession ? 'worker' : 'legacy'}:${user.id}`
+        const owner = `worker:${user.id}`
         const syncedListTypes = [
           USER_LIST_TYPES_ENUM.FAVORITE,
           USER_LIST_TYPES_ENUM.LATER,
@@ -88,7 +87,7 @@ export default {
         let pending = readPendingSync(owner)
         if (!pending) {
           pending = {
-            history: normalizeHistory(guestHistory, 5000),
+            history: normalizeHistory(guestHistory, HISTORY_CAPACITY),
             lists: Object.fromEntries(
               syncedListTypes.map((type) => [type, [...getLocalList(type, 'guest')]])
             ),
@@ -104,111 +103,47 @@ export default {
         try {
           response = await getMyLists(USER_LIST_TYPES_ENUM.HISTORY, { fresh: true })
           assertCurrent()
-          if (authStore.isWorkerSession) {
-            const hasLocalData =
-              localHistory.length || [...localLists.values()].some((items) => items.length)
-            if (
-              hasLocalData &&
-              (pending.approved ||
-                await askConfirmation(
-                  'Синхронизировать локальную историю и списки этого браузера с облаком?'
-                ))
-            ) {
-              assertCurrent()
-              pending.approved = true
-              savePendingSync(owner, pending)
-              if (localHistory.length) response = await importCloudHistory(localHistory)
-              assertCurrent()
-              pending.history = []
-              savePendingSync(owner, pending)
-              for (const type of syncedListTypes) {
-                const existing = new Set(
-                  (await getMyLists(type, { fresh: true })).map((item) => String(item.kp_id))
-                )
-                assertCurrent()
-                const missing = (localLists.get(type) || []).filter(item => !existing.has(String(item.kp_id)))
-                await importWorkerList(type, missing)
-                assertCurrent()
-                pending.lists[type] = []
-                savePendingSync(owner, pending)
-                await getMyLists(type)
-              }
-              assertCurrent()
-              clearPendingSync(owner)
-            } else {
-              // Keep a local backup if the user declines importing guest history.
-              if (localHistory.length)
-                localStorage.setItem(
-                  'reyohoho-guest-history-backup',
-                  JSON.stringify(normalizeHistory(localHistory, 5000))
-                )
-              for (const type of syncedListTypes) await getMyLists(type)
-            }
-            if (authStore.token !== token) throw new Error('Аккаунт изменился')
-            mainStore.setHistory(response)
-          } else {
-            const existingHistory = new Set(response.map((title) => String(title.kp_id)))
-            const candidates = new Map(localHistory.map((title) => [String(title.kp_id), title]))
-
-            for (const title of [...candidates.values()].reverse()) {
-              assertCurrent()
-              if (existingHistory.has(String(title.kp_id))) {
-                pending.history = pending.history.filter(
-                  (entry) => String(entry.kp_id) !== String(title.kp_id)
-                )
-                savePendingSync(owner, pending)
-                continue
-              }
-              let metadata = title
-              const needsMetadata =
-                !title.title ||
-                !title.poster ||
-                (title.rating_kinopoisk == null && title.rating_kp == null)
-              if (needsMetadata) {
-                try {
-                  const movie = await getKpInfo(title.kp_id)
-                  metadata = {
-                    ...movie,
-                    ...title,
-                    title: title.title || movie?.name_ru || movie?.name_original || '',
-                    poster: title.poster || movie?.poster_url_preview || movie?.poster_url || ''
-                  }
-                } catch (metadataError) {
-                  console.warn(`Не удалось дополнить историю для ${title.kp_id}`, metadataError)
-                }
-              }
-              assertCurrent()
-              await addToList(title.kp_id, USER_LIST_TYPES_ENUM.HISTORY, metadata)
-              assertCurrent()
-              pending.history = pending.history.filter(
-                (entry) => String(entry.kp_id) !== String(title.kp_id)
-              )
-              savePendingSync(owner, pending)
-            }
-            response = await getMyLists(USER_LIST_TYPES_ENUM.HISTORY)
+          const hasLocalData =
+            localHistory.length || [...localLists.values()].some((items) => items.length)
+          if (
+            hasLocalData &&
+            (pending.approved ||
+              await askConfirmation(
+                'Синхронизировать локальную историю и списки этого браузера с облаком?'
+              ))
+          ) {
             assertCurrent()
-            mainStore.setHistory(response)
-
+            pending.approved = true
+            savePendingSync(owner, pending)
+            if (localHistory.length) response = await importCloudHistory(localHistory)
+            assertCurrent()
+            pending.history = []
+            savePendingSync(owner, pending)
             for (const type of syncedListTypes) {
-              const serverList = await getMyLists(type, { fresh: true })
-              const existing = new Set(serverList.map((item) => String(item.kp_id)))
-              const merged = new Map(
-                (localLists.get(type) || []).map((item) => [String(item.kp_id), item])
+              const existing = new Set(
+                (await getMyLists(type, { fresh: true })).map((item) => String(item.kp_id))
               )
-              for (const item of merged.values()) {
-                assertCurrent()
-                if (!existing.has(String(item.kp_id))) await addToList(item.kp_id, type, item)
-                assertCurrent()
-                pending.lists[type] = pending.lists[type].filter(
-                  (entry) => String(entry.kp_id) !== String(item.kp_id)
-                )
-                savePendingSync(owner, pending)
-              }
+              assertCurrent()
+              const missing = (localLists.get(type) || []).filter(item => !existing.has(String(item.kp_id)))
+              await importWorkerList(type, missing)
+              assertCurrent()
+              pending.lists[type] = []
+              savePendingSync(owner, pending)
               await getMyLists(type)
             }
             assertCurrent()
             clearPendingSync(owner)
+          } else {
+            // Keep a local backup if the user declines importing guest history.
+            if (localHistory.length)
+              localStorage.setItem(
+                'reyohoho-guest-history-backup',
+                JSON.stringify(normalizeHistory(localHistory, HISTORY_CAPACITY))
+              )
+            for (const type of syncedListTypes) await getMyLists(type)
           }
+          if (authStore.token !== token) throw new Error('Аккаунт изменился')
+          mainStore.setHistory(response)
         } catch (err) {
           console.error('Auth error:', err)
           error.value =
@@ -275,7 +210,7 @@ export default {
 .error-message {
   max-width: 400px;
   padding: 20px;
-  border-radius: 8px;
+  border-radius: var(--radius-m);
 }
 
 .loading-message {
@@ -289,15 +224,15 @@ export default {
 
 .error-message {
   background-color: #1d1d1d;
-  color: var(--accent-color);
-  border: 1px solid var(--accent-color);
-  border-radius: 8px;
+  color: var(--accent-text);
+  border: 1px solid var(--accent-ui);
+  border-radius: var(--radius-m);
 }
 
 .spinner {
   border: 4px solid rgba(0, 0, 0, 0.1);
   border-radius: 50%;
-  border-top: 4px solid var(--accent-color);
+  border-top: 4px solid var(--accent-ui);
   width: 30px;
   height: 30px;
   animation: spin 1s linear infinite;
@@ -318,15 +253,15 @@ export default {
   display: inline-block;
   margin-top: 15px;
   padding: 8px 16px;
-  background-color: var(--accent-color);
-  color: white;
+  background-color: var(--accent-solid);
+  color: var(--accent-contrast);
   text-decoration: none;
-  border-radius: 4px;
+  border-radius: var(--radius-s);
   transition: background-color 0.3s;
 }
 
 .retry-button:hover,
 .home-button:hover {
-  background-color: var(--accent-hover);
+  background-color: var(--accent-solid-hover);
 }
 </style>

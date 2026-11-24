@@ -31,7 +31,16 @@ describe('offline shell dependency selection', () => {
     const bundle = {
       'entry.js': chunk('entry.js', ['shared.js'], {
         isEntry: true,
-        dynamicImports: ['workbox.js']
+        dynamicImports: ['workbox.js'],
+        viteMetadata: {
+          importedCss: new Set(),
+          // The default stars background is precached; the opt-in garland is left to the
+          // runtime cache.
+          importedAssets: new Set([
+            'assets/immutable/image-back-stars-AbC123.webp',
+            'assets/immutable/trn-christmas-lights-x_Y9.webp'
+          ])
+        }
       }),
       'shared.js': chunk('shared.js', ['entry.js']),
       'workbox.js': chunk('workbox.js', ['workbox-helper.js'], {
@@ -51,7 +60,7 @@ describe('offline shell dependency selection', () => {
       'comments.js': chunk('comments.js'),
       'dialog.js': chunk('dialog.js'),
       'scenes.js': chunk('scenes.js', [], {
-        facadeModuleId: '/repo/src/components/movie/MovieSceneTools.vue'
+        facadeModuleId: '/repo/src/components/RandomMovieModal.vue'
       }),
       'overlay.js': chunk('overlay.js', [], {
         facadeModuleId: '/repo/src/utils/playerVideoOverlayRuntime.js'
@@ -90,6 +99,8 @@ describe('offline shell dependency selection', () => {
       'movie.js',
       'movie.css',
       'poster.webp',
+      'assets/immutable/image-back-stars-AbC123.webp',
+      'assets/immutable/trn-christmas-lights-x_Y9.webp',
       'comments.js',
       'comments.css',
       'dialog.js',
@@ -114,7 +125,8 @@ describe('offline shell dependency selection', () => {
       'workbox-helper.js',
       'movie.js',
       'movie.css',
-      'poster.webp'
+      'poster.webp',
+      'assets/immutable/image-back-stars-AbC123.webp'
     ])
     expect(transformed.manifest.every(({ revision }) => revision === 'final-ssg-revision')).toBe(
       true

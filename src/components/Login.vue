@@ -7,7 +7,7 @@
         <p>Загрузка данных...</p>
       </div>
 
-      <div v-else class="login-methods">
+      <div v-else-if="authValue" class="login-methods">
         <p v-if="verificationCode">
           Код подтверждения: <strong>{{ verificationCode }}</strong
           >. Сверьте его в боте.
@@ -65,8 +65,8 @@
             </div>
             <p class="qr-hint">Используйте любое приложение для сканирования QR-кода</p>
             <p class="qr-hint">
-              Откройте бота и подтвердите вход на сайт. Не отправляйте боту пароль или коды входа
-              в Telegram.
+              Откройте бота и подтвердите вход на сайт. Не отправляйте боту пароль или коды входа в
+              Telegram.
             </p>
           </div>
         </div>
@@ -83,8 +83,7 @@
 </template>
 
 <script>
-import { ref, onBeforeUnmount, onMounted } from 'vue'
-import QrcodeVue from 'qrcode.vue'
+import { defineAsyncComponent, ref, onBeforeUnmount, onMounted } from 'vue'
 import { generateToken, getTGAuthResult } from '@/api/user'
 import { createTelegramAuthPoller } from '@/utils/telegramAuthPoller'
 import { saveAuthRedirect } from '@/utils/authRedirect'
@@ -94,7 +93,8 @@ import { useAuthStore } from '@/store/auth'
 
 export default {
   components: {
-    QrcodeVue
+    // Only the QR dialog draws it.
+    QrcodeVue: defineAsyncComponent(() => import('qrcode.vue'))
   },
   setup() {
     const qrValue = ref('')
@@ -194,6 +194,7 @@ export default {
       qrSize,
       loading,
       error,
+      authValue,
       loginWithTelegram,
       showModal,
       showQRModal,
@@ -206,44 +207,48 @@ export default {
 
 <style scoped>
 .login-page {
-  max-width: 1200px;
-  margin: 0 auto;
-  padding: 1rem;
+  box-sizing: border-box;
   min-height: 100vh;
+  padding: var(--page-top) 24px 64px;
   color: #e0e0e0;
 }
 
 .login-container {
-  max-width: 450px;
-  margin: 0 auto;
-  padding: 2rem;
-  text-align: center;
-  border-radius: 10px;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
-  border: 1px solid var(--accent-transparent);
+  box-sizing: border-box;
+  max-width: 420px;
+  padding: 24px;
+  border-radius: var(--radius-l);
+  box-shadow: inset 0 0 0 1px var(--hairline);
 }
 
 .dark-theme {
-  background: #2a2a2a;
+  background: var(--surface-raised);
   color: #e0e0e0;
 }
 
 h1 {
-  text-align: center;
-  margin-bottom: 2.5rem;
-  color: #ffffff;
-  font-size: 2rem;
-  font-weight: 500;
+  margin: 0 0 24px;
+  color: #fff;
+  font-size: var(--fs-2xl);
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  line-height: 1.25;
 }
 
 .login-methods {
   display: flex;
   flex-direction: column;
-  gap: 1.5rem;
+  gap: 16px;
+}
+
+.login-methods > p {
+  margin: 0;
+  color: var(--text-dim);
+  font-size: var(--fs-s);
 }
 
 .telegram-btn-container {
-  margin-bottom: 1rem;
+  margin: 0;
 }
 
 .telegram-btn {
@@ -252,11 +257,12 @@ h1 {
   justify-content: center;
   gap: 0.5rem;
   width: 100%;
-  padding: 0.75rem;
-  background: var(--accent-color);
-  color: white;
+  min-height: 48px;
+  padding: 0 16px;
+  background: var(--accent-solid);
+  color: var(--accent-contrast);
   border: none;
-  border-radius: 5px;
+  border-radius: var(--radius-m);
   font-size: 1rem;
   font-weight: 500;
   cursor: pointer;
@@ -264,7 +270,7 @@ h1 {
 }
 
 .telegram-btn:hover {
-  background: var(--accent-hover);
+  background: var(--accent-solid-hover);
   transform: translateY(-1px);
 }
 
@@ -277,15 +283,15 @@ h1 {
 .divider {
   display: flex;
   align-items: center;
-  color: #aaa;
-  font-size: 0.9rem;
+  color: var(--text-dim);
+  font-size: var(--fs-s);
 }
 
 .divider::before,
 .divider::after {
   content: '';
   flex: 1;
-  border-bottom: 1px solid #444;
+  border-bottom: 1px solid var(--hairline);
 }
 
 .divider::before {
@@ -302,11 +308,13 @@ h1 {
   justify-content: center;
   gap: 0.5rem;
   width: 100%;
-  padding: 0.75rem;
-  background: var(--accent-color);
-  color: white;
-  border: none;
-  border-radius: 5px;
+  min-height: 48px;
+  padding: 0 16px;
+  /* Alternative method after "или": secondary outline, Telegram stays the one primary fill. */
+  background: transparent;
+  color: #fff;
+  border: 1px solid var(--accent-color);
+  border-radius: var(--radius-m);
   font-size: 1rem;
   font-weight: 500;
   cursor: pointer;
@@ -314,7 +322,7 @@ h1 {
 }
 
 .qr-btn:hover {
-  background: var(--accent-hover);
+  background: var(--accent-transparent);
   transform: translateY(-1px);
 }
 
@@ -364,12 +372,14 @@ h1 {
   display: flex;
   justify-content: center;
   align-items: center;
+  /* Above the rail and the tab bar. */
+  z-index: calc(var(--z-sidebar) + 10);
 }
 
 .modal-content {
   background-color: #1e1e1e;
   padding: 2rem;
-  border-radius: 10px;
+  border-radius: var(--radius-l);
   max-width: 400px;
   width: 100%;
   text-align: center;
@@ -393,7 +403,7 @@ h1 {
 .qr-background {
   background: white;
   padding: 10px;
-  border-radius: 5px;
+  border-radius: var(--radius-m);
   display: inline-block;
 }
 
@@ -401,15 +411,24 @@ h1 {
   margin: 0 auto;
 }
 
+.error-message {
+  margin-top: 12px;
+  color: #ff8b8b;
+  font-size: 14px;
+  text-align: center;
+}
+
 .retry-btn {
   display: block;
+  min-height: 44px;
   margin: 12px auto 0;
-  padding: 8px 16px;
-  border: 0;
-  border-radius: 5px;
-  background: var(--accent-color);
+  padding: 8px 20px;
+  border: 1px solid rgba(255, 255, 255, 0.35);
+  border-radius: var(--radius-m);
+  background: transparent;
   color: #fff;
   cursor: pointer;
+  font: inherit;
 }
 
 .retry-btn:disabled {

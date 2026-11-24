@@ -31,21 +31,97 @@ function request(body, type = 'favorite') {
 }
 
 describe('account list metadata writes', () => {
-  it('imports bounded batches atomically, preserves existing entries and isolates accounts', async () => {
-    const bulk = items => serveAccount(new Request('https://api.reyhoho.fun/api/list/favorite/import', {
+  it('imports bounded batches, preserves existing entries and fills up to the capacity', async () => {
+    const bulk = (items, partial = true) => serveAccount(new Request('https://api.reyhoho.fun/api/list/favorite/import', {
       method: 'POST', headers: { Authorization: 'Bearer ' + token, 'Content-Type': 'application/json' },
-      body: JSON.stringify({ items })
+      body: JSON.stringify({ items, partial })
     }), env, origin)
-    expect(await (await bulk([{ kp_id: '301', title: 'Original' }, { kp_id: '42' }])).json()).toEqual({ added: 2 })
-    expect(await (await bulk([{ kp_id: '301', title: 'Changed' }])).json()).toEqual({ added: 0 })
+    expect(await (await bulk([{ kp_id: '301', title: 'Original' }, { kp_id: '42' }])).json()).toEqual({ added: 2, rejected: 0 })
+    expect(await (await bulk([{ kp_id: '301', title: 'Changed' }])).json()).toEqual({ added: 0, rejected: 0 })
     expect(db.sqlite.prepare('SELECT metadata FROM account_lists WHERE kp_id=?').get('301').metadata).toContain('Original')
     expect((await bulk([{ kp_id: 'invalid' }])).status).toBe(400)
     expect((await bulk(Array.from({ length: 41 }, (_, i) => ({ kp_id: String(i + 1) })))).status).toBe(400)
+    // Duplicate IDs in one batch collapse instead of failing the import.
+    expect(await (await bulk([{ kp_id: '7' }, { kp_id: '7' }])).json()).toEqual({ added: 1, rejected: 0 })
     const insert = db.sqlite.prepare('INSERT INTO account_lists VALUES (?,?,?,?,?)')
-    for (let i = 0; i < 997; i++) insert.run('worker-tg:123', 'favorite', String(10000 + i), '{}', '')
-    expect((await bulk([{ kp_id: '500' }, { kp_id: '501' }])).status).toBe(409)
+    for (let i = 0; i < 996; i++) insert.run('worker-tg:123', 'favorite', String(10000 + i), '{}', '')
+    // Clients that do not ask for partial imports keep all-or-nothing.
+    const legacy = await bulk([{ kp_id: '500' }, { kp_id: '501' }], false)
+    expect(legacy.status).toBe(409)
+    expect(await legacy.json()).toEqual({ error: 'list_capacity', limit: 1000, remaining: 0, added: 0, rejected: 1 })
     expect(db.sqlite.prepare('SELECT COUNT(*) AS n FROM account_lists').get().n).toBe(999)
-    expect(db.sqlite.prepare('SELECT COUNT(*) AS n FROM account_lists WHERE kp_id=?').get('500').n).toBe(0)
+    const partial = await bulk([{ kp_id: '500' }, { kp_id: '501' }])
+    expect(partial.status).toBe(200)
+    expect(await partial.json()).toEqual({ added: 1, rejected: 1 })
+    expect(db.sqlite.prepare('SELECT COUNT(*) AS n FROM account_lists').get().n).toBe(1000)
+    const full = await bulk([{ kp_id: '502' }])
+    expect(full.status).toBe(409)
+    expect(await full.json()).toEqual({ error: 'list_capacity', limit: 1000, remaining: 0, added: 0, rejected: 1 })
+    // An already-present title still succeeds at capacity.
+    expect(await (await bulk([{ kp_id: '500' }])).json()).toEqual({ added: 0, rejected: 0 })
+  })
+  it('keeps one viewing status per title and leaves other lists alone', async () => {
+    const put = (type) => serveAccount(request(JSON.stringify({ metadata: { title: 'T' } }), type), env, origin)
+    const types = () => db.sqlite.prepare('SELECT list_type FROM account_lists WHERE kp_id=? ORDER BY list_type').all('843831').map(row => row.list_type)
+    expect(await (await put('favorite')).json()).toEqual({ ok: true })
+    expect(await (await put('watching')).json()).toEqual({ ok: true, replaced: false })
+    expect(await (await put('completed')).json()).toEqual({ ok: true, replaced: true })
+    expect(types()).toEqual(['completed', 'favorite'])
+    await put('abandoned')
+    expect(types()).toEqual(['abandoned', 'favorite'])
+    // Import does not add a second status for a title that already has one.
+    const imported = await serveAccount(new Request('https://api.reyhoho.fun/api/list/watching/import', {
+      method: 'POST', headers: { Authorization: 'Bearer ' + token, 'Content-Type': 'application/json' },
+      body: JSON.stringify({ items: [{ kp_id: '843831' }, { kp_id: '42' }] })
+    }), env, origin)
+    expect(await imported.json()).toEqual({ added: 1, rejected: 0 })
+    expect(types()).toEqual(['abandoned', 'favorite'])
+  })
+  it('keeps one status when a status is set while an import is in flight', async () => {
+    const batch = db.batch.bind(db)
+    db.batch = async (statements) => {
+      db.sqlite
+        .prepare('INSERT INTO account_lists VALUES (?,?,?,?,?)')
+        .run('worker-tg:123', 'watching', '42', '{}', '2026-11-01')
+      return batch(statements)
+    }
+    const imported = await serveAccount(new Request('https://api.reyhoho.fun/api/list/completed/import', {
+      method: 'POST', headers: { Authorization: 'Bearer ' + token, 'Content-Type': 'application/json' },
+      body: JSON.stringify({ items: [{ kp_id: '42' }], partial: true })
+    }), env, origin)
+    expect(await imported.json()).toEqual({ added: 0, rejected: 0 })
+    expect(db.sqlite.prepare("SELECT list_type FROM account_lists WHERE kp_id='42'").all().map(row => row.list_type)).toEqual(['watching'])
+  })
+  it('returns a typed capacity error when a single add hits the list limit', async () => {
+    const insert = db.sqlite.prepare('INSERT INTO account_lists VALUES (?,?,?,?,?)')
+    for (let i = 0; i < 1000; i++) insert.run('worker-tg:123', 'later', String(10000 + i), '{}', '')
+    const response = await serveAccount(request(JSON.stringify({ metadata: {} }), 'later'), env, origin)
+    expect(response.status).toBe(409)
+    expect(await response.json()).toEqual({ error: 'list_capacity', limit: 1000, remaining: 0 })
+  })
+  it('keeps existing sessions working while new logins are switched off', async () => {
+    env.TELEGRAM_AUTH_ENABLED = 'false'
+    const response = await serveAccount(request(JSON.stringify({ metadata: {} })), env, origin)
+    expect(response.status).toBe(200)
+  })
+  it('charges the history alias once and exposes the next cursor', async () => {
+    let calls = 0
+    env.ACCOUNT_RATE_LIMITER = { limit: async () => (calls++, { success: true }) }
+    const insert = db.sqlite.prepare('INSERT INTO user_history VALUES (?,?,?,?,?)')
+    db.sqlite.exec('BEGIN')
+    for (let i = 1; i <= 1001; i++)
+      insert.run('worker-tg:123', String(i), JSON.stringify({ kp_id: String(i) }), '2026-01-01T00:00:00.000Z', 0)
+    db.sqlite.exec('COMMIT')
+    const response = await serveAccount(new Request('https://api.reyhoho.fun/api/list/history', {
+      headers: { Authorization: 'Bearer ' + token }
+    }), env, origin)
+    expect(response.status).toBe(200)
+    expect(calls).toBe(1)
+    const items = await response.json()
+    expect(Array.isArray(items)).toBe(true)
+    expect(items).toHaveLength(1000)
+    expect(response.headers.get('X-Next-Cursor')).toBeTruthy()
+    expect(response.headers.get('Access-Control-Expose-Headers')).toBe('X-Next-Cursor')
   })
   it('reads only authenticated movie membership and excludes deleted history', async () => {
     const insert = db.sqlite.prepare('INSERT INTO account_lists VALUES (?,?,?,?,?)')
@@ -106,7 +182,7 @@ describe('account list metadata writes', () => {
       expect(new TextEncoder().encode(body).byteLength).toBeGreaterThan(8192)
       const response = await serveAccount(request(body, type), env, origin)
       expect(response.status).toBe(200)
-      expect(await response.json()).toEqual({ ok: true })
+      expect(await response.json()).toMatchObject({ ok: true })
       const row = db.sqlite.prepare('SELECT * FROM account_lists').get()
       expect(row.user_id).toBe('worker-tg:123')
       expect(row.list_type).toBe(type)

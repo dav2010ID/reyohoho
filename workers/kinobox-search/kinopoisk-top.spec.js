@@ -64,6 +64,29 @@ describe('fixed Kinopoisk top proxy', () => {
       logger.mockRestore()
     }
   })
+  it('goes through the shared upstream guard on a cache miss', async () => {
+    const logger = vi.spyOn(console, 'error').mockImplementation(() => {})
+    try {
+      const upstream = vi.fn()
+      vi.stubGlobal('fetch', upstream)
+      const cache = { match: vi.fn().mockResolvedValue(null), put: vi.fn() }
+      const guard = vi.fn(() => Promise.reject(new Error('kinopoisk unavailable: circuit_open')))
+      const result = await serveKinopoiskTop(
+        resolve(),
+        new URL('https://guard.test/api/kinopoisk/top'),
+        { 'X-Worker-Version': 'guard' },
+        {},
+        cache,
+        async () => null,
+        guard
+      )
+      expect(guard).toHaveBeenCalledOnce()
+      expect(upstream).not.toHaveBeenCalled()
+      expect(result.status).toBe(502)
+    } finally {
+      logger.mockRestore()
+    }
+  })
   it('keeps waiting cache reads within the Workers Free subrequest budget', async () => {
     vi.useFakeTimers()
     const fetcher = vi.fn(

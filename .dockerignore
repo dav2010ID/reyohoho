@@ -1,6 +1,5 @@
 .git
 .github
-.gitlab-ci.yml
 .env
 .env.*
 backend/.env

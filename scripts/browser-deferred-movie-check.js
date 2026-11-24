@@ -32,14 +32,12 @@ try {
     for (const build of baselineRoot ? ['before', 'after'] : ['after']) {
       console.log(`Checking deferred controls: ${width}/${build}`)
       const context = await browser.newContext({
-        // Keep comments outside the 300px observer margin even on this short fixture.
         viewport: { width, height: 640 },
         serviceWorkers: 'block'
       })
       try {
         const page = await context.newPage()
         const errors = []
-        const commentRequests = []
         page.on('pageerror', (error) => errors.push(error.message))
         await page.route('**/*', (route) => {
           const url = new URL(route.request().url())
@@ -59,7 +57,6 @@ try {
                 ]
               })
             })
-          if (url.pathname.includes('/comments/')) commentRequests.push(url.pathname)
           return route.continue()
         })
         await page.goto(origin + '/__profile/setup?build=' + build)
@@ -67,41 +64,24 @@ try {
         await page.locator('.responsive-iframe[src]').waitFor()
         await page.waitForTimeout(1500)
         const initialResources = await resources(page)
-        const initialCommentRequests = commentRequests.length
         if (build === 'after') {
-          assert.equal(initialCommentRequests, 0, 'offscreen comments must not fetch data')
           assert(
             !initialResources.some(({ path }) =>
-              /\/(?:Comments|PlayerModal|MovieSceneTools|playerVideoOverlayRuntime)-/.test(path)
+              /\/(?:PlayerModal|playerVideoOverlayRuntime)-/.test(path)
             ),
             'optional movie and desktop tools must not load before use'
           )
-          await page.locator('button[title^="Показать тайминги"]').click()
-          await page.getByText('Записей о таймингах не найдено').waitFor()
-          const sceneResources = await resources(page)
-          assert(sceneResources.some(({ path }) => /\/MovieSceneTools-.*\.js$/.test(path)))
-          assert(sceneResources.some(({ path }) => /\/MovieSceneTools-.*\.css$/.test(path)))
-          await page.mouse.click(2, 638)
-          await page.locator('.nudity-info-popup').waitFor({ state: 'hidden' })
-          await page.locator('#movie-comments').scrollIntoViewIfNeeded()
-          await page.locator('.spoiler-warning').waitFor()
-          await page.waitForTimeout(300)
-          assert.equal(commentRequests.length, 1)
-          await page.locator('.spoiler-warning').click()
-          await page.locator('.comment-textarea').waitFor()
           await page.locator('.player-btn').click()
           await page.locator('.modal .player-item').last().click()
           await page.locator('.modal').waitFor({ state: 'hidden' })
           assert.match(await page.locator('.responsive-iframe').getAttribute('src'), /player=2/)
           const usedResources = await resources(page)
-          assert(usedResources.some(({ path }) => /\/Comments-.*\.js$/.test(path)))
           assert(usedResources.some(({ path }) => /\/PlayerModal-.*\.js$/.test(path)))
         }
         assert.deepEqual(errors, [])
         rows.push({
           width,
           build,
-          initialCommentRequests,
           initialScriptStyleBytes: initialResources.reduce((sum, entry) => sum + entry.bytes, 0),
           initialResources,
           pageErrors: errors
@@ -117,10 +97,9 @@ try {
   console.log(
     JSON.stringify(
       {
-        rows: rows.map(({ width, build, initialCommentRequests, initialScriptStyleBytes }) => ({
+        rows: rows.map(({ width, build, initialScriptStyleBytes }) => ({
           width,
           build,
-          initialCommentRequests,
           initialScriptStyleBytes
         })),
         deferredControls: true,

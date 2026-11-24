@@ -138,7 +138,7 @@ const close = () => {
 .modern-dark-dialog {
   background-color: #1d1d1d;
   color: #e2e8f0;
-  border-radius: 12px;
+  border-radius: var(--radius-l);
   overflow: hidden;
   width: 420px;
   box-shadow:
@@ -148,7 +148,7 @@ const close = () => {
 
 .modal-header {
   padding: 16px 20px;
-  border-bottom: 1px solid var(--accent-color);
+  border-bottom: 1px solid var(--accent-ui);
 }
 
 .modal-header h3 {
@@ -191,7 +191,7 @@ const close = () => {
 
 .modern-dark-btn {
   padding: 8px 16px;
-  border-radius: 6px;
+  border-radius: var(--radius-m);
   border: none;
   background-color: #242424;
   color: #e2e8f0;

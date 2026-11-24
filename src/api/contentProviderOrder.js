@@ -1,42 +1,14 @@
 import { CONTENT_PROVIDERS } from '@/api/providerRegistry'
 
-const REMOTE_PLAYER_PROVIDERS = [
-  CONTENT_PROVIDERS.DDBB,
-  CONTENT_PROVIDERS.DDBB_LIVE,
-  CONTENT_PROVIDERS.KINOBOX
-  // CONTENT_PROVIDERS.KINOBD // Temporarily disabled.
-]
-
-const REMOTE_MOVIE_INFO_PROVIDERS = [
-  CONTENT_PROVIDERS.KINOBOX
-  // CONTENT_PROVIDERS.KINOBD // Temporarily disabled.
-]
-
-const configuredFirst = (configuredProvider, providers) => [
-  configuredProvider,
-  ...providers.filter((provider) => provider !== configuredProvider)
-].filter((provider) => providers.includes(provider))
-
 export const getPlayerProviderOrder = (configuredProvider) => {
-  if (configuredProvider === CONTENT_PROVIDERS.LOCAL) return [CONTENT_PROVIDERS.LOCAL]
   if (configuredProvider === CONTENT_PROVIDERS.DDBB_LIVE)
     return [CONTENT_PROVIDERS.DDBB_LIVE, CONTENT_PROVIDERS.KINOBOX]
 
   // Player discovery is a fallback chain, not a combined list of mirrors.
   // DDBB Live goes first: on 2026-11-07 it answered every probe in about 0.4 s while
   // DDBB reset TLS connections and Kinobox timed out.
-  return [
-    CONTENT_PROVIDERS.DDBB_LIVE,
-    CONTENT_PROVIDERS.DDBB,
-    CONTENT_PROVIDERS.KINOBOX
-  ].filter((provider) => REMOTE_PLAYER_PROVIDERS.includes(provider))
+  return [CONTENT_PROVIDERS.DDBB_LIVE, CONTENT_PROVIDERS.DDBB, CONTENT_PROVIDERS.KINOBOX]
 }
 
-export const getMovieInfoProviderOrder = (configuredProvider) => {
-  const providers =
-    configuredProvider === CONTENT_PROVIDERS.LOCAL
-      ? [CONTENT_PROVIDERS.LOCAL, ...REMOTE_MOVIE_INFO_PROVIDERS]
-      : REMOTE_MOVIE_INFO_PROVIDERS
-
-  return configuredFirst(configuredProvider, providers)
-}
+// Cards always come from the Worker, whatever player source is selected.
+export const getMovieInfoProviderOrder = () => [CONTENT_PROVIDERS.KINOBOX]

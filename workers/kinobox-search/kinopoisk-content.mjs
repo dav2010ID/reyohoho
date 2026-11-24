@@ -1,6 +1,10 @@
 import { Buffer } from 'node:buffer'
 import { KINOPOISK_CONTENT_QUERIES } from './kinopoisk-content-queries.mjs'
 
+const OPTIONAL_QUERY_MS = 4000
+const FALLBACK_SHARE = 0.4
+const MIN_FALLBACK_MS = 3000
+
 const ENDPOINT = 'https://graphql.kinopoisk.ru/graphql/'
 const MAX_BYTES = 1024 * 1024
 const MOVIE_TYPES = new Set(['Film', 'TvSeries', 'MiniSeries', 'TvShow', 'Video'])
@@ -194,8 +198,18 @@ export async function requestKinopoiskContent(options, transportOptions = {}, fe
       const match = /^\/api\/movies\/([1-9]\d{0,11})$/.exec(options.path)
       if (!match) throw upstreamError('Unsupported Kinopoisk path', 'path')
       const movieId = Number(match[1])
-      // Ratings and crew are optional; the card is still useful without them.
-      const optional = (promise) => promise.catch(() => null)
+      // Ratings and crew are optional; the card is still useful without them,
+      // so a slow optional query must not hold the card until the deadline.
+      let optionalTimer
+      const optionalDeadline = new Promise((resolve) => {
+        optionalTimer = setTimeout(
+          resolve,
+          transportOptions.optionalTimeoutMs ?? OPTIONAL_QUERY_MS,
+          null
+        )
+      })
+      const optional = (promise) =>
+        Promise.race([promise.catch(() => null), optionalDeadline])
       const [meta, ratingBase, ratingExtended, crew] = await Promise.all([
         call('MovieDetailsMobileGeneralMeta', {
           movieId,
@@ -216,6 +230,7 @@ export async function requestKinopoiskContent(options, transportOptions = {}, fe
           })
         )
       ])
+      clearTimeout(optionalTimer)
       data = toKinoboxMovie(meta, ratingBase, ratingExtended, crew)
     }
     return {
@@ -233,7 +248,8 @@ export async function requestKinopoiskContent(options, transportOptions = {}, fe
 }
 
 // Search and movie cards come from Kinopoisk GraphQL; Kinobox remains their fallback
-// and the only source of player lists.
+// and the only source of player lists. The primary gets only part of the total
+// deadline so a hanging Kinopoisk still leaves Kinobox a real chance.
 export async function requestContent(
   options,
   transportOptions,
@@ -242,9 +258,14 @@ export async function requestContent(
   requestKinopoisk = requestKinopoiskContent
 ) {
   const started = Date.now()
+  const total = transportOptions?.timeoutMs || 15000
+  const reserve = Math.min(total, Math.max(MIN_FALLBACK_MS, Math.round(total * FALLBACK_SHARE)))
   if (options.path !== '/api/players') {
     try {
-      const response = await requestKinopoisk(options, transportOptions)
+      const response = await requestKinopoisk(options, {
+        ...transportOptions,
+        timeoutMs: Math.max(1, total - reserve)
+      })
       headers['X-Data-Source'] = 'kinopoisk'
       delete headers['X-Search-Transport']
       delete headers['X-Kinobox-Transport']
@@ -261,6 +282,8 @@ export async function requestContent(
     }
   }
   headers['X-Data-Source'] = 'kinobox'
-  const timeoutMs = Math.max(1, (transportOptions?.timeoutMs || 15000) - (Date.now() - started))
+  headers['X-Search-Transport'] = 'h2'
+  headers['X-Kinobox-Transport'] = 'h2'
+  const timeoutMs = Math.max(reserve, total - (Date.now() - started))
   return requestKinobox(options, { ...transportOptions, timeoutMs })
 }

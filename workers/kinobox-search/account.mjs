@@ -13,13 +13,19 @@ import { metadataUpdate, readMetadataPatch } from './metadata.mjs'
 const TYPES = new Set(['favorite', 'later', 'watching', 'completed', 'abandoned', 'history'])
 // Older clients send full provider responses. Bound reads, then store only card fields.
 const MAX_LIST_BODY_BYTES = 64 * 1024
+export const LIST_CAPACITY = 1000
+// A title has at most one viewing status; the other lists are independent.
+export const STATUS_TYPES = ['watching', 'completed', 'abandoned']
+const VALID_ID = /^[1-9]\d{0,11}$/
+const capacityReply = (reply, extra = {}) =>
+  reply({ error: 'list_capacity', limit: LIST_CAPACITY, remaining: 0, ...extra }, 409)
 
 export async function serveAccount(request, env, origin) {
   const reply = privateReply(origin)
-  if (!secureOrigin(origin)) return reply({ error: 'HTTPS required' }, 403)
+  if (!secureOrigin(origin, env)) return reply({ error: 'HTTPS required' }, 403)
   if (request.method === 'OPTIONS') return reply(null, 204)
-  if (env.TELEGRAM_AUTH_ENABLED !== 'true' || !env.HISTORY_DB)
-    return reply({ error: 'Accounts not configured' }, 503)
+  // Sessions stay valid while new logins are switched off (TELEGRAM_AUTH_ENABLED).
+  if (!env.HISTORY_DB) return reply({ error: 'Accounts not configured' }, 503)
   try {
     if (
       !(await checkLimit(
@@ -38,19 +44,88 @@ export async function serveAccount(request, env, origin) {
       const type = importMatch[1]
       if (!TYPES.has(type) || type === 'history') return reply({ error: 'Invalid list' }, 400)
       let items
+      let partial = false
       try {
         const body = await boundedJson(request.body, MAX_LIST_BODY_BYTES)
         if (!Array.isArray(body.items) || body.items.length > 40) throw new Error('Invalid batch')
+        if (!body.items.every((item) => VALID_ID.test(String(item?.kp_id ?? item?.id ?? ''))))
+          throw new Error('Invalid IDs')
+        // Clients that read `rejected` opt in; older ones keep all-or-nothing.
+        partial = body.partial === true
+        // Duplicates collapse to the newest copy instead of failing the batch.
         items = normalizeHistory(body.items, 40)
-        if (items.length !== body.items.length) throw new Error('Invalid or duplicate IDs')
-      } catch {
+      } catch (error) {
+        if (error.message === 'Body too large')
+          return reply({ error: 'Import batch too large', maxBytes: MAX_LIST_BODY_BYTES }, 413)
         return reply({ error: 'Invalid import batch' }, 400)
       }
-      if (!items.length) return reply({ added: 0 })
-      const results = await db.batch(items.map(item => db.prepare(
-        'INSERT INTO account_lists(user_id,list_type,kp_id,metadata,added_at) VALUES (?,?,?,?,?) ON CONFLICT(user_id,list_type,kp_id) DO NOTHING'
-      ).bind(uid, type, item.kp_id, JSON.stringify(item), item.addedAt)))
-      return reply({ added: results.reduce((sum, result) => sum + result.meta.changes, 0) })
+      if (!items.length) return reply({ added: 0, rejected: 0 })
+      const ids = items.map((item) => item.kp_id)
+      const marks = ids.map(() => '?').join(',')
+      const status = STATUS_TYPES.includes(type)
+      const statusMarks = STATUS_TYPES.map(() => '?').join(',')
+      const presentSql = `SELECT DISTINCT kp_id FROM account_lists WHERE user_id=? AND kp_id IN (${marks}) AND ${
+        status ? `list_type IN (${statusMarks})` : 'list_type=?'
+      }`
+      const presentParams = [uid, ...ids, ...(status ? STATUS_TYPES : [type])]
+      const [{ results: present }, { results: size }] = await Promise.all([
+        db
+          .prepare(presentSql)
+          .bind(...presentParams)
+          .all(),
+        db
+          .prepare('SELECT COUNT(*) AS n FROM account_lists WHERE user_id=? AND list_type=?')
+          .bind(uid, type)
+          .all()
+      ])
+      // Import never overrides an entry already in this list or a status the
+      // account already chose for that title.
+      const known = new Set(present.map((row) => String(row.kp_id)))
+      const fresh = items.filter((item) => !known.has(item.kp_id))
+      const room = Math.max(0, LIST_CAPACITY - Number(size[0]?.n || 0))
+      if (!fresh.length) return reply({ added: 0, rejected: 0 })
+      if (!room) return capacityReply(reply, { added: 0, rejected: fresh.length })
+      if (!partial && fresh.length > room)
+        return capacityReply(reply, { added: 0, rejected: fresh.length - room })
+      // The checks above are advisory: concurrent writes are resolved inside the
+      // transaction. Each insert re-checks the status (one per title) and, for
+      // partial imports, the capacity; legacy imports keep the aborting trigger.
+      const insertSql = `INSERT INTO account_lists(user_id,list_type,kp_id,metadata,added_at)
+        SELECT ?,?,?,?,? WHERE 1${
+          status
+            ? ` AND NOT EXISTS (SELECT 1 FROM account_lists WHERE user_id=? AND kp_id=? AND list_type IN (${statusMarks}))`
+            : ''
+        }${
+          partial
+            ? ` AND (SELECT COUNT(*) FROM account_lists WHERE user_id=? AND list_type=?) < ${LIST_CAPACITY}`
+            : ''
+        }
+        ON CONFLICT(user_id,list_type,kp_id) DO NOTHING`
+      const results = await db.batch([
+        ...fresh.map((item) =>
+          db
+            .prepare(insertSql)
+            .bind(
+              uid,
+              type,
+              item.kp_id,
+              JSON.stringify(item),
+              item.addedAt,
+              ...(status ? [uid, item.kp_id, ...STATUS_TYPES] : []),
+              ...(partial ? [uid, type] : [])
+            )
+        ),
+        db.prepare(presentSql).bind(...presentParams)
+      ])
+      const added = results
+        .slice(0, -1)
+        .reduce((sum, result) => sum + (result.meta?.changes || 0), 0)
+      // Whatever is still absent was left out for capacity.
+      const stored = new Set((results.at(-1).results || []).map((row) => String(row.kp_id)))
+      return reply({
+        added,
+        rejected: fresh.filter((item) => !stored.has(item.kp_id)).length
+      })
     }
     const status = /^\/api\/list-status\/([1-9]\d{0,11})$/.exec(path)
     if (status && request.method === 'GET') {
@@ -115,11 +190,20 @@ export async function serveAccount(request, env, origin) {
     const [, type, id] = match
     if (publicMatch && request.method !== 'GET') return reply({ error: 'Method not allowed' }, 405)
     if (type === 'history') {
+      // Old clients use this alias. It is already authenticated and charged
+      // above, so hand the verified identity through instead of re-checking.
       const url = new URL(request.url)
       url.pathname = `/api/history${id ? `/${id}` : ''}`
-      const response = await serveHistory(new Request(url, request), env, origin)
-      if (request.method === 'GET' && response.ok) return reply((await response.json()).history)
-      return response
+      const response = await serveHistory(new Request(url, request), env, origin, uid)
+      if (request.method !== 'GET' || !response.ok) return response
+      // Keep the bare-array shape; expose the next page through a header.
+      const page = await response.json()
+      const listed = reply(page.history)
+      if (page.nextCursor) {
+        listed.headers.set('X-Next-Cursor', page.nextCursor)
+        listed.headers.set('Access-Control-Expose-Headers', 'X-Next-Cursor')
+      }
+      return listed
     }
     if (id && request.method === 'PATCH') {
       let metadata
@@ -168,20 +252,31 @@ export async function serveAccount(request, env, origin) {
           return reply({ error: 'Metadata payload too large' }, 413)
         return reply({ error: 'Invalid metadata' }, 400)
       }
-      await db
+      const upsert = db
         .prepare(
           `INSERT INTO account_lists(user_id,list_type,kp_id,metadata,added_at) VALUES (?,?,?,?,?)
          ON CONFLICT(user_id,list_type,kp_id) DO UPDATE SET metadata=excluded.metadata,added_at=excluded.added_at`
         )
         .bind(uid, type, id, JSON.stringify(item), item.addedAt)
-        .run()
-      return reply({ ok: true })
+      if (!STATUS_TYPES.includes(type)) {
+        await upsert.run()
+        return reply({ ok: true })
+      }
+      // Choosing a status replaces the previous one in the same transaction.
+      const others = STATUS_TYPES.filter((other) => other !== type)
+      const [removed] = await db.batch([
+        db
+          .prepare(
+            `DELETE FROM account_lists WHERE user_id=? AND kp_id=? AND list_type IN (${others.map(() => '?').join(',')})`
+          )
+          .bind(uid, id, ...others),
+        upsert
+      ])
+      return reply({ ok: true, replaced: removed.meta.changes > 0 })
     }
     return reply({ error: 'Method not allowed' }, 405)
   } catch (error) {
-    return reply(
-      { error: 'Account service unavailable' },
-      /list_capacity/.test(error.message) ? 409 : 503
-    )
+    if (/list_capacity/.test(error.message)) return capacityReply(reply)
+    return reply({ error: 'Account service unavailable' }, 503)
   }
 }

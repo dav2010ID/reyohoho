@@ -5,13 +5,13 @@ import MovieSearch from './MovieSearch.vue'
 import RandomMovieModal from './RandomMovieModal.vue'
 import { MovieList } from './MovieList'
 import { useMainStore } from '@/store/main'
-import { useApiStore } from '@/store/api'
 
 const mocks = vi.hoisted(() => ({ random: vi.fn(), info: vi.fn(), top: vi.fn(), search: vi.fn() }))
 vi.mock('@/api/movies', () => ({
   getRandomMovie: mocks.random,
   getKpInfo: mocks.info,
   getMovies: mocks.top,
+  getLatestReleases: vi.fn(async () => []),
   apiSearch: mocks.search,
   getKpIDfromIMDB: vi.fn(),
   getKpIDfromSHIKI: vi.fn()
@@ -56,25 +56,20 @@ describe('random film interaction', () => {
     vi.restoreAllMocks()
   })
   const modal = () => wrapper.findComponent(RandomMovieModal)
-  it('shows only ID searches served by the selected configuration', async () => {
+  it('offers only title and Kinopoisk ID searches', async () => {
     const tabs = () => wrapper.get('.search-type-buttons').text()
-    expect(tabs()).toContain('ID Кинопоиск')
-    expect(tabs()).not.toContain('ID IMDB')
-    expect(tabs()).not.toContain('ID Shikimori')
-    useMainStore().contentApiProvider = 'local'
-    await flushPromises()
-    expect(tabs()).toContain('ID Shikimori')
-    expect(tabs()).not.toContain('ID IMDB')
-    useApiStore().$patch({ backendMode: 'local', backendModeUserSelected: true })
-    await flushPromises()
-    expect(tabs()).toContain('ID IMDB')
-    await wrapper.findAll('.search-type-buttons button').find(b => b.text() === 'ID IMDB').trigger('click')
-    useApiStore().backendMode = 'auto'
-    await flushPromises()
-    expect(wrapper.get('.search-type-buttons .active').text()).toBe('Название')
+    for (const provider of ['kinobox', 'local']) {
+      useMainStore().contentApiProvider = provider
+      await flushPromises()
+      expect(tabs()).toContain('ID КП')
+      expect(tabs()).not.toContain('ID IMDb')
+      expect(tabs()).not.toContain('ID Shikimori')
+    }
   })
+  // The dialog module loads on the first open.
   const open = async () => {
     await wrapper.find('.random-button').trigger('click')
+    await vi.dynamicImportSettled()
     await flushPromises()
   }
   it('creates history on the first reset of a search link and then retains it', async () => {

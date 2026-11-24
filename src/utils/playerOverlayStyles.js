@@ -8,11 +8,11 @@ const MUTED_TEXT = 'rgba(255, 255, 255, 0.6)'
 
 export const overlayInlineStyles = {
   settingsTitle:
-    'color: var(--accent-color, #6c5ce7); margin: 0 0 24px 0; font-size: 20px; font-weight: 600; text-align: center;',
+    'color: var(--accent-text, #988dee); margin: 0 0 24px 0; font-size: 20px; font-weight: 600; text-align: center;',
   settingsOptions: 'display: flex; flex-direction: column; gap: 16px;',
   settingsLabel:
     'display: flex; align-items: center; gap: 12px; color: white; cursor: pointer; padding: 8px; border-radius: 8px; background: rgba(255, 255, 255, 0.05);',
-  settingsCheckbox: 'width: 18px; height: 18px; accent-color: var(--accent-color, #6c5ce7);',
+  settingsCheckbox: 'width: 18px; height: 18px; accent-color: var(--accent-ui, #7364e8);',
   settingsLabelText: 'font-size: 16px;',
   settingsActions: 'display: flex; gap: 12px; margin-top: 24px; justify-content: center;',
   settingsSaveButton:

@@ -212,7 +212,7 @@ try {
       await page.goto(origin + '/', { waitUntil: 'networkidle' })
       if (excluded.auth) {
         await page.evaluate(() =>
-          history.replaceState(null, '', '/auth-success?token=fixture-secret')
+          window.history.replaceState(null, '', '/auth-success?token=fixture-secret')
         )
         await page.evaluate(() => {
           window.loadReyohohoAnalytics()

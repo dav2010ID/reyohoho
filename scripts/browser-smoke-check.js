@@ -11,7 +11,6 @@ import {
 } from './browser-test-utils.js'
 
 const baseUrl = process.argv[2] || 'http://127.0.0.1:4178/'
-const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms))
 
 async function recordStep(steps, name, run) {
   const startedAt = Date.now()

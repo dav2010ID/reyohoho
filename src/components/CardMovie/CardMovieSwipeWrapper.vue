@@ -159,7 +159,7 @@ function resetSwipe() {
 .swipe-container {
   position: relative;
   overflow: hidden;
-  border-radius: 15px;
+  border-radius: var(--radius-l);
 }
 
 .swipe-background {
@@ -231,7 +231,7 @@ function resetSwipe() {
 
 @media (max-width: 620px) {
   .swipe-container {
-    border-radius: 15px;
+    border-radius: var(--radius-l);
   }
 
   .swipe-background {

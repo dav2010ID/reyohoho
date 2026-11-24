@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { mergeHistory, normalizeHistory, readLegacyHistory } from '../../shared/history-data.js'
+import { HISTORY_CAPACITY, HistoryCapacityError, mergeHistory, normalizeHistory, readLegacyHistory } from '../../shared/history-data.js'
 import { LEGACY_ORIGIN, validateTransferMessage } from './historyTransfer'
 
 describe('history migration', () => {
@@ -34,7 +34,7 @@ describe('history migration', () => {
     expect(history[0].poster).toBe('')
     expect(history[0].title).toHaveLength(300)
     expect(mergeHistory([{ kp_id: 301, title: 'current' }], [{ kp_id: 301, title: 'old' }, { kp_id: 42 }])[0].title).toBe('current')
-    expect(() => normalizeHistory(Array(1001).fill({ kp_id: 1 }))).toThrow()
+    expect(() => normalizeHistory(Array(HISTORY_CAPACITY + 1).fill({ kp_id: 1 }))).toThrow()
   })
   it('requires exact origin, popup and nonce', () => {
     const popup = {}
@@ -44,13 +44,28 @@ describe('history migration', () => {
     expect(validateTransferMessage(event, {}, 'nonce')).toBeNull()
     expect(validateTransferMessage(event, popup, 'other')).toBeNull()
   })
-  it('keeps all current entries when the merged history exceeds the limit', () => {
+  it('refuses to drop entries when the merged history exceeds the limit', () => {
     const current = Array.from({ length: 999 }, (_, i) => ({ kp_id: i + 1 }))
-    const imported = [{ kp_id: 2000 }, { kp_id: 2001 }]
-    const merged = mergeHistory(current, imported)
-    expect(merged).toHaveLength(1000)
-    expect(current.every((item) => merged.some((entry) => entry.kp_id === String(item.kp_id)))).toBe(true)
-    expect(merged.some((item) => item.kp_id === '2000')).toBe(true)
+    const imported = [{ kp_id: 2000 }, { kp_id: 2001 }, { kp_id: 5 }]
+    expect(mergeHistory(current, imported, 1001)).toHaveLength(1001)
+    let error
+    try { mergeHistory(current, imported, 1000) } catch (caught) { error = caught }
+    expect(error).toBeInstanceOf(HistoryCapacityError)
+    expect(error).toMatchObject({ code: 'history_capacity', total: 1001, capacity: 1000 })
+    expect(error.message).toContain('Удалите не меньше 1 записей')
+  })
+  it('reads the current per-type guest key and keeps the newest copy', () => {
+    const storage = { getItem(key) {
+      if (key === 'reyohoho-user-lists:history') return JSON.stringify([
+        { kp_id: 301, title: 'new', addedAt: '2026-11-01T00:00:00.000Z' },
+        { kp_id: 7, addedAt: '2026-10-01T00:00:00.000Z' }
+      ])
+      if (key === 'main') return JSON.stringify({ history: [{ kp_id: 301, title: 'old', addedAt: '2025-01-01' }] })
+      return null
+    } }
+    const history = readLegacyHistory(storage)
+    expect(history.map((item) => item.kp_id)).toEqual(['301', '7'])
+    expect(history[0].title).toBe('new')
   })
   it('reads nested Vuex history and skips damaged stores', () => {
     const storage = { getItem(key) {

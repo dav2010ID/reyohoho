@@ -2,26 +2,31 @@
   <button
     type="button"
     class="deleteButton"
+    :aria-label="label"
     @click.stop.prevent="emit('click', $event)"
     @mousedown.stop
     @pointerdown.stop
   >
     <TrashIcon />
 
-    <span class="tooltip">Delete</span>
+    <span class="tooltip" aria-hidden="true">{{ label }}</span>
   </button>
 </template>
 
 <script setup>
 import TrashIcon from '@/components/icons/TrashIcon.vue'
 
+defineProps({
+  label: { type: String, default: 'Удалить' }
+})
+
 const emit = defineEmits(['click'])
 </script>
 
 <style scoped>
 .deleteButton {
-  width: 40px;
-  height: 40px;
+  width: 44px;
+  height: 44px;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -29,7 +34,7 @@ const emit = defineEmits(['click'])
   gap: 3px;
   background-color: transparent;
   border: none;
-  border-radius: 8px;
+  border-radius: var(--radius-m);
   cursor: pointer;
   transition: all 0.2s;
   position: relative;
@@ -59,7 +64,7 @@ const emit = defineEmits(['click'])
   top: -40px;
   background-color: var(--tooltip-color);
   color: white;
-  border-radius: 5px;
+  border-radius: var(--radius-m);
   font-size: 12px;
   padding: 8px 12px;
   font-weight: 600;

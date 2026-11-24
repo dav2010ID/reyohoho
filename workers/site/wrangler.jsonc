@@ -1,11 +1,15 @@
 {
   "$schema": "https://raw.githubusercontent.com/cloudflare/workers-sdk/main/packages/wrangler/config-schema.json",
   "name": "reyohoho-site",
+  "main": "src/index.mjs",
   "compatibility_date": "2026-11-10",
   "assets": {
     "directory": "../../dist",
-    "html_handling": "drop-trailing-slash",
-    "not_found_handling": "single-page-application"
+    "binding": "ASSETS",
+    // Prerendered pages are directories: /movie/301/slug/ is canonical.
+    "html_handling": "auto-trailing-slash",
+    // Misses go to the Worker, which decides 301 / 200 noindex / real 404.
+    "not_found_handling": "none"
   },
   "observability": { "enabled": true, "traces": { "enabled": true } }
 }

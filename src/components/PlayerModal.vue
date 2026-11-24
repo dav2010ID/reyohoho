@@ -1,11 +1,18 @@
 <template>
   <div class="modal" @click.self="$emit('close')">
-    <div v-dialog-focus="() => $emit('close')" aria-label="Выбор плеера" class="modal-content" @click.stop>
+    <div
+      v-dialog-focus="() => $emit('close')"
+      aria-label="Выбор плеера"
+      class="modal-content"
+      @click.stop
+    >
       <button class="close" @click="$emit('close')">&times;</button>
 
       <h2 v-if="!activeGroup">Выберите плеер</h2>
       <h2 v-else>
-        <button class="back-btn" @click="collapseGroup">← Назад</button>
+        <button class="back-btn" @click="collapseGroup">
+          <span class="sym" aria-hidden="true">←</span> Назад
+        </button>
         {{ activeGroup }}
       </h2>
 
@@ -149,7 +156,7 @@ const groupHasWarning = (group) => groupPlayers(group).some((player) => player.w
 .modal-content {
   background: #2d2d2d;
   padding: 20px;
-  border-radius: 8px;
+  border-radius: var(--radius-m);
   width: 90%;
   max-width: 500px;
   max-height: 80vh;
@@ -203,7 +210,7 @@ h2 {
   padding: 10px;
   background-color: #444;
   border: none;
-  border-radius: 4px;
+  border-radius: var(--radius-s);
   color: #fff;
   font-size: 1rem;
   cursor: pointer;
@@ -222,7 +229,8 @@ h2 {
 
 .player-item.active,
 .group-item.active {
-  background-color: var(--accent-color);
+  background-color: var(--accent-solid);
+  color: var(--accent-contrast);
   box-shadow: 0 0 5px var(--accent-semi-transparent);
 }
 

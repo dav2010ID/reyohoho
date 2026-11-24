@@ -1,14 +1,23 @@
 <template>
-  <ErrorMessage v-if="errorMessage" :message="errorMessage" :code="errorCode" show-retry @retry="retryPlayers" />
+  <ErrorMessage
+    v-if="errorMessage"
+    :message="errorMessage"
+    :code="errorCode"
+    show-retry
+    @retry="retryPlayers"
+  />
 
   <template v-else>
-    <PlayerSelectorBar
-      :selected-label="selectedPlayerLabel"
-      :has-players="playersInternal.length > 0"
-      :show-source-button="showSourceButton"
-      @open-player-modal="openPlayerModal"
-      @open-source-modal="openSourceModal"
-    />
+    <!-- Desktop: the chip sits in the movie header row (selectorTarget), otherwise above
+         the player. Phones: it leads the tool row under the player. -->
+    <Teleport v-if="!isMobile" defer :to="selectorTarget || 'body'" :disabled="!selectorTarget">
+      <PlayerSelectorBar
+        :inline="Boolean(selectorTarget)"
+        :selected-label="selectedPlayerLabel"
+        :has-players="playersInternal.length > 0"
+        @open-player-modal="openPlayerModal"
+      />
+    </Teleport>
     <!-- Модальное окно выбора плеера -->
     <PlayerModal
       v-if="showPlayerModal"
@@ -18,15 +27,6 @@
       @select="handlePlayerSelect"
     />
 
-    <PlayerSourceModal
-      v-if="showSourceModal"
-      :candidates="sourceCandidates"
-      :loading="sourceLoading"
-      :error="sourceError"
-      @close="closeSourceModal"
-      @select="applySourceCandidate"
-    />
-
     <!-- Единый контейнер плеера -->
     <div
       ref="containerRef"
@@ -34,8 +34,10 @@
       :style="!theaterMode ? containerStyle : {}"
     >
       <div class="iframe-wrapper" :style="!theaterMode ? iframeWrapperStyle : {}">
+        <!-- Sandbox flags apply when the frame is created: a change gets a new frame. -->
         <iframe
           v-show="!iframeLoading && safeIframeUrl"
+          :key="playerIframeSandbox ? 'sandboxed' : 'plain'"
           ref="playerIframe"
           :src="safeIframeUrl || undefined"
           :title="movieInfo?.title ? `Плеер для ${movieInfo.title}` : 'Видео-плеер'"
@@ -57,15 +59,16 @@
         <SpinnerLoading
           v-if="iframeLoading && !playersEmptyMessage"
           class="player-loading-spinner"
-          :text="selectedPlayerInternal ? `Загружается плеер: ${getProviderDisplayName(selectedPlayerInternal)}` : `Поиск плееров${searchingSource ? ': ' + searchingSource : '…'}`"
+          :text="
+            selectedPlayerInternal
+              ? `Загружается плеер: ${getProviderDisplayName(selectedPlayerInternal)}`
+              : `Поиск плееров${searchingSource ? ': ' + searchingSource : '…'}`
+          "
         />
         <div v-else-if="playersEmptyMessage" class="player-empty-state">
           <p>{{ playersEmptyMessage }}</p>
           <button type="button" @click="retryPlayers">Повторить</button>
           <button type="button" @click="router.push('/settings?tab=api')">Сменить источник</button>
-          <button v-if="showSourceButton" type="button" @click="openSourceModal">
-            Выбрать источник
-          </button>
         </div>
       </div>
 
@@ -89,6 +92,13 @@
 
     <!-- Кнопки управления -->
     <div v-if="!theaterMode" class="controls">
+      <PlayerSelectorBar
+        v-if="isMobile"
+        inline
+        :selected-label="selectedPlayerLabel"
+        :has-players="playersInternal.length > 0"
+        @open-player-modal="openPlayerModal"
+      />
       <div class="main-controls">
         <div
           v-if="!isMobile && kp_id"
@@ -420,9 +430,10 @@
           <button
             v-if="kp_id"
             class="mobile-control-btn favorite-btn"
-            :class="{ active: isInAnyList }"
+            :class="{ active: movieInfo?.lists?.isFavorite }"
             type="button"
-            aria-label="Добавить в список"
+            :aria-label="movieInfo?.lists?.isFavorite ? 'Убрать из избранного' : 'В избранное'"
+            :aria-pressed="Boolean(movieInfo?.lists?.isFavorite)"
             @click="toggleList(USER_LIST_TYPES_ENUM.FAVORITE)"
           >
             <span class="material-icons">{{
@@ -589,9 +600,6 @@ import {
   getSafePlayerUrl
 } from '@/utils/playerSecurity'
 
-const PlayerSourceModal = defineAsyncComponent(
-  () => import('@/components/player/PlayerSourceModal.vue')
-)
 const PlayerModal = defineAsyncComponent(() => import('@/components/PlayerModal.vue'))
 
 const mainStore = useMainStore()
@@ -603,6 +611,11 @@ const props = defineProps({
   movieInfo: {
     type: Object,
     default: () => ({})
+  },
+  // CSS selector of a header slot for the player chip on desktop.
+  selectorTarget: {
+    type: String,
+    default: ''
   }
 })
 const emit = defineEmits(['update:selectedPlayer', 'toggle-list'])
@@ -650,22 +663,14 @@ const {
   playersInternal,
   selectedPlayerInternal,
   showPlayerModal,
-  showSourceModal,
-  sourceCandidates,
-  sourceLoading,
-  sourceError,
   errorMessage,
   errorCode,
   playersEmptyMessage,
-  showSourceButton,
   selectedPlayerLabel,
   searchingSource,
   fetchPlayers,
   openPlayerModal,
-  closePlayerModal,
-  openSourceModal,
-  closeSourceModal,
-  applySourceCandidate
+  closePlayerModal
 } = usePlayerSources({
   props,
   getProviderDisplayName,
@@ -673,8 +678,9 @@ const {
 })
 
 const safeIframeUrl = computed(() => getSafePlayerUrl(selectedPlayerInternal.value?.iframe))
-// Fixed for the page lifetime: a sandbox change applies only to the next iframe navigation.
-const playerIframeSandbox = getPlayerIframeSandbox()
+const playerIframeSandbox = computed(() =>
+  getPlayerIframeSandbox(import.meta.env, safeIframeUrl.value)
+)
 const activeTooltip = ref(null)
 const tooltipHovered = ref(false)
 let hideTimeout = null
@@ -1012,18 +1018,15 @@ watch(selectedPlayerInternal, (newVal) => {
   }
 })
 
-watch(
-  kp_id,
-  async (newKpId) => {
-    if (newKpId) {
-      iframeLoading.value = true
-      selectedPlayerInternal.value = null
-      resetPlayerPlayback()
-      await fetchPlayers()
-      if (isCentered.value) centerPlayer()
-    }
+watch(kp_id, async (newKpId) => {
+  if (newKpId) {
+    iframeLoading.value = true
+    selectedPlayerInternal.value = null
+    resetPlayerPlayback()
+    await fetchPlayers()
+    if (isCentered.value) centerPlayer()
   }
-)
+})
 
 watch(
   () => mainStore.contentApiProvider,

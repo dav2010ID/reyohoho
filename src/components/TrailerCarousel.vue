@@ -1,9 +1,17 @@
 <template>
-  <section v-if="availableVideos.length" class="carousel-container">
+  <section
+    v-if="availableVideos.length"
+    class="carousel-container"
+    :class="{ 'carousel-container--single': single }"
+  >
+    <!-- One trailer: "Трейлер", no count and no caption repeating the word. -->
     <h2 class="trailers-title">
-      Трейлеры <span class="trailers-count">{{ availableVideos.length }}</span>
+      <template v-if="single">Трейлер</template>
+      <template v-else>
+        Трейлеры <span class="trailers-count">{{ availableVideos.length }}</span>
+      </template>
     </h2>
-    <div class="carousel-wrapper">
+    <div v-show="!(single && activeVideo)" class="carousel-wrapper">
       <!-- Кнопка для прокрутки влево -->
       <button
         v-show="!isMobile && canScrollLeft"
@@ -49,11 +57,12 @@
       </button>
     </div>
     <!-- Встроенный плеер -->
-    <div v-if="activeVideo" class="video-player">
+    <div v-if="activeVideo" class="video-player" :class="{ 'video-player--inline': single }">
       <iframe
-        :src="activeVideo.iframeUrl"
+        :src="playerSrc"
         :title="activeVideo.name || 'Трейлер YouTube'"
         frameborder="0"
+        allow="autoplay; encrypted-media; picture-in-picture; fullscreen"
         allowfullscreen
       ></iframe>
     </div>
@@ -76,7 +85,8 @@ const props = defineProps({
   activeVideoIndex: {
     type: Number,
     default: null
-  }
+  },
+  single: Boolean
 })
 
 const emit = defineEmits(['select'])
@@ -112,6 +122,13 @@ const activeVideo = computed(() =>
 )
 
 // Выбор видео для отображения во встроенном плеере
+// Inline single trailer: the click already asked to play, so start it.
+const playerSrc = computed(() => {
+  const url = activeVideo.value?.iframeUrl || ''
+  if (!props.single || !url) return url
+  return `${url}${url.includes('?') ? '&' : '?'}autoplay=1`
+})
+
 const selectVideo = (index) => {
   activeVideoIndex.value = index
   emit('select', availableVideos.value[index])
@@ -161,33 +178,19 @@ onBeforeUnmount(() => {
 
 <style lang="scss" scoped>
 .trailers-title {
-  display: inline-flex;
-  align-items: center;
-  gap: 10px;
-  margin: 0 0 16px;
+  margin: 0 0 20px;
   color: #fff;
-  font-size: 1.35rem;
-  line-height: 1.1;
-  letter-spacing: -0.02em;
-
-  &::before {
-    content: '';
-    width: 10px;
-    height: 10px;
-    border-radius: 999px;
-    background: var(--accent-color);
-    box-shadow: 0 0 10px color-mix(in srgb, var(--accent-color) 55%, transparent);
-  }
+  font-size: 1.4rem;
+  font-weight: 600;
+  line-height: 1.2;
+  letter-spacing: -0.01em;
 }
 
 .trailers-count {
-  padding: 2px 9px;
-  border-radius: 999px;
-  background: rgba(255, 255, 255, 0.08);
-  color: #aaa;
-  font-size: 0.8rem;
-  font-weight: 600;
-  letter-spacing: 0;
+  margin-left: 6px;
+  color: rgba(255, 255, 255, 0.5);
+  font-size: 1rem;
+  font-weight: 500;
 }
 
 .carousel-wrapper {
@@ -211,12 +214,12 @@ onBeforeUnmount(() => {
 
   &::-webkit-scrollbar-track {
     background: transparent;
-    border-radius: 10px;
+    border-radius: var(--radius-l);
   }
 
   &::-webkit-scrollbar-thumb {
     background: #494949;
-    border-radius: 10px;
+    border-radius: var(--radius-l);
   }
 
   &::-webkit-scrollbar-thumb:hover {
@@ -263,8 +266,8 @@ onBeforeUnmount(() => {
   width: 280px;
   padding: 0;
   scroll-snap-align: start;
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  border-radius: 14px;
+  border: 1px solid transparent;
+  border-radius: var(--radius-m);
   overflow: hidden;
   background: rgba(255, 255, 255, 0.04);
   color: inherit;
@@ -280,11 +283,7 @@ onBeforeUnmount(() => {
 .carousel-item:hover,
 .carousel-item:focus-visible,
 .carousel-item.is-active {
-  transform: translateY(-4px);
-  border-color: var(--accent-color);
-  box-shadow:
-    0 10px 24px rgba(0, 0, 0, 0.35),
-    0 0 18px var(--accent-semi-transparent);
+  border-color: var(--accent-ui);
 }
 
 .thumbnail {
@@ -327,8 +326,13 @@ onBeforeUnmount(() => {
 
 .carousel-item:hover .play-badge,
 .carousel-item.is-active .play-badge {
-  background: var(--accent-color);
+  background: var(--accent-solid);
+  color: var(--accent-contrast);
   transform: scale(1.08);
+}
+
+.carousel-container--single .video-name {
+  display: none;
 }
 
 .video-name {
@@ -348,9 +352,15 @@ onBeforeUnmount(() => {
   max-width: 1200px;
   aspect-ratio: 16 / 9;
   margin: 18px auto 0;
-  border-radius: 12px;
+  border-radius: var(--radius-l);
   overflow: hidden;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+}
+
+.video-player--inline {
+  max-width: none;
+  margin: 0;
+  border-radius: var(--radius-m);
 }
 
 .video-player iframe {

@@ -177,7 +177,6 @@ for(const type of ['largest-contentful-paint','layout-shift','longtask']){
   }}).observe({type,buffered:true});
 }
 localStorage.clear();sessionStorage.clear();
-localStorage.setItem('api',JSON.stringify({backendMode:'local',backendModeUserSelected:true}));
 </script>`
             )
             // Keep layout; replace remote posters with a deterministic local image.
@@ -195,7 +194,8 @@ localStorage.setItem('api',JSON.stringify({backendMode:'local',backendModeUserSe
               body = body.replace(/srcset="[^"]+"/g, `srcset="${origin}/__profile/poster.svg"`)
             }
             body = body.replace(
-              /(<script>window\.__INITIAL_STATE__=)(.*?)(<\/script>)/s,
+              // Prerendered state ships as JSON (src/utils/ssgState.js).
+              /(<script type="application\/json" id="ssg-state">)(.*?)(<\/script>)/s,
               (_, start, serialized, end) => {
                 const state = JSON.parse(JSON.parse(serialized))
                 const replacePosters = (value) => {

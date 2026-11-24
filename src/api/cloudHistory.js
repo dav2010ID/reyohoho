@@ -1,8 +1,15 @@
 import { useAuthStore } from '@/store/auth'
 import { reactive } from 'vue'
 import { useMainStore } from '@/store/main'
-import { normalizeHistory } from '../../shared/history-data.js'
+import { HISTORY_CAPACITY, HistoryCapacityError, normalizeHistory } from '../../shared/history-data.js'
+import { chunkByBytes } from '@/utils/importBatches'
+import { accountError } from './accountErrors'
 import { enrichListMetadata } from './listMetadata'
+import { WORKER_API_URL } from '@/api/workerOrigin'
+
+// Worker limits for POST /api/history/import (workers/kinobox-search/history.mjs).
+const HISTORY_IMPORT_ITEMS = 40
+const HISTORY_IMPORT_BYTES = 390000
 
 export const cloudHistoryAvailable =
   import.meta.env.VITE_CLOUD_HISTORY_ENABLED === 'true' ||
@@ -22,7 +29,7 @@ export async function historyRequest(path = '', method = 'GET', body) {
   if (!cloudHistoryAvailable || !auth.isAuthenticated)
     throw new Error('Войдите в аккаунт для облачной истории')
   const token = auth.token
-  const response = await fetch(`https://api.reyhoho.fun/api/history${path}`, {
+  const response = await fetch(`${WORKER_API_URL}/api/history${path}`, {
     method,
     credentials: 'omit',
     redirect: 'error',
@@ -33,15 +40,12 @@ export async function historyRequest(path = '', method = 'GET', body) {
   })
   // Do not apply data to a different account after an in-flight login/logout.
   if (useAuthStore().token !== token) throw new Error('Аккаунт изменился. Повторите операцию')
-  if (!response.ok) {
-    const error = new Error(
-      response.status === 503
+  if (!response.ok)
+    throw await accountError(response, (status) =>
+      status === 503
         ? 'Облачная история пока недоступна. Локальная история сохранена'
-        : `Ошибка облачной истории (${response.status})`
+        : `Ошибка облачной истории (${status})`
     )
-    error.response = { headers: response.headers, status: response.status, data: { error: error.message } }
-    throw error
-  }
   const data = await response.json()
   if (useAuthStore().token !== token) throw new Error('Аккаунт изменился. Повторите операцию')
   return data
@@ -57,20 +61,41 @@ export async function getCloudHistory() {
     const page = await historyRequest(cursor ? `?cursor=${encodeURIComponent(cursor)}` : '')
     if (!Array.isArray(page.history)) throw new Error('Неполный ответ облачной истории')
     items.push(...page.history)
-    if (items.length > 5000) throw new Error('Превышен лимит облачной истории')
+    if (items.length > HISTORY_CAPACITY) throw new Error('Превышен лимит облачной истории')
     cursor = page.nextCursor || null
     if (cursor && seen.has(cursor)) throw new Error('Ошибка пагинации истории')
     if (cursor) seen.add(cursor)
   } while (cursor)
-  return normalizeHistory(items, 5000)
+  return normalizeHistory(items, HISTORY_CAPACITY)
 }
 
 export async function importCloudHistory(items) {
   const token = useAuthStore().token
-  const normalized = normalizeHistory(items, 5000)
-  for (let i = 0; i < normalized.length; i += 40) {
+  if (Array.isArray(items) && items.length > HISTORY_CAPACITY)
+    throw new HistoryCapacityError(items.length)
+  const batches = chunkByBytes(normalizeHistory(items, HISTORY_CAPACITY), {
+    maxItems: HISTORY_IMPORT_ITEMS,
+    maxBytes: HISTORY_IMPORT_BYTES,
+    envelope: (history) => ({ history, partial: true })
+  })
+  let rejected = 0
+  for (const history of batches) {
     if (useAuthStore().token !== token) throw new Error('Аккаунт изменился. Повторите операцию')
-    await historyRequest('/import', 'POST', { history: normalized.slice(i, i + 40) })
+    try {
+      rejected += Number((await historyRequest('/import', 'POST', { history, partial: true })).rejected) || 0
+    } catch (error) {
+      if (error.code !== 'history_capacity') throw error
+      rejected += history.length
+    }
+  }
+  // Everything that fitted is saved; report what did not instead of hiding it.
+  if (rejected) {
+    const error = new Error(
+      `Облачная история заполнена (${HISTORY_CAPACITY} записей): не перенесено ${rejected}. Удалите старые записи и повторите.`
+    )
+    error.code = 'history_capacity'
+    error.rejected = rejected
+    throw error
   }
   if (useAuthStore().token !== token) throw new Error('Аккаунт изменился. Повторите операцию')
   const cards = reactive(await getCloudHistory())

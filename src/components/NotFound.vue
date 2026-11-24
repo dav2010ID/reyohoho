@@ -1,67 +1,117 @@
 <template>
+  <!-- No card: a large code, one sentence and two ways forward. -->
   <div class="error-page">
-    <div class="error-content">
-      <h1>404 - Страница не найдена</h1>
-      <p>Такой страницы не существует или ссылка устарела.</p>
-      <button class="home-button" @click="goToHome">На главную</button>
-    </div>
+    <p class="error-code" aria-hidden="true">404</p>
+    <h1>Страница не найдена</h1>
+    <p class="error-text">
+      Такой страницы нет или ссылка устарела. Найдите фильм или вернитесь на главную.
+    </p>
+    <form class="error-search" role="search" @submit.prevent="openSearch">
+      <input
+        v-model="query"
+        type="search"
+        class="error-search__input"
+        placeholder="Название фильма или сериала"
+        aria-label="Поиск фильмов и сериалов"
+      />
+      <button type="submit" class="error-search__button" aria-label="Найти">
+        <i class="fas fa-search" aria-hidden="true"></i>
+      </button>
+    </form>
+    <router-link to="/" class="home-link">На главную</router-link>
   </div>
 </template>
 
 <script setup>
-import { useRouter } from 'vue-router'
+import { ref } from 'vue'
+import { useNavbarStore } from '@/store/navbar'
 
-const router = useRouter()
+const navbarStore = useNavbarStore()
+const query = ref('')
 
-const goToHome = () => {
-  router.push('/')
-}
+const openSearch = () => navbarStore.openSearchModal(query.value)
 </script>
 
 <style scoped>
 .error-page {
   display: flex;
   flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  height: 100vh;
-  background-color: #000;
-  color: #fff;
-  text-align: center;
-}
-
-.error-content {
-  max-width: 600px;
-  padding: 20px;
-  background-color: #1a1a1a;
-  border-radius: 10px;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-}
-
-.error-content h1 {
-  font-size: 3rem;
-  margin-bottom: 20px;
+  align-items: flex-start;
+  gap: 16px;
+  box-sizing: border-box;
+  max-width: 640px;
+  padding: var(--page-top) 24px 64px;
   color: #fff;
 }
 
-.error-content p {
-  font-size: 1.2rem;
-  margin-bottom: 30px;
-  color: #ccc;
+.error-code {
+  margin: 0;
+  color: rgba(255, 255, 255, 0.12);
+  font-size: clamp(96px, 18vw, 160px);
+  font-weight: 900;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -0.04em;
+  line-height: 0.9;
 }
 
-.home-button {
-  background-color: var(--accent-color);
-  color: #fff;
+h1 {
+  margin: 0;
+  font-size: var(--fs-2xl);
+  font-weight: 800;
+  letter-spacing: -0.02em;
+}
+
+.error-text {
+  margin: 0;
+  color: var(--text-dim);
+  font-size: var(--fs-m);
+  line-height: 1.5;
+}
+
+.error-search {
+  display: flex;
+  width: 100%;
+  max-width: 480px;
+  margin-top: 8px;
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  border-radius: var(--radius-m);
+  background: var(--surface-raised);
+}
+
+.error-search:focus-within {
+  border-color: var(--accent-ui);
+  outline: 2px solid var(--accent-color);
+  outline-offset: 2px;
+}
+
+.error-search__input {
+  flex: 1;
+  min-width: 0;
+  min-height: 46px;
+  padding: 0 12px;
   border: none;
-  padding: 10px 20px;
-  border-radius: 5px;
-  font-size: 1rem;
-  cursor: pointer;
-  transition: background-color 0.3s ease;
+  background: transparent;
+  color: #fff;
+  font-size: 16px;
 }
 
-.home-button:hover {
-  background-color: var(--accent-hover);
+.error-search__input:focus {
+  outline: none;
+}
+
+.error-search__button {
+  width: 46px;
+  border: none;
+  background: none;
+  color: #fff;
+  cursor: pointer;
+}
+
+.home-link {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  color: var(--accent-light);
+  font-size: var(--fs-m);
 }
 </style>

@@ -1,6 +1,5 @@
 import { useAuthStore } from '@/store/auth'
-import { legacyMovieMethodAvailable } from '@/api/movieCapabilities'
-import { getLegacyShikiId, handleHashNavigation } from '@/helpers/hashHandler'
+import { handleHashNavigation } from '@/helpers/hashHandler'
 import { buildMoviePath, getMovieSeoEntry } from '@/utils/movieSeo'
 import {
   createDeferredAnalyticsLoader,
@@ -20,17 +19,6 @@ const shouldSkipPageViewTracking = (to) => {
 
 export const installRouterGuards = (router, { isClient = typeof window !== 'undefined' } = {}) => {
   router.beforeEach((to) => {
-    const shikiLink =
-      to.name === 'movie-info-shiki' ||
-      (to.name === 'movie-info' && to.params.kp_id.startsWith('shiki')) ||
-      (to.name === 'home' && getLegacyShikiId(to.hash))
-    const imdbLink = to.name === 'home' && to.hash.startsWith('#imdb=')
-    if (
-      (shikiLink && !legacyMovieMethodAvailable('getShikiInfo')) ||
-      (imdbLink && !legacyMovieMethodAvailable('getKpIDfromIMDB'))
-    ) {
-      return { name: 'Settings', query: { tab: 'api', unavailable: shikiLink ? 'shiki' : 'imdb' } }
-    }
     if (to.name === 'auth-success' && Object.hasOwn(to.query, 'token')) {
       const query = { ...to.query }
       delete query.token

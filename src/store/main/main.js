@@ -3,7 +3,7 @@ import { defineStore } from 'pinia'
 import { MAIN_STORE_NAME } from '../constants'
 import { beforeHydrateMainStore } from '../utils'
 import { resolvePosterByMovie } from '@/utils/mediaUtils'
-import { cardRatings } from '../../../shared/history-data.js'
+import { cardRatings, HISTORY_CAPACITY } from '../../../shared/history-data.js'
 import { getLocalList, replaceLocalList } from '@/utils/localUserLists'
 
 const ratingWrites = new WeakMap()
@@ -14,17 +14,11 @@ export const useMainStore = defineStore(MAIN_STORE_NAME, {
     historyOwner: 'guest',
     cloudHistoryAccount: null,
     isHistoryAllowed: true,
-    isCommentsEnabled: true,
-    isAutoShowComments: false,
-    commentsSortBy: 'rating',
     isMobile: false,
     dimmingEnabled: false,
     isCtrlFEnabled: false,
-    submitterUsername: '',
     cardSize: 'medium',
-    isStreamerMode: true,
     contentApiProvider: 'kinobox',
-    searchApiProvider: 'kinobox',
     sidebarAutoHide: false,
     sidebarPosition: 'left'
   }),
@@ -55,9 +49,6 @@ export const useMainStore = defineStore(MAIN_STORE_NAME, {
     },
     toggleCtrlF() {
       this.isCtrlFEnabled = !this.isCtrlFEnabled
-    },
-    setSubmitterUsername(username) {
-      this.submitterUsername = username
     },
 
     addToHistory(movie) {
@@ -99,6 +90,8 @@ export const useMainStore = defineStore(MAIN_STORE_NAME, {
           addedAt: new Date().toISOString()
         }
         this.history.unshift(movieWithDate)
+        // Rolling history: the oldest viewing leaves once the shared capacity is reached.
+        if (this.history.length > HISTORY_CAPACITY) this.history.length = HISTORY_CAPACITY
       }
       replaceLocalList('history', this.history, this.historyOwner)
     },
@@ -124,39 +117,17 @@ export const useMainStore = defineStore(MAIN_STORE_NAME, {
       this.isHistoryAllowed = value
     },
 
-    setCommentsEnabled(value) {
-      this.isCommentsEnabled = value
-    },
-
-    setAutoShowComments(value) {
-      this.isAutoShowComments = value
-    },
-
-    setCommentsSortBy(value) {
-      this.commentsSortBy = value
-    },
 
     updateCardSize(size) {
       this.cardSize = size
     },
 
-    setStreamerMode(value) {
-      this.isStreamerMode = value
-    },
 
     setContentApiProvider(value) {
       const normalizedProvider = String(value || '').toLowerCase()
-      const aliases = {
-        kinodb: 'kinobd'
-      }
-      const provider = aliases[normalizedProvider] || normalizedProvider
-      this.contentApiProvider = ['kinobox', 'ddbb', 'ddbb_live', 'local'].includes(provider)
-        ? provider
+      this.contentApiProvider = ['kinobox', 'ddbb', 'ddbb_live'].includes(normalizedProvider)
+        ? normalizedProvider
         : 'kinobox'
-    },
-
-    setSearchApiProvider(value) {
-      this.searchApiProvider = ['kinobox', 'local'].includes(value) ? value : 'kinobox'
     },
 
     setSidebarAutoHide(value) {
@@ -174,15 +145,9 @@ export const useMainStore = defineStore(MAIN_STORE_NAME, {
       'historyOwner',
       'cloudHistoryAccount',
       'isHistoryAllowed',
-      'isCommentsEnabled',
-      'isAutoShowComments',
-      'commentsSortBy',
       'isCtrlFEnabled',
-      'submitterUsername',
       'cardSize',
-      'isStreamerMode',
       'contentApiProvider',
-      'searchApiProvider',
       'sidebarAutoHide',
       'sidebarPosition'
     ],

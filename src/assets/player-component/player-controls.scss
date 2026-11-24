@@ -7,7 +7,7 @@
   padding: 6px 8px;
   width: fit-content;
   max-width: min(100%, 920px);
-  border-radius: 10px;
+  border-radius: var(--radius-l);
   background: rgba(20, 20, 20, 0.92);
   border: 1px solid #333;
   backdrop-filter: blur(8px);
@@ -32,7 +32,7 @@
   border: 1px solid rgba(255, 255, 255, 0.07);
   padding: 6px 8px;
   font-size: 18px;
-  border-radius: 8px;
+  border-radius: var(--radius-m);
   cursor: pointer;
   transition:
     background-color 0.18s ease,
@@ -48,7 +48,7 @@
 .controls button:hover {
   background-color: color-mix(in srgb, var(--accent-color) 32%, rgba(255, 255, 255, 0.08));
   color: #fff;
-  border-color: color-mix(in srgb, var(--accent-color) 58%, rgba(255, 255, 255, 0.14));
+  border-color: color-mix(in srgb, var(--accent-ui) 58%, rgba(255, 255, 255, 0.14));
   transform: translateY(-2px) scale(1.04);
   box-shadow:
     0 10px 22px rgba(0, 0, 0, 0.34),
@@ -57,7 +57,7 @@
 
 .controls button:active {
   background-color: color-mix(in srgb, var(--accent-color) 42%, rgba(255, 255, 255, 0.08));
-  border-color: color-mix(in srgb, var(--accent-color) 70%, rgba(255, 255, 255, 0.16));
+  border-color: color-mix(in srgb, var(--accent-ui) 70%, rgba(255, 255, 255, 0.16));
   transform: translateY(0) scale(0.98);
   box-shadow:
     0 0 10px color-mix(in srgb, var(--accent-color) 18%, transparent),
@@ -66,7 +66,7 @@
 
 .controls button.active {
   background-color: color-mix(in srgb, var(--accent-color) 48%, rgba(255, 255, 255, 0.08));
-  border-color: color-mix(in srgb, var(--accent-color) 76%, rgba(255, 255, 255, 0.16));
+  border-color: color-mix(in srgb, var(--accent-ui) 76%, rgba(255, 255, 255, 0.16));
   color: #fff;
   box-shadow:
     0 0 18px color-mix(in srgb, var(--accent-color) 26%, transparent),
@@ -75,7 +75,7 @@
 
 .controls .theater-mode-btn.active {
   background: var(--accent-transparent);
-  border-color: var(--accent-color);
+  border-color: var(--accent-ui);
   color: #fff;
 }
 
@@ -100,7 +100,7 @@
 }
 
 .controls button:focus-visible {
-  outline: 2px solid color-mix(in srgb, var(--accent-color) 72%, #fff);
+  outline: 2px solid color-mix(in srgb, var(--accent-ui) 72%, #fff);
   outline-offset: 2px;
 }
 
@@ -117,14 +117,14 @@
   gap: 2px;
   background-color: rgba(30, 30, 30, 0.98);
   border: 1px solid #444;
-  border-radius: 8px;
+  border-radius: var(--radius-m);
 }
 
 .aspect-ratio-option {
   box-sizing: border-box;
   min-width: 0;
   padding: 8px 10px;
-  border-radius: 5px;
+  border-radius: var(--radius-m);
   cursor: pointer;
   transition:
     background-color 0.18s ease,
@@ -138,13 +138,14 @@
 }
 
 .aspect-ratio-option:hover {
-  background-color: var(--accent-color);
+  background-color: var(--accent-solid);
+  color: var(--accent-contrast);
   box-shadow: 0 0 8px var(--accent-semi-transparent);
 }
 
 .aspect-ratio-option.active {
-  background-color: var(--accent-color);
-  color: white;
+  background-color: var(--accent-solid);
+  color: var(--accent-contrast);
   font-weight: 500;
   box-shadow: none;
 }
@@ -179,8 +180,12 @@
 }
 
 .electron-only:hover {
-  background-color: color-mix(in srgb, var(--accent-color) 26%, rgba(255, 255, 255, 0.08)) !important;
-  border-color: color-mix(in srgb, var(--accent-color) 48%, rgba(255, 255, 255, 0.12)) !important;
+  background-color: color-mix(
+    in srgb,
+    var(--accent-color) 26%,
+    rgba(255, 255, 255, 0.08)
+  ) !important;
+  border-color: color-mix(in srgb, var(--accent-ui) 48%, rgba(255, 255, 255, 0.12)) !important;
   opacity: 0.9;
   transform: translateY(-2px) scale(1.04) !important;
   box-shadow:
@@ -190,17 +195,25 @@
 
 @media (max-width: 600px) {
   .controls {
-    width: calc(100% - 16px);
+    flex-direction: row;
+    justify-content: space-between;
+    gap: 8px;
+    width: 100%;
     max-width: none;
     box-sizing: border-box;
-    margin: 6px auto 10px;
-    padding: 6px;
-    border-radius: 8px;
+    margin: 8px 0 4px;
+    padding: 0 10px;
+    border: none;
+    border-radius: 0;
+    background: none;
+    box-shadow: none;
+    backdrop-filter: none;
   }
 
   .main-controls {
-    width: 100%;
-    justify-content: center;
+    width: auto;
+    min-width: 0;
+    justify-content: flex-end;
     overflow-x: auto;
     flex-wrap: nowrap;
     gap: 6px;
@@ -215,11 +228,11 @@
 
   .controls button {
     width: 44px;
-    height: 40px;
+    height: 44px;
     flex: 0 0 44px;
     min-width: 44px;
     padding: 0;
-    border-radius: 7px;
+    border-radius: var(--radius-m);
   }
 
   .controls .aspect-ratio-dropdown-btn {

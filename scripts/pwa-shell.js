@@ -9,13 +9,16 @@ const shellFiles = new Set([
   'icons/icon-192x192.png',
   'icons/icon-512x512.png'
 ])
+// Imported by the entry but shown only when enabled; runtime-cached on first use.
+// The stars background is the default, so it stays in the precache.
+const optionalAssets = /(?:^|\/)trn-christmas-lights-[\w-]+\.webp$/
 
 // Keep the offline screens and SW registration client, not every lazy feature.
 export function createPwaShell() {
   let graphPath
   let isSsr = false
   const screens =
-    /\/src\/components\/(?:MovieSearch|TopMovies|MovieInfo|PlayerComponent|MovieRating|NotFound)\.vue$/
+    /\/src\/components\/(?:MovieSearch|TopMovies|MovieInfo|PlayerComponent|NotFound)\.vue$/
   return {
     plugin: {
       name: 'pwa-shell-dependencies',
@@ -57,7 +60,9 @@ export function createPwaShell() {
       const required = new Set(JSON.parse(await fs.readFile(graphPath, 'utf8')))
       if (!required.size) throw new Error('Offline shell dependency graph was not generated')
       return {
-        manifest: entries.filter(({ url }) => shellFiles.has(url) || required.has(url)),
+        manifest: entries.filter(
+          ({ url }) => shellFiles.has(url) || (required.has(url) && !optionalAssets.test(url))
+        ),
         warnings: []
       }
     }

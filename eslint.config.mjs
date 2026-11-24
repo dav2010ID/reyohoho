@@ -2,7 +2,28 @@ import vuePlugin from 'eslint-plugin-vue'
 import js from '@eslint/js'
 import prettierConfig from 'eslint-config-prettier'
 
+// Runtime globals of Node scripts, Cloudflare Workers and the transfer page.
+const serverGlobals = Object.fromEntries(
+  [
+    'Buffer', 'process', 'console', 'setTimeout', 'clearTimeout', 'setInterval',
+    'clearInterval', 'queueMicrotask', 'structuredClone', 'fetch', 'Request', 'Response',
+    'Headers', 'FormData', 'Blob', 'ReadableStream', 'WritableStream', 'TransformStream',
+    'TextEncoder', 'TextDecoder', 'URL', 'URLSearchParams', 'AbortController', 'AbortSignal',
+    'crypto', 'btoa', 'atob', 'caches', 'HTMLRewriter', 'WebSocket', 'performance',
+    'DOMException', 'Event', 'EventTarget', 'globalThis'
+  ].map((name) => [name, 'readonly'])
+)
+
 export default [
+  {
+    // Vendored TLS/HPACK sources and their generated bundles are not ours to lint.
+    ignores: [
+      'dist/**',
+      'workers/kinobox-search/vendor-{crypto,hpack,tls}.mjs',
+      'workers/**/*.bundle.mjs',
+      'workers/site/generated/**'
+    ]
+  },
   js.configs.recommended,
   ...vuePlugin.configs['flat/recommended'],
   prettierConfig,
@@ -63,6 +84,30 @@ export default [
       ],
       'vue/require-default-prop': 'off',
       'vue/multi-word-component-names': 'off' // Отключаем правило для однословных компонентов
+    }
+  },
+  {
+    files: ['workers/**/*.{js,mjs}', 'shared/**/*.js', 'scripts/**/*.{js,mjs}'],
+    languageOptions: { ecmaVersion: 'latest', globals: serverGlobals }
+  },
+  {
+    // Browser checks pass functions to page.evaluate(); they run in the page.
+    files: ['scripts/browser-*.js', 'scripts/frontend-profile-*.js'],
+    languageOptions: {
+      globals: Object.fromEntries(
+        [
+          'window', 'document', 'navigator', 'location', 'localStorage', 'sessionStorage',
+          'indexedDB', 'PerformanceObserver', 'getComputedStyle', 'requestAnimationFrame',
+          'MutationObserver', 'IntersectionObserver'
+        ].map((name) => [name, 'readonly'])
+      )
+    }
+  },
+  {
+    files: ['migration/**/*.js'],
+    languageOptions: {
+      ecmaVersion: 'latest',
+      globals: { ...serverGlobals, window: 'readonly', document: 'readonly', location: 'readonly' }
     }
   }
 ]

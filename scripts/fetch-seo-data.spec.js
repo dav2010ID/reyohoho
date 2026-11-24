@@ -118,4 +118,12 @@ describe('SEO catalog refresh', () => {
       expect(() => checkFreshness({ refreshedAt }, +now)).toThrow('14 days')
     }
   })
+  it('lets an emergency release ship an old but valid snapshot', () => {
+    expect(checkFreshness({ refreshedAt: '2026-09-20' }, +now, { allowStale: true })).toMatchObject({
+      stale: true,
+      days: 51
+    })
+    for (const refreshedAt of [undefined, 'invalid', '2026-11-12'])
+      expect(() => checkFreshness({ refreshedAt }, +now, { allowStale: true })).toThrow('14 days')
+  })
 })

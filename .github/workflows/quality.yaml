@@ -15,8 +15,8 @@ jobs:
   frontend:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
         with:
           node-version: 22
           cache: yarn
@@ -24,16 +24,24 @@ jobs:
       - run: yarn install --frozen-lockfile
       - run: yarn lint
       - run: yarn check:encoding
+      - run: yarn check:release
       - name: Prepare pinned Worker vendor modules
         run: node workers/kinobox-search/prepare-vendor.mjs
       - run: yarn test:unit --run
       - run: yarn build
+      # Catches import and bundling errors that unit tests (Node, not workerd) miss.
+      - name: Bundle both Workers without deploying
+        env:
+          WRANGLER_SEND_METRICS: 'false'
+        run: |
+          npx wrangler deploy --dry-run --outdir "$RUNNER_TEMP/api" --config workers/kinobox-search/wrangler.jsonc
+          npx wrangler deploy --dry-run --outdir "$RUNNER_TEMP/site" --config workers/site/wrangler.jsonc
 
   backend:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+      - uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065 # v5
         with:
           python-version: '3.13'
           cache: pip

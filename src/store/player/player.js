@@ -8,7 +8,6 @@ export const usePlayerStore = defineStore(PLAYER_STORE_NAME, {
     aspectRatio: '16:9',
     isCentered: false,
     showFavoriteTooltip: true,
-    kinobdSourceByKpId: {},
     compressorEnabled: false,
     mirrorEnabled: false,
     videoOverlayEnabled2: true,
@@ -39,16 +38,6 @@ export const usePlayerStore = defineStore(PLAYER_STORE_NAME, {
     setFavoriteTooltip(value) {
       this.showFavoriteTooltip = value
     },
-    setKinoBdSource(kpId, inid) {
-      if (!kpId) return
-      this.kinobdSourceByKpId = {
-        ...this.kinobdSourceByKpId,
-        [String(kpId)]: inid
-      }
-    },
-    clearKinoBdSources() {
-      this.kinobdSourceByKpId = {}
-    },
     updateCompressor(value) {
       this.compressorEnabled = value
     },
@@ -70,7 +59,6 @@ export const usePlayerStore = defineStore(PLAYER_STORE_NAME, {
       'aspectRatio',
       'isCentered',
       'showFavoriteTooltip',
-      'kinobdSourceByKpId',
       'compressorEnabled',
       'mirrorEnabled',
       'videoOverlayEnabled2',

@@ -3,7 +3,9 @@
     <div v-if="visible" class="notification">
       <!-- eslint-disable-next-line vue/no-v-html -->
       <span @click="handleClick" v-html="safeMessage"></span>
-      <button class="close-btn" @click="hideNotification">✕</button>
+      <button class="close-btn" aria-label="Закрыть" @click="hideNotification">
+        <span class="sym" aria-hidden="true">✕</span>
+      </button>
     </div>
   </transition>
 </template>
@@ -58,13 +60,13 @@ defineExpose({ showNotification })
 <style scoped>
 .notification {
   position: fixed;
-  bottom: 20px;
+  bottom: calc(var(--app-bottom-bar-height) + 20px);
   left: 50%;
   transform: translateX(-50%);
   background: #444;
   color: white;
   padding: 10px 16px;
-  border-radius: 8px;
+  border-radius: var(--radius-m);
   display: flex;
   align-items: center;
   gap: 10px;
@@ -92,7 +94,7 @@ defineExpose({ showNotification })
 }
 
 :deep(a) {
-  color: var(--accent-color);
+  color: var(--accent-text);
   text-decoration: underline;
   cursor: pointer;
   transition: color 0.2s ease;
@@ -103,6 +105,6 @@ defineExpose({ showNotification })
 }
 
 .success-icon {
-  color: var(--accent-color);
+  color: var(--accent-text);
 }
 </style>

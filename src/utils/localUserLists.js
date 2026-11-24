@@ -1,3 +1,5 @@
+import { reportStorageFailure } from './storageErrors'
+
 const STORAGE_KEY = 'reyohoho-user-lists'
 
 const storageKey = (owner) =>
@@ -7,7 +9,10 @@ const writeList = (type, items, owner = 'guest') => {
   try {
     localStorage.setItem(storageKey(owner) + ':' + type, JSON.stringify(items))
     return true
-  } catch { return false }
+  } catch {
+    reportStorageFailure(type)
+    return false
+  }
 }
 const readList = (type, owner = 'guest') => {
   if (typeof window === 'undefined') return []

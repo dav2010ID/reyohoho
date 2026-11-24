@@ -41,6 +41,11 @@
   --accent-color-rgb: 108, 92, 231;
   --accent-transparent: #6c5ce730;
   --accent-semi-transparent: #6c5ce780;
+  --accent-solid: #6c5ce7;
+  --accent-solid-hover: #5f51cb;
+  --accent-contrast: #ffffff;
+  --accent-text: #988dee;
+  --accent-ui: #7364e8;
 
   --secondary-color: #74b9ff;
   --secondary-hover: #0984e3;
@@ -55,16 +60,39 @@
   --text-muted: #999999;
   --text-secondary: #cccccc;
 
-  --bg-primary: #000000;
+  --bg-primary: #0b0b0c;
   --bg-secondary: #1e1e1e;
   --bg-tertiary: #2d2d2d;
   --bg-modal: rgba(30, 30, 30, 0.95);
+
+  /* One surface ladder, one hairline, one radius scale. */
+  --surface-page: #0b0b0c;
+  --surface-raised: #141414;
+  --surface-overlay: #1e1e1e;
+  --hairline: rgba(255, 255, 255, 0.08);
+  /* Where every page's content starts below the top edge. */
+  --page-top: 28px;
+  --text-dim: rgba(255, 255, 255, 0.72);
+  --text-faint: rgba(255, 255, 255, 0.55);
+  --radius-s: 4px;
+  --radius-m: 8px;
+  --radius-l: 12px;
+
+  /* Type scale: 12 / 13 / 15 / 17 / 22 / 28 / 32-48. */
+  --fs-xs: 12px;
+  --fs-s: 13px;
+  --fs-m: 15px;
+  --fs-l: 17px;
+  --fs-xl: 22px;
+  --fs-2xl: 28px;
+  --fs-title: clamp(32px, 3.2vw, 48px);
 
   --border-color: #444444;
   --border-hover: #666666;
   --border-focus: var(--accent-color);
 
-  --app-sidebar-collapsed-width: 70px;
+  --app-sidebar-collapsed-width: 80px;
+  --app-bottom-bar-height: 0px;
   --z-sidebar: 1000;
 }
 
@@ -78,6 +106,15 @@ body {
   background-color: var(--bg-primary);
   margin: 0 auto;
   padding: 0 0 0 var(--app-sidebar-collapsed-width);
+}
+
+/* Single glyphs outside Roboto's latin and cyrillic subsets (→ ← ★ ✓ ✕). */
+.sym {
+  font-family:
+    system-ui,
+    -apple-system,
+    'Segoe UI',
+    sans-serif;
 }
 
 html.no-scroll,
@@ -104,6 +141,19 @@ body.theater-mode-active .side-panel {
 
 body.theater-mode-active .side-panel.right {
   transform: translateX(100%);
+}
+
+/* Small uppercase label above a heading. */
+.kicker {
+  color: var(--text-faint);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.tabular {
+  font-variant-numeric: tabular-nums;
 }
 
 .visually-hidden {
@@ -141,6 +191,40 @@ input {
   font-family: 'Roboto', sans-serif;
 }
 
+/* Hidden until a keyboard user tabs to it; it is the first Tab stop on every page. */
+.skip-link {
+  position: fixed;
+  top: 8px;
+  left: 8px;
+  z-index: 10000;
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  padding: 0 16px;
+  border-radius: var(--radius-m);
+  background: var(--accent-solid);
+  color: var(--accent-contrast);
+  font-weight: 600;
+  text-decoration: none;
+  transform: translateY(calc(-100% - 16px));
+}
+
+.skip-link:focus,
+.skip-link:focus-visible {
+  transform: none;
+  outline: 2px solid #fff;
+  outline-offset: 2px;
+}
+
+#main-content:focus {
+  outline: none;
+}
+
+/* Press feedback for every button; "scale" composes with each component's own transform. */
+button:not(:disabled):active {
+  scale: 0.97;
+}
+
 a:focus-visible,
 button:focus-visible,
 input:focus-visible,
@@ -164,9 +248,20 @@ textarea:focus-visible {
 @media (max-width: 600px) {
   :root {
     --app-sidebar-collapsed-width: 0px;
+    --app-bottom-bar-height: calc(56px + env(safe-area-inset-bottom));
   }
 
   body {
-    padding: 2px 2px 15px 2px;
+    padding: 2px 2px calc(var(--app-bottom-bar-height) + 16px) 2px;
+  }
+
+  body.theater-mode-active {
+    padding-bottom: 0;
+  }
+}
+
+@media (max-width: 600px) {
+  :root {
+    --page-top: 16px;
   }
 }

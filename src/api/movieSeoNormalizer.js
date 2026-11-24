@@ -1,14 +1,9 @@
-import * as kinobd from '@/api/movies.kinobd'
-import { KINOBD_ENABLED } from '@/api/providerAvailability'
 import {
   getMovieSeoEntry,
   getMovieSeoSlug,
   needsMovieSeoEnrichment,
   registerMovieSeoEntry
 } from '@/utils/movieSeo'
-
-const SEO_ENRICHMENT_BATCH_SIZE = 5
-const seoEnrichmentPromises = new Map()
 
 const mergeRawData = (item, seoEntry) => {
   if (!seoEntry) return item?.raw_data
@@ -48,49 +43,7 @@ export const normalizeMovieListEntry = (item, seoEntry = null) => {
   }
 }
 
-const getMovieSeoEnrichment = async (kpId) => {
-  if (!KINOBD_ENABLED) return null
-  if (!seoEnrichmentPromises.has(kpId)) {
-    const enrichmentPromise = kinobd
-      .getMovieSeoByKpId(kpId)
-      .then((movie) => (movie ? registerMovieSeoEntry(movie) : null))
-      .catch(() => null)
-
-    seoEnrichmentPromises.set(kpId, enrichmentPromise)
-  }
-
-  return seoEnrichmentPromises.get(kpId)
-}
-
-export const normalizeMovieListResponse = async (data, { enrichMissingSeo = false } = {}) => {
-  if (!Array.isArray(data)) return data
-
-  const normalizedItems = data.map((item) => normalizeMovieListEntry(item))
-  if (!enrichMissingSeo) return normalizedItems
-
-  const missingKpIds = [
-    ...new Set(
-      normalizedItems
-        .filter((item) => needsMovieSeoEnrichment(item))
-        .map((item) => String(item.kp_id || '').trim())
-        .filter(Boolean)
-    )
-  ]
-
-  if (!missingKpIds.length) return normalizedItems
-
-  const enrichedEntries = new Map()
-
-  for (let index = 0; index < missingKpIds.length; index += SEO_ENRICHMENT_BATCH_SIZE) {
-    const chunk = missingKpIds.slice(index, index + SEO_ENRICHMENT_BATCH_SIZE)
-    const entries = await Promise.all(chunk.map(getMovieSeoEnrichment))
-
-    for (const entry of entries) {
-      if (entry?.kp_id) enrichedEntries.set(entry.kp_id, entry)
-    }
-  }
-
-  return normalizedItems.map((item) =>
-    normalizeMovieListEntry(item, enrichedEntries.get(String(item?.kp_id || '').trim()) || null)
-  )
-}
+// Cards carry their own SEO fields (slug, original title); the static catalogue
+// fills the rest. No extra provider is queried for list entries.
+export const normalizeMovieListResponse = async (data) =>
+  Array.isArray(data) ? data.map((item) => normalizeMovieListEntry(item)) : data

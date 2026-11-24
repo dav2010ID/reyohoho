@@ -17,7 +17,7 @@ export const useAuthStore = defineStore(AUTH_STORE_NAME, {
   actions: {
     setUser(user) {
       const main = useMainStore()
-      const owner = user?.id ? `${this.isWorkerSession ? 'worker' : 'legacy'}:${user.id}` : 'guest'
+      const owner = user?.id ? `worker:${user.id}` : 'guest'
       if (main.historyOwner !== owner) {
         replaceLocalList('history', main.history, main.historyOwner || 'guest')
         main.historyOwner = owner
@@ -56,6 +56,11 @@ export const useAuthStore = defineStore(AUTH_STORE_NAME, {
 
   persist: {
     key: AUTH_STORE_NAME,
-    afterHydrate: ({ store }) => store.setUser(store.token ? store.user : null)
+    afterHydrate: ({ store }) => {
+      // Only Worker (Telegram) sessions exist now. A token persisted by the old
+      // optional backend is dropped; its local lists stay under their old key.
+      if (store.token && !store.isWorkerSession) store.token = null
+      store.setUser(store.token ? store.user : null)
+    }
   }
 })

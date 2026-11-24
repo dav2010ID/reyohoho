@@ -72,6 +72,15 @@ describe('player iframe security assessment', () => {
     expect(sandbox).not.toMatch(/allow-top-navigation/)
   })
 
+  it('sandboxes only the providers verified for it during a staged rollout', () => {
+    const env = { VITE_PLAYER_SANDBOX_ORIGINS: 'https://verified.example, not a url' }
+    expect(getPlayerIframeSandbox(env, 'https://verified.example/embed/1')).toBe(
+      getPlayerIframeSandbox({ VITE_PLAYER_IFRAME_SANDBOX: 'true' })
+    )
+    expect(getPlayerIframeSandbox(env, 'https://other.example/embed/1')).toBeNull()
+    expect(getPlayerIframeSandbox(env, '')).toBeNull()
+  })
+
   it('persists only a normalized non-torrent player key', () => {
     expect(getPersistablePlayerKey({ key: ' alloha>1 ', iframe: 'https://player/?token=x' })).toBe(
       'ALLOHA>1'

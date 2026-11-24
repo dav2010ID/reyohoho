@@ -1,4 +1,6 @@
 import { useAuthStore } from '@/store/auth'
+import { accountError } from './accountErrors'
+import { WORKER_API_URL } from '@/api/workerOrigin'
 
 export const workerAuthEnabled = import.meta.env.VITE_WORKER_AUTH_ENABLED === 'true'
 
@@ -17,7 +19,7 @@ export async function workerAccountRequest(
   const session = token ?? useAuthStore().token
   if (!anonymous && !/^rh1_[A-Za-z0-9_-]{43}$/.test(session || ''))
     throw new Error('Требуется вход через Telegram')
-  const response = await fetch(`https://api.reyhoho.fun/api${path}`, {
+  const response = await fetch(`${WORKER_API_URL}/api${path}`, {
     method,
     credentials: 'omit',
     redirect: 'error',
@@ -31,15 +33,12 @@ export async function workerAccountRequest(
   })
   if (!anonymous && token === undefined && useAuthStore().token !== session)
     throw new Error('Аккаунт изменился. Повторите операцию')
-  if (!response.ok) {
-    const error = new Error(
-      response.status === 503
+  if (!response.ok)
+    throw await accountError(response, (status) =>
+      status === 503
         ? 'Сервис аккаунта временно недоступен. Попробуйте позже.'
-        : `Ошибка аккаунта (${response.status})`
+        : `Ошибка аккаунта (${status})`
     )
-    error.response = { headers: response.headers, status: response.status, data: { error: error.message } }
-    throw error
-  }
   const data = await response.json()
   if (!anonymous && token === undefined && useAuthStore().token !== session) throw new Error('Аккаунт изменился. Повторите операцию')
   return data

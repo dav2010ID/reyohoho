@@ -30,7 +30,7 @@ describe('CardsMovieMainContent image loading', () => {
     const wrapper = mountComponent({ movie: { ...movie, poster: cdnPoster } })
     const image = wrapper.get('img.movie-poster')
     expect(image.attributes('loading')).toBe('lazy')
-    expect(image.attributes('sizes')).toMatch(/^\(max-width: 620px\) 100px/)
+    expect(image.attributes('sizes')).toMatch(/^\(max-width: 620px\) calc\(\(100vw - 44px\) \/ 3\)/)
     expect(image.attributes('srcset')).toContain('/100x150 100w')
     expect(image.attributes('srcset')).toContain('/600x900 600w')
   })

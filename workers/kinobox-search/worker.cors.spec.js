@@ -6,12 +6,22 @@ import { serveHistory } from './history.mjs'
 import { privateReply } from './private-api.mjs'
 import { resolveKinopoiskTop } from './kinopoisk-top.mjs'
 import { resolveKinoboxResource } from './routes.mjs'
-import { resolveMovieExtras, serveMovieExtras } from './kinoapi.mjs'
+import {
+  resolveLatestReleases,
+  resolveMovieExtras,
+  serveLatestReleases,
+  serveMovieExtras
+} from './kinoapi.mjs'
 import { publicUpstreamBudget } from './public-budget.mjs'
+import { serveCspReport } from './csp-report.mjs'
+import { serveHealth } from './health.mjs'
+import { guardUpstream } from './upstream-guard.mjs'
+import { requestContent, requestKinopoiskContent } from './kinopoisk-content.mjs'
 
 // Exercise the real entrypoint's CORS gate without opening Cloudflare sockets.
 const source = readFileSync(new URL('./worker.mjs', import.meta.url), 'utf8')
-  .replace(/^import .*$/gm, '')
+  // Single- and multi-line imports alike.
+  .replace(/^import [^;]*? from '[^']+'$/gm, '')
   .replace('export default {', 'globalThis.worker = {')
 const cachedExtras = '{"data":null,"source":"kinoapi"}'
 const context = vm.createContext({
@@ -24,10 +34,20 @@ const context = vm.createContext({
   resolveKinoboxResource,
   resolveMovieExtras,
   serveMovieExtras,
+  resolveLatestReleases,
+  serveLatestReleases,
   publicUpstreamBudget,
+  serveCspReport,
+  serveHealth,
+  guardUpstream,
+  requestContent,
+  requestKinopoiskContent,
   caches: {
     default: {
-      match: async (key) => (key.includes('/__kinoapi-extras?') ? new Response(cachedExtras) : null)
+      match: async (key) =>
+        key.includes('/__kinoapi-extras?') || key.includes('/__kinoapi-latest?')
+          ? new Response(cachedExtras)
+          : null
     }
   }
 })
@@ -51,6 +71,15 @@ describe('Worker movie extras route', () => {
   it('validates the Kinopoisk ID before any lookup', async () => {
     expect((await get('/api/movies/abc/extras', { KinoapiLampac: 'k' })).status).toBe(400)
   })
+  it('serves the latest releases through the same secret and validates the limit', async () => {
+    expect((await get('/api/kinoapi/latest?limit=20')).headers.get('X-Latest-Cache')).toBe(
+      'DISABLED'
+    )
+    const response = await get('/api/kinoapi/latest?limit=20', { KinoapiLampac: 'k' })
+    expect(response.status).toBe(200)
+    expect(response.headers.get('X-Latest-Cache')).toBe('HIT')
+    expect((await get('/api/kinoapi/latest?limit=500', { KinoapiLampac: 'k' })).status).toBe(400)
+  })
 })
 
 describe('Worker custom domain origins', () => {
@@ -73,9 +102,7 @@ describe('Worker custom domain origins', () => {
     'https://www.reyhoho.fun',
     'http://reyhoho.fun',
     'http://www.reyhoho.fun',
-    'https://dav2010id.github.io',
-    'http://127.0.0.1:5173',
-    'http://localhost:5173'
+    'https://dav2010id.github.io'
   ])('accepts preflight from %s with the exact origin', async (origin) => {
     const response = await worker.fetch(
       new Request('https://proxy.example/api/movies/301', {
@@ -90,6 +117,22 @@ describe('Worker custom domain origins', () => {
     expect(response.headers.get('Vary')).toBe('Origin')
     expect(response.headers.get('Access-Control-Max-Age')).toBe('600')
     expect(response.headers.get('Cache-Control')).toBe('no-store')
+  })
+
+  it('accepts a local dev server only where the Worker opts in', async () => {
+    const preflight = (env) =>
+      worker.fetch(
+        new Request('https://proxy.example/api/movies/301', {
+          method: 'OPTIONS',
+          headers: { Origin: 'http://localhost:5173' }
+        }),
+        env,
+        {}
+      )
+    expect((await preflight({})).status).toBe(403)
+    const staging = await preflight({ ALLOW_DEV_ORIGINS: 'true' })
+    expect(staging.status).toBe(204)
+    expect(staging.headers.get('Access-Control-Allow-Origin')).toBe('http://localhost:5173')
   })
 
   it.each(['https://reyhoho.fun.evil.example', 'https://evil.example'])(

@@ -3,7 +3,7 @@ import { readFileSync } from 'node:fs'
 
 export function testDatabase() {
   const sqlite = new DatabaseSync(':memory:')
-  for (const name of ['0001_history.sql', '0002_telegram_auth.sql', '0003_list_lookup_history_page.sql', '0004_active_history_quota.sql'])
+  for (const name of ['0001_history.sql', '0002_telegram_auth.sql', '0003_list_lookup_history_page.sql', '0004_active_history_quota.sql', '0005_login_context.sql'])
     sqlite.exec(readFileSync(new URL(`./migrations/${name}`, import.meta.url), 'utf8'))
   return {
     sqlite,
@@ -14,7 +14,17 @@ export function testDatabase() {
           return {
             all: async () => ({ results: statement.all(...values) }),
             first: async () => statement.get(...values) || null,
-            run: async () => ({ meta: { changes: Number(statement.run(...values).changes) } })
+            run: async () => ({ meta: { changes: Number(statement.run(...values).changes) } }),
+            // D1 batches return rows for SELECT and RETURNING statements.
+            batchRun: async () => {
+              if (/^\s*SELECT/i.test(sql))
+                return { results: statement.all(...values), meta: { changes: 0 } }
+              if (/\bRETURNING\b/i.test(sql)) {
+                const results = statement.all(...values)
+                return { results, meta: { changes: results.length } }
+              }
+              return { meta: { changes: Number(statement.run(...values).changes) } }
+            }
           }
         }
       }
@@ -23,7 +33,7 @@ export function testDatabase() {
       sqlite.exec('BEGIN')
       try {
         const results = []
-        for (const statement of statements) results.push(await statement.run())
+        for (const statement of statements) results.push(await (statement.batchRun || statement.run)())
         sqlite.exec('COMMIT')
         return results
       } catch (error) {

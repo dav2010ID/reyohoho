@@ -186,20 +186,29 @@ export async function updateSeoDataFile({
   return movies
 }
 
-export function checkFreshness(stamp, now = Date.now()) {
+// An emergency release (allowStale) ships the last verified snapshot instead
+// of blocking every deploy; the stale age is still reported.
+export function checkFreshness(stamp, now = Date.now(), { allowStale = false } = {}) {
   const age = now - Date.parse(stamp?.refreshedAt)
-  if (!Number.isFinite(age) || age < 0 || age > 14 * 86400_000)
-    throw new Error(
-      'SEO catalog has no successful refresh in the last 14 days; run yarn seo:prepare'
-    )
+  if (Number.isFinite(age) && age >= 0 && age <= 14 * 86400_000) return { stale: false }
+  const message =
+    'SEO catalog has no successful refresh in the last 14 days; run yarn seo:prepare'
+  // A missing or future stamp is a broken snapshot, not just an old one.
+  if (!allowStale || !Number.isFinite(age) || age < 0) throw new Error(message)
+  return { stale: true, message, days: Math.floor(age / 86400_000) }
 }
 
 if (process.argv[1] && pathToFileURL(process.argv[1]).href === import.meta.url) {
   try {
-    if (process.argv.includes('--check-freshness'))
-      checkFreshness(
-        JSON.parse(await fs.readFile(path.resolve('src/data/seo-refresh.json'), 'utf8'))
+    if (process.argv.includes('--check-freshness')) {
+      const result = checkFreshness(
+        JSON.parse(await fs.readFile(path.resolve('src/data/seo-refresh.json'), 'utf8')),
+        Date.now(),
+        { allowStale: process.env.ALLOW_STALE_SEO === 'true' }
       )
+      if (result.stale)
+        console.log(`::warning::Emergency release: ${result.message} (${result.days} days old)`)
+    }
     else {
       const movies = await updateSeoDataFile()
       console.log(`Updated ${movies.length} SEO entries in ${catalogPath}`)

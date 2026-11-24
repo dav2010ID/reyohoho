@@ -8,7 +8,8 @@
       'hover-disabled': isCardHoverDisabled,
       'card-border': isCardBorder,
       [`card-size-${cardSize}`]: true,
-      [`variant-${variant}`]: true
+      [`variant-${variant}`]: true,
+      'layout-row': isRowLayout
     }"
     :to="moviePath"
     :data-test-id="`movie-card-${movie.kp_id}`"
@@ -22,11 +23,20 @@
       :show-delete="showDelete"
       :show-star="showStar"
       :variant="variant"
+      :show-type="showType"
+      :class="{ 'layout-row': isRowLayout }"
       :priority="variant !== 'related' && index < 3"
       @remove:from-history="(data) => emit('remove:from-history', data)"
     />
 
-    <CardMovieDetails :movie :is-history :variant="variant" />
+    <CardMovieDetails
+      :movie
+      :is-history
+      :variant="variant"
+      :rank="rank"
+      :show-original-title="showOriginalTitle"
+      :class="{ 'layout-row': isRowLayout }"
+    />
   </RouterLink>
 </template>
 
@@ -57,7 +67,11 @@ const {
   index = 0,
   showDelete = true,
   showStar = false,
-  variant = 'default'
+  variant = 'default',
+  showType = false,
+  showOriginalTitle = false,
+  rank = null,
+  rowLayout = false
 } = defineProps({
   movie: Object,
   isHistory: Boolean,
@@ -68,12 +82,21 @@ const {
   activeMovieIndex: [Number, null],
   showDelete: Boolean,
   showStar: Boolean,
-  variant: String
+  variant: String,
+  showType: Boolean,
+  showOriginalTitle: Boolean,
+  rank: { type: Number, default: null },
+  // A row (small poster beside the text) at any width: the desktop "continue watching" tiles.
+  rowLayout: Boolean
 })
 
 const emit = defineEmits(['remove:from-history', 'save:element'])
 const element = useTemplateRef('element')
 const moviePath = computed(() => getMovieSeoPath(movie))
+// Phones keep history and lists as compact rows so swipe-to-delete still works.
+const isRowLayout = computed(
+  () => rowLayout || (isMobile && (isHistory || isUserList) && variant !== 'related')
+)
 const authStore = useAuthStore()
 const route = useRoute()
 const enrichedMovie = ref(null)
@@ -144,133 +167,103 @@ onUnmounted(() => {
 </script>
 
 <style scoped>
+/* Chrome-less card: the poster is the card; text sits under it on the page surface.
+   Hover lift uses main's values: up 3px, scale 1.01, a 14/30 shadow (here on the poster). */
 .movie-card {
-  --card-radius: 10px;
-  --card-bg: #141414;
-  --card-border-color: transparent;
-  --card-shadow: 0 10px 24px rgba(0, 0, 0, 0.28);
-  --card-hover-shadow: 0 14px 30px rgba(0, 0, 0, 0.32);
-  --card-focus-outline: 2px solid var(--accent-color);
-  --card-focus-shadow: 0 0 0 3px color-mix(in srgb, var(--accent-color) 32%, transparent);
   --card-hover-translate: -3px;
   --card-hover-scale: 1.01;
-  text-decoration: none;
-  color: inherit;
-  width: 100%;
-  min-width: 0;
-  background: var(--card-bg);
-  border-radius: var(--card-radius);
-  overflow: hidden;
-  cursor: pointer;
+  --card-hover-shadow: 0 14px 30px rgba(0, 0, 0, 0.32);
+  position: relative;
   display: flex;
   flex-direction: column;
-  justify-content: space-between;
-  transition:
-    transform 0.2s ease,
-    box-shadow 0.2s ease,
-    border 0.2s ease;
-  box-shadow: var(--card-shadow);
-  border: 1px solid var(--card-border-color);
+  width: 100%;
+  min-width: 0;
+  border-radius: var(--radius-m);
+  color: inherit;
+  text-decoration: none;
+  cursor: pointer;
+  transition: transform 0.2s ease;
 }
 
-.has-border {
-  border: 1px solid var(--accent-color);
+.movie-card :deep(.movie-poster-frame) {
+  transition: box-shadow 0.2s ease;
+}
+
+.has-border :deep(.movie-poster-frame) {
+  box-shadow: 0 0 0 1px var(--accent-ui);
 }
 
 .movie-card:hover {
   transform: translateY(var(--card-hover-translate)) scale(var(--card-hover-scale));
+}
+
+.movie-card:hover :deep(.movie-poster-frame) {
   box-shadow: var(--card-hover-shadow);
+}
+
+.movie-card.has-border:hover :deep(.movie-poster-frame) {
+  box-shadow:
+    0 0 0 1px var(--accent-ui),
+    var(--card-hover-shadow);
 }
 
 .hover-disabled:hover {
   transform: none;
-  box-shadow: var(--card-shadow);
+}
+
+.hover-disabled:hover :deep(.movie-poster-frame) {
+  box-shadow: none;
+}
+
+.hover-disabled.has-border:hover :deep(.movie-poster-frame) {
+  box-shadow: 0 0 0 1px var(--accent-ui);
 }
 
 .movie-card:focus-visible {
-  outline: var(--card-focus-outline);
-  outline-offset: 2px;
-  box-shadow: var(--card-focus-shadow);
-  transition: border 0.2s ease;
-  cursor: pointer;
+  outline: 2px solid var(--accent-color);
+  outline-offset: 3px;
 }
 
-.movie-card:hover :deep(.delete-button) {
+.movie-card:hover :deep(.delete-button),
+.movie-card:focus-within :deep(.delete-button) {
   opacity: 1;
-}
-
-.movie-card.card-size-small :deep(.movie-details) {
-  padding: 10px;
-}
-
-.movie-card.card-size-small :deep(.movie-header h3) {
-  font-size: 0.95em;
-  -webkit-line-clamp: 3;
-  -moz-line-clamp: 3;
-  line-clamp: 3;
-  max-height: 3.6em;
-}
-
-.movie-card.card-size-small :deep(.original-title) {
-  font-size: 0.75em;
-  -webkit-line-clamp: 1;
-  -moz-line-clamp: 1;
-  line-clamp: 1;
-}
-
-.movie-card.card-size-small :deep(.genre-tag),
-.movie-card.card-size-small :deep(.genre-count) {
-  font-size: 0.7em;
-  padding: 1px 4px;
-}
-
-.movie-card.card-size-large :deep(.movie-details) {
-  padding: 20px;
-}
-
-.movie-card.card-size-large :deep(.movie-header h3) {
-  font-size: 1.3em;
-  -webkit-line-clamp: 4;
-  -moz-line-clamp: 4;
-  line-clamp: 4;
-  max-height: 5.2em;
-}
-
-.movie-card.card-size-large :deep(.original-title) {
-  font-size: 0.9em;
-  margin-bottom: 15px;
-}
-
-.movie-card.card-size-large :deep(.genre-tag),
-.movie-card.card-size-large :deep(.genre-count) {
-  font-size: 0.8em;
-  padding: 3px 8px;
-}
-
-.movie-card.card-size-large :deep(.year) {
-  font-size: 1em;
 }
 
 .movie-card.variant-related {
   height: auto;
 }
 
-/* Мобильная версия */
-@media (max-width: 620px) {
-  .movie-card {
-    flex-direction: row;
-    align-items: stretch;
-    min-height: 150px;
-    height: auto;
-    width: 100%;
-    border-radius: 15px;
+/* Rows: a 64x96 poster beside the text, the delete button at the end. */
+.movie-card.layout-row {
+  flex-direction: row;
+  align-items: center;
+  min-height: 96px;
+  padding-right: 52px;
+  box-sizing: border-box;
+}
+
+/* Desktop resume tiles sit on a raised surface. */
+@media (min-width: 621px) {
+  .movie-card.layout-row {
+    padding: 8px 52px 8px 8px;
+    border-radius: var(--radius-m);
+    background: var(--surface-raised);
+    box-shadow: inset 0 0 0 1px var(--hairline);
   }
 
-  .movie-card.variant-related {
-    flex-direction: column;
-    align-items: stretch;
-    min-height: 0;
-    border-radius: 14px;
+  .movie-card.layout-row:hover {
+    transform: none;
+    background: var(--surface-overlay);
+  }
+
+  .movie-card.layout-row:hover :deep(.movie-poster-frame) {
+    box-shadow: none;
+  }
+}
+
+@media (max-width: 620px) {
+  .movie-card:hover {
+    transform: none;
   }
 }
 </style>

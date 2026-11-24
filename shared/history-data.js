@@ -1,4 +1,29 @@
-export const MAX_HISTORY_ITEMS = 1000
+// One history capacity everywhere: guest storage, the old-origin bridge, files
+// and the D1 quota (`history_quota`). Lists have their own 1000-item limit.
+export const HISTORY_CAPACITY = 5000
+export const MAX_HISTORY_ITEMS = HISTORY_CAPACITY
+// Keys that may hold guest history, oldest format first. The current guest key
+// is a bare array written by src/utils/localUserLists.js.
+const LEGACY_HISTORY_KEYS = [
+  'main',
+  'reyohoho.store',
+  'vuex_backup',
+  'reyohoho-user-lists',
+  'reyohoho-user-lists:history'
+]
+
+export class HistoryCapacityError extends Error {
+  constructor(total, capacity = HISTORY_CAPACITY) {
+    super(
+      `История содержит ${total} записей, а лимит — ${capacity}. ` +
+        `Удалите не меньше ${total - capacity} записей и повторите.`
+    )
+    this.name = 'HistoryCapacityError'
+    this.code = 'history_capacity'
+    this.total = total
+    this.capacity = capacity
+  }
+}
 
 export function cardRatings(item) {
   const result = {}
@@ -43,27 +68,30 @@ export function normalizeHistory(items, maxItems = MAX_HISTORY_ITEMS) {
   return [...result.values()].sort((a, b) => b.addedAt.localeCompare(a.addedAt))
 }
 
-export function readLegacyHistory(storage) {
+export function readLegacyHistory(storage, capacity = HISTORY_CAPACITY) {
   const all = []
   // Whitelist history fields only. Never read the persisted auth store.
-  for (const key of ['main', 'reyohoho.store', 'vuex_backup', 'reyohoho-user-lists']) {
+  for (const key of LEGACY_HISTORY_KEYS) {
     try {
       const data = JSON.parse(storage.getItem(key) || 'null')
-      const history = data?.history || data?.main?.history
-      if (Array.isArray(history)) all.push(...normalizeHistory(history.slice(0, MAX_HISTORY_ITEMS)))
+      const history = Array.isArray(data) ? data : data?.history || data?.main?.history
+      if (Array.isArray(history)) all.push(...normalizeHistory(history.slice(0, capacity), capacity))
     } catch {
       /* An invalid legacy store must not prevent importing another format. */
     }
   }
-  const unique = new Map()
-  for (const item of all) if (!unique.has(item.kp_id)) unique.set(item.kp_id, item)
-  return normalizeHistory([...unique.values()].slice(0, MAX_HISTORY_ITEMS))
+  // Same title in several formats: keep the newest viewing.
+  return normalizeHistory(all, all.length).slice(0, capacity)
 }
 
-export function mergeHistory(current, imported) {
-  const existing = normalizeHistory(current)
+export function mergeHistory(current, imported, capacity = HISTORY_CAPACITY) {
+  const existing = normalizeHistory(current, Math.max(capacity, current?.length || 0))
   const ids = new Set(existing.map((item) => item.kp_id))
-  const missing = normalizeHistory(imported).filter((item) => !ids.has(item.kp_id))
-  // Preserve every current entry even when the combined history reaches the limit.
-  return normalizeHistory([...existing, ...missing].slice(0, MAX_HISTORY_ITEMS))
+  const missing = normalizeHistory(imported, Math.max(capacity, imported?.length || 0)).filter(
+    (item) => !ids.has(item.kp_id)
+  )
+  // Never drop entries silently: the caller reports how many must go first.
+  const total = existing.length + missing.length
+  if (total > capacity) throw new HistoryCapacityError(total, capacity)
+  return normalizeHistory([...existing, ...missing], capacity)
 }

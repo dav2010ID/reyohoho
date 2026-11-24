@@ -1,6 +1,30 @@
 <template>
   <div class="wrapper">
-    <div class="user-lists-page" tabindex="0">
+    <!-- Logged out, own lists: one clear way in instead of an empty toolbar. -->
+    <div v-if="needsLogin" class="user-lists-page lists-login">
+      <h1 class="lists-login__title">Списки</h1>
+      <p class="lists-login__text">
+        Войдите, чтобы вести списки: избранное, «смотрю», «позже» и просмотренное.
+      </p>
+      <!-- Preview of the lists (not interactive); icons are the ones the player's list buttons use. -->
+      <ul class="lists-preview" aria-hidden="true">
+        <li
+          v-for="tile in LOGIN_PREVIEW_TILES"
+          :key="tile.label"
+          :class="`lists-preview__tile--${tile.key}`"
+        >
+          <span class="material-icons">{{ tile.icon }}</span>
+          {{ tile.label }}
+        </li>
+      </ul>
+      <router-link to="/login" class="lists-login__button">Войти</router-link>
+      <router-link
+        :to="{ query: { type: USER_LIST_TYPES_ENUM.HISTORY } }"
+        class="lists-login__history"
+        >История просмотра <span class="sym" aria-hidden="true">→</span></router-link
+      >
+    </div>
+    <div v-else class="user-lists-page" tabindex="0">
       <div class="controls">
         <div class="filter-card type-card">
           <div class="button-group type-buttons">
@@ -14,33 +38,24 @@
               @click="changeTypeFilter(btn.value)"
             >
               {{ btn.label }}
-              <span v-if="listCounters[btn.value]" class="counter">{{
-                listCounters[btn.value]
-              }}</span>
+              <span v-if="counterFor(btn.value)" class="counter">{{ counterFor(btn.value) }}</span>
             </button>
             <button
-              v-if="capabilities.sharing"
-              class="share-btn"
-              :disabled="loading"
-              title="Поделиться списком"
-              @click="copyShareLink()"
-            >
-              <span class="material-icons">{{ 'share' }}</span>
-            </button>
-            <button
-              v-if="canManageOwnLists"
+              v-if="canManageOwnLists && authStore.token"
               class="share-btn"
               :disabled="loading"
               title="Экспортировать"
+              aria-label="Экспортировать"
               @click="exportListsAndHistory"
             >
               <span class="material-icons">{{ 'download' }}</span>
             </button>
             <button
-              v-if="canManageOwnLists"
+              v-if="canManageOwnLists && authStore.token"
               class="share-btn"
               :disabled="loading || isImporting"
               title="Импортировать"
+              aria-label="Импортировать"
               @click="openImportDialog"
             >
               <span class="material-icons">{{ isImporting ? 'hourglass_top' : 'upload' }}</span>
@@ -49,12 +64,13 @@
               v-if="!user_id || String(user_id) === String(authStore.user?.id)"
               class="clear-btn"
               :class="{
-                disabled: !movies.length || typeFilter === USER_LIST_TYPES_ENUM.RATED || loading
+                disabled: !listMovies.length || loading
               }"
-              :disabled="!movies.length || typeFilter === USER_LIST_TYPES_ENUM.RATED || loading"
-              title="Очистить список"
+              :disabled="!listMovies.length || loading"
+              :title="isHistoryView ? 'Очистить историю' : 'Очистить список'"
+              :aria-label="isHistoryView ? 'Очистить историю' : 'Очистить список'"
               @click="
-                movies.length && typeFilter !== USER_LIST_TYPES_ENUM.RATED && (showModal = true)
+                listMovies.length && (showModal = true)
               "
             >
               <span class="material-icons">{{ 'delete_sweep' }}</span>
@@ -71,19 +87,19 @@
         @change="handleImportFileSelect"
       />
 
-      <div v-if="movies.length === 0 && !loading && !errorMessage" class="empty-state">
-        <span class="material-icons">movie</span>
-        <p>Нет фильмов для отображения</p>
+      <div v-if="listMovies.length === 0 && !loading && !errorMessage" class="empty-state">
+        <span class="material-icons">{{ isHistoryView ? 'history' : 'movie' }}</span>
+        <p>{{ isHistoryView ? 'История просмотра пуста' : 'Нет фильмов для отображения' }}</p>
       </div>
 
+      <!-- History: MovieList deletes from the history itself (local and account), as on home. -->
       <MovieList
         v-else-if="!errorMessage"
-        :movies-list="movies"
-        :is-history="false"
+        :movies-list="listMovies"
+        :is-history="isHistoryView"
         :is-mobile="mainStore.isMobile"
         :is-user-list="true"
-        :show-delete="typeFilter !== USER_LIST_TYPES_ENUM.RATED"
-        :show-star="typeFilter === USER_LIST_TYPES_ENUM.RATED"
+        :show-delete="true"
         :loading="loading"
         @item-deleted="handleItemDeleted"
       />
@@ -94,7 +110,11 @@
   <Notification ref="notificationRef" />
   <BaseModal
     :is-open="showModal"
-    message="Вы уверены, что хотите очистить список?"
+    :message="
+      isHistoryView
+        ? 'Вы уверены, что хотите очистить историю?'
+        : 'Вы уверены, что хотите очистить список?'
+    "
     @confirm="clearList"
     @close="showModal = false"
   />
@@ -102,7 +122,6 @@
 
 <script setup>
 import {
-  addToList,
   importWorkerList,
   getMyLists,
   getUserLists,
@@ -120,13 +139,18 @@ import Notification from '@/components/notification/ToastMessage.vue'
 import BaseModal from '@/components/BaseModal.vue'
 import { useMainStore } from '@/store/main'
 import { logoutAndRedirect } from '@/utils/authSession'
-import { cardRatings } from '../../shared/history-data.js'
+import { cardRatings, HISTORY_CAPACITY, HistoryCapacityError } from '../../shared/history-data.js'
 import { importCloudHistory, isCloudHistoryEnabled } from '@/api/cloudHistory'
-import { accountCapabilities } from '@/api/accountCapabilities'
 
 const movies = ref([])
 const loading = ref(true)
 const typeFilter = ref(USER_LIST_TYPES_ENUM.FAVORITE)
+const LOGIN_PREVIEW_TILES = [
+  { key: 'favorite', label: 'Избранное', icon: 'favorite' },
+  { key: 'watching', label: 'Смотрю', icon: 'visibility' },
+  { key: 'later', label: 'Позже', icon: 'watch_later' },
+  { key: 'completed', label: 'Просмотрено', icon: 'check_circle' }
+]
 const errorMessage = ref('')
 const errorCode = ref(null)
 const authStore = useAuthStore()
@@ -140,19 +164,27 @@ const importFileInput = ref(null)
 const isImporting = ref(false)
 let fetchGeneration = 0
 const deletingItems = new Set()
-const captureView = () => ({ token: authStore.token, userId: user_id.value, type: typeFilter.value })
+const captureView = () => ({
+  token: authStore.token,
+  userId: user_id.value,
+  type: typeFilter.value
+})
 const isCurrentView = (view) =>
   authStore.token === view.token && user_id.value === view.userId && typeFilter.value === view.type
 
 const notificationRef = ref(null)
-const capabilities = computed(() => accountCapabilities(authStore))
+const isHistoryView = computed(() => typeFilter.value === USER_LIST_TYPES_ENUM.HISTORY)
+// Own lists need an account; a shared list (/lists/:user_id) stays public. The watch history
+// also lives on the device, so it opens without an account.
+const needsLogin = computed(() => !user_id.value && !authStore.token && !isHistoryView.value)
+// The history view reads the store, so deletions from the cards show at once.
+const listMovies = computed(() => (isHistoryView.value ? mainStore.history : movies.value))
 const exportableListTypes = computed(() => [
   USER_LIST_TYPES_ENUM.FAVORITE,
   USER_LIST_TYPES_ENUM.LATER,
   USER_LIST_TYPES_ENUM.WATCHING,
   USER_LIST_TYPES_ENUM.COMPLETED,
   USER_LIST_TYPES_ENUM.ABANDONED,
-  ...(capabilities.value.rated ? [USER_LIST_TYPES_ENUM.RATED] : []),
   USER_LIST_TYPES_ENUM.HISTORY
 ])
 
@@ -207,6 +239,8 @@ const mergeHistory = (currentHistory, importedHistory) => {
 
   normalizeHistoryItems(currentHistory).forEach(put)
   normalizeHistoryItems(importedHistory).forEach(put)
+  // Same limit as everywhere else; never drop entries silently.
+  if (merged.size > HISTORY_CAPACITY) throw new HistoryCapacityError(merged.size)
 
   return Array.from(merged.values()).sort((a, b) => Date.parse(b.addedAt) - Date.parse(a.addedAt))
 }
@@ -332,24 +366,10 @@ const importServerLists = async (parsedLists) => {
       if (incomingIds.length) await importCloudHistory(incomingIds.map((kp_id) => ({ kp_id })))
       continue
     }
-    if (authStore.isWorkerSession) {
-      addedCount += await importWorkerList(type, incomingIds.filter(id => !currentLists[type].has(id)))
-      continue
-    }
-    for (const kpId of incomingIds) {
-      if (authStore.token !== token) throw new Error('Аккаунт изменился. Повторите импорт')
-      if (currentLists[type].has(kpId)) continue
-      try {
-        // Legacy API has no bulk endpoint. Stay below its 180/minute limit.
-        await new Promise(resolve => setTimeout(resolve, 400))
-        if (authStore.token !== token) throw new Error('Аккаунт изменился. Повторите импорт')
-        await addToList(kpId, type)
-        currentLists[type].add(kpId)
-        addedCount += 1
-      } catch {
-        failedCount += 1
-      }
-    }
+    addedCount += await importWorkerList(
+      type,
+      incomingIds.filter((id) => !currentLists[type].has(id))
+    )
   }
 
   return { addedCount, failedCount }
@@ -413,27 +433,17 @@ const handleImportFileSelect = async (event) => {
     notificationRef.value.showNotification(
       summary.length ? `Импорт завершен (${summary.join(', ')})` : 'Импорт завершен'
     )
-  } catch {
+  } catch (error) {
+    // Capacity errors already say what was saved and what to remove.
     notificationRef.value.showNotification(
-      'Не удалось импортировать списки. Проверьте соединение и выберите файл, сохранённый через экспорт списков на сайте.'
+      error?.code === 'list_capacity' || error?.code === 'history_capacity'
+        ? error.message
+        : 'Не удалось импортировать списки. Проверьте соединение и выберите файл, сохранённый через экспорт списков на сайте.',
+      8000
     )
   } finally {
     isImporting.value = false
     loading.value = false
-  }
-}
-
-const copyShareLink = async () => {
-  try {
-    const baseUrl = window.location.origin + window.location.pathname.split('/lists')[0] + '/lists'
-    const userId = user_id.value || authStore.user?.id
-    const type = route.query.type || typeFilter.value
-    const url = userId ? `${baseUrl}/${userId}?type=${type}` : `${baseUrl}?type=${type}`
-
-    await navigator.clipboard.writeText(url)
-    notificationRef.value.showNotification('Скопировано')
-  } catch (err) {
-    console.error('Ошибка копирования:', err)
   }
 }
 
@@ -443,8 +453,12 @@ const typeFilters = computed(() => [
   { label: 'Позже', value: USER_LIST_TYPES_ENUM.LATER },
   { label: 'Просмотрено', value: USER_LIST_TYPES_ENUM.COMPLETED },
   { label: 'Брошено', value: USER_LIST_TYPES_ENUM.ABANDONED },
-  ...(capabilities.value.rated ? [{ label: 'Оценено', value: USER_LIST_TYPES_ENUM.RATED }] : [])
+  // Only the viewer's own history: it is never part of a shared list.
+  ...(canManageOwnLists.value ? [{ label: 'История', value: USER_LIST_TYPES_ENUM.HISTORY }] : [])
 ])
+
+const counterFor = (type) =>
+  type === USER_LIST_TYPES_ENUM.HISTORY ? mainStore.history.length : listCounters.value[type]
 
 const fetchCounters = async () => {
   const view = captureView()
@@ -461,18 +475,27 @@ const fetchCounters = async () => {
 
 const fetchMovies = async () => {
   const generation = ++fetchGeneration
+  if (needsLogin.value) {
+    loading.value = false
+    return
+  }
   const view = captureView()
   const current = () => generation === fetchGeneration && isCurrentView(view)
-  loading.value = true
   errorMessage.value = ''
   errorCode.value = null
+  if (view.type === USER_LIST_TYPES_ENUM.HISTORY && !view.token) {
+    loading.value = false
+    return
+  }
+  loading.value = view.type !== USER_LIST_TYPES_ENUM.HISTORY || mainStore.history.length === 0
 
   try {
     const result = view.userId
       ? await getUserLists(view.type, view.userId)
       : await getMyLists(view.type)
     if (!current()) return
-    movies.value = result
+    if (view.type === USER_LIST_TYPES_ENUM.HISTORY) mainStore.setHistory(result)
+    else movies.value = result
     await fetchCounters()
   } catch (error) {
     if (!current()) return
@@ -496,15 +519,25 @@ const changeTypeFilter = (value) => {
 }
 
 const clearList = async () => {
-  if (!canManageOwnLists.value || !authStore.token || loading.value) return
+  if (!canManageOwnLists.value || loading.value) return
+  if (isHistoryView.value && !authStore.token) {
+    mainStore.clearAllHistory()
+    showModal.value = false
+    notificationRef.value.showNotification('История очищена')
+    return
+  }
+  if (!authStore.token) return
   const view = captureView()
   loading.value = true
   if (authStore.token) {
     try {
       await delAllFromList(view.type)
+      if (view.type === USER_LIST_TYPES_ENUM.HISTORY) mainStore.clearAllHistory()
       if (!isCurrentView(view)) return
       movies.value = []
-      notificationRef.value.showNotification('Список очищен')
+      notificationRef.value.showNotification(
+        view.type === USER_LIST_TYPES_ENUM.HISTORY ? 'История очищена' : 'Список очищен'
+      )
       await fetchCounters()
     } catch (error) {
       if (!isCurrentView(view)) return
@@ -524,6 +557,8 @@ const clearList = async () => {
 }
 
 const handleItemDeleted = async (deletedItemId) => {
+  // History cards were already removed by MovieList (store and account).
+  if (isHistoryView.value) return
   if (!canManageOwnLists.value || !authStore.token) return
   const view = captureView()
   const key = `${view.token}:${view.type}:${deletedItemId}`
@@ -556,7 +591,8 @@ watch(
   ([newType, newUserId]) => {
     user_id.value = newUserId
     typeFilter.value = typeFilters.value.some((type) => type.value === newType)
-      ? newType : USER_LIST_TYPES_ENUM.FAVORITE
+      ? newType
+      : USER_LIST_TYPES_ENUM.FAVORITE
     movies.value = []
     listCounters.value = {}
     showModal.value = false
@@ -565,10 +601,134 @@ watch(
   { immediate: true }
 )
 
-onUnmounted(() => { fetchGeneration++ })
+onUnmounted(() => {
+  fetchGeneration++
+})
 </script>
 
 <style scoped>
+/* Starts at the page gutter like Settings and Top-250 (the list page itself is centred). */
+.user-lists-page.lists-login {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 12px;
+  max-width: 760px;
+  margin: 0;
+  padding: var(--page-top) 24px 64px;
+}
+
+/* Four outlined tiles; each list keeps one colour on its top edge. */
+.lists-preview {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 12px;
+  align-self: stretch;
+  margin: 12px 0;
+  padding: 0;
+  list-style: none;
+}
+
+.lists-preview li {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  box-sizing: border-box;
+  height: 96px;
+  padding: 14px;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-top: 2px solid var(--tile-edge);
+  border-radius: var(--radius-m);
+  color: #fff;
+  font-size: var(--fs-m);
+  font-weight: 600;
+}
+
+.lists-preview .material-icons {
+  color: var(--tile-edge);
+  font-size: 22px;
+}
+
+.lists-preview__tile--favorite {
+  --tile-edge: #ff7b7b;
+}
+
+.lists-preview__tile--watching {
+  --tile-edge: #b69cff;
+}
+
+.lists-preview__tile--later {
+  --tile-edge: #ffc94d;
+}
+
+.lists-preview__tile--completed {
+  --tile-edge: #7ab8ff;
+}
+
+.lists-login__title {
+  margin: 0;
+  color: #fff;
+  font-size: var(--fs-2xl);
+  font-weight: 800;
+  letter-spacing: -0.02em;
+}
+
+@media (max-width: 600px) {
+  .lists-preview {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+.lists-login__history {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  color: var(--text-dim);
+  font-size: var(--fs-s);
+  text-decoration: none;
+}
+
+.lists-login__history:hover {
+  color: #fff;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.lists-login__history:focus-visible {
+  outline: 2px solid var(--accent-color);
+  outline-offset: 2px;
+}
+
+.lists-login__text {
+  max-width: 560px;
+  margin: 0;
+  color: var(--text-dim);
+  font-size: var(--fs-m);
+  line-height: 1.5;
+}
+
+.lists-login__button {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  margin-top: 8px;
+  padding: 0 20px;
+  border-radius: var(--radius-m);
+  background: var(--accent-solid);
+  color: var(--accent-contrast);
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.lists-login__button:hover {
+  background: var(--accent-solid-hover);
+}
+
+.lists-login__button:focus-visible {
+  outline: 2px solid #fff;
+  outline-offset: 2px;
+}
+
 .empty-state {
   display: flex;
   flex-direction: column;
@@ -617,7 +777,7 @@ onUnmounted(() => { fetchGeneration++ })
   width: auto;
   background: rgba(37, 37, 37, 0.8);
   backdrop-filter: blur(10px);
-  border-radius: 12px;
+  border-radius: var(--radius-l);
   padding: 6px;
   box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
   transition: all 0.3s ease;
@@ -685,7 +845,7 @@ onUnmounted(() => { fetchGeneration++ })
 .share-btn {
   padding: 6px;
   border: 1px solid rgba(255, 255, 255, 0.08);
-  border-radius: 8px;
+  border-radius: var(--radius-m);
   background: rgba(45, 45, 45, 0.6);
   color: #e0e0e0;
   cursor: pointer;
@@ -701,7 +861,7 @@ onUnmounted(() => { fetchGeneration++ })
 .clear-btn {
   padding: 6px;
   border: 1px solid rgba(255, 255, 255, 0.08);
-  border-radius: 8px;
+  border-radius: var(--radius-m);
   background: rgba(45, 45, 45, 0.6);
   color: #e0e0e0;
   cursor: pointer;
@@ -729,7 +889,7 @@ onUnmounted(() => { fetchGeneration++ })
 .filter-btn {
   padding: 6px 12px;
   border: 1px solid rgba(255, 255, 255, 0.08);
-  border-radius: 8px;
+  border-radius: var(--radius-m);
   background: rgba(45, 45, 45, 0.6);
   color: #e0e0e0;
   cursor: pointer;
@@ -750,9 +910,9 @@ onUnmounted(() => { fetchGeneration++ })
 }
 
 .type-btn.active {
-  background: var(--accent-color);
+  background: var(--accent-solid);
   border-color: transparent;
-  color: white;
+  color: var(--accent-contrast);
   box-shadow: 0 2px 8px var(--accent-transparent);
 }
 
@@ -761,7 +921,7 @@ onUnmounted(() => { fetchGeneration++ })
   margin-left: 6px;
   background: rgba(255, 255, 255, 0.1);
   padding: 2px 6px;
-  border-radius: 10px;
+  border-radius: var(--radius-l);
   font-weight: 500;
   color: #fff;
 }
@@ -792,6 +952,15 @@ onUnmounted(() => { fetchGeneration++ })
     flex-wrap: wrap;
     justify-content: center;
     gap: 4px;
+  }
+}
+
+@media (max-width: 900px) {
+  .share-btn,
+  .clear-btn,
+  .filter-btn {
+    min-width: 40px;
+    min-height: 40px;
   }
 }
 

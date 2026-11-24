@@ -6,15 +6,7 @@
 
     <div v-if="user" class="profile-content">
       <div class="profile-photo">
-        <img
-          v-if="user.photo && photoURL"
-          :src="photoURL"
-          loading="lazy"
-          decoding="async"
-          alt="Profile Photo"
-          @error="setImageFallback"
-        />
-        <div v-else class="photo-placeholder">
+        <div class="photo-placeholder">
           {{ String.fromCodePoint(user.name.codePointAt(0)).toLocaleUpperCase() }}
         </div>
       </div>
@@ -23,7 +15,15 @@
         <div class="info-item">
           <label>Имя:</label>
           <div class="editable-field">
-            <span v-if="!isEditingName" class="editable-text" role="button" tabindex="0" @keydown.enter.prevent="startEditName" @keydown.space.prevent="startEditName" @click="startEditName">
+            <span
+              v-if="!isEditingName"
+              class="editable-text"
+              role="button"
+              tabindex="0"
+              @keydown.enter.prevent="startEditName"
+              @keydown.space.prevent="startEditName"
+              @click="startEditName"
+            >
               {{ user.name }}
               <i class="fas fa-edit edit-icon"></i>
             </span>
@@ -37,8 +37,12 @@
                 @keyup.esc="cancelEditName"
                 @blur="saveName"
               />
-              <button class="save-btn" @click="saveName">✓</button>
-              <button class="cancel-btn" @click="cancelEditName">✕</button>
+              <button class="save-btn" aria-label="Сохранить" @click="saveName">
+                <span class="sym" aria-hidden="true">✓</span>
+              </button>
+              <button class="cancel-btn" aria-label="Отмена" @click="cancelEditName">
+                <span class="sym" aria-hidden="true">✕</span>
+              </button>
             </div>
           </div>
         </div>
@@ -70,9 +74,7 @@
 import { ref, onMounted, nextTick } from 'vue'
 import { useAuthStore } from '@/store/auth'
 import { useRouter } from 'vue-router'
-import { getBaseURL } from '@/api/axios'
 import { logoutAndRedirect } from '@/utils/authSession'
-import { setImageFallback } from '@/utils/mediaUtils'
 
 export default {
   name: 'ProfilePage',
@@ -82,7 +84,6 @@ export default {
     const authStore = useAuthStore()
     const router = useRouter()
     const user = ref(authStore.user)
-    const photoURL = ref(null)
     const isEditingName = ref(false)
     const editingName = ref('')
     const nameInput = ref(null)
@@ -122,15 +123,8 @@ export default {
       editingName.value = ''
     }
 
-    onMounted(async () => {
-      if (!user.value) {
-        logout(true)
-      }
-
-      if (user.value.photo) {
-        const baseURL = await getBaseURL()
-        photoURL.value = `${baseURL}${user.value.photo}`
-      }
+    onMounted(() => {
+      if (!user.value) logout(true)
     })
 
     return {
@@ -138,14 +132,12 @@ export default {
       showDialog,
       confirmLogout,
       logout,
-      photoURL,
       isEditingName,
       editingName,
       nameInput,
       startEditName,
       saveName,
-      cancelEditName,
-      setImageFallback
+      cancelEditName
     }
   }
 }
@@ -175,7 +167,7 @@ export default {
   width: 150px;
   height: 150px;
   border-radius: 50%;
-  border: 2px solid var(--accent-color);
+  border: 2px solid var(--accent-ui);
   overflow: hidden;
   background-color: #f0f0f0;
   display: flex;
@@ -220,7 +212,7 @@ export default {
 .editable-text {
   cursor: pointer;
   padding: 2px 4px;
-  border-radius: 3px;
+  border-radius: var(--radius-s);
   transition: background-color 0.2s;
   display: flex;
   align-items: center;
@@ -240,7 +232,7 @@ export default {
 
 .editable-text:hover .edit-icon {
   opacity: 1;
-  color: var(--accent-color);
+  color: var(--accent-text);
 }
 
 .edit-input-container {
@@ -252,8 +244,8 @@ export default {
 .edit-input {
   flex: 1;
   padding: 4px 8px;
-  border: 1px solid var(--accent-color);
-  border-radius: 4px;
+  border: 1px solid var(--accent-ui);
+  border-radius: var(--radius-s);
   font-size: 14px;
   background-color: white;
   color: #333;
@@ -263,7 +255,7 @@ export default {
 .cancel-btn {
   padding: 4px 8px;
   border: none;
-  border-radius: 3px;
+  border-radius: var(--radius-s);
   cursor: pointer;
   font-size: 12px;
   transition: background-color 0.2s;
@@ -290,17 +282,17 @@ export default {
 .logout-btn {
   margin-top: 30px;
   padding: 10px 20px;
-  background-color: var(--accent-color);
-  color: white;
+  background-color: var(--accent-solid);
+  color: var(--accent-contrast);
   border: none;
-  border-radius: 5px;
+  border-radius: var(--radius-m);
   cursor: pointer;
   font-size: 16px;
   transition: background-color 0.3s;
 }
 
 .logout-btn:hover {
-  background-color: var(--accent-hover);
+  background-color: var(--accent-solid-hover);
 }
 
 .loading {
@@ -325,7 +317,7 @@ export default {
 .dialog {
   background-color: white;
   padding: 20px;
-  border-radius: 8px;
+  border-radius: var(--radius-m);
   max-width: 400px;
   width: 100%;
 }
@@ -333,7 +325,7 @@ export default {
 .modern-dark-dialog {
   background-color: #1d1d1d;
   color: #e2e8f0;
-  border-radius: 12px;
+  border-radius: var(--radius-l);
   overflow: hidden;
   width: 320px;
   box-shadow:
@@ -343,7 +335,7 @@ export default {
 
 .dialog-header {
   padding: 16px 20px;
-  border-bottom: 1px solid var(--accent-color);
+  border-bottom: 1px solid var(--accent-ui);
 }
 
 .dialog-header h3 {
@@ -370,7 +362,7 @@ export default {
 
 .modern-dark-btn {
   padding: 8px 16px;
-  border-radius: 6px;
+  border-radius: var(--radius-m);
   border: none;
   background-color: #242424;
   color: #e2e8f0;

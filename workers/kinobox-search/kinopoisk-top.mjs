@@ -139,7 +139,9 @@ export async function serveKinopoiskTop(
   headers,
   ctx,
   cache,
-  budget = async () => null
+  budget = async () => null,
+  // Shared per-upstream protection (upstream-guard.mjs), as for the cards.
+  guard = (run) => run()
 ) {
   const started = Date.now()
   delete headers['X-Search-Transport']
@@ -205,7 +207,7 @@ export async function serveKinopoiskTop(
   try {
     const rejected = await budget()
     if (rejected) return rejected
-    const data = await requestKinopoiskTop(resource)
+    const data = await guard(() => requestKinopoiskTop(resource))
     const body = JSON.stringify(data)
     await cachePut(cache, key, body, resource.cacheTtl)
     headers['X-Top-Cache'] = 'MISS'

@@ -6,7 +6,7 @@
     max-height 0.3s ease-in-out;
   overflow: hidden;
   padding-bottom: 0;
-  border-radius: 10px;
+  border-radius: var(--radius-l);
   background: #050505;
   box-shadow: 0 10px 28px rgba(0, 0, 0, 0.45);
   border: 1px solid rgba(255, 255, 255, 0.06);
@@ -59,7 +59,7 @@
   text-align: center;
   background: rgba(30, 30, 30, 0.72);
   border: 1px solid rgba(255, 255, 255, 0.08);
-  border-radius: 8px;
+  border-radius: var(--radius-m);
 }
 
 .player-empty-state > :first-child {
@@ -78,17 +78,17 @@
 
 .player-empty-state button {
   border: 0;
-  border-radius: 6px;
+  border-radius: var(--radius-m);
   padding: 10px 16px;
-  background: var(--accent-color);
-  color: #fff;
+  background: var(--accent-solid);
+  color: var(--accent-contrast);
   font-weight: 600;
   cursor: pointer;
   transition: background-color 0.2s ease;
 }
 
 .player-empty-state button:hover {
-  background: var(--accent-hover);
+  background: var(--accent-solid-hover);
 }
 
 .fullscreen {

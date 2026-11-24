@@ -1,9 +1,9 @@
 <template>
   <div class="wrapper">
-    <div class="top-100-page" tabindex="0">
-      <header v-if="isKinopoiskTop" class="top-header">
+    <div class="top-100-page">
+      <header class="top-header">
         <div class="top-heading">
-          <h1>Топ-250 Кинопоиска</h1>
+          <h1>Топ-250</h1>
           <p>Лучшие {{ typeFilter === 'series' ? 'сериалы' : 'фильмы' }} по рейтингу зрителей</p>
         </div>
         <div class="top-tabs" role="group" aria-label="Тип подборки">
@@ -20,53 +20,27 @@
           </button>
         </div>
       </header>
-      <h1 v-else class="visually-hidden">Популярные фильмы и сериалы</h1>
-      <div v-if="!isKinopoiskTop" class="controls">
-        <div v-if="!isKinopoiskTop" class="filter-card time-card">
-          <div class="button-group time-buttons">
-            <i class="material-icons card-icon">schedule</i>
-            <template v-for="(btn, idx) in timeFilters" :key="idx">
-              <div v-if="btn.type === 'separator'" class="filter-separator"></div>
-              <button
-                v-else
-                class="filter-btn time-btn"
-                :class="{ active: activeTimeFilter === btn.apiUrl, disabled: loading }"
-                :disabled="loading"
-                @click="changeTimeFilter(btn.apiUrl)"
-              >
-                {{ btn.label }}
-              </button>
-            </template>
-          </div>
-        </div>
-
-        <div class="filter-card type-card">
-          <div class="button-group type-buttons">
-            <i class="material-icons card-icon">movie</i>
-            <button
-              v-for="(btn, idx) in currentTypeFilters"
-              :key="idx"
-              class="filter-btn type-btn"
-              :class="{ active: typeFilter === btn.value, disabled: loading }"
-              :disabled="loading"
-              @click="changeTypeFilter(btn.value)"
-            >
-              {{ btn.label }}
-            </button>
-          </div>
-        </div>
-      </div>
 
       <MovieList
         v-if="!errorMessage"
         :movies-list="visibleMovies"
         :is-history="false"
         :loading="loading"
+        :show-rank="true"
       />
       <div v-if="canShowMore" class="load-more-wrap">
         <div ref="loadMoreSentinel" class="load-more-sentinel" aria-hidden="true"></div>
-        <button class="load-more-btn" type="button" :disabled="loadingMore" @click="showMore">
-          {{ loadingMore ? 'Загружаем...' : 'Показать еще' }}
+        <div
+          v-if="loadingMore"
+          class="skeleton-row"
+          :class="`skeleton-row--${mainStore.cardSize}`"
+          aria-hidden="true"
+        >
+          <span v-for="n in 7" :key="n" class="skeleton-poster"></span>
+        </div>
+        <!-- Pages load on scroll; the button only retries a failed page and keeps the list. -->
+        <button v-if="loadMoreFailed" class="load-more-btn" type="button" @click="retryShowMore">
+          Не удалось загрузить. Повторить
         </button>
       </div>
       <ErrorMessage v-if="errorMessage" :message="errorMessage" :code="errorCode" />
@@ -75,7 +49,7 @@
 </template>
 
 <script setup>
-import { getDiscussedMovies, getMovies } from '@/api/movies'
+import { getMovies } from '@/api/movies'
 import ErrorMessage from '@/components/ErrorMessage.vue'
 import { MovieList } from '@/components/MovieList'
 import { handleApiError } from '@/constants'
@@ -83,30 +57,20 @@ import { computed, nextTick, onMounted, onServerPrefetch, onUnmounted, ref, watc
 import { useRoute, useRouter } from 'vue-router'
 import { useHead } from '@unhead/vue'
 import { buildStaticPageHead } from '@/utils/staticSeo'
-import { useMainStore } from '@/store/main'
 import { usePublicPageState } from '@/composables/usePublicPageState'
-
-const mainStore = useMainStore()
-const isKinopoiskTop = computed(() => mainStore.contentApiProvider !== 'local')
 
 useHead(() =>
   buildStaticPageHead({
     routePath: '/top',
-    title: isKinopoiskTop.value
-      ? 'Топ-250 фильмов и сериалов Кинопоиска - ReYohoho'
-      : 'Популярные фильмы и сериалы онлайн - ReYohoho',
-    description: isKinopoiskTop.value
-      ? '250 лучших фильмов и сериалов по рейтингу Кинопоиска. Русские названия, постеры и рейтинги.'
-      : 'Популярные фильмы и сериалы за сутки, неделю, месяц и всё время. Фильтры по типу и обсуждаемости на ReYohoho.'
+    title: 'Топ-250 фильмов и сериалов Кинопоиска - ReYohoho',
+    description:
+      '250 лучших фильмов и сериалов по рейтингу Кинопоиска. Русские названия, постеры и рейтинги.'
   })
 )
 
 const movies = ref([])
 const loading = ref(false)
-import { DEFAULT_ACTIVE_TIME } from '@/constants'
-const activeTimeFilter = ref(DEFAULT_ACTIVE_TIME)
-const typeFilter = ref('all')
-const lastNormalTypeFilter = ref('all')
+const typeFilter = ref('movie')
 const errorMessage = ref('')
 const errorCode = ref(null)
 const route = useRoute()
@@ -115,36 +79,15 @@ const TOP_MOVIES_PAGE_SIZE = 36
 const page = ref(1)
 const hasMore = ref(true)
 const loadingMore = ref(false)
+const loadMoreFailed = ref(false)
 const loadMoreSentinel = ref(null)
 let loadMoreObserver = null
 
-const timeFilters = [
-  { label: '24 часа', apiUrl: '24h' },
-  { label: '7 дней', apiUrl: '7d' },
-  { label: '30 дней', apiUrl: '30d' },
-  { label: 'Всё время', apiUrl: 'all' },
-  { label: '---', apiUrl: 'separator', type: 'separator' },
-  { label: 'Обсуждаемое', apiUrl: 'discussed' }
-]
 
-const normalTypeFilters = [
-  { label: 'Все', value: 'all' },
+const currentTypeFilters = [
   { label: 'Фильмы', value: 'movie' },
   { label: 'Сериалы', value: 'series' }
 ]
-
-const discussedTypeFilters = [
-  { label: 'Горячее', value: 'hot' },
-  { label: 'Недавнее', value: 'recent' }
-]
-
-const currentTypeFilters = computed(() =>
-  isKinopoiskTop.value
-    ? normalTypeFilters.filter((filter) => filter.value !== 'all')
-    : activeTimeFilter.value === 'discussed'
-      ? discussedTypeFilters
-      : normalTypeFilters
-)
 const visibleMovies = computed(() => movies.value)
 const canShowMore = computed(() => !loading.value && hasMore.value && !errorMessage.value)
 
@@ -165,23 +108,16 @@ const dedupeMoviesByKpId = (items = []) => {
 const resetPagination = () => {
   page.value = 1
   hasMore.value = true
+  loadMoreFailed.value = false
 }
 
 const fetchMoviesPage = async (nextPage = 1) => {
-  const request =
-    activeTimeFilter.value === 'discussed'
-      ? getDiscussedMovies(typeFilter.value, {
-          page: nextPage,
-          limit: TOP_MOVIES_PAGE_SIZE
-        })
-      : getMovies({
-          activeTime: activeTimeFilter.value,
-          typeFilter: typeFilter.value,
-          page: nextPage,
-          limit: TOP_MOVIES_PAGE_SIZE
-        })
-
-  const nextMovies = await request
+  const nextMovies = await getMovies({
+    activeTime: 'top250',
+    typeFilter: typeFilter.value,
+    page: nextPage,
+    limit: TOP_MOVIES_PAGE_SIZE
+  })
   hasMore.value = Array.isArray(nextMovies) && nextMovies.length === TOP_MOVIES_PAGE_SIZE
   page.value = nextPage
 
@@ -189,11 +125,9 @@ const fetchMoviesPage = async (nextPage = 1) => {
 }
 
 const showMore = async () => {
-  if (loadingMore.value || loading.value || !hasMore.value) return
+  if (loadingMore.value || loading.value || !hasMore.value || loadMoreFailed.value) return
 
   loadingMore.value = true
-  errorMessage.value = ''
-  errorCode.value = null
 
   try {
     const nextMovies = await fetchMoviesPage(page.value + 1)
@@ -203,12 +137,16 @@ const showMore = async () => {
       hasMore.value = false
     }
   } catch (error) {
-    const { message, code } = handleApiError(error)
-    errorMessage.value = message
-    errorCode.value = code
+    console.error('Ошибка догрузки топа:', error)
+    loadMoreFailed.value = true
   } finally {
     loadingMore.value = false
   }
+}
+
+const retryShowMore = () => {
+  loadMoreFailed.value = false
+  showMore()
 }
 
 const disconnectInfiniteScroll = () => {
@@ -240,24 +178,7 @@ const setupInfiniteScroll = async () => {
 }
 
 const applyRouteFilters = (query) => {
-  if (isKinopoiskTop.value) {
-    activeTimeFilter.value = 'top250'
-    typeFilter.value = query.type === 'series' ? 'series' : 'movie'
-    lastNormalTypeFilter.value = typeFilter.value
-    return
-  }
-  const nextTime = typeof query.time === 'string' && query.time ? query.time : DEFAULT_ACTIVE_TIME
-  const nextType = typeof query.type === 'string' && query.type ? query.type : null
-
-  activeTimeFilter.value = nextTime
-
-  if (nextTime === 'discussed') {
-    typeFilter.value = nextType || 'hot'
-    return
-  }
-
-  typeFilter.value = nextType || 'all'
-  lastNormalTypeFilter.value = typeFilter.value
+  typeFilter.value = query.type === 'series' ? 'series' : 'movie'
 }
 
 const fetchMovies = async () => {
@@ -281,7 +202,7 @@ const fetchMovies = async () => {
 applyRouteFilters(route.query)
 const publicPage = usePublicPageState(`top:${route.fullPath}`)
 const initialPage = publicPage.read()
-if (initialPage && isKinopoiskTop.value) {
+if (initialPage) {
   movies.value = initialPage.movies
   hasMore.value = initialPage.hasMore
   page.value = initialPage.page
@@ -289,7 +210,8 @@ if (initialPage && isKinopoiskTop.value) {
 
 onServerPrefetch(async () => {
   await fetchMovies()
-  if (!errorMessage.value) publicPage.save({ movies: movies.value, hasMore: hasMore.value, page: page.value })
+  if (!errorMessage.value)
+    publicPage.save({ movies: movies.value, hasMore: hasMore.value, page: page.value })
 })
 
 watch(canShowMore, (canLoad) => {
@@ -300,33 +222,8 @@ watch(canShowMore, (canLoad) => {
   }
 })
 
-const changeTimeFilter = (apiUrl) => {
-  const previousTimeFilter = activeTimeFilter.value
-  activeTimeFilter.value = apiUrl
-
-  if (apiUrl === 'discussed') {
-    if (previousTimeFilter !== 'discussed') {
-      lastNormalTypeFilter.value = typeFilter.value
-    }
-    typeFilter.value = 'hot'
-  } else if (previousTimeFilter === 'discussed') {
-    typeFilter.value = lastNormalTypeFilter.value
-  }
-
-  router.push({
-    query: {
-      ...route.query,
-      time: activeTimeFilter.value,
-      type: typeFilter.value
-    }
-  })
-}
-
 const changeTypeFilter = (value) => {
   typeFilter.value = value
-  if (activeTimeFilter.value !== 'discussed') {
-    lastNormalTypeFilter.value = value
-  }
 
   router.push({
     query: {
@@ -339,7 +236,7 @@ const changeTypeFilter = (value) => {
 watch(
   () => route.query,
   (newQuery, oldQuery) => {
-    if (newQuery.time === oldQuery?.time && newQuery.type === oldQuery?.type) {
+    if (newQuery.type === oldQuery?.type) {
       return
     }
 
@@ -350,8 +247,7 @@ watch(
 
 onMounted(() => {
   applyRouteFilters(route.query)
-  // Prerendered cards use the default remote provider, not persisted local preferences.
-  if (!isKinopoiskTop.value || (!movies.value.length && !errorMessage.value)) {
+  if (!movies.value.length && !errorMessage.value) {
     fetchMovies().then(setupInfiniteScroll)
   } else {
     setupInfiniteScroll()
@@ -371,7 +267,7 @@ onUnmounted(disconnectInfiniteScroll)
 .top-100-page {
   flex: 1;
   min-width: 0;
-  padding-top: 20px;
+  padding-top: var(--page-top);
   padding-bottom: 40px;
   width: 100%;
   margin: 0 auto;
@@ -383,7 +279,7 @@ onUnmounted(disconnectInfiniteScroll)
   justify-content: space-between;
   flex-wrap: wrap;
   gap: 16px 24px;
-  padding: 0 15px;
+  padding: 0 24px;
   margin-bottom: 24px;
 }
 
@@ -393,45 +289,62 @@ onUnmounted(disconnectInfiniteScroll)
 
 .top-heading h1 {
   margin: 0;
-  font-size: clamp(1.4rem, 2.5vw, 2rem);
+  font-size: var(--fs-2xl);
   line-height: 1.25;
-  font-weight: 700;
-  letter-spacing: -0.025em;
+  font-weight: 800;
+  letter-spacing: -0.02em;
   overflow-wrap: anywhere;
 }
 
 .top-heading p {
-  margin: 8px 0 0;
-  color: #a8a8a8;
-  font-size: 0.9rem;
+  margin: 6px 0 0;
+  color: var(--text-dim);
+  font-size: var(--fs-s);
   line-height: 1.5;
 }
 
 .top-tabs {
   display: flex;
   flex-shrink: 0;
-  gap: 4px;
-  padding: 4px;
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  border-radius: 12px;
-  background: rgba(28, 28, 28, 0.85);
+  gap: 2px;
+  padding: 3px;
+  border-radius: var(--radius-s);
+  background: rgba(255, 255, 255, 0.05);
 }
 
 .top-tabs .type-btn {
-  min-height: 40px;
-  padding: 8px 18px;
-  border-color: transparent;
-  background: transparent;
-  font-size: 0.9rem;
+  min-width: 0;
+  min-height: 38px;
+  padding: 0 16px;
+  border: none;
+  border-radius: var(--radius-s);
+  background: none;
+  box-shadow: none;
+  color: var(--text-dim);
+  font-size: var(--fs-s);
+  font-weight: 500;
+  transform: none;
+}
+
+.top-tabs .type-btn:hover {
+  color: #fff;
+}
+
+.top-tabs .type-btn:hover:not(.active) {
+  background: none;
+  box-shadow: none;
+  transform: none;
 }
 
 .top-tabs .type-btn.active {
-  background: var(--accent-color);
+  background: rgba(255, 255, 255, 0.12);
+  box-shadow: none;
+  color: #fff;
 }
 
 .top-tabs .type-btn:focus-visible {
-  outline: 2px solid #fff;
-  outline-offset: 2px;
+  outline: 2px solid var(--accent-color);
+  outline-offset: -2px;
 }
 
 .controls {
@@ -450,7 +363,7 @@ onUnmounted(disconnectInfiniteScroll)
   width: auto;
   background: rgba(37, 37, 37, 0.8);
   backdrop-filter: blur(10px);
-  border-radius: 12px;
+  border-radius: var(--radius-l);
   padding: 6px;
   box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
   transition: all 0.3s ease;
@@ -526,7 +439,7 @@ onUnmounted(disconnectInfiniteScroll)
 .filter-btn {
   padding: 6px 12px;
   border: 1px solid rgba(255, 255, 255, 0.08);
-  border-radius: 8px;
+  border-radius: var(--radius-m);
   background: rgba(45, 45, 45, 0.6);
   color: #e0e0e0;
   cursor: pointer;
@@ -552,16 +465,16 @@ onUnmounted(disconnectInfiniteScroll)
 }
 
 .time-btn.active {
-  background: var(--accent-color);
+  background: var(--accent-solid);
   border-color: transparent;
-  color: white;
+  color: var(--accent-contrast);
   box-shadow: 0 2px 8px var(--accent-transparent);
 }
 
 .type-btn.active {
-  background: var(--accent-color);
+  background: var(--accent-solid);
   border-color: transparent;
-  color: white;
+  color: var(--accent-contrast);
   box-shadow: 0 2px 8px var(--accent-transparent);
 }
 
@@ -607,7 +520,7 @@ onUnmounted(disconnectInfiniteScroll)
 
 @media (max-width: 600px) {
   .top-header {
-    padding: 0 10px;
+    padding: 0 12px;
     margin-bottom: 16px;
   }
 
@@ -655,21 +568,65 @@ onUnmounted(disconnectInfiniteScroll)
 }
 
 .load-more-btn {
-  border: 1px solid rgba(255, 255, 255, 0.12);
-  border-radius: 8px;
-  background: var(--accent-color);
+  min-height: 44px;
+  padding: 0 18px;
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  border-radius: var(--radius-m);
+  background: transparent;
   color: #fff;
-  cursor: pointer;
   font-weight: 600;
-  padding: 10px 18px;
+  cursor: pointer;
 }
 
 .load-more-btn:hover {
-  background: var(--accent-hover);
+  background: rgba(255, 255, 255, 0.06);
 }
 
-.load-more-btn:disabled {
-  cursor: not-allowed;
-  opacity: 0.7;
+.skeleton-row {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(170px, 1fr));
+  gap: 28px 16px;
+  box-sizing: border-box;
+  width: 100%;
+  max-height: 300px;
+  padding: 0 24px;
+  overflow: hidden;
+}
+
+.skeleton-row--small {
+  grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+}
+
+.skeleton-row--large {
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  column-gap: 20px;
+}
+
+.skeleton-poster {
+  aspect-ratio: 2 / 3;
+  border-radius: var(--radius-m);
+  background: linear-gradient(100deg, #141414 30%, #1e1e1e 50%, #141414 70%) 0 0 / 200% 100%;
+  animation: top-skeleton-shimmer 1.4s linear infinite;
+}
+
+@keyframes top-skeleton-shimmer {
+  to {
+    background-position: -200% 0;
+  }
+}
+
+@media (max-width: 620px) {
+  .skeleton-row {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 16px 10px;
+    max-height: 200px;
+    padding: 0 12px;
+  }
+
+  .skeleton-row--large {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 20px;
+    max-height: 560px;
+  }
 }
 </style>

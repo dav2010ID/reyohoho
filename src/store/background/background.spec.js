@@ -82,16 +82,16 @@ describe('Тесты store background', () => {
     expect(store.isCardBorder).toBe(true)
   })
 
-  it('ResetBackground сбрасывает фон к stars и выключает блюр', () => {
+  it('ResetBackground сбрасывает фон к сплошному фону и выключает блюр', () => {
     const store = useBackgroundStore()
 
     store.SET_BACKGROUND_TYPE('dynamic')
     store.toggleBlur(true)
 
     store.resetBackground()
-    expect(store.backgroundType).toBe('stars')
+    expect(store.backgroundType).toBe('disabled')
     expect(store.isBlurActive).toBe(false)
-    expect(store.backgroundUrl).toBe(starsBackground)
+    expect(store.backgroundUrl).toBe('')
   })
 
   it('SET_BACKGROUND_TYPE работает корректно', () => {

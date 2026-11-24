@@ -1,32 +1,64 @@
 <template>
   <div class="search" @click="closeModal">
     <div v-dialog-focus="closeModal" aria-label="Поиск фильмов" class="search__content" @click.stop>
-      <!-- Поиск -->
-      <div class="input-wrapper">
-        <input
-          ref="searchInput"
-          v-model="searchTerm"
-          placeholder="Введите название фильма"
-          class="search-input"
-          :class="{ 'wrong-layout': showLayoutWarning }"
-          @keydown.enter="search"
-          @keydown.tab="handleTabKey"
-          @keydown.down.prevent="focusFirstMovieCard"
-          @input="handleInput"
-        />
-        <div v-if="showLayoutWarning" class="layout-warning" :class="{ show: showLayoutWarning }">
-          <i class="fas fa-keyboard"></i>
-          Возможно, вы используете неправильную раскладку. Нажмите Tab для переключения на
-          {{ suggestedLayout }} раскладку
+      <!-- One header row: the field and the close button. -->
+      <div class="search__head">
+        <div class="input-wrapper">
+          <input
+            ref="searchInput"
+            v-model="searchTerm"
+            aria-label="Поиск фильмов"
+            placeholder="Введите название фильма"
+            class="search-input"
+            :class="{ 'wrong-layout': showLayoutWarning }"
+            @keydown.enter="search"
+            @keydown.tab="handleTabKey"
+            @keydown.down.prevent="focusFirstMovieCard"
+            @input="handleInput"
+          />
+          <div v-if="showLayoutWarning" class="layout-warning" :class="{ show: showLayoutWarning }">
+            <i class="fas fa-keyboard"></i>
+            Возможно, вы используете неправильную раскладку. Нажмите Tab для переключения на
+            {{ suggestedLayout }} раскладку
+          </div>
         </div>
+        <button class="btn--close" type="button" aria-label="Закрыть" @click="closeModal">
+          <i class="fas fa-close" aria-hidden="true"></i>
+        </button>
       </div>
 
       <!-- Результаты поиска -->
       <div v-if="!errorMessage" class="search__results-wrapper">
         <div class="search__results">
-          <div v-if="searchTerm?.length < 3" class="no-results">
-            Здесь появятся результаты поиска
-          </div>
+          <!-- Empty query: the last five watched titles are one keypress away. -->
+          <template v-if="!searchTerm || searchTerm.length < 2">
+            <div v-if="recentHistory.length" class="recent">
+              <p class="recent__title">Недавно смотрели</p>
+              <router-link
+                v-for="movie in recentHistory"
+                :key="movie.kp_id"
+                class="search__movie movie"
+                :to="getMoviePath(movie)"
+                @click="closeModal"
+              >
+                <img
+                  :src="resolvePosterByMovie(movie)"
+                  :alt="movie.title ? `Постер ${movie.title}` : 'Постер фильма'"
+                  class="movie__poster"
+                  width="120"
+                  height="180"
+                  @error="setImageFallback"
+                />
+                <div class="movie__info">
+                  <div class="movie__title">{{ movie.title }}</div>
+                  <div v-if="movie.year" class="movie__meta">
+                    <span class="movie__year">{{ movie.year }}</span>
+                  </div>
+                </div>
+              </router-link>
+            </div>
+            <div v-else class="no-results">Начните вводить название</div>
+          </template>
 
           <template v-else-if="loading">
             <div v-for="idx in [0, 1, 2, 3]" :key="idx" class="movie-skeleton">
@@ -41,7 +73,7 @@
           </template>
 
           <div v-else-if="movies.length === 0 && !loading" class="no-results">
-            Для просмотра ничего не найдено
+            Ничего не найдено по «{{ searchTerm }}»
           </div>
 
           <div v-else>
@@ -54,7 +86,11 @@
             >
               <img
                 :src="movie.poster"
-                :alt="getMovieName(movie.raw_data) ? `Постер ${getMovieName(movie.raw_data)}` : 'Постер фильма'"
+                :alt="
+                  getMovieName(movie.raw_data)
+                    ? `Постер ${getMovieName(movie.raw_data)}`
+                    : 'Постер фильма'
+                "
                 class="movie__poster"
                 width="120"
                 height="180"
@@ -64,7 +100,7 @@
                   {{ getMovieName(movie.raw_data) }}
                 </div>
                 <div class="movie__meta">
-                  <span class="movie__rating" :class="getRatingColor(movie.raw_data?.rating)">
+                  <span class="movie__rating" :class="scoreTier(movie.raw_data?.rating)">
                     {{ movie.raw_data?.rating !== 'null' ? (movie.raw_data?.rating ?? '-') : '-' }}
                   </span>
                   <span class="movie__type"> {{ TYPES_ENUM[movie.raw_data?.type] ?? '-' }}, </span>
@@ -74,15 +110,15 @@
                 </div>
               </div>
             </router-link>
+            <router-link :to="allResultsLink" class="search__all" @click="closeModal">
+              Все результаты по «{{ searchTerm }}»
+              <span class="sym" aria-hidden="true">→</span>
+            </router-link>
           </div>
         </div>
       </div>
 
       <ErrorMessage v-if="errorMessage" :message="errorMessage" :code="errorCode" />
-
-      <button class="btn--close" @click="closeModal">
-        <i class="fas fa-close"></i>
-      </button>
     </div>
   </div>
 </template>
@@ -97,10 +133,11 @@ import { hasConsecutiveConsonants, suggestLayout, convertLayout } from '@/utils/
 import debounce from 'lodash.debounce'
 import { ref, watch, nextTick, onMounted, onUnmounted, computed } from 'vue'
 import { useMainStore } from '@/store/main'
-import { getRatingColor } from '@/utils/ratingUtils'
 import { getMovieName } from '@/utils/textUtils'
 import { getMovieSeoPath } from '@/utils/movieSeo'
+import { resolvePosterByMovie, setImageFallback } from '@/utils/mediaUtils'
 import { createLatestRequestGuard } from '@/utils/latestRequest'
+import { useRouter } from 'vue-router'
 
 const navbarStore = useNavbarStore()
 
@@ -120,12 +157,19 @@ const activeMovieIndex = ref(null)
 const showLayoutWarning = ref(false)
 const suggestedLayout = ref('')
 const store = useMainStore()
+const recentHistory = computed(() => (store.isHistoryAllowed ? store.history.slice(0, 5) : []))
 const isMobile = computed(() => store.isMobile)
 
 onMounted(async () => {
   await nextTick()
   document.addEventListener('keydown', handleKeyDown)
   searchInput.value?.focus()
+  // A query typed elsewhere (the 404 page) opens the modal already searching.
+  const prefill = navbarStore.takeSearchPrefill()
+  if (prefill) {
+    searchTerm.value = prefill
+    search()
+  }
 })
 
 onUnmounted(() => {
@@ -193,14 +237,32 @@ const debouncedPerformSearch = debounce(() => {
   }
 }, 700)
 
+// Any navigation (a result, the rail, the tab bar, browser back) closes the modal.
+const router = useRouter()
+const removeAfterEach = router?.afterEach(() => navbarStore.closeSearchModal())
+onUnmounted(() => removeAfterEach?.())
+
+// Same score colours as the cards: white from 7, amber from 5, red below.
+const scoreTier = (value) => {
+  const number = parseFloat(value)
+  if (!Number.isFinite(number) || number <= 0) return ''
+  if (number < 5) return 'is-low'
+  if (number < 7) return 'is-mid'
+  return ''
+}
+
+// The full result grid on home, which reads #search= on load and on hash change.
+const allResultsLink = computed(() => ({
+  path: '/',
+  hash: `#search=${encodeURIComponent(searchTerm.value || '')}`
+}))
+
 const closeModal = (event) => {
-  const isLeftClick = event.button === 0
+  // Escape через v-dialog-focus вызывает без события
+  const isPlainClick = !event || (event.button === 0 && !event.ctrlKey && !event.metaKey)
 
-  // Проверяем, что не зажаты Ctrl или Cmd
-  const isNotModified = !event.ctrlKey && !event.metaKey
-
-  // Если это обычный клик, скрываем попап
-  if ((isLeftClick && isNotModified) || !event) {
+  // Если это обычный клик или Escape, скрываем попап
+  if (isPlainClick) {
     navbarStore.closeSearchModal() // Используем метод из хранилища для закрытия модалки
     resetSearch()
   }
@@ -289,9 +351,12 @@ watch(searchTerm, () => {
 
 <style lang="scss" scoped>
 .btn--close {
-  position: absolute;
-  top: 8px;
-  right: 6px;
+  display: flex;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: center;
+  min-width: 44px;
+  min-height: 44px;
   border: 0;
   background: none;
   color: var(--text-color);
@@ -313,6 +378,9 @@ watch(searchTerm, () => {
 }
 
 .search {
+  /* Mounted inside the navigation, which uses the handwritten menu font. */
+  font-family: 'Roboto', sans-serif;
+  font-size: 16px;
   position: fixed;
   top: 0;
   left: 0;
@@ -321,40 +389,73 @@ watch(searchTerm, () => {
   background-color: rgba(0, 0, 0, 0.6);
   display: flex;
   justify-content: center;
-  align-items: center;
-  z-index: 30;
+  /* Top-anchored: the field stays put while results arrive. */
+  align-items: flex-start;
+  box-sizing: border-box;
+  padding-top: 12vh;
+
+  @media screen and (max-width: 600px) {
+    padding-top: 8px;
+  }
+  /* Above the rail and the tab bar, so the backdrop covers the whole app. */
+  z-index: calc(var(--z-sidebar) + 10);
 
   &__content {
     position: relative;
     display: flex;
     flex-direction: column;
     box-sizing: border-box;
-    background: rgba(30, 30, 30, 0.96);
-    padding: 20px;
-    border-radius: 8px;
-    width: min(800px, calc(100vw - 32px));
-    max-height: 90vh;
-    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    background: var(--surface-overlay);
+    padding: 12px;
+    border-radius: var(--radius-l);
+    width: min(640px, calc(100vw - 32px));
+    max-height: calc(88vh - 16px);
+    box-shadow:
+      inset 0 0 0 1px var(--hairline),
+      0 24px 48px rgba(0, 0, 0, 0.5);
 
     @media screen and (max-width: 600px) {
       width: calc(100vw - 24px);
-      padding: 14px;
+      max-height: calc(100dvh - 16px);
+      padding: 10px;
+    }
+  }
+
+  &__head {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  &__all {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    min-height: 44px;
+    margin: 4px 4px 4px 0;
+    padding: 0 14px;
+    border-radius: var(--radius-m);
+    color: var(--accent-light);
+    font-size: var(--fs-s);
+    font-weight: 600;
+    text-decoration: none;
+
+    &:hover,
+    &:focus-visible {
+      background: rgba(255, 255, 255, 0.06);
     }
 
-    @media (min-width: 768px) {
-      width: min(600px, calc(100vw - 32px));
-    }
-
-    @media (min-width: 1200px) {
-      width: min(800px, calc(100vw - 32px));
+    &:focus-visible {
+      outline: 2px solid var(--accent-color);
+      outline-offset: -2px;
     }
   }
 
   &__results-wrapper {
     flex: 1;
+    min-height: 0;
     overflow-y: auto; // Прокрутка только для результатов
-    margin-top: 20px;
-    max-height: calc(90vh - 120px); // Ограничение высоты (учитывая высоту инпута и отступы)
+    margin-top: 12px;
   }
 
   &__results {
@@ -363,11 +464,21 @@ watch(searchTerm, () => {
     box-sizing: border-box;
 
     /* Сообщение "Ничего не найдено" */
+    .recent__title {
+      margin: 4px 0 8px;
+      color: var(--text-faint);
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+    }
+
     .no-results {
       width: 100%;
+      margin: 16px auto;
+      color: var(--text-dim);
+      font-size: var(--fs-m);
       text-align: center;
-      font-size: 18px;
-      margin: 20px auto;
     }
   }
 
@@ -380,7 +491,7 @@ watch(searchTerm, () => {
     cursor: pointer;
     text-decoration: none;
     color: #fff;
-    border-radius: 8px;
+    border-radius: var(--radius-m);
     outline: none;
     margin: 2px 4px 8px 0;
     min-height: 68px;
@@ -400,7 +511,7 @@ watch(searchTerm, () => {
       height: 48px;
       flex: 0 0 32px;
       object-fit: cover;
-      border-radius: 3px;
+      border-radius: var(--radius-s);
       background: rgba(255, 255, 255, 0.08);
     }
 
@@ -412,31 +523,33 @@ watch(searchTerm, () => {
     &__title {
       font-size: 15px;
       line-height: 18px;
-      font-weight: 500;
+      font-weight: 600;
       padding: 0;
       margin: 0;
       overflow-wrap: anywhere;
     }
 
+    /* Year, type and score are secondary to the title. */
     &__meta {
       display: flex;
       flex-wrap: wrap;
       gap: 7px;
       margin-top: 3px;
+      color: var(--text-dim);
+      font-size: var(--fs-s);
       line-height: 18px;
     }
 
     &__rating {
-      &.low {
-        color: #ff6b6b;
+      color: #fff;
+      font-weight: 600;
+
+      &.is-mid {
+        color: #ffc94d;
       }
 
-      &.medium {
-        color: #ffd93d;
-      }
-
-      &.high {
-        color: #51cf66;
+      &.is-low {
+        color: #ff7b7b;
       }
     }
   }
@@ -444,25 +557,30 @@ watch(searchTerm, () => {
 
 .input-wrapper {
   position: relative;
-  width: 100%;
-  margin-top: 20px;
+  flex: 1 1 auto;
+  min-width: 0;
 }
 
+/* The same field as home search. */
 .search-input {
   box-sizing: border-box;
   width: 100%;
-  padding: 10px;
+  height: 48px;
+  padding: 0 14px;
   font-size: 16px;
-  border: 1px solid #ccc;
-  border-radius: 10px;
-  background: rgba(30, 30, 30, 0.8);
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  border-radius: var(--radius-m);
+  background: var(--surface-raised);
   color: #fff;
-  transition: all 0.3s ease;
+  transition: border-color 0.15s ease;
+
+  &::placeholder {
+    color: var(--text-faint);
+  }
 
   &:focus {
     outline: none;
-    border-color: var(--accent-color);
-    box-shadow: 0 0 0 2px var(--accent-transparent);
+    border-color: var(--accent-ui);
   }
 
   &.wrong-layout {
@@ -481,7 +599,7 @@ watch(searchTerm, () => {
   font-size: 14px;
   background: rgba(255, 140, 0, 0.15);
   padding: 8px 12px;
-  border-radius: 5px;
+  border-radius: var(--radius-m);
   pointer-events: none;
   border: 1px solid rgba(255, 140, 0, 0.5);
   display: flex;
@@ -511,14 +629,14 @@ watch(searchTerm, () => {
   justify-content: flex-start;
   padding: 10px 16px;
   gap: 12px;
-  border-radius: 10px;
+  border-radius: var(--radius-l);
   background: rgba(34, 34, 34, 0.5); // Цвет фона, похожий на реальный элемент
 
   &__poster {
     width: 32px;
     height: 48px; // Высота постерa
     background: rgba(255, 255, 255, 0.1);
-    border-radius: 4px;
+    border-radius: var(--radius-s);
     animation: shimmer 1.5s infinite linear;
   }
 
@@ -533,7 +651,7 @@ watch(searchTerm, () => {
     width: 70%;
     height: 18px; // Высота заголовка
     background: rgba(255, 255, 255, 0.1);
-    border-radius: 4px;
+    border-radius: var(--radius-s);
     animation: shimmer 1.5s infinite linear;
   }
 
@@ -546,7 +664,7 @@ watch(searchTerm, () => {
     width: 40px;
     height: 14px; // Высота рейтинга
     background: rgba(255, 255, 255, 0.1);
-    border-radius: 4px;
+    border-radius: var(--radius-s);
     animation: shimmer 1.5s infinite linear;
   }
 }
@@ -574,10 +692,10 @@ watch(searchTerm, () => {
 }
 
 .filter-select:focus {
-  border-color: var(--accent-color);
+  border-color: var(--accent-ui);
 }
 
 .status.completed {
-  color: var(--accent-color);
+  color: var(--accent-text);
 }
 </style>

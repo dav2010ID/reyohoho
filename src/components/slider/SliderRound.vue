@@ -1,6 +1,6 @@
 <template>
-  <div class="toggle">
-    <label class="switch">
+  <label class="toggle">
+    <span class="switch">
       <input
         type="checkbox"
         :checked="modelValue"
@@ -9,9 +9,9 @@
         @keydown.enter.prevent="toggle"
       />
       <span class="slider"></span>
-    </label>
+    </span>
     <span class="label-text"><slot></slot></span>
-  </div>
+  </label>
 </template>
 
 <script setup>
@@ -47,6 +47,14 @@ function toggle() {
   align-items: center;
   gap: 8px;
   min-width: 0;
+  cursor: pointer;
+}
+
+/* Touch: the whole row (switch + text) is one 44px target. */
+@media (max-width: 768px), (pointer: coarse) {
+  .toggle {
+    min-height: 44px;
+  }
 }
 
 .switch {
@@ -70,9 +78,9 @@ function toggle() {
   left: 0;
   right: 0;
   bottom: 0;
-  background-color: #444;
+  background-color: #6b6b6b;
   transition: 0.3s;
-  border-radius: 20px;
+  border-radius: var(--radius-l);
 }
 
 .slider:before {

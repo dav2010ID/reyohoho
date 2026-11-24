@@ -1,7 +1,7 @@
 // @vitest-environment node
 import { afterEach, describe, expect, it, vi } from 'vitest'
 import { serveTelegramAuth, cleanupAuth } from './telegram-auth.mjs'
-import { verifyWorkerSession } from './private-api.mjs'
+import { sha256, verifyWorkerSession } from './private-api.mjs'
 import { serveAccount } from './account.mjs'
 import { serveHistory } from './history.mjs'
 import { testDatabase } from './test-db.mjs'
@@ -134,6 +134,117 @@ describe('Telegram Worker auth', () => {
       response.token
     )
     await authCall(env, 'logout', {}, bearer)
+    expect(await verifyWorkerSession(request('/user', {}, 'GET', bearer), env)).toBeNull()
+    db.sqlite.close()
+  })
+  it('shows where a request came from and lets the owner end the session it produced', async () => {
+    const db = testDatabase()
+    const env = envFor(db)
+    const sent = []
+    vi.stubGlobal(
+      'fetch',
+      vi.fn(async (_url, options) => {
+        sent.push(JSON.parse(options.body))
+        return Response.json({ ok: true, result: {} })
+      })
+    )
+    const browser = {
+      'User-Agent':
+        'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0 Safari/537.36',
+      'CF-IPCountry': 'DE'
+    }
+    const login = async (headers) => {
+      const created = await (await authCall(env, 'telegram-login-token', {}, headers)).json()
+      const start = new URL(created.telegram_link).searchParams.get('start')
+      await webhook(env, startUpdate(start))
+      await webhook(env, callbackUpdate(start))
+      const polled = await (
+        await authCall(env, 'check-telegram-auth', { token: created.token }, headers)
+      ).json()
+      return polled.token
+    }
+    const first = await login(browser)
+    expect(sent[0].text).toContain('Запрос создан меньше минуты назад: Chrome, Windows, DE.')
+    const notice = sent.find((message) => message.text?.startsWith('Выполнен вход'))
+    expect(notice).toMatchObject({ chat_id: '123' })
+    expect(notice.text).toContain('Chrome, Windows, DE')
+    const [[revokeOne], [revokeAll]] = notice.reply_markup.inline_keyboard
+    expect(revokeOne.callback_data).toMatch(/^rv:[0-9a-f]{40}$/)
+    expect(revokeAll.callback_data).toBe('rva')
+    expect(JSON.stringify(sent)).not.toContain(first)
+    const second = await login({})
+    const session = (token) =>
+      verifyWorkerSession(request('/user', {}, 'GET', { Authorization: `Bearer ${token}` }), env)
+    const press = (data, id = 123) => {
+      const update = callbackUpdate('x'.repeat(43), id)
+      update.callback_query.data = data
+      return webhook(env, update)
+    }
+    // Another Telegram user cannot end someone else's session.
+    await press(revokeOne.callback_data, 999)
+    expect((await session(first)).id).toBe('123')
+    await press(revokeOne.callback_data)
+    expect(await session(first)).toBeNull()
+    expect((await session(second)).id).toBe('123')
+    expect(sent.at(-1).text).toBe('Вход завершён: это устройство вышло из аккаунта.')
+    await press(revokeOne.callback_data)
+    expect(sent.at(-1).text).toBe('Этот вход уже завершён.')
+    // A failed acknowledgement still answers 200, so Telegram does not redeliver
+    // "end all" and end a session created after the press.
+    const deliver = fetch.getMockImplementation()
+    fetch.mockImplementation(async (url, options) =>
+      String(url).endsWith('/answerCallbackQuery')
+        ? Response.json({ ok: false }, { status: 500 })
+        : deliver(url, options)
+    )
+    vi.spyOn(console, 'error').mockImplementation(() => {})
+    expect((await press('rva')).status).toBe(200)
+    expect(await session(second)).toBeNull()
+    fetch.mockImplementation(deliver)
+    await press('rva')
+    expect(sent.at(-1).text).toBe('Завершено входов: 0. Войдите заново на своих устройствах.')
+    db.sqlite.close()
+  })
+  it('keeps the login when the sign-in notice cannot be sent', async () => {
+    const db = testDatabase()
+    const env = envFor(db)
+    vi.spyOn(console, 'error').mockImplementation(() => {})
+    vi.stubGlobal(
+      'fetch',
+      vi.fn(async (_url, options) =>
+        JSON.parse(options.body).text?.startsWith('Выполнен вход')
+          ? Response.json({ ok: false }, { status: 500 })
+          : Response.json({ ok: true, result: {} })
+      )
+    )
+    const created = await (await authCall(env, 'telegram-login-token')).json()
+    const start = new URL(created.telegram_link).searchParams.get('start')
+    await webhook(env, startUpdate(start))
+    await webhook(env, callbackUpdate(start))
+    const waits = []
+    const polled = await serveTelegramAuth(
+      request('/auth/check-telegram-auth', { token: created.token }),
+      env,
+      origin,
+      { waitUntil: (promise) => waits.push(promise) }
+    )
+    expect((await polled.json()).authenticated).toBe(true)
+    expect(waits).toHaveLength(1)
+    await expect(waits[0]).resolves.toBeUndefined()
+    db.sqlite.close()
+  })
+  it('blocks new logins when switched off but keeps sessions and logout working', async () => {
+    const db = testDatabase()
+    const env = { ...envFor(db), TELEGRAM_AUTH_ENABLED: 'false' }
+    const access = 'rh1_' + 'b'.repeat(43)
+    db.sqlite.prepare('INSERT INTO tg_users VALUES (?,?)').run('123', 'Test')
+    db.sqlite
+      .prepare('INSERT INTO tg_sessions VALUES (?,?,?,?)')
+      .run(await sha256(access), '123', Math.floor(Date.now() / 1000) + 3600, 0)
+    const bearer = { Authorization: `Bearer ${access}` }
+    expect((await authCall(env, 'telegram-login-token')).status).toBe(503)
+    expect((await verifyWorkerSession(request('/user', {}, 'GET', bearer), env)).id).toBe('123')
+    expect((await authCall(env, 'logout', {}, bearer)).status).toBe(200)
     expect(await verifyWorkerSession(request('/user', {}, 'GET', bearer), env)).toBeNull()
     db.sqlite.close()
   })

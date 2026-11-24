@@ -36,7 +36,7 @@ describe('material icons subset generator', () => {
     const fetchImpl = vi
       .fn()
       .mockResolvedValueOnce(
-        new Response("@font-face { src: url(https://fonts.example/subset.ttf); }")
+        new Response('@font-face { src: url(https://fonts.example/subset.ttf); }')
       )
       .mockResolvedValueOnce(new Response(font))
 

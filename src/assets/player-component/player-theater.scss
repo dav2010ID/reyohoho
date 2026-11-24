@@ -62,7 +62,7 @@
   right: 24px;
   width: 44px;
   height: 44px;
-  border-radius: 14px;
+  border-radius: var(--radius-l);
   border: 1px solid rgba(255, 255, 255, 0.16);
   background: rgba(16, 16, 16, 0.72);
   backdrop-filter: blur(16px) saturate(1.4);

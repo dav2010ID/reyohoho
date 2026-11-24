@@ -39,11 +39,13 @@ export function privateReply(origin) {
     new Response(status === 204 ? null : JSON.stringify(data), { status, headers })
 }
 
-export function secureOrigin(origin) {
+// Bearer credentials need HTTPS; a local dev server only where the Worker opts in.
+export function secureOrigin(origin, env) {
   return (
     !origin ||
     origin.startsWith('https://') ||
-    /^http:\/\/(localhost|127\.0\.0\.1):5173$/.test(origin)
+    (env?.ALLOW_DEV_ORIGINS === 'true' &&
+      /^http:\/\/(localhost|127\.0\.0\.1):5173$/.test(origin))
   )
 }
 
@@ -65,7 +67,9 @@ export function randomToken() {
 }
 
 export async function verifyWorkerSession(request, env) {
-  if (env.TELEGRAM_AUTH_ENABLED !== 'true' || !env.HISTORY_DB) return null
+  // TELEGRAM_AUTH_ENABLED only gates NEW logins. Turning it off must not sign
+  // everyone out or hide their lists, history and logout.
+  if (!env.HISTORY_DB) return null
   const header = request.headers.get('Authorization') || ''
   if (!/^Bearer rh1_[A-Za-z0-9_-]{43}$/.test(header)) return null
   return primaryDb(env)

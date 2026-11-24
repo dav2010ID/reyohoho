@@ -1,13 +1,11 @@
 <template>
+  <a class="skip-link" href="#main-content">Перейти к содержимому</a>
   <ConfirmationHost />
   <BackgroundSpace />
-  <MobileHeader v-if="isMobile" />
+  <MobileHeader v-if="showMobileHeader" />
   <MenuNavigation />
 
-  <main
-    id="main-content"
-    :class="['router-view-container', { 'router-view-container--with-mobile-header': isMobile }]"
-  >
+  <main id="main-content" class="router-view-container" tabindex="-1">
     <router-view v-slot="{ Component }">
       <component :is="Component" />
     </router-view>
@@ -17,6 +15,7 @@
   <div v-if="dimmingEnabled" class="dimming-overlay" @click="toggleDimming"></div>
 
   <div v-if="showGarland" id="garland" :style="{ backgroundImage: `url(${garlandImage})` }"></div>
+  <ToastMessage ref="storageToast" />
 </template>
 
 <script setup>
@@ -24,10 +23,12 @@ import ConfirmationHost from '@/components/ConfirmationHost.vue'
 import BackgroundSpace from '@/components/BackgroundSpace.vue'
 import MenuNavigation from '@/components/MenuNavigation.vue'
 import MobileHeader from '@/components/MobileHeader.vue'
+import ToastMessage from '@/components/notification/ToastMessage.vue'
+import { STORAGE_ERROR_EVENT } from '@/utils/storageErrors'
 import { useMainStore } from '@/store/main'
 import { useNavbarStore } from '@/store/navbar'
 import { useHead } from '@unhead/vue'
-import { computed, onMounted, onUnmounted, watch } from 'vue'
+import { computed, onMounted, onUnmounted, ref, watch } from 'vue'
 import { useRoute } from 'vue-router'
 import { isNewYearPeriod } from '@/utils/dateUtils'
 import { buildStaticCanonicalUrl } from '@/utils/staticSeo'
@@ -37,15 +38,22 @@ const store = useMainStore()
 const navbarStore = useNavbarStore()
 const route = useRoute()
 let stopSidebarPositionWatch = null
+const storageToast = ref(null)
+const showStorageError = () =>
+  storageToast.value?.showNotification(
+    'Браузер не сохранил изменения: память сайта заполнена или запрещена. Освободите место или разрешите хранение данных.',
+    8000
+  )
 
 // Keep a route-level title entry alive while page-specific SEO head entries mount and unmount.
 // Without this fallback, removing the home page head can restore its old title on another route.
 const siteImage = buildStaticCanonicalUrl('/') + 'icons/icon-512x512.png'
 useHead(() => ({
   title: route.meta?.title || 'ReYohoho',
-  meta: route.name === 'movie-info' || route.name === 'movie-info-shiki'
-    ? []
-    : [{ property: 'og:image', content: siteImage }]
+  meta:
+    route.name === 'movie-info'
+      ? []
+      : [{ property: 'og:image', content: siteImage }]
 }))
 
 // Применяем класс sidebar-right на body при смене позиции панели
@@ -55,6 +63,10 @@ const applySidebarPosition = (pos) => {
 }
 
 const isMobile = computed(() => store.isMobile)
+// Home and the top list open with their own header; the bottom tab bar covers navigation.
+const showMobileHeader = computed(
+  () => isMobile.value && !['home', 'top-movies'].includes(route.name)
+)
 
 // Реактивное состояние для ширины окна
 const updateIsMobile = () => {
@@ -63,9 +75,11 @@ const updateIsMobile = () => {
 
 const handleKeyDown = (event) => {
   // Ctrl+F
-  if (!event.target?.closest?.('input,textarea,select,[contenteditable="true"]') &&
-      ((!event.ctrlKey && !event.metaKey && !event.altKey && event.key === '/') ||
-        (event.ctrlKey && event.key.toLowerCase() === 'f' && store.isCtrlFEnabled))) {
+  if (
+    !event.target?.closest?.('input,textarea,select,[contenteditable="true"]') &&
+    ((!event.ctrlKey && !event.metaKey && !event.altKey && event.key === '/') ||
+      (event.ctrlKey && event.key.toLowerCase() === 'f' && store.isCtrlFEnabled))
+  ) {
     event.preventDefault()
     event.stopPropagation()
     navbarStore.openSearchModal()
@@ -84,6 +98,7 @@ onMounted(() => {
   stopSidebarPositionWatch = watch(sidebarPosition, applySidebarPosition, { immediate: true })
   window.addEventListener('resize', updateIsMobile)
   document.addEventListener('keydown', handleKeyDown, true)
+  window.addEventListener(STORAGE_ERROR_EVENT, showStorageError)
 })
 
 onUnmounted(() => {
@@ -93,6 +108,7 @@ onUnmounted(() => {
   }
   window.removeEventListener('resize', updateIsMobile)
   document.removeEventListener('keydown', handleKeyDown, true)
+  window.removeEventListener(STORAGE_ERROR_EVENT, showStorageError)
 })
 
 const dimmingEnabled = computed(() => store.dimmingEnabled)
@@ -130,14 +146,9 @@ const showGarland = computed(() => isNewYearPeriod())
   z-index: 5;
 }
 
-/* Стиль для страницы с учетом мобильного хедера */
+/* The phone top bar reserves its own height (MobileHeader renders a spacer only when it shows). */
 .router-view-container {
-  padding-top: 0; /* По умолчанию без отступа */
-}
-
-/* Отступ сверху для мобильного хедера */
-.router-view-container--with-mobile-header {
-  padding-top: 60px; /* Здесь height хедера */
+  padding-top: 0;
 }
 
 #garland {
@@ -156,7 +167,9 @@ const showGarland = computed(() => isNewYearPeriod())
 
 <style>
 @media (prefers-reduced-motion: reduce) {
-  *, *::before, *::after {
+  *,
+  *::before,
+  *::after {
     animation-duration: 0.01ms !important;
     animation-iteration-count: 1 !important;
     transition-duration: 0.01ms !important;

@@ -74,7 +74,7 @@ function closeOnBackdrop(event) {
   padding: 8px 12px;
   min-height: 40px;
   border: 1px solid rgba(255, 255, 255, 0.14);
-  border-radius: 8px;
+  border-radius: var(--radius-m);
   background: rgba(20, 20, 20, 0.55);
   color: #aaa;
   font: inherit;
@@ -87,7 +87,7 @@ function closeOnBackdrop(event) {
 }
 .migration-entry__button:focus-visible,
 .migration-notice__dismiss:focus-visible {
-  outline: 2px solid var(--accent-color);
+  outline: 2px solid var(--accent-ui);
   outline-offset: 3px;
 }
 .migration-dialog {
@@ -96,7 +96,7 @@ function closeOnBackdrop(event) {
   box-sizing: border-box;
   padding: 0;
   border: 1px solid rgba(255, 255, 255, 0.16);
-  border-radius: 16px;
+  border-radius: var(--radius-l);
   background: #171717;
   text-align: left;
   color: #ddd;
@@ -127,7 +127,7 @@ function closeOnBackdrop(event) {
   width: 44px;
   height: 44px;
   border: 0;
-  border-radius: 8px;
+  border-radius: var(--radius-m);
   background: transparent;
   color: inherit;
   font-size: 28px;
@@ -137,7 +137,7 @@ function closeOnBackdrop(event) {
   background: rgba(255, 255, 255, 0.1);
 }
 .migration-dialog :deep(.history-sync) { margin-top: 20px; }
-.migration-dialog :deep(a) { color: var(--accent-color); }
+.migration-dialog :deep(a) { color: var(--accent-text); }
 .migration-dialog :deep(.history-actions) { align-items: center; }
 .migration-dialog :deep(.history-actions > *) { box-sizing: border-box; max-width: 100%; }
 @media (max-width: 600px) {
