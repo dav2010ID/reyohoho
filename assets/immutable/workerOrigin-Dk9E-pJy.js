@@ -1,0 +1,1 @@
+var e=`https://api.reyhoho.fun`.replace(/\/+$/,``);export{e as t};
