@@ -25,6 +25,10 @@ jobs:
     # Playwright 1.59 has no Chromium build for ubuntu-latest (26.04); the artifact
     # check below needs it. Raise this together with the Playwright version.
     runs-on: ubuntu-24.04
+    env:
+      # One value for the build and the live check: the artifact must be checked
+      # against the Worker it will call.
+      WORKER_API_URL: ${{ vars.VITE_WORKER_API_URL || 'https://api.reyhoho.fun' }}
 
     steps:
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
@@ -59,6 +63,7 @@ jobs:
           VITE_CLOUD_HISTORY_ENABLED: ${{ vars.VITE_CLOUD_HISTORY_ENABLED || 'false' }}
           VITE_PLAYER_IFRAME_SANDBOX: ${{ vars.VITE_PLAYER_IFRAME_SANDBOX || 'false' }}
           VITE_PLAYER_SANDBOX_ORIGINS: ${{ vars.VITE_PLAYER_SANDBOX_ORIGINS || '' }}
+          VITE_WORKER_API_URL: ${{ env.WORKER_API_URL }}
       - name: Verify prerendered pages
         run: node scripts/check-seo-pages.js dist
       - name: Install browser for artifact verification
@@ -77,7 +82,7 @@ jobs:
           fi
       # Site last: the live D1 migration and API Worker must already match release.json.
       - name: Check that the live API Worker is ready for this site
-        run: node scripts/check-release.mjs --live "${{ vars.VITE_WORKER_API_URL || 'https://api.reyhoho.fun' }}"
+        run: node scripts/check-release.mjs --live "$WORKER_API_URL"
       - name: Record the revision of the verified artifact
         run: git rev-parse HEAD > dist/build-sha.txt
 

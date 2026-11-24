@@ -27,11 +27,14 @@ describe('Worker health', () => {
     })
     db.sqlite.close()
   })
-  it('answers without D1 or migration records', async () => {
+  it('answers without D1 or migration records and does not cache the failure', async () => {
     expect(await read({}, 0)).toMatchObject({ d1Migration: null, schemaReady: false })
-    resetHealthCache()
     const db = testDatabase()
     expect((await read({ HISTORY_DB: db }, 0)).d1Migration).toBeNull()
+    // The migration ledger appears a moment later: no minute-long stale answer.
+    db.sqlite.exec('CREATE TABLE d1_migrations (id INTEGER PRIMARY KEY, name TEXT, applied_at TEXT)')
+    db.sqlite.exec(`INSERT INTO d1_migrations(name) VALUES ('${release.d1Migration}')`)
+    expect((await read({ HISTORY_DB: db }, 1_000)).schemaReady).toBe(true)
     db.sqlite.close()
   })
 })

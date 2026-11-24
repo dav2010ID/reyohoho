@@ -33,6 +33,10 @@ export function checkLive(health, release) {
     errors.push(
       `D1 is at ${health.d1Migration ?? 'no migrations'}, the release needs ${release.d1Migration}: apply the migration first`
     )
+  // A newer Worker can be ahead of its own migration even when this site's
+  // minimums are met.
+  if (health.schemaReady === false)
+    errors.push('the Worker reports schemaReady: false: apply its D1 migrations first')
   return errors
 }
 

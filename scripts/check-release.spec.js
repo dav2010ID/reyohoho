@@ -21,5 +21,9 @@ describe('release manifest', () => {
     expect(errors).toHaveLength(2)
     expect(errors[0]).toContain('deploy the API Worker first')
     expect(errors[1]).toContain('apply the migration first')
+    // A newer Worker that is ahead of its own migration is not ready either.
+    expect(
+      checkLive({ apiContract: 3, d1Migration: '0005_login_context.sql', schemaReady: false }, release)
+    ).toEqual(['the Worker reports schemaReady: false: apply its D1 migrations first'])
   })
 })

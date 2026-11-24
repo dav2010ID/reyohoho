@@ -19,7 +19,9 @@ async function appliedMigration(env, now) {
   } catch {
     name = null
   }
-  schema = { at: now, name }
+  // Only a successful read is cached: a transient D1 error must not hold a site
+  // release back for a minute.
+  schema = name ? { at: now, name } : null
   return name
 }
 
