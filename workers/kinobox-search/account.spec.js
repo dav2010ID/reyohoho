@@ -32,9 +32,9 @@ function request(body, type = 'favorite') {
 
 describe('account list metadata writes', () => {
   it('imports bounded batches, preserves existing entries and fills up to the capacity', async () => {
-    const bulk = items => serveAccount(new Request('https://api.reyhoho.fun/api/list/favorite/import', {
+    const bulk = (items, partial = true) => serveAccount(new Request('https://api.reyhoho.fun/api/list/favorite/import', {
       method: 'POST', headers: { Authorization: 'Bearer ' + token, 'Content-Type': 'application/json' },
-      body: JSON.stringify({ items })
+      body: JSON.stringify({ items, partial })
     }), env, origin)
     expect(await (await bulk([{ kp_id: '301', title: 'Original' }, { kp_id: '42' }])).json()).toEqual({ added: 2, rejected: 0 })
     expect(await (await bulk([{ kp_id: '301', title: 'Changed' }])).json()).toEqual({ added: 0, rejected: 0 })
@@ -45,6 +45,11 @@ describe('account list metadata writes', () => {
     expect(await (await bulk([{ kp_id: '7' }, { kp_id: '7' }])).json()).toEqual({ added: 1, rejected: 0 })
     const insert = db.sqlite.prepare('INSERT INTO account_lists VALUES (?,?,?,?,?)')
     for (let i = 0; i < 996; i++) insert.run('worker-tg:123', 'favorite', String(10000 + i), '{}', '')
+    // Clients that do not ask for partial imports keep all-or-nothing.
+    const legacy = await bulk([{ kp_id: '500' }, { kp_id: '501' }], false)
+    expect(legacy.status).toBe(409)
+    expect(await legacy.json()).toEqual({ error: 'list_capacity', limit: 1000, remaining: 0, added: 0, rejected: 1 })
+    expect(db.sqlite.prepare('SELECT COUNT(*) AS n FROM account_lists').get().n).toBe(999)
     const partial = await bulk([{ kp_id: '500' }, { kp_id: '501' }])
     expect(partial.status).toBe(200)
     expect(await partial.json()).toEqual({ added: 1, rejected: 1 })
@@ -71,6 +76,21 @@ describe('account list metadata writes', () => {
     }), env, origin)
     expect(await imported.json()).toEqual({ added: 1, rejected: 0 })
     expect(types()).toEqual(['abandoned', 'favorite'])
+  })
+  it('keeps one status when a status is set while an import is in flight', async () => {
+    const batch = db.batch.bind(db)
+    db.batch = async (statements) => {
+      db.sqlite
+        .prepare('INSERT INTO account_lists VALUES (?,?,?,?,?)')
+        .run('worker-tg:123', 'watching', '42', '{}', '2026-11-01')
+      return batch(statements)
+    }
+    const imported = await serveAccount(new Request('https://api.reyhoho.fun/api/list/completed/import', {
+      method: 'POST', headers: { Authorization: 'Bearer ' + token, 'Content-Type': 'application/json' },
+      body: JSON.stringify({ items: [{ kp_id: '42' }], partial: true })
+    }), env, origin)
+    expect(await imported.json()).toEqual({ added: 0, rejected: 0 })
+    expect(db.sqlite.prepare("SELECT list_type FROM account_lists WHERE kp_id='42'").all().map(row => row.list_type)).toEqual(['watching'])
   })
   it('returns a typed capacity error when a single add hits the list limit', async () => {
     const insert = db.sqlite.prepare('INSERT INTO account_lists VALUES (?,?,?,?,?)')

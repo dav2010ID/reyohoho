@@ -17,7 +17,11 @@ function database() {
           const statement = sqlite.prepare(sql)
           return {
             all: async () => ({ results: statement.all(...values) }),
-            run: async () => ({ meta: { changes: Number(statement.run(...values).changes) } })
+            run: async () => ({ meta: { changes: Number(statement.run(...values).changes) } }),
+            batchRun: async () =>
+              /^\s*SELECT/i.test(sql)
+                ? { results: statement.all(...values), meta: { changes: 0 } }
+                : { meta: { changes: Number(statement.run(...values).changes) } }
           }
         }
       }
@@ -26,7 +30,7 @@ function database() {
       sqlite.exec('BEGIN')
       try {
         const results = []
-        for (const statement of statements) results.push(await statement.run())
+        for (const statement of statements) results.push(await (statement.batchRun || statement.run)())
         sqlite.exec('COMMIT')
         return results
       } catch (error) {
@@ -138,7 +142,8 @@ describe('private D1 history', () => {
     await serveHistory(request('/301', 'DELETE'), env, origin)
     const tombstone = db.sqlite.prepare('SELECT * FROM user_history').get()
     expect(tombstone.metadata).toBe('{}')
-    expect(tombstone.added_at).toBe('')
+    // The tombstone keeps the deletion time.
+    expect(Number.isFinite(Date.parse(tombstone.added_at))).toBe(true)
     await serveHistory(
       request('/import', 'POST', { history: [{ kp_id: 301, title: 'old' }] }),
       env,
@@ -175,8 +180,14 @@ describe('private D1 history', () => {
     expect(await response.json()).toEqual({ error: 'history_capacity', changed: 0, rejected: 2, remaining: 0 })
     expect(db.sqlite.prepare('SELECT COUNT(*) AS n FROM user_history').get().n).toBe(1)
     db.sqlite.exec('UPDATE history_quota SET item_count = 4999')
+    const batch = [{ kp_id: 42, addedAt: '2026-01-02' }, { kp_id: 43, addedAt: '2026-01-01' }, { kp_id: 301 }]
+    // Clients that do not ask for partial imports keep all-or-nothing.
+    const legacy = await serveHistory(request('/import', 'POST', { history: batch }), env, origin)
+    expect(legacy.status).toBe(409)
+    expect(await legacy.json()).toEqual({ error: 'history_capacity', changed: 0, rejected: 1, remaining: 1 })
+    expect(db.sqlite.prepare('SELECT COUNT(*) AS n FROM user_history').get().n).toBe(1)
     const partial = await serveHistory(
-      request('/import', 'POST', { history: [{ kp_id: 42, addedAt: '2026-01-02' }, { kp_id: 43, addedAt: '2026-01-01' }, { kp_id: 301 }] }),
+      request('/import', 'POST', { history: batch, partial: true }),
       env,
       origin
     )
@@ -193,6 +204,48 @@ describe('private D1 history', () => {
     expect((await serveHistory(request('/301', 'PUT', {}), env, origin)).status).toBe(409)
     await serveHistory(request('/42', 'DELETE'), env, origin)
     expect((await serveHistory(request('/301', 'PUT', {}), env, origin)).status).toBe(200)
+    db.sqlite.close()
+  })
+  it('does not let an older replayed viewing undo a newer deletion', async () => {
+    const db = database()
+    vi.stubGlobal('fetch', vi.fn(async () => Response.json({ id: 11 })))
+    const env = envFor(db)
+    await serveHistory(request('/301', 'PUT', { title: 'Seen' }), env, origin)
+    await serveHistory(request('/301', 'DELETE'), env, origin)
+    const yesterday = new Date(Date.now() - 86400000).toISOString()
+    const replay = await serveHistory(
+      request('/301', 'PUT', { title: 'Offline', viewedAt: yesterday }),
+      env,
+      origin
+    )
+    expect(await replay.json()).toEqual({ ok: true, changed: 0, stale: true })
+    expect((await (await serveHistory(request(), env, origin)).json()).history).toEqual([])
+    // A viewing after the deletion brings the title back.
+    await serveHistory(request('/301', 'PUT', { title: 'Again' }), env, origin)
+    expect((await (await serveHistory(request(), env, origin)).json()).history[0].title).toBe('Again')
+    db.sqlite.close()
+  })
+  it('resolves a concurrent viewing inside the import transaction', async () => {
+    const db = database()
+    vi.stubGlobal('fetch', vi.fn(async () => Response.json({ id: 11 })))
+    const env = envFor(db)
+    await serveHistory(request('/301', 'PUT', {}), env, origin)
+    db.sqlite.exec('UPDATE history_quota SET item_count = 4998')
+    // Another device takes the last free slot between the checks and the write.
+    const batch = db.batch.bind(db)
+    db.batch = async (statements) => {
+      db.sqlite.exec(
+        "INSERT INTO user_history(user_id,kp_id,metadata,added_at,deleted) VALUES ('https://trusted.example/user:11','999','{}','2026-11-01',0)"
+      )
+      return batch(statements)
+    }
+    const response = await serveHistory(
+      request('/import', 'POST', { history: [{ kp_id: 42 }, { kp_id: 43 }], partial: true }),
+      env,
+      origin
+    )
+    expect(await response.json()).toEqual({ ok: true, changed: 1, rejected: 1 })
+    expect(db.sqlite.prepare('SELECT item_count FROM history_quota').get().item_count).toBe(5000)
     db.sqlite.close()
   })
   it('keeps the real time of a replayed viewing and never moves a newer one back', async () => {

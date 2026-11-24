@@ -76,13 +76,13 @@ export async function importCloudHistory(items) {
   const batches = chunkByBytes(normalizeHistory(items, HISTORY_CAPACITY), {
     maxItems: HISTORY_IMPORT_ITEMS,
     maxBytes: HISTORY_IMPORT_BYTES,
-    envelope: (history) => ({ history })
+    envelope: (history) => ({ history, partial: true })
   })
   let rejected = 0
   for (const history of batches) {
     if (useAuthStore().token !== token) throw new Error('Аккаунт изменился. Повторите операцию')
     try {
-      rejected += Number((await historyRequest('/import', 'POST', { history })).rejected) || 0
+      rejected += Number((await historyRequest('/import', 'POST', { history, partial: true })).rejected) || 0
     } catch (error) {
       if (error.code !== 'history_capacity') throw error
       rejected += history.length

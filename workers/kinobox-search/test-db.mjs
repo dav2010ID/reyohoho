@@ -14,7 +14,12 @@ export function testDatabase() {
           return {
             all: async () => ({ results: statement.all(...values) }),
             first: async () => statement.get(...values) || null,
-            run: async () => ({ meta: { changes: Number(statement.run(...values).changes) } })
+            run: async () => ({ meta: { changes: Number(statement.run(...values).changes) } }),
+            // D1 batches return rows for SELECT statements.
+            batchRun: async () =>
+              /^\s*SELECT/i.test(sql)
+                ? { results: statement.all(...values), meta: { changes: 0 } }
+                : { meta: { changes: Number(statement.run(...values).changes) } }
           }
         }
       }
@@ -23,7 +28,7 @@ export function testDatabase() {
       sqlite.exec('BEGIN')
       try {
         const results = []
-        for (const statement of statements) results.push(await statement.run())
+        for (const statement of statements) results.push(await (statement.batchRun || statement.run)())
         sqlite.exec('COMMIT')
         return results
       } catch (error) {

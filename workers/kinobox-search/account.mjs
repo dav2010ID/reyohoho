@@ -44,11 +44,14 @@ export async function serveAccount(request, env, origin) {
       const type = importMatch[1]
       if (!TYPES.has(type) || type === 'history') return reply({ error: 'Invalid list' }, 400)
       let items
+      let partial = false
       try {
         const body = await boundedJson(request.body, MAX_LIST_BODY_BYTES)
         if (!Array.isArray(body.items) || body.items.length > 40) throw new Error('Invalid batch')
         if (!body.items.every((item) => VALID_ID.test(String(item?.kp_id ?? item?.id ?? ''))))
           throw new Error('Invalid IDs')
+        // Clients that read `rejected` opt in; older ones keep all-or-nothing.
+        partial = body.partial === true
         // Duplicates collapse to the newest copy instead of failing the batch.
         items = normalizeHistory(body.items, 40)
       } catch (error) {
@@ -60,14 +63,15 @@ export async function serveAccount(request, env, origin) {
       const ids = items.map((item) => item.kp_id)
       const marks = ids.map(() => '?').join(',')
       const status = STATUS_TYPES.includes(type)
+      const statusMarks = STATUS_TYPES.map(() => '?').join(',')
+      const presentSql = `SELECT DISTINCT kp_id FROM account_lists WHERE user_id=? AND kp_id IN (${marks}) AND ${
+        status ? `list_type IN (${statusMarks})` : 'list_type=?'
+      }`
+      const presentParams = [uid, ...ids, ...(status ? STATUS_TYPES : [type])]
       const [{ results: present }, { results: size }] = await Promise.all([
         db
-          .prepare(
-            `SELECT DISTINCT kp_id FROM account_lists WHERE user_id=? AND kp_id IN (${marks}) AND ${
-              status ? `list_type IN (${STATUS_TYPES.map(() => '?').join(',')})` : 'list_type=?'
-            }`
-          )
-          .bind(uid, ...ids, ...(status ? STATUS_TYPES : [type]))
+          .prepare(presentSql)
+          .bind(...presentParams)
           .all(),
         db
           .prepare('SELECT COUNT(*) AS n FROM account_lists WHERE user_id=? AND list_type=?')
@@ -79,19 +83,49 @@ export async function serveAccount(request, env, origin) {
       const known = new Set(present.map((row) => String(row.kp_id)))
       const fresh = items.filter((item) => !known.has(item.kp_id))
       const room = Math.max(0, LIST_CAPACITY - Number(size[0]?.n || 0))
-      const rejected = Math.max(0, fresh.length - room)
       if (!fresh.length) return reply({ added: 0, rejected: 0 })
-      if (!room) return capacityReply(reply, { added: 0, rejected })
-      const results = await db.batch(
-        fresh.slice(0, room).map((item) =>
+      if (!room) return capacityReply(reply, { added: 0, rejected: fresh.length })
+      if (!partial && fresh.length > room)
+        return capacityReply(reply, { added: 0, rejected: fresh.length - room })
+      // The checks above are advisory: concurrent writes are resolved inside the
+      // transaction. Each insert re-checks the status (one per title) and, for
+      // partial imports, the capacity; legacy imports keep the aborting trigger.
+      const insertSql = `INSERT INTO account_lists(user_id,list_type,kp_id,metadata,added_at)
+        SELECT ?,?,?,?,? WHERE 1${
+          status
+            ? ` AND NOT EXISTS (SELECT 1 FROM account_lists WHERE user_id=? AND kp_id=? AND list_type IN (${statusMarks}))`
+            : ''
+        }${
+          partial
+            ? ` AND (SELECT COUNT(*) FROM account_lists WHERE user_id=? AND list_type=?) < ${LIST_CAPACITY}`
+            : ''
+        }
+        ON CONFLICT(user_id,list_type,kp_id) DO NOTHING`
+      const results = await db.batch([
+        ...fresh.map((item) =>
           db
-            .prepare(
-              'INSERT INTO account_lists(user_id,list_type,kp_id,metadata,added_at) VALUES (?,?,?,?,?) ON CONFLICT(user_id,list_type,kp_id) DO NOTHING'
+            .prepare(insertSql)
+            .bind(
+              uid,
+              type,
+              item.kp_id,
+              JSON.stringify(item),
+              item.addedAt,
+              ...(status ? [uid, item.kp_id, ...STATUS_TYPES] : []),
+              ...(partial ? [uid, type] : [])
             )
-            .bind(uid, type, item.kp_id, JSON.stringify(item), item.addedAt)
-        )
-      )
-      return reply({ added: results.reduce((sum, result) => sum + result.meta.changes, 0), rejected })
+        ),
+        db.prepare(presentSql).bind(...presentParams)
+      ])
+      const added = results
+        .slice(0, -1)
+        .reduce((sum, result) => sum + (result.meta?.changes || 0), 0)
+      // Whatever is still absent was left out for capacity.
+      const stored = new Set((results.at(-1).results || []).map((row) => String(row.kp_id)))
+      return reply({
+        added,
+        rejected: fresh.filter((item) => !stored.has(item.kp_id)).length
+      })
     }
     const status = /^\/api\/list-status\/([1-9]\d{0,11})$/.exec(path)
     if (status && request.method === 'GET') {

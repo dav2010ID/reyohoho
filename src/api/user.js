@@ -221,14 +221,17 @@ export async function importWorkerList(type, ids) {
   const batches = chunkByBytes(items, {
     maxItems: LIST_IMPORT_ITEMS,
     maxBytes: LIST_IMPORT_BYTES,
-    envelope: (batch) => ({ items: batch })
+    envelope: (batch) => ({ items: batch, partial: true })
   })
   let added = 0
   let rejected = 0
   for (const batch of batches) {
     if (auth.token !== token) throw new Error('Аккаунт изменился. Повторите импорт')
     try {
-      const result = await workerAccountRequest(`/list/${type}/import`, 'POST', { items: batch })
+      const result = await workerAccountRequest(`/list/${type}/import`, 'POST', {
+        items: batch,
+        partial: true
+      })
       added += Number(result.added) || 0
       rejected += Number(result.rejected) || 0
     } catch (error) {
