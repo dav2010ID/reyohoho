@@ -44,6 +44,13 @@ describe('upstream guard', () => {
       reason: 'circuit_open'
     })
   })
+  it('opens on throttling answered as a 429 response', async () => {
+    for (let i = 0; i < BREAKER_FAILURES; i += 1)
+      await guardUpstream('kinobox', {}, async () => ({ status: 429 }), clock)
+    await expect(
+      guardUpstream('kinobox', {}, async () => ({ status: 200 }), clock)
+    ).rejects.toMatchObject({ reason: 'circuit_open' })
+  })
   it('honours the shared upstream budget and the Kinobox kill switch', async () => {
     const run = vi.fn(async () => ({ status: 200 }))
     const limiter = { limit: vi.fn(async () => ({ success: false })) }

@@ -60,7 +60,8 @@ export async function guardUpstream(upstream, env, run, now = Date.now) {
   }
   try {
     const response = await run()
-    record(upstream, response?.status >= 500, now())
+    // Throttling counts as trouble whether it arrives as a response or an error.
+    record(upstream, response?.status >= 500 || response?.status === 429, now())
     return response
   } catch (error) {
     record(upstream, isFailure(error), now())

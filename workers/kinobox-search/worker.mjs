@@ -106,7 +106,9 @@ export default {
     if (resource.kind === 'latest')
       return serveLatestReleases(resource, url, headers, caches.default, env.KinoapiLampac, budget)
     if (resource.kind === 'top')
-      return serveKinopoiskTop(resource, url, headers, ctx, caches.default, budget)
+      return serveKinopoiskTop(resource, url, headers, ctx, caches.default, budget, (run) =>
+        guardUpstream('kinopoisk', env, run)
+      )
     return serveKinoboxContent(
       resource,
       url,
