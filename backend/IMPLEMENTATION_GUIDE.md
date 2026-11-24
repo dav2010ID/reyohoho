@@ -1,7 +1,7 @@
 # Реализация backend API для ReYohoho
 
 Этот документ относится к Python backend. Собственный Telegram-вход, профиль,
-приватные списки и история на Cloudflare описаны в [worker-telegram.md](worker-telegram.md).
+приватные списки и история на Cloudflare описаны в [worker-telegram.md](../docs/worker-telegram.md).
 
 Этот документ описывает назначение маршрутов, ожидаемые контракты и рекомендуемую реализацию. Он составлен по фактическим вызовам в `src/api/movies.backend.js`, `src/api/user.js` и использующим их Vue-компонентам.
 

@@ -199,8 +199,8 @@ node scripts/browser-artifact-check.js dist
 
 `backend/` (Sanic, SQLAlchemy, Alembic) — прототип для размещения на VPS. Frontend к нему не
 обращается, в production не развёртывается и в аудиты не входит. Документация:
-[BACKEND_IMPLEMENTATION_GUIDE.md](BACKEND_IMPLEMENTATION_GUIDE.md),
-[API_DOCUMENTATION.md](API_DOCUMENTATION.md). Проверки: `uv run ruff check backend`,
+[backend/IMPLEMENTATION_GUIDE.md](../backend/IMPLEMENTATION_GUIDE.md), OpenAPI — `/openapi.json`
+самого backend. Проверки: `uv run ruff check backend`,
 `uv run pytest backend/tests -q`.
 
 ## 10. Generated code

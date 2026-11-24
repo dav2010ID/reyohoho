@@ -50,8 +50,7 @@ debug logger and avoid formatting TLS trace payloads when tracing is disabled.
 With `--download`, `prepare-vendor.mjs` verifies both the original and adapted bundles and fails
 if a patch target changes.
 
-The [2026-10-18 CPU audit](../../docs/worker-cpu-audit-2026-10-18.md) includes
-edge measurements, cache behavior and native-fetch compatibility results.
+A 2026-10-18 CPU audit (in git history) measured this path at the edge.
 The current custom TLS path does not reliably fit the Workers Free 10 ms budget.
 
 Public endpoint after deployment:
