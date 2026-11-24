@@ -181,15 +181,22 @@ async function handleWebhook(request, env, reply) {
         .bind(...(revoke ? [id, revoke[1]] : [id]))
         .run()
       const changes = Number(removed.meta?.changes || 0)
-      await telegramCall(env, 'answerCallbackQuery', {
-        callback_query_id: callback.id,
-        show_alert: true,
-        text: revoke
-          ? changes
-            ? 'Вход завершён: это устройство вышло из аккаунта.'
-            : 'Этот вход уже завершён.'
-          : `Завершено входов: ${changes}. Войдите заново на своих устройствах.`
-      })
+      // The sessions are already gone. Acknowledge best-effort and still return
+      // 200: a failed webhook makes Telegram redeliver the update, and a second
+      // "end all" would end sessions created after the press.
+      try {
+        await telegramCall(env, 'answerCallbackQuery', {
+          callback_query_id: callback.id,
+          show_alert: true,
+          text: revoke
+            ? changes
+              ? 'Вход завершён: это устройство вышло из аккаунта.'
+              : 'Этот вход уже завершён.'
+            : `Завершено входов: ${changes}. Войдите заново на своих устройствах.`
+        })
+      } catch {
+        console.error(JSON.stringify({ event: 'telegram_revoke_ack_failed' }))
+      }
       return reply({ ok: true })
     }
     const startHash = await sha256(match[1])
@@ -355,12 +362,11 @@ export async function serveTelegramAuth(request, env, origin, ctx) {
         .bind(pollHash)
     ])
     if (results[0].meta.changes > 0) {
-      const owner = await db
-        .prepare('SELECT candidate_id FROM tg_login WHERE poll_hash=?')
-        .bind(pollHash)
-        .first()
-      if (owner?.candidate_id) {
-        const notice = notifyLogin(env, owner.candidate_id, sessionHash, describeClient(request))
+      // The session is committed: no further D1 read may turn this into a 503,
+      // because a retry would find the login token already consumed.
+      const owner = results[0].results?.[0]?.candidate_id
+      if (owner) {
+        const notice = notifyLogin(env, owner, sessionHash, describeClient(request))
         if (ctx?.waitUntil) ctx.waitUntil(notice)
         else await notice
       }

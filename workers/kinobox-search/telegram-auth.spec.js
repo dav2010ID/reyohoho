@@ -189,9 +189,20 @@ describe('Telegram Worker auth', () => {
     expect(sent.at(-1).text).toBe('Вход завершён: это устройство вышло из аккаунта.')
     await press(revokeOne.callback_data)
     expect(sent.at(-1).text).toBe('Этот вход уже завершён.')
-    await press('rva')
+    // A failed acknowledgement still answers 200, so Telegram does not redeliver
+    // "end all" and end a session created after the press.
+    const deliver = fetch.getMockImplementation()
+    fetch.mockImplementation(async (url, options) =>
+      String(url).endsWith('/answerCallbackQuery')
+        ? Response.json({ ok: false }, { status: 500 })
+        : deliver(url, options)
+    )
+    vi.spyOn(console, 'error').mockImplementation(() => {})
+    expect((await press('rva')).status).toBe(200)
     expect(await session(second)).toBeNull()
-    expect(sent.at(-1).text).toBe('Завершено входов: 1. Войдите заново на своих устройствах.')
+    fetch.mockImplementation(deliver)
+    await press('rva')
+    expect(sent.at(-1).text).toBe('Завершено входов: 0. Войдите заново на своих устройствах.')
     db.sqlite.close()
   })
   it('keeps the login when the sign-in notice cannot be sent', async () => {

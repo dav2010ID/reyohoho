@@ -15,11 +15,16 @@ export function testDatabase() {
             all: async () => ({ results: statement.all(...values) }),
             first: async () => statement.get(...values) || null,
             run: async () => ({ meta: { changes: Number(statement.run(...values).changes) } }),
-            // D1 batches return rows for SELECT statements.
-            batchRun: async () =>
-              /^\s*SELECT/i.test(sql)
-                ? { results: statement.all(...values), meta: { changes: 0 } }
-                : { meta: { changes: Number(statement.run(...values).changes) } }
+            // D1 batches return rows for SELECT and RETURNING statements.
+            batchRun: async () => {
+              if (/^\s*SELECT/i.test(sql))
+                return { results: statement.all(...values), meta: { changes: 0 } }
+              if (/\bRETURNING\b/i.test(sql)) {
+                const results = statement.all(...values)
+                return { results, meta: { changes: results.length } }
+              }
+              return { meta: { changes: Number(statement.run(...values).changes) } }
+            }
           }
         }
       }
