@@ -1,5 +1,5 @@
 import movies from '../data/movies.json'
-import { describe, expect, it } from 'vitest'
+import { describe, expect, it, vi } from 'vitest'
 import {
   buildMovieCanonicalUrl,
   buildMovieSeo,
@@ -91,6 +91,21 @@ describe('movieSeo', () => {
 
     expect(getMovieSeoSlug({ kp_id: '777777' })).toBe('young-sherlock')
     expect(getMovieSeoPath({ kp_id: '777777' })).toBe('/movie/777777/young-sherlock')
+  })
+
+  it('does not let a card fetched during prerender change another page', () => {
+    vi.stubEnv('SSR', true)
+    try {
+      const merged = registerMovieSeoEntry({
+        kp_id: '818181',
+        title: 'Карточка с полки',
+        poster: 'https://mirror.test/poster/300x450'
+      })
+      expect(merged.poster).toBe('https://mirror.test/poster/300x450')
+    } finally {
+      vi.unstubAllEnvs()
+    }
+    expect(getMovieSeoEntry('818181')).toBeNull()
   })
 
   it('prefers kpIdOverride over unrelated provider ids', () => {

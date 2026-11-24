@@ -92,6 +92,10 @@ export const registerMovieSeoEntry = (movieLike = {}) => {
     ? mergeMovieSeoEntries(existingEntry, normalizedMovie)
     : normalizedMovie
 
+  // Prerendering renders every page in one process. A card fetched for one page
+  // (home shelves, top list) must not change another page's metadata, which
+  // comes from the verified catalogue (scripts/check-seo-pages.js).
+  if (import.meta.env.SSR) return mergedEntry
   runtimeMoviesByKpId.set(mergedEntry.kp_id, mergedEntry)
   return mergedEntry
 }
