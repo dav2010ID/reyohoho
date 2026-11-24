@@ -16,6 +16,7 @@ Worker change must keep the previous site working (see "Compatibility" below).
    yarn test:unit --run
    VITE_PRERENDER_MOVIE_PAGES=true VITE_WORKER_AUTH_ENABLED=true yarn build:github
    node scripts/check-seo-pages.js dist
+   yarn playwright install --with-deps chromium   # once, on a clean Linux machine
    node scripts/browser-artifact-check.js dist
    ```
 
@@ -59,8 +60,9 @@ Worker change must keep the previous site working (see "Compatibility" below).
    manually. Check `https://reyhoho.fun/build-sha.txt` equals the released
    `main` commit.
 
-Rollback: redeploy the previous Worker version (`npx wrangler rollback`) — the
-migrations are additive and the old Worker works with them. Restore D1 with Time
+Rollback: redeploy the previous Worker version
+(`npx wrangler rollback --config workers/kinobox-search/wrangler.local.jsonc`) —
+the migrations are additive and the old Worker works with them. Restore D1 with Time
 Travel only for data damage, not for a code problem.
 
 ## release.json
@@ -83,7 +85,7 @@ everything before `/api/health` existed.
 schemaReady }`. `d1Migration` comes from Wrangler's `d1_migrations` table; a
 successful read is cached for a minute. The site deploy runs
 `node scripts/check-release.mjs --live <api origin>` with the same Worker URL the
-build uses, before it uploads the artifact, and stops if the live Worker serves
+build uses (a path prefix is kept), before it uploads the artifact, and stops if the live Worker serves
 an older contract, D1 is behind or `schemaReady` is false.
 
 ## Compatibility with the site that is still live
@@ -104,7 +106,10 @@ an older contract, D1 is behind or `schemaReady` is false.
 D1, bot and rate-limit counters and `ALLOW_DEV_ORIGINS=true`. Before first use:
 create the D1 database (`npx wrangler d1 create reyohoho-history-staging`), put
 its ID in place of `<YOUR_STAGING_D1_DATABASE_ID>` in your local config, set the
-staging bot and its secrets with `--env staging`. Then run the steps above with
+staging bot and its secrets with `--env staging`, and register the staging
+bot's webhook on the staging Worker URL (`setWebhook` with the
+`TELEGRAM_WEBHOOK_SECRET` as `secret_token`; `scripts/configure-worker-telegram.mjs`
+does this for production only). Then run the steps above with
 `--env staging` (the migration command keeps the binding name `HISTORY_DB`) and
 build the site with `VITE_WORKER_API_URL=<staging origin>`; check it with
 `yarn preview` or a `workers/site` preview, not on GitHub Pages.

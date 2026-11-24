@@ -259,6 +259,33 @@ describe('history outbox', () => {
     expect(calls).toEqual(['PUT /301', 'DELETE /'])
     expect(localStorage.getItem('reyohoho-history-outbox:worker%3A11')).toBeNull()
   })
+  it('does not clear an account the user switched to, and keeps the queue when the DELETE fails', async () => {
+    mocks.history.mockRejectedValue(offline())
+    await expect(addToList('301', 'history', movie)).rejects.toThrow()
+    const outbox = () => localStorage.getItem('reyohoho-history-outbox:worker%3A11')
+    let release
+    mocks.history.mockImplementation((path, method) =>
+      method === 'PUT' && !release
+        ? new Promise((resolve) => {
+            release = () => resolve({ ok: true })
+          })
+        : method === 'DELETE'
+          ? Promise.reject(offline())
+          : Promise.resolve({ ok: true })
+    )
+    void flushHistoryOutbox()
+    await vi.waitFor(() => expect(release).toBeTypeOf('function'))
+    const clearing = delAllFromList('history')
+    mocks.auth.token = 'other-session'
+    release()
+    await expect(clearing).rejects.toThrow('Аккаунт изменился')
+    expect(mocks.history.mock.calls.some(([, method]) => method === 'DELETE')).toBe(false)
+    mocks.auth.token = 'test-session'
+    mocks.history.mockRejectedValue(offline())
+    await expect(addToList('302', 'history', movie)).rejects.toThrow()
+    await expect(delAllFromList('history')).rejects.toThrow()
+    expect(JSON.parse(outbox()).map((entry) => entry.kpId)).toContain('302')
+  })
   it('keeps queues separate per account', async () => {
     mocks.history.mockRejectedValue(offline())
     await expect(addToList('301', 'history', movie)).rejects.toThrow()

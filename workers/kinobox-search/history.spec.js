@@ -260,7 +260,14 @@ describe('private D1 history', () => {
     const stale = await serveHistory(request('/301', 'PUT', { title: 'B', viewedAt: older }), env, origin)
     expect(await stale.json()).toEqual({ ok: true, changed: 0, stale: true })
     expect(JSON.parse(row().metadata).title).toBe('A')
-    // Implausible client times fall back to the server clock.
+    // A replay older than the 90-day window does not count as a new viewing.
+    const ancient = await serveHistory(
+      request('/301', 'PUT', { title: 'Ancient', viewedAt: '2020-01-01T00:00:00Z' }),
+      env,
+      origin
+    )
+    expect(await ancient.json()).toEqual({ ok: true, changed: 0, stale: true })
+    // Implausible future client times fall back to the server clock.
     await serveHistory(request('/301', 'PUT', { title: 'C', viewedAt: '2099-01-01T00:00:00Z' }), env, origin)
     expect(Date.parse(row().added_at)).toBeLessThanOrEqual(Date.now())
     expect(JSON.parse(row().metadata).title).toBe('C')

@@ -144,9 +144,12 @@ const sendHistoryTracked = (owner, entry) => {
   sending.then(settle, settle)
   return sending
 }
+// The queue itself is dropped only after the server confirmed the deletion:
+// if the DELETE fails, unsent viewings and deletions stay queued.
+const historyClearing = new Set()
 const stopHistoryWrites = async (owner) => {
   historyGeneration.set(owner, (historyGeneration.get(owner) || 0) + 1)
-  clearHistoryOutbox(owner)
+  historyClearing.add(owner)
   await Promise.allSettled([...(historyInFlight.get(owner) || [])])
 }
 
@@ -178,7 +181,7 @@ export function flushHistoryOutbox() {
   } catch {
     return Promise.resolve(0)
   }
-  if (!isAccount(owner)) return Promise.resolve(0)
+  if (!isAccount(owner) || historyClearing.has(owner)) return Promise.resolve(0)
   if (flushing.has(owner)) return flushing.get(owner)
   const token = useAuthStore().token
   const generation = historyGeneration.get(owner) || 0
@@ -293,15 +296,23 @@ const delAllFromList = async (type) => {
   const token = useAuthStore().token
   const owner = listOwner()
   invalidateList(owner, type)
-  if (type === HISTORY) await stopHistoryWrites(owner)
-  if (type === HISTORY && isCloudHistoryEnabled()) {
-    const data = await historyRequest('', 'DELETE')
-    clearHistoryOutbox(owner)
-    if (useAuthStore().token === token) clearLocalList(type, owner)
-    return data
+  if (type === HISTORY) {
+    try {
+      await stopHistoryWrites(owner)
+      // The DELETE carries the current token: never clear an account the user
+      // switched to while the writes in flight were settling.
+      if (useAuthStore().token !== token) throw new Error('Аккаунт изменился. Повторите операцию')
+      const data = isCloudHistoryEnabled()
+        ? await historyRequest('', 'DELETE')
+        : (await apiCall((api) => api.delete(`/list/${type}`))).data
+      clearHistoryOutbox(owner)
+      if (useAuthStore().token === token) clearLocalList(type, owner)
+      return data
+    } finally {
+      historyClearing.delete(owner)
+    }
   }
   const { data } = await apiCall((api) => api.delete(`/list/${type}`))
-  if (type === HISTORY) clearHistoryOutbox(owner)
   if (useAuthStore().token === token) clearLocalList(type, owner)
   return data
 }

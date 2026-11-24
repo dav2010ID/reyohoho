@@ -6,11 +6,12 @@ import { metadataUpdate, readMetadataPatch } from './metadata.mjs'
 // authenticated and rate-limited this request (the /api/list/history alias).
 const REPLAY_WINDOW_MS = 90 * 24 * 60 * 60 * 1000
 // Queued clients replay a viewing later; keep its real time if it is plausible.
+// A replay older than the window is clamped to the window start, not stamped as
+// new: it must not revive a title deleted after it (or overtake a newer viewing).
 function viewedAt(value, now = Date.now()) {
   const time = Date.parse(value)
-  return Number.isFinite(time) && time <= now + 5 * 60 * 1000 && time >= now - REPLAY_WINDOW_MS
-    ? new Date(time).toISOString()
-    : new Date(now).toISOString()
+  if (!Number.isFinite(time) || time > now + 5 * 60 * 1000) return new Date(now).toISOString()
+  return new Date(Math.max(time, now - REPLAY_WINDOW_MS)).toISOString()
 }
 
 export async function serveHistory(request, env, origin, verifiedUserId) {
@@ -217,16 +218,11 @@ export async function serveHistory(request, env, origin, verifiedUserId) {
         ),
         db.prepare(presentSql).bind(userId, ...ids)
       ])
-      const changed = result
-        .slice(0, -1)
-        .reduce((sum, entry) => sum + (entry.meta?.changes || 0), 0)
-      // Whatever is still absent was left out for capacity.
+      // Counted from the rows themselves: meta.changes includes quota-trigger
+      // writes. Whatever is still absent was left out for capacity.
       const stored = new Set((result.at(-1).results || []).map((row) => String(row.kp_id)))
-      return reply({
-        ok: true,
-        changed,
-        rejected: fresh.filter((item) => !stored.has(item.kp_id)).length
-      })
+      const changed = fresh.filter((item) => stored.has(item.kp_id)).length
+      return reply({ ok: true, changed, rejected: fresh.length - changed })
     }
     // A viewing. It never moves a newer viewing back in time, and it revives a
     // deleted title only when it happened after the deletion (added_at holds the

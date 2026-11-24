@@ -41,7 +41,9 @@ export function checkLive(health, release) {
 }
 
 async function fetchHealth(origin) {
-  const response = await fetch(new URL('/api/health', origin), {
+  // Keep a path prefix (a proxy in front of the Worker), as the site does.
+  const base = String(origin).replace(/\/+$/, '') + '/'
+  const response = await fetch(new URL('api/health', base), {
     headers: { Accept: 'application/json' },
     signal: AbortSignal.timeout(10000)
   })
