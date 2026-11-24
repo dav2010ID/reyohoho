@@ -1,6 +1,6 @@
 import { afterEach, describe, expect, it, vi } from 'vitest'
 import { getKpInfo } from './movies.kinobox'
-import { enrichListMetadata } from './listMetadata'
+import { ENRICH_LIMIT, enrichListMetadata } from './listMetadata'
 vi.mock('./movies.kinobox', () => ({ getKpInfo: vi.fn() }))
 afterEach(() => vi.resetAllMocks())
 const movie = {
@@ -32,6 +32,19 @@ describe('imported card metadata', () => {
     expect(result.ratings_checked).toBe(1)
     await enrichListMetadata([result], { includeRatings: true })
     expect(getKpInfo).toHaveBeenCalledTimes(1)
+  })
+  it('fetches at most one budget of cards per load and reports unsaved updates', async () => {
+    getKpInfo.mockImplementation(async (id) => ({ ...movie, title: 'Film ' + id }))
+    const warn = vi.spyOn(console, 'warn').mockImplementation(() => {})
+    const items = Array.from({ length: ENRICH_LIMIT + 10 }, (_, i) => ({ kp_id: String(1000 + i) }))
+    const persist = vi.fn(async () => {
+      throw new Error('offline')
+    })
+    const result = await enrichListMetadata(items, { persist })
+    expect(getKpInfo).toHaveBeenCalledTimes(ENRICH_LIMIT)
+    expect(result.at(-1)).toEqual({ kp_id: String(1000 + ENRICH_LIMIT + 9) })
+    expect(result[0].title).toBe('Film 1000')
+    expect(warn).toHaveBeenCalledWith(expect.stringContaining(`${ENRICH_LIMIT} metadata updates not saved`))
   })
   it('bounds concurrent metadata requests across independent cards', async () => {
     let active = 0,

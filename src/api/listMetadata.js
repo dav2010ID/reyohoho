@@ -39,13 +39,19 @@ async function loadMetadata(id) {
   return pending.get(id)
 }
 
+// One list load fetches details for at most this many cards; the rest keep
+// their IDs and are filled on later loads, so a large import is not N GETs + N PATCHes.
+export const ENRICH_LIMIT = 60
+
 // Bounded requests; failures keep the imported ID and are retried on the next load.
 export async function enrichListMetadata(
   items,
-  { persist, onItem, includeRatings = false, isCurrent = () => true } = {}
+  { persist, onItem, includeRatings = false, isCurrent = () => true, limit = ENRICH_LIMIT } = {}
 ) {
   const result = [...items]
-  for (let offset = 0; offset < items.length; offset += 3) {
+  let budget = limit
+  let persistFailures = 0
+  for (let offset = 0; offset < items.length && budget > 0; offset += 3) {
     if (!isCurrent()) throw new Error('Аккаунт изменился. Повторите операцию')
     await Promise.all(
       items.slice(offset, offset + 3).map(async (item, index) => {
@@ -56,9 +62,11 @@ export async function enrichListMetadata(
           !cardRatings(item).rating_imdb
         if (
           !/^[1-9]\d{0,11}$/.test(id) ||
-          (!needsCardMetadata(item) && !(includeRatings && missingRatings))
+          (!needsCardMetadata(item) && !(includeRatings && missingRatings)) ||
+          budget <= 0
         )
           return
+        budget -= 1
         const movie = await loadMetadata(id)
         if (!isCurrent() || !movie) return
         const enriched = fillCardMetadata(item, movie)
@@ -66,11 +74,15 @@ export async function enrichListMetadata(
         onItem?.(enriched, offset + index)
         if (persist && JSON.stringify(enriched) !== JSON.stringify(item)) {
           // A storage failure must not hide a usable card. Subsequent loads retry.
-          await persist(enriched).catch(() => {})
+          await persist(enriched).catch(() => {
+            persistFailures += 1
+          })
         }
       })
     )
   }
+  if (persistFailures)
+    console.warn(`[listMetadata] ${persistFailures} metadata updates not saved; retried on next load`)
   if (!isCurrent()) throw new Error('Аккаунт изменился. Повторите операцию')
   return result
 }

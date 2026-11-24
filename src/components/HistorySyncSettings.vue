@@ -284,7 +284,8 @@ function download() {
   run(async () => {
     const token = auth.token
     const history = auth.isAuthenticated
-      ? await getMyLists(USER_LIST_TYPES_ENUM.HISTORY, { fresh: true, awaitMetadata: true })
+      ? // The export needs IDs and what metadata is already known, not a refill.
+        await getMyLists(USER_LIST_TYPES_ENUM.HISTORY, { fresh: true })
       : main.history
     if (auth.token !== token) throw new Error('Аккаунт изменился. Повторите экспорт')
     const url = URL.createObjectURL(
