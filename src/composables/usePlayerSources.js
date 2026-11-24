@@ -7,7 +7,6 @@ import { computed, onBeforeUnmount, ref } from 'vue'
 import { getSafePlayerUrl } from '@/utils/playerSecurity'
 
 const normalizePlayerKey = (key) => String(key || '').toUpperCase()
-const KINOBOX_LOW_PRIORITY_PROVIDERS = new Set(['YOUTUBE'])
 const NO_PLAYERS_MESSAGE =
   'Плееры не найдены. Попробуйте выбрать другой источник или включить VPN.'
 
@@ -41,24 +40,7 @@ export function usePlayerSources({ props, getProviderDisplayName, onSelectedPlay
     onSelectedPlayerChange?.(player)
   }
 
-  const isKinoboxPlayer = (player) =>
-    normalizePlayerKey(player?.source) === 'KINOBOX' || normalizePlayerKey(player?.key).startsWith('KINOBOX>')
-
-  const isLowPriorityKinoboxPlayer = (player) =>
-    isKinoboxPlayer(player) &&
-    KINOBOX_LOW_PRIORITY_PROVIDERS.has(normalizePlayerKey(getProviderDisplayName(player)))
-
-  const getDefaultPlayer = () => {
-    if (mainStore.contentApiProvider === 'kinobox') {
-      return (
-        playersInternal.value.find((player) => isKinoboxPlayer(player) && !isLowPriorityKinoboxPlayer(player)) ||
-        playersInternal.value.find(isKinoboxPlayer) ||
-        playersInternal.value[0]
-      )
-    }
-
-    return playersInternal.value[0]
-  }
+  const getDefaultPlayer = () => playersInternal.value[0]
 
   const applyPlayersData = (players) => {
     const dedupedPlayers = []
@@ -92,7 +74,7 @@ export function usePlayerSources({ props, getProviderDisplayName, onSelectedPlay
           normalizePlayerKey(player.key) === normalizedPreferred ||
           normalizePlayerKey(getProviderDisplayName(player)) === normalizedPreferred
       )
-      setSelectedPlayer(isLowPriorityKinoboxPlayer(preferred) ? getDefaultPlayer() : preferred || getDefaultPlayer())
+      setSelectedPlayer(preferred || getDefaultPlayer())
     } else {
       setSelectedPlayer(getDefaultPlayer())
     }

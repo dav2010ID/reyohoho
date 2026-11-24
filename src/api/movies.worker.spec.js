@@ -1,14 +1,14 @@
 import { describe, expect, it } from 'vitest'
 import {
-  normalizeKinoboxSearchResponse,
-  normalizeKinoboxMovie,
+  normalizeWorkerSearchResponse,
+  normalizeWorkerMovie,
   normalizeMovieExtras
-} from './movies.kinobox'
+} from './movies.worker'
 import { getMovieName } from '@/utils/textUtils'
 
-describe('Kinobox search response normalization', () => {
+describe('Worker search response normalization', () => {
   it('reads the live API data.items envelope', () => {
-    const results = normalizeKinoboxSearchResponse({
+    const results = normalizeWorkerSearchResponse({
       data: {
         success: true,
         total: 131,
@@ -33,7 +33,7 @@ describe('Kinobox search response normalization', () => {
     expect(results[0].poster).toBe('https://poster.example/matrix.jpg')
   })
   it('normalizes nested movie search results for the existing search UI', () => {
-    const results = normalizeKinoboxSearchResponse({
+    const results = normalizeWorkerSearchResponse({
       data: {
         movies: [
           {
@@ -57,17 +57,17 @@ describe('Kinobox search response normalization', () => {
       rating_kp: 7.5,
       type: 'TV_SERIES',
       year: 2024,
-      source: 'kinobox'
+      source: 'worker'
     })
     expect(results[0].raw_data.type).toBe('TV_SERIES')
   })
 
   it('returns an empty list for unsupported responses', () => {
-    expect(normalizeKinoboxSearchResponse({ data: null })).toEqual([])
+    expect(normalizeWorkerSearchResponse({ data: null })).toEqual([])
   })
 
   it('uses the original title when no Russian title is available', () => {
-    const results = normalizeKinoboxSearchResponse({
+    const results = normalizeWorkerSearchResponse({
       data: { items: [{ id: 301, title: { russian: null, original: 'The Matrix' } }] }
     })
     expect(results[0].title).toBe('The Matrix')
@@ -75,9 +75,9 @@ describe('Kinobox search response normalization', () => {
   })
 })
 
-describe('Kinobox movie card normalization', () => {
+describe('Worker movie card normalization', () => {
   it('keeps title, description, ratings, poster and other movie information', () => {
-    const movie = normalizeKinoboxMovie(
+    const movie = normalizeWorkerMovie(
       {
         id: 301,
         title: { russian: 'Матрица', original: 'The Matrix' },

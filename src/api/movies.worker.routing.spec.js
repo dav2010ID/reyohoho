@@ -12,8 +12,7 @@ vi.mock('axios', () => ({
 
 beforeEach(() => {
   vi.resetModules()
-  vi.stubEnv('VITE_KINOBOX_API_URL', '')
-  vi.stubEnv('VITE_KINOBOX_SEARCH_API_URL', '')
+  vi.stubEnv('VITE_WORKER_API_URL', '')
   mocks.get.mockReset()
   mocks.create.mockReset().mockReturnValue({ get: mocks.get })
 })
@@ -22,9 +21,9 @@ afterEach(() => {
   vi.restoreAllMocks()
 })
 
-describe('Kinobox content proxy routing', () => {
+describe('Worker content routing', () => {
   it('loads movie extras from the Worker and treats a missing title as empty', async () => {
-    const { getMovieExtras } = await import('./movies.kinobox')
+    const { getMovieExtras } = await import('./movies.worker')
     mocks.get.mockResolvedValue({ data: { data: { tagline: 'Тест' }, source: 'kinoapi' } })
     expect(await getMovieExtras(301)).toMatchObject({ slogan: 'Тест' })
     expect(mocks.get).toHaveBeenCalledWith(
@@ -38,7 +37,7 @@ describe('Kinobox content proxy routing', () => {
     'selects a film from valid top pages at random boundary %s',
     async (random) => {
       vi.spyOn(Math, 'random').mockReturnValue(random)
-      const { getRandomMovie } = await import('./movies.kinobox')
+      const { getRandomMovie } = await import('./movies.worker')
       mocks.get.mockResolvedValue({
         data: {
           data: {
@@ -60,21 +59,21 @@ describe('Kinobox content proxy routing', () => {
     }
   )
   it('rejects an empty or unusable random pool rather than returning a broken watch link', async () => {
-    const { getRandomMovie } = await import('./movies.kinobox')
+    const { getRandomMovie } = await import('./movies.worker')
     mocks.get.mockResolvedValue({ data: { data: { items: [] } } })
     await expect(getRandomMovie()).rejects.toThrow('selection is empty')
     mocks.get.mockResolvedValue({ data: { data: { items: [{ movie: { id: 301 } }] } } })
     await expect(getRandomMovie()).rejects.toThrow('selection is empty')
   })
   it('preserves random request cancellation without calling another endpoint', async () => {
-    const { getRandomMovie } = await import('./movies.kinobox')
+    const { getRandomMovie } = await import('./movies.worker')
     const error = Object.assign(new Error('Canceled'), { code: 'ERR_CANCELED' })
     mocks.get.mockRejectedValue(error)
     await expect(getRandomMovie()).rejects.toBe(error)
     expect(mocks.get).toHaveBeenCalledTimes(1)
   })
   it('loads top cards through the shared Worker, not a browser GraphQL call', async () => {
-    const { getTopMovies } = await import('./movies.kinobox')
+    const { getTopMovies } = await import('./movies.worker')
     mocks.get.mockResolvedValue({
       data: {
         data: {
@@ -108,7 +107,7 @@ describe('Kinobox content proxy routing', () => {
     })
   })
   it('routes search to the permanent Worker and keeps request cancellation', async () => {
-    const { apiSearch } = await import('./movies.kinobox')
+    const { apiSearch } = await import('./movies.worker')
     mocks.get.mockResolvedValue({
       data: { data: { items: [{ id: 301, title: { russian: 'Матрица' } }] } }
     })
@@ -116,16 +115,12 @@ describe('Kinobox content proxy routing', () => {
     const results = await apiSearch('Матрица', { signal, timeout: 20000 })
     expect(mocks.get).toHaveBeenCalledWith(
       '/api/movies/search/',
-      expect.objectContaining({
-        baseURL: 'https://api.reyhoho.fun',
-        timeout: 20000,
-        params: { query: 'Матрица' }
-      })
+      expect.objectContaining({ timeout: 20000, params: { query: 'Матрица' } })
     )
+    expect(mocks.create).toHaveBeenCalledWith({ baseURL: 'https://api.reyhoho.fun' })
     expect(results[0]).toMatchObject({ id: 301, title: 'Матрица' })
   })
   it.each([
-    ['Kinobox', () => import('./movies.kinobox')],
     ['DDBB', () => import('./movies.ddbb')],
     ['DDBB Live', () => import('./movies.ddbb-live')]
   ])('passes cancellation signals through the %s player transport', async (_name, loadAdapter) => {
@@ -147,39 +142,24 @@ describe('Kinobox content proxy routing', () => {
     expect(mocks.get.mock.calls[0][1].headers?.['Content-Type']).toBeUndefined()
   })
 
-  it('supports a separate search endpoint override', async () => {
-    vi.stubEnv('VITE_KINOBOX_SEARCH_API_URL', 'https://search.example')
-    const { apiSearch } = await import('./movies.kinobox')
-    mocks.get.mockResolvedValue({ data: { data: { items: [] } } })
-    await apiSearch('Matrix')
-    expect(mocks.get.mock.calls[0][1].baseURL).toBe('https://search.example')
+  it('has no player list of its own', async () => {
+    const adapter = await import('./movies.worker')
+    expect(adapter.getPlayers).toBeUndefined()
+    expect(adapter.getPlayersRaw).toBeUndefined()
   })
 
-  it('uses the same Worker for movie details and players', async () => {
-    const { getKpInfo, getPlayersRaw } = await import('./movies.kinobox')
+  it('sends search and movie details to the configured Worker', async () => {
+    vi.stubEnv('VITE_WORKER_API_URL', 'https://staging-api.example/')
+    const { apiSearch, getKpInfo } = await import('./movies.worker')
+    mocks.get.mockResolvedValue({ data: { data: { items: [] } } })
+    await apiSearch('Matrix')
     mocks.get.mockResolvedValue({ data: { data: { movie: { id: 301 } } } })
     await getKpInfo(301)
-    mocks.get.mockResolvedValue({ data: { data: [] } })
-    await getPlayersRaw(301)
-    expect(mocks.create).toHaveBeenCalledWith(
-      expect.objectContaining({
-        baseURL: 'https://api.reyhoho.fun'
-      })
-    )
-    expect(mocks.get.mock.calls[0][1]).not.toHaveProperty('baseURL')
-    expect(mocks.get.mock.calls[1][1]).not.toHaveProperty('baseURL')
-  })
-
-  it('uses the general API override for search when no separate override is set', async () => {
-    vi.stubEnv('VITE_KINOBOX_API_URL', 'https://kinobox-proxy.example')
-    const { apiSearch } = await import('./movies.kinobox')
-    mocks.get.mockResolvedValue({ data: { data: { items: [] } } })
-    await apiSearch('Matrix')
-    expect(mocks.create).toHaveBeenCalledWith(
-      expect.objectContaining({
-        baseURL: 'https://kinobox-proxy.example'
-      })
-    )
-    expect(mocks.get.mock.calls[0][1].baseURL).toBe('https://kinobox-proxy.example')
+    expect(mocks.create).toHaveBeenCalledWith({ baseURL: 'https://staging-api.example' })
+    expect(mocks.get.mock.calls.map(([path]) => path)).toEqual([
+      '/api/movies/search/',
+      '/api/movies/301'
+    ])
+    for (const [, config] of mocks.get.mock.calls) expect(config).not.toHaveProperty('baseURL')
   })
 })

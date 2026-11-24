@@ -54,8 +54,6 @@ async function main() {
     scriptHashes: await collectSiteSecurity(DIST_PATH),
     apiOrigin: parseWorkerApiUrl(env.VITE_WORKER_API_URL),
     connectOrigins: [
-      origin(env.VITE_KINOBOX_API_URL),
-      origin(env.VITE_KINOBOX_SEARCH_API_URL),
       origin(env.VITE_DDBB_API_URL || 'https://p2.ddbb.lol'),
       origin(env.VITE_DDBB_LIVE_API_URL || 'https://a.ddbb.live')
     ]

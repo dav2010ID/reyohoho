@@ -5,7 +5,7 @@ const mocks = vi.hoisted(() => ({
   local: vi.fn(),
   backend: vi.fn(),
   loadProvider: vi.fn(),
-  store: { contentApiProvider: 'kinobox' }
+  store: { contentApiProvider: 'ddbb_live' }
 }))
 vi.mock('@/store/main', () => ({ useMainStore: () => mocks.store }))
 vi.mock('@/api/providerRegistry', async (importOriginal) => ({
@@ -16,10 +16,10 @@ import { getRandomMovie } from './movies'
 
 beforeEach(() => {
   vi.resetAllMocks()
-  mocks.store.contentApiProvider = 'kinobox'
+  mocks.store.contentApiProvider = 'ddbb_live'
   mocks.random.mockResolvedValue({ kp_id: 301, title: 'Матрица' })
   mocks.loadProvider.mockImplementation(async (provider) => {
-    if (provider === 'kinobox') return { getRandomMovie: mocks.random }
+    if (provider === 'worker') return { getRandomMovie: mocks.random }
     if (provider === 'local') return { getRandomMovie: mocks.local }
     if (provider === 'backend') return { getRandomMovie: mocks.backend }
     throw new Error('Unexpected provider')
@@ -27,7 +27,7 @@ beforeEach(() => {
 })
 
 describe('random film routing', () => {
-  it.each(['kinobox', 'ddbb', 'ddbb_live', 'kinobd', 'local', 'backend'])(
+  it.each(['ddbb_live', 'ddbb', 'kinobox', 'kinobd', 'local', 'backend'])(
     'uses the proxy for %s without the legacy backend',
     async (provider) => {
       mocks.store.contentApiProvider = provider
@@ -35,7 +35,7 @@ describe('random film routing', () => {
       expect(await getRandomMovie({ signal })).toMatchObject({ kp_id: 301 })
       expect(mocks.random).toHaveBeenCalledWith({ signal })
       expect(mocks.loadProvider).toHaveBeenCalledTimes(1)
-      expect(mocks.loadProvider).toHaveBeenCalledWith('kinobox')
+      expect(mocks.loadProvider).toHaveBeenCalledWith('worker')
     }
   )
   it('does not fall back to an unconfigured backend on proxy errors or cancellation', async () => {

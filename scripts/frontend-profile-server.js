@@ -45,8 +45,7 @@ export async function createProfileServer({
         'https://a.ddbb.live',
         'http://localhost:8000',
         env.VITE_APP_API_URL,
-        env.VITE_KINOBOX_API_URL,
-        env.VITE_KINOBOX_SEARCH_API_URL
+        env.VITE_WORKER_API_URL
       ].filter(Boolean)
     )
   ]
@@ -112,7 +111,9 @@ export async function createProfileServer({
           const movie = movies.find((movie) => movie.kp_id === id)
           body = JSON.stringify({ data: { movie: toMovie(movie || movies[1]) } })
         } else if (endpoint.includes('/players')) {
-          body = JSON.stringify({ data: [] })
+          // Like the real Worker: player lists come from DDBB, not from this API.
+          res.statusCode = 410
+          body = '{"error":"Players are not served by this API"}'
         } else if (endpoint.includes('/rating/')) {
           body = JSON.stringify({ user_rating: null, average_rating: null, vote_count: 0 })
         } else if (endpoint.includes('/comments/')) {

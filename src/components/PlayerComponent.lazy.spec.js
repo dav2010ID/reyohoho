@@ -24,8 +24,8 @@ vi.mock('@/utils/playerVideoOverlayRuntime', () => {
 
 vi.mock('@/api/movies', () => ({
   getPlayers: vi.fn(async () => ({
-    'KINOBOX>TEST': {
-      source: 'KINOBOX',
+    'DDBB LIVE>TEST': {
+      source: 'DDBB LIVE',
       iframe: 'https://player.example/embed/123'
     }
   })),
@@ -35,7 +35,7 @@ vi.mock('@/api/movies', () => ({
 }))
 
 vi.mock('@/store/main', () => ({
-  useMainStore: () => ({ isMobile: false, dimmingEnabled: false, contentApiProvider: 'kinobox' })
+  useMainStore: () => ({ isMobile: false, dimmingEnabled: false, contentApiProvider: 'ddbb_live' })
 }))
 
 vi.mock('vue-router', () => ({
@@ -94,7 +94,7 @@ describe('PlayerComponent optional runtime boundaries', () => {
     expect(web.wrapper.get('iframe').attributes('src')).toBe('https://player.example/embed/123')
     await web.wrapper.get('iframe').trigger('load')
     await vi.dynamicImportSettled()
-    expect(web.playerStore.preferredPlayer).toBe('KINOBOX>TEST')
+    expect(web.playerStore.preferredPlayer).toBe('DDBB LIVE>TEST')
     expect(window.dataLayer).toEqual(
       expect.arrayContaining([
         expect.objectContaining({ event: 'player_iframe_load', status: 'success' }),

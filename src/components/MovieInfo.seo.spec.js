@@ -11,7 +11,7 @@ const routeMock = reactive({ params: { kp_id: '123' }, query: {}, hash: '' })
 const mainMock = {
   isMobile: false,
   isHistoryAllowed: false,
-  contentApiProvider: 'kinobox',
+  contentApiProvider: 'ddbb_live',
   addToHistory: vi.fn()
 }
 
@@ -124,7 +124,7 @@ describe('MovieInfo SEO', () => {
     authMock.token = ''
     routeMock.params.kp_id = '123'
     authMock.isWorkerSession = false
-    mainMock.contentApiProvider = 'kinobox'
+    mainMock.contentApiProvider = 'ddbb_live'
     mainMock.isMobile = false
     mainMock.isHistoryAllowed = false
     useHeadMock.mockReset()
@@ -375,7 +375,7 @@ describe('MovieInfo SEO', () => {
       description: 'Fetched description',
       slogan: null,
       similars: [],
-      source: 'kinobox'
+      source: 'worker'
     }
     getKpInfoMock.mockResolvedValue(card)
     let deliver
@@ -387,7 +387,7 @@ describe('MovieInfo SEO', () => {
     try {
       await vi.waitFor(() => expect(wrapper.text()).toContain('Fetched Movie'))
       expect(wrapper.findComponent({ name: 'MovieList' }).exists()).toBe(false)
-      expect(getMovieExtrasMock.mock.calls[0][0]).toMatchObject({ kp_id: 123, source: 'kinobox' })
+      expect(getMovieExtrasMock.mock.calls[0][0]).toMatchObject({ kp_id: 123, source: 'worker' })
       deliver({
         slogan: 'Extra tagline',
         name_ru: 'Must not replace the title',
@@ -430,7 +430,7 @@ describe('MovieInfo SEO', () => {
       kp_id: Number(id),
       name_ru: 'Movie ' + id,
       slogan: null,
-      source: 'kinobox'
+      source: 'worker'
     }))
     let deliverFirst
     getMovieExtrasMock
@@ -462,7 +462,7 @@ describe('MovieInfo SEO', () => {
     getKpInfoMock.mockResolvedValue({
       kp_id: 123,
       name_ru: 'Fetched Movie',
-      source: 'kinobox',
+      source: 'worker',
       staff: [
         ...Array.from({ length: 14 }, (_, index) => person(index + 1, 'ACTOR')),
         person(100, 'DIRECTOR'),

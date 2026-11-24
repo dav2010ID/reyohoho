@@ -1,4 +1,4 @@
-import { getKpInfo } from '@/api/movies.kinobox'
+import { getKpInfo } from '@/api/movies.worker'
 import { getMovieSeoSlug } from '@/utils/movieSeo'
 import { cardRatings } from '../../shared/history-data.js'
 import {

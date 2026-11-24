@@ -23,7 +23,7 @@ import {
   pendingHistoryWrites
 } from '@/utils/historyOutbox'
 
-// Worker limits for POST /api/list/:type/import (workers/kinobox-search/account.mjs).
+// Worker limits for POST /api/list/:type/import (the API Worker's account.mjs).
 const LIST_IMPORT_ITEMS = 40
 const LIST_IMPORT_BYTES = 60 * 1024
 

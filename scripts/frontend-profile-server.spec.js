@@ -53,10 +53,10 @@ describe('isolated frontend profiling fixture', () => {
     expect((await fetch(`${origin}/`, { method: 'POST' })).status).toBe(405)
   })
 
-  it('returns a valid empty Kinobox player response', async () => {
+  it('answers the retired player list route like the Worker', async () => {
     const origin = await setup()
     const response = await fetch(`${origin}/__profile/api/api/players?kinopoisk=5494049`)
-    expect(await response.json()).toEqual({ data: [] })
+    expect(response.status).toBe(410)
   })
 
   it('delays selected chunks while keeping unrelated assets available', async () => {
