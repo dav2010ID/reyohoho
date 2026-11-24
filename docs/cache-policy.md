@@ -19,7 +19,7 @@
   screens and controls become available offline after an online visit. Comments
   load near the viewport or on request; the player chooser loads when opened.
   Service worker caching does not include API responses or account data.
-- Worker: movie cards 6h, search 10m, top 1h, players 1m. Only validated JSON is
+- Worker: movie cards 6h, search 10m, top 1h. Only validated JSON is
   stored. Last successful movie cards can be served for up to 48h after fetch
   when upstream returns 429/5xx or a connection/timeout error. Stale storage
   is best-effort/local to a Cloudflare data center and can be evicted earlier.
@@ -27,13 +27,13 @@
   Same-isolate requests wait for the first request/cache write, using primitive
   leases with an expiry, not shared request-scoped I/O promises. This is not
   a global/distributed lock.
-- Browser public-data memory cache: search 1m, cards/top 5m, players 30s;
+- Browser public-data memory cache: search 1m, cards/top 5m;
   capped at 120 entries and approximately 4 MiB serialized UTF-16 payloads.
   Shared pending requests also bounded. AbortSignal-owned transports remain
   separate to preserve independent cancellation. SSR/custom requests bypass it.
 - Auth, history and lists always use `private, no-store`, and never enter these
   caches. CORS preflight permission lasts 600s, not the private response body.
-- Logs: `event=public_cache`, `kind=search|movie|players|top`,
+- Logs: `event=public_cache`, `kind=search|movie|top`,
   `cache=HIT|MISS|STALE|BACKOFF`, `status`, `durationMs`. No queries, tokens,
   movie IDs or personal data. Measure ratios by kind after a full traffic day;
   zone-level CDN HIT does not measure Workers Cache API hit rate.

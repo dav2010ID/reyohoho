@@ -35,8 +35,7 @@ Worker change must keep the previous site working (see "Compatibility" below).
 3. Secrets must already be set on the production Worker (`npx wrangler secret list
    --config workers/kinobox-search/wrangler.local.jsonc`): `TELEGRAM_BOT_TOKEN`,
    `TELEGRAM_WEBHOOK_SECRET`, `KinoapiLampac`.
-4. Verify the vendored TLS modules: `node workers/kinobox-search/prepare-vendor.mjs`.
-5. Optional but recommended: rehearse on staging (below).
+4. Optional but recommended: rehearse on staging (below).
 
 ## Release
 
@@ -96,6 +95,8 @@ an older contract, D1 is behind or `schemaReady` is false.
 - A deleted history row keeps its deletion time; replays older than the
   deletion are ignored. Tombstones from before this change have no time and
   behave as before.
+- `/api/players` answers `410 Gone`: older sites asked it only after both DDBB
+  sources, and now fail over at once instead of waiting for Kinobox.
 - The production Worker no longer accepts `http://localhost:5173`. Local
   development uses the staging Worker (`ALLOW_DEV_ORIGINS=true`) through
   `VITE_WORKER_API_URL`.
