@@ -78,7 +78,7 @@ export default {
     const reply = (data, status = 200) => new Response(JSON.stringify(data), { status, headers })
     // Browsers post CSP reports cross-origin with their own preflight.
     if (new URL(request.url).pathname === '/api/csp-report')
-      return serveCspReport(request, allowedOrigin(origin, env))
+      return serveCspReport(request, allowedOrigin(origin, env), env)
     if (origin && !allowedOrigin(origin, env)) return reply({ error: 'Origin not allowed' }, 403)
     const privatePath = new URL(request.url).pathname
     if (privatePath.startsWith('/api/auth/')) return serveTelegramAuth(request, env, origin, ctx)

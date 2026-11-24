@@ -1,5 +1,7 @@
 // CSP violation reports from reyhoho.fun (report-uri and the Reporting API).
 // Only origins and paths are logged: page queries can hold tokens or searches.
+import { boundedJson } from './private-api.mjs'
+
 const MAX_BYTES = 32 * 1024
 const MAX_REPORTS = 10
 
@@ -39,7 +41,7 @@ export function summarizeCspReports(payload) {
     }))
 }
 
-export async function serveCspReport(request, allowedOrigin) {
+export async function serveCspReport(request, allowedOrigin, env = {}) {
   const origin = request.headers.get('Origin')
   const headers = {
     'Access-Control-Allow-Origin': allowedOrigin ? origin : 'https://reyhoho.fun',
@@ -54,13 +56,23 @@ export async function serveCspReport(request, allowedOrigin) {
   if (request.method !== 'POST') return done(405)
   if (origin && !allowedOrigin) return done(403)
   if (Number(request.headers.get('Content-Length')) > MAX_BYTES) return done(413)
-  const text = await request.text()
-  if (text.length > MAX_BYTES) return done(413)
+  // Reports are unauthenticated: a per-IP budget keeps them from flooding logs.
+  if (env.PUBLIC_RATE_LIMITER) {
+    const ip = request.headers.get('CF-Connecting-IP') || 'local'
+    let allowed = false
+    try {
+      allowed = (await env.PUBLIC_RATE_LIMITER.limit({ key: `csp:${ip}` })).success
+    } catch {
+      // Without a working limiter, drop the report rather than log without bound.
+    }
+    if (!allowed) return done(429)
+  }
   let payload
   try {
-    payload = JSON.parse(text)
-  } catch {
-    return done(400)
+    // Stops reading at the byte limit, also without Content-Length.
+    payload = await boundedJson(request.body, MAX_BYTES)
+  } catch (error) {
+    return done(error.message === 'Body too large' ? 413 : 400)
   }
   for (const report of summarizeCspReports(payload))
     console.log(JSON.stringify({ event: 'csp_report', ...report }))

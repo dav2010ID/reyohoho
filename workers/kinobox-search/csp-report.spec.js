@@ -56,4 +56,40 @@ describe('CSP reports', () => {
     expect((await serveCspReport(post('x'.repeat(40000)), true)).status).toBe(413)
     expect((await serveCspReport(post({}), false)).status).toBe(403)
   })
+  it('stops reading at the byte limit without Content-Length and counts bytes', async () => {
+    const chunk = new TextEncoder().encode('x'.repeat(16 * 1024))
+    let pulled = 0
+    const endless = new ReadableStream({
+      pull(controller) {
+        pulled += 1
+        controller.enqueue(chunk)
+      }
+    })
+    const streamed = new Request('https://api.reyhoho.fun/api/csp-report', {
+      method: 'POST',
+      headers: { Origin: 'https://reyhoho.fun' },
+      body: endless,
+      duplex: 'half'
+    })
+    expect((await serveCspReport(streamed, true)).status).toBe(413)
+    expect(pulled).toBeLessThan(5)
+    // 20,000 Cyrillic characters are about 40 KB of UTF-8.
+    const wide = { 'csp-report': { 'document-uri': 'https://reyhoho.fun/' + 'я'.repeat(20000) } }
+    expect((await serveCspReport(post(wide), true)).status).toBe(413)
+  })
+  it('limits reports per IP and drops them when the limiter fails', async () => {
+    vi.spyOn(console, 'log').mockImplementation(() => {})
+    const keys = []
+    const limited = {
+      PUBLIC_RATE_LIMITER: {
+        limit: async ({ key }) => (keys.push(key), { success: keys.length < 2 })
+      }
+    }
+    const report = () => post({ 'csp-report': {} }, { 'CF-Connecting-IP': '203.0.113.7' })
+    expect((await serveCspReport(report(), true, limited)).status).toBe(204)
+    expect((await serveCspReport(report(), true, limited)).status).toBe(429)
+    expect(keys).toEqual(['csp:203.0.113.7', 'csp:203.0.113.7'])
+    const broken = { PUBLIC_RATE_LIMITER: { limit: async () => Promise.reject(new Error('down')) } }
+    expect((await serveCspReport(report(), true, broken)).status).toBe(429)
+  })
 })
