@@ -5,7 +5,8 @@ import { describe, expect, it } from 'vitest'
 import { serveHistory } from './history.mjs'
 import { privateReply } from './private-api.mjs'
 import { resolveKinopoiskTop } from './kinopoisk-top.mjs'
-import { resolveKinoboxResource } from './routes.mjs'
+import { resolveContentResource } from './routes.mjs'
+import { serveContent } from './content.mjs'
 import {
   resolveLatestReleases,
   resolveMovieExtras,
@@ -16,9 +17,9 @@ import { publicUpstreamBudget } from './public-budget.mjs'
 import { serveCspReport } from './csp-report.mjs'
 import { serveHealth } from './health.mjs'
 import { guardUpstream } from './upstream-guard.mjs'
-import { requestContent, requestKinopoiskContent } from './kinopoisk-content.mjs'
+import { requestKinopoiskContent } from './kinopoisk-content.mjs'
 
-// Exercise the real entrypoint's CORS gate without opening Cloudflare sockets.
+// Exercise the real entrypoint's routing and CORS gate without network access.
 const source = readFileSync(new URL('./worker.mjs', import.meta.url), 'utf8')
   // Single- and multi-line imports alike.
   .replace(/^import [^;]*? from '[^']+'$/gm, '')
@@ -31,7 +32,8 @@ const context = vm.createContext({
   Set,
   serveHistory,
   resolveKinopoiskTop,
-  resolveKinoboxResource,
+  resolveContentResource,
+  serveContent,
   resolveMovieExtras,
   serveMovieExtras,
   resolveLatestReleases,
@@ -40,7 +42,6 @@ const context = vm.createContext({
   serveCspReport,
   serveHealth,
   guardUpstream,
-  requestContent,
   requestKinopoiskContent,
   caches: {
     default: {
@@ -82,8 +83,23 @@ describe('Worker movie extras route', () => {
   })
 })
 
+describe('Worker player lists', () => {
+  it('answers the retired players route at once without any upstream call', async () => {
+    const response = await worker.fetch(
+      new Request('https://api.reyhoho.fun/api/players?kinopoisk=301', {
+        headers: { Origin: 'https://reyhoho.fun' }
+      }),
+      {},
+      {}
+    )
+    expect(response.status).toBe(410)
+    expect(response.headers.get('Access-Control-Allow-Origin')).toBe('https://reyhoho.fun')
+    expect(await response.json()).toEqual({ error: 'Players are not served by this API' })
+  })
+})
+
 describe('Worker custom domain origins', () => {
-  it('routes authenticated history separately without opening the Kinobox transport', async () => {
+  it('routes authenticated history separately from the public catalogue', async () => {
     const request = new Request('https://api.reyhoho.fun/api/history', {
       method: 'OPTIONS',
       headers: { Origin: 'https://reyhoho.fun' }
@@ -91,7 +107,7 @@ describe('Worker custom domain origins', () => {
     const preflight = await worker.fetch(request, {}, {})
     expect(preflight.headers.get('Access-Control-Allow-Methods')).toContain('DELETE')
     expect(preflight.headers.get('Access-Control-Allow-Headers')).toContain('Authorization')
-    expect(preflight.headers.get('X-Kinobox-Transport')).toBeNull()
+    expect(preflight.headers.get('X-Search-Cache')).toBeNull()
     expect(preflight.headers.get('Access-Control-Max-Age')).toBe('600')
     const response = await worker.fetch(new Request(request.url), {}, {})
     expect(response.status).toBe(503)

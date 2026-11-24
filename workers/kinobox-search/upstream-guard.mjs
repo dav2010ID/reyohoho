@@ -2,8 +2,7 @@
 // - a circuit breaker per isolate: after repeated failures the upstream is
 //   skipped for a while instead of every request waiting for its timeout;
 // - an optional shared budget per upstream (UPSTREAM_RATE_LIMITER binding), so
-//   many IPs together cannot exhaust a provider quota;
-// - KINOBOX_TRANSPORT=off: a kill switch for the vendored TLS/HTTP2 transport.
+//   many IPs together cannot exhaust a provider quota.
 export const BREAKER_FAILURES = 5
 export const BREAKER_OPEN_MS = 30_000
 
@@ -42,8 +41,6 @@ function record(upstream, failed, now) {
 }
 
 export async function guardUpstream(upstream, env, run, now = Date.now) {
-  if (upstream === 'kinobox' && env?.KINOBOX_TRANSPORT === 'off')
-    throw new UpstreamUnavailable(upstream, 'disabled')
   if ((breakers.get(upstream)?.openUntil || 0) > now())
     throw new UpstreamUnavailable(upstream, 'circuit_open')
   if (env?.UPSTREAM_RATE_LIMITER) {

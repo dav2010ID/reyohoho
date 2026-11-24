@@ -1,11 +1,9 @@
-import { getKinoboxCacheUrl, isKinoboxResponseValid } from './routes.mjs'
+import { getContentCacheUrl, isContentResponseValid } from './routes.mjs'
 import { cacheMatch, cachePut, logPublicCache } from './public-cache.mjs'
-import { gunzipSync, inflateSync, brotliDecompressSync } from 'node:zlib'
-
-const MAX_DECODED_BODY = 1024 * 1024
 
 const STALE_TTL = 48 * 3600
 const RETRY_TTL = 30
+const DEADLINE_MS = 15000
 // Primitive leases only, never cross-request promises/sockets. This collapses
 // bursts within an isolate; Cache API is local, not a global distributed lock.
 const leases = new Map()
@@ -17,7 +15,9 @@ const busy = (key) => {
 }
 const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms))
 
-export async function serveKinoboxContent(
+// Search and movie cards. `requestUpstream(options, { timeoutMs })` resolves to
+// `{ status, body, source }` with `body` as JSON text.
+export async function serveContent(
   resource,
   url,
   headers,
@@ -26,21 +26,19 @@ export async function serveKinoboxContent(
   budget = async () => null
 ) {
   const started = Date.now()
-  // Player discovery has an 8 s client timeout, including time spent waiting for a lease.
-  const playerDeadline = resource.kind === 'players' ? started + 6500 : null
-  const key = getKinoboxCacheUrl(url.origin, resource, headers['X-Worker-Version'])
-  const staleKey = key.replace('/__kinobox-cache?', '/__kinobox-stale?')
-  const retryKey = key.replace('/__kinobox-cache?', '/__kinobox-retry?')
-  const respond = (body, status, state, retry = false, entry) => {
+  const key = getContentCacheUrl(url.origin, resource, headers['X-Worker-Version'])
+  const staleKey = key.replace('/__content-cache?', '/__content-stale?')
+  const retryKey = key.replace('/__content-cache?', '/__content-retry?')
+  const respond = (body, status, state, retry = false, entry, source) => {
     logPublicCache(resource.kind, state, started, status)
-    const source = entry?.headers?.get?.('X-Data-Source')
+    const cachedSource = entry?.headers?.get?.('X-Data-Source')
     return new Response(body, {
       status,
       headers: {
         ...headers,
-        ...(entry ? { 'X-Data-Source': source || 'unknown' } : {}),
+        ...(entry ? { 'X-Data-Source': cachedSource || 'unknown' } : {}),
+        ...(source ? { 'X-Data-Source': source } : {}),
         'X-Search-Cache': state,
-        'X-Kinobox-Cache': state,
         ...(retry ? { 'Retry-After': String(RETRY_TTL) } : {})
       }
     })
@@ -56,7 +54,6 @@ export async function serveKinoboxContent(
   // Wait with this request's own I/O, rather than sharing another request's promise.
   for (let attempt = 0; busy(key) && attempt < 20; attempt++) {
     if (stale) return respond(stale.body, 200, 'STALE', false, stale)
-    if (playerDeadline && Date.now() + 500 >= playerDeadline) return unavailable()
     await sleep(500)
     const filled = await cacheMatch(cache, key)
     if (filled) return respond(filled.body, 200, 'HIT', false, filled)
@@ -95,42 +92,17 @@ export async function serveKinoboxContent(
       const fallback = await currentStale()
       return fallback ? respond(fallback.body, 200, 'STALE', false, fallback) : rejected
     }
-    const deadline = playerDeadline ?? Date.now() + 15000
-    if (deadline <= Date.now()) return unavailable()
-    const load = () =>
-      requestUpstream(
-        {
-          path: resource.path,
-          params: { ...resource.params, ts: Math.floor(Date.now() / 1000) }
-        },
-        { timeoutMs: Math.max(1, deadline - Date.now()) }
-      )
-    let response
-    try {
-      response = await load()
-    } catch (error) {
-      // Retry only the observed transient stream reset, once, within the same deadline.
-      if (error.message !== 'HTTP/2 RST_STREAM: 1' || deadline - Date.now() < 1000) throw error
-      await sleep(250)
-      const retryRejected = await budget()
-      if (retryRejected) {
-        const fallback = await currentStale()
-        return fallback ? respond(fallback.body, 200, 'STALE', false, fallback) : retryRejected
-      }
-      if (deadline - Date.now() < 750) throw error
-      console.log(
-        JSON.stringify({ event: 'kinobox_retry', kind: resource.kind, reason: 'rst_stream_1' })
-      )
-      response = await load()
-    }
+    const response = await requestUpstream(
+      { path: resource.path, params: resource.params },
+      { timeoutMs: DEADLINE_MS }
+    )
+    const source = response.source || 'kinopoisk'
     console.log(
       JSON.stringify({
-        event: 'kinobox_response',
+        event: 'content_response',
         kind: resource.kind,
         status: response.status,
-        source: response.source || 'kinobox',
-        protocol: response.tls?.selectedAlpn,
-        tls: response.tls?.version,
+        source,
         durationMs: Date.now() - started
       })
     )
@@ -147,23 +119,9 @@ export async function serveKinoboxContent(
         'MISS'
       )
     }
-    const encoding = response.headers['content-encoding'] || 'identity'
-    const decompress = new Map([
-      ['gzip', gunzipSync],
-      ['deflate', inflateSync],
-      ['br', brotliDecompressSync]
-    ]).get(encoding)
-    if (encoding !== 'identity' && typeof decompress !== 'function') {
-      return await invalid('Unexpected upstream encoding')
-    }
-    let body
+    const body = response.body
     let data
     try {
-      const decoded = decompress
-        ? decompress(response.body, { maxOutputLength: MAX_DECODED_BODY })
-        : response.body
-      if (decoded.length > MAX_DECODED_BODY) throw new Error('Decoded body too large')
-      body = decoded.toString('utf8')
       data = JSON.parse(body)
     } catch {
       return await invalid('Invalid upstream JSON')
@@ -172,31 +130,38 @@ export async function serveKinoboxContent(
       await discardStale()
       return respond(body, 404, 'MISS')
     }
-    if (!isKinoboxResponseValid(resource.kind, data)) {
+    if (!isContentResponseValid(resource.kind, data)) {
       return await invalid('Unexpected upstream schema')
     }
     // Finish the cache write before releasing the lease to avoid another cold miss.
     if (ownsLease())
       await Promise.all([
-        cachePut(cache, key, body, resource.cacheTtl, response.source || 'kinobox'),
-        ...(resource.kind === 'movie'
-          ? [cachePut(cache, staleKey, body, STALE_TTL, response.source || 'kinobox')]
-          : [])
+        cachePut(cache, key, body, resource.cacheTtl, source),
+        ...(resource.kind === 'movie' ? [cachePut(cache, staleKey, body, STALE_TTL, source)] : [])
       ])
-    return respond(body, 200, 'MISS')
+    return respond(body, 200, 'MISS', false, undefined, source)
   } catch (error) {
-    const timeout = /timeout/i.test(error.message)
+    // Kinopoisk errors carry an upstream status: throttling and 5xx back off
+    // like a transient failure, anything else is a definitive answer.
+    const status = error?.upstreamStatus
+    const timeout = error?.reason === 'timeout' || /timeout/i.test(error?.message || '')
     console.error(
       JSON.stringify({
-        event: 'kinobox_error',
+        event: 'content_error',
         kind: resource.kind,
-        reason: timeout ? 'timeout' : 'connection',
-        transportCode: new RegExp('^HTTP/2 RST_STREAM: [0-9]+$').test(error.message)
-          ? error.message
-          : undefined,
+        reason: timeout ? 'timeout' : error?.reason || 'connection',
+        upstreamStatus: status,
         durationMs: Date.now() - started
       })
     )
+    if (status && status !== 429 && status < 500) {
+      if (status === 404) await discardStale()
+      return respond(
+        JSON.stringify({ error: 'Upstream HTTP error', upstreamStatus: status }),
+        status === 404 ? 404 : 502,
+        'MISS'
+      )
+    }
     return await transient(
       timeout ? 'Upstream timeout' : 'Upstream connection failed',
       timeout ? 504 : 502

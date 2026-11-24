@@ -279,8 +279,6 @@ async function serveKinoapiCached(
   budget
 ) {
   const started = Date.now()
-  delete headers['X-Search-Transport']
-  delete headers['X-Kinobox-Transport']
   headers['X-Data-Source'] = 'kinoapi'
   const respond = (body, status, state, retryAfter) => {
     logPublicCache(kind, state, started, status)

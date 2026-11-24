@@ -62,7 +62,7 @@ const serve = (cache, fetchImpl, { id = 361, key = KEY, budget } = {}) =>
   serveMovieExtras(
     resource(id),
     new URL(`https://proxy.test/api/movies/${id}/extras`),
-    { 'X-Worker-Version': 'test', 'X-Kinobox-Transport': 'h2' },
+    { 'X-Worker-Version': 'test' },
     cache,
     key,
     budget,
@@ -201,7 +201,6 @@ describe('movie extras endpoint', () => {
     expect(first.status).toBe(200)
     expect(first.headers.get('X-Extras-Cache')).toBe('MISS')
     expect(first.headers.get('X-Data-Source')).toBe('kinoapi')
-    expect(first.headers.has('X-Kinobox-Transport')).toBe(false)
     expect((await first.json()).data.similar).toHaveLength(1)
     const fresh = cache.put.mock.calls.find(([key]) => key.includes('/__kinoapi-extras?'))
     expect(fresh[1].headers.get('Cache-Control')).toBe('public, max-age=86400')

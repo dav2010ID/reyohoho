@@ -47,8 +47,6 @@ jobs:
         run: node scripts/fetch-seo-data.js --check-freshness
         env:
           ALLOW_STALE_SEO: ${{ github.event_name == 'workflow_dispatch' && inputs.allow_stale_seo && 'true' || 'false' }}
-      - name: Prepare pinned Worker vendor modules
-        run: node workers/kinobox-search/prepare-vendor.mjs
       - name: Validate the checkout used to build this artifact
         run: |
           yarn lint

@@ -1,8 +1,7 @@
 // @vitest-environment node
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
-import { gzipSync, deflateSync, brotliCompressSync } from 'node:zlib'
-import { serveKinoboxContent } from './kinobox-content.mjs'
-import { resolveKinoboxResource } from './routes.mjs'
+import { serveContent } from './content.mjs'
+import { resolveContentResource } from './routes.mjs'
 
 let time, entries, cache
 const headers = {
@@ -12,13 +11,12 @@ const headers = {
 }
 const upstream = (status = 200, data = { data: { movie: { id: 301 } } }) => ({
   status,
-  headers: {},
-  body: Buffer.from(JSON.stringify(data)),
-  tls: { selectedAlpn: 'h2', version: 'TLS1.3' }
+  body: JSON.stringify(data),
+  source: 'kinopoisk'
 })
 const serve = (load, path = '/api/movies/301', h = headers, budget) => {
   const url = new URL(path, 'https://api.reyhoho.fun')
-  return serveKinoboxContent(resolveKinoboxResource(url), url, h, cache, load, budget)
+  return serveContent(resolveContentResource(url), url, h, cache, load, budget)
 }
 const deferred = () => {
   let resolve
@@ -49,81 +47,11 @@ afterEach(() => {
   vi.useRealTimers()
   vi.restoreAllMocks()
 })
-describe('Kinobox public caching', () => {
-  it('includes time already spent in the player discovery deadline', async () => {
-    const load = vi.fn().mockResolvedValue(upstream(200, { data: [] }))
-    const budget = async () => {
-      time += 4000
-      return null
-    }
-    await serve(load, '/api/players?kinopoisk=301', headers, budget)
-    expect(load.mock.calls[0][1].timeoutMs).toBe(2500)
-  })
-  it('retries a stream reset once and charges both upstream attempts', async () => {
-    const load = vi
-      .fn()
-      .mockRejectedValueOnce(new Error('HTTP/2 RST_STREAM: 1'))
-      .mockResolvedValue(upstream())
-    const budget = vi.fn(async () => null)
-    const response = await serve(load, undefined, headers, budget)
-    expect(response.status).toBe(200)
-    expect(load).toHaveBeenCalledTimes(2)
-    expect(budget).toHaveBeenCalledTimes(2)
-    expect(load.mock.calls[1][1].timeoutMs).toBeLessThanOrEqual(15000)
-  })
-  it('does not retry other transport errors', async () => {
-    const load = vi.fn().mockRejectedValue(new Error('Certificate verification failed'))
+describe('Content public caching', () => {
+  it('answers a connection error with 502 after one attempt', async () => {
+    const load = vi.fn().mockRejectedValue(new Error('ECONNRESET'))
     expect((await serve(load)).status).toBe(502)
     expect(load).toHaveBeenCalledTimes(1)
-  })
-  it('stops after a second reset', async () => {
-    const load = vi.fn().mockRejectedValue(new Error('HTTP/2 RST_STREAM: 1'))
-    expect((await serve(load)).status).toBe(502)
-    expect(load).toHaveBeenCalledTimes(2)
-  })
-  it('does not bypass the upstream budget for retries', async () => {
-    const load = vi.fn().mockRejectedValue(new Error('HTTP/2 RST_STREAM: 1'))
-    const budget = vi
-      .fn()
-      .mockResolvedValueOnce(null)
-      .mockResolvedValue(new Response(null, { status: 429 }))
-    expect((await serve(load, undefined, headers, budget)).status).toBe(429)
-    expect(load).toHaveBeenCalledTimes(1)
-  })
-  it.each([
-    ['gzip', gzipSync],
-    ['deflate', deflateSync],
-    ['br', brotliCompressSync]
-  ])('validates and caches bounded %s JSON as decoded text', async (encoding, compress) => {
-    const reply = upstream()
-    const load = vi.fn(async () => ({
-      ...reply,
-      headers: { 'content-encoding': encoding },
-      body: compress(reply.body)
-    }))
-    const first = await serve(load)
-    expect(first.status).toBe(200)
-    expect(await first.json()).toEqual(JSON.parse(reply.body.toString()))
-    expect((await serve(load)).headers.get('X-Kinobox-Cache')).toBe('HIT')
-    expect(load).toHaveBeenCalledTimes(1)
-  })
-  it.each([Buffer.from('broken gzip'), gzipSync(Buffer.alloc(1024 * 1024 + 1, 32))])(
-    'rejects corrupt or oversized decompressed payloads',
-    async (body) => {
-      const load = vi.fn(async () => ({
-        ...upstream(),
-        headers: { 'content-encoding': 'gzip' },
-        body
-      }))
-      expect((await serve(load)).status).toBe(502)
-      expect((await serve(load)).status).toBe(503)
-      expect(load).toHaveBeenCalledTimes(1)
-    }
-  )
-  it('adds a server-generated timestamp to players without changing the cache key', async () => {
-    const load = vi.fn(async () => upstream(200, { data: [] }))
-    expect((await serve(load, '/api/players?kinopoisk=301')).status).toBe(200)
-    expect(load.mock.calls[0][0].params).toEqual({ kinopoisk: '301', ts: 0 })
   })
 
   it('charges cold upstream attempts, keeps hits free and denies without fetching', async () => {
@@ -146,12 +74,12 @@ describe('Kinobox public caching', () => {
   })
   it('serves MISS then HIT with request-specific CORS and no public client cache', async () => {
     const load = vi.fn(async () => upstream())
-    expect((await serve(load)).headers.get('X-Kinobox-Cache')).toBe('MISS')
+    expect((await serve(load)).headers.get('X-Search-Cache')).toBe('MISS')
     const hit = await serve(load, '/api/movies/301', {
       ...headers,
       'Access-Control-Allow-Origin': 'https://www.reyhoho.fun'
     })
-    expect(hit.headers.get('X-Kinobox-Cache')).toBe('HIT')
+    expect(hit.headers.get('X-Search-Cache')).toBe('HIT')
     expect(hit.headers.get('Cache-Control')).toBe('no-store')
     expect(hit.headers.get('Access-Control-Allow-Origin')).toBe('https://www.reyhoho.fun')
     expect(load).toHaveBeenCalledTimes(1)
@@ -163,9 +91,9 @@ describe('Kinobox public caching', () => {
       await serve(load)
       time = 21600 * 1000 + 1
       const stale = await serve(load)
-      expect(stale.headers.get('X-Kinobox-Cache')).toBe('STALE')
+      expect(stale.headers.get('X-Search-Cache')).toBe('STALE')
       expect(await stale.json()).toEqual({ data: { movie: { id: 301 } } })
-      expect((await serve(load)).headers.get('X-Kinobox-Cache')).toBe('STALE')
+      expect((await serve(load)).headers.get('X-Search-Cache')).toBe('STALE')
       expect(load).toHaveBeenCalledTimes(2)
       time += 31000
       await serve(load)
@@ -197,7 +125,7 @@ describe('Kinobox public caching', () => {
       return upstream()
     })
     const replies = await Promise.all([serve(load), serve(load), serve(load)])
-    expect(replies.map((r) => r.headers.get('X-Kinobox-Cache')).sort()).toEqual([
+    expect(replies.map((r) => r.headers.get('X-Search-Cache')).sort()).toEqual([
       'HIT',
       'HIT',
       'MISS'
@@ -211,7 +139,7 @@ describe('Kinobox public caching', () => {
   })
 })
 
-describe('Kinobox cache bursts and failure recovery', () => {
+describe('Content cache bursts and failure recovery', () => {
   beforeEach(() => {
     // Keep the explicit Date.now clock used by the TTL cache; fake only polling timers.
     vi.useFakeTimers({ toFake: ['setTimeout', 'clearTimeout'] })
@@ -230,7 +158,7 @@ describe('Kinobox cache bursts and failure recovery', () => {
     const replies = await Promise.all(
       Array.from({ length: 16 }, () => serve(load, undefined, headers, budget))
     )
-    expect(replies.every((reply) => reply.headers.get('X-Kinobox-Cache') === 'HIT')).toBe(true)
+    expect(replies.every((reply) => reply.headers.get('X-Search-Cache') === 'HIT')).toBe(true)
     expect(await Promise.all(replies.map((reply) => reply.json()))).toEqual(
       Array.from({ length: 16 }, () => data)
     )
@@ -243,50 +171,46 @@ describe('Kinobox cache bursts and failure recovery', () => {
   it('shares canonical paths and timestamps but isolates worker versions and request hosts', async () => {
     const load = vi.fn(async () => upstream())
     await serve(load, '/api/movies/301?ts=1')
-    expect((await serve(load, '/api/movies/301/?ts=2')).headers.get('X-Kinobox-Cache')).toBe('HIT')
+    expect((await serve(load, '/api/movies/301/?ts=2')).headers.get('X-Search-Cache')).toBe('HIT')
     const nextVersion = { ...headers, 'X-Worker-Version': 'test-v2' }
-    expect((await serve(load, undefined, nextVersion)).headers.get('X-Kinobox-Cache')).toBe('MISS')
+    expect((await serve(load, undefined, nextVersion)).headers.get('X-Search-Cache')).toBe('MISS')
     const otherUrl = new URL('https://other-api.example/api/movies/301')
-    const other = await serveKinoboxContent(
-      resolveKinoboxResource(otherUrl),
+    const other = await serveContent(
+      resolveContentResource(otherUrl),
       otherUrl,
       headers,
       cache,
       load
     )
-    expect(other.headers.get('X-Kinobox-Cache')).toBe('MISS')
+    expect(other.headers.get('X-Search-Cache')).toBe('MISS')
     expect(load).toHaveBeenCalledTimes(3)
   })
 
-  it('decodes and validates JSON once while preserving whitespace and large number literals', async () => {
+  it('validates JSON once while preserving whitespace and large number literals', async () => {
     const body =
       ' \n{ "data": { "movie": { "id": 9007199254740993, "score": 1.2300e+2, "title": "Матрица" } } }\n\t'
-    const buffer = Buffer.from(body)
-    const decode = vi.spyOn(buffer, 'toString')
     const parse = vi.spyOn(JSON, 'parse')
-    const load = vi.fn(async () => ({ ...upstream(), body: buffer }))
+    const load = vi.fn(async () => ({ ...upstream(), body }))
     const miss = await serve(load)
-    expect(miss.headers.get('X-Kinobox-Cache')).toBe('MISS')
+    expect(miss.headers.get('X-Search-Cache')).toBe('MISS')
     expect(await miss.text()).toBe(body)
-    expect(decode).toHaveBeenCalledExactlyOnceWith('utf8')
     expect(parse.mock.calls.filter(([text]) => text === body)).toHaveLength(1)
     for (const entry of entries.values()) expect(await entry.response.clone().text()).toBe(body)
 
     const hit = await serve(load)
-    expect(hit.headers.get('X-Kinobox-Cache')).toBe('HIT')
+    expect(hit.headers.get('X-Search-Cache')).toBe('HIT')
     expect(await hit.text()).toBe(body)
     time = 21600 * 1000
     load.mockResolvedValue(upstream(503))
     const stale = await serve(load)
-    expect(stale.headers.get('X-Kinobox-Cache')).toBe('STALE')
+    expect(stale.headers.get('X-Search-Cache')).toBe('STALE')
     expect(await stale.text()).toBe(body)
-    expect(decode).toHaveBeenCalledTimes(1)
     expect(parse.mock.calls.filter(([text]) => text === body)).toHaveLength(1)
   })
 
   it('preserves the provider JSON text for a definitive isSuccess false response', async () => {
     const body = ' { "data": { "isSuccess": false, "id": 9007199254740993 } }\n'
-    const reply = await serve(async () => ({ ...upstream(), body: Buffer.from(body) }))
+    const reply = await serve(async () => ({ ...upstream(), body }))
     expect(reply.status).toBe(404)
     expect(await reply.text()).toBe(body)
     expect(cache.put).not.toHaveBeenCalled()
@@ -313,15 +237,14 @@ describe('Kinobox cache bursts and failure recovery', () => {
       fetch.resolve()
       await pending
     }
-    expect((await pending).every((reply) => reply.headers.get('X-Kinobox-Cache') === 'MISS')).toBe(
+    expect((await pending).every((reply) => reply.headers.get('X-Search-Cache') === 'MISS')).toBe(
       true
     )
   })
 
   it.each([
     ['movie', '/api/movies/301', { data: { movie: { id: 301 } } }, 21600],
-    ['search', '/?query=Matrix', { data: { items: [{ id: 301 }] } }, 600],
-    ['players', '/api/players?kinopoisk=301', { data: [{ type: 'player' }] }, 60]
+    ['search', '/?query=Matrix', { data: { items: [{ id: 301 }] } }, 600]
   ])(
     'collapses a 16-request cold %s burst into one upstream attempt',
     async (_, path, data, ttl) => {
@@ -340,7 +263,7 @@ describe('Kinobox cache bursts and failure recovery', () => {
       await vi.advanceTimersByTimeAsync(500)
       const replies = await pending
 
-      expect(replies.map((reply) => reply.headers.get('X-Kinobox-Cache')).sort()).toEqual([
+      expect(replies.map((reply) => reply.headers.get('X-Search-Cache')).sort()).toEqual([
         ...Array(15).fill('HIT'),
         'MISS'
       ])
@@ -350,9 +273,9 @@ describe('Kinobox cache bursts and failure recovery', () => {
       expect(load).toHaveBeenCalledTimes(1)
       expect(budget).toHaveBeenCalledTimes(1)
       expect(peak).toBe(1)
-      const fresh = cache.put.mock.calls.find(([key]) => key.includes('/__kinobox-cache?'))
+      const fresh = cache.put.mock.calls.find(([key]) => key.includes('/__content-cache?'))
       expect(fresh[1].headers.get('Cache-Control')).toBe(`public, max-age=${ttl}`)
-      const stale = cache.put.mock.calls.find(([key]) => key.includes('/__kinobox-stale?'))
+      const stale = cache.put.mock.calls.find(([key]) => key.includes('/__content-stale?'))
       if (ttl === 21600) {
         expect(stale[1].headers.get('Cache-Control')).toBe('public, max-age=172800')
       } else {
@@ -365,7 +288,7 @@ describe('Kinobox cache bursts and failure recovery', () => {
     const write = deferred()
     const put = cache.put.getMockImplementation()
     cache.put.mockImplementation(async (...args) => {
-      if (args[0].includes('/__kinobox-stale?')) await write.promise
+      if (args[0].includes('/__content-stale?')) await write.promise
       return put(...args)
     })
     const load = vi.fn(async () => upstream())
@@ -378,7 +301,7 @@ describe('Kinobox cache bursts and failure recovery', () => {
     try {
       expect(finished).toBe(false)
       const replies = await Promise.all(Array.from({ length: 8 }, () => serve(load)))
-      expect(replies.every((reply) => reply.headers.get('X-Kinobox-Cache') === 'HIT')).toBe(true)
+      expect(replies.every((reply) => reply.headers.get('X-Search-Cache') === 'HIT')).toBe(true)
       expect(load).toHaveBeenCalledTimes(1)
     } finally {
       write.resolve()
@@ -417,7 +340,7 @@ describe('Kinobox cache bursts and failure recovery', () => {
       const pending = Promise.all(Array.from({ length: 8 }, () => serve(load)))
       await vi.advanceTimersByTimeAsync(500)
       const replies = await pending
-      const first = replies.find((reply) => reply.headers.get('X-Kinobox-Cache') === 'MISS')
+      const first = replies.find((reply) => reply.headers.get('X-Search-Cache') === 'MISS')
       expect(first.status).toBe(status)
       expect(await first.json()).toEqual({ error })
       expect(replies.filter((reply) => reply.status === 503)).toHaveLength(7)
@@ -425,7 +348,7 @@ describe('Kinobox cache bursts and failure recovery', () => {
       expect(load).toHaveBeenCalledTimes(1)
       expect(cache.put).toHaveBeenCalledTimes(1)
       const [key, marker] = cache.put.mock.calls[0]
-      expect(key).toContain('/__kinobox-retry?')
+      expect(key).toContain('/__content-retry?')
       expect(marker.headers.get('Cache-Control')).toBe('public, max-age=30')
       expect(await marker.clone().text()).toBe('{}')
 
@@ -434,20 +357,15 @@ describe('Kinobox cache bursts and failure recovery', () => {
       expect(load).toHaveBeenCalledTimes(1)
       time = 30000
       load.mockResolvedValue(upstream())
-      expect((await serve(load)).headers.get('X-Kinobox-Cache')).toBe('MISS')
-      expect((await serve(load)).headers.get('X-Kinobox-Cache')).toBe('HIT')
+      expect((await serve(load)).headers.get('X-Search-Cache')).toBe('MISS')
+      expect((await serve(load)).headers.get('X-Search-Cache')).toBe('HIT')
       expect(load).toHaveBeenCalledTimes(2)
     }
   )
 
   it.each([
-    ['malformed JSON', () => ({ ...upstream(), body: Buffer.from('{') }), 'Invalid upstream JSON'],
-    ['invalid schema', () => upstream(200, { data: { movie: [] } }), 'Unexpected upstream schema'],
-    [
-      'compressed payload',
-      () => ({ ...upstream(), headers: { 'content-encoding': 'unsupported' } }),
-      'Unexpected upstream encoding'
-    ]
+    ['malformed JSON', () => ({ ...upstream(), body: '{' }), 'Invalid upstream JSON'],
+    ['invalid schema', () => upstream(200, { data: { movie: [] } }), 'Unexpected upstream schema']
   ])(
     'suppresses stale data for %s, stores only an invalid marker and later recovers',
     async (_, invalid, error) => {
@@ -464,7 +382,7 @@ describe('Kinobox cache bursts and failure recovery', () => {
       expect(rejected.headers.get('Retry-After')).toBe('30')
       expect(cache.put).toHaveBeenCalledTimes(1)
       const [key, marker] = cache.put.mock.calls[0]
-      expect(key).toContain('/__kinobox-retry?')
+      expect(key).toContain('/__content-retry?')
       expect(await marker.clone().text()).toBe('invalid')
       expect(marker.headers.get('Cache-Control')).toBe('public, max-age=30')
       expect((await serve(load)).status).toBe(503)
@@ -475,7 +393,7 @@ describe('Kinobox cache bursts and failure recovery', () => {
       load.mockResolvedValue(upstream(200, replacement))
       expect(await (await serve(load)).json()).toEqual(replacement)
       const hit = await serve(load)
-      expect(hit.headers.get('X-Kinobox-Cache')).toBe('HIT')
+      expect(hit.headers.get('X-Search-Cache')).toBe('HIT')
       expect(await hit.json()).toEqual(replacement)
       expect(load).toHaveBeenCalledTimes(3)
     }
@@ -508,7 +426,7 @@ describe('Kinobox cache bursts and failure recovery', () => {
     await vi.advanceTimersByTimeAsync(4000)
     const replies = await pending
     expect(replies.every((reply) => reply.status === 200)).toBe(true)
-    expect(replies.every((reply) => reply.headers.get('X-Kinobox-Cache') === 'MISS')).toBe(true)
+    expect(replies.every((reply) => reply.headers.get('X-Search-Cache') === 'MISS')).toBe(true)
     expect(load).toHaveBeenCalledTimes(8)
     expect(entries.size).toBe(0)
   })
@@ -529,7 +447,7 @@ describe('Kinobox cache bursts and failure recovery', () => {
     const reply = await waiter
     try {
       expect(reply.status).toBe(503)
-      expect(reply.headers.get('X-Kinobox-Cache')).toBe('BACKOFF')
+      expect(reply.headers.get('X-Search-Cache')).toBe('BACKOFF')
       expect(reply.headers.get('Retry-After')).toBe('30')
       expect(cache.match).toHaveBeenCalledTimes(43)
       expect(load).toHaveBeenCalledTimes(1)
@@ -539,19 +457,14 @@ describe('Kinobox cache bursts and failure recovery', () => {
       fetch.resolve(upstream())
       await leader
     }
-    expect((await serve(load)).headers.get('X-Kinobox-Cache')).toBe('HIT')
+    expect((await serve(load)).headers.get('X-Search-Cache')).toBe('HIT')
   })
 
   it.each([
     ['HTTP 404', () => upstream(404), 404],
     ['provider not found', () => upstream(200, { data: { isSuccess: false } }), 404],
-    ['invalid JSON cooldown', () => ({ ...upstream(), body: Buffer.from('{') }), 502],
-    ['invalid schema cooldown', () => upstream(200, { data: { movie: [] } }), 502],
-    [
-      'unexpected encoding cooldown',
-      () => ({ ...upstream(), headers: { 'content-encoding': 'unsupported' } }),
-      502
-    ]
+    ['invalid JSON cooldown', () => ({ ...upstream(), body: '{' }), 502],
+    ['invalid schema cooldown', () => upstream(200, { data: { movie: [] } }), 502]
   ])(
     'does not resurrect a stale card after %s followed by a transient failure',
     async (_, invalid, status) => {
@@ -564,8 +477,8 @@ describe('Kinobox cache bursts and failure recovery', () => {
       const rejected = await serve(load)
       expect(rejected.status).toBe(status)
       expect(cache.delete).toHaveBeenCalledTimes(1)
-      expect(cache.delete.mock.calls[0][0]).toContain('/__kinobox-stale?')
-      expect([...entries.keys()].some((key) => key.includes('/__kinobox-stale?'))).toBe(false)
+      expect(cache.delete.mock.calls[0][0]).toContain('/__content-stale?')
+      expect([...entries.keys()].some((key) => key.includes('/__content-stale?'))).toBe(false)
       time += 30000
       load.mockResolvedValue(upstream(503))
       const later = await serve(load)
@@ -606,26 +519,21 @@ describe('Kinobox cache bursts and failure recovery', () => {
     fetch.resolve(upstream())
     const reply = await pending
     expect(reply.status).toBe(200)
-    expect(reply.headers.get('X-Kinobox-Cache')).toBe('MISS')
+    expect(reply.headers.get('X-Search-Cache')).toBe('MISS')
     expect(cache.put).not.toHaveBeenCalled()
     expect(entries.size).toBe(0)
 
     load.mockResolvedValue(upstream())
-    expect((await serve(load)).headers.get('X-Kinobox-Cache')).toBe('MISS')
-    expect((await serve(load)).headers.get('X-Kinobox-Cache')).toBe('HIT')
+    expect((await serve(load)).headers.get('X-Search-Cache')).toBe('MISS')
+    expect((await serve(load)).headers.get('X-Search-Cache')).toBe('HIT')
     expect(load).toHaveBeenCalledTimes(2)
   })
 
   it.each([
     ['HTTP 404', () => upstream(404), 404],
     ['provider not found', () => upstream(200, { data: { isSuccess: false } }), 404],
-    ['invalid JSON', () => ({ ...upstream(), body: Buffer.from('{') }), 502],
+    ['invalid JSON', () => ({ ...upstream(), body: '{' }), 502],
     ['invalid schema', () => upstream(200, {}), 502],
-    [
-      'unexpected encoding',
-      () => ({ ...upstream(), headers: { 'content-encoding': 'unsupported' } }),
-      502
-    ],
     ['HTTP 503', () => upstream(503), 502],
     [
       'timeout',
@@ -659,9 +567,9 @@ describe('Kinobox cache bursts and failure recovery', () => {
     const hit = await serve(async () => {
       throw new Error('unexpected upstream attempt')
     })
-    expect(hit.headers.get('X-Kinobox-Cache')).toBe('HIT')
+    expect(hit.headers.get('X-Search-Cache')).toBe('HIT')
     expect(await hit.json()).toEqual(newData)
-    const stale = [...entries].find(([key]) => key.includes('/__kinobox-stale?'))
+    const stale = [...entries].find(([key]) => key.includes('/__content-stale?'))
     expect(await stale[1].response.clone().json()).toEqual(newData)
   })
 
@@ -679,8 +587,8 @@ describe('Kinobox cache bursts and failure recovery', () => {
       await pending
     }
     expect((await pending).status).toBe(502)
-    expect([...entries.keys()].some((key) => key.includes('/__kinobox-retry?'))).toBe(false)
-    expect([...entries.keys()].some((key) => key.includes('/__kinobox-stale?'))).toBe(false)
+    expect([...entries.keys()].some((key) => key.includes('/__content-retry?'))).toBe(false)
+    expect([...entries.keys()].some((key) => key.includes('/__content-stale?'))).toBe(false)
   })
 
   it('rechecks lease ownership after waiting for stale invalidation', async () => {
@@ -707,9 +615,9 @@ describe('Kinobox cache bursts and failure recovery', () => {
     }
     expect((await invalid).status).toBe(502)
     expect(cache.put).not.toHaveBeenCalled()
-    expect([...entries.keys()].some((key) => key.includes('/__kinobox-retry?'))).toBe(false)
+    expect([...entries.keys()].some((key) => key.includes('/__content-retry?'))).toBe(false)
     const hit = await serve(vi.fn())
-    expect(hit.headers.get('X-Kinobox-Cache')).toBe('HIT')
+    expect(hit.headers.get('X-Search-Cache')).toBe('HIT')
     expect(await hit.json()).toEqual(newData)
   })
 

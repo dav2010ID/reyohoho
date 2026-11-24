@@ -1,7 +1,6 @@
-import { connect } from 'cloudflare:sockets'
-import { resolveKinoboxResource } from './routes.mjs'
-import { serveKinoboxContent } from './kinobox-content.mjs'
-import { requestContent, requestKinopoiskContent } from './kinopoisk-content.mjs'
+import { resolveContentResource } from './routes.mjs'
+import { serveContent } from './content.mjs'
+import { requestKinopoiskContent } from './kinopoisk-content.mjs'
 import { guardUpstream } from './upstream-guard.mjs'
 import { resolveKinopoiskTop, serveKinopoiskTop } from './kinopoisk-top.mjs'
 import { serveHistory } from './history.mjs'
@@ -17,7 +16,7 @@ import {
   serveMovieExtras
 } from './kinoapi.mjs'
 
-const VERSION = 'kinopoisk-content-2026-11-01'
+const VERSION = 'kinopoisk-only-2026-11-24'
 const ALLOWED = new Set([
   'https://reyhoho.fun',
   'https://www.reyhoho.fun',
@@ -29,31 +28,6 @@ const ALLOWED = new Set([
 const DEV_ORIGINS = new Set(['http://127.0.0.1:5173', 'http://localhost:5173'])
 const allowedOrigin = (origin, env) =>
   ALLOWED.has(origin) || (env?.ALLOW_DEV_ORIGINS === 'true' && DEV_ORIGINS.has(origin))
-
-// The vendored TLS 1.3/HTTP2 stack (~0.5 MB) is evaluated only when a request
-// actually goes to Kinobox, never for account, history or cached routes.
-let kinoboxHttp2
-const loadKinoboxHttp2 = () => (kinoboxHttp2 ||= import('./kinobox-http2-vendored.mjs'))
-
-async function openTransport(hostname, port) {
-  const socket = connect({ hostname, port }, { secureTransport: 'off' })
-  // TLS is applied by the verified TLS 1.3 client, not disabled.
-  let timeout
-  try {
-    await Promise.race([
-      socket.opened,
-      new Promise((_, reject) => {
-        timeout = setTimeout(() => reject(new Error('TCP connect timeout')), 5000)
-      })
-    ])
-  } catch (error) {
-    await socket.close().catch(() => {})
-    throw error
-  } finally {
-    clearTimeout(timeout)
-  }
-  return { readable: socket.readable, writable: socket.writable, close: () => socket.close() }
-}
 
 export default {
   async scheduled(_event, env, ctx) {
@@ -68,11 +42,10 @@ export default {
       'Access-Control-Allow-Headers': 'Content-Type',
       'Access-Control-Max-Age': '600',
       'Access-Control-Expose-Headers':
-        'X-Search-Transport, X-Worker-Version, X-Search-Cache, X-Kinobox-Transport, X-Kinobox-Cache, X-Top-Cache, X-Extras-Cache, X-Latest-Cache, X-Data-Source',
+        'X-Worker-Version, X-Search-Cache, X-Top-Cache, X-Extras-Cache, X-Latest-Cache, X-Data-Source',
       Vary: 'Origin',
       'Cache-Control': 'no-store',
-      // Transport/source headers are set only by the code path that actually served
-      // the body (see requestContent and the cache entries), never as a default.
+      // X-Data-Source is set only by the code path that actually served the body.
       'X-Worker-Version': VERSION
     }
     const reply = (data, status = 200) => new Response(JSON.stringify(data), { status, headers })
@@ -98,7 +71,7 @@ export default {
       resolveKinopoiskTop(url) ||
       resolveMovieExtras(url) ||
       resolveLatestReleases(url) ||
-      resolveKinoboxResource(url)
+      resolveContentResource(url)
     if (resource.error) return reply({ error: resource.error }, resource.status)
     const budget = publicUpstreamBudget(request, env, headers)
     if (resource.kind === 'extras')
@@ -109,22 +82,13 @@ export default {
       return serveKinopoiskTop(resource, url, headers, ctx, caches.default, budget, (run) =>
         guardUpstream('kinopoisk', env, run)
       )
-    return serveKinoboxContent(
+    return serveContent(
       resource,
       url,
       headers,
       caches.default,
       (options, transportOptions) =>
-        requestContent(
-          options,
-          transportOptions,
-          headers,
-          (o, t) =>
-            guardUpstream('kinobox', env, async () =>
-              (await loadKinoboxHttp2()).requestKinoboxHttp2(o, openTransport, t)
-            ),
-          (o, t) => guardUpstream('kinopoisk', env, () => requestKinopoiskContent(o, t))
-        ),
+        guardUpstream('kinopoisk', env, () => requestKinopoiskContent(options, transportOptions)),
       budget
     )
   }
