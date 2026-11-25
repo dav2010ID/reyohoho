@@ -84,10 +84,15 @@ jobs:
       - name: Record the revision of the verified artifact
         run: git rev-parse HEAD > dist/build-sha.txt
 
+      # site-meta.json belongs to this build: the site Worker bundles it next to dist.
+      # Hidden files are needed for dist/.assetsignore.
       - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
         with:
           name: production-files
-          path: dist
+          include-hidden-files: true
+          path: |
+            dist
+            workers/site/generated/site-meta.json
 
   deploy:
     needs: build
@@ -97,10 +102,58 @@ jobs:
       - uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4
         with:
           name: production-files
-          path: dist
 
+      # Still deployed after the switch: the rollback target (docs/cloudflare-site.md).
       - uses: peaceiris/actions-gh-pages@329bcc8f12caed2cefe5a5b80781499a6f3b361b # v4
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           publish_dir: dist
           cname: reyhoho.fun
+
+  # vars.SITE_TARGET: unset = GitHub Pages only; "preview" = also the site Worker on
+  # workers.dev; "cloudflare" = the site Worker serves reyhoho.fun. See docs/cloudflare-site.md.
+  deploy-worker:
+    needs: build
+    if: vars.SITE_TARGET == 'preview' || vars.SITE_TARGET == 'cloudflare'
+    runs-on: ubuntu-latest
+    env:
+      SITE_TARGET: ${{ vars.SITE_TARGET }}
+
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
+        with:
+          node-version: 22
+          cache: yarn
+
+      - run: corepack enable
+      - run: yarn install --frozen-lockfile
+
+      - uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4
+        with:
+          name: production-files
+
+      - name: Deploy the site Worker
+        id: deploy
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          WRANGLER_SEND_METRICS: 'false'
+        run: |
+          domain=()
+          if [ "$SITE_TARGET" = cloudflare ]; then domain=(--domain reyhoho.fun); fi
+          npx wrangler deploy --config workers/site/wrangler.jsonc "${domain[@]}" \
+            --message "$(cat dist/build-sha.txt)" | tee "$RUNNER_TEMP/deploy.log"
+          url=$(grep -oE 'https://[a-z0-9.-]+\.workers\.dev' "$RUNNER_TEMP/deploy.log" | head -n 1)
+          echo "workers_dev=$url" >> "$GITHUB_OUTPUT"
+
+      - name: Check the deployed site
+        env:
+          WORKERS_DEV: ${{ steps.deploy.outputs.workers_dev }}
+        run: |
+          if [ "$SITE_TARGET" = cloudflare ]; then base=https://reyhoho.fun; www=--www
+          else base=$WORKERS_DEV; www=; fi
+          # A first workers.dev deploy can answer 523 for a minute while its DNS appears.
+          for _ in $(seq 1 24); do curl -fsS -o /dev/null "$base/" && break; sleep 5; done
+          node scripts/check-site.mjs "$base" $www

@@ -18,7 +18,9 @@ export default [
   {
     ignores: [
       'dist/**',
-      'workers/site/generated/**'
+      'workers/site/generated/**',
+      // wrangler dev bundles
+      '**/.wrangler/**'
     ]
   },
   js.configs.recommended,
