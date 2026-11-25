@@ -16,11 +16,8 @@ const serverGlobals = Object.fromEntries(
 
 export default [
   {
-    // Vendored TLS/HPACK sources and their generated bundles are not ours to lint.
     ignores: [
       'dist/**',
-      'workers/kinobox-search/vendor-{crypto,hpack,tls}.mjs',
-      'workers/**/*.bundle.mjs',
       'workers/site/generated/**'
     ]
   },

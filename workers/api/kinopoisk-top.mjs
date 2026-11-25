@@ -144,8 +144,6 @@ export async function serveKinopoiskTop(
   guard = (run) => run()
 ) {
   const started = Date.now()
-  delete headers['X-Search-Transport']
-  delete headers['X-Kinobox-Transport']
   headers['X-Data-Source'] = 'kinopoisk'
   const cacheUrl = new URL('/__kinopoisk-top-cache', url.origin)
   cacheUrl.searchParams.set('version', headers['X-Worker-Version'])

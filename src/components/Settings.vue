@@ -161,9 +161,9 @@
                   v-model="contentApiProvider"
                   type="radio"
                   name="content-api-provider"
-                  value="kinobox"
+                  value="ddbb_live"
                 />
-                <span class="radio-label">Kinobox (по умолчанию)</span>
+                <span class="radio-label">DDBB Live (по умолчанию)</span>
               </label>
               <label class="radio">
                 <input
@@ -174,19 +174,10 @@
                 />
                 <span class="radio-label">DDBB</span>
               </label>
-              <label class="radio">
-                <input
-                  v-model="contentApiProvider"
-                  type="radio"
-                  name="content-api-provider"
-                  value="ddbb_live"
-                />
-                <span class="radio-label">DDBB Live</span>
-              </label>
             </div>
             <p class="api-note">
               Поиск и карточки фильмов всегда загружаются через сервер сайта. Если выбранный
-              источник не нашёл плееров, остальные проверяются автоматически.
+              источник не нашёл плееров, второй проверяется автоматически.
             </p>
           </div>
         </section>

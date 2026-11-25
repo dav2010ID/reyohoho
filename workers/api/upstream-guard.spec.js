@@ -27,7 +27,7 @@ describe('upstream guard', () => {
     })
     expect(run).not.toHaveBeenCalled()
     // Other upstreams are unaffected.
-    await expect(guardUpstream('kinobox', {}, run, clock)).resolves.toEqual({ status: 200 })
+    await expect(guardUpstream('kinoapi', {}, run, clock)).resolves.toEqual({ status: 200 })
     now += BREAKER_OPEN_MS + 1
     await expect(guardUpstream('kinopoisk', {}, run, clock)).resolves.toEqual({ status: 200 })
   })
@@ -39,19 +39,19 @@ describe('upstream guard', () => {
     await guardUpstream('kinopoisk', {}, ok, clock)
     expect(ok).toHaveBeenCalled()
     for (let i = 0; i < BREAKER_FAILURES; i += 1)
-      await guardUpstream('kinobox', {}, async () => ({ status: 503 }), clock)
-    await expect(guardUpstream('kinobox', {}, ok, clock)).rejects.toMatchObject({
+      await guardUpstream('kinopoisk', {}, async () => ({ status: 503 }), clock)
+    await expect(guardUpstream('kinopoisk', {}, ok, clock)).rejects.toMatchObject({
       reason: 'circuit_open'
     })
   })
   it('opens on throttling answered as a 429 response', async () => {
     for (let i = 0; i < BREAKER_FAILURES; i += 1)
-      await guardUpstream('kinobox', {}, async () => ({ status: 429 }), clock)
+      await guardUpstream('kinopoisk', {}, async () => ({ status: 429 }), clock)
     await expect(
-      guardUpstream('kinobox', {}, async () => ({ status: 200 }), clock)
+      guardUpstream('kinopoisk', {}, async () => ({ status: 200 }), clock)
     ).rejects.toMatchObject({ reason: 'circuit_open' })
   })
-  it('honours the shared upstream budget and the Kinobox kill switch', async () => {
+  it('honours the shared upstream budget', async () => {
     const run = vi.fn(async () => ({ status: 200 }))
     const limiter = { limit: vi.fn(async () => ({ success: false })) }
     await expect(
@@ -62,9 +62,6 @@ describe('upstream guard', () => {
     await expect(
       guardUpstream('kinopoisk', { UPSTREAM_RATE_LIMITER: broken }, run, clock)
     ).resolves.toEqual({ status: 200 })
-    await expect(
-      guardUpstream('kinobox', { KINOBOX_TRANSPORT: 'off' }, run, clock)
-    ).rejects.toMatchObject({ reason: 'disabled' })
     expect(run).toHaveBeenCalledTimes(1)
   })
 })

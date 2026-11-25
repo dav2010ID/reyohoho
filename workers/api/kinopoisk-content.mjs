@@ -1,9 +1,6 @@
-import { Buffer } from 'node:buffer'
 import { KINOPOISK_CONTENT_QUERIES } from './kinopoisk-content-queries.mjs'
 
 const OPTIONAL_QUERY_MS = 4000
-const FALLBACK_SHARE = 0.4
-const MIN_FALLBACK_MS = 3000
 
 const ENDPOINT = 'https://graphql.kinopoisk.ru/graphql/'
 const MAX_BYTES = 1024 * 1024
@@ -103,7 +100,7 @@ const named = (items) =>
 
 const isMovie = (movie) => MOVIE_TYPES.has(movie?.__typename) && Number.isInteger(movie?.id)
 
-// Forward only public card data in the Kinobox response shape the frontend already reads.
+// Forward only public card data, in the `{ data: { items | movie } }` shape the site reads.
 function searchItem(movie) {
   return {
     id: movie.id,
@@ -116,7 +113,7 @@ function searchItem(movie) {
   }
 }
 
-export function toKinoboxSearch(data) {
+export function toSearchResponse(data) {
   const top = data?.suggest?.top
   const candidates = [top?.topResult?.global, ...(top?.movies || []).map((item) => item?.movie)]
   const seen = new Set()
@@ -129,7 +126,7 @@ export function toKinoboxSearch(data) {
   return { data: { items }, source: 'kinopoisk' }
 }
 
-export function toKinoboxMovie(meta, ratingBase, ratingExtended, crew) {
+export function toMovieResponse(meta, ratingBase, ratingExtended, crew) {
   const movie = meta?.movie
   if (!isMovie(movie)) return { data: { isSuccess: false, movie: null }, source: 'kinopoisk' }
   const kinopoisk = ratingBase?.movie?.rating?.kinopoisk
@@ -179,7 +176,7 @@ export function toKinoboxMovie(meta, ratingBase, ratingExtended, crew) {
   }
 }
 
-// Same contract as requestKinoboxHttp2 for the search and movie paths.
+// Resolves to `{ status, body, source }` for serveContent (content.mjs).
 export async function requestKinopoiskContent(options, transportOptions = {}, fetchImpl = fetch) {
   const controller = new AbortController()
   const timeout = setTimeout(() => controller.abort(), transportOptions.timeoutMs || 15000)
@@ -187,7 +184,7 @@ export async function requestKinopoiskContent(options, transportOptions = {}, fe
   try {
     let data
     if (options.path === '/api/movies/search/') {
-      data = toKinoboxSearch(
+      data = toSearchResponse(
         await call('SuggestSearch', {
           keyword: options.params.query,
           yandexCityId: 0,
@@ -231,12 +228,11 @@ export async function requestKinopoiskContent(options, transportOptions = {}, fe
         )
       ])
       clearTimeout(optionalTimer)
-      data = toKinoboxMovie(meta, ratingBase, ratingExtended, crew)
+      data = toMovieResponse(meta, ratingBase, ratingExtended, crew)
     }
     return {
       status: 200,
-      headers: {},
-      body: Buffer.from(JSON.stringify(data)),
+      body: JSON.stringify(data),
       source: 'kinopoisk'
     }
   } catch (error) {
@@ -245,45 +241,4 @@ export async function requestKinopoiskContent(options, transportOptions = {}, fe
   } finally {
     clearTimeout(timeout)
   }
-}
-
-// Search and movie cards come from Kinopoisk GraphQL; Kinobox remains their fallback
-// and the only source of player lists. The primary gets only part of the total
-// deadline so a hanging Kinopoisk still leaves Kinobox a real chance.
-export async function requestContent(
-  options,
-  transportOptions,
-  headers,
-  requestKinobox,
-  requestKinopoisk = requestKinopoiskContent
-) {
-  const started = Date.now()
-  const total = transportOptions?.timeoutMs || 15000
-  const reserve = Math.min(total, Math.max(MIN_FALLBACK_MS, Math.round(total * FALLBACK_SHARE)))
-  if (options.path !== '/api/players') {
-    try {
-      const response = await requestKinopoisk(options, {
-        ...transportOptions,
-        timeoutMs: Math.max(1, total - reserve)
-      })
-      headers['X-Data-Source'] = 'kinopoisk'
-      delete headers['X-Search-Transport']
-      delete headers['X-Kinobox-Transport']
-      return response
-    } catch (error) {
-      console.error(
-        JSON.stringify({
-          event: 'kinopoisk_content_error',
-          reason: error.reason || 'connection',
-          upstreamStatus: error.upstreamStatus,
-          durationMs: Date.now() - started
-        })
-      )
-    }
-  }
-  headers['X-Data-Source'] = 'kinobox'
-  headers['X-Search-Transport'] = 'h2'
-  headers['X-Kinobox-Transport'] = 'h2'
-  const timeoutMs = Math.max(reserve, total - (Date.now() - started))
-  return requestKinobox(options, { ...transportOptions, timeoutMs })
 }

@@ -2,19 +2,16 @@ import axios from 'axios'
 import { createPublicDataCache } from './publicDataCache'
 import { WORKER_API_URL } from '@/api/workerOrigin'
 
-const KINOBOX_BASE_URL = import.meta.env.VITE_KINOBOX_API_URL || WORKER_API_URL
-// All Kinobox content uses the same Worker; a separate search override remains supported.
-const KINOBOX_SEARCH_BASE_URL = import.meta.env.VITE_KINOBOX_SEARCH_API_URL || KINOBOX_BASE_URL
-
+// Public catalogue routes of the site's Worker (VITE_WORKER_API_URL).
 const api = axios.create({
-  baseURL: KINOBOX_BASE_URL
+  baseURL: WORKER_API_URL
 })
 
 const publicData = createPublicDataCache()
 const publicGet = async (path, config, ttl, validate) => {
   const { signal, ...requestConfig } = config
   const key = JSON.stringify([
-    requestConfig.baseURL || KINOBOX_BASE_URL,
+    requestConfig.baseURL || WORKER_API_URL,
     path,
     requestConfig.params || {}
   ])
@@ -46,15 +43,6 @@ const publicGet = async (path, config, ttl, validate) => {
   )
   return { data }
 }
-
-const ensureUniqueKey = (obj, baseKey) => {
-  if (!obj[baseKey]) return baseKey
-  let idx = 2
-  while (obj[`${baseKey} #${idx}`]) idx++
-  return `${baseKey} #${idx}`
-}
-
-const normalizePlayerType = (value) => String(value || 'Player').trim()
 
 const toNumberOrNull = (value) => {
   if (value === null || value === undefined || value === '') return null
@@ -99,7 +87,7 @@ const normalizeStaff = (crew = []) => {
   }))
 }
 
-const normalizeKinoboxMovie = (movie, kpId) => {
+const normalizeWorkerMovie = (movie, kpId) => {
   if (!movie || typeof movie !== 'object') return null
 
   const resolvedKpId =
@@ -193,11 +181,11 @@ const normalizeKinoboxMovie = (movie, kpId) => {
       rating: toNumberOrNull(ratingKinopoisk.value),
       type: toLegacyType(movie?.type)
     },
-    source: 'kinobox'
+    source: 'worker'
   }
 }
 
-const normalizeKinoboxSearchResponse = (data) => {
+const normalizeWorkerSearchResponse = (data) => {
   const candidates = [
     data,
     data?.data,
@@ -212,65 +200,12 @@ const normalizeKinoboxSearchResponse = (data) => {
 
   return rows
     .map((movie) =>
-      normalizeKinoboxMovie(
+      normalizeWorkerMovie(
         movie,
         movie?.kinopoiskId || movie?.kinopoisk_id || movie?.kinopoisk || movie?.id
       )
     )
     .filter((movie) => movie?.id)
-}
-
-const toPlayersMap = (providers = [], { type = null } = {}) => {
-  const players = {}
-  const selectedType = type ? String(type).toLowerCase() : null
-
-  for (const provider of providers) {
-    const providerType = normalizePlayerType(provider?.type)
-
-    if (selectedType && providerType.toLowerCase() !== selectedType) {
-      continue
-    }
-
-    const providerBaseIframe = provider?.iframeUrl || ''
-    const providerLabel = `KINOBOX>${providerType}`
-
-    if (providerBaseIframe) {
-      const key = ensureUniqueKey(players, providerLabel)
-      players[key] = {
-        name: key,
-        translate: providerType,
-        iframe: providerBaseIframe,
-        quality: '',
-        warning: false,
-        source: 'kinobox',
-        raw_data: provider
-      }
-    }
-  }
-
-  return players
-}
-
-const getPlayersRaw = async (kpId, { title = '', signal } = {}) => {
-  const { data } = await publicGet(
-    '/api/players',
-    {
-      signal,
-      params: {
-        kinopoisk: String(kpId),
-        ...(title ? { title: String(title) } : {})
-      }
-    },
-    30000,
-    (data) => Array.isArray(data?.data) && data.data.length > 0
-  )
-
-  return Array.isArray(data?.data) ? data.data : []
-}
-
-const getPlayers = async (kpId, options = {}) => {
-  const providers = await getPlayersRaw(kpId, options)
-  return toPlayersMap(providers, options)
 }
 
 const getKpInfo = async (kpId, requestConfig = {}) => {
@@ -282,7 +217,7 @@ const getKpInfo = async (kpId, requestConfig = {}) => {
   )
 
   const movie = data?.data?.movie || data?.movie || data?.data || null
-  return normalizeKinoboxMovie(movie, kpId)
+  return normalizeWorkerMovie(movie, kpId)
 }
 
 const YOUTUBE_ID = /^[\w-]{11}$/
@@ -341,7 +276,6 @@ const apiSearch = async (searchTerm, requestConfig = {}) => {
     '/api/movies/search/',
     {
       ...requestConfig,
-      baseURL: KINOBOX_SEARCH_BASE_URL,
       params: {
         query: String(searchTerm).trim()
       }
@@ -350,7 +284,7 @@ const apiSearch = async (searchTerm, requestConfig = {}) => {
     (data) => Array.isArray(data?.data?.items)
   )
 
-  return normalizeKinoboxSearchResponse(data)
+  return normalizeWorkerSearchResponse(data)
 }
 
 const getTopMovies = async (
@@ -372,7 +306,7 @@ const getTopMovies = async (
     const poster = movie?.gallery?.posterUrl || ''
     const posterUrl = poster.startsWith('//') ? 'https:' + poster + '/300x450' : poster
     return {
-      ...normalizeKinoboxMovie({
+      ...normalizeWorkerMovie({
         ...movie,
         gallery: { ...movie?.gallery, posterUrl }
       }),
@@ -395,7 +329,7 @@ const getLatestReleases = async ({ limit = 20 } = {}, requestConfig = {}) => {
   return data.data.items
     .filter((item) => Number.isInteger(item?.kinopoiskId) && item.kinopoiskId > 0)
     .map((item) => ({
-      ...normalizeKinoboxMovie({
+      ...normalizeWorkerMovie({
         id: item.kinopoiskId,
         type: item.type === 'tv' ? 'TV_SERIES' : 'FILM',
         title: { russian: item.title?.russian || '', original: item.title?.original || '' },
@@ -435,11 +369,9 @@ export {
   getKpInfo,
   getMovieExtras,
   normalizeMovieExtras,
-  getPlayers,
-  getPlayersRaw,
   getTopMovies,
   getLatestReleases,
   getRandomMovie,
-  normalizeKinoboxMovie,
-  normalizeKinoboxSearchResponse
+  normalizeWorkerMovie,
+  normalizeWorkerSearchResponse
 }

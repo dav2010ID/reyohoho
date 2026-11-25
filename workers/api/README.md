@@ -1,25 +1,22 @@
-# Kinobox content HTTP/2 and Kinopoisk top proxy
+# ReYohoho API Worker
 
-This Worker uses `cloudflare:sockets` for raw TCP, a TLS 1.3 client with
-certificate verification and ALPN `h2`, and a bounded HTTP/2/HPACK client.
-TLS is performed in JavaScript; `secureTransport: "off"` does not mean that
-HTTP is sent unencrypted. The upstream host is fixed to `api.kinobox.tv`.
-
-Kinobox testing showed that HTTP/1.1 connections are closed, while HTTP/2
-with a browser User-Agent, `Accept-Encoding: br` and a `kinobox.in` Referer
-returns JSON. Workers' `http2.connect()` and TLS `ALPNProtocols` were not
-implemented in the tested runtime. Native `fetch()` returned upstream 520.
+One Worker serves the public catalogue, Telegram login, the account, lists and
+cloud history (D1 `HISTORY_DB`) at `https://api.reyhoho.fun`.
 
 ## Data sources
 
-Search (`/api/movies/search/`) and movie cards (`/api/movies/{id}`) are loaded
-from Kinopoisk GraphQL with native `fetch()` (`kinopoisk-content.mjs`) and
-returned in the Kinobox response shape the frontend already reads. Kinopoisk
-accepts only its known documents, so `kinopoisk-content-queries.mjs` holds
-exact copies of `backend/graphql/*.graphql`; a test fails if they diverge.
-Ratings and crew are optional sub-requests. If Kinopoisk fails, the request
-falls back to Kinobox. Player lists still come only from Kinobox. The
+Search (`/api/movies/search/`, also `/?query=`) and movie cards
+(`/api/movies/{id}`) are loaded from Kinopoisk GraphQL with native `fetch()`
+(`kinopoisk-content.mjs`), reduced to public card data in the
+`{ data: { items } }` / `{ data: { movie } }` shape the site reads, and cached by
+`content.mjs`. Kinopoisk accepts only its known documents, so
+`kinopoisk-content-queries.mjs` holds exact copies of `backend/graphql/*.graphql`;
+a test fails if they diverge. Ratings and crew are optional sub-requests. The
 `X-Data-Source` response header names the source used.
+
+The Worker serves no player lists: the site gets them from DDBB Live and DDBB.
+`/api/players` answers `410 Gone` at once, so sites released before Kinobox was
+removed stop waiting for it.
 
 ## Build and deploy
 
@@ -29,29 +26,10 @@ and D1 database ID there. Configure Telegram using
 either configuration file; use Cloudflare Secrets.
 
 ```powershell
-node prepare-vendor.mjs
 npx --yes wrangler@4.147.0 deploy --dry-run --config wrangler.local.jsonc
 npx --yes wrangler@4.147.0 login --scopes account:read user:read workers:write workers_scripts:write workers_tail:read
 npx --yes wrangler@4.147.0 deploy --config wrangler.local.jsonc
 ```
-
-The adapted vendor modules (`vendor-*.mjs`) are committed, because esm.sh
-rebuilds bundles in place: on 2026-11-01 `hpack.js@2.1.6` changed from 68 KB to
-124 KB at the same URL. `node prepare-vendor.mjs` verifies their size and SHA256
-against `vendor-manifest.json` offline. `node prepare-vendor.mjs --download`
-refetches and re-adapts them and fails if the upstream bundle differs from the
-pinned one; update the manifest only after reviewing a new bundle. Bundled
-license notices are inside `vendor-tls.mjs`/`vendor-crypto.mjs`, in
-`LICENSE-reclaim.txt` and in `LICENSE-hpack.txt`.
-The trust store is scoped to ISRG Root X1/X2. TLS library supplemental roots
-are cleared before the first handshake.
-Runtime adaptations in `runtime-vendor-patches.mjs` disable the bundled stream
-debug logger and avoid formatting TLS trace payloads when tracing is disabled.
-With `--download`, `prepare-vendor.mjs` verifies both the original and adapted bundles and fails
-if a patch target changes.
-
-A 2026-10-18 CPU audit (in git history) measured this path at the edge.
-The current custom TLS path does not reliably fit the Workers Free 10 ms budget.
 
 Public endpoint after deployment:
 `https://api.reyhoho.fun/?query=Матрица`
@@ -62,18 +40,16 @@ domain by default. The previous `workers.dev` endpoint and preview/version URLs
 are disabled (`workers_dev: false`, `preview_urls: false`). Old open tabs using
 the previous endpoint need to reload to receive the updated frontend.
 
-The frontend uses this Worker by default for search, movie cards/details and
-player lists. `VITE_KINOBOX_API_URL` overrides the shared base URL;
-`VITE_KINOBOX_SEARCH_API_URL` optionally overrides search only.
+The frontend uses this Worker for search, movie cards, top lists, account and
+history; `VITE_WORKER_API_URL` points a build at another Worker (staging).
 
-Kinobox JSON envelopes are forwarded unchanged. Kinopoisk top responses are
-reduced to public movie cards. Allowlisted routes:
+Kinopoisk responses are reduced to public movie cards. Allowlisted routes:
 
 | Route                        | Parameters                                                                              | Per-location success cache |
 | ---------------------------- | --------------------------------------------------------------------------------------- | -------------------------- |
 | `/` or `/api/movies/search/` | `query`, 1–150 characters                                                               | 10 minutes                 |
 | `/api/movies/{id}`           | Positive numeric movie ID                                                               | 6 hours                    |
-| `/api/players`               | Positive numeric `kinopoisk`, optional `title` up to 300 characters                     | 1 minute                   |
+| `/api/players`               | Retired: always `410 Gone`                                                              | —                          |
 | `/api/kinopoisk/top`         | `type=movie` or `series`, positive `page`, `limit=1..50` (default 36), offset below 250 | 1 hour                     |
 | `/api/movies/{id}/extras`    | Positive numeric movie ID                                                               | 24 hours                   |
 | `/api/kinoapi/latest`        | `limit=1..50` (default 24)                                                              | 1 hour                     |
@@ -109,8 +85,7 @@ TMDB poster; the shelf is hidden when the route fails.
 ## Kinopoisk top
 
 The top route uses native Worker `fetch()` to a fixed Kinopoisk GraphQL endpoint,
-with the public website's fixed `MovieDesktopListPage` query. It does not use the
-custom Kinobox HTTP/2 client and does not claim a forced upstream ALPN protocol.
+with the public website's fixed `MovieDesktopListPage` query.
 Callers cannot supply a query, upstream host, headers or cookies. User data is
 disabled (`withUserData: false`); redirects are rejected.
 
@@ -144,24 +119,15 @@ see `../../docs/cloud-history.md` and `../../docs/worker-telegram.md`.
 The tracked configuration is a template: configure D1 and authentication in the
 ignored local configuration before deploying. Private routes fail closed without them.
 
-Pinned `@reclaimprotocol/tls@0.1.4` and `hpack.js@2.1.6` bundles.
-The Reclaim license is included in `LICENSE-reclaim.txt`; dependency license
-notices are retained in the generated bundles.
-
 ## Upstream protection
 
-`upstream-guard.mjs` wraps the Kinopoisk and Kinobox requests:
+`upstream-guard.mjs` wraps the Kinopoisk requests:
 
 - **Circuit breaker:** after 5 failures (timeouts, 5xx, 429) an upstream is
   skipped for 30 s in that isolate. Missing titles do not count.
 - **Shared budget:** the optional `UPSTREAM_RATE_LIMITER` binding (key
   `upstream:<name>`) caps calls per upstream across all IPs, on top of the
   per-IP `PUBLIC_RATE_LIMITER`. If the binding fails, requests are allowed.
-- **Kill switch:** `KINOBOX_TRANSPORT=off` turns the vendored TLS/HTTP2 transport
-  off. Players then fail fast and serve stale cache when it exists; catalogue
-  requests use Kinopoisk only.
 
-The TLS stack is loaded with a dynamic import, the first time a request
-actually goes to Kinobox. Account, history and cached routes never evaluate it.
 `GET /api/health` reports the API contract and the applied D1 migration (see
 `docs/release.md`).

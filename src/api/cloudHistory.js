@@ -7,7 +7,7 @@ import { accountError } from './accountErrors'
 import { enrichListMetadata } from './listMetadata'
 import { WORKER_API_URL } from '@/api/workerOrigin'
 
-// Worker limits for POST /api/history/import (workers/kinobox-search/history.mjs).
+// Worker limits for POST /api/history/import (the API Worker's history.mjs).
 const HISTORY_IMPORT_ITEMS = 40
 const HISTORY_IMPORT_BYTES = 390000
 

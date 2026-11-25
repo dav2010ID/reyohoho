@@ -6,10 +6,10 @@ let pausedUntil = 0
 // Extras are optional: a failure hides the extra blocks and never fails the card.
 // Only Worker-sourced cards need them; backend cards carry their own related data.
 export const getMovieExtras = async (movie, { signal } = {}) => {
-  if (movie?.source !== 'kinobox' || !movie.kp_id || Date.now() < pausedUntil) return null
+  if (movie?.source !== 'worker' || !movie.kp_id || Date.now() < pausedUntil) return null
   try {
-    const kinobox = await loadProvider(CONTENT_PROVIDERS.KINOBOX)
-    return await kinobox.getMovieExtras(movie.kp_id, { signal })
+    const worker = await loadProvider(CONTENT_PROVIDERS.WORKER)
+    return await worker.getMovieExtras(movie.kp_id, { signal })
   } catch {
     // Every attempt costs a Worker request, so do not repeat it on each card while it fails.
     if (!signal?.aborted) pausedUntil = Date.now() + PAUSE_MS

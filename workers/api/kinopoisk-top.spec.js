@@ -229,19 +229,19 @@ describe('fixed Kinopoisk top proxy', () => {
     await vi.advanceTimersByTimeAsync(100)
     await check
   })
-  it('returns cache hits without contacting Kinopoisk or claiming Kinobox HTTP/2', async () => {
+  it('returns cache hits without contacting Kinopoisk', async () => {
     const fetcher = vi.fn()
     vi.stubGlobal('fetch', fetcher)
     const cache = { match: vi.fn().mockResolvedValue(new Response('{}')) }
     const response = await serveKinopoiskTop(
       resolve(),
       new URL('https://proxy.test/api/kinopoisk/top'),
-      { 'X-Search-Transport': 'h2', 'X-Kinobox-Transport': 'h2', 'X-Worker-Version': 'test' },
+      { 'X-Worker-Version': 'test' },
       {},
       cache
     )
     expect(response.headers.get('X-Top-Cache')).toBe('HIT')
-    expect(response.headers.has('X-Kinobox-Transport')).toBe(false)
+    expect(response.headers.get('X-Data-Source')).toBe('kinopoisk')
     expect(fetcher).not.toHaveBeenCalled()
   })
   it('caches only a short retry marker for upstream failures', async () => {

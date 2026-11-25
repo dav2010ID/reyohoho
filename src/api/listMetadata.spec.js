@@ -1,7 +1,7 @@
 import { afterEach, describe, expect, it, vi } from 'vitest'
-import { getKpInfo } from './movies.kinobox'
+import { getKpInfo } from './movies.worker'
 import { ENRICH_LIMIT, enrichListMetadata } from './listMetadata'
-vi.mock('./movies.kinobox', () => ({ getKpInfo: vi.fn() }))
+vi.mock('./movies.worker', () => ({ getKpInfo: vi.fn() }))
 afterEach(() => vi.resetAllMocks())
 const movie = {
   title: 'Матрица',

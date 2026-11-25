@@ -58,7 +58,7 @@ describe('random film interaction', () => {
   const modal = () => wrapper.findComponent(RandomMovieModal)
   it('offers only title and Kinopoisk ID searches', async () => {
     const tabs = () => wrapper.get('.search-type-buttons').text()
-    for (const provider of ['kinobox', 'local']) {
+    for (const provider of ['ddbb_live', 'ddbb']) {
       useMainStore().contentApiProvider = provider
       await flushPromises()
       expect(tabs()).toContain('ID КП')

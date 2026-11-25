@@ -69,7 +69,7 @@ describe('random movie modal data', () => {
     }
     expect(normalizeRandomMovie(legacy)).toMatchObject(legacy)
   })
-  it('converts Kinobox clock durations and age codes to readable values', () => {
+  it('converts clock durations and age codes to readable values', () => {
     expect(
       normalizeRandomMovie(movie, { film_length: '02:22:00', rating_age_limits: 'age18' })
     ).toMatchObject({ duration: 142, age_rating: '18+' })

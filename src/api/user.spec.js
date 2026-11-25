@@ -10,7 +10,7 @@ import {
   repairCardRatings
 } from './user'
 import { replaceLocalList } from '@/utils/localUserLists'
-import { getKpInfo } from './movies.kinobox'
+import { getKpInfo } from './movies.worker'
 import { normalizeHistory } from '../../shared/history-data.js'
 
 const mocks = vi.hoisted(() => ({
@@ -33,7 +33,7 @@ vi.mock('./cloudHistory', () => ({
   getCloudHistory: async () => (await mocks.history()).history,
   historyRequest: mocks.history
 }))
-vi.mock('./movies.kinobox', () => ({ getKpInfo: vi.fn() }))
+vi.mock('./movies.worker', () => ({ getKpInfo: vi.fn() }))
 vi.mock('./movieSeoNormalizer', () => ({ normalizeMovieListResponse: async (data) => data }))
 vi.mock('@/utils/localUserLists', () => ({
   addLocalListItem: mocks.localAdd,

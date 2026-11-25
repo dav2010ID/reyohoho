@@ -5,6 +5,7 @@ import { beforeHydrateMainStore } from '../utils'
 import { resolvePosterByMovie } from '@/utils/mediaUtils'
 import { cardRatings, HISTORY_CAPACITY } from '../../../shared/history-data.js'
 import { getLocalList, replaceLocalList } from '@/utils/localUserLists'
+import { PLAYER_SOURCES } from '@/api/providerRegistry'
 
 const ratingWrites = new WeakMap()
 
@@ -18,7 +19,7 @@ export const useMainStore = defineStore(MAIN_STORE_NAME, {
     dimmingEnabled: false,
     isCtrlFEnabled: false,
     cardSize: 'medium',
-    contentApiProvider: 'kinobox',
+    contentApiProvider: PLAYER_SOURCES[0],
     sidebarAutoHide: false,
     sidebarPosition: 'left'
   }),
@@ -125,9 +126,9 @@ export const useMainStore = defineStore(MAIN_STORE_NAME, {
 
     setContentApiProvider(value) {
       const normalizedProvider = String(value || '').toLowerCase()
-      this.contentApiProvider = ['kinobox', 'ddbb', 'ddbb_live'].includes(normalizedProvider)
+      this.contentApiProvider = PLAYER_SOURCES.includes(normalizedProvider)
         ? normalizedProvider
-        : 'kinobox'
+        : PLAYER_SOURCES[0]
     },
 
     setSidebarAutoHide(value) {

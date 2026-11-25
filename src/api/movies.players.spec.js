@@ -28,7 +28,7 @@ describe('player source aggregation', () => {
     ])
     const merged = mergePlayerMaps([
       normalized,
-      { 'KINOBOX>Alloha': { iframe: 'https://player.test/base' } }
+      { 'DDBB>Alloha': { iframe: 'https://player.test/base' } }
     ])
 
     expect(Object.keys(normalized)).toEqual(['DDBB>Alloha'])

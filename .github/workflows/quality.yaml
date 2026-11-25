@@ -25,8 +25,6 @@ jobs:
       - run: yarn lint
       - run: yarn check:encoding
       - run: yarn check:release
-      - name: Prepare pinned Worker vendor modules
-        run: node workers/kinobox-search/prepare-vendor.mjs
       - run: yarn test:unit --run
       - run: yarn build
       # Catches import and bundling errors that unit tests (Node, not workerd) miss.
@@ -34,7 +32,7 @@ jobs:
         env:
           WRANGLER_SEND_METRICS: 'false'
         run: |
-          npx wrangler deploy --dry-run --outdir "$RUNNER_TEMP/api" --config workers/kinobox-search/wrangler.jsonc
+          npx wrangler deploy --dry-run --outdir "$RUNNER_TEMP/api" --config workers/api/wrangler.jsonc
           npx wrangler deploy --dry-run --outdir "$RUNNER_TEMP/site" --config workers/site/wrangler.jsonc
 
   backend:

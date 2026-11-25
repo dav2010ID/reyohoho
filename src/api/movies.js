@@ -4,19 +4,18 @@ import { trackAnalyticsEvent } from '@/utils/analytics'
 import { rethrowRequestCancellation } from '@/utils/requestCancellation'
 import { getSearchProviderOrder } from '@/api/searchProviderOrder'
 import { getMovieInfoProviderOrder, getPlayerProviderOrder } from '@/api/contentProviderOrder'
-import { CONTENT_PROVIDERS, loadProvider } from '@/api/providerRegistry'
+import { CONTENT_PROVIDERS, PLAYER_SOURCES, loadProvider } from '@/api/providerRegistry'
 import { getSafePlayerUrl } from '@/utils/playerSecurity'
 
 const PLAYER_PROVIDER_TIMEOUT_MS = 8000
 const PLAYER_HEDGE_MS = 2000
+// The visitor's player source; cards and search do not depend on it.
 const getCurrentProvider = () => {
   try {
     const provider = useMainStore().contentApiProvider
-    return Object.values(CONTENT_PROVIDERS).includes(provider)
-      ? provider
-      : CONTENT_PROVIDERS.KINOBOX
+    return PLAYER_SOURCES.includes(provider) ? provider : PLAYER_SOURCES[0]
   } catch {
-    return CONTENT_PROVIDERS.KINOBOX
+    return PLAYER_SOURCES[0]
   }
 }
 
@@ -219,7 +218,7 @@ const getPlayersWithFallback = async (contentId, options = {}, ...rest) => {
 }
 
 const apiSearch = async (...args) => {
-  const configuredProvider = CONTENT_PROVIDERS.KINOBOX
+  const configuredProvider = CONTENT_PROVIDERS.WORKER
   const order = getSearchProviderOrder()
   let lastError = null
   let successfulSearch = false
@@ -263,7 +262,7 @@ const hasKpInfo = (movieInfo) => {
 
 const getKpInfoWithFallback = async (...args) => {
   const [kpId] = args
-  const configuredProvider = CONTENT_PROVIDERS.KINOBOX
+  const configuredProvider = CONTENT_PROVIDERS.WORKER
   const order = getMovieInfoProviderOrder()
   let lastError = null
 
@@ -297,13 +296,13 @@ const shouldEnrichListSeo = import.meta.env.SSR
 // Top lists use the Worker's fixed Kinopoisk query.
 const getMovies = async (...args) =>
   normalizeMovieListResponse(
-    await (await loadProvider(CONTENT_PROVIDERS.KINOBOX)).getTopMovies(...args),
+    await (await loadProvider(CONTENT_PROVIDERS.WORKER)).getTopMovies(...args),
     { enrichMissingSeo: shouldEnrichListSeo }
   )
 // The Kino API catalogue is served by the Worker whatever the player source is.
 const getLatestReleases = async (...args) =>
-  (await loadProvider(CONTENT_PROVIDERS.KINOBOX)).getLatestReleases(...args)
+  (await loadProvider(CONTENT_PROVIDERS.WORKER)).getLatestReleases(...args)
 const getRandomMovie = async (...args) =>
-  (await loadProvider(CONTENT_PROVIDERS.KINOBOX)).getRandomMovie(...args)
+  (await loadProvider(CONTENT_PROVIDERS.WORKER)).getRandomMovie(...args)
 
 export { apiSearch, getKpInfo, getPlayers, getMovies, getLatestReleases, getRandomMovie }

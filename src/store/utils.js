@@ -1,11 +1,12 @@
 import { LEGACY_STORE_KEY, LEGACY_STORE_KEY_BACKUP, MAIN_STORE_NAME } from './constants'
 import { replaceLocalList } from '@/utils/localUserLists'
+import { PLAYER_SOURCES } from '@/api/providerRegistry'
 
-export const CONTENT_PROVIDER_DDBB_DEFAULT_MIGRATION_KEY = 'main:contentApiProviderDefault:ddbb:v1'
-export const CONTENT_PROVIDER_KINOBOX_DEFAULT_MIGRATION_KEY = 'main:contentApiProviderDefault:kinobox:v1'
-
-// Switch the previous remote default once; preserve later explicit DDBB choices.
-const LEGACY_PLAYER_PROVIDERS_TO_KINOBOX = new Set(['ddbb', 'rhserv', 'kinobd', 'kinodb'])
+// Markers of one-time provider migrations that no longer exist.
+const RETIRED_MIGRATION_KEYS = [
+  'main:contentApiProviderDefault:ddbb:v1',
+  'main:contentApiProviderDefault:kinobox:v1'
+]
 
 export function beforeHydrateLegacyVuex(ctx) {
   if (typeof window === 'undefined' || !window.localStorage) return
@@ -57,38 +58,10 @@ export function beforeHydrateLegacyVuex(ctx) {
   }
 }
 
-function migrateMainContentProviderDefault(ctx) {
-  if (typeof window === 'undefined' || !window.localStorage) return
-  if (ctx.store.$id !== MAIN_STORE_NAME) return
-  if (localStorage.getItem(CONTENT_PROVIDER_KINOBOX_DEFAULT_MIGRATION_KEY) === 'done') return
-
-  const raw = localStorage.getItem(MAIN_STORE_NAME)
-  if (!raw) {
-    localStorage.setItem(CONTENT_PROVIDER_DDBB_DEFAULT_MIGRATION_KEY, 'done')
-    localStorage.setItem(CONTENT_PROVIDER_KINOBOX_DEFAULT_MIGRATION_KEY, 'done')
-    return
-  }
-
-  try {
-    const persistedMain = JSON.parse(raw)
-    const provider = String(persistedMain?.contentApiProvider || '').toLowerCase()
-
-    if (LEGACY_PLAYER_PROVIDERS_TO_KINOBOX.has(provider)) {
-      persistedMain.contentApiProvider = 'kinobox'
-      localStorage.setItem(MAIN_STORE_NAME, JSON.stringify(persistedMain))
-    }
-
-    localStorage.setItem(CONTENT_PROVIDER_DDBB_DEFAULT_MIGRATION_KEY, 'done')
-    localStorage.setItem(CONTENT_PROVIDER_KINOBOX_DEFAULT_MIGRATION_KEY, 'done')
-  } catch (err) {
-    console.error('Ошибка миграции дефолтного провайдера плееров:', err)
-  }
-}
-
 export function beforeHydrateMainStore(ctx) {
   beforeHydrateLegacyVuex(ctx)
-  migrateMainContentProviderDefault(ctx)
   if (ctx.store.$id !== MAIN_STORE_NAME || typeof window === 'undefined' || !window.localStorage) return
+  for (const key of RETIRED_MIGRATION_KEYS) localStorage.removeItem(key)
   const raw = localStorage.getItem(MAIN_STORE_NAME)
   if (!raw) return
   try {
@@ -97,13 +70,13 @@ export function beforeHydrateMainStore(ctx) {
       if (!replaceLocalList('history', persisted.history, persisted.historyOwner || 'guest')) return
       delete persisted.history
     }
-    // Only the Worker and the two DDBB sources remain; older choices
-    // (local backend, KinoBD, rhserv) fall back to the default.
+    // Only the two DDBB player sources remain; older choices (Kinobox, local
+    // backend, KinoBD, rhserv) fall back to the default.
     if (
       'contentApiProvider' in persisted &&
-      !['kinobox', 'ddbb', 'ddbb_live'].includes(persisted.contentApiProvider)
+      !PLAYER_SOURCES.includes(persisted.contentApiProvider)
     ) {
-      persisted.contentApiProvider = 'kinobox'
+      persisted.contentApiProvider = PLAYER_SOURCES[0]
     }
     delete persisted.searchApiProvider
     localStorage.setItem(MAIN_STORE_NAME, JSON.stringify(persisted))

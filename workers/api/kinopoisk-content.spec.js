@@ -2,14 +2,9 @@
 import { afterEach, describe, expect, it, vi } from 'vitest'
 import { readFileSync } from 'node:fs'
 import { KINOPOISK_CONTENT_QUERIES } from './kinopoisk-content-queries.mjs'
-import {
-  requestContent,
-  requestKinopoiskContent,
-  toKinoboxMovie,
-  toKinoboxSearch
-} from './kinopoisk-content.mjs'
-import { serveKinoboxContent } from './kinobox-content.mjs'
-import { isKinoboxResponseValid, resolveKinoboxResource } from './routes.mjs'
+import { requestKinopoiskContent, toMovieResponse, toSearchResponse } from './kinopoisk-content.mjs'
+import { serveContent } from './content.mjs'
+import { isContentResponseValid, resolveContentResource } from './routes.mjs'
 
 const json = (data, status = 200) =>
   new Response(JSON.stringify(data), { status, headers: { 'Content-Type': 'application/json' } })
@@ -129,9 +124,9 @@ describe('Kinopoisk GraphQL content', () => {
     }
   })
 
-  it('maps search suggestions to deduplicated public Kinobox items', () => {
-    const data = toKinoboxSearch(responses.SuggestSearch.data)
-    expect(isKinoboxResponseValid('search', data)).toBe(true)
+  it('maps search suggestions to deduplicated public items', () => {
+    const data = toSearchResponse(responses.SuggestSearch.data)
+    expect(isContentResponseValid('search', data)).toBe(true)
     expect(data.data.items).toEqual([
       {
         id: 301,
@@ -150,17 +145,17 @@ describe('Kinopoisk GraphQL content', () => {
   })
 
   it('returns an empty search list for an empty suggestion', () => {
-    expect(toKinoboxSearch({ suggest: { top: null } }).data.items).toEqual([])
+    expect(toSearchResponse({ suggest: { top: null } }).data.items).toEqual([])
   })
 
   it('maps card metadata, ratings and main crew without private fields', () => {
-    const data = toKinoboxMovie(
+    const data = toMovieResponse(
       responses.MovieDetailsMobileGeneralMeta.data,
       responses.MovieDetailsMobileRatingBase.data,
       responses.MovieDetailsMobileRatingExtended.data,
       responses.MovieDetailsMobileMainCrewMembers.data
     )
-    expect(isKinoboxResponseValid('movie', data)).toBe(true)
+    expect(isContentResponseValid('movie', data)).toBe(true)
     const movie = data.data.movie
     expect(movie).toMatchObject({
       id: 301,
@@ -187,11 +182,11 @@ describe('Kinopoisk GraphQL content', () => {
   })
 
   it('uses series years and reports an unknown ID as unsuccessful', () => {
-    const series = toKinoboxMovie({
+    const series = toMovieResponse({
       movie: { __typename: 'TvSeries', id: 464963, title: {}, fallbackYear: 2011 }
     })
     expect(series.data.movie).toMatchObject({ type: 'TvSeries', year: 2011, crew: [] })
-    expect(toKinoboxMovie({ movie: null }).data).toEqual({ isSuccess: false, movie: null })
+    expect(toMovieResponse({ movie: null }).data).toEqual({ isSuccess: false, movie: null })
   })
 
   it('sends fixed documents without following redirects', async () => {
@@ -293,75 +288,8 @@ describe('Kinopoisk GraphQL content', () => {
   })
 })
 
-describe('content source selection', () => {
-  const kinoboxResponse = { status: 200, headers: {}, body: Buffer.from('{}') }
-
-  it('serves search and movies from Kinopoisk without touching Kinobox', async () => {
-    const headers = { 'X-Search-Transport': 'h2', 'X-Kinobox-Transport': 'h2' }
-    const kinobox = vi.fn()
-    const kinopoisk = vi.fn(async () => ({ status: 200, source: 'kinopoisk' }))
-    const response = await requestContent(
-      { path: '/api/movies/301' },
-      {},
-      headers,
-      kinobox,
-      kinopoisk
-    )
-    expect(response.source).toBe('kinopoisk')
-    expect(kinobox).not.toHaveBeenCalled()
-    expect(headers).toEqual({ 'X-Data-Source': 'kinopoisk' })
-  })
-
-  it('falls back to Kinobox with the remaining deadline', async () => {
-    vi.spyOn(console, 'error').mockImplementation(() => {})
-    let now = 1000
-    vi.spyOn(Date, 'now').mockImplementation(() => now)
-    const headers = {}
-    const kinobox = vi.fn(async () => kinoboxResponse)
-    const kinopoisk = vi.fn(async () => {
-      now += 4000
-      throw Object.assign(new Error('Kinopoisk upstream HTTP 403'), {
-        reason: 'http',
-        upstreamStatus: 403
-      })
-    })
-    const options = { path: '/api/movies/search/', params: { query: 'x' } }
-    expect(await requestContent(options, { timeoutMs: 15000 }, headers, kinobox, kinopoisk)).toBe(
-      kinoboxResponse
-    )
-    expect(kinopoisk).toHaveBeenCalledWith(options, { timeoutMs: 9000 })
-    expect(kinobox).toHaveBeenCalledWith(options, { timeoutMs: 11000 })
-    expect(headers['X-Data-Source']).toBe('kinobox')
-    expect(JSON.parse(console.error.mock.calls[0][0])).toMatchObject({
-      event: 'kinopoisk_content_error',
-      reason: 'http',
-      upstreamStatus: 403
-    })
-  })
-
-  it('keeps a real fallback budget after the primary used its whole share', async () => {
-    vi.spyOn(console, 'error').mockImplementation(() => {})
-    let now = 1000
-    vi.spyOn(Date, 'now').mockImplementation(() => now)
-    const kinobox = vi.fn(async () => kinoboxResponse)
-    const kinopoisk = vi.fn(async (_options, { timeoutMs }) => {
-      now += timeoutMs + 500
-      throw Object.assign(new Error('timeout'), { reason: 'timeout' })
-    })
-    const options = { path: '/api/movies/301' }
-    await requestContent(options, { timeoutMs: 15000 }, {}, kinobox, kinopoisk)
-    expect(kinobox.mock.calls[0][1].timeoutMs).toBe(6000)
-  })
-
-  it('keeps player lists on Kinobox', async () => {
-    const kinobox = vi.fn(async () => kinoboxResponse)
-    const kinopoisk = vi.fn()
-    await requestContent({ path: '/api/players', params: {} }, {}, {}, kinobox, kinopoisk)
-    expect(kinopoisk).not.toHaveBeenCalled()
-    expect(kinobox).toHaveBeenCalledTimes(1)
-  })
-
-  it('caches a Kinopoisk card through the existing content handler', async () => {
+describe('Kinopoisk content through the cache', () => {
+  it('caches a Kinopoisk card through the content handler', async () => {
     vi.spyOn(console, 'log').mockImplementation(() => {})
     const entries = new Map()
     const cache = {
@@ -370,26 +298,69 @@ describe('content source selection', () => {
       delete: vi.fn(async (key) => entries.delete(key))
     }
     const url = new URL('/api/movies/301', 'https://api.reyhoho.fun')
-    const headers = { 'X-Worker-Version': 'test', 'X-Kinobox-Transport': 'h2' }
     const fetchImpl = kinopoiskFetch()
     const load = (options, transportOptions) =>
-      requestContent(options, transportOptions, headers, vi.fn(), (o, t) =>
-        requestKinopoiskContent(o, t, fetchImpl)
-      )
-    const first = await serveKinoboxContent(resolveKinoboxResource(url), url, headers, cache, load)
+      requestKinopoiskContent(options, transportOptions, fetchImpl)
+    const first = await serveContent(
+      resolveContentResource(url),
+      url,
+      { 'X-Worker-Version': 'test' },
+      cache,
+      load
+    )
     expect(first.status).toBe(200)
-    expect(first.headers.get('X-Kinobox-Cache')).toBe('MISS')
+    expect(first.headers.get('X-Search-Cache')).toBe('MISS')
     expect(first.headers.get('X-Data-Source')).toBe('kinopoisk')
     expect((await first.json()).data.movie.title.russian).toBe('Матрица')
     // A fresh request reads provenance from the cache entry, not from shared state.
-    const second = await serveKinoboxContent(resolveKinoboxResource(url), url, { 'X-Worker-Version': 'test' }, cache, load)
-    expect(second.headers.get('X-Kinobox-Cache')).toBe('HIT')
+    const second = await serveContent(
+      resolveContentResource(url),
+      url,
+      { 'X-Worker-Version': 'test' },
+      cache,
+      load
+    )
+    expect(second.headers.get('X-Search-Cache')).toBe('HIT')
     expect(second.headers.get('X-Data-Source')).toBe('kinopoisk')
-    expect(second.headers.has('X-Kinobox-Transport')).toBe(false)
     expect(fetchImpl).toHaveBeenCalledTimes(4)
     expect(JSON.parse(console.log.mock.calls[0][0])).toMatchObject({
-      event: 'kinobox_response',
+      event: 'content_response',
       source: 'kinopoisk'
     })
+  })
+
+  it('answers a definitive Kinopoisk HTTP error without a retry marker', async () => {
+    vi.spyOn(console, 'error').mockImplementation(() => {})
+    const cache = { match: vi.fn(async () => undefined), put: vi.fn(), delete: vi.fn() }
+    const url = new URL('/?query=x', 'https://api.reyhoho.fun')
+    const fetchImpl = vi.fn(async () => new Response('', { status: 403 }))
+    const reply = await serveContent(
+      resolveContentResource(url),
+      url,
+      { 'X-Worker-Version': 'test' },
+      cache,
+      (o, t) => requestKinopoiskContent(o, t, fetchImpl)
+    )
+    expect(reply.status).toBe(502)
+    expect(await reply.json()).toEqual({ error: 'Upstream HTTP error', upstreamStatus: 403 })
+    expect(reply.headers.has('Retry-After')).toBe(false)
+    expect(cache.put).not.toHaveBeenCalled()
+  })
+
+  it('backs off after Kinopoisk throttling', async () => {
+    vi.spyOn(console, 'error').mockImplementation(() => {})
+    const cache = { match: vi.fn(async () => undefined), put: vi.fn(), delete: vi.fn() }
+    const url = new URL('/?query=y', 'https://api.reyhoho.fun')
+    const fetchImpl = vi.fn(async () => new Response('', { status: 429 }))
+    const reply = await serveContent(
+      resolveContentResource(url),
+      url,
+      { 'X-Worker-Version': 'test' },
+      cache,
+      (o, t) => requestKinopoiskContent(o, t, fetchImpl)
+    )
+    expect(reply.status).toBe(502)
+    expect(reply.headers.get('Retry-After')).toBe('30')
+    expect(cache.put.mock.calls[0][0]).toContain('/__content-retry?')
   })
 })

@@ -12,8 +12,8 @@ ReYohoho — Vue-приложение для поиска фильмов и се
 iframe-плеера. Production состоит из трёх частей:
 
 - **статический сайт** (vite-ssg + PWA), собирается `yarn build:github`;
-- **API Worker** `workers/kinobox-search` на `https://api.reyhoho.fun`: каталог (Kinobox,
-  Kinopoisk, kinoapi), Telegram-вход, аккаунт, списки и история в D1 (`HISTORY_DB`);
+- **API Worker** `workers/api` на `https://api.reyhoho.fun`: каталог
+  (Kinopoisk, kinoapi), Telegram-вход, аккаунт, списки и история в D1 (`HISTORY_DB`);
 - **site Worker** `workers/site` (Workers Static Assets) — плановый хостинг `reyhoho.fun`
   с security headers и маршрутизацией фильмов; сейчас сайт публикуется на GitHub Pages.
 
@@ -21,10 +21,10 @@ Python `backend/` — прототип для VPS, в production не испол
 
 | Сценарий | Frontend | Worker и внешние зависимости |
 |---|---|---|
-| Поиск | `MovieSearch.vue` → `src/api/movies.js` | `GET /api/movies/search/` → Kinobox |
-| Карточка | `MovieInfo.vue` | `GET /api/movies/<id>` → Kinobox/Kinopoisk; `movieExtras.js` → kinoapi |
+| Поиск | `MovieSearch.vue` → `src/api/movies.js` | `GET /api/movies/search/` → Kinopoisk |
+| Карточка | `MovieInfo.vue` | `GET /api/movies/<id>` → Kinopoisk; `movieExtras.js` → kinoapi |
 | Топ и новинки | `TopMovies.vue`, `MovieSearch.vue` | `/api/kinopoisk/top`, `/api/kinoapi/latest` |
-| Просмотр | `PlayerComponent.vue`, `usePlayerSources.js` | DDBB Live → DDBB → `/api/players` (Kinobox) |
+| Просмотр | `PlayerComponent.vue`, `usePlayerSources.js` | DDBB Live ↔ DDBB (выбранный источник первым) |
 | Вход | `Login.vue` → `AuthSuccess.vue` | `/api/auth/*`, Telegram bot, D1 `tg_login`/`tg_sessions`/`tg_users` |
 | Списки и профиль | `UserLists.vue`, `User.vue`, `MovieList/` | `/api/user`, `/api/list/*`, `/api/user-list/*` |
 | История | `cloudHistory.js`, `historyOutbox.js` | `/api/history*`, D1 `user_history` |
@@ -49,10 +49,10 @@ TypeScript нет, typecheck не выполняется.
 ```text
 Browser / PWA
   ├─ Vue routes, Pinia persisted state (настройки, локальные списки/история, плеер, сессия)
-  └─ src/api/movies.js → providerRegistry (kinobox | ddbb | ddbb_live)
-       ├─ movies.kinobox.js ──► API Worker (WORKER_API_URL из src/api/workerOrigin.js)
-       │                          ├─ каталог: Kinobox (vendored TLS/HTTP2, lazy), Kinopoisk, kinoapi
-       │                          │   └─ upstream-guard: circuit breaker, общий бюджет, kill switch
+  └─ src/api/movies.js → providerRegistry (worker | ddbb | ddbb_live)
+       ├─ movies.worker.js ───► API Worker (WORKER_API_URL из src/api/workerOrigin.js)
+       │                          ├─ каталог: Kinopoisk, kinoapi
+       │                          │   └─ upstream-guard: circuit breaker, общий бюджет
        │                          ├─ /api/auth/*, /api/user, /api/list*, /api/history* → D1
        │                          ├─ /api/health (контракт и миграция D1), /api/csp-report
        │                          └─ per-IP бюджет, Cache API
@@ -61,7 +61,7 @@ Browser / PWA
 
 `src/api/workerOrigin.js` задаёт origin Worker (`VITE_WORKER_API_URL`, по умолчанию
 `https://api.reyhoho.fun`); его используют `workerAccount.js`, `cloudHistory.js` и
-`movies.kinobox.js`. Bearer-токен отправляется только на этот origin.
+`movies.worker.js`. Bearer-токен отправляется только на этот origin.
 
 ## 4. Директории
 
@@ -74,7 +74,7 @@ Browser / PWA
 | `src/router/` | routes, auth guard, SEO slug redirect, analytics | route names | `router/*.spec.js`, `main.spec.js` |
 | `src/utils/` | сессия, SEO, локальные списки, outbox, `ssgState.js`, `playerSecurity.js` | auth/session, sandbox | `*.spec.js` |
 | `shared/` | нормализация истории и карточек (общая с мостом) | `history-data.js` копируется в мост вручную | `shared/*.spec.js`, bridge spec |
-| `workers/kinobox-search/` | API Worker и миграции D1 | auth, CORS, лимиты, vendored TLS | Worker specs, `wrangler deploy --dry-run` |
+| `workers/api/` | API Worker и миграции D1 | auth, CORS, лимиты | Worker specs, `wrangler deploy --dry-run` |
 | `workers/site/` | site Worker: роутинг и заголовки | `generated/` создаёт postbuild | `router.spec.js`, dry-run |
 | `migration/history-transfer/` | мост переноса со старого origin | публикуется из отдельного репозитория | bridge spec |
 | `scripts/` | SEO, postbuild, security headers, release check, browser checks | generated outputs | script specs |
@@ -113,10 +113,10 @@ SSG-код должен быть SSR-safe. Страницы фильмов prere
 
 ### API и fallback
 
-- `providerRegistry.js` — lazy-импорт `kinobox`, `ddbb`, `ddbb_live`.
+- `providerRegistry.js` — lazy-импорт `worker`, `ddbb`, `ddbb_live`; `PLAYER_SOURCES` — выбор в настройках.
 - Поиск и карточки — всегда Worker (`searchProviderOrder.js`, `contentProviderOrder.js`).
-- Плееры — цепочка DDBB Live → DDBB → Kinobox (или DDBB Live → Kinobox при явном выборе),
-  15-секундный timeout, `mergePlayerMaps()` убирает дубли.
+- Плееры — цепочка из двух источников: выбранный (по умолчанию DDBB Live), затем второй;
+  8 с на источник, второй стартует через 2 с ожидания, `mergePlayerMaps()` убирает дубли.
 - `workerAccount.js`, `user.js` — аккаунт и списки; `cloudHistory.js` — история;
   `listMetadata.js` — дозагрузка метаданных (не больше 60 за загрузку).
 
@@ -139,7 +139,7 @@ SSG-код должен быть SSR-safe. Страницы фильмов prere
 |---|---|---|
 | `GET /api/movies/search/?query=` | поиск | нет |
 | `GET /api/movies/<id>` | карточка | нет |
-| `GET /api/players?kinopoisk=` | плееры Kinobox | нет |
+| `GET /api/players` | выведен из работы: всегда `410 Gone` | нет |
 | `GET /api/kinopoisk/top`, `/api/kinoapi/latest`, `/api/movies/<id>/extras` | топ, новинки, доп. данные | нет |
 | `GET /api/health` | версия, `apiContract`, последняя миграция D1, `schemaReady` | нет |
 | `POST /api/csp-report` | приём CSP-отчётов (логируются только origin и path) | нет |
@@ -149,8 +149,8 @@ SSG-код должен быть SSR-safe. Страницы фильмов prere
 
 Защита: allowlist Origin (`localhost:5173` только при `ALLOW_DEV_ORIGINS=true`, то есть в
 staging), per-IP бюджет, `ACCOUNT_RATE_LIMITER`, `UPSTREAM_RATE_LIMITER`, circuit breaker на
-upstream (`upstream-guard.mjs`), `KINOBOX_TRANSPORT=off` как kill switch. Миграции D1 —
-`workers/kinobox-search/migrations/0001…0005`. Подробнее — README Worker и
+upstream (`upstream-guard.mjs`). Миграции D1 —
+`workers/api/migrations/0001…0005`. Подробнее — README Worker и
 [worker-telegram.md](worker-telegram.md).
 
 Устаревшая ветка: `history.mjs` всё ещё принимает внешние токены через `HISTORY_AUTH_USER_URL`
@@ -165,7 +165,7 @@ upstream (`upstream-guard.mjs`), `KINOBOX_TRANSPORT=off` как kill switch. М�
   провайдерам. Same-origin overlay-код требует доступа к DOM плеера.
 - `htmlSanitizer.js` (DOMPurify) используется для toast-сообщений.
 - Security review обязателен для `workerOrigin.js`, auth store/utils, `PlayerComponent.vue`,
-  `playerSecurity.js`, CORS и auth в Worker, `site-security.js`, vendored TLS.
+  `playerSecurity.js`, CORS и auth в Worker, `site-security.js`.
 
 ## 8. Тесты, сборка, CI
 
@@ -211,13 +211,13 @@ node scripts/browser-artifact-check.js dist
 | `public/sitemap.xml`, `public/robots.txt` | `yarn seo:assets` | не смешивать с runtime |
 | `public/icons/*` | `yarn icons*` | отдельный commit |
 | `dist/`, `workers/site/generated/` | build/postbuild | не коммитить |
-| `workers/kinobox-search/vendor-*.mjs` | `prepare-vendor.mjs` | не редактировать вручную |
+| `workers/api/vendor-*.mjs` | `prepare-vendor.mjs` | не редактировать вручную |
 | `yarn.lock` | Yarn | только dependency-коммиты |
 
 ## 11. Правила для агентов
 
 1. `git status --short --branch`; не трогать чужие изменения.
-2. Сверять docs с кодом: маршруты — `src/router/routes.js` и `workers/kinobox-search/worker.mjs`.
+2. Сверять docs с кодом: маршруты — `src/router/routes.js` и `workers/api/worker.mjs`.
 3. Сохранять формы ответов API, имена маршрутов, props/events и persisted keys без
    согласованной миграции.
 4. Новая миграция D1 — новый файл и обновление `release.json`; применённые не менять.

@@ -7,7 +7,7 @@ import { randomBytes } from 'node:crypto'
 const root = fileURLToPath(new URL('../', import.meta.url))
 const privatePath = fileURLToPath(new URL('../backend/.env', import.meta.url))
 const configPath = fileURLToPath(
-  new URL('../workers/kinobox-search/wrangler.local.jsonc', import.meta.url)
+  new URL('../workers/api/wrangler.local.jsonc', import.meta.url)
 )
 const webhookUrl = 'https://api.reyhoho.fun/api/auth/telegram-webhook'
 
@@ -104,7 +104,7 @@ async function main() {
   try {
     oldConfig = await readFile(configPath, 'utf8')
   } catch {
-    throw new Error('Create ignored workers/kinobox-search/wrangler.local.jsonc with your account and D1 IDs; see docs/worker-telegram.md')
+    throw new Error('Create ignored workers/api/wrangler.local.jsonc with your account and D1 IDs; see docs/worker-telegram.md')
   }
   const config = JSON.parse(oldConfig)
   if (!config.account_id || !config.d1_databases?.some((db) => db.binding === 'HISTORY_DB' && db.database_id))
@@ -113,7 +113,7 @@ async function main() {
   config.vars.TELEGRAM_BOT_USERNAME = bot.username
   try {
     await writeFile(configPath, `${JSON.stringify(config, null, 2)}\n`)
-    await wrangler(['deploy', '--dry-run', '--config', 'workers/kinobox-search/wrangler.local.jsonc'])
+    await wrangler(['deploy', '--dry-run', '--config', 'workers/api/wrangler.local.jsonc'])
     await wrangler([
       'd1',
       'migrations',
@@ -121,16 +121,16 @@ async function main() {
       'reyohoho-history',
       '--remote',
       '--config',
-      'workers/kinobox-search/wrangler.local.jsonc'
+      'workers/api/wrangler.local.jsonc'
     ])
     await wrangler(
-      ['secret', 'bulk', '--config', 'workers/kinobox-search/wrangler.local.jsonc'],
+      ['secret', 'bulk', '--config', 'workers/api/wrangler.local.jsonc'],
       JSON.stringify({
         TELEGRAM_BOT_TOKEN: botToken,
         TELEGRAM_WEBHOOK_SECRET: secret
       })
     )
-    await wrangler(['deploy', '--keep-vars', '--config', 'workers/kinobox-search/wrangler.local.jsonc'])
+    await wrangler(['deploy', '--keep-vars', '--config', 'workers/api/wrangler.local.jsonc'])
   } catch (error) {
     await writeFile(configPath, oldConfig)
     throw error

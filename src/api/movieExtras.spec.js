@@ -2,11 +2,11 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
 const mocks = vi.hoisted(() => ({ getMovieExtras: vi.fn(), loadProvider: vi.fn() }))
 vi.mock('./providerRegistry', () => ({
-  CONTENT_PROVIDERS: { KINOBOX: 'kinobox' },
+  CONTENT_PROVIDERS: { WORKER: 'worker' },
   loadProvider: mocks.loadProvider
 }))
 
-const card = { kp_id: 361, source: 'kinobox' }
+const card = { kp_id: 361, source: 'worker' }
 const load = () => import('./movieExtras')
 
 beforeEach(() => {
@@ -24,7 +24,7 @@ describe('movie extras loading', () => {
     const signal = new AbortController().signal
     mocks.getMovieExtras.mockResolvedValue({ slogan: 'Тест' })
     expect(await getMovieExtras(card, { signal })).toEqual({ slogan: 'Тест' })
-    expect(mocks.loadProvider).toHaveBeenCalledWith('kinobox')
+    expect(mocks.loadProvider).toHaveBeenCalledWith('worker')
     expect(mocks.getMovieExtras).toHaveBeenCalledWith(361, { signal })
   })
   it('skips cards from sources that already carry their own related data', async () => {

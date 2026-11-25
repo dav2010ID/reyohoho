@@ -8,7 +8,7 @@ const mocks = vi.hoisted(() => ({
   getDiscussedMovies: vi.fn(),
   push: vi.fn(),
   route: { query: {} },
-  store: { contentApiProvider: 'kinobox' }
+  store: { contentApiProvider: 'ddbb_live' }
 }))
 vi.mock('@/api/movies', () => ({
   getMovies: mocks.getMovies,
@@ -25,7 +25,7 @@ let wrapper
 beforeEach(() => {
   vi.clearAllMocks()
   mocks.route = reactive({ query: {} })
-  mocks.store = reactive({ contentApiProvider: 'kinobox' })
+  mocks.store = reactive({ contentApiProvider: 'ddbb_live' })
   mocks.getMovies.mockResolvedValue([{ kp_id: 258687, title: 'Интерстеллар' }])
 })
 afterEach(() => wrapper?.unmount())
