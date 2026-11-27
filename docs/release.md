@@ -55,7 +55,8 @@ Worker change must keep the previous site working (see "Compatibility" below).
    pass with `schemaReady: true`. Check a Telegram login and the history page on
    the site that is still live.
 4. **Site.** Merge to `main`; the Deploy-GH workflow builds, re-runs the checks
-   and publishes to GitHub Pages. If `main` is already merged, run Deploy-GH
+   and publishes to GitHub Pages (and to the site Worker when `SITE_TARGET` is set,
+   see `docs/cloudflare-site.md`). If `main` is already merged, run Deploy-GH
    manually. Check `https://reyhoho.fun/build-sha.txt` equals the released
    `main` commit.
 

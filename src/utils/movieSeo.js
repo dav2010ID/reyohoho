@@ -128,9 +128,12 @@ export const buildMoviePath = (kpId, slug = '') => {
   return normalizedSlug ? `/movie/${normalizedKpId}/${normalizedSlug}` : `/movie/${normalizedKpId}`
 }
 
+// Links use the canonical form with a trailing slash: prerendered pages are
+// directories, so the slashless form costs every visitor and crawler a redirect.
 export const getMovieSeoPath = (movieLike = {}, kpIdOverride = null) => {
   const kpId = getMovieIdentifier(movieLike, kpIdOverride)
-  return buildMoviePath(kpId, getMovieSeoSlug(movieLike, kpIdOverride))
+  const path = buildMoviePath(kpId, getMovieSeoSlug(movieLike, kpIdOverride))
+  return kpId ? `${path}/` : path
 }
 
 export const buildMovieCanonicalUrl = (kpId, slug = '') =>

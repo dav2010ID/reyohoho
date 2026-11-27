@@ -14,6 +14,9 @@ const TEMPLATE_404_PATH = path.resolve(process.cwd(), 'public', '404.html')
 const FALLBACK_404_PATH = path.join(DIST_PATH, '404.html')
 const MANIFEST_PATH = path.join(DIST_PATH, 'manifest.webmanifest')
 const HEADERS_PATH = path.join(DIST_PATH, '_headers')
+// Cache rules come from the source file, so running postbuild twice cannot stack blocks.
+const CACHE_RULES_PATH = path.resolve(process.cwd(), 'public', '_headers')
+const ASSETS_IGNORE_PATH = path.join(DIST_PATH, '.assetsignore')
 // Read by workers/site at deploy time; generated, not committed.
 const SITE_META_PATH = path.resolve(process.cwd(), 'workers', 'site', 'generated', 'site-meta.json')
 const origin = (value) => (value ? new URL(value).origin : null)
@@ -58,8 +61,18 @@ async function main() {
       origin(env.VITE_DDBB_LIVE_API_URL || 'https://a.ddbb.live')
     ]
   })
-  const cacheRules = await fs.readFile(HEADERS_PATH, 'utf8').catch(() => '')
-  await fs.writeFile(HEADERS_PATH, `${headersBlock('/*', headers)}\n${cacheRules}`, 'utf8')
+  const cacheRules = await fs.readFile(CACHE_RULES_PATH, 'utf8').catch(() => '')
+  // The site Worker's workers.dev URL (preview, later a second address) must not be indexed.
+  const previewRule = headersBlock('https://:worker.:account.workers.dev/*', {
+    'X-Robots-Tag': 'noindex'
+  })
+  await fs.writeFile(
+    HEADERS_PATH,
+    `${headersBlock('/*', headers)}\n${previewRule}\n${cacheRules}`,
+    'utf8'
+  )
+  // GitHub Pages files the site Worker must not serve: it answers misses itself.
+  await fs.writeFile(ASSETS_IGNORE_PATH, '404.html\nCNAME\n', 'utf8')
   const movies = await prerenderedMoviePaths(DIST_PATH)
   await fs.mkdir(path.dirname(SITE_META_PATH), { recursive: true })
   await fs.writeFile(SITE_META_PATH, `${JSON.stringify({ headers, movies })}\n`, 'utf8')

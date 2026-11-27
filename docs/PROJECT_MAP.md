@@ -15,7 +15,8 @@ iframe-плеера. Production состоит из трёх частей:
 - **API Worker** `workers/api` на `https://api.reyhoho.fun`: каталог
   (Kinopoisk, kinoapi), Telegram-вход, аккаунт, списки и история в D1 (`HISTORY_DB`);
 - **site Worker** `workers/site` (Workers Static Assets) — плановый хостинг `reyhoho.fun`
-  с security headers и маршрутизацией фильмов; сейчас сайт публикуется на GitHub Pages.
+  с security headers и маршрутизацией фильмов; сейчас сайт публикуется на GitHub Pages,
+  переход включает переменная `SITE_TARGET` (`docs/cloudflare-site.md`).
 
 Python `backend/` — прототип для VPS, в production не используется (раздел 9).
 
@@ -184,7 +185,8 @@ node scripts/browser-artifact-check.js dist
 
 - `quality.yaml` — lint, encoding, тесты, сборка, `check:release`, `wrangler deploy --dry-run`
   обоих Workers; actions закреплены по SHA.
-- `github.yaml` — сборка и публикация на GitHub Pages, еженедельное обновление SEO
+- `github.yaml` — сборка и публикация на GitHub Pages и, по `SITE_TARGET`, в site Worker
+  (`deploy-worker` + `scripts/check-site.mjs`), еженедельное обновление SEO
   (`ALLOW_STALE_SEO` / input `allow_stale_seo`), live-проверка `check-release --live` перед
   публикацией.
 - Порядок релиза: миграция D1 → API Worker → frontend ([release.md](release.md)).

@@ -3,6 +3,10 @@
   "name": "reyohoho-site",
   "main": "src/index.mjs",
   "compatibility_date": "2026-11-10",
+  // The workers.dev URL is the preview before the switch and stays after it (noindex via _headers).
+  // reyhoho.fun is attached with `--domain` at deploy time (docs/cloudflare-site.md), not here.
+  "workers_dev": true,
+  "preview_urls": false,
   "assets": {
     "directory": "../../dist",
     "binding": "ASSETS",

@@ -18,6 +18,14 @@ describe('movieSeo', () => {
     )
   })
 
+  it('links to the canonical URL itself, so neither server nor client redirects', () => {
+    const movie = { kp_id: '5591410', name_original: 'Young Sherlock' }
+    expect(buildMovieCanonicalUrl('5591410', 'young-sherlock')).toBe(
+      `https://reyhoho.fun${getMovieSeoPath(movie)}`
+    )
+    expect(getMovieSeoPath({ kp_id: '424242' })).toMatch(/^\/movie\/424242\/[^/]+\/$/)
+  })
+
   it('keeps meta descriptions concise', () => {
     const seo = buildMovieSeo({
       kp_id: '123',
@@ -38,7 +46,7 @@ describe('movieSeo', () => {
     }
 
     expect(getMovieSeoSlug(movie)).toBe('young-sherlock')
-    expect(getMovieSeoPath(movie)).toBe('/movie/5591410/young-sherlock')
+    expect(getMovieSeoPath(movie)).toBe('/movie/5591410/young-sherlock/')
   })
 
   it('falls back to transliterated localized title when no original Latin title exists', () => {
@@ -63,7 +71,7 @@ describe('movieSeo', () => {
         kp_id: '5591410',
         title: 'Молодой Шерлок'
       })
-    ).toBe('/movie/5591410/young-sherlock')
+    ).toBe('/movie/5591410/young-sherlock/')
   })
 
   it('falls back to a deterministic movie-id slug when the title cannot be transliterated', () => {
@@ -73,7 +81,7 @@ describe('movieSeo', () => {
     }
 
     expect(getMovieSeoSlug(movie)).toBe('movie-424242')
-    expect(getMovieSeoPath(movie)).toBe('/movie/424242/movie-424242')
+    expect(getMovieSeoPath(movie)).toBe('/movie/424242/movie-424242/')
   })
 
   it('prefers richer incoming canonical data when registering the same kp id again', () => {
@@ -90,7 +98,7 @@ describe('movieSeo', () => {
     })
 
     expect(getMovieSeoSlug({ kp_id: '777777' })).toBe('young-sherlock')
-    expect(getMovieSeoPath({ kp_id: '777777' })).toBe('/movie/777777/young-sherlock')
+    expect(getMovieSeoPath({ kp_id: '777777' })).toBe('/movie/777777/young-sherlock/')
   })
 
   it('does not let a card fetched during prerender change another page', () => {
