@@ -1,0 +1,1016 @@
+{
+  "\u0000plugin-vue:export-helper": [
+    "/assets/immutable/image-back-stars-DQ1zdM_d.webp",
+    "/assets/immutable/trn-christmas-lights-CqAqthlw.webp",
+    "/assets/immutable/material-symbols-subset-2nrvBbU8.ttf"
+  ],
+  "\u0000rolldown/runtime.js": [
+    "/assets/immutable/rolldown-runtime-QTnfLwEv.js"
+  ],
+  "\u0000vite/modulepreload-polyfill.js": [
+    "/assets/immutable/image-back-stars-DQ1zdM_d.webp",
+    "/assets/immutable/trn-christmas-lights-CqAqthlw.webp",
+    "/assets/immutable/material-symbols-subset-2nrvBbU8.ttf"
+  ],
+  "\u0000vite/preload-helper.js": [
+    "/assets/immutable/mediaUtils-_Sy8PYwd.js"
+  ],
+  "../../../../../@vite-plugin-pwa/virtual:pwa-register": [
+    "/assets/immutable/image-back-stars-DQ1zdM_d.webp",
+    "/assets/immutable/trn-christmas-lights-CqAqthlw.webp",
+    "/assets/immutable/material-symbols-subset-2nrvBbU8.ttf"
+  ],
+  "index.html": [
+    "/assets/immutable/image-back-stars-DQ1zdM_d.webp",
+    "/assets/immutable/trn-christmas-lights-CqAqthlw.webp",
+    "/assets/immutable/material-symbols-subset-2nrvBbU8.ttf"
+  ],
+  "node_modules/@unhead/vue/dist/client.mjs": [
+    "/assets/immutable/vendor-vue-B-LDkT8y.js"
+  ],
+  "node_modules/@unhead/vue/dist/shared/vue.Cd6dkybA.mjs": [
+    "/assets/immutable/vendor-vue-B-LDkT8y.js"
+  ],
+  "node_modules/@unhead/vue/dist/shared/vue.N9zWjxoK.mjs": [
+    "/assets/immutable/vendor-vue-B-LDkT8y.js"
+  ],
+  "node_modules/@vue/reactivity/dist/reactivity.esm-bundler.js": [
+    "/assets/immutable/vendor-vue-B-LDkT8y.js"
+  ],
+  "node_modules/@vue/runtime-core/dist/runtime-core.esm-bundler.js": [
+    "/assets/immutable/vendor-vue-B-LDkT8y.js"
+  ],
+  "node_modules/@vue/runtime-dom/dist/runtime-dom.esm-bundler.js": [
+    "/assets/immutable/image-back-stars-DQ1zdM_d.webp",
+    "/assets/immutable/trn-christmas-lights-CqAqthlw.webp",
+    "/assets/immutable/material-symbols-subset-2nrvBbU8.ttf"
+  ],
+  "node_modules/@vue/shared/dist/shared.esm-bundler.js": [
+    "/assets/immutable/vendor-vue-B-LDkT8y.js"
+  ],
+  "node_modules/axios/lib/adapters/adapters.js": [
+    "/assets/immutable/vendor-http-BK20qonh.js"
+  ],
+  "node_modules/axios/lib/adapters/fetch.js": [
+    "/assets/immutable/vendor-http-BK20qonh.js"
+  ],
+  "node_modules/axios/lib/adapters/xhr.js": [
+    "/assets/immutable/vendor-http-BK20qonh.js"
+  ],
+  "node_modules/axios/lib/axios.js": [
+    "/assets/immutable/vendor-http-BK20qonh.js"
+  ],
+  "node_modules/axios/lib/cancel/CancelToken.js": [
+    "/assets/immutable/vendor-http-BK20qonh.js"
+  ],
+  "node_modules/axios/lib/cancel/CanceledError.js": [
+    "/assets/immutable/vendor-http-BK20qonh.js"
+  ],
+  "node_modules/axios/lib/cancel/isCancel.js": [
+    "/assets/immutable/vendor-http-BK20qonh.js"
+  ],
+  "node_modules/axios/lib/core/Axios.js": [
+    "/assets/immutable/vendor-http-BK20qonh.js"
+  ],
+  "node_modules/axios/lib/core/AxiosError.js": [
+    "/assets/immutable/vendor-http-BK20qonh.js"
+  ],
+  "node_modules/axios/lib/core/AxiosHeaders.js": [
+    "/assets/immutable/vendor-http-BK20qonh.js"
+  ],
+  "node_modules/axios/lib/core/InterceptorManager.js": [
+    "/assets/immutable/vendor-http-BK20qonh.js"
+  ],
+  "node_modules/axios/lib/core/buildFullPath.js": [
+    "/assets/immutable/vendor-http-BK20qonh.js"
+  ],
+  "node_modules/axios/lib/core/dispatchRequest.js": [
+    "/assets/immutable/vendor-http-BK20qonh.js"
+  ],
+  "node_modules/axios/lib/core/mergeConfig.js": [
+    "/assets/immutable/vendor-http-BK20qonh.js"
+  ],
+  "node_modules/axios/lib/core/methodList.js": [
+    "/assets/immutable/vendor-http-BK20qonh.js"
+  ],
+  "node_modules/axios/lib/core/setFormDataHeaders.js": [
+    "/assets/immutable/vendor-http-BK20qonh.js"
+  ],
+  "node_modules/axios/lib/core/settle.js": [
+    "/assets/immutable/vendor-http-BK20qonh.js"
+  ],
+  "node_modules/axios/lib/core/transformData.js": [
+    "/assets/immutable/vendor-http-BK20qonh.js"
+  ],
+  "node_modules/axios/lib/defaults/index.js": [
+    "/assets/immutable/vendor-http-BK20qonh.js"
+  ],
+  "node_modules/axios/lib/defaults/transitional.js": [
+    "/assets/immutable/vendor-http-BK20qonh.js"
+  ],
+  "node_modules/axios/lib/env/data.js": [
+    "/assets/immutable/vendor-http-BK20qonh.js"
+  ],
+  "node_modules/axios/lib/helpers/AxiosURLSearchParams.js": [
+    "/assets/immutable/vendor-http-BK20qonh.js"
+  ],
+  "node_modules/axios/lib/helpers/HttpStatusCode.js": [
+    "/assets/immutable/vendor-http-BK20qonh.js"
+  ],
+  "node_modules/axios/lib/helpers/bind.js": [
+    "/assets/immutable/vendor-http-BK20qonh.js"
+  ],
+  "node_modules/axios/lib/helpers/buildURL.js": [
+    "/assets/immutable/vendor-http-BK20qonh.js"
+  ],
+  "node_modules/axios/lib/helpers/combineURLs.js": [
+    "/assets/immutable/vendor-http-BK20qonh.js"
+  ],
+  "node_modules/axios/lib/helpers/composeSignals.js": [
+    "/assets/immutable/vendor-http-BK20qonh.js"
+  ],
+  "node_modules/axios/lib/helpers/cookies.js": [
+    "/assets/immutable/vendor-http-BK20qonh.js"
+  ],
+  "node_modules/axios/lib/helpers/estimateDataURLDecodedBytes.js": [
+    "/assets/immutable/vendor-http-BK20qonh.js"
+  ],
+  "node_modules/axios/lib/helpers/formDataToJSON.js": [
+    "/assets/immutable/vendor-http-BK20qonh.js"
+  ],
+  "node_modules/axios/lib/helpers/isAbsoluteURL.js": [
+    "/assets/immutable/vendor-http-BK20qonh.js"
+  ],
+  "node_modules/axios/lib/helpers/isAxiosError.js": [
+    "/assets/immutable/vendor-http-BK20qonh.js"
+  ],
+  "node_modules/axios/lib/helpers/isURLSameOrigin.js": [
+    "/assets/immutable/vendor-http-BK20qonh.js"
+  ],
+  "node_modules/axios/lib/helpers/normalizeURLForProtocolCheck.js": [
+    "/assets/immutable/vendor-http-BK20qonh.js"
+  ],
+  "node_modules/axios/lib/helpers/parseHeaders.js": [
+    "/assets/immutable/vendor-http-BK20qonh.js"
+  ],
+  "node_modules/axios/lib/helpers/parseProtocol.js": [
+    "/assets/immutable/vendor-http-BK20qonh.js"
+  ],
+  "node_modules/axios/lib/helpers/progressEventReducer.js": [
+    "/assets/immutable/vendor-http-BK20qonh.js"
+  ],
+  "node_modules/axios/lib/helpers/resolveConfig.js": [
+    "/assets/immutable/vendor-http-BK20qonh.js"
+  ],
+  "node_modules/axios/lib/helpers/sanitizeHeaderValue.js": [
+    "/assets/immutable/vendor-http-BK20qonh.js"
+  ],
+  "node_modules/axios/lib/helpers/speedometer.js": [
+    "/assets/immutable/vendor-http-BK20qonh.js"
+  ],
+  "node_modules/axios/lib/helpers/spread.js": [
+    "/assets/immutable/vendor-http-BK20qonh.js"
+  ],
+  "node_modules/axios/lib/helpers/throttle.js": [
+    "/assets/immutable/vendor-http-BK20qonh.js"
+  ],
+  "node_modules/axios/lib/helpers/toFormData.js": [
+    "/assets/immutable/vendor-http-BK20qonh.js"
+  ],
+  "node_modules/axios/lib/helpers/toURLEncodedForm.js": [
+    "/assets/immutable/vendor-http-BK20qonh.js"
+  ],
+  "node_modules/axios/lib/helpers/trackStream.js": [
+    "/assets/immutable/vendor-http-BK20qonh.js"
+  ],
+  "node_modules/axios/lib/helpers/validator.js": [
+    "/assets/immutable/vendor-http-BK20qonh.js"
+  ],
+  "node_modules/axios/lib/platform/browser/classes/Blob.js": [
+    "/assets/immutable/vendor-http-BK20qonh.js"
+  ],
+  "node_modules/axios/lib/platform/browser/classes/FormData.js": [
+    "/assets/immutable/vendor-http-BK20qonh.js"
+  ],
+  "node_modules/axios/lib/platform/browser/classes/URLSearchParams.js": [
+    "/assets/immutable/vendor-http-BK20qonh.js"
+  ],
+  "node_modules/axios/lib/platform/browser/index.js": [
+    "/assets/immutable/vendor-http-BK20qonh.js"
+  ],
+  "node_modules/axios/lib/platform/common/utils.js": [
+    "/assets/immutable/vendor-http-BK20qonh.js"
+  ],
+  "node_modules/axios/lib/platform/index.js": [
+    "/assets/immutable/vendor-http-BK20qonh.js"
+  ],
+  "node_modules/axios/lib/utils.js": [
+    "/assets/immutable/vendor-http-BK20qonh.js"
+  ],
+  "node_modules/dompurify/dist/purify.es.mjs": [
+    "/assets/immutable/vendor-sanitize-BGzA-uNi.js"
+  ],
+  "node_modules/lodash.debounce/index.js": [
+    "/assets/immutable/latestRequest-DNmRTsHI.js"
+  ],
+  "node_modules/pinia-plugin-persistedstate/dist/index.js": [
+    "/assets/immutable/vendor-vue-B-LDkT8y.js"
+  ],
+  "node_modules/pinia/dist/pinia.mjs": [
+    "/assets/immutable/vendor-vue-B-LDkT8y.js"
+  ],
+  "node_modules/qrcode.vue/dist/qrcode.vue.esm.js": [
+    "/assets/immutable/qrcode.vue.esm-ChNpgsyC.js"
+  ],
+  "node_modules/unhead/dist/client.mjs": [
+    "/assets/immutable/vendor-vue-B-LDkT8y.js"
+  ],
+  "node_modules/unhead/dist/shared/unhead.AvDFlk_u.mjs": [
+    "/assets/immutable/vendor-vue-B-LDkT8y.js"
+  ],
+  "node_modules/unhead/dist/shared/unhead.BrXkGDAU.mjs": [
+    "/assets/immutable/vendor-vue-B-LDkT8y.js"
+  ],
+  "node_modules/unhead/dist/shared/unhead.ChXiQvI8.mjs": [
+    "/assets/immutable/vendor-vue-B-LDkT8y.js"
+  ],
+  "node_modules/unhead/dist/shared/unhead.J7R8psSN.mjs": [
+    "/assets/immutable/vendor-vue-B-LDkT8y.js"
+  ],
+  "node_modules/unhead/node_modules/hookable/dist/index.mjs": [
+    "/assets/immutable/vendor-vue-B-LDkT8y.js"
+  ],
+  "node_modules/vite-ssg/dist/index.mjs": [
+    "/assets/immutable/image-back-stars-DQ1zdM_d.webp",
+    "/assets/immutable/trn-christmas-lights-CqAqthlw.webp",
+    "/assets/immutable/material-symbols-subset-2nrvBbU8.ttf"
+  ],
+  "node_modules/vite-ssg/dist/shared/vite-ssg.C6pK7rvr.mjs": [
+    "/assets/immutable/image-back-stars-DQ1zdM_d.webp",
+    "/assets/immutable/trn-christmas-lights-CqAqthlw.webp",
+    "/assets/immutable/material-symbols-subset-2nrvBbU8.ttf"
+  ],
+  "node_modules/vite-ssg/dist/shared/vite-ssg.ETIvV-80.mjs": [
+    "/assets/immutable/image-back-stars-DQ1zdM_d.webp",
+    "/assets/immutable/trn-christmas-lights-CqAqthlw.webp",
+    "/assets/immutable/material-symbols-subset-2nrvBbU8.ttf"
+  ],
+  "node_modules/vue-router/dist/devtools-DCoWQoU_.js": [
+    "/assets/immutable/vendor-vue-B-LDkT8y.js"
+  ],
+  "node_modules/vue-router/dist/useApi-s_02lHjl.js": [
+    "/assets/immutable/vendor-vue-B-LDkT8y.js"
+  ],
+  "node_modules/vue-router/dist/vue-router.js": [
+    "/assets/immutable/vendor-vue-B-LDkT8y.js"
+  ],
+  "node_modules/workbox-window/build/workbox-window.prod.es5.mjs": [
+    "/assets/immutable/workbox-window.prod.es5-Bd17z0YL.js"
+  ],
+  "shared/history-data.js": [
+    "/assets/immutable/image-back-stars-DQ1zdM_d.webp",
+    "/assets/immutable/trn-christmas-lights-CqAqthlw.webp",
+    "/assets/immutable/material-symbols-subset-2nrvBbU8.ttf"
+  ],
+  "shared/movie-metadata.js": [
+    "/assets/immutable/user-tFK5VPKB.js"
+  ],
+  "src/App.vue": [
+    "/assets/immutable/image-back-stars-DQ1zdM_d.webp",
+    "/assets/immutable/trn-christmas-lights-CqAqthlw.webp",
+    "/assets/immutable/material-symbols-subset-2nrvBbU8.ttf"
+  ],
+  "src/App.vue?vue&type=style&index=0&lang.css": [
+    "/assets/immutable/image-back-stars-DQ1zdM_d.webp",
+    "/assets/immutable/trn-christmas-lights-CqAqthlw.webp",
+    "/assets/immutable/material-symbols-subset-2nrvBbU8.ttf"
+  ],
+  "src/App.vue?vue&type=style&index=1&lang.css": [
+    "/assets/immutable/image-back-stars-DQ1zdM_d.webp",
+    "/assets/immutable/trn-christmas-lights-CqAqthlw.webp",
+    "/assets/immutable/material-symbols-subset-2nrvBbU8.ttf"
+  ],
+  "src/api/accountErrors.js": [
+    "/assets/immutable/workerAccount-DA_epL3v.js"
+  ],
+  "src/api/cloudHistory.js": [
+    "/assets/immutable/user-tFK5VPKB.js"
+  ],
+  "src/api/contentProviderOrder.js": [
+    "/assets/immutable/image-back-stars-DQ1zdM_d.webp",
+    "/assets/immutable/trn-christmas-lights-CqAqthlw.webp",
+    "/assets/immutable/material-symbols-subset-2nrvBbU8.ttf"
+  ],
+  "src/api/listMetadata.js": [
+    "/assets/immutable/user-tFK5VPKB.js"
+  ],
+  "src/api/movieExtras.js": [
+    "/assets/immutable/MovieInfo-BHI1QHoE.js",
+    "/assets/immutable/MovieInfo-D4amDiEJ.css",
+    "/assets/immutable/icon-shikimori-DUDsIhO9.svg"
+  ],
+  "src/api/movieSeoNormalizer.js": [
+    "/assets/immutable/image-back-stars-DQ1zdM_d.webp",
+    "/assets/immutable/trn-christmas-lights-CqAqthlw.webp",
+    "/assets/immutable/material-symbols-subset-2nrvBbU8.ttf"
+  ],
+  "src/api/movies.ddbb-live.js": [
+    "/assets/immutable/movies.ddbb-live-6g_BTZUJ.js"
+  ],
+  "src/api/movies.ddbb.js": [
+    "/assets/immutable/movies.ddbb-C_pRzNXz.js"
+  ],
+  "src/api/movies.js": [
+    "/assets/immutable/image-back-stars-DQ1zdM_d.webp",
+    "/assets/immutable/trn-christmas-lights-CqAqthlw.webp",
+    "/assets/immutable/material-symbols-subset-2nrvBbU8.ttf"
+  ],
+  "src/api/movies.worker.js": [
+    "/assets/immutable/movies.worker-lAvbh7Un.js"
+  ],
+  "src/api/providerRegistry.js": [
+    "/assets/immutable/image-back-stars-DQ1zdM_d.webp",
+    "/assets/immutable/trn-christmas-lights-CqAqthlw.webp",
+    "/assets/immutable/material-symbols-subset-2nrvBbU8.ttf"
+  ],
+  "src/api/publicDataCache.js": [
+    "/assets/immutable/movies.worker-lAvbh7Un.js"
+  ],
+  "src/api/searchProviderOrder.js": [
+    "/assets/immutable/image-back-stars-DQ1zdM_d.webp",
+    "/assets/immutable/trn-christmas-lights-CqAqthlw.webp",
+    "/assets/immutable/material-symbols-subset-2nrvBbU8.ttf"
+  ],
+  "src/api/user.js": [
+    "/assets/immutable/user-tFK5VPKB.js"
+  ],
+  "src/api/workerAccount.js": [
+    "/assets/immutable/workerAccount-DA_epL3v.js"
+  ],
+  "src/api/workerOrigin.js": [
+    "/assets/immutable/workerOrigin-Dk9E-pJy.js"
+  ],
+  "src/assets/fontawesome-subset.css": [
+    "/assets/immutable/image-back-stars-DQ1zdM_d.webp",
+    "/assets/immutable/trn-christmas-lights-CqAqthlw.webp",
+    "/assets/immutable/material-symbols-subset-2nrvBbU8.ttf"
+  ],
+  "src/assets/icon-imdb-logo.svg": [
+    "/assets/immutable/movieDuration-BsZsv3Js.js"
+  ],
+  "src/assets/icon-kp-logo.svg": [
+    "/assets/immutable/RandomMovieModal-DitTlhDL.js",
+    "/assets/immutable/RandomMovieModal-BIbHQp_i.css"
+  ],
+  "src/assets/icon-main-logo-150x150.png": [
+    "/assets/immutable/image-back-stars-DQ1zdM_d.webp",
+    "/assets/immutable/trn-christmas-lights-CqAqthlw.webp",
+    "/assets/immutable/material-symbols-subset-2nrvBbU8.ttf"
+  ],
+  "src/assets/icon-metacritic.svg": [
+    "/assets/immutable/MovieInfo-BHI1QHoE.js",
+    "/assets/immutable/MovieInfo-D4amDiEJ.css",
+    "/assets/immutable/icon-shikimori-DUDsIhO9.svg"
+  ],
+  "src/assets/icon-rotten-tomatoes.svg": [
+    "/assets/immutable/MovieInfo-BHI1QHoE.js",
+    "/assets/immutable/MovieInfo-D4amDiEJ.css",
+    "/assets/immutable/icon-shikimori-DUDsIhO9.svg"
+  ],
+  "src/assets/icon-shikimori.svg": [
+    "/assets/immutable/MovieInfo-BHI1QHoE.js",
+    "/assets/immutable/MovieInfo-D4amDiEJ.css",
+    "/assets/immutable/icon-shikimori-DUDsIhO9.svg"
+  ],
+  "src/assets/icon-spinner.svg": [
+    "/assets/immutable/MovieList-BzRJhy9S.js",
+    "/assets/immutable/MovieList-Sqx-kFhL.css"
+  ],
+  "src/assets/icon-tmdb.svg": [
+    "/assets/immutable/MovieInfo-BHI1QHoE.js",
+    "/assets/immutable/MovieInfo-D4amDiEJ.css",
+    "/assets/immutable/icon-shikimori-DUDsIhO9.svg"
+  ],
+  "src/assets/image-back-stars.webp": [
+    "/assets/immutable/image-back-stars-DQ1zdM_d.webp",
+    "/assets/immutable/trn-christmas-lights-CqAqthlw.webp",
+    "/assets/immutable/material-symbols-subset-2nrvBbU8.ttf"
+  ],
+  "src/assets/image-no-poster.gif": [
+    "/assets/immutable/mediaUtils-_Sy8PYwd.js"
+  ],
+  "src/assets/player-component.scss?vue&type=style&index=0&src=9092eafb&scoped=9092eafb&lang.css": [
+    "/assets/immutable/PlayerComponent-CbibA25b.js",
+    "/assets/immutable/PlayerComponent-BCnvcUS0.css"
+  ],
+  "src/assets/trn-christmas-lights.webp": [
+    "/assets/immutable/image-back-stars-DQ1zdM_d.webp",
+    "/assets/immutable/trn-christmas-lights-CqAqthlw.webp",
+    "/assets/immutable/material-symbols-subset-2nrvBbU8.ttf"
+  ],
+  "src/components/AuthSuccess.vue": [
+    "/assets/immutable/AuthSuccess-Be-gvtza.js",
+    "/assets/immutable/AuthSuccess-B74DIbmJ.css"
+  ],
+  "src/components/AuthSuccess.vue?vue&type=style&index=0&scoped=5d4b6040&lang.css": [
+    "/assets/immutable/AuthSuccess-Be-gvtza.js",
+    "/assets/immutable/AuthSuccess-B74DIbmJ.css"
+  ],
+  "src/components/BackgroundSpace.vue": [
+    "/assets/immutable/image-back-stars-DQ1zdM_d.webp",
+    "/assets/immutable/trn-christmas-lights-CqAqthlw.webp",
+    "/assets/immutable/material-symbols-subset-2nrvBbU8.ttf"
+  ],
+  "src/components/BackgroundSpace.vue?vue&type=style&index=0&scoped=97a9cd89&lang.css": [
+    "/assets/immutable/image-back-stars-DQ1zdM_d.webp",
+    "/assets/immutable/trn-christmas-lights-CqAqthlw.webp",
+    "/assets/immutable/material-symbols-subset-2nrvBbU8.ttf"
+  ],
+  "src/components/BaseModal.vue": [
+    "/assets/immutable/image-back-stars-DQ1zdM_d.webp",
+    "/assets/immutable/trn-christmas-lights-CqAqthlw.webp",
+    "/assets/immutable/material-symbols-subset-2nrvBbU8.ttf"
+  ],
+  "src/components/BaseModal.vue?vue&type=style&index=0&scoped=8f9e5c9b&lang.css": [
+    "/assets/immutable/image-back-stars-DQ1zdM_d.webp",
+    "/assets/immutable/trn-christmas-lights-CqAqthlw.webp",
+    "/assets/immutable/material-symbols-subset-2nrvBbU8.ttf"
+  ],
+  "src/components/CardMovie/CardMovie.vue": [
+    "/assets/immutable/MovieList-BzRJhy9S.js",
+    "/assets/immutable/MovieList-Sqx-kFhL.css"
+  ],
+  "src/components/CardMovie/CardMovie.vue?vue&type=style&index=0&scoped=20e38d0e&lang.css": [
+    "/assets/immutable/MovieList-BzRJhy9S.js",
+    "/assets/immutable/MovieList-Sqx-kFhL.css"
+  ],
+  "src/components/CardMovie/CardMovieDetails.vue": [
+    "/assets/immutable/MovieList-BzRJhy9S.js",
+    "/assets/immutable/MovieList-Sqx-kFhL.css"
+  ],
+  "src/components/CardMovie/CardMovieDetails.vue?vue&type=style&index=0&scoped=3c8b5104&lang.css": [
+    "/assets/immutable/MovieList-BzRJhy9S.js",
+    "/assets/immutable/MovieList-Sqx-kFhL.css"
+  ],
+  "src/components/CardMovie/CardMovieSwipeWrapper.vue": [
+    "/assets/immutable/MovieList-BzRJhy9S.js",
+    "/assets/immutable/MovieList-Sqx-kFhL.css"
+  ],
+  "src/components/CardMovie/CardMovieSwipeWrapper.vue?vue&type=style&index=0&scoped=8bc88bc3&lang.css": [
+    "/assets/immutable/MovieList-BzRJhy9S.js",
+    "/assets/immutable/MovieList-Sqx-kFhL.css"
+  ],
+  "src/components/CardMovie/CardsMovieMainContent.vue": [
+    "/assets/immutable/MovieList-BzRJhy9S.js",
+    "/assets/immutable/MovieList-Sqx-kFhL.css"
+  ],
+  "src/components/CardMovie/CardsMovieMainContent.vue?vue&type=style&index=0&scoped=f60ea0e1&lang.css": [
+    "/assets/immutable/MovieList-BzRJhy9S.js",
+    "/assets/immutable/MovieList-Sqx-kFhL.css"
+  ],
+  "src/components/CardMovie/index.js": [
+    "/assets/immutable/MovieList-BzRJhy9S.js",
+    "/assets/immutable/MovieList-Sqx-kFhL.css"
+  ],
+  "src/components/ConfirmationHost.vue": [
+    "/assets/immutable/image-back-stars-DQ1zdM_d.webp",
+    "/assets/immutable/trn-christmas-lights-CqAqthlw.webp",
+    "/assets/immutable/material-symbols-subset-2nrvBbU8.ttf"
+  ],
+  "src/components/ContactsPage.vue": [
+    "/assets/immutable/ContactsPage-Cs9FVNwn.js",
+    "/assets/immutable/ContactsPage-BmBLqVPf.css"
+  ],
+  "src/components/ContactsPage.vue?vue&type=style&index=0&scoped=155af109&lang.css": [
+    "/assets/immutable/ContactsPage-Cs9FVNwn.js",
+    "/assets/immutable/ContactsPage-BmBLqVPf.css"
+  ],
+  "src/components/ErrorMessage.vue": [
+    "/assets/immutable/ErrorMessage-Pmw_UpK4.js",
+    "/assets/immutable/ErrorMessage-ygpqHBWs.css"
+  ],
+  "src/components/ErrorMessage.vue?vue&type=style&index=0&scoped=07e55bc5&lang.css": [
+    "/assets/immutable/ErrorMessage-Pmw_UpK4.js",
+    "/assets/immutable/ErrorMessage-ygpqHBWs.css"
+  ],
+  "src/components/HistoryMigrationNotice.vue": [
+    "/assets/immutable/MovieSearch-DPUKT21I.js",
+    "/assets/immutable/MovieSearch-DRCWRVgj.css"
+  ],
+  "src/components/HistoryMigrationNotice.vue?vue&type=style&index=0&scoped=c9a8a778&lang.css": [
+    "/assets/immutable/MovieSearch-DPUKT21I.js",
+    "/assets/immutable/MovieSearch-DRCWRVgj.css"
+  ],
+  "src/components/HistorySyncSettings.vue": [
+    "/assets/immutable/HistorySyncSettings-eGM4gGNH.js",
+    "/assets/immutable/HistorySyncSettings-CT3WOtVT.css"
+  ],
+  "src/components/HistorySyncSettings.vue?vue&type=style&index=0&scoped=5a5ee090&lang.css": [
+    "/assets/immutable/HistorySyncSettings-eGM4gGNH.js",
+    "/assets/immutable/HistorySyncSettings-CT3WOtVT.css"
+  ],
+  "src/components/LavaLampBackground.vue": [
+    "/assets/immutable/image-back-stars-DQ1zdM_d.webp",
+    "/assets/immutable/trn-christmas-lights-CqAqthlw.webp",
+    "/assets/immutable/material-symbols-subset-2nrvBbU8.ttf"
+  ],
+  "src/components/LavaLampBackground.vue?vue&type=style&index=0&scoped=e1e15834&lang.css": [
+    "/assets/immutable/image-back-stars-DQ1zdM_d.webp",
+    "/assets/immutable/trn-christmas-lights-CqAqthlw.webp",
+    "/assets/immutable/material-symbols-subset-2nrvBbU8.ttf"
+  ],
+  "src/components/Login.vue": [
+    "/assets/immutable/Login-BhmSmrSN.js",
+    "/assets/immutable/Login-BcFfgquH.css"
+  ],
+  "src/components/Login.vue?vue&type=style&index=0&scoped=25e32c8b&lang.css": [
+    "/assets/immutable/Login-BhmSmrSN.js",
+    "/assets/immutable/Login-BcFfgquH.css"
+  ],
+  "src/components/MenuNavigation.vue": [
+    "/assets/immutable/image-back-stars-DQ1zdM_d.webp",
+    "/assets/immutable/trn-christmas-lights-CqAqthlw.webp",
+    "/assets/immutable/material-symbols-subset-2nrvBbU8.ttf"
+  ],
+  "src/components/MenuNavigation.vue?vue&type=style&index=0&scoped=546b8d47&lang.css": [
+    "/assets/immutable/image-back-stars-DQ1zdM_d.webp",
+    "/assets/immutable/trn-christmas-lights-CqAqthlw.webp",
+    "/assets/immutable/material-symbols-subset-2nrvBbU8.ttf"
+  ],
+  "src/components/MenuNavigation/DesktopMenu.vue": [
+    "/assets/immutable/image-back-stars-DQ1zdM_d.webp",
+    "/assets/immutable/trn-christmas-lights-CqAqthlw.webp",
+    "/assets/immutable/material-symbols-subset-2nrvBbU8.ttf"
+  ],
+  "src/components/MenuNavigation/DesktopMenu.vue?vue&type=style&index=0&scoped=c48342e8&lang.css": [
+    "/assets/immutable/image-back-stars-DQ1zdM_d.webp",
+    "/assets/immutable/trn-christmas-lights-CqAqthlw.webp",
+    "/assets/immutable/material-symbols-subset-2nrvBbU8.ttf"
+  ],
+  "src/components/MenuNavigation/MobileMenu.vue": [
+    "/assets/immutable/image-back-stars-DQ1zdM_d.webp",
+    "/assets/immutable/trn-christmas-lights-CqAqthlw.webp",
+    "/assets/immutable/material-symbols-subset-2nrvBbU8.ttf"
+  ],
+  "src/components/MenuNavigation/MobileMenu.vue?vue&type=style&index=0&scoped=1562f11c&lang.css": [
+    "/assets/immutable/image-back-stars-DQ1zdM_d.webp",
+    "/assets/immutable/trn-christmas-lights-CqAqthlw.webp",
+    "/assets/immutable/material-symbols-subset-2nrvBbU8.ttf"
+  ],
+  "src/components/MobileHeader.vue": [
+    "/assets/immutable/image-back-stars-DQ1zdM_d.webp",
+    "/assets/immutable/trn-christmas-lights-CqAqthlw.webp",
+    "/assets/immutable/material-symbols-subset-2nrvBbU8.ttf"
+  ],
+  "src/components/MobileHeader.vue?vue&type=style&index=0&scoped=2de57387&lang.css": [
+    "/assets/immutable/image-back-stars-DQ1zdM_d.webp",
+    "/assets/immutable/trn-christmas-lights-CqAqthlw.webp",
+    "/assets/immutable/material-symbols-subset-2nrvBbU8.ttf"
+  ],
+  "src/components/ModalSearch.vue": [
+    "/assets/immutable/ModalSearch-CtbK0TyQ.js",
+    "/assets/immutable/ModalSearch-BdmNt4iY.css"
+  ],
+  "src/components/ModalSearch.vue?vue&type=style&index=0&scoped=a19fa716&lang.scss": [
+    "/assets/immutable/ModalSearch-CtbK0TyQ.js",
+    "/assets/immutable/ModalSearch-BdmNt4iY.css"
+  ],
+  "src/components/MovieInfo.css?vue&type=style&index=0&src=d0c5542d&scoped=d0c5542d&lang.css": [
+    "/assets/immutable/MovieInfo-BHI1QHoE.js",
+    "/assets/immutable/MovieInfo-D4amDiEJ.css",
+    "/assets/immutable/icon-shikimori-DUDsIhO9.svg"
+  ],
+  "src/components/MovieInfo.vue": [
+    "/assets/immutable/MovieInfo-BHI1QHoE.js",
+    "/assets/immutable/MovieInfo-D4amDiEJ.css",
+    "/assets/immutable/icon-shikimori-DUDsIhO9.svg"
+  ],
+  "src/components/MovieList/MovieList.vue": [
+    "/assets/immutable/MovieList-BzRJhy9S.js",
+    "/assets/immutable/MovieList-Sqx-kFhL.css"
+  ],
+  "src/components/MovieList/MovieList.vue?vue&type=style&index=0&scoped=47142ebe&lang.css": [
+    "/assets/immutable/MovieList-BzRJhy9S.js",
+    "/assets/immutable/MovieList-Sqx-kFhL.css"
+  ],
+  "src/components/MovieList/index.js": [
+    "/assets/immutable/MovieList-BzRJhy9S.js",
+    "/assets/immutable/MovieList-Sqx-kFhL.css"
+  ],
+  "src/components/MovieSearch.vue": [
+    "/assets/immutable/MovieSearch-DPUKT21I.js",
+    "/assets/immutable/MovieSearch-DRCWRVgj.css"
+  ],
+  "src/components/MovieSearch.vue?vue&type=style&index=0&scoped=e39f26b5&lang.css": [
+    "/assets/immutable/MovieSearch-DPUKT21I.js",
+    "/assets/immutable/MovieSearch-DRCWRVgj.css"
+  ],
+  "src/components/NotFound.vue": [
+    "/assets/immutable/NotFound-B_B4SWcf.js",
+    "/assets/immutable/NotFound-CZSVI0df.css"
+  ],
+  "src/components/NotFound.vue?vue&type=style&index=0&scoped=706593b0&lang.css": [
+    "/assets/immutable/NotFound-B_B4SWcf.js",
+    "/assets/immutable/NotFound-CZSVI0df.css"
+  ],
+  "src/components/PlayerComponent.vue": [
+    "/assets/immutable/PlayerComponent-CbibA25b.js",
+    "/assets/immutable/PlayerComponent-BCnvcUS0.css"
+  ],
+  "src/components/PlayerModal.vue": [
+    "/assets/immutable/PlayerModal-PWv8rr_4.js",
+    "/assets/immutable/PlayerModal-CBjHVCi4.css"
+  ],
+  "src/components/PlayerModal.vue?vue&type=style&index=0&scoped=5986675c&lang.css": [
+    "/assets/immutable/PlayerModal-PWv8rr_4.js",
+    "/assets/immutable/PlayerModal-CBjHVCi4.css"
+  ],
+  "src/components/RandomMovieModal.vue": [
+    "/assets/immutable/RandomMovieModal-DitTlhDL.js",
+    "/assets/immutable/RandomMovieModal-BIbHQp_i.css"
+  ],
+  "src/components/RandomMovieModal.vue?vue&type=style&index=0&scoped=0c705def&lang.css": [
+    "/assets/immutable/RandomMovieModal-DitTlhDL.js",
+    "/assets/immutable/RandomMovieModal-BIbHQp_i.css"
+  ],
+  "src/components/Settings.vue": [
+    "/assets/immutable/Settings-DdA-wjss.js",
+    "/assets/immutable/Settings-Ca8P7jY4.css"
+  ],
+  "src/components/Settings.vue?vue&type=style&index=0&scoped=1b1e3f8c&lang.css": [
+    "/assets/immutable/Settings-DdA-wjss.js",
+    "/assets/immutable/Settings-Ca8P7jY4.css"
+  ],
+  "src/components/SpinnerLoading.vue": [
+    "/assets/immutable/MovieList-BzRJhy9S.js",
+    "/assets/immutable/MovieList-Sqx-kFhL.css"
+  ],
+  "src/components/SpinnerLoading.vue?vue&type=style&index=0&scoped=0dbd38db&lang.css": [
+    "/assets/immutable/MovieList-BzRJhy9S.js",
+    "/assets/immutable/MovieList-Sqx-kFhL.css"
+  ],
+  "src/components/ThemeSelector.vue": [
+    "/assets/immutable/Settings-DdA-wjss.js",
+    "/assets/immutable/Settings-Ca8P7jY4.css"
+  ],
+  "src/components/ThemeSelector.vue?vue&type=style&index=0&scoped=5e498d4e&lang.css": [
+    "/assets/immutable/Settings-DdA-wjss.js",
+    "/assets/immutable/Settings-Ca8P7jY4.css"
+  ],
+  "src/components/TopMovies.vue": [
+    "/assets/immutable/TopMovies-B8NV-sGL.js",
+    "/assets/immutable/TopMovies-CjBCb3mN.css"
+  ],
+  "src/components/TopMovies.vue?vue&type=style&index=0&scoped=0d25dbba&lang.css": [
+    "/assets/immutable/TopMovies-B8NV-sGL.js",
+    "/assets/immutable/TopMovies-CjBCb3mN.css"
+  ],
+  "src/components/TrailerCarousel.vue": [
+    "/assets/immutable/TrailerCarousel-BkBX-1Oj.js",
+    "/assets/immutable/TrailerCarousel-BY8409m0.css"
+  ],
+  "src/components/TrailerCarousel.vue?vue&type=style&index=0&scoped=817c14d1&lang.scss": [
+    "/assets/immutable/TrailerCarousel-BkBX-1Oj.js",
+    "/assets/immutable/TrailerCarousel-BY8409m0.css"
+  ],
+  "src/components/User.vue": [
+    "/assets/immutable/User-kDpI8ajw.js",
+    "/assets/immutable/User-D1d0cA_u.css"
+  ],
+  "src/components/User.vue?vue&type=style&index=0&scoped=6c9efbf5&lang.css": [
+    "/assets/immutable/User-kDpI8ajw.js",
+    "/assets/immutable/User-D1d0cA_u.css"
+  ],
+  "src/components/UserLists.vue": [
+    "/assets/immutable/UserLists-B2ZbhaVH.js",
+    "/assets/immutable/UserLists-Bu9XQJ1X.css"
+  ],
+  "src/components/UserLists.vue?vue&type=style&index=0&scoped=ff4bda55&lang.css": [
+    "/assets/immutable/UserLists-B2ZbhaVH.js",
+    "/assets/immutable/UserLists-Bu9XQJ1X.css"
+  ],
+  "src/components/buttons/DeleteButton.vue": [
+    "/assets/immutable/MovieList-BzRJhy9S.js",
+    "/assets/immutable/MovieList-Sqx-kFhL.css"
+  ],
+  "src/components/buttons/DeleteButton.vue?vue&type=style&index=0&scoped=90c9cc1c&lang.css": [
+    "/assets/immutable/MovieList-BzRJhy9S.js",
+    "/assets/immutable/MovieList-Sqx-kFhL.css"
+  ],
+  "src/components/icons/TrashIcon.vue": [
+    "/assets/immutable/MovieList-BzRJhy9S.js",
+    "/assets/immutable/MovieList-Sqx-kFhL.css"
+  ],
+  "src/components/movie/MovieMobileListDropdown.vue": [
+    "/assets/immutable/MovieMobileListDropdown-DpSoWG8Y.js",
+    "/assets/immutable/MovieMobileListDropdown-Q9bMecYc.css"
+  ],
+  "src/components/movie/MovieMobileListDropdown.vue?vue&type=style&index=0&scoped=7928e758&lang.css": [
+    "/assets/immutable/MovieMobileListDropdown-DpSoWG8Y.js",
+    "/assets/immutable/MovieMobileListDropdown-Q9bMecYc.css"
+  ],
+  "src/components/movie/RibbonNav.vue": [
+    "/assets/immutable/RibbonNav-DLRuRpHm.js",
+    "/assets/immutable/RibbonNav-pO__u3jZ.css"
+  ],
+  "src/components/movie/RibbonNav.vue?vue&type=style&index=0&scoped=5789e986&lang.css": [
+    "/assets/immutable/RibbonNav-DLRuRpHm.js",
+    "/assets/immutable/RibbonNav-pO__u3jZ.css"
+  ],
+  "src/components/notification/ToastMessage.vue": [
+    "/assets/immutable/image-back-stars-DQ1zdM_d.webp",
+    "/assets/immutable/trn-christmas-lights-CqAqthlw.webp",
+    "/assets/immutable/material-symbols-subset-2nrvBbU8.ttf"
+  ],
+  "src/components/notification/ToastMessage.vue?vue&type=style&index=0&scoped=e41d2f32&lang.css": [
+    "/assets/immutable/image-back-stars-DQ1zdM_d.webp",
+    "/assets/immutable/trn-christmas-lights-CqAqthlw.webp",
+    "/assets/immutable/material-symbols-subset-2nrvBbU8.ttf"
+  ],
+  "src/components/player/PlayerSelectorBar.vue": [
+    "/assets/immutable/PlayerComponent-CbibA25b.js",
+    "/assets/immutable/PlayerComponent-BCnvcUS0.css"
+  ],
+  "src/components/player/PlayerSelectorBar.vue?vue&type=style&index=0&scoped=d88a3fd8&lang.css": [
+    "/assets/immutable/PlayerComponent-CbibA25b.js",
+    "/assets/immutable/PlayerComponent-BCnvcUS0.css"
+  ],
+  "src/components/slider/SliderRound.vue": [
+    "/assets/immutable/player-DzmM0w5k.js",
+    "/assets/immutable/player-d55AcML6.css"
+  ],
+  "src/components/slider/SliderRound.vue?vue&type=style&index=0&scoped=76401cd6&lang.css": [
+    "/assets/immutable/player-DzmM0w5k.js",
+    "/assets/immutable/player-d55AcML6.css"
+  ],
+  "src/composables/useAppSetup.js": [
+    "/assets/immutable/image-back-stars-DQ1zdM_d.webp",
+    "/assets/immutable/trn-christmas-lights-CqAqthlw.webp",
+    "/assets/immutable/material-symbols-subset-2nrvBbU8.ttf"
+  ],
+  "src/composables/useConfirmation.js": [
+    "/assets/immutable/image-back-stars-DQ1zdM_d.webp",
+    "/assets/immutable/trn-christmas-lights-CqAqthlw.webp",
+    "/assets/immutable/material-symbols-subset-2nrvBbU8.ttf"
+  ],
+  "src/composables/usePlayerElectronControls.js": [
+    "/assets/immutable/PlayerComponent-CbibA25b.js",
+    "/assets/immutable/PlayerComponent-BCnvcUS0.css"
+  ],
+  "src/composables/usePlayerLayout.js": [
+    "/assets/immutable/PlayerComponent-CbibA25b.js",
+    "/assets/immutable/PlayerComponent-BCnvcUS0.css"
+  ],
+  "src/composables/usePlayerLists.js": [
+    "/assets/immutable/MovieInfo-BHI1QHoE.js",
+    "/assets/immutable/MovieInfo-D4amDiEJ.css",
+    "/assets/immutable/icon-shikimori-DUDsIhO9.svg"
+  ],
+  "src/composables/usePlayerSharing.js": [
+    "/assets/immutable/PlayerComponent-CbibA25b.js",
+    "/assets/immutable/PlayerComponent-BCnvcUS0.css"
+  ],
+  "src/composables/usePlayerSources.js": [
+    "/assets/immutable/PlayerComponent-CbibA25b.js",
+    "/assets/immutable/PlayerComponent-BCnvcUS0.css"
+  ],
+  "src/composables/usePlayerVideoOverlay.js": [
+    "/assets/immutable/PlayerComponent-CbibA25b.js",
+    "/assets/immutable/PlayerComponent-BCnvcUS0.css"
+  ],
+  "src/composables/usePublicPageState.js": [
+    "/assets/immutable/usePublicPageState-Bf20VNR-.js"
+  ],
+  "src/constants.js": [
+    "/assets/immutable/image-back-stars-DQ1zdM_d.webp",
+    "/assets/immutable/trn-christmas-lights-CqAqthlw.webp",
+    "/assets/immutable/material-symbols-subset-2nrvBbU8.ttf"
+  ],
+  "src/helpers/hashHandler.js": [
+    "/assets/immutable/image-back-stars-DQ1zdM_d.webp",
+    "/assets/immutable/trn-christmas-lights-CqAqthlw.webp",
+    "/assets/immutable/material-symbols-subset-2nrvBbU8.ttf"
+  ],
+  "src/helpers/ui.js": [
+    "/assets/immutable/PlayerComponent-CbibA25b.js",
+    "/assets/immutable/PlayerComponent-BCnvcUS0.css"
+  ],
+  "src/main.js": [
+    "/assets/immutable/image-back-stars-DQ1zdM_d.webp",
+    "/assets/immutable/trn-christmas-lights-CqAqthlw.webp",
+    "/assets/immutable/material-symbols-subset-2nrvBbU8.ttf"
+  ],
+  "src/router/index.js": [
+    "/assets/immutable/image-back-stars-DQ1zdM_d.webp",
+    "/assets/immutable/trn-christmas-lights-CqAqthlw.webp",
+    "/assets/immutable/material-symbols-subset-2nrvBbU8.ttf"
+  ],
+  "src/router/routes.js": [
+    "/assets/immutable/image-back-stars-DQ1zdM_d.webp",
+    "/assets/immutable/trn-christmas-lights-CqAqthlw.webp",
+    "/assets/immutable/material-symbols-subset-2nrvBbU8.ttf"
+  ],
+  "src/store/auth/auth.js": [
+    "/assets/immutable/image-back-stars-DQ1zdM_d.webp",
+    "/assets/immutable/trn-christmas-lights-CqAqthlw.webp",
+    "/assets/immutable/material-symbols-subset-2nrvBbU8.ttf"
+  ],
+  "src/store/auth/index.js": [
+    "/assets/immutable/image-back-stars-DQ1zdM_d.webp",
+    "/assets/immutable/trn-christmas-lights-CqAqthlw.webp",
+    "/assets/immutable/material-symbols-subset-2nrvBbU8.ttf"
+  ],
+  "src/store/background/background.js": [
+    "/assets/immutable/image-back-stars-DQ1zdM_d.webp",
+    "/assets/immutable/trn-christmas-lights-CqAqthlw.webp",
+    "/assets/immutable/material-symbols-subset-2nrvBbU8.ttf"
+  ],
+  "src/store/background/index.js": [
+    "/assets/immutable/image-back-stars-DQ1zdM_d.webp",
+    "/assets/immutable/trn-christmas-lights-CqAqthlw.webp",
+    "/assets/immutable/material-symbols-subset-2nrvBbU8.ttf"
+  ],
+  "src/store/constants.js": [
+    "/assets/immutable/image-back-stars-DQ1zdM_d.webp",
+    "/assets/immutable/trn-christmas-lights-CqAqthlw.webp",
+    "/assets/immutable/material-symbols-subset-2nrvBbU8.ttf"
+  ],
+  "src/store/main/index.js": [
+    "/assets/immutable/image-back-stars-DQ1zdM_d.webp",
+    "/assets/immutable/trn-christmas-lights-CqAqthlw.webp",
+    "/assets/immutable/material-symbols-subset-2nrvBbU8.ttf"
+  ],
+  "src/store/main/main.js": [
+    "/assets/immutable/image-back-stars-DQ1zdM_d.webp",
+    "/assets/immutable/trn-christmas-lights-CqAqthlw.webp",
+    "/assets/immutable/material-symbols-subset-2nrvBbU8.ttf"
+  ],
+  "src/store/navbar.js": [
+    "/assets/immutable/image-back-stars-DQ1zdM_d.webp",
+    "/assets/immutable/trn-christmas-lights-CqAqthlw.webp",
+    "/assets/immutable/material-symbols-subset-2nrvBbU8.ttf"
+  ],
+  "src/store/player/index.js": [
+    "/assets/immutable/player-DzmM0w5k.js",
+    "/assets/immutable/player-d55AcML6.css"
+  ],
+  "src/store/player/player.js": [
+    "/assets/immutable/player-DzmM0w5k.js",
+    "/assets/immutable/player-d55AcML6.css"
+  ],
+  "src/store/theme.js": [
+    "/assets/immutable/image-back-stars-DQ1zdM_d.webp",
+    "/assets/immutable/trn-christmas-lights-CqAqthlw.webp",
+    "/assets/immutable/material-symbols-subset-2nrvBbU8.ttf"
+  ],
+  "src/store/trailer/index.js": [
+    "/assets/immutable/trailer-BTHM9cnK.js"
+  ],
+  "src/store/trailer/trailer.js": [
+    "/assets/immutable/trailer-BTHM9cnK.js"
+  ],
+  "src/store/utils.js": [
+    "/assets/immutable/image-back-stars-DQ1zdM_d.webp",
+    "/assets/immutable/trn-christmas-lights-CqAqthlw.webp",
+    "/assets/immutable/material-symbols-subset-2nrvBbU8.ttf"
+  ],
+  "src/utils/accentContrast.js": [
+    "/assets/immutable/image-back-stars-DQ1zdM_d.webp",
+    "/assets/immutable/trn-christmas-lights-CqAqthlw.webp",
+    "/assets/immutable/material-symbols-subset-2nrvBbU8.ttf"
+  ],
+  "src/utils/analytics.js": [
+    "/assets/immutable/image-back-stars-DQ1zdM_d.webp",
+    "/assets/immutable/trn-christmas-lights-CqAqthlw.webp",
+    "/assets/immutable/material-symbols-subset-2nrvBbU8.ttf"
+  ],
+  "src/utils/authRedirect.js": [
+    "/assets/immutable/authRedirect-C1ka0-G0.js"
+  ],
+  "src/utils/authSession.js": [
+    "/assets/immutable/authSession-B8C-roVk.js"
+  ],
+  "src/utils/basePath.js": [
+    "/assets/immutable/basePath-GMHcoxdV.js"
+  ],
+  "src/utils/dateUtils.js": [
+    "/assets/immutable/image-back-stars-DQ1zdM_d.webp",
+    "/assets/immutable/trn-christmas-lights-CqAqthlw.webp",
+    "/assets/immutable/material-symbols-subset-2nrvBbU8.ttf"
+  ],
+  "src/utils/dialogFocus.js": [
+    "/assets/immutable/image-back-stars-DQ1zdM_d.webp",
+    "/assets/immutable/trn-christmas-lights-CqAqthlw.webp",
+    "/assets/immutable/material-symbols-subset-2nrvBbU8.ttf"
+  ],
+  "src/utils/historyMigrationNotice.js": [
+    "/assets/immutable/MovieSearch-DPUKT21I.js",
+    "/assets/immutable/MovieSearch-DRCWRVgj.css"
+  ],
+  "src/utils/historyOutbox.js": [
+    "/assets/immutable/user-tFK5VPKB.js"
+  ],
+  "src/utils/historyTransfer.js": [
+    "/assets/immutable/HistorySyncSettings-eGM4gGNH.js",
+    "/assets/immutable/HistorySyncSettings-CT3WOtVT.css"
+  ],
+  "src/utils/htmlSanitizer.js": [
+    "/assets/immutable/image-back-stars-DQ1zdM_d.webp",
+    "/assets/immutable/trn-christmas-lights-CqAqthlw.webp",
+    "/assets/immutable/material-symbols-subset-2nrvBbU8.ttf"
+  ],
+  "src/utils/importBatches.js": [
+    "/assets/immutable/user-tFK5VPKB.js"
+  ],
+  "src/utils/keyboardLayout.js": [
+    "/assets/immutable/latestRequest-DNmRTsHI.js"
+  ],
+  "src/utils/latestRequest.js": [
+    "/assets/immutable/latestRequest-DNmRTsHI.js"
+  ],
+  "src/utils/localUserLists.js": [
+    "/assets/immutable/image-back-stars-DQ1zdM_d.webp",
+    "/assets/immutable/trn-christmas-lights-CqAqthlw.webp",
+    "/assets/immutable/material-symbols-subset-2nrvBbU8.ttf"
+  ],
+  "src/utils/logger.js": [
+    "/assets/immutable/sceneSelection-ASQNEZ4c.js"
+  ],
+  "src/utils/mediaUtils.js": [
+    "/assets/immutable/mediaUtils-_Sy8PYwd.js"
+  ],
+  "src/utils/movieDuration.js": [
+    "/assets/immutable/movieDuration-BsZsv3Js.js"
+  ],
+  "src/utils/movieSeo.js": [
+    "/assets/immutable/image-back-stars-DQ1zdM_d.webp",
+    "/assets/immutable/trn-christmas-lights-CqAqthlw.webp",
+    "/assets/immutable/material-symbols-subset-2nrvBbU8.ttf"
+  ],
+  "src/utils/movieSlug.js": [
+    "/assets/immutable/image-back-stars-DQ1zdM_d.webp",
+    "/assets/immutable/trn-christmas-lights-CqAqthlw.webp",
+    "/assets/immutable/material-symbols-subset-2nrvBbU8.ttf"
+  ],
+  "src/utils/movieStatus.js": [
+    "/assets/immutable/MovieInfo-BHI1QHoE.js",
+    "/assets/immutable/MovieInfo-D4amDiEJ.css",
+    "/assets/immutable/icon-shikimori-DUDsIhO9.svg"
+  ],
+  "src/utils/pendingAccountSync.js": [
+    "/assets/immutable/pendingAccountSync-ClclUM6b.js"
+  ],
+  "src/utils/playerOverlayStyles.js": [
+    "/assets/immutable/playerVideoOverlayRuntime-Djg9hI8A.js"
+  ],
+  "src/utils/playerSecurity.js": [
+    "/assets/immutable/image-back-stars-DQ1zdM_d.webp",
+    "/assets/immutable/trn-christmas-lights-CqAqthlw.webp",
+    "/assets/immutable/material-symbols-subset-2nrvBbU8.ttf"
+  ],
+  "src/utils/playerUtils.js": [
+    "/assets/immutable/playerUtils-CyeQpfWx.js"
+  ],
+  "src/utils/playerVideoOverlayRuntime.js": [
+    "/assets/immutable/playerVideoOverlayRuntime-Djg9hI8A.js"
+  ],
+  "src/utils/randomMovie.js": [
+    "/assets/immutable/MovieSearch-DPUKT21I.js",
+    "/assets/immutable/MovieSearch-DRCWRVgj.css"
+  ],
+  "src/utils/requestCancellation.js": [
+    "/assets/immutable/image-back-stars-DQ1zdM_d.webp",
+    "/assets/immutable/trn-christmas-lights-CqAqthlw.webp",
+    "/assets/immutable/material-symbols-subset-2nrvBbU8.ttf"
+  ],
+  "src/utils/sceneSelection.js": [
+    "/assets/immutable/sceneSelection-ASQNEZ4c.js"
+  ],
+  "src/utils/ssgState.js": [
+    "/assets/immutable/image-back-stars-DQ1zdM_d.webp",
+    "/assets/immutable/trn-christmas-lights-CqAqthlw.webp",
+    "/assets/immutable/material-symbols-subset-2nrvBbU8.ttf"
+  ],
+  "src/utils/staticSeo.js": [
+    "/assets/immutable/image-back-stars-DQ1zdM_d.webp",
+    "/assets/immutable/trn-christmas-lights-CqAqthlw.webp",
+    "/assets/immutable/material-symbols-subset-2nrvBbU8.ttf"
+  ],
+  "src/utils/storageErrors.js": [
+    "/assets/immutable/image-back-stars-DQ1zdM_d.webp",
+    "/assets/immutable/trn-christmas-lights-CqAqthlw.webp",
+    "/assets/immutable/material-symbols-subset-2nrvBbU8.ttf"
+  ],
+  "src/utils/telegramAuthPoller.js": [
+    "/assets/immutable/Login-BhmSmrSN.js",
+    "/assets/immutable/Login-BcFfgquH.css"
+  ],
+  "src/utils/textUtils.js": [
+    "/assets/immutable/ModalSearch-CtbK0TyQ.js",
+    "/assets/immutable/ModalSearch-BdmNt4iY.css"
+  ],
+  "src/utils/watchedAgo.js": [
+    "/assets/immutable/MovieList-BzRJhy9S.js",
+    "/assets/immutable/MovieList-Sqx-kFhL.css"
+  ]
+}
