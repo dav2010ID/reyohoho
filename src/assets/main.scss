@@ -98,6 +98,10 @@
 
 html {
   scroll-behavior: smooth;
+  /* Dark-only site: native scrollbars and controls must not fall back to the light theme
+     (Windows draws white tracks under the ribbons otherwise). scrollbar-color is inherited. */
+  color-scheme: dark;
+  scrollbar-color: rgba(255, 255, 255, 0.22) transparent;
 }
 
 body {
