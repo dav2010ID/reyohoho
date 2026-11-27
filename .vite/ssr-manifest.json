@@ -273,7 +273,7 @@
     "/assets/immutable/material-symbols-subset-2nrvBbU8.ttf"
   ],
   "shared/movie-metadata.js": [
-    "/assets/immutable/user-DhmUSPsy.js"
+    "/assets/immutable/user-D-P-qiTQ.js"
   ],
   "src/App.vue": [
     "/assets/immutable/image-back-stars-DQ1zdM_d.webp",
@@ -291,10 +291,10 @@
     "/assets/immutable/material-symbols-subset-2nrvBbU8.ttf"
   ],
   "src/api/accountErrors.js": [
-    "/assets/immutable/workerAccount-C7KyUTTO.js"
+    "/assets/immutable/workerAccount-DYo8E3OO.js"
   ],
   "src/api/cloudHistory.js": [
-    "/assets/immutable/user-DhmUSPsy.js"
+    "/assets/immutable/user-D-P-qiTQ.js"
   ],
   "src/api/contentProviderOrder.js": [
     "/assets/immutable/image-back-stars-DQ1zdM_d.webp",
@@ -302,10 +302,10 @@
     "/assets/immutable/material-symbols-subset-2nrvBbU8.ttf"
   ],
   "src/api/listMetadata.js": [
-    "/assets/immutable/user-DhmUSPsy.js"
+    "/assets/immutable/user-D-P-qiTQ.js"
   ],
   "src/api/movieExtras.js": [
-    "/assets/immutable/MovieInfo-0q-sRoNS.js",
+    "/assets/immutable/MovieInfo-UXu6PBwZ.js",
     "/assets/immutable/MovieInfo-D4amDiEJ.css",
     "/assets/immutable/icon-shikimori-DUDsIhO9.svg"
   ],
@@ -315,10 +315,10 @@
     "/assets/immutable/material-symbols-subset-2nrvBbU8.ttf"
   ],
   "src/api/movies.ddbb-live.js": [
-    "/assets/immutable/movies.ddbb-live-RpGOcIkw.js"
+    "/assets/immutable/movies.ddbb-live-Yv5GjsFv.js"
   ],
   "src/api/movies.ddbb.js": [
-    "/assets/immutable/movies.ddbb-hq3hEi-4.js"
+    "/assets/immutable/movies.ddbb-D3Aqentd.js"
   ],
   "src/api/movies.js": [
     "/assets/immutable/image-back-stars-DQ1zdM_d.webp",
@@ -342,10 +342,10 @@
     "/assets/immutable/material-symbols-subset-2nrvBbU8.ttf"
   ],
   "src/api/user.js": [
-    "/assets/immutable/user-DhmUSPsy.js"
+    "/assets/immutable/user-D-P-qiTQ.js"
   ],
   "src/api/workerAccount.js": [
-    "/assets/immutable/workerAccount-C7KyUTTO.js"
+    "/assets/immutable/workerAccount-DYo8E3OO.js"
   ],
   "src/api/workerOrigin.js": [
     "/assets/immutable/workerOrigin-Dk9E-pJy.js"
@@ -359,7 +359,7 @@
     "/assets/immutable/movieDuration-BsZsv3Js.js"
   ],
   "src/assets/icon-kp-logo.svg": [
-    "/assets/immutable/RandomMovieModal-D1AqQnXX.js",
+    "/assets/immutable/RandomMovieModal-Cn0vPq5M.js",
     "/assets/immutable/RandomMovieModal-BIbHQp_i.css"
   ],
   "src/assets/icon-main-logo-150x150.png": [
@@ -368,26 +368,26 @@
     "/assets/immutable/material-symbols-subset-2nrvBbU8.ttf"
   ],
   "src/assets/icon-metacritic.svg": [
-    "/assets/immutable/MovieInfo-0q-sRoNS.js",
+    "/assets/immutable/MovieInfo-UXu6PBwZ.js",
     "/assets/immutable/MovieInfo-D4amDiEJ.css",
     "/assets/immutable/icon-shikimori-DUDsIhO9.svg"
   ],
   "src/assets/icon-rotten-tomatoes.svg": [
-    "/assets/immutable/MovieInfo-0q-sRoNS.js",
+    "/assets/immutable/MovieInfo-UXu6PBwZ.js",
     "/assets/immutable/MovieInfo-D4amDiEJ.css",
     "/assets/immutable/icon-shikimori-DUDsIhO9.svg"
   ],
   "src/assets/icon-shikimori.svg": [
-    "/assets/immutable/MovieInfo-0q-sRoNS.js",
+    "/assets/immutable/MovieInfo-UXu6PBwZ.js",
     "/assets/immutable/MovieInfo-D4amDiEJ.css",
     "/assets/immutable/icon-shikimori-DUDsIhO9.svg"
   ],
   "src/assets/icon-spinner.svg": [
-    "/assets/immutable/MovieList-DW5bderc.js",
+    "/assets/immutable/MovieList-CwOJq-Kt.js",
     "/assets/immutable/MovieList-Sqx-kFhL.css"
   ],
   "src/assets/icon-tmdb.svg": [
-    "/assets/immutable/MovieInfo-0q-sRoNS.js",
+    "/assets/immutable/MovieInfo-UXu6PBwZ.js",
     "/assets/immutable/MovieInfo-D4amDiEJ.css",
     "/assets/immutable/icon-shikimori-DUDsIhO9.svg"
   ],
@@ -400,7 +400,7 @@
     "/assets/immutable/mediaUtils-_Sy8PYwd.js"
   ],
   "src/assets/player-component.scss?vue&type=style&index=0&src=9092eafb&scoped=9092eafb&lang.css": [
-    "/assets/immutable/PlayerComponent-XK7UxAz1.js",
+    "/assets/immutable/PlayerComponent-pYWv0CBO.js",
     "/assets/immutable/PlayerComponent-BCnvcUS0.css"
   ],
   "src/assets/trn-christmas-lights.webp": [
@@ -409,11 +409,11 @@
     "/assets/immutable/material-symbols-subset-2nrvBbU8.ttf"
   ],
   "src/components/AuthSuccess.vue": [
-    "/assets/immutable/AuthSuccess-CE8Vecke.js",
+    "/assets/immutable/AuthSuccess-CNMA2OsT.js",
     "/assets/immutable/AuthSuccess-B74DIbmJ.css"
   ],
   "src/components/AuthSuccess.vue?vue&type=style&index=0&scoped=5d4b6040&lang.css": [
-    "/assets/immutable/AuthSuccess-CE8Vecke.js",
+    "/assets/immutable/AuthSuccess-CNMA2OsT.js",
     "/assets/immutable/AuthSuccess-B74DIbmJ.css"
   ],
   "src/components/BackgroundSpace.vue": [
@@ -437,39 +437,39 @@
     "/assets/immutable/material-symbols-subset-2nrvBbU8.ttf"
   ],
   "src/components/CardMovie/CardMovie.vue": [
-    "/assets/immutable/MovieList-DW5bderc.js",
+    "/assets/immutable/MovieList-CwOJq-Kt.js",
     "/assets/immutable/MovieList-Sqx-kFhL.css"
   ],
   "src/components/CardMovie/CardMovie.vue?vue&type=style&index=0&scoped=20e38d0e&lang.css": [
-    "/assets/immutable/MovieList-DW5bderc.js",
+    "/assets/immutable/MovieList-CwOJq-Kt.js",
     "/assets/immutable/MovieList-Sqx-kFhL.css"
   ],
   "src/components/CardMovie/CardMovieDetails.vue": [
-    "/assets/immutable/MovieList-DW5bderc.js",
+    "/assets/immutable/MovieList-CwOJq-Kt.js",
     "/assets/immutable/MovieList-Sqx-kFhL.css"
   ],
   "src/components/CardMovie/CardMovieDetails.vue?vue&type=style&index=0&scoped=3c8b5104&lang.css": [
-    "/assets/immutable/MovieList-DW5bderc.js",
+    "/assets/immutable/MovieList-CwOJq-Kt.js",
     "/assets/immutable/MovieList-Sqx-kFhL.css"
   ],
   "src/components/CardMovie/CardMovieSwipeWrapper.vue": [
-    "/assets/immutable/MovieList-DW5bderc.js",
+    "/assets/immutable/MovieList-CwOJq-Kt.js",
     "/assets/immutable/MovieList-Sqx-kFhL.css"
   ],
   "src/components/CardMovie/CardMovieSwipeWrapper.vue?vue&type=style&index=0&scoped=8bc88bc3&lang.css": [
-    "/assets/immutable/MovieList-DW5bderc.js",
+    "/assets/immutable/MovieList-CwOJq-Kt.js",
     "/assets/immutable/MovieList-Sqx-kFhL.css"
   ],
   "src/components/CardMovie/CardsMovieMainContent.vue": [
-    "/assets/immutable/MovieList-DW5bderc.js",
+    "/assets/immutable/MovieList-CwOJq-Kt.js",
     "/assets/immutable/MovieList-Sqx-kFhL.css"
   ],
   "src/components/CardMovie/CardsMovieMainContent.vue?vue&type=style&index=0&scoped=f60ea0e1&lang.css": [
-    "/assets/immutable/MovieList-DW5bderc.js",
+    "/assets/immutable/MovieList-CwOJq-Kt.js",
     "/assets/immutable/MovieList-Sqx-kFhL.css"
   ],
   "src/components/CardMovie/index.js": [
-    "/assets/immutable/MovieList-DW5bderc.js",
+    "/assets/immutable/MovieList-CwOJq-Kt.js",
     "/assets/immutable/MovieList-Sqx-kFhL.css"
   ],
   "src/components/ConfirmationHost.vue": [
@@ -478,35 +478,35 @@
     "/assets/immutable/material-symbols-subset-2nrvBbU8.ttf"
   ],
   "src/components/ContactsPage.vue": [
-    "/assets/immutable/ContactsPage-slY7_qag.js",
+    "/assets/immutable/ContactsPage-DVyUIDnS.js",
     "/assets/immutable/ContactsPage-BmBLqVPf.css"
   ],
   "src/components/ContactsPage.vue?vue&type=style&index=0&scoped=155af109&lang.css": [
-    "/assets/immutable/ContactsPage-slY7_qag.js",
+    "/assets/immutable/ContactsPage-DVyUIDnS.js",
     "/assets/immutable/ContactsPage-BmBLqVPf.css"
   ],
   "src/components/ErrorMessage.vue": [
-    "/assets/immutable/ErrorMessage-BmOs6jXP.js",
+    "/assets/immutable/ErrorMessage-CMaJ_QFQ.js",
     "/assets/immutable/ErrorMessage-ygpqHBWs.css"
   ],
   "src/components/ErrorMessage.vue?vue&type=style&index=0&scoped=07e55bc5&lang.css": [
-    "/assets/immutable/ErrorMessage-BmOs6jXP.js",
+    "/assets/immutable/ErrorMessage-CMaJ_QFQ.js",
     "/assets/immutable/ErrorMessage-ygpqHBWs.css"
   ],
   "src/components/HistoryMigrationNotice.vue": [
-    "/assets/immutable/MovieSearch-BnIM083v.js",
+    "/assets/immutable/MovieSearch-DjDncByc.js",
     "/assets/immutable/MovieSearch-DRCWRVgj.css"
   ],
   "src/components/HistoryMigrationNotice.vue?vue&type=style&index=0&scoped=c9a8a778&lang.css": [
-    "/assets/immutable/MovieSearch-BnIM083v.js",
+    "/assets/immutable/MovieSearch-DjDncByc.js",
     "/assets/immutable/MovieSearch-DRCWRVgj.css"
   ],
   "src/components/HistorySyncSettings.vue": [
-    "/assets/immutable/HistorySyncSettings-BlOZeiDj.js",
+    "/assets/immutable/HistorySyncSettings-CfT1cxZP.js",
     "/assets/immutable/HistorySyncSettings-CT3WOtVT.css"
   ],
   "src/components/HistorySyncSettings.vue?vue&type=style&index=0&scoped=5a5ee090&lang.css": [
-    "/assets/immutable/HistorySyncSettings-BlOZeiDj.js",
+    "/assets/immutable/HistorySyncSettings-CfT1cxZP.js",
     "/assets/immutable/HistorySyncSettings-CT3WOtVT.css"
   ],
   "src/components/LavaLampBackground.vue": [
@@ -520,11 +520,11 @@
     "/assets/immutable/material-symbols-subset-2nrvBbU8.ttf"
   ],
   "src/components/Login.vue": [
-    "/assets/immutable/Login-cShczAFP.js",
+    "/assets/immutable/Login-BGjigT5S.js",
     "/assets/immutable/Login-BcFfgquH.css"
   ],
   "src/components/Login.vue?vue&type=style&index=0&scoped=25e32c8b&lang.css": [
-    "/assets/immutable/Login-cShczAFP.js",
+    "/assets/immutable/Login-BGjigT5S.js",
     "/assets/immutable/Login-BcFfgquH.css"
   ],
   "src/components/MenuNavigation.vue": [
@@ -568,153 +568,153 @@
     "/assets/immutable/material-symbols-subset-2nrvBbU8.ttf"
   ],
   "src/components/ModalSearch.vue": [
-    "/assets/immutable/ModalSearch-CNcE8fdm.js",
+    "/assets/immutable/ModalSearch-JMW37LAW.js",
     "/assets/immutable/ModalSearch-BdmNt4iY.css"
   ],
   "src/components/ModalSearch.vue?vue&type=style&index=0&scoped=a19fa716&lang.scss": [
-    "/assets/immutable/ModalSearch-CNcE8fdm.js",
+    "/assets/immutable/ModalSearch-JMW37LAW.js",
     "/assets/immutable/ModalSearch-BdmNt4iY.css"
   ],
   "src/components/MovieInfo.css?vue&type=style&index=0&src=d0c5542d&scoped=d0c5542d&lang.css": [
-    "/assets/immutable/MovieInfo-0q-sRoNS.js",
+    "/assets/immutable/MovieInfo-UXu6PBwZ.js",
     "/assets/immutable/MovieInfo-D4amDiEJ.css",
     "/assets/immutable/icon-shikimori-DUDsIhO9.svg"
   ],
   "src/components/MovieInfo.vue": [
-    "/assets/immutable/MovieInfo-0q-sRoNS.js",
+    "/assets/immutable/MovieInfo-UXu6PBwZ.js",
     "/assets/immutable/MovieInfo-D4amDiEJ.css",
     "/assets/immutable/icon-shikimori-DUDsIhO9.svg"
   ],
   "src/components/MovieList/MovieList.vue": [
-    "/assets/immutable/MovieList-DW5bderc.js",
+    "/assets/immutable/MovieList-CwOJq-Kt.js",
     "/assets/immutable/MovieList-Sqx-kFhL.css"
   ],
   "src/components/MovieList/MovieList.vue?vue&type=style&index=0&scoped=47142ebe&lang.css": [
-    "/assets/immutable/MovieList-DW5bderc.js",
+    "/assets/immutable/MovieList-CwOJq-Kt.js",
     "/assets/immutable/MovieList-Sqx-kFhL.css"
   ],
   "src/components/MovieList/index.js": [
-    "/assets/immutable/MovieList-DW5bderc.js",
+    "/assets/immutable/MovieList-CwOJq-Kt.js",
     "/assets/immutable/MovieList-Sqx-kFhL.css"
   ],
   "src/components/MovieSearch.vue": [
-    "/assets/immutable/MovieSearch-BnIM083v.js",
+    "/assets/immutable/MovieSearch-DjDncByc.js",
     "/assets/immutable/MovieSearch-DRCWRVgj.css"
   ],
   "src/components/MovieSearch.vue?vue&type=style&index=0&scoped=e39f26b5&lang.css": [
-    "/assets/immutable/MovieSearch-BnIM083v.js",
+    "/assets/immutable/MovieSearch-DjDncByc.js",
     "/assets/immutable/MovieSearch-DRCWRVgj.css"
   ],
   "src/components/NotFound.vue": [
-    "/assets/immutable/NotFound-BDNReNNg.js",
+    "/assets/immutable/NotFound-BiPwbUdl.js",
     "/assets/immutable/NotFound-CZSVI0df.css"
   ],
   "src/components/NotFound.vue?vue&type=style&index=0&scoped=706593b0&lang.css": [
-    "/assets/immutable/NotFound-BDNReNNg.js",
+    "/assets/immutable/NotFound-BiPwbUdl.js",
     "/assets/immutable/NotFound-CZSVI0df.css"
   ],
   "src/components/PlayerComponent.vue": [
-    "/assets/immutable/PlayerComponent-XK7UxAz1.js",
+    "/assets/immutable/PlayerComponent-pYWv0CBO.js",
     "/assets/immutable/PlayerComponent-BCnvcUS0.css"
   ],
   "src/components/PlayerModal.vue": [
-    "/assets/immutable/PlayerModal-Bh3_O170.js",
+    "/assets/immutable/PlayerModal-TW0PItqU.js",
     "/assets/immutable/PlayerModal-CBjHVCi4.css"
   ],
   "src/components/PlayerModal.vue?vue&type=style&index=0&scoped=5986675c&lang.css": [
-    "/assets/immutable/PlayerModal-Bh3_O170.js",
+    "/assets/immutable/PlayerModal-TW0PItqU.js",
     "/assets/immutable/PlayerModal-CBjHVCi4.css"
   ],
   "src/components/RandomMovieModal.vue": [
-    "/assets/immutable/RandomMovieModal-D1AqQnXX.js",
+    "/assets/immutable/RandomMovieModal-Cn0vPq5M.js",
     "/assets/immutable/RandomMovieModal-BIbHQp_i.css"
   ],
   "src/components/RandomMovieModal.vue?vue&type=style&index=0&scoped=0c705def&lang.css": [
-    "/assets/immutable/RandomMovieModal-D1AqQnXX.js",
+    "/assets/immutable/RandomMovieModal-Cn0vPq5M.js",
     "/assets/immutable/RandomMovieModal-BIbHQp_i.css"
   ],
   "src/components/Settings.vue": [
-    "/assets/immutable/Settings-BQ5BNSTS.js",
+    "/assets/immutable/Settings-B9wuNar7.js",
     "/assets/immutable/Settings-Ca8P7jY4.css"
   ],
   "src/components/Settings.vue?vue&type=style&index=0&scoped=1b1e3f8c&lang.css": [
-    "/assets/immutable/Settings-BQ5BNSTS.js",
+    "/assets/immutable/Settings-B9wuNar7.js",
     "/assets/immutable/Settings-Ca8P7jY4.css"
   ],
   "src/components/SpinnerLoading.vue": [
-    "/assets/immutable/MovieList-DW5bderc.js",
+    "/assets/immutable/MovieList-CwOJq-Kt.js",
     "/assets/immutable/MovieList-Sqx-kFhL.css"
   ],
   "src/components/SpinnerLoading.vue?vue&type=style&index=0&scoped=0dbd38db&lang.css": [
-    "/assets/immutable/MovieList-DW5bderc.js",
+    "/assets/immutable/MovieList-CwOJq-Kt.js",
     "/assets/immutable/MovieList-Sqx-kFhL.css"
   ],
   "src/components/ThemeSelector.vue": [
-    "/assets/immutable/Settings-BQ5BNSTS.js",
+    "/assets/immutable/Settings-B9wuNar7.js",
     "/assets/immutable/Settings-Ca8P7jY4.css"
   ],
   "src/components/ThemeSelector.vue?vue&type=style&index=0&scoped=5e498d4e&lang.css": [
-    "/assets/immutable/Settings-BQ5BNSTS.js",
+    "/assets/immutable/Settings-B9wuNar7.js",
     "/assets/immutable/Settings-Ca8P7jY4.css"
   ],
   "src/components/TopMovies.vue": [
-    "/assets/immutable/TopMovies-BxryZiyI.js",
+    "/assets/immutable/TopMovies-B0upgc2v.js",
     "/assets/immutable/TopMovies-CjBCb3mN.css"
   ],
   "src/components/TopMovies.vue?vue&type=style&index=0&scoped=0d25dbba&lang.css": [
-    "/assets/immutable/TopMovies-BxryZiyI.js",
+    "/assets/immutable/TopMovies-B0upgc2v.js",
     "/assets/immutable/TopMovies-CjBCb3mN.css"
   ],
   "src/components/TrailerCarousel.vue": [
-    "/assets/immutable/TrailerCarousel-CtNQai3z.js",
+    "/assets/immutable/TrailerCarousel-T-nC-wDo.js",
     "/assets/immutable/TrailerCarousel-BY8409m0.css"
   ],
   "src/components/TrailerCarousel.vue?vue&type=style&index=0&scoped=817c14d1&lang.scss": [
-    "/assets/immutable/TrailerCarousel-CtNQai3z.js",
+    "/assets/immutable/TrailerCarousel-T-nC-wDo.js",
     "/assets/immutable/TrailerCarousel-BY8409m0.css"
   ],
   "src/components/User.vue": [
-    "/assets/immutable/User-aiqiTLmZ.js",
+    "/assets/immutable/User-Buyljn4p.js",
     "/assets/immutable/User-D1d0cA_u.css"
   ],
   "src/components/User.vue?vue&type=style&index=0&scoped=6c9efbf5&lang.css": [
-    "/assets/immutable/User-aiqiTLmZ.js",
+    "/assets/immutable/User-Buyljn4p.js",
     "/assets/immutable/User-D1d0cA_u.css"
   ],
   "src/components/UserLists.vue": [
-    "/assets/immutable/UserLists-DQ57jPxx.js",
+    "/assets/immutable/UserLists-RK20i2g2.js",
     "/assets/immutable/UserLists-Bu9XQJ1X.css"
   ],
   "src/components/UserLists.vue?vue&type=style&index=0&scoped=ff4bda55&lang.css": [
-    "/assets/immutable/UserLists-DQ57jPxx.js",
+    "/assets/immutable/UserLists-RK20i2g2.js",
     "/assets/immutable/UserLists-Bu9XQJ1X.css"
   ],
   "src/components/buttons/DeleteButton.vue": [
-    "/assets/immutable/MovieList-DW5bderc.js",
+    "/assets/immutable/MovieList-CwOJq-Kt.js",
     "/assets/immutable/MovieList-Sqx-kFhL.css"
   ],
   "src/components/buttons/DeleteButton.vue?vue&type=style&index=0&scoped=90c9cc1c&lang.css": [
-    "/assets/immutable/MovieList-DW5bderc.js",
+    "/assets/immutable/MovieList-CwOJq-Kt.js",
     "/assets/immutable/MovieList-Sqx-kFhL.css"
   ],
   "src/components/icons/TrashIcon.vue": [
-    "/assets/immutable/MovieList-DW5bderc.js",
+    "/assets/immutable/MovieList-CwOJq-Kt.js",
     "/assets/immutable/MovieList-Sqx-kFhL.css"
   ],
   "src/components/movie/MovieMobileListDropdown.vue": [
-    "/assets/immutable/MovieMobileListDropdown-CZPyQ_uh.js",
+    "/assets/immutable/MovieMobileListDropdown-uXxfle5p.js",
     "/assets/immutable/MovieMobileListDropdown-Q9bMecYc.css"
   ],
   "src/components/movie/MovieMobileListDropdown.vue?vue&type=style&index=0&scoped=7928e758&lang.css": [
-    "/assets/immutable/MovieMobileListDropdown-CZPyQ_uh.js",
+    "/assets/immutable/MovieMobileListDropdown-uXxfle5p.js",
     "/assets/immutable/MovieMobileListDropdown-Q9bMecYc.css"
   ],
   "src/components/movie/RibbonNav.vue": [
-    "/assets/immutable/RibbonNav-DQXhLKPM.js",
+    "/assets/immutable/RibbonNav-DnfCDsCD.js",
     "/assets/immutable/RibbonNav-pO__u3jZ.css"
   ],
   "src/components/movie/RibbonNav.vue?vue&type=style&index=0&scoped=5789e986&lang.css": [
-    "/assets/immutable/RibbonNav-DQXhLKPM.js",
+    "/assets/immutable/RibbonNav-DnfCDsCD.js",
     "/assets/immutable/RibbonNav-pO__u3jZ.css"
   ],
   "src/components/notification/ToastMessage.vue": [
@@ -728,19 +728,19 @@
     "/assets/immutable/material-symbols-subset-2nrvBbU8.ttf"
   ],
   "src/components/player/PlayerSelectorBar.vue": [
-    "/assets/immutable/PlayerComponent-XK7UxAz1.js",
+    "/assets/immutable/PlayerComponent-pYWv0CBO.js",
     "/assets/immutable/PlayerComponent-BCnvcUS0.css"
   ],
   "src/components/player/PlayerSelectorBar.vue?vue&type=style&index=0&scoped=d88a3fd8&lang.css": [
-    "/assets/immutable/PlayerComponent-XK7UxAz1.js",
+    "/assets/immutable/PlayerComponent-pYWv0CBO.js",
     "/assets/immutable/PlayerComponent-BCnvcUS0.css"
   ],
   "src/components/slider/SliderRound.vue": [
-    "/assets/immutable/player-C0JzMOOE.js",
+    "/assets/immutable/player-C0YCTK4g.js",
     "/assets/immutable/player-d55AcML6.css"
   ],
   "src/components/slider/SliderRound.vue?vue&type=style&index=0&scoped=76401cd6&lang.css": [
-    "/assets/immutable/player-C0JzMOOE.js",
+    "/assets/immutable/player-C0YCTK4g.js",
     "/assets/immutable/player-d55AcML6.css"
   ],
   "src/composables/useAppSetup.js": [
@@ -754,28 +754,28 @@
     "/assets/immutable/material-symbols-subset-2nrvBbU8.ttf"
   ],
   "src/composables/usePlayerElectronControls.js": [
-    "/assets/immutable/PlayerComponent-XK7UxAz1.js",
+    "/assets/immutable/PlayerComponent-pYWv0CBO.js",
     "/assets/immutable/PlayerComponent-BCnvcUS0.css"
   ],
   "src/composables/usePlayerLayout.js": [
-    "/assets/immutable/PlayerComponent-XK7UxAz1.js",
+    "/assets/immutable/PlayerComponent-pYWv0CBO.js",
     "/assets/immutable/PlayerComponent-BCnvcUS0.css"
   ],
   "src/composables/usePlayerLists.js": [
-    "/assets/immutable/MovieInfo-0q-sRoNS.js",
+    "/assets/immutable/MovieInfo-UXu6PBwZ.js",
     "/assets/immutable/MovieInfo-D4amDiEJ.css",
     "/assets/immutable/icon-shikimori-DUDsIhO9.svg"
   ],
   "src/composables/usePlayerSharing.js": [
-    "/assets/immutable/PlayerComponent-XK7UxAz1.js",
+    "/assets/immutable/PlayerComponent-pYWv0CBO.js",
     "/assets/immutable/PlayerComponent-BCnvcUS0.css"
   ],
   "src/composables/usePlayerSources.js": [
-    "/assets/immutable/PlayerComponent-XK7UxAz1.js",
+    "/assets/immutable/PlayerComponent-pYWv0CBO.js",
     "/assets/immutable/PlayerComponent-BCnvcUS0.css"
   ],
   "src/composables/usePlayerVideoOverlay.js": [
-    "/assets/immutable/PlayerComponent-XK7UxAz1.js",
+    "/assets/immutable/PlayerComponent-pYWv0CBO.js",
     "/assets/immutable/PlayerComponent-BCnvcUS0.css"
   ],
   "src/composables/usePublicPageState.js": [
@@ -792,7 +792,7 @@
     "/assets/immutable/material-symbols-subset-2nrvBbU8.ttf"
   ],
   "src/helpers/ui.js": [
-    "/assets/immutable/PlayerComponent-XK7UxAz1.js",
+    "/assets/immutable/PlayerComponent-pYWv0CBO.js",
     "/assets/immutable/PlayerComponent-BCnvcUS0.css"
   ],
   "src/main.js": [
@@ -851,11 +851,11 @@
     "/assets/immutable/material-symbols-subset-2nrvBbU8.ttf"
   ],
   "src/store/player/index.js": [
-    "/assets/immutable/player-C0JzMOOE.js",
+    "/assets/immutable/player-C0YCTK4g.js",
     "/assets/immutable/player-d55AcML6.css"
   ],
   "src/store/player/player.js": [
-    "/assets/immutable/player-C0JzMOOE.js",
+    "/assets/immutable/player-C0YCTK4g.js",
     "/assets/immutable/player-d55AcML6.css"
   ],
   "src/store/theme.js": [
@@ -904,14 +904,14 @@
     "/assets/immutable/material-symbols-subset-2nrvBbU8.ttf"
   ],
   "src/utils/historyMigrationNotice.js": [
-    "/assets/immutable/MovieSearch-BnIM083v.js",
+    "/assets/immutable/MovieSearch-DjDncByc.js",
     "/assets/immutable/MovieSearch-DRCWRVgj.css"
   ],
   "src/utils/historyOutbox.js": [
-    "/assets/immutable/user-DhmUSPsy.js"
+    "/assets/immutable/user-D-P-qiTQ.js"
   ],
   "src/utils/historyTransfer.js": [
-    "/assets/immutable/HistorySyncSettings-BlOZeiDj.js",
+    "/assets/immutable/HistorySyncSettings-CfT1cxZP.js",
     "/assets/immutable/HistorySyncSettings-CT3WOtVT.css"
   ],
   "src/utils/htmlSanitizer.js": [
@@ -920,7 +920,7 @@
     "/assets/immutable/material-symbols-subset-2nrvBbU8.ttf"
   ],
   "src/utils/importBatches.js": [
-    "/assets/immutable/user-DhmUSPsy.js"
+    "/assets/immutable/user-D-P-qiTQ.js"
   ],
   "src/utils/keyboardLayout.js": [
     "/assets/immutable/latestRequest-DNmRTsHI.js"
@@ -953,7 +953,7 @@
     "/assets/immutable/material-symbols-subset-2nrvBbU8.ttf"
   ],
   "src/utils/movieStatus.js": [
-    "/assets/immutable/MovieInfo-0q-sRoNS.js",
+    "/assets/immutable/MovieInfo-UXu6PBwZ.js",
     "/assets/immutable/MovieInfo-D4amDiEJ.css",
     "/assets/immutable/icon-shikimori-DUDsIhO9.svg"
   ],
@@ -961,7 +961,7 @@
     "/assets/immutable/pendingAccountSync-ClclUM6b.js"
   ],
   "src/utils/playerOverlayStyles.js": [
-    "/assets/immutable/playerVideoOverlayRuntime-c-9Co1Iw.js"
+    "/assets/immutable/playerVideoOverlayRuntime-C9_JUh0D.js"
   ],
   "src/utils/playerSecurity.js": [
     "/assets/immutable/image-back-stars-DQ1zdM_d.webp",
@@ -972,10 +972,10 @@
     "/assets/immutable/playerUtils-CyeQpfWx.js"
   ],
   "src/utils/playerVideoOverlayRuntime.js": [
-    "/assets/immutable/playerVideoOverlayRuntime-c-9Co1Iw.js"
+    "/assets/immutable/playerVideoOverlayRuntime-C9_JUh0D.js"
   ],
   "src/utils/randomMovie.js": [
-    "/assets/immutable/MovieSearch-BnIM083v.js",
+    "/assets/immutable/MovieSearch-DjDncByc.js",
     "/assets/immutable/MovieSearch-DRCWRVgj.css"
   ],
   "src/utils/requestCancellation.js": [
@@ -1002,15 +1002,15 @@
     "/assets/immutable/material-symbols-subset-2nrvBbU8.ttf"
   ],
   "src/utils/telegramAuthPoller.js": [
-    "/assets/immutable/Login-cShczAFP.js",
+    "/assets/immutable/Login-BGjigT5S.js",
     "/assets/immutable/Login-BcFfgquH.css"
   ],
   "src/utils/textUtils.js": [
-    "/assets/immutable/ModalSearch-CNcE8fdm.js",
+    "/assets/immutable/ModalSearch-JMW37LAW.js",
     "/assets/immutable/ModalSearch-BdmNt4iY.css"
   ],
   "src/utils/watchedAgo.js": [
-    "/assets/immutable/MovieList-DW5bderc.js",
+    "/assets/immutable/MovieList-CwOJq-Kt.js",
     "/assets/immutable/MovieList-Sqx-kFhL.css"
   ]
 }
